@@ -22,8 +22,8 @@ import (
 
 	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 
-	"gitlab.com/cetchain/cetchain/app"
-	cet_init "gitlab.com/cetchain/cetchain/init"
+	"github.com/coinexchain/dex/app"
+	cet_init "github.com/coinexchain/dex/init"
 )
 
 // cetd custom flags

@@ -1,7 +1,7 @@
 package authx
 
 import (
-	"gitlab.com/cetchain/cetchain/testutil"
+	"github.com/coinexchain/dex/testutil"
 	"testing"
 
 	"github.com/stretchr/testify/require"

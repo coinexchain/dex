@@ -25,8 +25,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"gitlab.com/cetchain/cetchain/x/authx"
-	"gitlab.com/cetchain/cetchain/x/incentive"
+	"github.com/coinexchain/dex/x/authx"
+	"github.com/coinexchain/dex/x/incentive"
 )
 
 const (

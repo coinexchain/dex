@@ -1,4 +1,4 @@
-module gitlab.com/cetchain/cetchain
+module github.com/coinexchain/dex
 
 require (
 	github.com/cosmos/cosmos-sdk v0.34.4

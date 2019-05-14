@@ -40,21 +40,17 @@ import (
 	slashingclient "github.com/cosmos/cosmos-sdk/x/slashing/client"
 	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 
-	"gitlab.com/cetchain/cetchain/app"
+	"github.com/coinexchain/dex/app"
 )
 
 func main() {
 	// Configure cobra to sort commands
 	cobra.EnableCommandSorting = false
 
-	// Instantiate the codec for the command line application
-	cdc := app.MakeCodec()
-
 	initSdkConfig()
 
-	// TODO: setup keybase, viper object, etc. to be passed into
-	// the below functions and eliminate global vars, like we do
-	// with the cdc
+	// Instantiate the codec for the command line application
+	cdc := app.MakeCodec()
 
 	rootCmd := createRootCmd(cdc)
 

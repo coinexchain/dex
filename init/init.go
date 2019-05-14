@@ -18,7 +18,7 @@ import (
 
 	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 
-	"gitlab.com/cetchain/cetchain/app"
+	"github.com/coinexchain/dex/app"
 )
 
 const (
