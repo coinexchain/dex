@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/x/bankx"
 	"io"
 	"os"
 	"sort"
@@ -51,6 +52,7 @@ type CetChainApp struct {
 	// keys to access the substores
 	keyMain          *sdk.KVStoreKey
 	keyAccount       *sdk.KVStoreKey
+	keyAccountX		 *sdk.KVStoreKey
 	keyStaking       *sdk.KVStoreKey
 	tkeyStaking      *sdk.TransientStoreKey
 	keySlashing      *sdk.KVStoreKey
@@ -64,8 +66,10 @@ type CetChainApp struct {
 
 	// Manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
+	accountXKeeper      authx.AccountXKeeper
 	feeCollectionKeeper auth.FeeCollectionKeeper
-	bankKeeper          bank.Keeper
+	bankKeeper			bank.BaseKeeper
+	bankxKeeper          bankx.Keeper
 	stakingKeeper       staking.Keeper
 	slashingKeeper      slashing.Keeper
 	distrKeeper         distr.Keeper
@@ -91,6 +95,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 		invCheckPeriod:   invCheckPeriod,
 		keyMain:          sdk.NewKVStoreKey(bam.MainStoreKey),
 		keyAccount:       sdk.NewKVStoreKey(auth.StoreKey),
+		keyAccountX:	  sdk.NewKVStoreKey(authx.StoreKey),
 		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
 		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
 		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
@@ -137,7 +142,10 @@ func (app *CetChainApp) initKeepers() {
 		app.paramsKeeper.Subspace(auth.DefaultParamspace),
 		auth.ProtoBaseAccount,
 	)
-
+	app.accountXKeeper=authx.NewKeeper(
+		app.cdc,
+		app.keyAccountX,
+		)
 	// add handlers
 	app.bankKeeper = bank.NewBaseKeeper(
 		app.accountKeeper,
@@ -148,6 +156,11 @@ func (app *CetChainApp) initKeepers() {
 		app.cdc,
 		app.keyFeeCollection,
 	)
+	app.bankxKeeper=bankx.NewKeeper(
+		app.accountXKeeper,
+		app.bankKeeper,
+		app.feeCollectionKeeper,
+		)
 	stakingKeeper := staking.NewKeeper(
 		app.cdc,
 		app.keyStaking, app.tkeyStaking,
@@ -200,6 +213,7 @@ func (app *CetChainApp) registerCrisisRoutes() {
 
 func (app *CetChainApp) registerMessageRoutes() {
 	app.Router().
+		AddRoute(bankx.RouterKey,bankx.NewHandler(app.bankxKeeper)).
 		AddRoute(bank.RouterKey, bank.NewHandler(app.bankKeeper)).
 		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
 		AddRoute(distr.RouterKey, distr.NewHandler(app.distrKeeper)).
