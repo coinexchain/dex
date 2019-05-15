@@ -6,17 +6,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
-type Keeper struct{
+type Keeper struct {
 	axk authx.AccountXKeeper
-	bk bank.BaseKeeper
+	bk  bank.BaseKeeper
 	fck auth.FeeCollectionKeeper
-
 }
 
-func NewKeeper(axk authx.AccountXKeeper, bk bank.BaseKeeper, fck auth.FeeCollectionKeeper) Keeper{
+func NewKeeper(axk authx.AccountXKeeper, bk bank.BaseKeeper, fck auth.FeeCollectionKeeper) Keeper {
 	return Keeper{
-		axk:axk,
-		bk:bk,
-		fck:fck,
+		axk: axk,
+		bk:  bk,
+		fck: fck,
 	}
 }

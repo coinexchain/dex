@@ -16,12 +16,12 @@ type LockedCoin struct {
 	UnlockTime int64    `json:"unlock_time"`
 }
 
-func NewAccountXWithAddress(ctx sdk.Context, addr sdk.AccAddress) AccountX{
-	acc:=AccountX{
-		Address:addr,
+func NewAccountXWithAddress(ctx sdk.Context, addr sdk.AccAddress) AccountX {
+	acc := AccountX{
+		Address: addr,
 	}
 	return acc
 }
 func (acc *AccountX) SetActivated(activated bool) {
-	acc.Activated=activated
+	acc.Activated = activated
 }

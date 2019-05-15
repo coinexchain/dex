@@ -1,5 +1,5 @@
 package bankx
 
-const(
-	RouterKey="bankx"
+const (
+	RouterKey = "bankx"
 )
