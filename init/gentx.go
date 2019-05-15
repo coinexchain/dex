@@ -30,7 +30,6 @@ import (
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 
 	"github.com/coinexchain/dex/app"
@@ -88,7 +87,7 @@ following delegation and commission default parameters:
 				return err
 			}
 
-			genesisState := gaia_app.GenesisState{}
+			genesisState := app.GenesisState{}
 			if err = cdc.UnmarshalJSON(genDoc.AppState, &genesisState); err != nil {
 				return err
 			}
@@ -220,7 +219,7 @@ following delegation and commission default parameters:
 	return cmd
 }
 
-func accountInGenesis(genesisState gaia_app.GenesisState, key sdk.AccAddress, coins sdk.Coins) error {
+func accountInGenesis(genesisState app.GenesisState, key sdk.AccAddress, coins sdk.Coins) error {
 	accountIsInGenesis := false
 	bondDenom := genesisState.StakingData.Params.BondDenom
 

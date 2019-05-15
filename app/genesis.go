@@ -1,7 +1,9 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,6 +16,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
+
+	"github.com/coinexchain/dex/x/asset"
 )
 
 var (
@@ -22,9 +26,23 @@ var (
 	defaultBondDenom = "cet"
 )
 
+// State to Unmarshal
+type GenesisState struct {
+	Accounts     []gaia_app.GenesisAccount `json:"accounts"`
+	AuthData     auth.GenesisState         `json:"auth"`
+	BankData     bank.GenesisState         `json:"bank"`
+	StakingData  staking.GenesisState      `json:"staking"`
+	DistrData    distribution.GenesisState `json:"distr"`
+	GovData      gov.GenesisState          `json:"gov"`
+	CrisisData   crisis.GenesisState       `json:"crisis"`
+	SlashingData slashing.GenesisState     `json:"slashing"`
+	AssetData    asset.GenesisState        `json:"asset"`
+	GenTxs       []json.RawMessage         `json:"gentxs"`
+}
+
 // NewDefaultGenesisState generates the default state for gaia.
-func NewDefaultGenesisState() gaia_app.GenesisState {
-	gs := gaia_app.GenesisState{
+func NewDefaultGenesisState() GenesisState {
+	gs := GenesisState{
 		Accounts:     nil,
 		AuthData:     auth.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
@@ -33,6 +51,7 @@ func NewDefaultGenesisState() gaia_app.GenesisState {
 		GovData:      gov.DefaultGenesisState(),
 		CrisisData:   crisis.DefaultGenesisState(),
 		SlashingData: slashing.DefaultGenesisState(),
+		AssetData:    asset.DefaultGenesisState(),
 		GenTxs:       nil,
 	}
 	// TODO: create staking.GenesisState from scratch
@@ -40,11 +59,22 @@ func NewDefaultGenesisState() gaia_app.GenesisState {
 	return gs
 }
 
+// Sanitize sorts accounts and coin sets.
+func (gs GenesisState) Sanitize() {
+	sort.Slice(gs.Accounts, func(i, j int) bool {
+		return gs.Accounts[i].AccountNumber < gs.Accounts[j].AccountNumber
+	})
+
+	for _, acc := range gs.Accounts {
+		acc.Coins = acc.Coins.Sort()
+	}
+}
+
 // ValidateGenesisState ensures that the genesis state obeys the expected invariants
 // TODO: No validators are both bonded and jailed (#2088)
 // TODO: Error if there is a duplicate validator (#1708)
 // TODO: Ensure all state machine parameters are in genesis (#1704)
-func ValidateGenesisState(genesisState gaia_app.GenesisState) error {
+func ValidateGenesisState(genesisState GenesisState) error {
 	if err := validateGenesisStateAccounts(genesisState.Accounts); err != nil {
 		return err
 	}

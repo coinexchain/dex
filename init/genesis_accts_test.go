@@ -6,8 +6,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"github.com/cosmos/cosmos-sdk/cmd/gaia/app"
+	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/app"
 )
 
 func TestAddGenesisAccount(t *testing.T) {
@@ -40,7 +42,7 @@ func TestAddGenesisAccount(t *testing.T) {
 		{
 			"dup account",
 			args{
-				app.GenesisState{Accounts: []app.GenesisAccount{{Address: addr1}}},
+				app.GenesisState{Accounts: []gaia_app.GenesisAccount{{Address: addr1}}},
 				addr1,
 				sdk.NewCoins(),
 				sdk.NewCoins(),
