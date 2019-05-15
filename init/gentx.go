@@ -44,14 +44,14 @@ var (
 	defaultMinSelfDelegation       = "1"
 )
 
-// GenTxCmd builds the gaiad gentx command.
+// GenTxCmd builds the cetd gentx command.
 // nolint: errcheck
 func GenTxCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "gentx",
 		Short: "Generate a genesis tx carrying a self delegation",
 		Args:  cobra.NoArgs,
-		Long: fmt.Sprintf(`This command is an alias of the 'gaiad tx create-validator' command'.
+		Long: fmt.Sprintf(`This command is an alias of the 'cetd tx create-validator' command'.
 
 It creates a genesis piece carrying a self delegation with the
 following delegation and commission default parameters:
@@ -92,7 +92,7 @@ following delegation and commission default parameters:
 				return err
 			}
 
-			if err = gaia_app.GaiaValidateGenesisState(genesisState); err != nil {
+			if err = app.ValidateGenesisState(genesisState); err != nil {
 				return err
 			}
 

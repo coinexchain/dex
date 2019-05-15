@@ -17,10 +17,9 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 
 	"github.com/coinexchain/dex/app"
 	cet_init "github.com/coinexchain/dex/init"
