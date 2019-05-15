@@ -72,7 +72,7 @@ func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	rootCmd.AddCommand(gaia_init.TestnetFilesCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.GenTxCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.AddGenesisAccountCmd(ctx, cdc))
-	rootCmd.AddCommand(gaia_init.ValidateGenesisCmd(ctx, cdc))
+	rootCmd.AddCommand(cet_init.ValidateGenesisCmd(ctx, cdc))
 	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
 
 	return rootCmd
