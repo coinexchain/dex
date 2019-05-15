@@ -2,6 +2,10 @@ package app
 
 import (
 	"fmt"
+	"time"
+
+	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -9,14 +13,17 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"time"
+)
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
+var (
+	// bonded tokens given to genesis validators/accounts
+	freeTokensPerAcc = sdk.TokensFromTendermintPower(150)
+	defaultBondDenom = "cet"
 )
 
 // NewDefaultGenesisState generates the default state for gaia.
 func NewDefaultGenesisState() gaia_app.GenesisState {
-	return gaia_app.GenesisState{
+	gs := gaia_app.GenesisState{
 		Accounts:     nil,
 		AuthData:     auth.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
@@ -27,6 +34,9 @@ func NewDefaultGenesisState() gaia_app.GenesisState {
 		SlashingData: slashing.DefaultGenesisState(),
 		GenTxs:       nil,
 	}
+	// TODO: create staking.GenesisState from scratch
+	gs.StakingData.Params.BondDenom = "cet"
+	return gs
 }
 
 // ValidateGenesisState ensures that the genesis state obeys the expected invariants
