@@ -16,7 +16,7 @@ type LockedCoin struct {
 	UnlockTime int64    `json:"unlock_time"`
 }
 
-func NewAccountXWithAddress(addr sdk.AccAddress) AccountX {
+func NewAccountXWithAddress(ctx sdk.Context,addr sdk.AccAddress) AccountX {
 	acc := AccountX{
 		Address: addr,
 	}
