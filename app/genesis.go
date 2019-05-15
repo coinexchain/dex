@@ -35,7 +35,7 @@ func NewDefaultGenesisState() gaia_app.GenesisState {
 		GenTxs:       nil,
 	}
 	// TODO: create staking.GenesisState from scratch
-	gs.StakingData.Params.BondDenom = "cet"
+	gs.StakingData.Params.BondDenom = defaultBondDenom
 	return gs
 }
 
