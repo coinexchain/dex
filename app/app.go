@@ -25,8 +25,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
-
 	"github.com/coinexchain/dex/x/authx"
 	"github.com/coinexchain/dex/x/incentive"
 )
@@ -288,7 +286,7 @@ func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 	stateJSON := req.AppStateBytes
 	// TODO is this now the whole genesis file?
 
-	var genesisState gaia_app.GenesisState
+	var genesisState GenesisState
 	err := app.cdc.UnmarshalJSON(stateJSON, &genesisState)
 	if err != nil {
 		panic(err) // TODO https://github.com/cosmos/cosmos-sdk/issues/468
@@ -321,7 +319,7 @@ func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 }
 
 // initialize store from a genesis state
-func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState gaia_app.GenesisState) []abci.ValidatorUpdate {
+func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState GenesisState) []abci.ValidatorUpdate {
 	genesisState.Sanitize()
 
 	// load the accounts

@@ -53,7 +53,7 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 				return err
 			}
 
-			var appState gaia_app.GenesisState
+			var appState app.GenesisState
 			if err = cdc.UnmarshalJSON(genDoc.AppState, &appState); err != nil {
 				return err
 			}
@@ -126,7 +126,7 @@ func getAddress(addrOrKeyName string) (addr sdk.AccAddress, err error) {
 	return
 }
 
-func addGenesisAccount(appState gaia_app.GenesisState, accInfo *accountInfo) (gaia_app.GenesisState, error) {
+func addGenesisAccount(appState app.GenesisState, accInfo *accountInfo) (app.GenesisState, error) {
 	for _, stateAcc := range appState.Accounts {
 		if stateAcc.Address.Equals(accInfo.addr) {
 			return appState, fmt.Errorf("the application state already contains account %v", accInfo.addr)
