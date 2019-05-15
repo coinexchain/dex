@@ -29,19 +29,9 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
 
-			addr, err := sdk.AccAddressFromBech32(args[0])
+			addr, err := getAddress(args[0])
 			if err != nil {
-				kb, err := keys.NewKeyBaseFromDir(viper.GetString(flagClientHome))
-				if err != nil {
-					return err
-				}
-
-				info, err := kb.Get(args[0])
-				if err != nil {
-					return err
-				}
-
-				addr = info.GetAddress()
+				return err
 			}
 
 			coins, err := sdk.ParseCoins(args[1])
@@ -71,7 +61,7 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 				return err
 			}
 
-			appState, err = addGenesisAccount(cdc, appState, addr, coins, vestingAmt, vestingStart, vestingEnd)
+			appState, err = addGenesisAccount(appState, addr, coins, vestingAmt, vestingStart, vestingEnd)
 			if err != nil {
 				return err
 			}
@@ -94,8 +84,26 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 	return cmd
 }
 
+func getAddress(addrOrKeyName string) (addr sdk.AccAddress, err error) {
+	addr, err = sdk.AccAddressFromBech32(addrOrKeyName)
+	if err != nil {
+		kb, err := keys.NewKeyBaseFromDir(viper.GetString(flagClientHome))
+		if err != nil {
+			return nil, err
+		}
+
+		info, err := kb.Get(addrOrKeyName)
+		if err != nil {
+			return nil, err
+		}
+
+		addr = info.GetAddress()
+	}
+	return
+}
+
 func addGenesisAccount(
-	cdc *codec.Codec, appState gaia_app.GenesisState, addr sdk.AccAddress,
+	appState gaia_app.GenesisState, addr sdk.AccAddress,
 	coins, vestingAmt sdk.Coins, vestingStart, vestingEnd int64,
 ) (gaia_app.GenesisState, error) {
 
