@@ -109,6 +109,13 @@ func (keeper Keeper) SetToken(ctx sdk.Context, token Token) {
 
 }
 
+func (keeper Keeper) IssueToken(ctx sdk.Context, token MsgIssueToken) (tags sdk.Tags, err sdk.Error) {
+	//TODO:
+	//deduct the fee from issuer’s account
+	//New token info is saved on the CoinEx Chain
+	return
+}
+
 // -----------------------------------------------------------------------------
 // Params
 
@@ -139,8 +146,3 @@ func (keeper Keeper) decodeToken(bz []byte) (token Token) {
 	return
 }
 
-func (keeper Keeper) IssueToken(ctx sdk.Context, token MsgIssueToken) (sdk.Tags, sdk.Error) {
-	//TODO:
-	//deduct the fee from issuer’s account
-	//New token info is saved on the CoinEx Chain
-}

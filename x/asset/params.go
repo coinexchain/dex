@@ -11,8 +11,6 @@ const (
 	DefaultParamspace = "asset"
 )
 
-var ()
-
 // Parameter keys
 var (
 	KeyIssueTokenFee                 = []byte("IssueTokenFee")
