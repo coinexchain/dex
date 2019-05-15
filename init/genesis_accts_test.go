@@ -77,8 +77,9 @@ func TestAddGenesisAccount(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := addGenesisAccount(
-				tt.args.appState, tt.args.addr, tt.args.coins,
-				tt.args.vestingAmt, tt.args.vestingStart, tt.args.vestingEnd,
+				tt.args.appState,
+				&accountInfo{tt.args.addr, tt.args.coins,
+					tt.args.vestingAmt, tt.args.vestingStart, tt.args.vestingEnd},
 			)
 			require.Equal(t, tt.wantErr, err != nil)
 		})

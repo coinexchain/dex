@@ -19,6 +19,14 @@ import (
 	"github.com/coinexchain/dex/app"
 )
 
+type accountInfo struct {
+	addr         sdk.AccAddress
+	coins        sdk.Coins
+	vestingAmt   sdk.Coins
+	vestingStart int64
+	vestingEnd   int64
+}
+
 // AddGenesisAccountCmd returns add-genesis-account cobra Command.
 func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
@@ -29,19 +37,7 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
 
-			addr, err := getAddress(args[0])
-			if err != nil {
-				return err
-			}
-
-			coins, err := sdk.ParseCoins(args[1])
-			if err != nil {
-				return err
-			}
-
-			vestingStart := viper.GetInt64(flagVestingStart)
-			vestingEnd := viper.GetInt64(flagVestingEnd)
-			vestingAmt, err := sdk.ParseCoins(viper.GetString(flagVestingAmt))
+			accInfo, err := collectAccInfo(args)
 			if err != nil {
 				return err
 			}
@@ -61,7 +57,7 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 				return err
 			}
 
-			appState, err = addGenesisAccount(appState, addr, coins, vestingAmt, vestingStart, vestingEnd)
+			appState, err = addGenesisAccount(appState, accInfo)
 			if err != nil {
 				return err
 			}
@@ -84,6 +80,33 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 	return cmd
 }
 
+func collectAccInfo(args []string) (*accountInfo, error) {
+	addr, err := getAddress(args[0])
+	if err != nil {
+		return nil, err
+	}
+
+	coins, err := sdk.ParseCoins(args[1])
+	if err != nil {
+		return nil, err
+	}
+
+	vestingStart := viper.GetInt64(flagVestingStart)
+	vestingEnd := viper.GetInt64(flagVestingEnd)
+	vestingAmt, err := sdk.ParseCoins(viper.GetString(flagVestingAmt))
+	if err != nil {
+		return nil, err
+	}
+
+	accInfo := &accountInfo{
+		addr:         addr,
+		coins:        coins,
+		vestingAmt:   vestingAmt,
+		vestingStart: vestingStart,
+		vestingEnd:   vestingEnd}
+	return accInfo, nil
+}
+
 func getAddress(addrOrKeyName string) (addr sdk.AccAddress, err error) {
 	addr, err = sdk.AccAddressFromBech32(addrOrKeyName)
 	if err != nil {
@@ -102,40 +125,36 @@ func getAddress(addrOrKeyName string) (addr sdk.AccAddress, err error) {
 	return
 }
 
-func addGenesisAccount(
-	appState gaia_app.GenesisState, addr sdk.AccAddress,
-	coins, vestingAmt sdk.Coins, vestingStart, vestingEnd int64,
-) (gaia_app.GenesisState, error) {
-
+func addGenesisAccount(appState gaia_app.GenesisState, accInfo *accountInfo, ) (gaia_app.GenesisState, error) {
 	for _, stateAcc := range appState.Accounts {
-		if stateAcc.Address.Equals(addr) {
-			return appState, fmt.Errorf("the application state already contains account %v", addr)
+		if stateAcc.Address.Equals(accInfo.addr) {
+			return appState, fmt.Errorf("the application state already contains account %v", accInfo.addr)
 		}
 	}
 
-	acc := auth.NewBaseAccountWithAddress(addr)
-	acc.Coins = coins
+	acc := auth.NewBaseAccountWithAddress(accInfo.addr)
+	acc.Coins = accInfo.coins
 
-	if !vestingAmt.IsZero() {
+	if !accInfo.vestingAmt.IsZero() {
 		var vacc auth.VestingAccount
 
 		bvacc := &auth.BaseVestingAccount{
 			BaseAccount:     &acc,
-			OriginalVesting: vestingAmt,
-			EndTime:         vestingEnd,
+			OriginalVesting: accInfo.vestingAmt,
+			EndTime:         accInfo.vestingEnd,
 		}
 
 		if bvacc.OriginalVesting.IsAllGT(acc.Coins) {
 			return appState, fmt.Errorf("vesting amount cannot be greater than total amount")
 		}
-		if vestingStart >= vestingEnd {
+		if accInfo.vestingStart >= accInfo.vestingEnd {
 			return appState, fmt.Errorf("vesting start time must before end time")
 		}
 
-		if vestingStart != 0 {
+		if accInfo.vestingStart != 0 {
 			vacc = &auth.ContinuousVestingAccount{
 				BaseVestingAccount: bvacc,
-				StartTime:          vestingStart,
+				StartTime:          accInfo.vestingStart,
 			}
 		} else {
 			vacc = &auth.DelayedVestingAccount{
