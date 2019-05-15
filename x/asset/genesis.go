@@ -22,19 +22,19 @@ func DefaultGenesisState() GenesisState {
 }
 
 // InitGenesis - Init store state from genesis data
-func InitGenesis(ctx sdk.Context, data GenesisState) {
-	// TODO
+func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+	keeper.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
-func ExportGenesis(ctx sdk.Context, tk TokenKeeper) GenesisState {
-	params := tk.GetParams(ctx)
+func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
+	params := keeper.GetParams(ctx)
 	return NewGenesisState(params)
 }
 
-// ValidateGenesis performs basic validation of auth genesis data returning an
+// ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func ValidateGenesis(data GenesisState) error {
-	// TODO
+	//TODO:
 	return nil
 }
