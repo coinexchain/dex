@@ -125,13 +125,23 @@ func getAddress(addrOrKeyName string) (addr sdk.AccAddress, err error) {
 	return
 }
 
-func addGenesisAccount(appState gaia_app.GenesisState, accInfo *accountInfo, ) (gaia_app.GenesisState, error) {
+func addGenesisAccount(appState gaia_app.GenesisState, accInfo *accountInfo) (gaia_app.GenesisState, error) {
 	for _, stateAcc := range appState.Accounts {
 		if stateAcc.Address.Equals(accInfo.addr) {
 			return appState, fmt.Errorf("the application state already contains account %v", accInfo.addr)
 		}
 	}
 
+	acc, err := newGenesisAccount(accInfo)
+	if err != nil {
+		return appState, err
+	}
+
+	appState.Accounts = append(appState.Accounts, acc)
+	return appState, nil
+}
+
+func newGenesisAccount(accInfo *accountInfo) (genAcc gaia_app.GenesisAccount, err error) {
 	acc := auth.NewBaseAccountWithAddress(accInfo.addr)
 	acc.Coins = accInfo.coins
 
@@ -145,10 +155,10 @@ func addGenesisAccount(appState gaia_app.GenesisState, accInfo *accountInfo, ) (
 		}
 
 		if bvacc.OriginalVesting.IsAllGT(acc.Coins) {
-			return appState, fmt.Errorf("vesting amount cannot be greater than total amount")
+			return genAcc, fmt.Errorf("vesting amount cannot be greater than total amount")
 		}
 		if accInfo.vestingStart >= accInfo.vestingEnd {
-			return appState, fmt.Errorf("vesting start time must before end time")
+			return genAcc, fmt.Errorf("vesting start time must before end time")
 		}
 
 		if accInfo.vestingStart != 0 {
@@ -162,10 +172,8 @@ func addGenesisAccount(appState gaia_app.GenesisState, accInfo *accountInfo, ) (
 			}
 		}
 
-		appState.Accounts = append(appState.Accounts, gaia_app.NewGenesisAccountI(vacc))
+		return gaia_app.NewGenesisAccountI(vacc), nil
 	} else {
-		appState.Accounts = append(appState.Accounts, gaia_app.NewGenesisAccount(&acc))
+		return gaia_app.NewGenesisAccount(&acc), nil
 	}
-
-	return appState, nil
 }
