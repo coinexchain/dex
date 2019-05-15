@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -13,6 +12,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+
+	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 )
 
 var (
