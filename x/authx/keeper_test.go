@@ -43,7 +43,7 @@ func TestAccountXGetSet(t *testing.T) {
 	require.False(t, ok)
 
 	//create account
-	acc := NewAccountXWithAddress(addr)
+	acc := NewAccountXWithAddress(input.ctx, addr)
 	require.Equal(t, addr, acc.GetAddress())
 
 	input.axk.SetAccountX(input.ctx, acc)
