@@ -214,8 +214,7 @@ func (app *CetChainApp) registerCrisisRoutes() {
 
 func (app *CetChainApp) registerMessageRoutes() {
 	app.Router().
-		AddRoute(bankx.RouterKey, bankx.NewHandler(app.bankxKeeper)).
-		AddRoute(bank.RouterKey, bank.NewHandler(app.bankKeeper)).
+		AddRoute(bank.RouterKey, bankx.NewHandler(app.bankxKeeper)).
 		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
 		AddRoute(distr.RouterKey, distr.NewHandler(app.distrKeeper)).
 		AddRoute(slashing.RouterKey, slashing.NewHandler(app.slashingKeeper)).
