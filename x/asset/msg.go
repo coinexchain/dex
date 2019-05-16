@@ -2,6 +2,8 @@ package asset
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"regexp"
+	"unicode/utf8"
 )
 
 // RouterKey is they name of the asset module
@@ -40,15 +42,21 @@ func (msg MsgIssueToken) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgIssueToken) ValidateBasic() sdk.Error {
 
+	if utf8.RuneCountInString(msg.Name) > 32 {
+		return sdk.ErrTxDecode("issue token name limited to 32 unicode characters")
+	}
+	if m, _ := regexp.MatchString("[a-z][a-z0-9]{1,7}", msg.Symbol); !m {
+		return sdk.ErrTxDecode("issue token symbol limited to [a-z][a-z0-9]{1,7}")
+	}
+	if msg.TotalSupply > MaxTokenAmount {
+		return sdk.ErrTxDecode("issue token supply amt limited to 90 billion")
+	}
+	if msg.TotalSupply < 0 {
+		return sdk.ErrTxDecode("issue token supply amt should be positive")
+	}
 	if msg.Owner.Empty() {
 		return sdk.ErrInvalidAddress("missing Owner address")
 	}
-	//TODO:
-	//Name limited to 32 unicode characters
-	//input Symbol in correct format =~ [a-z][a-z0-9]{1,7}
-	//TotalSupply before boosting should not exceed 90 billion
-	//can not issue main token
-	//token symbol should different
 
 	return nil
 }

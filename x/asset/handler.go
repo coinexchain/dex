@@ -38,9 +38,7 @@ func handleMsgIssueToken(ctx sdk.Context, k Keeper, msg MsgIssueToken) sdk.Resul
 	if err != nil {
 		return err.Result()
 	}
-	return sdk.Result{
-
-	}
+	return sdk.Result{}
 }
 
 // handleMsgTransferOwnership - Handle MsgTransferOwnership
