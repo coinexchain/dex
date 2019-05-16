@@ -2,6 +2,7 @@ package asset
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -26,8 +27,8 @@ type Keeper struct {
 	// The (unexposed) key used to access the store from the Context.
 	key sdk.StoreKey
 
-	// The prototypical token constructor.
-	proto func() Token
+	ak  auth.AccountKeeper
+	fck auth.FeeCollectionKeeper
 
 	// The codec codec for binary encoding/decoding of token.
 	cdc *codec.Codec
@@ -39,12 +40,13 @@ type Keeper struct {
 // (binary) encode and decode concrete Token.
 // nolint
 func NewKeeper(
-	cdc *codec.Codec, key sdk.StoreKey, paramstore params.Subspace, proto func() Token,
-) Keeper {
+	cdc *codec.Codec, key sdk.StoreKey, paramstore params.Subspace,
+	ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) Keeper {
 
 	return Keeper{
 		key:           key,
-		proto:         proto,
+		ak:            ak,
+		fck:           fck,
 		cdc:           cdc,
 		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
 	}
@@ -109,10 +111,8 @@ func (keeper Keeper) SetToken(ctx sdk.Context, token Token) {
 
 }
 
+//IssueToken - new token and store
 func (keeper Keeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) (err sdk.Error) {
-	//TODO:
-	//deduct the fee from issuer’s account
-	//New token info is saved on the CoinEx Chain
 
 	token, err := NewToken(msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
 		msg.Mintable, msg.Burnable, msg.AddrFreezeable, msg.TokenFreezeable)
