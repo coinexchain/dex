@@ -99,9 +99,6 @@ func ValidateGenesisState(genesisState GenesisState) error {
 	if err := staking.ValidateGenesis(genesisState.StakingData); err != nil {
 		return err
 	}
-	//if err := mint.ValidateGenesis(genesisState.MintData); err != nil {
-	//	return err
-	//}
 	if err := distribution.ValidateGenesis(genesisState.DistrData); err != nil {
 		return err
 	}

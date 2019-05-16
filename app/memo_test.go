@@ -18,7 +18,7 @@ import (
 	"github.com/coinexchain/dex/testutil"
 )
 
-func TestMemo(t *testing.T) {
+func TestSend(t *testing.T) {
 	// genesis state
 	toAddr := sdk.AccAddress([]byte("from"))
 	key, _, fromAddr := testutil.KeyPubAddr()
@@ -50,4 +50,8 @@ func TestMemo(t *testing.T) {
 
 	result := app.Deliver(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
+}
+
+func TestMemo(t *testing.T) {
+	// TODO
 }

@@ -1,9 +1,11 @@
 package bankx
 
 import (
-	"github.com/coinexchain/dex/x/authx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+
+	"github.com/coinexchain/dex/denoms"
+	"github.com/coinexchain/dex/x/authx"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
@@ -57,7 +59,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 		}
 
 		//collect account activation fees
-		k.fck.AddCollectedFees(ctx, sdk.NewCoins(sdk.NewCoin("cet,", sdk.NewInt(activatedFee))))
+		k.fck.AddCollectedFees(ctx, denoms.NewCetCoins(activatedFee))
 	}
 
 	//handle coins transfer
