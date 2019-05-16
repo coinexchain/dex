@@ -7,7 +7,7 @@ if [ ! -x "$(type -p glide)" ]; then
     exit 1
 fi
 
-if [ ! -x "$(type -p gometalinter)" ]; then
+if [ ! -x "$(type -p golangci-lint)" ]; then
     exit 1
 fi
 
