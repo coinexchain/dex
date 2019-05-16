@@ -36,7 +36,7 @@ install:
   - cd -
   - go mod tidy
   - go mod vendor
-  - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+  - go get github.com/golangci/golangci-lint/cmd/golangci-lint
   - golangci-lint --install
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
