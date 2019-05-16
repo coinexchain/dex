@@ -67,7 +67,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 	// new accountx for toaddress if needed
 	if !ok {
 		newAccountX := authx.NewAccountXWithAddress(msg.ToAddress)
-		newAccountX.SetActivated(true)
+		newAccountX.Activated = true
 		k.axk.SetAccountX(ctx, newAccountX)
 	}
 
