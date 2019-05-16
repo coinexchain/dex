@@ -1,5 +1,14 @@
 language: go
 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-6
+      - gcc-6
+
+
 go:
   - 1.12.x
 cache:
