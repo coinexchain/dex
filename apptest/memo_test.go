@@ -20,7 +20,7 @@ func TestMemo(t *testing.T) {
 	db := dbm.NewMemDB()
 	app := app.NewCetChainApp(logger, db, nil, true, 10000)
 
-	app.InitChain(abci.RequestInitChain{AppStateBytes:[]byte("{}")})
+	app.InitChain(abci.RequestInitChain{AppStateBytes: []byte("{}")})
 
 	header := abci.Header{Height: 1}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
