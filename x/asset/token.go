@@ -67,14 +67,28 @@ type BaseToken struct {
 	IsFrozen  bool  // Whether token being frozen currently
 }
 
-// NewBaseToken - default Mintable/Burnable/AddrFreezeable/TokenFreezeable/IsFrozen
-func NewToken() BaseToken {
-	return BaseToken{
-		Mintable:        false,
-		Burnable:        false,
-		AddrFreezeable:  false,
-		TokenFreezeable: false,
+// NewToken - new base token
+func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
+	mintable bool, burnable bool, addrfreezeable bool, tokenfreezeable bool) (token BaseToken, err sdk.Error) {
+	token.SetName(name)
+	token.SetSymbol(symbol)
+	if err := token.SetOwner(owner); err != nil {
+		return BaseToken{}, sdk.ErrInvalidAddress("issue token must set a valid token owner")
 	}
+	if err := token.SetTotalSupply(amt); err != nil {
+		return BaseToken{}, sdk.ErrInvalidCoins("issue token must set a valid total supply")
+	}
+
+	token.SetMintable(mintable)
+	token.SetBurnable(burnable)
+	token.SetAddrFreezeable(addrfreezeable)
+	token.SetTokenFreezeable(tokenfreezeable)
+
+	token.SetTotalMint(0)
+	token.SetTotalBurn(0)
+	token.SetIsFrozen(false)
+
+	return token, nil
 }
 
 func (t BaseToken) GetName() string {
@@ -99,7 +113,10 @@ func (t BaseToken) GetTotalSupply() int64 {
 
 func (t BaseToken) SetTotalSupply(amt int64) error {
 	if amt > MaxTokenAmount {
-		return errors.New("token total supply limit to 90 billion")
+		return errors.New("token total supply limited to 90 billion")
+	}
+	if amt < 0 {
+		return errors.New("token total supply must a positive")
 	}
 	t.TotalSupply = amt
 	return nil
@@ -155,7 +172,7 @@ func (t BaseToken) GetTotalBurn() int64 {
 
 func (t BaseToken) SetTotalBurn(amt int64) error {
 	if amt > MaxTokenAmount {
-		return errors.New("token total supply limit to 90 billion")
+		return errors.New("token total supply limited to 90 billion")
 	}
 	t.TotalBurn = amt
 	return nil
@@ -167,7 +184,7 @@ func (t BaseToken) GetTotalMint() int64 {
 
 func (t BaseToken) SetTotalMint(amt int64) error {
 	if amt > MaxTokenAmount {
-		return errors.New("token total supply limit to 90 billion")
+		return errors.New("token total supply limited to 90 billion")
 	}
 	t.TotalMint = amt
 	return nil

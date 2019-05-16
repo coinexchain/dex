@@ -34,8 +34,7 @@ func NewHandler(k Keeper) sdk.Handler {
 
 // handleMsgIssueToken - Handle MsgIssueToken
 func handleMsgIssueToken(ctx sdk.Context, k Keeper, msg MsgIssueToken) sdk.Result {
-	_, err := k.IssueToken(ctx, msg)
-	if err != nil {
+	if err := k.IssueToken(ctx, msg); err != nil {
 		return err.Result()
 	}
 	return sdk.Result{}

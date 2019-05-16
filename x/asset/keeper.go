@@ -109,11 +109,20 @@ func (keeper Keeper) SetToken(ctx sdk.Context, token Token) {
 
 }
 
-func (keeper Keeper) IssueToken(ctx sdk.Context, token MsgIssueToken) (tags sdk.Tags, err sdk.Error) {
+func (keeper Keeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) (err sdk.Error) {
 	//TODO:
 	//deduct the fee from issuer’s account
 	//New token info is saved on the CoinEx Chain
-	return
+
+	token, err := NewToken(msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
+		msg.Mintable, msg.Burnable, msg.AddrFreezeable, msg.TokenFreezeable)
+
+	if err != nil {
+		return err
+	}
+	keeper.SetToken(ctx, token)
+
+	return nil
 }
 
 // -----------------------------------------------------------------------------
