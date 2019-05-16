@@ -74,7 +74,30 @@ func subTokenFee(ctx sdk.Context, k Keeper, addr sdk.AccAddress, fee sdk.Coins) 
 
 	return nil
 }
+func addTokenCoins(ctx sdk.Context, k Keeper, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 
+	acc := k.ak.GetAccount(ctx, addr)
+	if acc == nil {
+		return sdk.ErrUnknownAddress("no valid address")
+	}
+
+	if !amt.IsValid() {
+		return sdk.ErrInvalidCoins(amt.String())
+	}
+
+	oldCoins := acc.GetCoins()
+	newCoins := oldCoins.Add(amt)
+
+	if newCoins.IsAnyNegative() {
+		return sdk.ErrInsufficientCoins(
+			fmt.Sprintf("insufficient account funds; %s < %s", oldCoins, amt),
+		)
+	}
+
+	err := setCoins(ctx, k.ak, addr, newCoins)
+
+	return err
+}
 
 // handleMsgIssueToken - Handle MsgIssueToken
 func handleMsgIssueToken(ctx sdk.Context, k Keeper, msg MsgIssueToken) sdk.Result {
@@ -86,6 +109,10 @@ func handleMsgIssueToken(ctx sdk.Context, k Keeper, msg MsgIssueToken) sdk.Resul
 	k.fck.AddCollectedFees(ctx, issueFee)
 
 	if err := k.IssueToken(ctx, msg); err != nil {
+		return err.Result()
+	}
+
+	if err := addTokenCoins(ctx, k, msg.Owner, cet(msg.TotalSupply)); err != nil {
 		return err.Result()
 	}
 
