@@ -10,6 +10,16 @@ import (
 const (
 	DefaultParamspace = "asset"
 	MaxTokenAmount    = 9E18 // 90 billion * 10 ^ 8
+
+	IssueTokenFee                 = 10000
+	FreezeAddrFee                 = 10
+	UnFreezeAddrFee               = 10
+	FreezeTokenFee                = 1000
+	UnFreezeTokenFee              = 1000
+	TokenFreezeWhitelistAddFee    = 100
+	TokenFreezeWhitelistRemoveFee = 100
+	BurnFee                       = 1000
+	MintFee                       = 1000
 )
 
 // Parameter keys
@@ -75,19 +85,19 @@ func (p Params) Equal(p2 Params) bool {
 func DefaultParams() Params {
 
 	return Params{
-		IssueTokenFee:                 cet(10000),
-		FreezeAddrFee:                 cet(10),
-		UnFreezeAddrFee:               cet(10),
-		FreezeTokenFee:                cet(1000),
-		UnFreezeTokenFee:              cet(1000),
-		TokenFreezeWhitelistAddFee:    cet(100),
-		TokenFreezeWhitelistRemoveFee: cet(100),
-		BurnFee:                       cet(1000),
-		MintFee:                       cet(1000),
+		IssueTokenFee:                 CetCoin(IssueTokenFee),
+		FreezeAddrFee:                 CetCoin(FreezeAddrFee),
+		UnFreezeAddrFee:               CetCoin(UnFreezeAddrFee),
+		FreezeTokenFee:                CetCoin(FreezeTokenFee),
+		UnFreezeTokenFee:              CetCoin(UnFreezeTokenFee),
+		TokenFreezeWhitelistAddFee:    CetCoin(TokenFreezeWhitelistAddFee),
+		TokenFreezeWhitelistRemoveFee: CetCoin(TokenFreezeWhitelistRemoveFee),
+		BurnFee:                       CetCoin(BurnFee),
+		MintFee:                       CetCoin(MintFee),
 	}
 }
 
-func cet(amt int64) sdk.Coins {
+func CetCoin(amt int64) sdk.Coins {
 	return sdk.Coins{
 		sdk.NewCoin("cet", sdk.NewInt(amt)),
 	}

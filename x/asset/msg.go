@@ -25,8 +25,19 @@ type MsgIssueToken struct {
 var _ sdk.Msg = MsgIssueToken{}
 
 // NewMsgIssueToken
-func NewMsgIssueToken() MsgIssueToken {
-	return MsgIssueToken{}
+func NewMsgIssueToken(name string, symbol string, amt int64, owner sdk.AccAddress,
+	mintable bool, burnable bool, addrFreezeable bool, tokenFreezeable bool) MsgIssueToken {
+
+	return MsgIssueToken{
+		name,
+		symbol,
+		amt,
+		owner,
+		mintable,
+		burnable,
+		addrFreezeable,
+		tokenFreezeable,
+	}
 }
 
 // Route Implements Msg.
@@ -55,7 +66,7 @@ func (msg MsgIssueToken) ValidateBasic() sdk.Error {
 		return sdk.ErrTxDecode("issue token supply amt should be positive")
 	}
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("missing Owner address")
+		return sdk.ErrInvalidAddress("missing owner address")
 	}
 
 	return nil
