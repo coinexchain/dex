@@ -15,7 +15,7 @@ type Token interface {
 	SetSymbol(string)
 
 	GetTotalSupply() int64
-	SetTotalSupply(int64)
+	SetTotalSupply(int64) error
 
 	GetOwner() sdk.AccAddress
 	SetOwner(sdk.AccAddress) error
@@ -33,10 +33,10 @@ type Token interface {
 	SetTokenFreezeable(bool)
 
 	GetTotalBurn() int64
-	SetTotalBurn(int64)
+	SetTotalBurn(int64) error
 
 	GetTotalMint() int64
-	SetTotalMint(int64)
+	SetTotalMint(int64) error
 
 	GetIsFrozen() bool
 	SetIsFrozen(bool)
@@ -97,8 +97,12 @@ func (t BaseToken) GetTotalSupply() int64 {
 	return t.TotalSupply
 }
 
-func (t BaseToken) SetTotalSupply(amt int64) {
+func (t BaseToken) SetTotalSupply(amt int64) error {
+	if amt > MaxTokenAmount {
+		return errors.New("token total supply limit to 90 billion")
+	}
 	t.TotalSupply = amt
+	return nil
 }
 
 func (t BaseToken) GetOwner() sdk.AccAddress {
@@ -149,16 +153,24 @@ func (t BaseToken) GetTotalBurn() int64 {
 	return t.TotalBurn
 }
 
-func (t BaseToken) SetTotalBurn(amt int64) {
+func (t BaseToken) SetTotalBurn(amt int64) error {
+	if amt > MaxTokenAmount {
+		return errors.New("token total supply limit to 90 billion")
+	}
 	t.TotalBurn = amt
+	return nil
 }
 
 func (t BaseToken) GetTotalMint() int64 {
 	return t.TotalMint
 }
 
-func (t BaseToken) SetTotalMint(amt int64) {
+func (t BaseToken) SetTotalMint(amt int64) error {
+	if amt > MaxTokenAmount {
+		return errors.New("token total supply limit to 90 billion")
+	}
 	t.TotalMint = amt
+	return nil
 }
 
 func (t BaseToken) GetIsFrozen() bool {
