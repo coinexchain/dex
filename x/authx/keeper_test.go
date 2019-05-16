@@ -44,24 +44,24 @@ func TestAccountXGetSet(t *testing.T) {
 
 	//create account
 	acc := NewAccountXWithAddress(addr)
-	require.Equal(t, addr, acc.GetAddress())
+	require.Equal(t, addr, acc.Address)
 
 	input.axk.SetAccountX(input.ctx, acc)
 
 	acc, ok = input.axk.GetAccountX(input.ctx, addr)
 	require.True(t, ok)
 
-	acc.SetActivated(true)
+	acc.Activated = true
 	input.axk.SetAccountX(input.ctx, acc)
 	acc, _ = input.axk.GetAccountX(input.ctx, addr)
-	require.Equal(t, true, acc.GetActivated())
+	require.Equal(t, true, acc.Activated)
 
-	acc.SetTransferMemoRequired(false)
+	acc.TransferMemoRequired = false
 	input.axk.SetAccountX(input.ctx, acc)
 	acc, _ = input.axk.GetAccountX(input.ctx, addr)
-	require.Equal(t, false, acc.GetTransferMemoRequired())
+	require.Equal(t, false, acc.TransferMemoRequired)
 
-	lockedcoin := acc.GetLockedCoins()
+	lockedcoin := acc.LockedCoins
 	require.Nil(t, lockedcoin)
 }
 

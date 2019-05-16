@@ -22,23 +22,3 @@ func NewAccountXWithAddress(addr sdk.AccAddress) AccountX {
 	}
 	return acc
 }
-
-func (acc *AccountX) GetActivated() bool {
-	return acc.Activated
-}
-func (acc *AccountX) SetActivated(activated bool) {
-	acc.Activated = activated
-}
-func (acc *AccountX) SetTransferMemoRequired(transferMemoRequired bool) {
-	acc.TransferMemoRequired = transferMemoRequired
-}
-
-func (acc *AccountX) GetTransferMemoRequired() bool {
-	return acc.TransferMemoRequired
-}
-func (acc *AccountX) GetAddress() sdk.AccAddress {
-	return acc.Address
-}
-func (acc *AccountX) GetLockedCoins() []LockedCoin {
-	return acc.LockedCoins
-}
