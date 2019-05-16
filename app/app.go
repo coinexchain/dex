@@ -156,6 +156,7 @@ func (app *CetChainApp) initKeepers() {
 		app.keyFeeCollection,
 	)
 	app.bankxKeeper = bankx.NewKeeper(
+		app.paramsKeeper.Subspace(bankx.DefaultParamSpace),
 		app.accountXKeeper,
 		app.bankKeeper,
 		app.feeCollectionKeeper,

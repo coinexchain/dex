@@ -12,7 +12,7 @@ import (
 )
 
 type testInput struct {
-	cdc *codec.Codec
+
 	ctx sdk.Context
 	axk AccountXKeeper
 }
@@ -31,7 +31,7 @@ func setupTestInput() testInput {
 	axk := NewKeeper(cdc, authXKey)
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 
-	return testInput{cdc: cdc, ctx: ctx, axk: axk}
+	return testInput{ ctx: ctx, axk: axk}
 }
 
 func TestAccountXGetSet(t *testing.T) {

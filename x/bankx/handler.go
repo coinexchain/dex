@@ -6,7 +6,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
-
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
@@ -19,14 +18,15 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 
 }
-func subOneCET(amt sdk.Coins) (sdk.Coins, bool) {
+func subActivatedFee(amt sdk.Coins, sub int64) (sdk.Coins, bool) {
 
 	var found bool
 	for i, coin := range amt {
 		if coin.Denom != "cet" {
 			continue
 		}
-		amt[i] = sdk.NewCoin("cet", coin.Amount.Sub(sdk.OneInt()))
+
+		amt[i] = sdk.NewCoin("cet", coin.Amount.Sub(sdk.NewInt(sub)))
 		found = true
 	}
 	return amt, found
@@ -46,7 +46,9 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 	if !ok {
 
 		//check whether the first transfer contains cet
-		amt, found = subOneCET(msg.Amount)
+		activatedFee := k.GetParam(ctx).ActivatedFee
+
+		amt, found = subActivatedFee(msg.Amount, activatedFee)
 		if !found {
 			return ErrorFirstTransferNotCET(CodeSpaceBankx).Result()
 		}
@@ -54,8 +56,8 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 			return sdk.ErrInvalidCoins(amt.String()).Result()
 		}
 
-		//collect 1 cet activating fees
-		k.fck.AddCollectedFees(ctx, sdk.NewCoins(sdk.NewCoin("cet,", sdk.OneInt())))
+		//collect account activation fees
+		k.fck.AddCollectedFees(ctx, sdk.NewCoins(sdk.NewCoin("cet,", sdk.NewInt(activatedFee))))
 	}
 
 	//handle coins transfer
@@ -68,7 +70,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 	// new accountx for toaddress if needed
 	if !ok {
 		newAccountX := authx.NewAccountXWithAddress(msg.ToAddress)
-		newAccountX.SetActivated(true)
+		newAccountX.Activated = true
 		k.axk.SetAccountX(ctx, newAccountX)
 	}
 
