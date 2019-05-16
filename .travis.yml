@@ -18,6 +18,7 @@ before_cache:
   - rm -rf $GOPATH/pkg/**/github.com/coinexchain/dex
 
 before_install:
+  - export GO111MODULE=on
   - export GOROOT=$(go env GOROOT)
   - export CXX="g++-6" CC="gcc-6"
   - export PATH=$PATH:$HOME/gopath/bin
