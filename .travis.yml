@@ -24,7 +24,10 @@ before_install:
   - export PATH=$PATH:$HOME/gopath/bin
 
 install:
-  - go get  github.com/alecthomas/gometalinter
+  - cd -
+  - go mod tidy
+  - go mod vendor
+  - go get github.com/alecthomas/gometalinter
   - gometalinter --install
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
