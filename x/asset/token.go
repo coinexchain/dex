@@ -106,7 +106,7 @@ func (t BaseToken) GetOwner() sdk.AccAddress {
 }
 
 func (t BaseToken) SetOwner(addr sdk.AccAddress) error {
-	if len(addr) == 0 {
+	if addr.Empty() {
 		return errors.New("must set a valid token owner")
 	}
 	t.Owner = addr

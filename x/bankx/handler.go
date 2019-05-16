@@ -6,7 +6,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
-
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {

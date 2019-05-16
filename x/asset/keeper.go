@@ -145,4 +145,3 @@ func (keeper Keeper) decodeToken(bz []byte) (token Token) {
 	}
 	return
 }
-

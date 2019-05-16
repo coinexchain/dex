@@ -9,6 +9,7 @@ import (
 // DefaultParamspace defines the default asset module parameter subspace
 const (
 	DefaultParamspace = "asset"
+	MaxTokenAmount    = 90000000000 // 90 billion
 )
 
 // Parameter keys
