@@ -174,7 +174,7 @@ func newGenesisAccount(accInfo *accountInfo) (genAcc gaia_app.GenesisAccount, er
 		}
 
 		return gaia_app.NewGenesisAccountI(vacc), nil
-	} else {
-		return gaia_app.NewGenesisAccount(&acc), nil
 	}
+
+	return gaia_app.NewGenesisAccount(&acc), nil
 }

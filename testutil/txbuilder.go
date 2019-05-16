@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type stdTxBuilder struct {
-	chainId  string
+type StdTxBuilder struct {
+	chainID  string
 	msgs     []sdk.Msg
 	privKeys []crypto.PrivKey
 	accNums  []uint64
@@ -16,29 +16,29 @@ type stdTxBuilder struct {
 	fee      auth.StdFee
 }
 
-func NewStdTxBuilder(chainId string) *stdTxBuilder {
-	return &stdTxBuilder{chainId: chainId}
+func NewStdTxBuilder(chainID string) *StdTxBuilder {
+	return &StdTxBuilder{chainID: chainID}
 }
 
-func (builder *stdTxBuilder) Msgs(msgs ...sdk.Msg) *stdTxBuilder {
+func (builder *StdTxBuilder) Msgs(msgs ...sdk.Msg) *StdTxBuilder {
 	builder.msgs = msgs
 	return builder
 }
-func (builder *stdTxBuilder) AccNumSeqKey(num, seq uint64, key crypto.PrivKey) *stdTxBuilder {
+func (builder *StdTxBuilder) AccNumSeqKey(num, seq uint64, key crypto.PrivKey) *StdTxBuilder {
 	builder.accNums = append(builder.accNums, num)
 	builder.seqs = append(builder.seqs, seq)
 	builder.privKeys = append(builder.privKeys, key)
 	return builder
 }
-func (builder *stdTxBuilder) Fee(fee auth.StdFee) *stdTxBuilder {
+func (builder *StdTxBuilder) Fee(fee auth.StdFee) *StdTxBuilder {
 	builder.fee = fee
 	return builder
 }
 
-func (builder *stdTxBuilder) Build() auth.StdTx {
+func (builder *StdTxBuilder) Build() auth.StdTx {
 	sigs := make([]auth.StdSignature, len(builder.privKeys))
 	for i, privKey := range builder.privKeys {
-		signBytes := auth.StdSignBytes(builder.chainId,
+		signBytes := auth.StdSignBytes(builder.chainID,
 			builder.accNums[i], builder.seqs[i], builder.fee, builder.msgs, "")
 
 		sig, err := privKey.Sign(signBytes)
