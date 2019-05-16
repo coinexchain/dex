@@ -18,6 +18,7 @@ import (
 	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 
 	"github.com/coinexchain/dex/x/asset"
+	"github.com/coinexchain/dex/x/bankx"
 )
 
 var (
@@ -31,6 +32,7 @@ type GenesisState struct {
 	Accounts     []gaia_app.GenesisAccount `json:"accounts"`
 	AuthData     auth.GenesisState         `json:"auth"`
 	BankData     bank.GenesisState         `json:"bank"`
+	BankXData    bankx.GenesisState        `json:"bankx"`
 	StakingData  staking.GenesisState      `json:"staking"`
 	DistrData    distribution.GenesisState `json:"distr"`
 	GovData      gov.GenesisState          `json:"gov"`
@@ -46,6 +48,7 @@ func NewDefaultGenesisState() GenesisState {
 		Accounts:     nil,
 		AuthData:     auth.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
+		BankXData:    bankx.DefaultGenesisState(),
 		StakingData:  staking.DefaultGenesisState(),
 		DistrData:    distribution.DefaultGenesisState(),
 		GovData:      gov.DefaultGenesisState(),
@@ -90,6 +93,9 @@ func ValidateGenesisState(genesisState GenesisState) error {
 	if err := bank.ValidateGenesis(genesisState.BankData); err != nil {
 		return err
 	}
+	if err := bankx.ValidateGenesis(genesisState.BankXData); err != nil {
+		return err
+	}
 	if err := staking.ValidateGenesis(genesisState.StakingData); err != nil {
 		return err
 	}
@@ -103,6 +109,9 @@ func ValidateGenesisState(genesisState GenesisState) error {
 		return err
 	}
 	if err := crisis.ValidateGenesis(genesisState.CrisisData); err != nil {
+		return err
+	}
+	if err := asset.ValidateGenesis(genesisState.AssetData); err != nil {
 		return err
 	}
 
