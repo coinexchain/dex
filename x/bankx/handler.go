@@ -44,11 +44,11 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 	var amt sdk.Coins
 	var found bool
 
+	activatedFee := k.GetParam(ctx).ActivatedFee
 	//toaccount doesn't exist yet
 	if !ok {
 
 		//check whether the first transfer contains cet
-		activatedFee := k.GetParam(ctx).ActivatedFee
 
 		amt, found = subActivatedFee(msg.Amount, activatedFee)
 		if !found {
@@ -61,6 +61,13 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 		//collect account activation fees
 		k.fck.AddCollectedFees(ctx, denoms.NewCetCoins(activatedFee))
 	}
+
+	// sub the activatedfees from fromaddress
+	fromAccount := k.ak.GetAccount(ctx, msg.FromAddress)
+	oldCoins := fromAccount.GetCoins()
+	newCoins, _ := subActivatedFee(oldCoins, activatedFee)
+	fromAccount.SetCoins(newCoins)
+	k.ak.SetAccount(ctx, fromAccount)
 
 	//handle coins transfer
 	t, err := k.bk.SendCoins(ctx, msg.FromAddress, msg.ToAddress, amt)

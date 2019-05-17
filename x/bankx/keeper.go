@@ -12,14 +12,16 @@ type Keeper struct {
 	paramSubspace params.Subspace
 	axk           authx.AccountXKeeper
 	bk            bank.BaseKeeper
+	ak            auth.AccountKeeper
 	fck           auth.FeeCollectionKeeper
 }
 
-func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper, bk bank.BaseKeeper, fck auth.FeeCollectionKeeper) Keeper {
+func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper, bk bank.BaseKeeper, ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) Keeper {
 	return Keeper{
 		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
 		axk:           axk,
 		bk:            bk,
+		ak:            ak,
 		fck:           fck,
 	}
 }
