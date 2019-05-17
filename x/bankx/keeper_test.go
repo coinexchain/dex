@@ -15,25 +15,29 @@ import (
 	"testing"
 )
 
-func defaultContext(key sdk.StoreKey, tkey sdk.StoreKey) sdk.Context {
-	db := dbm.NewMemDB()
-	cms := store.NewCommitMultiStore(db)
-	cms.MountStoreWithDB(key, sdk.StoreTypeIAVL, db)
-	cms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
-	cms.LoadLatestVersion()
-	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
-	return ctx
-}
+func defaultContext() (sdk.Context, params.Keeper) {
 
-func TestParamGetSet(t *testing.T) {
 	cdc := codec.New()
 	skey := sdk.NewKVStoreKey("test")
 	tkey := sdk.NewTransientStoreKey("transient_test")
-	ctx := defaultContext(skey, tkey)
 
+	db := dbm.NewMemDB()
+	cms := store.NewCommitMultiStore(db)
+	cms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
+
+	cms.LoadLatestVersion()
+	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+
+	return ctx, paramsKeeper
+}
+
+func TestParamGetSet(t *testing.T) {
+
+	ctx, paramsKeeper := defaultContext()
 	subspace := paramsKeeper.Subspace(DefaultParamSpace)
-	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.FeeCollectionKeeper{})
+	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{})
 
 	//expect DefaultActivatedFees=1
 	defaultParam := DefaultParam()
