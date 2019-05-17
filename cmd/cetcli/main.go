@@ -95,10 +95,13 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		crisisclient.NewModuleClient(sl.StoreKey, cdc),
 	}
 
+	cfgCmd := client.ConfigCmd(app.DefaultCLIHome)
+	cfgCmd.Short = "Create or query a CoinEx Chain CLI configuration file"
+
 	// Construct Root Command
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
-		client.ConfigCmd(app.DefaultCLIHome),
+		cfgCmd,
 		queryCmd(cdc, mc),
 		txCmd(cdc, mc),
 		client.LineBreak,
