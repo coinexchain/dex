@@ -23,7 +23,9 @@ directories:
   - $GOPATH/pkg
 
 before_cache:
+  # coveralls.io
   - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+
   - find $HOME/.glide/cache -name ORIG_HEAD -exec rm {} \;
   - rm -rf $GOPATH/src/github.com/coinexchain/dex/*
   - rm -rf $GOPATH/pkg/**/github.com/coinexchain/dex
