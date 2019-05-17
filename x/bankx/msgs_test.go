@@ -10,13 +10,13 @@ import (
 	"github.com/coinexchain/dex/testutil"
 )
 
-// MsgSetTransferMemoRequired tests
+// MsgSetMemoRequired tests
 
 func TestRoute(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	require.Equal(t, msg.Route(), "bankx")
-	require.Equal(t, msg.Type(), "set_transfer_memo_required")
+	require.Equal(t, msg.Type(), "set_memo_required")
 }
 
 func TestValidation(t *testing.T) {
@@ -37,7 +37,7 @@ func TestGetSignBytes(t *testing.T) {
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	sign := msg.GetSignBytes()
 
-	expected := `{"type":"cet-chain/MsgSetTransferMemoRequired","value":{"address":"cosmos1v9jxguspv4h2u","required":true}}`
+	expected := `{"type":"cet-chain/MsgSetMemoRequired","value":{"address":"cosmos1v9jxguspv4h2u","required":true}}`
 	require.Equal(t, expected, string(sign))
 }
 
