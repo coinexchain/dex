@@ -62,9 +62,21 @@ func IssueTokenCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			mintable, err := strconv.ParseBool(args[3])
+			if err != nil {
+				return err
+			}
 			burnable, err := strconv.ParseBool(args[4])
+			if err != nil {
+				return err
+			}
 			addrFreezeable, err := strconv.ParseBool(args[5])
+			if err != nil {
+				return err
+			}
 			tokenFreezeable, err := strconv.ParseBool(args[6])
+			if err != nil {
+				return err
+			}
 
 			// build and sign the transaction, then broadcast to Tendermint
 			msg := asset.NewMsgIssueToken(name, symbol, totalSupply, owner, mintable, burnable, addrFreezeable, tokenFreezeable)
