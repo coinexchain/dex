@@ -20,8 +20,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
-
 	"github.com/coinexchain/dex/app"
 	cet_init "github.com/coinexchain/dex/init"
 )
@@ -69,7 +67,7 @@ func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 
 	rootCmd.AddCommand(cet_init.InitCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.CollectGenTxsCmd(ctx, cdc))
-	rootCmd.AddCommand(gaia_init.TestnetFilesCmd(ctx, cdc))
+	rootCmd.AddCommand(cet_init.TestnetFilesCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.GenTxCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.AddGenesisAccountCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.ValidateGenesisCmd(ctx, cdc))
