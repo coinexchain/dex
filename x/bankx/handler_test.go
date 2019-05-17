@@ -67,13 +67,14 @@ func TestHandler(t *testing.T) {
 
 	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
 	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
-	coins := sdk.NewCoins(sdk.Coin{"cet", sdk.NewInt(int64(10))})
+	coins := sdk.NewCoins(sdk.Coin{Denom: "cet", Amount: sdk.NewInt(int64(10))})
 	fromAccount.SetCoins(coins)
 
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := bank.MsgSend{fromAddr, toAddr, sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(int64(2))))}
+	coin := sdk.NewCoin("cet", sdk.NewInt(int64(2)))
+	msgSend := bank.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: sdk.NewCoins(coin)}
 
 	handleMsgSend(input.ctx, input.bxk, msgSend)
 
