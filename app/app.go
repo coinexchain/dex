@@ -77,7 +77,7 @@ type CetChainApp struct {
 	govKeeper           gov.Keeper
 	crisisKeeper        crisis.Keeper
 	incentiveKeeper     incentive.Keeper
-	assetKeeper         asset.Keeper
+	assetKeeper         asset.TokenKeeper
 	paramsKeeper        params.Keeper
 }
 
