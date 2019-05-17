@@ -22,3 +22,9 @@ get dependencies
 ```bash
 go get -u
 ```
+
+### GolangCI-Lint
+
+```bash
+go get  github.com/golangci/golangci-lint/cmd/golangci-lint
+```
