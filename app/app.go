@@ -210,10 +210,12 @@ func (app *CetChainApp) initKeepers() {
 		app.feeCollectionKeeper,
 		app.bankKeeper,
 	)
-	app.assetKeeper = asset.NewKeeper(app.cdc,
+	app.assetKeeper = asset.NewKeeper(
+		app.cdc,
 		app.keyAsset,
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
-		nil, // TODO
+		app.accountKeeper,
+		app.feeCollectionKeeper,
 	)
 }
 
