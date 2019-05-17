@@ -6,7 +6,7 @@ import (
 	"unicode/utf8"
 )
 
-// RouterKey is they name of the asset module
+// RouterKey is the name of the asset module
 const RouterKey = "asset"
 
 // MsgIssueToken

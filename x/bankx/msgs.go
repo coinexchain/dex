@@ -1,11 +1,11 @@
-package authx
+package bankx
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// RouterKey is they name of the authx module
-const RouterKey = "authx"
+// RouterKey is the name of the bankx module
+const RouterKey = "bankx"
 
 var _ sdk.Msg = MsgSetTransferMemoRequired{}
 

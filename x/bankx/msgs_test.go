@@ -1,12 +1,13 @@
-package authx
+package bankx
 
 import (
-	"github.com/coinexchain/dex/testutil"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/testutil"
 )
 
 // MsgSetTransferMemoRequired tests
@@ -14,7 +15,7 @@ import (
 func TestRoute(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgSetTransferMemoRequired(addr, true)
-	require.Equal(t, msg.Route(), "authx")
+	require.Equal(t, msg.Route(), "bankx")
 	require.Equal(t, msg.Type(), "set_transfer_memo_required")
 }
 

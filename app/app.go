@@ -232,7 +232,9 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(distr.RouterKey, distr.NewHandler(app.distrKeeper)).
 		AddRoute(slashing.RouterKey, slashing.NewHandler(app.slashingKeeper)).
 		AddRoute(gov.RouterKey, gov.NewHandler(app.govKeeper)).
-		AddRoute(crisis.RouterKey, crisis.NewHandler(app.crisisKeeper))
+		AddRoute(crisis.RouterKey, crisis.NewHandler(app.crisisKeeper)).
+		AddRoute(bankx.RouterKey, bankx.NewHandler(app.bankxKeeper)).
+		AddRoute(asset.RouterKey, asset.NewHandler(app.assetKeeper))
 
 	app.QueryRouter().
 		AddRoute(auth.QuerierRoute, auth.NewQuerier(app.accountKeeper)).

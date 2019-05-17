@@ -1,4 +1,4 @@
-package authx
+package bankx
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -12,5 +12,5 @@ func init() {
 
 // RegisterCodec registers concrete types on the codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(AccountX{}, "authx/AccountX", nil)
+	cdc.RegisterConcrete(MsgSetTransferMemoRequired{}, "cet-chain/MsgSetTransferMemoRequired", nil)
 }
