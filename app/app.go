@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/x/bankx"
 	"io"
 	"os"
 	"sort"
@@ -25,7 +24,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	"github.com/coinexchain/dex/x/asset"
 	"github.com/coinexchain/dex/x/authx"
+	"github.com/coinexchain/dex/x/bankx"
 	"github.com/coinexchain/dex/x/incentive"
 )
 
@@ -62,6 +63,7 @@ type CetChainApp struct {
 	keyFeeCollection *sdk.KVStoreKey
 	keyParams        *sdk.KVStoreKey
 	tkeyParams       *sdk.TransientStoreKey
+	keyAsset         *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -75,6 +77,7 @@ type CetChainApp struct {
 	govKeeper           gov.Keeper
 	crisisKeeper        crisis.Keeper
 	incentiveKeeper     incentive.Keeper
+	assetKeeper         asset.Keeper
 	paramsKeeper        params.Keeper
 }
 
@@ -105,6 +108,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
 		keyParams:        sdk.NewKVStoreKey(params.StoreKey),
 		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
+		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
 	}
 
 	app.initKeepers()
@@ -115,6 +119,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyMint, app.keyDistr,
 		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
+		app.keyAccountX,
 	)
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
@@ -141,10 +146,6 @@ func (app *CetChainApp) initKeepers() {
 		app.paramsKeeper.Subspace(auth.DefaultParamspace),
 		auth.ProtoBaseAccount,
 	)
-	app.accountXKeeper = authx.NewKeeper(
-		app.cdc,
-		app.keyAccountX,
-	)
 	// add handlers
 	app.bankKeeper = bank.NewBaseKeeper(
 		app.accountKeeper,
@@ -154,13 +155,6 @@ func (app *CetChainApp) initKeepers() {
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(
 		app.cdc,
 		app.keyFeeCollection,
-	)
-	app.bankxKeeper = bankx.NewKeeper(
-		app.paramsKeeper.Subspace(bankx.DefaultParamSpace),
-		app.accountXKeeper,
-		app.bankKeeper,
-		app.accountKeeper,
-		app.feeCollectionKeeper,
 	)
 	stakingKeeper := staking.NewKeeper(
 		app.cdc,
@@ -193,16 +187,36 @@ func (app *CetChainApp) initKeepers() {
 		app.bankKeeper,
 		app.feeCollectionKeeper,
 	)
-	app.incentiveKeeper = incentive.NewKeeper(
-		app.feeCollectionKeeper,
-		app.bankKeeper,
-	)
 
 	// register the staking hooks
 	// NOTE: The stakingKeeper above is passed by reference, so that it can be
 	// modified like below:
 	app.stakingKeeper = *stakingKeeper.SetHooks(
 		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
+	)
+
+	// cet keepers
+	app.accountXKeeper = authx.NewKeeper(
+		app.cdc,
+		app.keyAccountX,
+	)
+	app.bankxKeeper = bankx.NewKeeper(
+		app.paramsKeeper.Subspace(bankx.DefaultParamSpace),
+		app.accountXKeeper,
+		app.bankKeeper,
+		app.accountKeeper,
+		app.feeCollectionKeeper,
+	)
+	app.incentiveKeeper = incentive.NewKeeper(
+		app.feeCollectionKeeper,
+		app.bankKeeper,
+	)
+	app.assetKeeper = asset.NewKeeper(
+		app.cdc,
+		app.keyAsset,
+		app.paramsKeeper.Subspace(asset.DefaultParamspace),
+		app.accountKeeper,
+		app.feeCollectionKeeper,
 	)
 }
 
@@ -342,9 +356,11 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	// initialize module-specific stores
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
+	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
 	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
+	//asset.InitGenesis(ctx, app.kee)
 
 	// validate genesis state
 	if err := ValidateGenesisState(genesisState); err != nil {

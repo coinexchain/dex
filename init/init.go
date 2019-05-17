@@ -46,7 +46,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: 
 		Long:  `Initialize validators's and node's configuration files.`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
-			return genGenesisJson(ctx, cdc, args[0])
+			return genGenesisJSON(ctx, cdc, args[0])
 		},
 	}
 
@@ -57,7 +57,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: 
 	return cmd
 }
 
-func genGenesisJson(ctx *server.Context, cdc *codec.Codec, moniker string) error {
+func genGenesisJSON(ctx *server.Context, cdc *codec.Codec, moniker string) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
 

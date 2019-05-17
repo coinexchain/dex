@@ -116,10 +116,8 @@ func TestStartStandAlone(t *testing.T) {
 	svr.Start()
 
 	timer := time.NewTimer(time.Duration(2) * time.Second)
-	select {
-	case <-timer.C:
-		svr.Stop()
-	}
+	<-timer.C
+	svr.Stop()
 }
 
 func TestInitNodeValidatorFiles(t *testing.T) {

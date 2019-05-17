@@ -1,0 +1,51 @@
+language: go
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - sourceline: 'ppa:masterminds/glide'
+    packages:
+      - g++-6
+      - gcc-6
+      - glide
+
+
+go:
+  - 1.12.x
+cache:
+  ccache:  true
+  apt: true
+
+directories:
+  - ${TRAVIS_BUILD_DIR}/vendor
+  - $GOPATH/src
+  - $GOPATH/pkg
+
+before_cache:
+  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - find $HOME/.glide/cache -name ORIG_HEAD -exec rm {} \;
+  - rm -rf $GOPATH/src/github.com/coinexchain/dex/*
+  - rm -rf $GOPATH/pkg/**/github.com/coinexchain/dex
+
+before_install:
+  - export GO111MODULE=on
+  - export GOROOT=$(go env GOROOT)
+  - export CXX="g++-6" CC="gcc-6"
+  - export PATH=$PATH:$HOME/gopath/bin
+
+install:
+  - cd -
+  - go mod tidy
+  - go mod vendor
+  - go get github.com/golangci/golangci-lint/cmd/golangci-lint
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+
+script:
+  - ./check.sh
+
+notifications:
+  email:
+    on_success: change
+    on_failure: alwayss

@@ -69,26 +69,27 @@ type BaseToken struct {
 
 // NewToken - new base token
 func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
-	mintable bool, burnable bool, addrfreezeable bool, tokenfreezeable bool) (token BaseToken, err sdk.Error) {
-	token.SetName(name)
-	token.SetSymbol(symbol)
-	if err := token.SetOwner(owner); err != nil {
+	mintable bool, burnable bool, addrfreezeable bool, tokenfreezeable bool) (t BaseToken, err sdk.Error) {
+
+	t.SetName(name)
+	t.SetSymbol(symbol)
+	if err := t.SetOwner(owner); err != nil {
 		return BaseToken{}, sdk.ErrInvalidAddress("issue token must set a valid token owner")
 	}
-	if err := token.SetTotalSupply(amt); err != nil {
+	if err := t.SetTotalSupply(amt); err != nil {
 		return BaseToken{}, sdk.ErrInvalidCoins("issue token must set a valid total supply")
 	}
 
-	token.SetMintable(mintable)
-	token.SetBurnable(burnable)
-	token.SetAddrFreezeable(addrfreezeable)
-	token.SetTokenFreezeable(tokenfreezeable)
+	t.SetMintable(mintable)
+	t.SetBurnable(burnable)
+	t.SetAddrFreezeable(addrfreezeable)
+	t.SetTokenFreezeable(tokenfreezeable)
 
-	token.SetTotalMint(0)
-	token.SetTotalBurn(0)
-	token.SetIsFrozen(false)
+	t.SetTotalMint(0)
+	t.SetTotalBurn(0)
+	t.SetIsFrozen(false)
 
-	return token, nil
+	return t, nil
 }
 
 func (t BaseToken) GetName() string {
