@@ -2,7 +2,9 @@ package app
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"sort"
 	"time"
 
@@ -19,6 +21,7 @@ import (
 
 	"github.com/coinexchain/dex/x/asset"
 	"github.com/coinexchain/dex/x/bankx"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 var (
@@ -148,4 +151,63 @@ func validateGenesisStateAccounts(accs []gaia_app.GenesisAccount) error {
 	}
 
 	return nil
+}
+
+// CetAppGenState but with JSON
+func CetAppGenStateJSON(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []json.RawMessage) (
+	appState json.RawMessage, err error) {
+	// create the final app state
+	genesisState, err := CetAppGenState(cdc, genDoc, appGenTxs)
+	if err != nil {
+		return nil, err
+	}
+	return codec.MarshalJSONIndent(cdc, genesisState)
+}
+
+// Create the core parameters for genesis initialization for gaia
+// note that the pubkey input is this machines pubkey
+func CetAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []json.RawMessage) (
+	genesisState GenesisState, err error) {
+
+	if err = cdc.UnmarshalJSON(genDoc.AppState, &genesisState); err != nil {
+		return genesisState, err
+	}
+
+	// if there are no gen txs to be processed, return the default empty state
+	if len(appGenTxs) == 0 {
+		return genesisState, errors.New("there must be at least one genesis tx")
+	}
+
+	stakingData := genesisState.StakingData
+	for i, genTx := range appGenTxs {
+		var tx auth.StdTx
+		if err := cdc.UnmarshalJSON(genTx, &tx); err != nil {
+			return genesisState, err
+		}
+
+		msgs := tx.GetMsgs()
+		if len(msgs) != 1 {
+			return genesisState, errors.New(
+				"must provide genesis StdTx with exactly 1 CreateValidator message")
+		}
+
+		if _, ok := msgs[0].(staking.MsgCreateValidator); !ok {
+			return genesisState, fmt.Errorf(
+				"Genesis transaction %v does not contain a MsgCreateValidator", i)
+		}
+	}
+
+	for _, acc := range genesisState.Accounts {
+		for _, coin := range acc.Coins {
+			if coin.Denom == genesisState.StakingData.Params.BondDenom {
+				stakingData.Pool.NotBondedTokens = stakingData.Pool.NotBondedTokens.
+					Add(coin.Amount) // increase the supply
+			}
+		}
+	}
+
+	genesisState.StakingData = stakingData
+	genesisState.GenTxs = appGenTxs
+
+	return genesisState, nil
 }

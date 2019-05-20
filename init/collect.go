@@ -115,7 +115,7 @@ func genAppStateFromConfig(
 
 	cfg.WriteConfigFile(filepath.Join(config.RootDir, "config", "config.toml"), config)
 
-	appState, err = gaia_app.GaiaAppGenStateJSON(cdc, genDoc, genTxs)
+	appState, err = app.CetAppGenStateJSON(cdc, genDoc, genTxs)
 	if err != nil {
 		return
 	}

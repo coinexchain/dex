@@ -9,7 +9,7 @@ const (
 var ParamStoreKeyActivatedFee = []byte("ActivatedFee")
 
 type Param struct {
-	ActivatedFee int64
+	ActivatedFee int64 `json:"ActivatedFee"`
 }
 
 func DefaultParam() Param {
