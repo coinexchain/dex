@@ -123,7 +123,8 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	)
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetAnteHandler(authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper, anteHelper{}))
+	app.SetAnteHandler(authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper,
+		anteHelper{accountXKeeper: app.accountXKeeper}))
 	app.SetEndBlocker(app.EndBlocker)
 
 	if loadLatest {
@@ -358,7 +359,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	// initialize module-specific stores
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
+	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData, genesisState.Accounts)
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
 	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
