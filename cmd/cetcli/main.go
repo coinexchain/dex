@@ -20,7 +20,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 
-	ass "github.com/coinexchain/dex/x/asset"
+	as "github.com/coinexchain/dex/x/asset"
+	ass "github.com/coinexchain/dex/x/asset/rest"
 	at "github.com/cosmos/cosmos-sdk/x/auth"
 	auth "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/client/rest"
@@ -32,7 +33,7 @@ import (
 	st "github.com/cosmos/cosmos-sdk/x/staking"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/client/rest"
 
-	assetclient "github.com/coinexchain/dex/x/asset/client"
+	assclient "github.com/coinexchain/dex/x/asset/client"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 	crisisclient "github.com/cosmos/cosmos-sdk/x/crisis/client"
@@ -90,7 +91,7 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 	// Module clients hold cli commands (tx,query) and lcd routes
 	// TODO: Make the lcd command take a list of ModuleClient
 	mc := []sdk.ModuleClients{
-		assetclient.NewModuleClient(ass.StoreKey, cdc),
+		assclient.NewModuleClient(as.StoreKey, cdc),
 		govClient.NewModuleClient(gv.StoreKey, cdc),
 		distClient.NewModuleClient(distcmd.StoreKey, cdc),
 		stakingclient.NewModuleClient(st.StoreKey, cdc),
@@ -204,6 +205,7 @@ func registerRoutes(rs *lcd.RestServer) {
 	staking.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	slashing.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	gov.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	ass.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, as.StoreKey)
 }
 
 func registerSwaggerUI(rs *lcd.RestServer) {
