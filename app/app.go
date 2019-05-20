@@ -123,7 +123,8 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	)
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetAnteHandler(authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper, anteHelper{}))
+	app.SetAnteHandler(authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper,
+		anteHelper{accountXKeeper: app.accountXKeeper}))
 	app.SetEndBlocker(app.EndBlocker)
 
 	if loadLatest {

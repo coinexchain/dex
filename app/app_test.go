@@ -18,24 +18,37 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
+func newApp() *CetChainApp {
+	logger := log.NewNopLogger()
+	db := dbm.NewMemDB()
+	return NewCetChainApp(logger, db, nil, true, 10000)
+}
+
+func initApp(accs ...auth.BaseAccount) *CetChainApp {
+	app := newApp()
+
+	// genesis state
+	genState := NewDefaultGenesisState()
+	for _, acc := range accs {
+		genAcc := gaia_app.NewGenesisAccount(&acc)
+		genState.Accounts = append(genState.Accounts, genAcc)
+	}
+
+	// init chain
+	genStateBytes, _ := app.cdc.MarshalJSON(genState)
+	app.InitChain(abci.RequestInitChain{ChainId: "c1", AppStateBytes: genStateBytes})
+
+	return app
+}
+
 func TestSend(t *testing.T) {
 	// genesis state
 	toAddr := sdk.AccAddress([]byte("from"))
 	key, _, fromAddr := testutil.KeyPubAddr()
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: dex.NewCetCoins(1000)}
-	genAcc := gaia_app.NewGenesisAccount(&acc0)
-
-	genState := NewDefaultGenesisState()
-	genState.Accounts = append(genState.Accounts, genAcc)
 
 	// app
-	logger := log.NewNopLogger()
-	db := dbm.NewMemDB()
-	app := NewCetChainApp(logger, db, nil, true, 10000)
-
-	// init chain
-	genStateBytes, _ := app.cdc.MarshalJSON(genState)
-	app.InitChain(abci.RequestInitChain{ChainId: "c1", AppStateBytes: genStateBytes})
+	app := initApp(acc0)
 
 	// begin block
 	header := abci.Header{Height: 1}
