@@ -1,6 +1,11 @@
 vendor/
 .idea/
+.DS_Store
+.idea
+*.iml
 
-/cetd
-/cetcli
+cetd
+cetcli
 *.out
+
+
