@@ -12,14 +12,14 @@ import (
 
 // MsgSetMemoRequired tests
 
-func TestRoute(t *testing.T) {
+func TestSetMemoRequiredRoute(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	require.Equal(t, msg.Route(), "bankx")
 	require.Equal(t, msg.Type(), "set_memo_required")
 }
 
-func TestValidation(t *testing.T) {
+func TestSetMemoRequiredValidation(t *testing.T) {
 	validAddr := sdk.AccAddress([]byte("addr"))
 	var emptyAddr sdk.AccAddress
 
@@ -32,7 +32,7 @@ func TestValidation(t *testing.T) {
 	})
 }
 
-func TestGetSignBytes(t *testing.T) {
+func TestSetMemoRequiredGetSignBytes(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	sign := msg.GetSignBytes()
@@ -41,7 +41,7 @@ func TestGetSignBytes(t *testing.T) {
 	require.Equal(t, expected, string(sign))
 }
 
-func TestGetSigners(t *testing.T) {
+func TestSetMemoRequiredGetSigners(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	signers := msg.GetSigners()

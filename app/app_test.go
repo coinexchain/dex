@@ -14,15 +14,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	"github.com/coinexchain/dex/denoms"
 	"github.com/coinexchain/dex/testutil"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestSend(t *testing.T) {
 	// genesis state
 	toAddr := sdk.AccAddress([]byte("from"))
 	key, _, fromAddr := testutil.KeyPubAddr()
-	acc0 := auth.BaseAccount{Address: fromAddr, Coins: denoms.NewCetCoins(1000)}
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: dex.NewCetCoins(1000)}
 	genAcc := gaia_app.NewGenesisAccount(&acc0)
 
 	genState := NewDefaultGenesisState()
@@ -42,9 +42,9 @@ func TestSend(t *testing.T) {
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
 	// deliver tx
-	coins := denoms.NewCetCoins(100)
+	coins := dex.NewCetCoins(100)
 	msg := bank.NewMsgSend(fromAddr, toAddr, coins)
-	fee := auth.NewStdFee(1000000, denoms.NewCetCoins(100))
+	fee := auth.NewStdFee(1000000, dex.NewCetCoins(100))
 	tx := testutil.NewStdTxBuilder("c1").
 		Msgs(msg).Fee(fee).AccNumSeqKey(0, 0, key).Build()
 
