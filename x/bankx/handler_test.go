@@ -1,20 +1,24 @@
 package bankx
 
 import (
-	"github.com/coinexchain/dex/denoms"
-	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/x/authx"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	dbm "github.com/tendermint/tendermint/libs/db"
-	"github.com/tendermint/tendermint/libs/log"
-	"testing"
+
+	"github.com/coinexchain/dex/denoms"
+	"github.com/coinexchain/dex/testutil"
+	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/dex/x/authx"
 )
 
 type testInput struct {
@@ -129,4 +133,17 @@ func TestHandleMsgSetMemoRequiredAccountNotExisted(t *testing.T) {
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodespaceRoot, result.Codespace)
 	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
+}
+
+func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
+	input := setupTestInput()
+
+	addr := testutil.ToAccAddress("myaddr")
+	accX := authx.NewAccountXWithAddress(addr)
+	input.axk.SetAccountX(input.ctx, accX)
+
+	msg := NewMsgSetTransferMemoRequired(addr, true)
+	result := input.handle(msg)
+	require.Equal(t, dex.CodespaceDEX, result.Codespace)
+	require.Equal(t, dex.CodeUnactivatedAddress, result.Code)
 }
