@@ -79,11 +79,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 
 func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg MsgSetMemoRequired) sdk.Result {
 	accountX, found := axk.GetAccountX(ctx, msg.Address)
-	if !found {
-		msg := fmt.Sprintf("account %s does not exist", msg.Address)
-		return sdk.ErrUnknownAddress(msg).Result()
-	}
-	if !accountX.Activated {
+	if !found || !accountX.Activated {
 		msg := fmt.Sprintf("account %s is not activated", msg.Address)
 		return dex.ErrUnactivatedAddress(msg).Result()
 	}

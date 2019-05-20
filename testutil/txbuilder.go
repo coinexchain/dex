@@ -5,6 +5,8 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 type StdTxBuilder struct {
@@ -30,8 +32,8 @@ func (builder *StdTxBuilder) AccNumSeqKey(num, seq uint64, key crypto.PrivKey) *
 	builder.privKeys = append(builder.privKeys, key)
 	return builder
 }
-func (builder *StdTxBuilder) Fee(fee auth.StdFee) *StdTxBuilder {
-	builder.fee = fee
+func (builder *StdTxBuilder) Fee(gas uint64, cet int64) *StdTxBuilder {
+	builder.fee = auth.NewStdFee(1000000, dex.NewCetCoins(cet))
 	return builder
 }
 
