@@ -15,7 +15,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
-	"github.com/coinexchain/dex/denoms"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 	"github.com/coinexchain/dex/x/authx"
@@ -83,9 +82,9 @@ func TestHandlerCases(t *testing.T) {
 	input := setupTestInput()
 
 	testCases := []testSendCases{
-		{"fromaddr1", "toaddr1", denoms.NewCetCoins(10), denoms.NewCetCoins(2)},
-		{"fromaddr2", "toaddr2", denoms.NewCetCoins(10), denoms.NewCetCoins(1)},
-		{"fromaddr3", "toaddr3", denoms.NewCetCoins(0), denoms.NewCetCoins(2)},
+		{"fromaddr1", "toaddr1", dex.NewCetCoins(10), dex.NewCetCoins(2)},
+		{"fromaddr2", "toaddr2", dex.NewCetCoins(10), dex.NewCetCoins(1)},
+		{"fromaddr3", "toaddr3", dex.NewCetCoins(0), dex.NewCetCoins(2)},
 	}
 
 	var fromAccount = make([]auth.Account, len(testCases))

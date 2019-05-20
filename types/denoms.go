@@ -1,4 +1,4 @@
-package denoms
+package types
 
 import "strings"
 
