@@ -17,12 +17,13 @@ import (
 )
 
 type testInput struct {
-	ctx sdk.Context
-	ak  auth.AccountKeeper
-	pk  params.Keeper
-	bk  bank.Keeper
-	bxk Keeper
-	axk authx.AccountXKeeper
+	ctx     sdk.Context
+	ak      auth.AccountKeeper
+	pk      params.Keeper
+	bk      bank.Keeper
+	bxk     Keeper
+	axk     authx.AccountXKeeper
+	handler sdk.Handler
 }
 
 func setupTestInput() testInput {
@@ -56,7 +57,9 @@ func setupTestInput() testInput {
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
 	bxkKeeper.SetParam(ctx, DefaultParam())
-	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk}
+
+	handler := NewHandler(bxkKeeper)
+	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, handler: handler}
 }
 
 type testSendCases struct {
@@ -94,23 +97,26 @@ func TestHandlerCases(t *testing.T) {
 
 		case 0:
 
-			handleMsgSend(input.ctx, input.bxk, msgSend)
+			input.handler(input.ctx, msgSend)
 			require.Equal(t, sdk.NewInt(int64(8)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
 
-			handleMsgSend(input.ctx, input.bxk, msgSend)
+			input.handler(input.ctx, msgSend)
 			require.Equal(t, sdk.NewInt(int64(6)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
 			require.Equal(t, sdk.NewInt(int64(3)), input.ak.GetAccount(input.ctx, []byte(v.toAddr)).GetCoins().AmountOf("cet"))
 			require.Equal(t, sdk.NewInt(int64(1)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 		case 1:
-			handleMsgSend(input.ctx, input.bxk, msgSend)
+			input.handler(input.ctx, msgSend)
 			require.Equal(t, sdk.NewInt(int64(9)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
 			require.Equal(t, sdk.NewInt(int64(2)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 		case 2:
-			handleMsgSend(input.ctx, input.bxk, msgSend)
+			input.handler(input.ctx, msgSend)
 			require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
 			require.Equal(t, sdk.NewInt(int64(2)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
-
 		}
 	}
+
+}
+
+func TestHandleMsgSetMemoRequired(t *testing.T) {
 
 }
