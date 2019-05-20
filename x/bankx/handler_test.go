@@ -146,3 +146,22 @@ func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
 	require.Equal(t, dex.CodespaceDEX, result.Codespace)
 	require.Equal(t, dex.CodeUnactivatedAddress, result.Code)
 }
+
+func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
+	input := setupTestInput()
+
+	addr := testutil.ToAccAddress("myaddr")
+	accX := authx.NewAccountXWithAddress(addr)
+	accX.Activated = true
+	input.axk.SetAccountX(input.ctx, accX)
+
+	accX, _ = input.axk.GetAccountX(input.ctx, addr)
+	require.Equal(t,false, accX.TransferMemoRequired)
+
+	msg := NewMsgSetTransferMemoRequired(addr, true)
+	result := input.handle(msg)
+	require.Equal(t, sdk.CodeOK, result.Code)
+
+	accX, _ = input.axk.GetAccountX(input.ctx, addr)
+	require.Equal(t,true, accX.TransferMemoRequired)
+}
