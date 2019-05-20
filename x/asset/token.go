@@ -3,16 +3,18 @@ package asset
 import (
 	"errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"regexp"
+	"unicode/utf8"
 )
 
 // Token is an interface used to store asset at a given token within state.
 // Many complex conditions can be used in the concrete struct which implements Token.
 type Token interface {
 	GetName() string
-	SetName(string)
+	SetName(string) error
 
 	GetSymbol() string
-	SetSymbol(string)
+	SetSymbol(string) error
 
 	GetTotalSupply() int64
 	SetTotalSupply(int64) error
@@ -71,13 +73,17 @@ type BaseToken struct {
 func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrfreezeable bool, tokenfreezeable bool) (t BaseToken, err sdk.Error) {
 
-	t.SetName(name)
-	t.SetSymbol(symbol)
+	if err := t.SetName(name); err != nil {
+		return BaseToken{}, ErrorInvalidTokenName(CodeSpaceAsset, err.Error())
+	}
+	if err := t.SetSymbol(symbol); err != nil {
+		return BaseToken{}, ErrorInvalidTokenSymbol(CodeSpaceAsset, err.Error())
+	}
 	if err := t.SetOwner(owner); err != nil {
-		return BaseToken{}, sdk.ErrInvalidAddress("issue token must set a valid token owner")
+		return BaseToken{}, ErrorInvalidTokenOwner(CodeSpaceAsset, err.Error())
 	}
 	if err := t.SetTotalSupply(amt); err != nil {
-		return BaseToken{}, sdk.ErrInvalidCoins("issue token must set a valid total supply")
+		return BaseToken{}, ErrorInvalidTokenSupply(CodeSpaceAsset, err.Error())
 	}
 
 	t.SetMintable(mintable)
@@ -96,16 +102,26 @@ func (t BaseToken) GetName() string {
 	return t.Name
 }
 
-func (t BaseToken) SetName(name string) {
+func (t BaseToken) SetName(name string) error {
+	if utf8.RuneCountInString(name) > 32 {
+		return errors.New("issue token name limited to 32 unicode characters")
+	}
 	t.Name = name
+
+	return nil
 }
 
 func (t BaseToken) GetSymbol() string {
 	return t.Symbol
 }
 
-func (t BaseToken) SetSymbol(symbol string) {
+func (t BaseToken) SetSymbol(symbol string) error {
+	if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", symbol); !m {
+		return errors.New("issue token symbol limited to [a-z][a-z0-9]{1,7}")
+	}
 	t.Symbol = symbol
+
+	return nil
 }
 
 func (t BaseToken) GetTotalSupply() int64 {
@@ -129,7 +145,7 @@ func (t BaseToken) GetOwner() sdk.AccAddress {
 
 func (t BaseToken) SetOwner(addr sdk.AccAddress) error {
 	if addr.Empty() {
-		return errors.New("must set a valid token owner")
+		return errors.New("issue token must set a valid token owner")
 	}
 	t.Owner = addr
 	return nil

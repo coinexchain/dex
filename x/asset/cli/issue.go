@@ -34,7 +34,7 @@ func IssueTokenCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			symbol := args[1]
-			if m, _ := regexp.MatchString("[a-z][a-z0-9]{1,7}", symbol); !m {
+			if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", symbol); !m {
 				return fmt.Errorf("issue token symbol limited to [a-z][a-z0-9]{1,7}")
 			}
 
