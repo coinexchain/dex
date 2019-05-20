@@ -14,6 +14,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 var (
@@ -28,10 +30,17 @@ func init() {
 	copy(simSecp256k1Pubkey[:], bz)
 }
 
+type AnteHelper interface {
+	IsMemoRequired(msg sdk.Msg, ctx sdk.Context) bool
+	GasFee(msg sdk.Msg) sdk.Coins
+}
+
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
-func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) sdk.AnteHandler {
+func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
+	anteHelper AnteHelper) sdk.AnteHandler {
+
 	return func(
 		ctx sdk.Context, tx sdk.Tx, simulate bool,
 	) (newCtx sdk.Context, res sdk.Result, abort bool) {
@@ -88,7 +97,10 @@ func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) sdk.Ant
 
 		newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
 
-		if res := ValidateMemo(stdTx, params); !res.IsOK() {
+		if res := ValidateMemoSize(stdTx, params); !res.IsOK() {
+			return newCtx, res, true
+		}
+		if res := CheckMissingMemo(stdTx, newCtx, anteHelper); !res.IsOK() {
 			return newCtx, res, true
 		}
 
@@ -150,8 +162,7 @@ func GetSignerAcc(ctx sdk.Context, ak auth.AccountKeeper, addr sdk.AccAddress) (
 	return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr)).Result()
 }
 
-// ValidateMemo validates the memo size.
-func ValidateMemo(stdTx auth.StdTx, params auth.Params) sdk.Result {
+func ValidateMemoSize(stdTx auth.StdTx, params auth.Params) sdk.Result {
 	memoLength := len(stdTx.GetMemo())
 	if uint64(memoLength) > params.MaxMemoCharacters {
 		return sdk.ErrMemoTooLarge(
@@ -160,6 +171,17 @@ func ValidateMemo(stdTx auth.StdTx, params auth.Params) sdk.Result {
 				params.MaxMemoCharacters, memoLength,
 			),
 		).Result()
+	}
+
+	return sdk.Result{}
+}
+
+func CheckMissingMemo(stdTx auth.StdTx, ctx sdk.Context, anteHelper AnteHelper) sdk.Result {
+	memoLength := len(stdTx.GetMemo())
+	for _, msg := range stdTx.Msgs {
+		if anteHelper.IsMemoRequired(msg, ctx) && memoLength < 1 {
+			return dex.ErrMemoMissing("memo is empty").Result()
+		}
 	}
 
 	return sdk.Result{}
