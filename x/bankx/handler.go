@@ -1,6 +1,7 @@
 package bankx
 
 import (
+	"fmt"
 	"github.com/coinexchain/dex/denoms"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -78,14 +79,15 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 
 func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg MsgSetMemoRequired) sdk.Result {
 	accountX, found := axk.GetAccountX(ctx, msg.Address)
-	if !found || !accountX.Activated {
-		return sdk.ErrInvalidAddress("Address is not activated").Result()
+	if !found {
+		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", msg.Address)).Result()
+	}
+	if !accountX.Activated {
+		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s is not activated", msg.Address)).Result()
 	}
 
-	if found {
-		accountX.TransferMemoRequired = msg.Required
-		axk.SetAccountX(ctx, accountX)
-	}
+	accountX.TransferMemoRequired = msg.Required
+	axk.SetAccountX(ctx, accountX)
 
 	return sdk.Result{}
 }

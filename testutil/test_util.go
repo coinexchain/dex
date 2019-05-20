@@ -33,3 +33,7 @@ func KeyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
 	addr := sdk.AccAddress(pub.Address())
 	return key, pub, addr
 }
+
+func ToAccAddress(addr string) sdk.AccAddress {
+	return sdk.AccAddress([]byte(addr))
+}

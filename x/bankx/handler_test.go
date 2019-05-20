@@ -2,6 +2,7 @@ package bankx
 
 import (
 	"github.com/coinexchain/dex/denoms"
+	"github.com/coinexchain/dex/testutil"
 	"github.com/coinexchain/dex/x/authx"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -24,6 +25,10 @@ type testInput struct {
 	bxk     Keeper
 	axk     authx.AccountXKeeper
 	handler sdk.Handler
+}
+
+func (input testInput) handle(msg sdk.Msg) sdk.Result {
+	return input.handler(input.ctx, msg)
 }
 
 func setupTestInput() testInput {
@@ -97,19 +102,19 @@ func TestHandlerCases(t *testing.T) {
 
 		case 0:
 
-			input.handler(input.ctx, msgSend)
+			input.handle(msgSend)
 			require.Equal(t, sdk.NewInt(int64(8)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
 
-			input.handler(input.ctx, msgSend)
+			input.handle(msgSend)
 			require.Equal(t, sdk.NewInt(int64(6)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
 			require.Equal(t, sdk.NewInt(int64(3)), input.ak.GetAccount(input.ctx, []byte(v.toAddr)).GetCoins().AmountOf("cet"))
 			require.Equal(t, sdk.NewInt(int64(1)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 		case 1:
-			input.handler(input.ctx, msgSend)
+			input.handle(msgSend)
 			require.Equal(t, sdk.NewInt(int64(9)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
 			require.Equal(t, sdk.NewInt(int64(2)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 		case 2:
-			input.handler(input.ctx, msgSend)
+			input.handle(msgSend)
 			require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
 			require.Equal(t, sdk.NewInt(int64(2)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 		}
@@ -117,6 +122,11 @@ func TestHandlerCases(t *testing.T) {
 
 }
 
-func TestHandleMsgSetMemoRequired(t *testing.T) {
+func TestHandleMsgSetMemoRequiredAccountNotExisted(t *testing.T) {
+	input := setupTestInput()
 
+	msg := NewMsgSetTransferMemoRequired(testutil.ToAccAddress("xxx"), true)
+	result := input.handle(msg)
+	require.Equal(t, sdk.CodespaceRoot, result.Codespace)
+	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
 }
