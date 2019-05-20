@@ -1,10 +1,10 @@
 package bankx
 
 import (
+	"github.com/coinexchain/dex/denoms"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	"github.com/coinexchain/dex/denoms"
 	"github.com/coinexchain/dex/x/authx"
 )
 
@@ -20,19 +20,6 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 
 }
-func subActivatedFee(amt sdk.Coins, sub int64) (sdk.Coins, bool) {
-
-	var found bool
-	for i, coin := range amt {
-		if coin.Denom != "cet" {
-			continue
-		}
-
-		amt[i] = sdk.NewCoin("cet", coin.Amount.Sub(sdk.NewInt(sub)))
-		found = true
-	}
-	return amt, found
-}
 
 func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 
@@ -41,33 +28,22 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 	}
 
 	_, ok := k.axk.GetAccountX(ctx, msg.ToAddress)
-	var amt sdk.Coins
-	var found bool
+	amt := msg.Amount
+
+	var neg bool
 
 	activatedFee := k.GetParam(ctx).ActivatedFee
 	//toaccount doesn't exist yet
 	if !ok {
 
-		//check whether the first transfer contains cet
+		//check whether the first transfer contains at least activatedFee cet
+		amt, neg = amt.SafeSub(denoms.NewCetCoins(activatedFee))
 
-		amt, found = subActivatedFee(msg.Amount, activatedFee)
-		if !found {
-			return ErrorFirstTransferNotCET(CodeSpaceBankx).Result()
-		}
-		if !amt.IsValid() {
+		if neg {
 			return sdk.ErrInvalidCoins(amt.String()).Result()
 		}
 
-		//collect account activation fees
-		k.fck.AddCollectedFees(ctx, denoms.NewCetCoins(activatedFee))
 	}
-
-	// sub the activatedfees from fromaddress
-	fromAccount := k.ak.GetAccount(ctx, msg.FromAddress)
-	oldCoins := fromAccount.GetCoins()
-	newCoins, _ := subActivatedFee(oldCoins, activatedFee)
-	fromAccount.SetCoins(newCoins)
-	k.ak.SetAccount(ctx, fromAccount)
 
 	//handle coins transfer
 	t, err := k.bk.SendCoins(ctx, msg.FromAddress, msg.ToAddress, amt)
@@ -81,6 +57,17 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 		newAccountX := authx.NewAccountXWithAddress(msg.ToAddress)
 		newAccountX.Activated = true
 		k.axk.SetAccountX(ctx, newAccountX)
+
+		//collect account activation fees
+		k.fck.AddCollectedFees(ctx, denoms.NewCetCoins(activatedFee))
+
+		// sub the activatedfees from fromaddress
+		fromAccount := k.ak.GetAccount(ctx, msg.FromAddress)
+		oldCoins := fromAccount.GetCoins()
+		newCoins, _ := oldCoins.SafeSub(denoms.NewCetCoins(activatedFee))
+		//newCoins, _ := subActivatedFee(oldCoins, activatedFee)
+		fromAccount.SetCoins(newCoins)
+		k.ak.SetAccount(ctx, fromAccount)
 	}
 
 	return sdk.Result{

@@ -1,6 +1,7 @@
 package bankx
 
 import (
+	"github.com/coinexchain/dex/denoms"
 	"github.com/coinexchain/dex/x/authx"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -58,27 +59,58 @@ func setupTestInput() testInput {
 	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk}
 }
 
-func TestHandler(t *testing.T) {
+type testSendCases struct {
+	fromAddr  string
+	toAddr    string
+	fromCoins sdk.Coins
+	amt       sdk.Coins
+}
+
+func TestHandlerCases(t *testing.T) {
 
 	input := setupTestInput()
 
-	fromAddr := []byte("from-address")
-	toAddr := []byte("to-address")
+	testCases := []testSendCases{
+		{"fromaddr1", "toaddr1", denoms.NewCetCoins(10), denoms.NewCetCoins(2)},
+		{"fromaddr2", "toaddr2", denoms.NewCetCoins(10), denoms.NewCetCoins(1)},
+		{"fromaddr3", "toaddr3", denoms.NewCetCoins(0), denoms.NewCetCoins(2)},
+	}
 
-	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
-	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
-	coins := sdk.NewCoins(sdk.Coin{Denom: "cet", Amount: sdk.NewInt(int64(10))})
-	fromAccount.SetCoins(coins)
+	var fromAccount = make([]auth.Account, len(testCases))
+	var fromAccountX = make([]authx.AccountX, len(testCases))
 
-	input.ak.SetAccount(input.ctx, fromAccount)
-	input.axk.SetAccountX(input.ctx, fromAccountX)
+	for i, v := range testCases {
 
-	coin := sdk.NewCoin("cet", sdk.NewInt(int64(2)))
-	msgSend := bank.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: sdk.NewCoins(coin)}
+		fromAccount[i] = input.ak.NewAccountWithAddress(input.ctx, []byte(v.fromAddr))
+		fromAccountX[i] = authx.NewAccountXWithAddress([]byte(v.fromAddr))
+		fromAccount[i].SetCoins(v.fromCoins)
 
-	handleMsgSend(input.ctx, input.bxk, msgSend)
+		input.ak.SetAccount(input.ctx, fromAccount[i])
+		input.axk.SetAccountX(input.ctx, fromAccountX[i])
 
-	require.Equal(t, sdk.NewInt(int64(8)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(int64(1)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+		msgSend := bank.MsgSend{FromAddress: []byte(v.fromAddr), ToAddress: []byte(v.toAddr), Amount: v.amt}
+
+		switch i {
+
+		case 0:
+
+			handleMsgSend(input.ctx, input.bxk, msgSend)
+			require.Equal(t, sdk.NewInt(int64(8)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
+
+			handleMsgSend(input.ctx, input.bxk, msgSend)
+			require.Equal(t, sdk.NewInt(int64(6)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
+			require.Equal(t, sdk.NewInt(int64(3)), input.ak.GetAccount(input.ctx, []byte(v.toAddr)).GetCoins().AmountOf("cet"))
+			require.Equal(t, sdk.NewInt(int64(1)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+		case 1:
+			handleMsgSend(input.ctx, input.bxk, msgSend)
+			require.Equal(t, sdk.NewInt(int64(9)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
+			require.Equal(t, sdk.NewInt(int64(2)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+		case 2:
+			handleMsgSend(input.ctx, input.bxk, msgSend)
+			require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, []byte(v.fromAddr)).GetCoins().AmountOf("cet"))
+			require.Equal(t, sdk.NewInt(int64(2)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+
+		}
+	}
 
 }
