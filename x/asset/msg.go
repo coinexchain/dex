@@ -56,7 +56,7 @@ func (msg MsgIssueToken) ValidateBasic() sdk.Error {
 	if utf8.RuneCountInString(msg.Name) > 32 {
 		return ErrorInvalidTokenName(CodeSpaceAsset, "issue token name limited to 32 unicode characters")
 	}
-	if m, _ := regexp.MatchString("[a-z][a-z0-9]{1,7}", msg.Symbol); !m {
+	if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", msg.Symbol); !m {
 		return ErrorInvalidTokenSymbol(CodeSpaceAsset, "issue token symbol limited to [a-z][a-z0-9]{1,7}")
 	}
 	if msg.TotalSupply > MaxTokenAmount {
