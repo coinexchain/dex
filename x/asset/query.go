@@ -48,7 +48,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte,
 
 	token := tk.GetToken(ctx, params.symbol)
 	if token == nil {
-		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("token %s does not exist", params.symbol))
+		return nil, sdk.ErrInternal(fmt.Sprintf("token %s does not exist", params.symbol))
 	}
 
 	bz, err := codec.MarshalJSONIndent(tk.cdc, token)
@@ -62,6 +62,10 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte,
 func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
 
 	tokenList := tk.GetAllTokens(ctx)
+	if tokenList == nil {
+		return nil, sdk.ErrInternal(fmt.Sprintf("cannot query any token"))
+	}
+
 	bz, err := codec.MarshalJSONIndent(tk.cdc, tokenList)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))

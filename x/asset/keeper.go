@@ -70,7 +70,7 @@ func (tk TokenKeeper) GetAllTokens(ctx sdk.Context) []Token {
 		tokens = append(tokens, token)
 		return false
 	}
-	tk.IterateAccounts(ctx, appendToken)
+	tk.IterateToken(ctx, appendToken)
 	return tokens
 }
 
@@ -82,7 +82,7 @@ func (tk TokenKeeper) RemoveToken(ctx sdk.Context, token Token) {
 }
 
 // IterateToken implements token Keeper
-func (tk TokenKeeper) IterateAccounts(ctx sdk.Context, process func(Token) (stop bool)) {
+func (tk TokenKeeper) IterateToken(ctx sdk.Context, process func(Token) (stop bool)) {
 	store := ctx.KVStore(tk.key)
 	iter := sdk.KVStorePrefixIterator(store, TokenStoreKeyPrefix)
 	defer iter.Close()

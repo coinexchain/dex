@@ -11,15 +11,15 @@ const (
 	DefaultParamspace = "asset"
 	MaxTokenAmount    = 9E18 // 90 billion * 10 ^ 8
 
-	IssueTokenFee                 = 10000
-	FreezeAddrFee                 = 10
-	UnFreezeAddrFee               = 10
-	FreezeTokenFee                = 1000
-	UnFreezeTokenFee              = 1000
-	TokenFreezeWhitelistAddFee    = 100
-	TokenFreezeWhitelistRemoveFee = 100
-	BurnFee                       = 1000
-	MintFee                       = 1000
+	IssueTokenFee                 = 1E12 // 10000 * 10 ^8
+	FreezeAddrFee                 = 1E9  // 10 * 10 ^ 8
+	UnFreezeAddrFee               = 1E9  // 10 * 10 ^ 8
+	FreezeTokenFee                = 1E11 //1000 * 10 ^ 8
+	UnFreezeTokenFee              = 1E11 //1000 * 10 ^ 8
+	TokenFreezeWhitelistAddFee    = 1E10 // 100 * 10 ^ 8
+	TokenFreezeWhitelistRemoveFee = 1E10 // 100 * 10 ^ 8
+	BurnFee                       = 1E11 //1000 * 10 ^ 8
+	MintFee                       = 1E11 //1000 * 10 ^ 8
 )
 
 // Parameter keys
