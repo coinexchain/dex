@@ -13,12 +13,13 @@ func NewHandler(k Keeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case bank.MsgSend:
 			return handleMsgSend(ctx, k, msg)
+		case MsgSetMemoRequired:
+			return handleMsgSetMemoRequired(ctx, k.axk, msg)
 		default:
 			errMsg := "Unrecognized bank Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
-
 }
 
 func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
@@ -73,4 +74,18 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 	return sdk.Result{
 		Tags: t,
 	}
+}
+
+func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg MsgSetMemoRequired) sdk.Result {
+	accountX, found := axk.GetAccountX(ctx, msg.Address)
+	if !found || !accountX.Activated {
+		return sdk.ErrInvalidAddress("Address is not activated").Result()
+	}
+
+	if found {
+		accountX.TransferMemoRequired = msg.Required
+		axk.SetAccountX(ctx, accountX)
+	}
+
+	return sdk.Result{}
 }
