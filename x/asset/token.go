@@ -74,10 +74,10 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 	t.SetName(name)
 	t.SetSymbol(symbol)
 	if err := t.SetOwner(owner); err != nil {
-		return BaseToken{}, sdk.ErrInvalidAddress("issue token must set a valid token owner")
+		return BaseToken{}, ErrorInvalidTokenOwner(CodeSpaceAsset, "issue token must set a valid token owner")
 	}
 	if err := t.SetTotalSupply(amt); err != nil {
-		return BaseToken{}, sdk.ErrInvalidCoins("issue token must set a valid total supply")
+		return BaseToken{}, ErrorInvalidTokenSupply(CodeSpaceAsset, "issue token must set a valid total supply")
 	}
 
 	t.SetMintable(mintable)
