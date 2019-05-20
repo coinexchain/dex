@@ -6,14 +6,14 @@ import (
 
 // Register concrete types on codec codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgIssueToken{}, "coinex-chain/MsgIssueToken", nil)
-	cdc.RegisterConcrete(MsgTransferOwnership{}, "coinex-chain/MsgTransferOwnership", nil)
-	cdc.RegisterConcrete(MsgFreezeAddress{}, "coinex-chain/MsgFreezeAddress", nil)
-	cdc.RegisterConcrete(MsgUnfreezeAddress{}, "coinex-chain/MsgUnfreezeAddress", nil)
-	cdc.RegisterConcrete(MsgFreezeToken{}, "coinex-chain/MsgFreezeToken", nil)
-	cdc.RegisterConcrete(MsgUnfreezeToken{}, "coinex-chain/MsgUnfreezeToken", nil)
-	cdc.RegisterConcrete(MsgBurnToken{}, "coinex-chain/MsgBurnToken", nil)
-	cdc.RegisterConcrete(MsgMintToken{}, "coinex-chain/MsgMintToken", nil)
+	cdc.RegisterConcrete(MsgIssueToken{}, "asset/MsgIssueToken", nil)
+	cdc.RegisterConcrete(MsgTransferOwnership{}, "asset/MsgTransferOwnership", nil)
+	cdc.RegisterConcrete(MsgFreezeAddress{}, "asset/MsgFreezeAddress", nil)
+	cdc.RegisterConcrete(MsgUnfreezeAddress{}, "asset/MsgUnfreezeAddress", nil)
+	cdc.RegisterConcrete(MsgFreezeToken{}, "asset/MsgFreezeToken", nil)
+	cdc.RegisterConcrete(MsgUnfreezeToken{}, "asset/MsgUnfreezeToken", nil)
+	cdc.RegisterConcrete(MsgBurnToken{}, "asset/MsgBurnToken", nil)
+	cdc.RegisterConcrete(MsgMintToken{}, "asset/MsgMintToken", nil)
 }
 
 var msgCdc = codec.New()
