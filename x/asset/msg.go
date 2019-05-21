@@ -6,9 +6,6 @@ import (
 	"unicode/utf8"
 )
 
-// RouterKey is the name of the asset module
-const RouterKey = "asset"
-
 // MsgIssueToken
 type MsgIssueToken struct {
 	Name        string         //  Name of the newly issued asset, limited to 32 unicode characters

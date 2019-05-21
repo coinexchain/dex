@@ -45,7 +45,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 		//check whether the first transfer contains at least activatedFee cet
 		amt, neg = amt.SafeSub(dex.NewCetCoins(activatedFee))
 		if neg {
-			return sdk.ErrInvalidCoins(amt.String()).Result()
+			return ErrorInsufficientCETForActivatingFee().Result()
 		}
 
 	}

@@ -1,0 +1,240 @@
+{
+  "genesis_time": "2019-05-20T07:31:22.844616Z",
+  "chain_id": "test_chain",
+  "consensus_params": {
+    "block": {
+      "max_bytes": "22020096",
+      "max_gas": "-1",
+      "time_iota_ms": "1000"
+    },
+    "evidence": {
+      "max_age": "100000"
+    },
+    "validator": {
+      "pub_key_types": [
+        "ed25519"
+      ]
+    }
+  },
+  "app_hash": "",
+  "app_state": {
+    "accounts": [
+      {
+        "address": "cosmos1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp",
+        "coins": [
+          {
+            "denom": "cet",
+            "amount": "1000000000"
+          }
+        ],
+        "sequence_number": "0",
+        "account_number": "0",
+        "original_vesting": null,
+        "delegated_free": null,
+        "delegated_vesting": null,
+        "start_time": "0",
+        "end_time": "0"
+      }
+    ],
+    "auth": {
+      "collected_fees": null,
+      "params": {
+        "max_memo_characters": "256",
+        "tx_sig_limit": "7",
+        "tx_size_cost_per_byte": "10",
+        "sig_verify_cost_ed25519": "590",
+        "sig_verify_cost_secp256k1": "1000"
+      }
+    },
+    "bank": {
+      "send_enabled": true
+    },
+    "bankx": {
+      "param": {
+        "activated_fee": "1"
+      }
+    },
+    "staking": {
+      "pool": {
+        "not_bonded_tokens": "1000000000",
+        "bonded_tokens": "0"
+      },
+      "params": {
+        "unbonding_time": "259200000000000",
+        "max_validators": 100,
+        "max_entries": 7,
+        "bond_denom": "cet"
+      },
+      "last_total_power": "0",
+      "last_validator_powers": null,
+      "validators": null,
+      "delegations": null,
+      "unbonding_delegations": null,
+      "redelegations": null,
+      "exported": false
+    },
+    "distr": {
+      "fee_pool": {
+        "community_pool": null
+      },
+      "community_tax": "0.020000000000000000",
+      "base_proposer_reward": "0.010000000000000000",
+      "bonus_proposer_reward": "0.040000000000000000",
+      "withdraw_addr_enabled": true,
+      "delegator_withdraw_infos": null,
+      "previous_proposer": "",
+      "outstanding_rewards": null,
+      "validator_accumulated_commissions": null,
+      "validator_historical_rewards": null,
+      "validator_current_rewards": null,
+      "delegator_starting_infos": null,
+      "validator_slash_events": null
+    },
+    "gov": {
+      "starting_proposal_id": "1",
+      "deposits": null,
+      "votes": null,
+      "proposals": null,
+      "deposit_params": {
+        "min_deposit": [
+          {
+            "denom": "stake",
+            "amount": "10000000"
+          }
+        ],
+        "max_deposit_period": "172800000000000"
+      },
+      "voting_params": {
+        "voting_period": "172800000000000"
+      },
+      "tally_params": {
+        "quorum": "0.334000000000000000",
+        "threshold": "0.500000000000000000",
+        "veto": "0.334000000000000000"
+      }
+    },
+    "crisis": {
+      "constant_fee": {
+        "denom": "stake",
+        "amount": "1000"
+      }
+    },
+    "slashing": {
+      "params": {
+        "max_evidence_age": "120000000000",
+        "signed_blocks_window": "100",
+        "min_signed_per_window": "0.500000000000000000",
+        "downtime_jail_duration": "600000000000",
+        "slash_fraction_double_sign": "0.050000000000000000",
+        "slash_fraction_downtime": "0.010000000000000000"
+      },
+      "signing_infos": {},
+      "missed_blocks": {}
+    },
+    "asset": {
+      "params": {
+        "issue_token_fee": [
+          {
+            "denom": "cet",
+            "amount": "1000000000000"
+          }
+        ],
+        "freeze_address_fee": [
+          {
+            "denom": "cet",
+            "amount": "1000000000"
+          }
+        ],
+        "unfreeze_address_fee": [
+          {
+            "denom": "cet",
+            "amount": "1000000000"
+          }
+        ],
+        "freeze_token_fee": [
+          {
+            "denom": "cet",
+            "amount": "100000000000"
+          }
+        ],
+        "unfreeze_token_fee": [
+          {
+            "denom": "cet",
+            "amount": "100000000000"
+          }
+        ],
+        "token_freeze_whitelist_add_fee": [
+          {
+            "denom": "cet",
+            "amount": "10000000000"
+          }
+        ],
+        "token_freeze_whitelist_remove_fee": [
+          {
+            "denom": "cet",
+            "amount": "10000000000"
+          }
+        ],
+        "burn_fee": [
+          {
+            "denom": "cet",
+            "amount": "100000000000"
+          }
+        ],
+        "mint_fee": [
+          {
+            "denom": "cet",
+            "amount": "100000000000"
+          }
+        ]
+      }
+    },
+    "gentxs": [
+      {
+        "type": "auth/StdTx",
+        "value": {
+          "msg": [
+            {
+              "type": "cosmos-sdk/MsgCreateValidator",
+              "value": {
+                "description": {
+                  "moniker": "moniker123",
+                  "identity": "",
+                  "website": "",
+                  "details": ""
+                },
+                "commission": {
+                  "rate": "0.100000000000000000",
+                  "max_rate": "0.200000000000000000",
+                  "max_change_rate": "0.010000000000000000"
+                },
+                "min_self_delegation": "1",
+                "delegator_address": "cosmos1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp",
+                "validator_address": "cosmosvaloper1jzvzctg849zesmgq8edy50ufg2yz2hr7qht46j",
+                "pubkey": "cosmosvalconspub1zcjduepq7u2hwyy8yjuvgpalznhq5npv25smv9y6a37w506slm2f3u65ts6q7x53ej",
+                "value": {
+                  "denom": "cet",
+                  "amount": "100000000"
+                }
+              }
+            }
+          ],
+          "fee": {
+            "amount": null,
+            "gas": "200000"
+          },
+          "signatures": [
+            {
+              "pub_key": {
+                "type": "tendermint/PubKeySecp256k1",
+                "value": "ArdyQ4pwV0o5f7TuA+LAJEHc5Jk7JeR84W/KbRr2NICI"
+              },
+              "signature": "QnZi7eXZ+5vdqzyHQfKeW1Wbx+IFuQimxYx8cKjzWU589TD1bMg3NSlBLRPPXjdu7mUQm0q+lDjgbgRH10M6oA=="
+            }
+          ],
+          "memo": "8ec6373916eb2acd43ad47e235852e20e11399f9@192.168.16.12:26656"
+        }
+      }
+    ]
+  }
+}
