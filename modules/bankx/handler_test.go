@@ -60,7 +60,7 @@ func setupTestInput() testInput {
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
 	axk := authx.NewKeeper(cdc, authxKey)
-	bxkKeeper := NewKeeper(paramsKeeper.Subspace(CodeSpaceBankx), axk, bk, ak, fck)
+	bxkKeeper := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
@@ -116,8 +116,8 @@ func TestHandleMsgSetMemoRequiredAccountNotExisted(t *testing.T) {
 
 	msg := NewMsgSetTransferMemoRequired(testutil.ToAccAddress("xxx"), true)
 	result := input.handle(msg)
-	require.Equal(t, dex.CodespaceDEX, result.Codespace)
-	require.Equal(t, dex.CodeUnactivatedAddress, result.Code)
+	require.Equal(t, CodeSpaceBankx, result.Codespace)
+	require.Equal(t, CodeUnactivatedAddress, result.Code)
 }
 
 func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
@@ -129,8 +129,8 @@ func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
 
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
-	require.Equal(t, dex.CodespaceDEX, result.Codespace)
-	require.Equal(t, dex.CodeUnactivatedAddress, result.Code)
+	require.Equal(t, CodeSpaceBankx, result.Codespace)
+	require.Equal(t, CodeUnactivatedAddress, result.Code)
 }
 
 func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {

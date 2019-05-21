@@ -85,7 +85,7 @@ func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg Msg
 	accountX, found := axk.GetAccountX(ctx, msg.Address)
 	if !found || !accountX.Activated {
 		msg := fmt.Sprintf("account %s is not activated", msg.Address)
-		return dex.ErrUnactivatedAddress(msg).Result()
+		return ErrUnactivatedAddress(msg).Result()
 	}
 
 	accountX.TransferMemoRequired = msg.Required

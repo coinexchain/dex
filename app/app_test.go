@@ -1,20 +1,21 @@
 package app
 
 import (
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/cosmos/cosmos-sdk/store/errors"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 
 	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
+	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
+	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -88,5 +89,5 @@ func TestMemo(t *testing.T) {
 		Msgs(msgSend).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result2 := app.Deliver(tx2)
-	require.Equal(t, dex.CodeMemoMissing, result2.Code)
+	require.Equal(t, bankx.CodeMemoMissing, result2.Code)
 }
