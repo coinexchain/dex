@@ -4,10 +4,10 @@ vendor/
 .idea
 *.iml
 
+*.out
+
+# ignore cetd & cetcli executables
 cetd
 cetcli
 !cetd/
 !cetcli/
-*.out
-
-
