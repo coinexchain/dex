@@ -2,6 +2,7 @@ package asset
 
 import (
 	"bytes"
+	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
@@ -85,20 +86,15 @@ func (p Params) Equal(p2 Params) bool {
 func DefaultParams() Params {
 
 	return Params{
-		IssueTokenFee:                 CetCoin(IssueTokenFee),
-		FreezeAddrFee:                 CetCoin(FreezeAddrFee),
-		UnFreezeAddrFee:               CetCoin(UnFreezeAddrFee),
-		FreezeTokenFee:                CetCoin(FreezeTokenFee),
-		UnFreezeTokenFee:              CetCoin(UnFreezeTokenFee),
-		TokenFreezeWhitelistAddFee:    CetCoin(TokenFreezeWhitelistAddFee),
-		TokenFreezeWhitelistRemoveFee: CetCoin(TokenFreezeWhitelistRemoveFee),
-		BurnFee:                       CetCoin(BurnFee),
-		MintFee:                       CetCoin(MintFee),
+		IssueTokenFee:                 types.NewCetCoins(IssueTokenFee),
+		FreezeAddrFee:                 types.NewCetCoins(FreezeAddrFee),
+		UnFreezeAddrFee:               types.NewCetCoins(UnFreezeAddrFee),
+		FreezeTokenFee:                types.NewCetCoins(FreezeTokenFee),
+		UnFreezeTokenFee:              types.NewCetCoins(UnFreezeTokenFee),
+		TokenFreezeWhitelistAddFee:    types.NewCetCoins(TokenFreezeWhitelistAddFee),
+		TokenFreezeWhitelistRemoveFee: types.NewCetCoins(TokenFreezeWhitelistRemoveFee),
+		BurnFee:                       types.NewCetCoins(BurnFee),
+		MintFee:                       types.NewCetCoins(MintFee),
 	}
 }
 
-func CetCoin(amt int64) sdk.Coins {
-	return sdk.Coins{
-		sdk.NewCoin("cet", sdk.NewInt(amt)),
-	}
-}

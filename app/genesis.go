@@ -43,7 +43,7 @@ type GenesisState struct {
 	GenTxs       []json.RawMessage         `json:"gentxs"`
 }
 
-// NewDefaultGenesisState generates the default state for gaia.
+// NewDefaultGenesisState generates the default state for coindex.
 func NewDefaultGenesisState() GenesisState {
 	gs := GenesisState{
 		Accounts:     nil,

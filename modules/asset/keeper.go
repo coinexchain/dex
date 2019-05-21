@@ -61,7 +61,7 @@ func NewKeeper(
 // GetToken implements token Keeper.
 func (tk TokenKeeper) GetToken(ctx sdk.Context, symbol string) Token {
 	store := ctx.KVStore(tk.key)
-	bz := store.Get([]byte(symbol))
+	bz := store.Get(TokenStoreKey(symbol))
 	if bz == nil {
 		return nil
 	}
@@ -113,7 +113,7 @@ func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) {
 	if err != nil {
 		panic(err)
 	}
-	store.Set([]byte(symbol), bz)
+	store.Set(TokenStoreKey(symbol), bz)
 
 }
 

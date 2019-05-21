@@ -102,8 +102,7 @@ func addTokenCoins(ctx sdk.Context, tk TokenKeeper, addr sdk.AccAddress, amt sdk
 // handleMsgIssueToken - Handle MsgIssueToken
 func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk.Result {
 
-	//issueFee := tk.GetParams(ctx).IssueTokenFee
-	issueFee := CetCoin(IssueTokenFee)
+	issueFee := tk.GetParams(ctx).IssueTokenFee
 	if err := subTokenFee(ctx, tk, msg.Owner, issueFee); err != nil {
 		return err.Result()
 	}
