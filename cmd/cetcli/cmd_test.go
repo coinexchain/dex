@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/require"
 
 	"github.com/coinexchain/dex/app"
 )
