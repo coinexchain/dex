@@ -2,26 +2,25 @@ package main
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/client/tx"
-	"github.com/rakyll/statik/fs"
-	"github.com/spf13/viper"
-	"github.com/tendermint/go-amino"
 	"net/http"
 	"os"
 	"path"
 
+	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 
-	as "github.com/coinexchain/dex/x/asset"
-	ass "github.com/coinexchain/dex/x/asset/rest"
 	at "github.com/cosmos/cosmos-sdk/x/auth"
 	auth "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/client/rest"
@@ -33,7 +32,6 @@ import (
 	st "github.com/cosmos/cosmos-sdk/x/staking"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/client/rest"
 
-	assclient "github.com/coinexchain/dex/x/asset/client"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 	crisisclient "github.com/cosmos/cosmos-sdk/x/crisis/client"
@@ -44,6 +42,9 @@ import (
 	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 
 	"github.com/coinexchain/dex/app"
+	as "github.com/coinexchain/dex/x/asset"
+	assclient "github.com/coinexchain/dex/x/asset/client"
+	ass "github.com/coinexchain/dex/x/asset/rest"
 	bankxcmd "github.com/coinexchain/dex/x/bankx/client/cli"
 )
 
