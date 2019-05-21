@@ -5,7 +5,6 @@ import (
 	"github.com/coinexchain/dex/x/asset"
 	"github.com/spf13/cobra"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 )
@@ -15,7 +14,7 @@ import (
 // nolint: unparam
 func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "token [symbol]",
+		Use:   "token-info [symbol]",
 		Short: "Query token info",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -40,5 +39,5 @@ func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			return cliCtx.PrintOutput(token)
 		},
 	}
-	return client.GetCommands(cmd)[0]
+	return cmd
 }

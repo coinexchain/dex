@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -19,7 +18,7 @@ import (
 // IssueTokenCmd will create a issue token tx and sign it with the given key.
 func IssueTokenCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "issue token [name] [symbol] [totalSupply] [mintable] [burnable] [addrFreezeable] [tokenFreezeable]",
+		Use:   "token-issue [name] [symbol] [totalSupply] [mintable] [burnable] [addrFreezeable] [tokenFreezeable]",
 		Short: "Create and sign a issue token tx",
 		Args:  cobra.ExactArgs(8),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -83,9 +82,6 @@ func IssueTokenCmd(cdc *codec.Codec) *cobra.Command {
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
 		},
 	}
-
-	cmd = client.PostCommands(cmd)[0]
-	cmd.MarkFlagRequired(client.FlagFrom)
 
 	return cmd
 }
