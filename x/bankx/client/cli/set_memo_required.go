@@ -14,7 +14,7 @@ import (
 	"github.com/coinexchain/dex/x/bankx"
 )
 
-func SetMemoRequired(cdc *codec.Codec) *cobra.Command {
+func SetMemoRequiredCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set-transfer-memo-required <bool>",
 		Short: "Mark if memo is required to receive coins",

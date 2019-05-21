@@ -44,8 +44,9 @@ import (
 	"github.com/coinexchain/dex/app"
 	as "github.com/coinexchain/dex/x/asset"
 	assclient "github.com/coinexchain/dex/x/asset/client"
-	ass "github.com/coinexchain/dex/x/asset/rest"
+	assrest "github.com/coinexchain/dex/x/asset/rest"
 	bankxcmd "github.com/coinexchain/dex/x/bankx/client/cli"
+	bankxrest "github.com/coinexchain/dex/x/bankx/client/rest"
 )
 
 func main() {
@@ -179,7 +180,7 @@ func txCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 
 	txCmd.AddCommand(
 		bankcmd.SendTxCmd(cdc),
-		bankxcmd.SetMemoRequired(cdc),
+		bankxcmd.SetMemoRequiredCmd(cdc),
 		client.LineBreak,
 		authcmd.GetSignCommand(cdc),
 		authcmd.GetMultiSignCommand(cdc),
@@ -204,11 +205,12 @@ func registerRoutes(rs *lcd.RestServer) {
 	tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	auth.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, at.StoreKey)
 	bank.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
+	bankxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	dist.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, distcmd.StoreKey)
 	staking.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	slashing.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	gov.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
-	ass.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, as.StoreKey)
+	assrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, as.StoreKey)
 }
 
 func registerSwaggerUI(rs *lcd.RestServer) {
