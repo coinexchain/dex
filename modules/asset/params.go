@@ -97,4 +97,3 @@ func DefaultParams() Params {
 		MintFee:                       types.NewCetCoins(MintFee),
 	}
 }
-

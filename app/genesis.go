@@ -29,8 +29,8 @@ var (
 
 // State to Unmarshal
 type GenesisState struct {
-	Accounts     []gaia_app.GenesisAccount `json:"accounts"`
-	AuthData     auth.GenesisState         `json:"auth"`
+	Accounts []gaia_app.GenesisAccount `json:"accounts"`
+	AuthData auth.GenesisState         `json:"auth"`
 	//TODO: AuthXData    authx.GenesisState        `json:"authx"`
 	BankData     bank.GenesisState         `json:"bank"`
 	BankXData    bankx.GenesisState        `json:"bankx"`
