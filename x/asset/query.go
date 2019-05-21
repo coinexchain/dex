@@ -29,7 +29,7 @@ func NewQuerier(tk TokenKeeper, cdc *codec.Codec) sdk.Querier {
 	}
 }
 
-// defines the params for query: "custom/asset/token"
+// defines the params for query: "custom/asset/token-info"
 type QueryTokenParams struct {
 	symbol string
 }
