@@ -45,7 +45,7 @@ install:
   - go get github.com/mattn/goveralls
 
 script:
-  - ./sh/check.sh
+  - ./scripts/check.sh
 
 notifications:
   email:
