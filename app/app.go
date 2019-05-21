@@ -243,7 +243,8 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(distr.QuerierRoute, distr.NewQuerier(app.distrKeeper)).
 		AddRoute(gov.QuerierRoute, gov.NewQuerier(app.govKeeper)).
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
-		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc))
+		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
+		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.assetKeeper, app.cdc))
 }
 
 // custom tx codec
@@ -259,6 +260,7 @@ func MakeCodec() *codec.Codec {
 	crisis.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	asset.RegisterCodec(cdc)
 	return cdc
 }
 
@@ -363,7 +365,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
 	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
-	//asset.InitGenesis(ctx, app.kee)
+	asset.InitGenesis(ctx, app.assetKeeper,genesisState.AssetData)
 
 	// validate genesis state
 	if err := ValidateGenesisState(genesisState); err != nil {

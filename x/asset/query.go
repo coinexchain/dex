@@ -16,7 +16,7 @@ const (
 )
 
 // creates a querier for asset REST endpoints
-func NewQuerier(tk TokenKeeper) sdk.Querier {
+func NewQuerier(tk TokenKeeper, cdc *codec.Code) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
 		case QueryToken:
