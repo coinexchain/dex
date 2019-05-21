@@ -6,6 +6,9 @@ import (
 
 // Register concrete types on codec codec
 func RegisterCodec(cdc *codec.Codec) {
+	cdc.RegisterInterface((*Token)(nil), nil)
+	cdc.RegisterConcrete(&BaseToken{}, "asset/Token", nil)
+
 	cdc.RegisterConcrete(MsgIssueToken{}, "asset/MsgIssueToken", nil)
 	cdc.RegisterConcrete(MsgTransferOwnership{}, "asset/MsgTransferOwnership", nil)
 	cdc.RegisterConcrete(MsgFreezeAddress{}, "asset/MsgFreezeAddress", nil)
