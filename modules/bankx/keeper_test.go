@@ -1,7 +1,7 @@
 package bankx
 
 import (
-	"github.com/coinexchain/dex/x/authx"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"

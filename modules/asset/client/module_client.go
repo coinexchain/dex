@@ -1,12 +1,12 @@
 package client
 
 import (
-	"github.com/coinexchain/dex/x/asset"
+	"github.com/coinexchain/dex/modules/asset"
 
 	"github.com/spf13/cobra"
 	"github.com/tendermint/go-amino"
 
-	assCli "github.com/coinexchain/dex/x/asset/client/cli"
+	assCli "github.com/coinexchain/dex/modules/asset/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 )
 

@@ -1,7 +1,7 @@
 package bankx
 
 import (
-	"github.com/coinexchain/dex/x/authx"
+	"github.com/coinexchain/dex/modules/authx"
 	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"

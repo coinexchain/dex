@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/x/asset"
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"

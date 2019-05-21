@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/coinexchain/dex/x/bankx"
+	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	"github.com/stretchr/testify/require"
 	"testing"

@@ -24,10 +24,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/x/asset"
-	"github.com/coinexchain/dex/x/authx"
-	"github.com/coinexchain/dex/x/bankx"
-	"github.com/coinexchain/dex/x/incentive"
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/incentive"
 )
 
 const (

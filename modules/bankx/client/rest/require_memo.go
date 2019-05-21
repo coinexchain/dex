@@ -12,7 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
-	"github.com/coinexchain/dex/x/bankx"
+	"github.com/coinexchain/dex/modules/bankx"
 )
 
 type MmeoReq struct {

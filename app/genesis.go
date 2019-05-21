@@ -19,8 +19,8 @@ import (
 
 	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 
-	"github.com/coinexchain/dex/x/asset"
-	"github.com/coinexchain/dex/x/bankx"
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/bankx"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 

@@ -11,7 +11,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 
-	"github.com/coinexchain/dex/x/bankx"
+	"github.com/coinexchain/dex/modules/bankx"
 )
 
 func RequireMemoCmd(cdc *codec.Codec) *cobra.Command {

@@ -42,11 +42,11 @@ import (
 	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 
 	"github.com/coinexchain/dex/app"
-	as "github.com/coinexchain/dex/x/asset"
-	assclient "github.com/coinexchain/dex/x/asset/client"
-	assrest "github.com/coinexchain/dex/x/asset/rest"
-	bankxcmd "github.com/coinexchain/dex/x/bankx/client/cli"
-	bankxrest "github.com/coinexchain/dex/x/bankx/client/rest"
+	as "github.com/coinexchain/dex/modules/asset"
+	assclient "github.com/coinexchain/dex/modules/asset/client"
+	assrest "github.com/coinexchain/dex/modules/asset/rest"
+	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
+	bankxrest "github.com/coinexchain/dex/modules/bankx/client/rest"
 )
 
 func main() {
