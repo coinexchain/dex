@@ -365,7 +365,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
 	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
-	asset.InitGenesis(ctx, app.assetKeeper,genesisState.AssetData)
+	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
 
 	// validate genesis state
 	if err := ValidateGenesisState(genesisState); err != nil {
