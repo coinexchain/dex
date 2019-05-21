@@ -4,8 +4,10 @@ vendor/
 .idea
 *.iml
 
-*/cetd
-*/cetcli
+cetd
+cetcli
+!cetd/
+!cetcli/
 *.out
 
 
