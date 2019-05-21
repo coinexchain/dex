@@ -20,7 +20,7 @@ func IssueTokenCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "token-issue [name] [symbol] [totalSupply] [mintable] [burnable] [addrFreezeable] [tokenFreezeable]",
 		Short: "Create and sign a issue token tx",
-		Args:  cobra.ExactArgs(8),
+		Args:  cobra.ExactArgs(7),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().
