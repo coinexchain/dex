@@ -54,19 +54,19 @@ var _ Token = (*BaseToken)(nil)
 
 // BaseToken - a base Token structure.
 type BaseToken struct {
-	Name        string         //  Name of the newly issued asset, limited to 32 unicode characters.
-	Symbol      string         //  token symbol, [a-z][a-z0-9]{1,7}
-	TotalSupply int64          //  The total supply for this token [0]
-	Owner       sdk.AccAddress // The initial issuer of this token
+	Name        string         `json:"name"`             //  Name of the newly issued asset, limited to 32 unicode characters.
+	Symbol      string         `json:"symbol"`           //  token symbol, [a-z][a-z0-9]{1,7}
+	TotalSupply int64          `json:"total_supply"`     //  The total supply for this token [0]
+	Owner       sdk.AccAddress `json:"owner"`            // The initial issuer of this token
 
-	Mintable        bool // Whether this token could be minted after the issuing
-	Burnable        bool // Whether this token could be burned
-	AddrFreezeable  bool // whether could freeze some addresses to forbid transaction
-	TokenFreezeable bool // whether token could be global freeze
+	Mintable        bool       `json:"mintable"`         // Whether this token could be minted after the issuing
+	Burnable        bool       `json:"burnable"`         // Whether this token could be burned
+	AddrFreezeable  bool       `json:"addr_freezeable"`  // whether could freeze some addresses to forbid transaction
+	TokenFreezeable bool       `json:"token_freezeable"` // whether token could be global freeze
 
-	TotalBurn int64 // Total amount of burn
-	TotalMint int64 // Total amount of mint
-	IsFrozen  bool  // Whether token being frozen currently
+	TotalBurn int64            `json:"total_burn"`       // Total amount of burn
+	TotalMint int64            `json:"total_mint"`       // Total amount of mint
+	IsFrozen  bool             `json:"is_frozen"`        // Whether token being frozen currently
 }
 
 // NewToken - new base token

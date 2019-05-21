@@ -8,7 +8,6 @@ import (
 	"sort"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -25,8 +24,6 @@ import (
 )
 
 var (
-	// bonded tokens given to genesis validators/accounts
-	freeTokensPerAcc = sdk.TokensFromTendermintPower(150)
 	defaultBondDenom = "cet"
 )
 
@@ -34,6 +31,7 @@ var (
 type GenesisState struct {
 	Accounts     []gaia_app.GenesisAccount `json:"accounts"`
 	AuthData     auth.GenesisState         `json:"auth"`
+	//TODO: AuthXData    authx.GenesisState        `json:"authx"`
 	BankData     bank.GenesisState         `json:"bank"`
 	BankXData    bankx.GenesisState        `json:"bankx"`
 	StakingData  staking.GenesisState      `json:"staking"`
@@ -65,6 +63,32 @@ func NewDefaultGenesisState() GenesisState {
 	gs.GovData.DepositParams.MinDeposit[0].Denom = defaultBondDenom
 	gs.CrisisData.ConstantFee.Denom = defaultBondDenom
 	return gs
+}
+
+func NewGenesisState(accounts []gaia_app.GenesisAccount,
+	authData auth.GenesisState,
+	//TODO: authXData
+	bankData bank.GenesisState,
+	bankxData bankx.GenesisState,
+	stakingData staking.GenesisState,
+	distrData distribution.GenesisState,
+	govData gov.GenesisState,
+	crisisData crisis.GenesisState,
+	slashingData slashing.GenesisState,
+	assetData asset.GenesisState) GenesisState {
+
+	return GenesisState{
+		Accounts:     accounts,
+		AuthData:     authData,
+		BankData:     bankData,
+		BankXData:    bankxData,
+		StakingData:  stakingData,
+		DistrData:    distrData,
+		GovData:      govData,
+		CrisisData:   crisisData,
+		SlashingData: slashingData,
+		AssetData:    assetData,
+	}
 }
 
 // Sanitize sorts accounts and coin sets.
