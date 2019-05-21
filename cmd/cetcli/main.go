@@ -44,6 +44,7 @@ import (
 	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 
 	"github.com/coinexchain/dex/app"
+	bankxcmd "github.com/coinexchain/dex/x/bankx/client/cli"
 )
 
 func main() {
@@ -177,6 +178,7 @@ func txCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 
 	txCmd.AddCommand(
 		bankcmd.SendTxCmd(cdc),
+		bankxcmd.SetMemoRequired(cdc),
 		client.LineBreak,
 		authcmd.GetSignCommand(cdc),
 		authcmd.GetMultiSignCommand(cdc),
