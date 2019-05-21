@@ -5,7 +5,7 @@ vendor/
 *.iml
 
 */cetd
-/cetcli
+*/cetcli
 *.out
 
 
