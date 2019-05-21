@@ -31,12 +31,12 @@ func NewQuerier(tk TokenKeeper, cdc *codec.Codec) sdk.Querier {
 
 // defines the params for query: "custom/asset/token-info"
 type QueryTokenParams struct {
-	symbol string
+	Symbol string
 }
 
 func NewQueryAssetParams(s string) QueryTokenParams {
 	return QueryTokenParams{
-		symbol: s,
+		Symbol: s,
 	}
 }
 
@@ -46,9 +46,9 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte,
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	token := tk.GetToken(ctx, params.symbol)
+	token := tk.GetToken(ctx, params.Symbol)
 	if token == nil {
-		return nil, ErrorNoTokenPersist(CodeSpaceAsset, fmt.Sprintf("can not query token %s", params.symbol))
+		return nil, ErrorNoTokenPersist(CodeSpaceAsset, fmt.Sprintf("can not query token %s", params.Symbol))
 	}
 
 	bz, err := codec.MarshalJSONIndent(tk.cdc, token)
