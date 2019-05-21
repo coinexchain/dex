@@ -14,9 +14,9 @@ import (
 	"github.com/coinexchain/dex/x/bankx"
 )
 
-func SetMemoRequiredCmd(cdc *codec.Codec) *cobra.Command {
+func RequireMemoCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-transfer-memo-required <bool>",
+		Use:   "require-memo <bool>",
 		Short: "Mark if memo is required to receive coins",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
