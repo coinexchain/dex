@@ -5,9 +5,10 @@ import sdk "github.com/cosmos/cosmos-sdk/types"
 const (
 	CodeSpaceBankx = "bankx"
 
-	CodeInsufficientCETForActivatingFee = 19
+	CodeInsufficientCETForActivatedFee = 19
+	CodeInvalidActivatedFee            = 20
 )
 
 func ErrorInsufficientCETForActivatingFee() sdk.Error {
-	return sdk.NewError(CodeSpaceBankx, CodeInsufficientCETForActivatingFee, "Insufficient CET for Activating fees")
+	return sdk.NewError(CodeSpaceBankx, CodeInsufficientCETForActivatedFee, "Insufficient CET for Activating fees")
 }
