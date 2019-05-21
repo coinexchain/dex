@@ -98,7 +98,7 @@
       "deposit_params": {
         "min_deposit": [
           {
-            "denom": "stake",
+            "denom": "cet",
             "amount": "10000000"
           }
         ],
@@ -115,7 +115,7 @@
     },
     "crisis": {
       "constant_fee": {
-        "denom": "stake",
+        "denom": "cet",
         "amount": "1000"
       }
     },

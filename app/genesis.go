@@ -60,8 +60,10 @@ func NewDefaultGenesisState() GenesisState {
 		AssetData:    asset.DefaultGenesisState(),
 		GenTxs:       nil,
 	}
-	// TODO: create staking.GenesisState from scratch
+	// TODO: create staking.GenesisState & gov.GenesisState & crisis.GenesisState from scratch
 	gs.StakingData.Params.BondDenom = defaultBondDenom
+	gs.GovData.DepositParams.MinDeposit[0].Denom = defaultBondDenom
+	gs.CrisisData.ConstantFee.Denom = defaultBondDenom
 	return gs
 }
 
