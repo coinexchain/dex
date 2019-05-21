@@ -251,6 +251,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 func MakeCodec() *codec.Codec {
 	var cdc = codec.New()
 	bank.RegisterCodec(cdc)
+	bankx.RegisterCodec(cdc)
 	staking.RegisterCodec(cdc)
 	distr.RegisterCodec(cdc)
 	slashing.RegisterCodec(cdc)
