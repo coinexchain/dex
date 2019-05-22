@@ -9,4 +9,6 @@ import (
 func TestDefaultGenesisState(t *testing.T) {
 	state := NewDefaultGenesisState()
 	require.Equal(t, "cet", state.StakingData.Params.BondDenom)
+	require.Equal(t, "cet", state.GovData.DepositParams.MinDeposit[0].Denom)
+	require.Equal(t, "cet", state.CrisisData.ConstantFee.Denom)
 }
