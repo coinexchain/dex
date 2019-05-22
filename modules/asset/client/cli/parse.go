@@ -10,7 +10,7 @@ func parseIssueFlags() (*issue, error) {
 
 	for _, flag := range issueFlags {
 		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, pls see help : " +
+			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
 				"$ cetcli tx asset issue-token -h", flag)
 		}
 	}
