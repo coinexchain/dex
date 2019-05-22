@@ -85,7 +85,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := bank.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1)}
+	msgSend := MsgSendWithUnlockTime{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1), UnlockTime: 0}
 	input.handle(msgSend)
 
 	//send 0 to toaddr results toAccount to be created

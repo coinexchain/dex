@@ -76,7 +76,7 @@ func (msg MsgSendWithUnlockTime) ValidateBasic() sdk.Error {
 		return sdk.ErrInsufficientCoins("send amount must be positive")
 	}
 	t := time.Now().Unix()
-	if msg.UnlockTime <= t {
+	if msg.UnlockTime <= t && msg.UnlockTime != 0 {
 		return ErrUnlockTime("Invalid Unlock Time")
 	}
 	return nil
