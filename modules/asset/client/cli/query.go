@@ -41,3 +41,30 @@ func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	}
 	return cmd
 }
+
+// GetTokenListCmd returns all token that will display
+func GetTokenListCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "token-list ",
+		Short: "Query all token",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
+			res, err := cliCtx.QueryWithData(route, nil)
+			if err != nil {
+				return err
+			}
+
+			var tokens []asset.Token
+			cdc.MustUnmarshalJSON(res, &tokens)
+			for _, t := range tokens {
+				if err := cliCtx.PrintOutput(t); err != nil {
+
+				}
+			}
+			return nil
+		},
+	}
+	return cmd
+}

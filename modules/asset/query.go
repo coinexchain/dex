@@ -12,7 +12,7 @@ import (
 // query endpoints supported by the asset Querier
 const (
 	QueryToken     = "token-info"
-	QueryTokenList = "tokenList"
+	QueryTokenList = "token-list"
 )
 
 // creates a querier for asset REST endpoints
