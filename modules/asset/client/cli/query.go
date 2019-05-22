@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/spf13/cobra"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -14,9 +15,17 @@ import (
 // nolint: unparam
 func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "token-info [symbol]",
+		Use:   "token [symbol]",
 		Short: "Query token info",
 		Args:  cobra.ExactArgs(1),
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query details for a token. You can find the token by token symbol".
+
+Example:
+$ cetcli query asset token btc
+`,
+			),
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().
 				WithCodec(cdc)
@@ -44,8 +53,15 @@ func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 // GetTokenListCmd returns all token that will display
 func GetTokenListCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "token-list ",
+		Use:   "tokens ",
 		Short: "Query all token",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query details for all tokens. 
+Example:
+$ cetcli query asset tokens
+`,
+			),
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
