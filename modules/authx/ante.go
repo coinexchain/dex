@@ -14,8 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-
-	dex "github.com/coinexchain/dex/types"
 )
 
 var (
@@ -31,7 +29,7 @@ func init() {
 }
 
 type AnteHelper interface {
-	IsMemoRequired(msg sdk.Msg, ctx sdk.Context) bool
+	CheckMemo(msg sdk.Msg, memo string, ctx sdk.Context) sdk.Error
 	GasFee(msg sdk.Msg) sdk.Coins
 }
 
@@ -177,10 +175,10 @@ func ValidateMemoSize(stdTx auth.StdTx, params auth.Params) sdk.Result {
 }
 
 func CheckMissingMemo(stdTx auth.StdTx, ctx sdk.Context, anteHelper AnteHelper) sdk.Result {
-	memoLength := len(stdTx.GetMemo())
+	memo := stdTx.Memo
 	for _, msg := range stdTx.Msgs {
-		if anteHelper.IsMemoRequired(msg, ctx) && memoLength < 1 {
-			return dex.ErrMemoMissing("memo is empty").Result()
+		if err := anteHelper.CheckMemo(msg, memo, ctx); err != nil {
+			return err.Result()
 		}
 	}
 

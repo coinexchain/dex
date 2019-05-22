@@ -293,7 +293,7 @@ func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) ab
 	tags = append(tags, endBlockerTags...)
 
 	if app.invCheckPeriod != 0 && ctx.BlockHeight()%int64(app.invCheckPeriod) == 0 {
-		//app.assertRuntimeInvariants()
+		app.assertRuntimeInvariants()
 	}
 
 	return abci.ResponseEndBlock{
@@ -302,7 +302,7 @@ func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) ab
 	}
 }
 
-// custom logic for gaia initialization
+// custom logic for coindex initialization
 func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	stateJSON := req.AppStateBytes
 	// TODO is this now the whole genesis file?
@@ -361,6 +361,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 
 	// initialize module-specific stores
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
+	//TODO: authx
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData, genesisState.Accounts)
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())

@@ -6,19 +6,21 @@ import (
 
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
-	Params Params `json:"params"`
+	Params Params  `json:"params"`
+	Tokens []Token `json:"tokens"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params Params) GenesisState {
+func NewGenesisState(params Params, tokens []Token) GenesisState {
 	return GenesisState{
 		Params: params,
+		Tokens: tokens,
 	}
 }
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParams())
+	return NewGenesisState(DefaultParams(), []Token{})
 }
 
 // InitGenesis - Init store state from genesis data
@@ -28,8 +30,7 @@ func InitGenesis(ctx sdk.Context, tk TokenKeeper, data GenesisState) {
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, tk TokenKeeper) GenesisState {
-	params := tk.GetParams(ctx)
-	return NewGenesisState(params)
+	return NewGenesisState(tk.GetParams(ctx), tk.GetAllTokens(ctx))
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an

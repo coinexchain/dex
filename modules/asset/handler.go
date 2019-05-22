@@ -112,7 +112,7 @@ func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk
 		return err.Result()
 	}
 
-	if err := addTokenCoins(ctx, tk, msg.Owner, CetCoin(msg.TotalSupply)); err != nil {
+	if err := addTokenCoins(ctx, tk, msg.Owner, NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
 		return err.Result()
 	}
 

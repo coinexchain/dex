@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/types"
 	"regexp"
 	"strconv"
 	"unicode/utf8"
@@ -20,7 +21,7 @@ func IssueTokenCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "token-issue [name] [symbol] [totalSupply] [mintable] [burnable] [addrFreezeable] [tokenFreezeable]",
 		Short: "Create and sign a issue token tx",
-		Args:  cobra.ExactArgs(8),
+		Args:  cobra.ExactArgs(7),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().
@@ -55,7 +56,7 @@ func IssueTokenCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// ensure account has enough coins
-			issueFee := asset.CetCoin(asset.IssueTokenFee)
+			issueFee := types.NewCetCoins(asset.IssueTokenFee)
 			if !account.GetCoins().IsAllGTE(issueFee) {
 				return fmt.Errorf("address %s doesn't have enough cet to issue token", owner)
 			}
