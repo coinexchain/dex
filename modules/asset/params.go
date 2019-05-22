@@ -93,7 +93,7 @@ func DefaultParams() Params {
 		UnFreezeTokenFee:              types.NewCetCoins(UnFreezeTokenFee),
 		TokenFreezeWhitelistAddFee:    types.NewCetCoins(TokenFreezeWhitelistAddFee),
 		TokenFreezeWhitelistRemoveFee: types.NewCetCoins(TokenFreezeWhitelistRemoveFee),
-		BurnFee:                       types.NewCetCoins(BurnFee),
-		MintFee:                       types.NewCetCoins(MintFee),
+		BurnFee: types.NewCetCoins(BurnFee),
+		MintFee: types.NewCetCoins(MintFee),
 	}
 }
