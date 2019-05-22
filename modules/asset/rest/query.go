@@ -14,13 +14,18 @@ import (
 // register REST routes
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, storeName string) {
 	r.HandleFunc(
-		"/asset/token/{symbol}",
+		"/asset/tokens/{symbol}",
 		QueryTokenRequestHandlerFn(storeName, cdc, cliCtx),
+	).Methods("GET")
+
+	r.HandleFunc(
+		"/asset/tokens/",
+		QueryTokensRequestHandlerFn(storeName, cdc, cliCtx),
 	).Methods("GET")
 
 }
 
-// query assetREST Handler
+// QueryTokenRequestHandlerFn - query assetREST Handler
 func QueryTokenRequestHandlerFn(
 	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
 ) http.HandlerFunc {
@@ -45,5 +50,25 @@ func QueryTokenRequestHandlerFn(
 		cdc.MustUnmarshalJSON(res, &token)
 
 		rest.PostProcessResponse(w, cdc, token, cliCtx.Indent)
+	}
+}
+
+// QueryTokensRequestHandlerFn - query assetREST Handler
+func QueryTokensRequestHandlerFn(
+	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryTokenList)
+		res, err := cliCtx.QueryWithData(route, nil)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		var tokens []asset.Token
+		cdc.MustUnmarshalJSON(res, &tokens)
+
+		rest.PostProcessResponse(w, cdc, tokens, cliCtx.Indent)
 	}
 }
