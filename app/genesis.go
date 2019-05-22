@@ -111,6 +111,10 @@ func ValidateGenesisState(genesisState GenesisState) error {
 		return err
 	}
 
+	if err := asset.ValidateGenesis(genesisState.AssetData); err != nil {
+		return err
+	}
+
 	// skip stakingData validation as genesis is created from txs
 	if len(genesisState.GenTxs) > 0 {
 		return nil
@@ -135,9 +139,6 @@ func ValidateGenesisState(genesisState GenesisState) error {
 		return err
 	}
 	if err := crisis.ValidateGenesis(genesisState.CrisisData); err != nil {
-		return err
-	}
-	if err := asset.ValidateGenesis(genesisState.AssetData); err != nil {
 		return err
 	}
 

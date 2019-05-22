@@ -44,6 +44,7 @@ type Token interface {
 	GetIsFrozen() bool
 	SetIsFrozen(bool)
 
+	IsValid() error
 	// Ensure that account implements stringer
 	String() string
 }
@@ -98,6 +99,25 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 	t.SetIsFrozen(false)
 
 	return t, nil
+}
+
+func (t *BaseToken) IsValid() error {
+	_, err := NewToken(t.Name, t.Symbol, t.TotalSupply, t.Owner,
+		t.Mintable, t.Burnable, t.AddrFreezeable, t.TokenFreezeable)
+
+	if err != nil {
+		return err
+	}
+
+	if t.TotalMint < 0 {
+		return ErrorInvalidTotalMint(CodeSpaceAsset, fmt.Sprintf("Invalid total mint: %d", t.TotalMint))
+	}
+
+	if t.TotalBurn < 0 {
+		return ErrorInvalidTotalMint(CodeSpaceAsset, fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
+	}
+
+	return nil
 }
 
 func (t BaseToken) GetName() string {

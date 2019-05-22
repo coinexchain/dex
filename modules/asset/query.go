@@ -72,5 +72,4 @@ func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) (
 	}
 
 	return bz, nil
-
 }
