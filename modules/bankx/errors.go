@@ -9,6 +9,7 @@ const (
 	CodeMemoMissing                    sdk.CodeType = 112
 	CodeInsufficientCETForActivatedFee sdk.CodeType = 113
 	CodeInvalidActivatedFee            sdk.CodeType = 114
+	CodeInvalidUnlockTime              sdk.CodeType = 115
 )
 
 func ErrUnactivatedAddress(msg string) sdk.Error {
@@ -21,4 +22,8 @@ func ErrMemoMissing() sdk.Error {
 
 func ErrorInsufficientCETForActivatingFee() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInsufficientCETForActivatedFee, "Insufficient CET for Activating fees")
+}
+
+func ErrUnlockTime(msg string) sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeInvalidUnlockTime, msg)
 }
