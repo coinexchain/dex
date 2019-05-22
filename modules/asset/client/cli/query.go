@@ -34,9 +34,8 @@ func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			var token asset.Token
-			cdc.MustUnmarshalJSON(res, &token)
-			return cliCtx.PrintOutput(token)
+			fmt.Println(string(res))
+			return nil
 		},
 	}
 	return cmd
@@ -56,13 +55,7 @@ func GetTokenListCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			var tokens []asset.Token
-			cdc.MustUnmarshalJSON(res, &tokens)
-			for _, t := range tokens {
-				if err := cliCtx.PrintOutput(t); err != nil {
-
-				}
-			}
+			fmt.Println(string(res))
 			return nil
 		},
 	}
