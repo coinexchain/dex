@@ -1,13 +1,15 @@
 package market
 
+import "github.com/cosmos/cosmos-sdk/types"
+
 type MarketInfo struct {
 	Stock             string
 	Money             string
 	Create            string
 	PricePrecision    byte
-	LastExecutedPrice int
+	LastExecutedPrice types.Dec
 }
 
-func (minfo *MarketInfo) CheckMarketInfoValid() bool {
+func (info *MarketInfo) CheckCreateMarketInfoValid() bool {
 	return true
 }
