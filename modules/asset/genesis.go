@@ -1,6 +1,7 @@
 package asset
 
 import (
+	"errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -45,12 +46,19 @@ func ValidateGenesis(data GenesisState) error {
 		return err
 	}
 
+	tokenSymbols := make(map[string]interface{})
+
 	for _, token := range data.Tokens {
-		//TODO: check duplicate Token symbol
 		err = token.IsValid()
 		if err != nil {
 			return err
 		}
+
+		if _, exists := tokenSymbols[token.GetSymbol()]; exists {
+			return errors.New("Duplicate token symbol found during asset ValidateGenesis")
+		}
+
+		tokenSymbols[token.GetSymbol()] = nil
 	}
 
 	return nil
