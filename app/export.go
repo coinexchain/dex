@@ -36,18 +36,7 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 	// iterate to get the accounts
 	accounts := app.getAllAccountsForGenesis(ctx)
 
-	genState := NewGenesisState(
-		accounts,
-		auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
-		bank.ExportGenesis(ctx, app.bankKeeper),
-		bankx.ExportGenesis(ctx, app.bankxKeeper),
-		staking.ExportGenesis(ctx, app.stakingKeeper),
-		distr.ExportGenesis(ctx, app.distrKeeper),
-		gov.ExportGenesis(ctx, app.govKeeper),
-		crisis.ExportGenesis(ctx, app.crisisKeeper),
-		slashing.ExportGenesis(ctx, app.slashingKeeper),
-		asset.ExportGenesis(ctx, app.assetKeeper),
-	)
+	genState := app.createGenesisState(accounts, ctx)
 	appState, err = codec.MarshalJSONIndent(app.cdc, genState)
 	if err != nil {
 		return nil, nil, err
@@ -193,4 +182,19 @@ func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context) (accounts []ga
 	}
 	app.accountKeeper.IterateAccounts(ctx, appendAccount)
 	return
+}
+
+func (app *CetChainApp) createGenesisState(accounts []gaia_app.GenesisAccount, ctx sdk.Context) GenesisState {
+	return NewGenesisState(
+		accounts,
+		auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
+		bank.ExportGenesis(ctx, app.bankKeeper),
+		bankx.ExportGenesis(ctx, app.bankxKeeper),
+		staking.ExportGenesis(ctx, app.stakingKeeper),
+		distr.ExportGenesis(ctx, app.distrKeeper),
+		gov.ExportGenesis(ctx, app.govKeeper),
+		crisis.ExportGenesis(ctx, app.crisisKeeper),
+		slashing.ExportGenesis(ctx, app.slashingKeeper),
+		asset.ExportGenesis(ctx, app.assetKeeper),
+	)
 }
