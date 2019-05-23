@@ -1,7 +1,9 @@
 package bankx
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -47,4 +49,71 @@ func TestSetMemoRequiredGetSigners(t *testing.T) {
 	signers := msg.GetSigners()
 	require.Equal(t, 1, len(signers))
 	require.Equal(t, addr, signers[0])
+}
+
+func TestMsgSendRoute(t *testing.T) {
+	addr1 := sdk.AccAddress([]byte("from"))
+	addr2 := sdk.AccAddress([]byte("to"))
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10))
+	var msg = NewMsgSend(addr1, addr2, coins, 10)
+
+	require.Equal(t, msg.Route(), "bankx")
+	require.Equal(t, msg.Type(), "send")
+}
+
+func TestMsgSendValidation(t *testing.T) {
+	addr1 := sdk.AccAddress([]byte("from"))
+	addr2 := sdk.AccAddress([]byte("to"))
+	cet123 := sdk.NewCoins(sdk.NewInt64Coin("cet", 123))
+	cet0 := sdk.NewCoins(sdk.NewInt64Coin("cet", 0))
+	cet123eth123 := sdk.NewCoins(sdk.NewInt64Coin("cet", 123), sdk.NewInt64Coin("eth", 123))
+	cet123eth0 := sdk.Coins{sdk.NewInt64Coin("cet", 123), sdk.NewInt64Coin("eth", 0)}
+
+	var emptyAddr sdk.AccAddress
+	time := time.Now().Unix()
+	validTime := time + 1000
+	invalidTime := time - 1000
+
+	cases := []struct {
+		valid bool
+		tx    MsgSend
+	}{
+		{true, NewMsgSend(addr1, addr2, cet123, validTime)},       // valid send
+		{true, NewMsgSend(addr1, addr2, cet123eth123, validTime)}, // valid send with multiple coins
+		{false, NewMsgSend(addr1, addr2, cet0, validTime)},        // non positive coin
+		{false, NewMsgSend(addr1, addr2, cet123eth0, validTime)},  // non positive coin in multicoins
+		{false, NewMsgSend(emptyAddr, addr2, cet123, validTime)},  // empty from addr
+		{false, NewMsgSend(addr1, emptyAddr, cet123, validTime)},  // empty to addr
+		{false, NewMsgSend(addr1, addr2, cet123, invalidTime)},    // invalid unlocked time
+		{false, NewMsgSend(addr1, addr2, cet123eth123, invalidTime)},
+		{true, NewMsgSend(addr1, addr2, cet123, 0)},
+		{true, NewMsgSend(addr1, addr2, cet123eth123, 0)},
+	}
+
+	for _, tc := range cases {
+		err := tc.tx.ValidateBasic()
+		if tc.valid {
+			require.Nil(t, err)
+		} else {
+			require.NotNil(t, err)
+		}
+	}
+}
+
+func TestMsgSendGetSignBytes(t *testing.T) {
+	addr1 := sdk.AccAddress([]byte("input"))
+	addr2 := sdk.AccAddress([]byte("output"))
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10))
+	var msg = NewMsgSend(addr1, addr2, coins, 0)
+	res := msg.GetSignBytes()
+
+	expected := `{"type":"cet-chain/MsgSend","value":{"amount":[{"amount":"10","denom":"cet"}],"from_address":"cosmos1d9h8qat57ljhcm","to_address":"cosmos1da6hgur4wsmpnjyg","unlock_time":"0"}}`
+	require.Equal(t, expected, string(res))
+}
+
+func TestMsgSendGetSigners(t *testing.T) {
+	var msg = NewMsgSend(sdk.AccAddress([]byte("input1")), sdk.AccAddress{}, sdk.NewCoins(), 0)
+	res := msg.GetSigners()
+	// TODO: fix this !
+	require.Equal(t, fmt.Sprintf("%v", res), "[696E70757431]")
 }
