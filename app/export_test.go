@@ -28,5 +28,5 @@ func TestExportGenesisState(t *testing.T) {
 	state := app.exportGenesisState(ctx)
 	require.Equal(t, 1, len(state.Accounts))
 	require.Equal(t, 1, len(state.AccountsX))
-	require.Equal(t, true, state.AccountsX[0].TransferMemoRequired)
+	require.Equal(t, true, state.AccountsX[0].MemoRequired)
 }
