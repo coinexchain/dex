@@ -22,6 +22,7 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	cet_init "github.com/coinexchain/dex/init"
+	cet_server "github.com/coinexchain/dex/server"
 )
 
 // cetd custom flags
@@ -62,7 +63,7 @@ func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:               "cetd",
 		Short:             "CET Chain Daemon (server)",
-		PersistentPreRunE: server.PersistentPreRunEFn(ctx),
+		PersistentPreRunE: cet_server.PersistentPreRunEFn(ctx),
 	}
 
 	rootCmd.AddCommand(cet_init.InitCmd(ctx, cdc))
