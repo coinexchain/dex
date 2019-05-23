@@ -54,6 +54,23 @@ func (axk AccountXKeeper) SetAccountX(ctx sdk.Context, ax AccountX) {
 	store.Set(AddressStoreKey(addr), bz)
 }
 
+func (axk AccountXKeeper) IterateAccounts(ctx sdk.Context, process func(AccountX) (stop bool)) {
+	store := ctx.KVStore(axk.key)
+	iter := sdk.KVStorePrefixIterator(store, AddressStoreKeyPrefix)
+	defer iter.Close()
+	for {
+		if !iter.Valid() {
+			return
+		}
+		val := iter.Value()
+		acc := axk.decodeAccountX(val)
+		if process(acc) {
+			return
+		}
+		iter.Next()
+	}
+}
+
 // -----------------------------------------------------------------------------
 // Codec
 

@@ -41,6 +41,7 @@ import (
 	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 
 	"github.com/coinexchain/dex/app"
+	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
 	as "github.com/coinexchain/dex/modules/asset"
 	assclient "github.com/coinexchain/dex/modules/asset/client"
 	assrest "github.com/coinexchain/dex/modules/asset/rest"
@@ -199,7 +200,7 @@ func txCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 // NOTE: details on the routes added for each module are in the module documentation
 // NOTE: If making updates here you also need to update the test helper in client/lcd/test_helper.go
 func registerRoutes(rs *lcd.RestServer) {
-	//registerSwaggerUI(rs)
+	registerSwaggerUI(rs)
 	rpc.RegisterRoutes(rs.CliCtx, rs.Mux)
 	tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	auth.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, at.StoreKey)
