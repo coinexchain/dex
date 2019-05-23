@@ -94,8 +94,12 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 	t.SetAddrFreezeable(addrfreezeable)
 	t.SetTokenFreezeable(tokenfreezeable)
 
-	t.SetTotalMint(0)
-	t.SetTotalBurn(0)
+	if err := t.SetTotalMint(0); err != nil {
+		return nil, ErrorInvalidTotalMint(CodeSpaceAsset, err.Error())
+	}
+	if err := t.SetTotalBurn(0); err != nil {
+		return nil, ErrorInvalidTotalBurn(CodeSpaceAsset, err.Error())
+	}
 	t.SetIsFrozen(false)
 
 	return t, nil
@@ -210,8 +214,8 @@ func (t BaseToken) GetTotalBurn() int64 {
 }
 
 func (t *BaseToken) SetTotalBurn(amt int64) error {
-	if amt > MaxTokenAmount {
-		return errors.New("token total supply limited to 90 billion")
+	if amt > MaxTokenAmount || amt < 0 {
+		return errors.New("invalid total burn amt")
 	}
 	t.TotalBurn = amt
 	return nil
@@ -222,8 +226,8 @@ func (t BaseToken) GetTotalMint() int64 {
 }
 
 func (t *BaseToken) SetTotalMint(amt int64) error {
-	if amt > MaxTokenAmount {
-		return errors.New("token total supply limited to 90 billion")
+	if amt > MaxTokenAmount || amt < 0 {
+		return errors.New("invalid total mint amt")
 	}
 	t.TotalMint = amt
 	return nil

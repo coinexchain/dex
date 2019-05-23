@@ -1,6 +1,7 @@
 package asset
 
 import (
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -106,19 +107,27 @@ func (tk TokenKeeper) IterateToken(ctx sdk.Context, process func(Token) (stop bo
 }
 
 // SetToken  implements token Keeper.
-func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) {
+func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) sdk.Error {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(tk.key)
+
+	tokens := tk.GetAllTokens(ctx)
+	for _, t := range tokens {
+		if symbol == t.GetSymbol() {
+			return ErrorDuplicateTokenSymbol(CodeSpaceAsset, fmt.Sprintf("token symbol already exists in store"))
+		}
+	}
+
 	bz, err := tk.cdc.MarshalBinaryBare(token)
 	if err != nil {
-		panic(err)
+		return sdk.ErrInternal(err.Error())
 	}
 	store.Set(TokenStoreKey(symbol), bz)
-
+	return nil
 }
 
 //IssueToken - new token and store
-func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) (err sdk.Error) {
+func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 
 	token, err := NewToken(msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
 		msg.Mintable, msg.Burnable, msg.AddrFreezeable, msg.TokenFreezeable)
@@ -126,7 +135,10 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) (err sdk.Er
 	if err != nil {
 		return err
 	}
-	tk.SetToken(ctx, token)
+	err = tk.SetToken(ctx, token)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
