@@ -47,7 +47,7 @@ var issueFlags = []string{
 }
 
 // IssueTokenCmd will create a issue token tx and sign.
-func IssueTokenCmd(cdc *codec.Codec) *cobra.Command {
+func IssueTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "issue-token",
 		Short: "Create and sign a issue token tx",
@@ -84,6 +84,17 @@ $ cetcli tx asset issue-token --name="my first token" \
 			symbol := issue.Symbol
 			if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", symbol); !m {
 				return fmt.Errorf("issue token symbol limited to [a-z][a-z0-9]{1,7}")
+			}
+
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
+			res, _ := cliCtx.QueryWithData(route, nil)
+			var tokens []asset.Token
+			cdc.MustUnmarshalJSON(res, &tokens)
+
+			for _, t := range tokens {
+				if symbol == t.GetSymbol() {
+					return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")
+				}
 			}
 
 			totalSupply := issue.TotalSupply
