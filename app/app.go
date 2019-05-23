@@ -353,7 +353,11 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 		acc := gacc.ToAccount()
 		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
 		app.accountKeeper.SetAccount(ctx, acc)
-		accx := authx.NewAccountXWithAddress(acc.GetAddress())
+
+		accx := authx.AccountX{Address: gacc.Address, Activated: true}
+		app.accountXKeeper.SetAccountX(ctx, accx)
+	}
+	for _, accx := range genesisState.AccountsX {
 		app.accountXKeeper.SetAccountX(ctx, accx)
 	}
 
@@ -368,7 +372,6 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 
 	// initialize module-specific stores
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
-	//TODO: authx
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())

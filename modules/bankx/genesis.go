@@ -1,9 +1,6 @@
 package bankx
 
 import (
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -26,25 +23,7 @@ func DefaultGenesisState() GenesisState {
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
-
 	keeper.SetParam(ctx, data.Param)
-}
-
-/*
-// InitGenesis - Init store state from genesis data
-func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState,
-	accounts []auth.Account) {
-
-	keeper.SetParam(ctx, data.Param)
-	activateGenesisAccounts(ctx, keeper, accounts)
-}
-*/
-
-func activateGenesisAccounts(ctx sdk.Context, keeper Keeper, accounts []auth.Account) {
-	for _, acc := range accounts {
-		accX := authx.AccountX{Address: acc.GetAddress(), Activated: true}
-		keeper.axk.SetAccountX(ctx, accX)
-	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
