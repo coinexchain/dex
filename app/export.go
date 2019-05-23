@@ -34,13 +34,7 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 	}
 
 	// iterate to get the accounts
-	accounts := []gaia_app.GenesisAccount{}
-	appendAccount := func(acc auth.Account) (stop bool) {
-		account := gaia_app.NewGenesisAccountI(acc)
-		accounts = append(accounts, account)
-		return false
-	}
-	app.accountKeeper.IterateAccounts(ctx, appendAccount)
+	accounts := app.getAllAccountsForGenesis(ctx)
 
 	genState := NewGenesisState(
 		accounts,
@@ -189,4 +183,14 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 			return false
 		},
 	)
+}
+
+func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context) (accounts []gaia_app.GenesisAccount) {
+	appendAccount := func(acc auth.Account) (stop bool) {
+		account := gaia_app.NewGenesisAccountI(acc)
+		accounts = append(accounts, account)
+		return false
+	}
+	app.accountKeeper.IterateAccounts(ctx, appendAccount)
+	return
 }
