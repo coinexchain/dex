@@ -1,13 +1,13 @@
 package market
 
-import "github.com/cosmos/cosmos-sdk/types"
+import sdk "github.com/cosmos/cosmos-sdk/types"
 
 type MarketInfo struct {
 	Stock             string
 	Money             string
-	Create            string
+	Create            sdk.AccAddress
 	PricePrecision    byte
-	LastExecutedPrice types.Dec
+	LastExecutedPrice sdk.Dec
 }
 
 func (info *MarketInfo) CheckCreateMarketInfoValid() bool {

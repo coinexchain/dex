@@ -3,26 +3,26 @@ package market
 import (
 	"fmt"
 	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type Order struct {
-	Sender         string
+	Sender         sdk.AccAddress
 	Sequence       uint64
 	Symbol         string
 	OrderType      byte
 	PricePrecision byte
-	Price          types.Dec
-	Quantity       types.Dec
+	Price          sdk.Dec
+	Quantity       sdk.Dec
 	Side           byte
 	TimeInForce    int
 	Height         uint64
 
 	// These field will change when order filled/cancel.
-	LeftStock types.Dec
-	Freeze    types.Dec
-	DealStock types.Dec
-	DealMoney types.Dec
+	LeftStock sdk.Dec
+	Freeze    sdk.Dec
+	DealStock sdk.Dec
+	DealMoney sdk.Dec
 }
 
 func (or *Order) CheckOrderValidToMempool(keeper bankx.Keeper) bool {

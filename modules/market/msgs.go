@@ -5,7 +5,10 @@ import (
 )
 
 // RouterKey is the name of the bankx module
-const RouterKey = "market"
+const (
+	RouterKey = "market"
+	MarketKey = RouterKey
+)
 
 ///////////////////////////////////////////////////////////
 // MsgCreateMarketInfo
@@ -13,14 +16,14 @@ const RouterKey = "market"
 var _ sdk.Msg = MsgCreateMarketInfo{}
 
 type MsgCreateMarketInfo struct {
-	Stock          string `json:"stock"`
-	Money          string `json:"money"`
-	Crater         string `json:"crater"`
-	PricePrecision byte   `json:"priceprecision"`
+	Stock          string         `json:"stock"`
+	Money          string         `json:"money"`
+	Creator        sdk.AccAddress `json:"crater"`
+	PricePrecision byte           `json:"priceprecision"`
 }
 
-func NewMsgCreateMarketInfo(stock, money, crater string, priceprecision byte) MsgCreateMarketInfo {
-	return MsgCreateMarketInfo{Stock: stock, Money: money, Crater: crater, PricePrecision: priceprecision}
+func NewMsgCreateMarketInfo(stock, money string, crater sdk.AccAddress, priceprecision byte) MsgCreateMarketInfo {
+	return MsgCreateMarketInfo{Stock: stock, Money: money, Creator: crater, PricePrecision: priceprecision}
 }
 
 // --------------------------------------------------------
@@ -31,7 +34,7 @@ func (msg MsgCreateMarketInfo) Route() string { return RouterKey }
 func (msg MsgCreateMarketInfo) Type() string { return "create_market_required" }
 
 func (msg MsgCreateMarketInfo) ValidateBasic() sdk.Error {
-	if len(msg.Crater) == 0 {
+	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("missing creator address")
 	}
 	if len(msg.Stock) == 0 || len(msg.Money) == 0 {
@@ -48,7 +51,7 @@ func (msg MsgCreateMarketInfo) GetSignBytes() []byte {
 }
 
 func (msg MsgCreateMarketInfo) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{[]byte(msg.Crater)}
+	return []sdk.AccAddress{[]byte(msg.Creator)}
 }
 
 ///////////////////////////////////////////////////////////
@@ -57,16 +60,15 @@ func (msg MsgCreateMarketInfo) GetSigners() []sdk.AccAddress {
 var _ sdk.Msg = MsgCreateGTEOrder{}
 
 type MsgCreateGTEOrder struct {
-	Sender         string
-	Sequence       uint64
-	Symbol         string
-	OrderType      byte
-	PricePrecision byte
-	Price          uint64
-	Quantity       uint64
-	Side           byte
-	TimeInForce    int
-	Height         uint64
+	Sender         sdk.AccAddress `json:"sender"`
+	Sequence       uint64         `json:"sequence"`
+	Symbol         string         `json:"symbol"`
+	OrderType      byte           `json:"ordertype"`
+	PricePrecision byte           `json:"priceprecision"`
+	Price          int64          `json:"price"`
+	Quantity       int64          `json:"quantity"`
+	Side           byte           `json:"side"`
+	TimeInForce    int            `json:"timeinforce"`
 }
 
 func (msg MsgCreateGTEOrder) Route() string { return RouterKey }
@@ -94,4 +96,16 @@ func (msg MsgCreateGTEOrder) GetSignBytes() []byte {
 
 func (msg MsgCreateGTEOrder) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{[]byte(msg.Sender)}
+}
+
+///////////////////////////////////////////////////////////
+// MsgCreateIOCOrder
+
+type MsgCreateIOCOrder struct {
+}
+
+///////////////////////////////////////////////////////////
+// MsgCancelOrder
+
+type MsgCancelOrder struct {
 }

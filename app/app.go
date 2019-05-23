@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/market"
 	"io"
 	"os"
 	"sort"
@@ -29,6 +28,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/coinexchain/dex/modules/market"
 )
 
 const (
@@ -65,6 +65,7 @@ type CetChainApp struct {
 	keyParams        *sdk.KVStoreKey
 	tkeyParams       *sdk.TransientStoreKey
 	keyAsset         *sdk.KVStoreKey
+	keyMarket        *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -111,6 +112,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 		keyParams:        sdk.NewKVStoreKey(params.StoreKey),
 		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
 		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
+		keyMarket:        sdk.NewKVStoreKey(market.MarketKey),
 	}
 
 	app.initKeepers()
@@ -221,7 +223,12 @@ func (app *CetChainApp) initKeepers() {
 		app.accountKeeper,
 		app.feeCollectionKeeper,
 	)
-	app.marketKeeper = market.NewKeeper()
+	app.marketKeeper = market.NewKeeper(
+		app.keyMarket,
+		market.MockAssertKeeper{},
+		market.MockBankxKeeper{},
+		app.feeCollectionKeeper,
+	)
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {

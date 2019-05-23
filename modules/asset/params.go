@@ -86,14 +86,14 @@ func (p Params) Equal(p2 Params) bool {
 func DefaultParams() Params {
 
 	return Params{
-		IssueTokenFee:                 types.NewCetCoins(IssueTokenFee),
-		FreezeAddrFee:                 types.NewCetCoins(FreezeAddrFee),
-		UnFreezeAddrFee:               types.NewCetCoins(UnFreezeAddrFee),
-		FreezeTokenFee:                types.NewCetCoins(FreezeTokenFee),
-		UnFreezeTokenFee:              types.NewCetCoins(UnFreezeTokenFee),
-		TokenFreezeWhitelistAddFee:    types.NewCetCoins(TokenFreezeWhitelistAddFee),
-		TokenFreezeWhitelistRemoveFee: types.NewCetCoins(TokenFreezeWhitelistRemoveFee),
-		BurnFee: types.NewCetCoins(BurnFee),
-		MintFee: types.NewCetCoins(MintFee),
+		types.NewCetCoins(IssueTokenFee),
+		types.NewCetCoins(FreezeAddrFee),
+		types.NewCetCoins(UnFreezeAddrFee),
+		types.NewCetCoins(FreezeTokenFee),
+		types.NewCetCoins(UnFreezeTokenFee),
+		types.NewCetCoins(TokenFreezeWhitelistAddFee),
+		types.NewCetCoins(TokenFreezeWhitelistRemoveFee),
+		types.NewCetCoins(BurnFee),
+		types.NewCetCoins(MintFee),
 	}
 }
