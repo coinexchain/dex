@@ -348,6 +348,8 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 		acc := gacc.ToAccount()
 		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
 		app.accountKeeper.SetAccount(ctx, acc)
+		accx := authx.NewAccountXWithAddress(acc.GetAddress())
+		app.accountXKeeper.SetAccountX(ctx, accx)
 	}
 
 	// initialize distribution (must happen before staking)
@@ -363,7 +365,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	//TODO: authx
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData, genesisState.Accounts)
+	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
 	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)

@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"sort"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -16,21 +18,32 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
-
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
+const (
+	defaultGenesisAccountNum = 7
+)
+
 var (
 	defaultBondDenom = "cet"
+
+	//TODO:update these address to be under coinex's control
+	testAddress1 = []byte("test-address1")
+	testAddress2 = []byte("test-address2")
+	testAddress3 = []byte("test-address3")
+	testAddress4 = []byte("test-address4")
+	testAddress5 = []byte("test-address5")
+	testAddress6 = []byte("test-address6")
+	testAddress7 = []byte("test-address7")
 )
 
 // State to Unmarshal
 type GenesisState struct {
-	Accounts []gaia_app.GenesisAccount `json:"accounts"`
-	AuthData auth.GenesisState         `json:"auth"`
+	Accounts []GenesisAccount  `json:"accounts"`
+	AuthData auth.GenesisState `json:"auth"`
 	//TODO: AuthXData    authx.GenesisState        `json:"authx"`
 	BankData     bank.GenesisState         `json:"bank"`
 	BankXData    bankx.GenesisState        `json:"bankx"`
@@ -46,7 +59,7 @@ type GenesisState struct {
 // NewDefaultGenesisState generates the default state for coindex.
 func NewDefaultGenesisState() GenesisState {
 	gs := GenesisState{
-		Accounts:     nil,
+		Accounts:     DefaultCETGenesisAccount(),
 		AuthData:     auth.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
 		BankXData:    bankx.DefaultGenesisState(),
@@ -65,7 +78,7 @@ func NewDefaultGenesisState() GenesisState {
 	return gs
 }
 
-func NewGenesisState(accounts []gaia_app.GenesisAccount,
+func NewGenesisState(accounts []GenesisAccount,
 	authData auth.GenesisState,
 	//TODO: authXData
 	bankData bank.GenesisState,
@@ -147,7 +160,7 @@ func ValidateGenesisState(genesisState GenesisState) error {
 // validateGenesisStateAccounts performs validation of genesis accounts. It
 // ensures that there are no duplicate accounts in the genesis state and any
 // provided vesting accounts are valid.
-func validateGenesisStateAccounts(accs []gaia_app.GenesisAccount) error {
+func validateGenesisStateAccounts(accs []GenesisAccount) error {
 	addrMap := make(map[string]bool, len(accs))
 	for _, acc := range accs {
 		addrStr := acc.Address.String()
@@ -236,4 +249,129 @@ func CetAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []jso
 	genesisState.GenTxs = appGenTxs
 
 	return genesisState, nil
+}
+
+// GenesisAccount defines an account initialized at genesis.
+type GenesisAccount struct {
+	Address       sdk.AccAddress `json:"address"`
+	Coins         sdk.Coins      `json:"coins"`
+	Sequence      uint64         `json:"sequence_number"`
+	AccountNumber uint64         `json:"account_number"`
+
+	// vesting account fields
+	OriginalVesting  sdk.Coins `json:"original_vesting"`  // total vesting coins upon initialization
+	DelegatedFree    sdk.Coins `json:"delegated_free"`    // delegated vested coins at time of delegation
+	DelegatedVesting sdk.Coins `json:"delegated_vesting"` // delegated vesting coins at time of delegation
+	StartTime        int64     `json:"start_time"`        // vesting start time (UNIX Epoch time)
+	EndTime          int64     `json:"end_time"`          // vesting end time (UNIX Epoch time)
+}
+
+// convert GenesisAccount to auth.BaseAccount
+func (ga *GenesisAccount) ToAccount() auth.Account {
+	bacc := &auth.BaseAccount{
+		Address:       ga.Address,
+		Coins:         ga.Coins.Sort(),
+		AccountNumber: ga.AccountNumber,
+		Sequence:      ga.Sequence,
+	}
+
+	if !ga.OriginalVesting.IsZero() {
+		baseVestingAcc := &auth.BaseVestingAccount{
+			BaseAccount:      bacc,
+			OriginalVesting:  ga.OriginalVesting,
+			DelegatedFree:    ga.DelegatedFree,
+			DelegatedVesting: ga.DelegatedVesting,
+			EndTime:          ga.EndTime,
+		}
+
+		if ga.StartTime != 0 && ga.EndTime != 0 {
+			return &auth.ContinuousVestingAccount{
+				BaseVestingAccount: baseVestingAcc,
+				StartTime:          ga.StartTime,
+			}
+		} else if ga.EndTime != 0 {
+			return &auth.DelayedVestingAccount{
+				BaseVestingAccount: baseVestingAcc,
+			}
+		} else {
+			panic(fmt.Sprintf("invalid genesis vesting account: %+v", ga))
+		}
+	}
+
+	return bacc
+}
+func NewGenesisAccount(acc *auth.BaseAccount) GenesisAccount {
+	return GenesisAccount{
+		Address:       acc.Address,
+		Coins:         acc.Coins,
+		AccountNumber: acc.AccountNumber,
+		Sequence:      acc.Sequence,
+	}
+}
+
+func NewGenesisAccountI(acc auth.Account) GenesisAccount {
+	gacc := GenesisAccount{
+		Address:       acc.GetAddress(),
+		Coins:         acc.GetCoins(),
+		AccountNumber: acc.GetAccountNumber(),
+		Sequence:      acc.GetSequence(),
+	}
+
+	vacc, ok := acc.(auth.VestingAccount)
+	if ok {
+		gacc.OriginalVesting = vacc.GetOriginalVesting()
+		gacc.DelegatedFree = vacc.GetDelegatedFree()
+		gacc.DelegatedVesting = vacc.GetDelegatedVesting()
+		gacc.StartTime = vacc.GetStartTime()
+		gacc.EndTime = vacc.GetEndTime()
+	}
+
+	return gacc
+}
+
+func defaultCETAccount() []auth.Account {
+
+	accs := make([]auth.Account, defaultGenesisAccountNum)
+
+	ba1:=auth.NewBaseAccountWithAddress(testAddress1)
+	ba1.SetCoins(types.NewCetCoins(2888000000))
+	accs[0]=&ba1
+
+	ba2:=auth.NewBaseAccountWithAddress(testAddress2)
+	ba2.SetCoins(types.NewCetCoins(1200000000))
+	accs[1]=&ba2
+
+
+	ba3 := auth.NewBaseAccountWithAddress(testAddress3)
+	ba3.SetCoins(types.NewCetCoins(360000000))
+	accs[2] = auth.NewDelayedVestingAccount(&ba3, 1577836800)
+
+	ba4 := auth.NewBaseAccountWithAddress(testAddress4)
+	ba4.SetCoins(types.NewCetCoins(360000000))
+	accs[3] = auth.NewDelayedVestingAccount(&ba4, 1609459200)
+
+	ba5 := auth.NewBaseAccountWithAddress(testAddress5)
+	ba5.SetCoins(types.NewCetCoins(360000000))
+	accs[4] = auth.NewDelayedVestingAccount(&ba5, 1640995200)
+
+	ba6:= auth.NewBaseAccountWithAddress(testAddress6)
+	ba6.SetCoins(types.NewCetCoins(360000000))
+	accs[5] = auth.NewDelayedVestingAccount(&ba6, 1672531200)
+
+	ba7 := auth.NewBaseAccountWithAddress(testAddress7)
+	ba7.SetCoins(types.NewCetCoins(360000000))
+	accs[6] = auth.NewDelayedVestingAccount(&ba7, 1704067200)
+
+	return accs
+}
+
+func DefaultCETGenesisAccount() []GenesisAccount {
+	accs := defaultCETAccount()
+	genesisAccs := make([]GenesisAccount, len(accs))
+
+	for i, acc := range accs {
+		genesisAccs[i] = NewGenesisAccountI(acc)
+	}
+
+	return genesisAccs
 }

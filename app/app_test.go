@@ -9,7 +9,6 @@ import (
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -32,7 +31,7 @@ func initApp(accs ...auth.BaseAccount) *CetChainApp {
 	// genesis state
 	genState := NewDefaultGenesisState()
 	for _, acc := range accs {
-		genAcc := gaia_app.NewGenesisAccount(&acc)
+		genAcc := NewGenesisAccount(&acc)
 		genState.Accounts = append(genState.Accounts, genAcc)
 	}
 

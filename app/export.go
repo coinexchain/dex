@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -31,9 +30,9 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 	}
 
 	// iterate to get the accounts
-	accounts := []gaia_app.GenesisAccount{}
+	accounts := []GenesisAccount{}
 	appendAccount := func(acc auth.Account) (stop bool) {
-		account := gaia_app.NewGenesisAccountI(acc)
+		account := NewGenesisAccountI(acc)
 		accounts = append(accounts, account)
 		return false
 	}
