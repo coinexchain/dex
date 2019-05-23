@@ -19,7 +19,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -111,7 +110,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 	dexConfig.MinGasPrices = viper.GetString(server.FlagMinGasPrices)
 
 	var (
-		accs     []gaia_app.GenesisAccount
+		accs     []app.GenesisAccount
 		genFiles []string
 	)
 
@@ -194,7 +193,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 		accTokens := sdk.TokensFromTendermintPower(1000)
 		accStakingTokens := sdk.TokensFromTendermintPower(500)
-		accs = append(accs, gaia_app.GenesisAccount{
+		accs = append(accs, app.GenesisAccount{
 			Address: addr,
 			Coins: sdk.Coins{
 				sdk.NewCoin(fmt.Sprintf("%stoken", nodeDirName), accTokens),
@@ -258,7 +257,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 }
 
 func initGenFiles(
-	cdc *codec.Codec, chainID string, accs []gaia_app.GenesisAccount,
+	cdc *codec.Codec, chainID string, accs []app.GenesisAccount,
 	genFiles []string, numValidators int,
 ) error {
 

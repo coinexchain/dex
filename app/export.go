@@ -7,7 +7,6 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -190,9 +189,9 @@ func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
 	)
 }
 
-func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context) (accounts []gaia_app.GenesisAccount) {
+func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context) (accounts []GenesisAccount) {
 	appendFn := func(acc auth.Account) (stop bool) {
-		account := gaia_app.NewGenesisAccountI(acc)
+		account := NewGenesisAccountI(acc)
 		accounts = append(accounts, account)
 		return false
 	}
