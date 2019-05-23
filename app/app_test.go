@@ -59,7 +59,7 @@ func TestSend(t *testing.T) {
 	coins := dex.NewCetCoins(100)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
 	tx := testutil.NewStdTxBuilder("c1").
-		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(7, 0, key).Build()
+		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
@@ -79,14 +79,14 @@ func TestMemo(t *testing.T) {
 	// deliver tx
 	msgSetMemoRequired := bankx.NewMsgSetTransferMemoRequired(addr, true)
 	tx1 := testutil.NewStdTxBuilder("c1").
-		Msgs(msgSetMemoRequired).Fee(1000000, 100).AccNumSeqKey(7, 0, key).Build()
+		Msgs(msgSetMemoRequired).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 	result1 := app.Deliver(tx1)
 	require.Equal(t, errors.CodeOK, result1.Code)
 
 	coins := dex.NewCetCoins(100)
 	msgSend := bank.NewMsgSend(addr, addr, coins)
 	tx2 := testutil.NewStdTxBuilder("c1").
-		Msgs(msgSend).Fee(1000000, 100).AccNumSeqKey(7, 0, key).Build()
+		Msgs(msgSend).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result2 := app.Deliver(tx2)
 	require.Equal(t, bankx.CodeMemoMissing, result2.Code)

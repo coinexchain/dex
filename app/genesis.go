@@ -22,7 +22,6 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
@@ -62,7 +61,7 @@ type GenesisState struct {
 // NewDefaultGenesisState generates the default state for coindex.
 func NewDefaultGenesisState() GenesisState {
 	gs := GenesisState{
-		Accounts:     DefaultCETGenesisAccount(),
+		Accounts:     nil,
 		AccountsX:    nil,
 		AuthData:     auth.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
@@ -334,56 +333,4 @@ func NewGenesisAccountI(acc auth.Account) GenesisAccount {
 	}
 
 	return gacc
-}
-
-func defaultCETAccount() []auth.Account {
-
-	accs := make([]auth.Account, defaultGenesisAccountNum)
-
-	ba1 := auth.NewBaseAccountWithAddress(testAddress1)
-	ba1.SetCoins(types.NewCetCoins(2888000000))
-	accs[0] = &ba1
-
-	ba2 := auth.NewBaseAccountWithAddress(testAddress2)
-	ba2.SetCoins(types.NewCetCoins(1200000000))
-	accs[1] = &ba2
-
-	ba3 := auth.NewBaseAccountWithAddress(testAddress3)
-	ba3.SetCoins(types.NewCetCoins(360000000))
-	accs[2] = auth.NewDelayedVestingAccount(&ba3, 1577836800)
-
-	ba4 := auth.NewBaseAccountWithAddress(testAddress4)
-	ba4.SetCoins(types.NewCetCoins(360000000))
-	accs[3] = auth.NewDelayedVestingAccount(&ba4, 1609459200)
-
-	ba5 := auth.NewBaseAccountWithAddress(testAddress5)
-	ba5.SetCoins(types.NewCetCoins(360000000))
-	accs[4] = auth.NewDelayedVestingAccount(&ba5, 1640995200)
-
-	ba6 := auth.NewBaseAccountWithAddress(testAddress6)
-	ba6.SetCoins(types.NewCetCoins(360000000))
-	accs[5] = auth.NewDelayedVestingAccount(&ba6, 1672531200)
-
-	ba7 := auth.NewBaseAccountWithAddress(testAddress7)
-	ba7.SetCoins(types.NewCetCoins(360000000))
-	accs[6] = auth.NewDelayedVestingAccount(&ba7, 1704067200)
-
-	return accs
-}
-
-func DefaultCETGenesisAccount() []GenesisAccount {
-	accs := defaultCETAccount()
-	genesisAccs := make([]GenesisAccount, len(accs))
-
-	for i, acc := range accs {
-		bacc, ok := acc.(*auth.BaseAccount)
-		if ok {
-			genesisAccs[i] = NewGenesisAccount(bacc)
-			continue
-		}
-
-		genesisAccs[i] = NewGenesisAccountI(acc)
-	}
-
-	return genesisAccs
 }
