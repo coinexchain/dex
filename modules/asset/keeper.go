@@ -25,7 +25,7 @@ const (
 
 var (
 	// TokenStoreKeyPrefix prefix for asset-by-TokenSymbol store
-	TokenStoreKeyPrefix = []byte{0x00}
+	TokenStoreKeyPrefix = []byte{0x01}
 )
 
 // Keeper encodes/decodes tokens using the go-amino (binary)
@@ -111,11 +111,8 @@ func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) sdk.Error {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(tk.key)
 
-	tokens := tk.GetAllTokens(ctx)
-	for _, t := range tokens {
-		if symbol == t.GetSymbol() {
-			return ErrorDuplicateTokenSymbol(CodeSpaceAsset, fmt.Sprintf("token symbol already exists in store"))
-		}
+	if tk.IsTokenExists(ctx, symbol) {
+		return ErrorDuplicateTokenSymbol(CodeSpaceAsset, fmt.Sprintf("token symbol already exists in store"))
 	}
 
 	bz, err := tk.cdc.MarshalBinaryBare(token)
@@ -141,6 +138,22 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 	}
 
 	return nil
+}
+
+//IsTokenFrozen - check whether the coin's owner has frozen "denom", forbiding transmission and exchange.
+func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, symbol string) bool {
+	return tk.GetToken(ctx, symbol).GetIsFrozen()
+}
+
+// IsTokenExists - check whether there is a coin named "denom"
+func (tk TokenKeeper) IsTokenExists(ctx sdk.Context, symbol string) bool {
+	tokens := tk.GetAllTokens(ctx)
+	for _, t := range tokens {
+		if symbol == t.GetSymbol() {
+			return true
+		}
+	}
+	return false
 }
 
 // -----------------------------------------------------------------------------

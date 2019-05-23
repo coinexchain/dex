@@ -3,16 +3,16 @@ package asset
 import sdk "github.com/cosmos/cosmos-sdk/types"
 
 const (
-	CodeSpaceAsset = "asset"
+	CodeSpaceAsset = ModuleName
 
-	CodeInvalidTokenName     = 0
-	CodeInvalidTokenSymbol   = 1
-	CodeInvalidTokenSupply   = 2
-	CodeInvalidTokenOwner    = 3
-	CodeNoTokenPersist       = 4
-	CodeInvalidTotalMint     = 5
-	CodeInvalidTotalBurn     = 6
-	CodeDuplicateTokenSymbol = 7
+	CodeInvalidTokenName     = 201
+	CodeInvalidTokenSymbol   = 202
+	CodeInvalidTokenSupply   = 203
+	CodeInvalidTokenOwner    = 204
+	CodeNoTokenPersist       = 205
+	CodeInvalidTotalMint     = 206
+	CodeInvalidTotalBurn     = 207
+	CodeDuplicateTokenSymbol = 208
 )
 
 func ErrorInvalidTokenName(codespace sdk.CodespaceType, fmt string) sdk.Error {
