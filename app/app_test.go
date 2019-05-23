@@ -57,7 +57,7 @@ func TestSend(t *testing.T) {
 
 	// deliver tx
 	coins := dex.NewCetCoins(100)
-	msg := bankx.NewMsgSendWithUnlocktime(fromAddr, toAddr, coins, time.Now().Unix()+10000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
 	tx := testutil.NewStdTxBuilder("c1").
 		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(7, 0, key).Build()
 

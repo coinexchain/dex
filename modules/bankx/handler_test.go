@@ -85,7 +85,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := MsgSendWithUnlockTime{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1), UnlockTime: 0}
+	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1), UnlockTime: 0}
 	input.handle(msgSend)
 
 	//send 0 to toaddr results toAccount to be created
@@ -150,4 +150,8 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 
 	accX, _ = input.axk.GetAccountX(input.ctx, addr)
 	require.Equal(t, true, accX.TransferMemoRequired)
+}
+
+func TestHandleMsgSend(t *testing.T) {
+
 }

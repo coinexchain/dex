@@ -12,7 +12,7 @@ import (
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
-		case MsgSendWithUnlockTime:
+		case MsgSend:
 			return handleMsgSend(ctx, k, msg)
 		case MsgSetMemoRequired:
 			return handleMsgSetMemoRequired(ctx, k.axk, msg)
@@ -24,7 +24,7 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
-func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSendWithUnlockTime) sdk.Result {
+func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 
 	if !k.bk.GetSendEnabled(ctx) {
 		return bank.ErrSendDisabled(k.bk.Codespace()).Result()

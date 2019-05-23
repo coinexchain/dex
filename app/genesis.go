@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/types"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"sort"
 	"time"
 
@@ -19,7 +16,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
@@ -43,9 +44,9 @@ var (
 
 // State to Unmarshal
 type GenesisState struct {
-	Accounts []GenesisAccount  `json:"accounts"`
-	AuthData auth.GenesisState `json:"auth"`
-	//TODO: AuthXData    authx.GenesisState        `json:"authx"`
+	Accounts     []GenesisAccount `json:"accounts"`
+	AccountsX    []authx.AccountX          `json:"accountsx"` // additional account info bused by CoinEx chain
+	AuthData     auth.GenesisState         `json:"auth"`
 	BankData     bank.GenesisState         `json:"bank"`
 	BankXData    bankx.GenesisState        `json:"bankx"`
 	StakingData  staking.GenesisState      `json:"staking"`
@@ -61,6 +62,7 @@ type GenesisState struct {
 func NewDefaultGenesisState() GenesisState {
 	gs := GenesisState{
 		Accounts:     DefaultCETGenesisAccount(),
+		AccountsX:    nil,
 		AuthData:     auth.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
 		BankXData:    bankx.DefaultGenesisState(),
@@ -79,9 +81,10 @@ func NewDefaultGenesisState() GenesisState {
 	return gs
 }
 
-func NewGenesisState(accounts []GenesisAccount,
+func NewGenesisState(
+	accounts []GenesisAccount,
+	accountsX []authx.AccountX,
 	authData auth.GenesisState,
-	//TODO: authXData
 	bankData bank.GenesisState,
 	bankxData bankx.GenesisState,
 	stakingData staking.GenesisState,
@@ -93,6 +96,7 @@ func NewGenesisState(accounts []GenesisAccount,
 
 	return GenesisState{
 		Accounts:     accounts,
+		AccountsX:    accountsX,
 		AuthData:     authData,
 		BankData:     bankData,
 		BankXData:    bankxData,
