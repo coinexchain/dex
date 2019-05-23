@@ -41,7 +41,7 @@ func TestParamGetSet(t *testing.T) {
 
 	//expect DefaultActivatedFees=1
 	defaultParam := DefaultParam()
-	require.Equal(t, int64(1), defaultParam.ActivatedFee)
+	require.Equal(t, int64(100000000), defaultParam.ActivatedFee)
 
 	//expect SetParam don't panic
 	require.NotPanics(t, func() { bkxKepper.SetParam(ctx, defaultParam) }, "bankxKeeper SetParam panics")

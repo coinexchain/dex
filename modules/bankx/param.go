@@ -14,7 +14,7 @@ type Param struct {
 
 func DefaultParam() Param {
 	return Param{
-		ActivatedFee: 1,
+		ActivatedFee: 100000000,
 	}
 }
 
