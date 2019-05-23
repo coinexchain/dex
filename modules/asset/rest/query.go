@@ -46,8 +46,9 @@ func QueryTokenRequestHandlerFn(
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryToken)
 		res, err := cliCtx.QueryWithData(route, bz)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+		if err != nil || len(res) == 0 {
+			err := fmt.Errorf("token with symbol: %s does not exist", symbol)
+			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 			return
 		}
 

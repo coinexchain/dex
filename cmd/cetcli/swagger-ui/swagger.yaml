@@ -1820,6 +1820,30 @@ paths:
             type: string
         500:
           description: Internal Server Error
+  /asset/tokens/{symbol}:
+    get:
+      tags:
+        - ICS100
+      summary: queryToken
+      description: Get token with provided `symbol`
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: Token symbol
+          required: true
+          type: string
+          x-example: abc
+      responses:
+        200:
+          description: token with provided symbol
+          schema:
+            $ref: "#/definitions/Token"
+        404:
+          description: Token not found
+        500:
+          description: Internal Server Error
   /asset/tokens:
     get:
       tags:
