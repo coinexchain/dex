@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/market"
 	"io"
 	"os"
 	"sort"
@@ -79,6 +80,7 @@ type CetChainApp struct {
 	incentiveKeeper     incentive.Keeper
 	assetKeeper         asset.TokenKeeper
 	paramsKeeper        params.Keeper
+	marketKeeper        market.Keeper
 }
 
 // NewCetChainApp returns a reference to an initialized CetChainApp.
@@ -219,6 +221,7 @@ func (app *CetChainApp) initKeepers() {
 		app.accountKeeper,
 		app.feeCollectionKeeper,
 	)
+	app.marketKeeper = market.NewKeeper()
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {
@@ -236,7 +239,8 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(gov.RouterKey, gov.NewHandler(app.govKeeper)).
 		AddRoute(crisis.RouterKey, crisis.NewHandler(app.crisisKeeper)).
 		AddRoute(bankx.RouterKey, bankx.NewHandler(app.bankxKeeper)).
-		AddRoute(asset.RouterKey, asset.NewHandler(app.assetKeeper))
+		AddRoute(asset.RouterKey, asset.NewHandler(app.assetKeeper)).
+		AddRoute(market.RouterKey, market.NewHandler(app.marketKeeper))
 
 	app.QueryRouter().
 		AddRoute(auth.QuerierRoute, auth.NewQuerier(app.accountKeeper)).
@@ -262,6 +266,7 @@ func MakeCodec() *codec.Codec {
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 	asset.RegisterCodec(cdc)
+	market.RegisterCodec(cdc)
 	return cdc
 }
 

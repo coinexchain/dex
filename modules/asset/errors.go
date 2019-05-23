@@ -10,6 +10,8 @@ const (
 	CodeInvalidTokenSupply = 2
 	CodeInvalidTokenOwner  = 3
 	CodeNoTokenPersist     = 4
+	CodeInvalidTotalMint   = 5
+	CodeInvalidTotalBurn   = 6
 )
 
 func ErrorInvalidTokenName(codespace sdk.CodespaceType, fmt string) sdk.Error {
@@ -26,4 +28,10 @@ func ErrorInvalidTokenOwner(codespace sdk.CodespaceType, fmt string) sdk.Error {
 }
 func ErrorNoTokenPersist(codespace sdk.CodespaceType, fmt string) sdk.Error {
 	return sdk.NewError(codespace, CodeNoTokenPersist, fmt)
+}
+func ErrorInvalidTotalMint(codespace sdk.CodespaceType, fmt string) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidTotalMint, fmt)
+}
+func ErrorInvalidTotalBurn(codespace sdk.CodespaceType, fmt string) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidTotalBurn, fmt)
 }

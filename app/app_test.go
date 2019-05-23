@@ -2,6 +2,7 @@ package app
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -56,7 +57,7 @@ func TestSend(t *testing.T) {
 
 	// deliver tx
 	coins := dex.NewCetCoins(100)
-	msg := bank.NewMsgSend(fromAddr, toAddr, coins)
+	msg := bankx.NewMsgSendWithUnlocktime(fromAddr, toAddr, coins, time.Now().Unix()+10000)
 	tx := testutil.NewStdTxBuilder("c1").
 		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 

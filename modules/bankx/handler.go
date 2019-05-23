@@ -12,10 +12,11 @@ import (
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
-		case bank.MsgSend:
+		case MsgSendWithUnlockTime:
 			return handleMsgSend(ctx, k, msg)
 		case MsgSetMemoRequired:
 			return handleMsgSetMemoRequired(ctx, k.axk, msg)
+
 		default:
 			errMsg := "Unrecognized bank Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -23,7 +24,7 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
-func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
+func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSendWithUnlockTime) sdk.Result {
 
 	if !k.bk.GetSendEnabled(ctx) {
 		return bank.ErrSendDisabled(k.bk.Codespace()).Result()
@@ -48,17 +49,6 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 			return ErrorInsufficientCETForActivatingFee().Result()
 		}
 
-	}
-
-	//handle coins transfer
-	t, err := k.bk.SendCoins(ctx, msg.FromAddress, msg.ToAddress, amt)
-
-	if err != nil {
-		return err.Result()
-	}
-
-	// new accountx for toaddress if needed
-	if !ok {
 		// sub the activatedfees from fromaddress
 		fromAccount = k.ak.GetAccount(ctx, msg.FromAddress)
 		oldCoins := fromAccount.GetCoins()
@@ -73,7 +63,33 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg bank.MsgSend) sdk.Result {
 		newAccountX := authx.NewAccountXWithAddress(msg.ToAddress)
 		newAccountX.Activated = true
 		k.axk.SetAccountX(ctx, newAccountX)
+	}
 
+	aux, ok := k.axk.GetAccountX(ctx, msg.ToAddress)
+	if !ok {
+		return authx.ErrInvalidAccoutx("No AccoutX exist").Result()
+	}
+
+	time := msg.UnlockTime
+	if time != 0 {
+		for _, coin := range amt {
+			aux.LockedCoins = append(aux.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: time})
+		}
+		k.axk.SetAccountX(ctx, aux)
+		_, tag, err := k.bk.SubtractCoins(ctx, msg.FromAddress, amt)
+		if err != nil {
+			return err.Result()
+		}
+		return sdk.Result{
+			Tags: tag,
+		}
+	}
+
+	//handle coins transfer
+	t, err := k.bk.SendCoins(ctx, msg.FromAddress, msg.ToAddress, amt)
+
+	if err != nil {
+		return err.Result()
 	}
 
 	return sdk.Result{

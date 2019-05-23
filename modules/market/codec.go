@@ -1,4 +1,4 @@
-package bankx
+package market
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -12,6 +12,6 @@ func init() {
 
 // RegisterCodec registers concrete types on the codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgSetMemoRequired{}, "cet-chain/MsgSetMemoRequired", nil)
-	cdc.RegisterConcrete(MsgSendWithUnlockTime{}, "cet-chain/MsgSendWithUnlockTime", nil)
+	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "cet-chain/MsgCreateMarketInfo", nil)
+	cdc.RegisterConcrete(MsgCreateGTEOrder{}, "cet-chain/MsgCreateGTEOrder", nil)
 }
