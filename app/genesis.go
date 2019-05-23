@@ -16,12 +16,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/testutil"
+	"github.com/coinexchain/dex/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
@@ -44,7 +45,7 @@ var (
 
 // State to Unmarshal
 type GenesisState struct {
-	Accounts     []GenesisAccount `json:"accounts"`
+	Accounts     []GenesisAccount          `json:"accounts"`
 	AccountsX    []authx.AccountX          `json:"accountsx"` // additional account info bused by CoinEx chain
 	AuthData     auth.GenesisState         `json:"auth"`
 	BankData     bank.GenesisState         `json:"bank"`
