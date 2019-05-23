@@ -7,6 +7,9 @@ import (
 	"sort"
 	"time"
 
+	tmtypes "github.com/tendermint/tendermint/types"
+
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -16,14 +19,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/coinexchain/dex/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 const (
