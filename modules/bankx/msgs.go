@@ -41,28 +41,28 @@ func (msg MsgSetMemoRequired) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Address}
 }
 
-var _ sdk.Msg = MsgSendWithUnlockTime{}
+var _ sdk.Msg = MsgSend{}
 
-type MsgSendWithUnlockTime struct {
+type MsgSend struct {
 	FromAddress sdk.AccAddress `json:"from_address"`
 	ToAddress   sdk.AccAddress `json:"to_address"`
 	Amount      sdk.Coins      `json:"amount"`
 	UnlockTime  int64          `json:"unlock_time"`
 }
 
-func NewMsgSendWithUnlocktime(fromAddr, toAddr sdk.AccAddress, amount sdk.Coins, time int64) MsgSendWithUnlockTime {
-	return MsgSendWithUnlockTime{FromAddress: fromAddr, ToAddress: toAddr, Amount: amount, UnlockTime: time}
+func NewMsgSend(fromAddr, toAddr sdk.AccAddress, amount sdk.Coins, time int64) MsgSend {
+	return MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: amount, UnlockTime: time}
 }
 
-func (msg MsgSendWithUnlockTime) Route() string {
+func (msg MsgSend) Route() string {
 	return RouterKey
 }
 
-func (msg MsgSendWithUnlockTime) Type() string {
+func (msg MsgSend) Type() string {
 	return "unlock_time_send"
 }
 
-func (msg MsgSendWithUnlockTime) ValidateBasic() sdk.Error {
+func (msg MsgSend) ValidateBasic() sdk.Error {
 	if msg.FromAddress.Empty() {
 		return sdk.ErrInvalidAddress("missing sender address")
 	}
@@ -82,10 +82,10 @@ func (msg MsgSendWithUnlockTime) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSendWithUnlockTime) GetSignBytes() []byte {
+func (msg MsgSend) GetSignBytes() []byte {
 	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
-func (msg MsgSendWithUnlockTime) GetSigners() []sdk.AccAddress {
+func (msg MsgSend) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.FromAddress}
 }
