@@ -87,13 +87,14 @@ $ cetcli tx asset issue-token --name="my first token" \
 			}
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
-			res, _ := cliCtx.QueryWithData(route, nil)
-			var tokens []asset.Token
-			cdc.MustUnmarshalJSON(res, &tokens)
+			if res, _ := cliCtx.QueryWithData(route, nil); res != nil {
+				var tokens []asset.Token
+				cdc.MustUnmarshalJSON(res, &tokens)
 
-			for _, t := range tokens {
-				if symbol == t.GetSymbol() {
-					return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")
+				for _, t := range tokens {
+					if symbol == t.GetSymbol() {
+						return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")
+					}
 				}
 			}
 
