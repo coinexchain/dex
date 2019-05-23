@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/coinexchain/dex/testutil"
 	"github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"sort"
@@ -31,13 +32,13 @@ var (
 	defaultBondDenom = "cet"
 
 	//TODO:update these address to be under coinex's control
-	testAddress1 = []byte("test-address1")
-	testAddress2 = []byte("test-address2")
-	testAddress3 = []byte("test-address3")
-	testAddress4 = []byte("test-address4")
-	testAddress5 = []byte("test-address5")
-	testAddress6 = []byte("test-address6")
-	testAddress7 = []byte("test-address7")
+	_, _, testAddress1 = testutil.KeyPubAddr()
+	_, _, testAddress2 = testutil.KeyPubAddr()
+	_, _, testAddress3 = testutil.KeyPubAddr()
+	_, _, testAddress4 = testutil.KeyPubAddr()
+	_, _, testAddress5 = testutil.KeyPubAddr()
+	_, _, testAddress6 = testutil.KeyPubAddr()
+	_, _, testAddress7 = testutil.KeyPubAddr()
 )
 
 // State to Unmarshal
@@ -334,14 +335,13 @@ func defaultCETAccount() []auth.Account {
 
 	accs := make([]auth.Account, defaultGenesisAccountNum)
 
-	ba1:=auth.NewBaseAccountWithAddress(testAddress1)
+	ba1 := auth.NewBaseAccountWithAddress(testAddress1)
 	ba1.SetCoins(types.NewCetCoins(2888000000))
-	accs[0]=&ba1
+	accs[0] = &ba1
 
-	ba2:=auth.NewBaseAccountWithAddress(testAddress2)
+	ba2 := auth.NewBaseAccountWithAddress(testAddress2)
 	ba2.SetCoins(types.NewCetCoins(1200000000))
-	accs[1]=&ba2
-
+	accs[1] = &ba2
 
 	ba3 := auth.NewBaseAccountWithAddress(testAddress3)
 	ba3.SetCoins(types.NewCetCoins(360000000))
@@ -355,7 +355,7 @@ func defaultCETAccount() []auth.Account {
 	ba5.SetCoins(types.NewCetCoins(360000000))
 	accs[4] = auth.NewDelayedVestingAccount(&ba5, 1640995200)
 
-	ba6:= auth.NewBaseAccountWithAddress(testAddress6)
+	ba6 := auth.NewBaseAccountWithAddress(testAddress6)
 	ba6.SetCoins(types.NewCetCoins(360000000))
 	accs[5] = auth.NewDelayedVestingAccount(&ba6, 1672531200)
 
@@ -371,6 +371,12 @@ func DefaultCETGenesisAccount() []GenesisAccount {
 	genesisAccs := make([]GenesisAccount, len(accs))
 
 	for i, acc := range accs {
+		bacc, ok := acc.(*auth.BaseAccount)
+		if ok {
+			genesisAccs[i] = NewGenesisAccount(bacc)
+			continue
+		}
+
 		genesisAccs[i] = NewGenesisAccountI(acc)
 	}
 
