@@ -5,10 +5,10 @@ import (
 )
 
 type AccountX struct {
-	Address              sdk.AccAddress `json:"address"`
-	Activated            bool           `json:"activated"`
-	TransferMemoRequired bool           `json:"transfer_memo_required"`
-	LockedCoins          []LockedCoin   `json:"locked_coins"`
+	Address      sdk.AccAddress `json:"address"`
+	Activated    bool           `json:"activated"`
+	MemoRequired bool           `json:"memo_required"` // if memo is required for receiving coins
+	LockedCoins  []LockedCoin   `json:"locked_coins"`
 }
 
 type LockedCoin struct {

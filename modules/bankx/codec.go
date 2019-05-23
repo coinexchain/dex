@@ -13,4 +13,5 @@ func init() {
 // RegisterCodec registers concrete types on the codec
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgSetMemoRequired{}, "cet-chain/MsgSetMemoRequired", nil)
+	cdc.RegisterConcrete(MsgSend{}, "cet-chain/MsgSend", nil)
 }

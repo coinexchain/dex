@@ -55,10 +55,10 @@ func TestAccountXGetSet(t *testing.T) {
 	acc, _ = input.axk.GetAccountX(input.ctx, addr)
 	require.Equal(t, true, acc.Activated)
 
-	acc.TransferMemoRequired = false
+	acc.MemoRequired = false
 	input.axk.SetAccountX(input.ctx, acc)
 	acc, _ = input.axk.GetAccountX(input.ctx, addr)
-	require.Equal(t, false, acc.TransferMemoRequired)
+	require.Equal(t, false, acc.MemoRequired)
 
 	lockedcoin := acc.LockedCoins
 	require.Nil(t, lockedcoin)

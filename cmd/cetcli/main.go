@@ -33,7 +33,6 @@ import (
 	staking "github.com/cosmos/cosmos-sdk/x/staking/client/rest"
 
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
-	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 	crisisclient "github.com/cosmos/cosmos-sdk/x/crisis/client"
 	distcmd "github.com/cosmos/cosmos-sdk/x/distribution"
 	distClient "github.com/cosmos/cosmos-sdk/x/distribution/client"
@@ -42,9 +41,10 @@ import (
 	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 
 	"github.com/coinexchain/dex/app"
+	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
 	as "github.com/coinexchain/dex/modules/asset"
 	assclient "github.com/coinexchain/dex/modules/asset/client"
-	assrest "github.com/coinexchain/dex/modules/asset/rest"
+	assrest "github.com/coinexchain/dex/modules/asset/client/rest"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
 	bankxrest "github.com/coinexchain/dex/modules/bankx/client/rest"
 )
@@ -179,7 +179,7 @@ func txCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 	}
 
 	txCmd.AddCommand(
-		bankcmd.SendTxCmd(cdc),
+		bankxcmd.SendTxCmd(cdc),
 		bankxcmd.RequireMemoCmd(cdc),
 		client.LineBreak,
 		authcmd.GetSignCommand(cdc),

@@ -60,30 +60,31 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: 
 func genGenesisJSON(ctx *server.Context, cdc *codec.Codec, moniker string) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
+	config.Moniker = moniker
 
 	chainID := viper.GetString(client.FlagChainID)
 	if chainID == "" {
 		chainID = fmt.Sprintf("test-chain-%v", common.RandStr(6))
 	}
 
+	// generate node_key.json & priv_validator_key.json
 	nodeID, _, err := gaia_init.InitializeNodeValidatorFiles(config)
 	if err != nil {
 		return err
 	}
 
-	config.Moniker = moniker
-
 	var appState json.RawMessage
 	genFile := config.GenesisFile()
 
+	// generate genesis.json
 	if appState, err = initializeEmptyGenesis(cdc, genFile, viper.GetBool(flagOverwrite)); err != nil {
 		return err
 	}
-
 	if err = gaia_init.ExportGenesisFile(genFile, chainID, nil, appState); err != nil {
 		return err
 	}
 
+	// generate config.toml
 	cfg.WriteConfigFile(filepath.Join(config.RootDir, "config", "config.toml"), config)
 
 	toPrint := newPrintInfo(config.Moniker, chainID, nodeID, "", appState)

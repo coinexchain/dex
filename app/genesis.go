@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"sort"
 	"time"
 
+	tmtypes "github.com/tendermint/tendermint/types"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -16,11 +19,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
-
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 var (
@@ -29,9 +30,9 @@ var (
 
 // State to Unmarshal
 type GenesisState struct {
-	Accounts []gaia_app.GenesisAccount `json:"accounts"`
-	AuthData auth.GenesisState         `json:"auth"`
-	//TODO: AuthXData    authx.GenesisState        `json:"authx"`
+	Accounts     []GenesisAccount          `json:"accounts"`
+	AccountsX    []authx.AccountX          `json:"accountsx"` // additional account info bused by CoinEx chain
+	AuthData     auth.GenesisState         `json:"auth"`
 	BankData     bank.GenesisState         `json:"bank"`
 	BankXData    bankx.GenesisState        `json:"bankx"`
 	StakingData  staking.GenesisState      `json:"staking"`
@@ -47,6 +48,7 @@ type GenesisState struct {
 func NewDefaultGenesisState() GenesisState {
 	gs := GenesisState{
 		Accounts:     nil,
+		AccountsX:    nil,
 		AuthData:     auth.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
 		BankXData:    bankx.DefaultGenesisState(),
@@ -65,9 +67,10 @@ func NewDefaultGenesisState() GenesisState {
 	return gs
 }
 
-func NewGenesisState(accounts []gaia_app.GenesisAccount,
+func NewGenesisState(
+	accounts []GenesisAccount,
+	accountsX []authx.AccountX,
 	authData auth.GenesisState,
-	//TODO: authXData
 	bankData bank.GenesisState,
 	bankxData bankx.GenesisState,
 	stakingData staking.GenesisState,
@@ -79,6 +82,7 @@ func NewGenesisState(accounts []gaia_app.GenesisAccount,
 
 	return GenesisState{
 		Accounts:     accounts,
+		AccountsX:    accountsX,
 		AuthData:     authData,
 		BankData:     bankData,
 		BankXData:    bankxData,
@@ -111,6 +115,10 @@ func ValidateGenesisState(genesisState GenesisState) error {
 		return err
 	}
 
+	if err := asset.ValidateGenesis(genesisState.AssetData); err != nil {
+		return err
+	}
+
 	// skip stakingData validation as genesis is created from txs
 	if len(genesisState.GenTxs) > 0 {
 		return nil
@@ -137,9 +145,6 @@ func ValidateGenesisState(genesisState GenesisState) error {
 	if err := crisis.ValidateGenesis(genesisState.CrisisData); err != nil {
 		return err
 	}
-	if err := asset.ValidateGenesis(genesisState.AssetData); err != nil {
-		return err
-	}
 
 	return slashing.ValidateGenesis(genesisState.SlashingData)
 }
@@ -147,7 +152,7 @@ func ValidateGenesisState(genesisState GenesisState) error {
 // validateGenesisStateAccounts performs validation of genesis accounts. It
 // ensures that there are no duplicate accounts in the genesis state and any
 // provided vesting accounts are valid.
-func validateGenesisStateAccounts(accs []gaia_app.GenesisAccount) error {
+func validateGenesisStateAccounts(accs []GenesisAccount) error {
 	addrMap := make(map[string]bool, len(accs))
 	for _, acc := range accs {
 		addrStr := acc.Address.String()
@@ -236,4 +241,82 @@ func CetAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []jso
 	genesisState.GenTxs = appGenTxs
 
 	return genesisState, nil
+}
+
+// GenesisAccount defines an account initialized at genesis.
+type GenesisAccount struct {
+	Address       sdk.AccAddress `json:"address"`
+	Coins         sdk.Coins      `json:"coins"`
+	Sequence      uint64         `json:"sequence_number"`
+	AccountNumber uint64         `json:"account_number"`
+
+	// vesting account fields
+	OriginalVesting  sdk.Coins `json:"original_vesting"`  // total vesting coins upon initialization
+	DelegatedFree    sdk.Coins `json:"delegated_free"`    // delegated vested coins at time of delegation
+	DelegatedVesting sdk.Coins `json:"delegated_vesting"` // delegated vesting coins at time of delegation
+	StartTime        int64     `json:"start_time"`        // vesting start time (UNIX Epoch time)
+	EndTime          int64     `json:"end_time"`          // vesting end time (UNIX Epoch time)
+}
+
+// convert GenesisAccount to auth.BaseAccount
+func (ga *GenesisAccount) ToAccount() auth.Account {
+	bacc := &auth.BaseAccount{
+		Address:       ga.Address,
+		Coins:         ga.Coins.Sort(),
+		AccountNumber: ga.AccountNumber,
+		Sequence:      ga.Sequence,
+	}
+
+	if !ga.OriginalVesting.IsZero() {
+		baseVestingAcc := &auth.BaseVestingAccount{
+			BaseAccount:      bacc,
+			OriginalVesting:  ga.OriginalVesting,
+			DelegatedFree:    ga.DelegatedFree,
+			DelegatedVesting: ga.DelegatedVesting,
+			EndTime:          ga.EndTime,
+		}
+
+		if ga.StartTime != 0 && ga.EndTime != 0 {
+			return &auth.ContinuousVestingAccount{
+				BaseVestingAccount: baseVestingAcc,
+				StartTime:          ga.StartTime,
+			}
+		} else if ga.EndTime != 0 {
+			return &auth.DelayedVestingAccount{
+				BaseVestingAccount: baseVestingAcc,
+			}
+		} else {
+			panic(fmt.Sprintf("invalid genesis vesting account: %+v", ga))
+		}
+	}
+
+	return bacc
+}
+func NewGenesisAccount(acc *auth.BaseAccount) GenesisAccount {
+	return GenesisAccount{
+		Address:       acc.Address,
+		Coins:         acc.Coins,
+		AccountNumber: acc.AccountNumber,
+		Sequence:      acc.Sequence,
+	}
+}
+
+func NewGenesisAccountI(acc auth.Account) GenesisAccount {
+	gacc := GenesisAccount{
+		Address:       acc.GetAddress(),
+		Coins:         acc.GetCoins(),
+		AccountNumber: acc.GetAccountNumber(),
+		Sequence:      acc.GetSequence(),
+	}
+
+	vacc, ok := acc.(auth.VestingAccount)
+	if ok {
+		gacc.OriginalVesting = vacc.GetOriginalVesting()
+		gacc.DelegatedFree = vacc.GetDelegatedFree()
+		gacc.DelegatedVesting = vacc.GetDelegatedVesting()
+		gacc.StartTime = vacc.GetStartTime()
+		gacc.EndTime = vacc.GetEndTime()
+	}
+
+	return gacc
 }

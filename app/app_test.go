@@ -2,6 +2,7 @@ package app
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -9,7 +10,6 @@ import (
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -32,7 +32,7 @@ func initApp(accs ...auth.BaseAccount) *CetChainApp {
 	// genesis state
 	genState := NewDefaultGenesisState()
 	for _, acc := range accs {
-		genAcc := gaia_app.NewGenesisAccount(&acc)
+		genAcc := NewGenesisAccount(&acc)
 		genState.Accounts = append(genState.Accounts, genAcc)
 	}
 
@@ -46,7 +46,7 @@ func initApp(accs ...auth.BaseAccount) *CetChainApp {
 func TestSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
-	acc0 := auth.BaseAccount{Address: fromAddr, Coins: dex.NewCetCoins(1000)}
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: dex.NewCetCoins(10000000000)}
 
 	// app
 	app := initApp(acc0)
@@ -56,8 +56,8 @@ func TestSend(t *testing.T) {
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
 	// deliver tx
-	coins := dex.NewCetCoins(100)
-	msg := bank.NewMsgSend(fromAddr, toAddr, coins)
+	coins := dex.NewCetCoins(1000000000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
 	tx := testutil.NewStdTxBuilder("c1").
 		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 

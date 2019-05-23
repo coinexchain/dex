@@ -14,7 +14,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 
 	"github.com/coinexchain/dex/app"
@@ -142,7 +141,7 @@ func addGenesisAccount(appState app.GenesisState, accInfo *accountInfo) (app.Gen
 	return appState, nil
 }
 
-func newGenesisAccount(accInfo *accountInfo) (genAcc gaia_app.GenesisAccount, err error) {
+func newGenesisAccount(accInfo *accountInfo) (genAcc app.GenesisAccount, err error) {
 	acc := auth.NewBaseAccountWithAddress(accInfo.addr)
 	acc.Coins = accInfo.coins
 
@@ -173,8 +172,8 @@ func newGenesisAccount(accInfo *accountInfo) (genAcc gaia_app.GenesisAccount, er
 			}
 		}
 
-		return gaia_app.NewGenesisAccountI(vacc), nil
+		return app.NewGenesisAccountI(vacc), nil
 	}
 
-	return gaia_app.NewGenesisAccount(&acc), nil
+	return app.NewGenesisAccount(&acc), nil
 }

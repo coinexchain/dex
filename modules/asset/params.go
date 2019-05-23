@@ -2,6 +2,7 @@ package asset
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -80,6 +81,16 @@ func (p Params) Equal(p2 Params) bool {
 	bz1 := msgCdc.MustMarshalBinaryLengthPrefixed(&p)
 	bz2 := msgCdc.MustMarshalBinaryLengthPrefixed(&p2)
 	return bytes.Equal(bz1, bz2)
+}
+
+func (p *Params) ValidateGenesis() error {
+	for _, pair := range p.ParamSetPairs() {
+		fee := pair.Value.(*sdk.Coins)
+		if fee.Empty() || fee.IsAnyNegative() {
+			return fmt.Errorf("%s must be a valid sdk.Coins, is %s", pair.Key, fee.String())
+		}
+	}
+	return nil
 }
 
 // DefaultParams returns a default set of parameters.

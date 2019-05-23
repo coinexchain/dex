@@ -79,13 +79,13 @@ func TestHandlerMsgSend(t *testing.T) {
 	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
 	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
 
-	oneCoins := dex.NewCetCoins(1)
+	oneCoins := dex.NewCetCoins(100000000)
 	fromAccount.SetCoins(oneCoins)
 
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := bank.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1)}
+	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
 	input.handle(msgSend)
 
 	//send 0 to toaddr results toAccount to be created
@@ -93,21 +93,41 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
 	_, found := input.axk.GetAccountX(input.ctx, toAddr)
-	require.NotNil(t, true, found)
-	require.Equal(t, sdk.NewInt(int64(1)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, true, found)
+	require.Equal(t, sdk.NewInt(int64(100000000)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 
-	fromAccount.SetCoins(dex.NewCetCoins(10))
+	fromAccount.SetCoins(dex.NewCetCoins(1000000000))
 	input.ak.SetAccount(input.ctx, fromAccount)
 
 	input.handle(msgSend)
-	require.Equal(t, sdk.NewInt(int64(9)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(int64(1)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(int64(1)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(900000000)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(100000000)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(100000000)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 
 	input.handle(msgSend)
-	require.Equal(t, sdk.NewInt(int64(8)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(int64(2)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(int64(1)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(800000000)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(200000000)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(100000000)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+
+	newMsg := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 1}
+	input.handle(newMsg)
+	aux, _ := input.axk.GetAccountX(input.ctx, toAddr)
+	require.Equal(t, sdk.NewInt(int64(100000000)), aux.LockedCoins[0].Coin.Amount)
+	require.Equal(t, sdk.NewInt(int64(700000000)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(200000000)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(100000000)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, int64(1), aux.LockedCoins[0].UnlockTime)
+
+	newMsg2 := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	input.handle(newMsg2)
+	aux, _ = input.axk.GetAccountX(input.ctx, toAddr)
+	require.Equal(t, sdk.NewInt(int64(100000000)), aux.LockedCoins[0].Coin.Amount)
+	require.Equal(t, sdk.NewInt(int64(600000000)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(200000000)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(100000000)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, int64(1), aux.LockedCoins[0].UnlockTime)
+	require.Equal(t, sdk.NewInt(int64(100000000)), aux.LockedCoins[1].Coin.Amount)
+	require.Equal(t, int64(2), aux.LockedCoins[1].UnlockTime)
 
 }
 
@@ -142,12 +162,12 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 	input.axk.SetAccountX(input.ctx, accX)
 
 	accX, _ = input.axk.GetAccountX(input.ctx, addr)
-	require.Equal(t, false, accX.TransferMemoRequired)
+	require.Equal(t, false, accX.MemoRequired)
 
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodeOK, result.Code)
 
 	accX, _ = input.axk.GetAccountX(input.ctx, addr)
-	require.Equal(t, true, accX.TransferMemoRequired)
+	require.Equal(t, true, accX.MemoRequired)
 }
