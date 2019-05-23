@@ -15,7 +15,7 @@ import (
 
 // registerTXRoutes -
 func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
-	r.HandleFunc("/asset/issue", issueRequestHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens", issueRequestHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
 // SendReq defines the properties of a send request's body.
