@@ -19,6 +19,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 )
 
@@ -33,10 +34,7 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 		app.prepForZeroHeightGenesis(ctx, jailWhiteList)
 	}
 
-	// iterate to get the accounts
-	accounts := app.getAllAccountsForGenesis(ctx)
-
-	genState := app.createGenesisState(accounts, ctx)
+	genState := app.exportGenesisState(ctx)
 	appState, err = codec.MarshalJSONIndent(app.cdc, genState)
 	if err != nil {
 		return nil, nil, err
@@ -174,19 +172,12 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 	)
 }
 
-func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context) (accounts []gaia_app.GenesisAccount) {
-	appendAccount := func(acc auth.Account) (stop bool) {
-		account := gaia_app.NewGenesisAccountI(acc)
-		accounts = append(accounts, account)
-		return false
-	}
-	app.accountKeeper.IterateAccounts(ctx, appendAccount)
-	return
-}
+func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
+	// iterate to get the accounts
+	accounts := app.getAllAccountsForGenesis(ctx)
+	accountsX := app.getAllAccountsXForGenesis(ctx)
 
-func (app *CetChainApp) createGenesisState(accounts []gaia_app.GenesisAccount, ctx sdk.Context) GenesisState {
-	return NewGenesisState(
-		accounts,
+	return NewGenesisState(accounts, accountsX,
 		auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
 		bank.ExportGenesis(ctx, app.bankKeeper),
 		bankx.ExportGenesis(ctx, app.bankxKeeper),
@@ -197,4 +188,23 @@ func (app *CetChainApp) createGenesisState(accounts []gaia_app.GenesisAccount, c
 		slashing.ExportGenesis(ctx, app.slashingKeeper),
 		asset.ExportGenesis(ctx, app.assetKeeper),
 	)
+}
+
+func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context) (accounts []gaia_app.GenesisAccount) {
+	appendFn := func(acc auth.Account) (stop bool) {
+		account := gaia_app.NewGenesisAccountI(acc)
+		accounts = append(accounts, account)
+		return false
+	}
+	app.accountKeeper.IterateAccounts(ctx, appendFn)
+	return
+}
+
+func (app *CetChainApp) getAllAccountsXForGenesis(ctx sdk.Context) (accountsX []authx.AccountX) {
+	appendFn := func(accountX authx.AccountX) (stop bool) {
+		accountsX = append(accountsX, accountX)
+		return false
+	}
+	app.accountXKeeper.IterateAccounts(ctx, appendFn)
+	return
 }
