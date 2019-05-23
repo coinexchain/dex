@@ -55,7 +55,7 @@ func QueryTokenRequestHandlerFn(
 			return
 		}
 
-		var token asset.BaseToken
+		var token asset.Token
 		cdc.MustUnmarshalJSON(res, &token)
 
 		rest.PostProcessResponse(w, cdc, token, cliCtx.Indent)
@@ -79,7 +79,7 @@ func QueryTokensRequestHandlerFn(
 			return
 		}
 
-		var tokens []asset.BaseToken
+		var tokens []asset.Token
 		cdc.MustUnmarshalJSON(res, &tokens)
 
 		rest.PostProcessResponse(w, cdc, tokens, cliCtx.Indent)
