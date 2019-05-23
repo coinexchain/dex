@@ -8,9 +8,14 @@ import (
 )
 
 const (
-	MinimumTokenPricePrecision    = 0
-	CollectCreateMarketFeeAddress = ""
+	MinimumTokenPricePrecision              = 0
+	CollectCreateMarketFeeAddress           = ""
+	Buy                                     = 1
+	Sell                                    = 2
+	LimitOrder                    OrderType = 2
 )
+
+type OrderType = byte
 
 var CreateMarketSpendCet sdk.Coin
 
@@ -63,7 +68,7 @@ func handlerMsgCreateMarketinfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper
 func checkMsgCreateMarketInfo(msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
 	var err error
 	if keeper.axk.Exists(msg.Money) != nil || keeper.axk.Exists(msg.Stock) != nil {
-		return ErrTokenNoExsit()
+		return ErrTokenNoExist()
 	}
 
 	if keeper.axk.IsTokenIssuer(msg.Stock, []byte(msg.Creator)) != nil && keeper.axk.IsTokenIssuer(msg.Money, []byte(msg.Creator)) != nil {
@@ -84,13 +89,13 @@ func checkMsgCreateMarketInfo(msg MsgCreateMarketInfo, keeper Keeper) sdk.Result
 
 func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Keeper) sdk.Result {
 
-	if ret := checkMsgCreateGTEOrder(msg, keeper); !ret.IsOK() {
-		return ret
-	}
-
 	store := ctx.KVStore(keeper.markeyKey)
 	if store == nil {
 		return ErrNoStoreEngine()
+	}
+
+	if ret := checkMsgCreateGTEOrder(store, msg, keeper); !ret.IsOK() {
+		return ret
 	}
 
 	addr, err := bech32.Encode("", msg.Sender)
@@ -116,7 +121,26 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 	return sdk.Result{}
 }
 
-func checkMsgCreateGTEOrder(msg MsgCreateGTEOrder, keeper Keeper) sdk.Result {
+func checkMsgCreateGTEOrder(store sdk.KVStore, msg MsgCreateGTEOrder, keeper Keeper) sdk.Result {
+
+	if msg.Side != Buy && msg.Side != Sell {
+		return ErrInvalidTradeSide()
+	}
+
+	if msg.OrderType != LimitOrder {
+		return ErrInvalidOrderType()
+	}
+
+	if value := store.Get(marketStoreKey(marketIdetifierPrefix, msg.Symbol)); value == nil {
+		return ErrNoExistKeyInStore()
+	}
+	//TODO. Add additional check condition
+
+	//TODO. Need recompute trader coin number
+	coin := sdk.Coins{}
+	if !keeper.bnk.HaveSufficientCoins(msg.Sender, coin) {
+		return ErrNoHaveSufficientCoins()
+	}
 
 	return sdk.Result{}
 }

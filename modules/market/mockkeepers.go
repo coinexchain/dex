@@ -23,6 +23,10 @@ func (mb MockBankxKeeper) IsFrozenByCoinOwner(acc sdk.AccAddress, denom string) 
 	return nil
 }
 
+func (mb MockBankxKeeper) HaveSufficientCoins(addr sdk.AccAddress, amt sdk.Coins) bool {
+	return true
+}
+
 //-----------------------------------------------------------
 
 type MockAssertKeeper struct {

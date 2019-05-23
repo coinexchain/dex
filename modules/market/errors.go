@@ -11,9 +11,13 @@ const (
 	CodeSendTokenFailed       = 123
 	CodeNoStoreEngine         = 124
 	CodeInvalidAddress        = 125
+	CodeNotExistKeyInStore    = 126
+	CodeNotHaveSufficientCoin = 127
+	CodeInvalidTradeSide      = 128
+	CodeInvalidOrderType      = 129
 )
 
-func ErrTokenNoExsit() sdk.Result {
+func ErrTokenNoExist() sdk.Result {
 
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidToken, "Token not exsit").Result()
 }
@@ -41,4 +45,24 @@ func ErrNoStoreEngine() sdk.Result {
 func ErrInvalidAddress() sdk.Result {
 
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidAddress, "Invalid address").Result()
+}
+
+func ErrNoExistKeyInStore() sdk.Result {
+
+	return sdk.NewError(CodeSpaceMarket, CodeNotExistKeyInStore, "Not exist key in store").Result()
+}
+
+func ErrNoHaveSufficientCoins() sdk.Result {
+
+	return sdk.NewError(CodeSpaceMarket, CodeNotHaveSufficientCoin, "Not sufficient coin").Result()
+}
+
+func ErrInvalidTradeSide() sdk.Result {
+
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidTradeSide, "Invalid trade side").Result()
+}
+
+func ErrInvalidOrderType() sdk.Result {
+
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderType, "Invalid order type").Result()
 }
