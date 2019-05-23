@@ -5,6 +5,6 @@ if [ ! -f "./go.mod" ]; then
     exit 1
 fi
 
-statik -src=./cmd/cetcli/swagger-ui -dest=./cmd/cetcli -f
+statik -src=./cmd/cetcli/swagger-ui -dest=./cmd/cetcli -f -m
 
 (go build github.com/coinexchain/dex/cmd/cetd && go build github.com/coinexchain/dex/cmd/cetcli) && echo "---------- build OK" || echo "---------- build Failed"

@@ -24,7 +24,7 @@ func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Co
 	).Methods("GET")
 
 	r.HandleFunc(
-		"/asset/tokens/",
+		"/asset/tokens",
 		QueryTokensRequestHandlerFn(storeName, cdc, cliCtx),
 	).Methods("GET")
 
