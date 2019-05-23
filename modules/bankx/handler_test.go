@@ -142,14 +142,14 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 	input.axk.SetAccountX(input.ctx, accX)
 
 	accX, _ = input.axk.GetAccountX(input.ctx, addr)
-	require.Equal(t, false, accX.TransferMemoRequired)
+	require.Equal(t, false, accX.MemoRequired)
 
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodeOK, result.Code)
 
 	accX, _ = input.axk.GetAccountX(input.ctx, addr)
-	require.Equal(t, true, accX.TransferMemoRequired)
+	require.Equal(t, true, accX.MemoRequired)
 }
 
 func TestHandleMsgSend(t *testing.T) {

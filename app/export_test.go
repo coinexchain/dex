@@ -22,7 +22,7 @@ func TestExportGenesisState(t *testing.T) {
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	accx := authx.AccountX{
-		Address: addr, Activated: true, TransferMemoRequired: true}
+		Address: addr, Activated: true, MemoRequired: true}
 	app.accountXKeeper.SetAccountX(ctx, accx)
 
 	state := app.exportGenesisState(ctx)
