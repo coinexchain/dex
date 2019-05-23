@@ -18,7 +18,7 @@ func (ah anteHelper) CheckMemo(msg sdk.Msg, memo string, ctx sdk.Context) sdk.Er
 	memoLen := len(memo)
 	switch msg := msg.(type) {
 	case bank.MsgSend:
-		if ax, ok := ah.accountXKeeper.GetAccountX(ctx, msg.ToAddress); ok && ax.TransferMemoRequired {
+		if ax, ok := ah.accountXKeeper.GetAccountX(ctx, msg.ToAddress); ok && ax.MemoRequired {
 			if memoLen == 0 {
 				return bankx.ErrMemoMissing()
 			}

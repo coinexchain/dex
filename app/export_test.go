@@ -22,11 +22,11 @@ func TestExportGenesisState(t *testing.T) {
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	accx := authx.AccountX{
-		Address: addr, Activated: true, TransferMemoRequired: true}
+		Address: addr, Activated: true, MemoRequired: true}
 	app.accountXKeeper.SetAccountX(ctx, accx)
 
 	state := app.exportGenesisState(ctx)
 	require.Equal(t, 8, len(state.Accounts))
 	require.Equal(t, 8, len(state.AccountsX))
-	//require.Equal(t, true, state.AccountsX[0].TransferMemoRequired)
+	//require.Equal(t, true, state.AccountsX[0].MemoRequired)
 }

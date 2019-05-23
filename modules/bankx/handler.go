@@ -104,7 +104,7 @@ func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg Msg
 		return ErrUnactivatedAddress(msg).Result()
 	}
 
-	accountX.TransferMemoRequired = msg.Required
+	accountX.MemoRequired = msg.Required
 	axk.SetAccountX(ctx, accountX)
 
 	return sdk.Result{}
