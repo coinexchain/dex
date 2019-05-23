@@ -17,6 +17,8 @@ tags:
     description: Slashing module APIs
   - name: ICS24
     description: Fee distribution module APIs
+  - name: ICS100
+    description: Asset module APIs
   - name: version
     description: Query app version
 schemes:
@@ -1818,6 +1820,51 @@ paths:
             type: string
         500:
           description: Internal Server Error
+  /asset/tokens:
+    get:
+      tags:
+        - ICS100
+      summary: list tokens
+      description: List all existing tokens
+      produces:
+        - application/json
+      responses:
+        200:
+          description: All existing tokens
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Token"
+        500:
+          description: Internal Server Error
+    post:
+      tags:
+        - ICS100
+      summary: issue token
+      description: Issue a new Token
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: tokenInfo
+          description: The detail info about the Token to issue
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/TokenBasicInfo"
+      responses:
+        200:
+          description: Token issuance result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
 definitions:
   CheckTxResult:
     type: object
@@ -2351,3 +2398,43 @@ definitions:
         type: string
       missed_blocks_counter:
         type: string
+  TokenBasicInfo:
+    type: object
+    properties:
+      name:
+        type: string
+        example: "ABC Token"
+      symbol:
+        type: string
+        example: "abc"
+      total_supply:
+        type: integer
+        example: "2000000000000000"
+      owner:
+        $ref: "#/definitions/Address"
+      mintable:
+        type: boolean
+        example: false
+      burnable:
+        type: boolean
+        example: true
+      addr_freezeable:
+        type: boolean
+        example: false
+      token_freezeable:
+        type: boolean
+        example: false
+  Token:
+    type: object
+    allOf:
+      - $ref: "#/definitions/TokenBasicInfo"
+      - properties:
+          total_burn:
+            type: integer
+            example: "100000000000000"
+          total_mint:
+            type: integer
+            example: "0"
+          is_frozen:
+            type: boolean
+            example: false
