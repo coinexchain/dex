@@ -22,25 +22,10 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/types"
-)
-
-const (
-	defaultGenesisAccountNum = 7
 )
 
 var (
 	defaultBondDenom = "cet"
-
-	//TODO:update these address to be under coinex's control
-	_, _, testAddress1 = testutil.KeyPubAddr()
-	_, _, testAddress2 = testutil.KeyPubAddr()
-	_, _, testAddress3 = testutil.KeyPubAddr()
-	_, _, testAddress4 = testutil.KeyPubAddr()
-	_, _, testAddress5 = testutil.KeyPubAddr()
-	_, _, testAddress6 = testutil.KeyPubAddr()
-	_, _, testAddress7 = testutil.KeyPubAddr()
 )
 
 // State to Unmarshal
