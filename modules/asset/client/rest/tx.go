@@ -24,7 +24,6 @@ type issueReq struct {
 	Name            string         `json:"name"`
 	Symbol          string         `json:"symbol"`
 	TotalSupply     int64          `json:"total_supply"`
-	Owner           sdk.AccAddress `json:"owner"`
 	Mintable        bool           `json:"mintable"`
 	Burnable        bool           `json:"burnable"`
 	AddrFreezeable  bool           `json:"addrfreezeable"`
