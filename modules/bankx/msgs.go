@@ -59,7 +59,7 @@ func (msg MsgSend) Route() string {
 }
 
 func (msg MsgSend) Type() string {
-	return "unlock_time_send"
+	return "send"
 }
 
 func (msg MsgSend) ValidateBasic() sdk.Error {
