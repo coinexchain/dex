@@ -11,3 +11,5 @@ cetd
 cetcli
 !cetd/
 !cetcli/
+
+cmd/cetcli/statik/statik.go
