@@ -8,6 +8,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
@@ -22,11 +23,15 @@ func TestExportGenesisState(t *testing.T) {
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	accx := authx.AccountX{
-		Address: addr, Activated: true, MemoRequired: true}
+		Address: addr, Activated: true, MemoRequired: true,
+		LockedCoins:[]authx.LockedCoin{authx.LockedCoin{Coin:dex.NewCetCoin(10),UnlockTime:10}}}
 	app.accountXKeeper.SetAccountX(ctx, accx)
 
 	state := app.exportGenesisState(ctx)
 	require.Equal(t, 1, len(state.Accounts))
 	require.Equal(t, 1, len(state.AccountsX))
 	require.Equal(t, true, state.AccountsX[0].MemoRequired)
+	require.Equal(t, int64(10), state.AccountsX[0].LockedCoins[0].UnlockTime)
+	require.Equal(t, sdk.NewInt(int64(10)), state.AccountsX[0].LockedCoins[0].Coin.Amount)
+	require.Equal(t, "cet", state.AccountsX[0].LockedCoins[0].Coin.Denom)
 }

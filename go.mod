@@ -1,6 +1,7 @@
 module github.com/coinexchain/dex
 
 require (
+	github.com/btcsuite/btcutil v0.0.0-20180706230648-ab6388e0c60a
 	github.com/cosmos/cosmos-sdk v0.34.4
 	github.com/golangci/golangci-lint v1.16.0 // indirect
 	github.com/gorilla/mux v1.7.0
