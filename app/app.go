@@ -384,7 +384,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
 
 	// validate genesis state
-	if err := ValidateGenesisState(genesisState); err != nil {
+	if err := genesisState.Validate(); err != nil {
 		panic(err) // TODO find a way to do this w/o panics
 	}
 

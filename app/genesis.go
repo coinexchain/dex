@@ -114,46 +114,46 @@ func (gs GenesisState) Sanitize() {
 // TODO: No validators are both bonded and jailed (#2088)
 // TODO: Error if there is a duplicate validator (#1708)
 // TODO: Ensure all state machine parameters are in genesis (#1704)
-func ValidateGenesisState(genesisState GenesisState) error {
-	if err := validateGenesisStateAccounts(genesisState.Accounts); err != nil {
+func (gs GenesisState) Validate() error {
+	if err := validateGenesisStateAccounts(gs.Accounts); err != nil {
 		return err
 	}
 
-	if err := asset.ValidateGenesis(genesisState.AssetData); err != nil {
+	if err := asset.ValidateGenesis(gs.AssetData); err != nil {
 		return err
 	}
 
 	// skip stakingData validation as genesis is created from txs
-	if len(genesisState.GenTxs) > 0 {
+	if len(gs.GenTxs) > 0 {
 		return nil
 	}
 
-	if err := auth.ValidateGenesis(genesisState.AuthData); err != nil {
+	if err := auth.ValidateGenesis(gs.AuthData); err != nil {
 		return err
 	}
-	if err := genesisState.AuthXData.Validate(); err != nil {
+	if err := gs.AuthXData.Validate(); err != nil {
 		return err
 	}
-	if err := bank.ValidateGenesis(genesisState.BankData); err != nil {
+	if err := bank.ValidateGenesis(gs.BankData); err != nil {
 		return err
 	}
-	if err := genesisState.BankXData.Validate(); err != nil {
+	if err := gs.BankXData.Validate(); err != nil {
 		return err
 	}
-	if err := staking.ValidateGenesis(genesisState.StakingData); err != nil {
+	if err := staking.ValidateGenesis(gs.StakingData); err != nil {
 		return err
 	}
-	if err := distribution.ValidateGenesis(genesisState.DistrData); err != nil {
+	if err := distribution.ValidateGenesis(gs.DistrData); err != nil {
 		return err
 	}
-	if err := gov.ValidateGenesis(genesisState.GovData); err != nil {
+	if err := gov.ValidateGenesis(gs.GovData); err != nil {
 		return err
 	}
-	if err := crisis.ValidateGenesis(genesisState.CrisisData); err != nil {
+	if err := crisis.ValidateGenesis(gs.CrisisData); err != nil {
 		return err
 	}
 
-	return slashing.ValidateGenesis(genesisState.SlashingData)
+	return slashing.ValidateGenesis(gs.SlashingData)
 }
 
 // validateGenesisStateAccounts performs validation of genesis accounts. It
