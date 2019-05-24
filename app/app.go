@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -377,18 +378,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	}
 
 	if len(genesisState.GenTxs) > 0 {
-		for _, genTx := range genesisState.GenTxs {
-			var tx auth.StdTx
-			err = app.cdc.UnmarshalJSON(genTx, &tx)
-			if err != nil {
-				panic(err)
-			}
-			bz := app.cdc.MustMarshalBinaryLengthPrefixed(tx)
-			res := app.BaseApp.DeliverTx(bz)
-			if !res.IsOK() {
-				panic(res.Log)
-			}
-		}
+		app.deliverGenTxs(genesisState.GenTxs)
 
 		validators = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
 	}
@@ -418,6 +408,21 @@ func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisSt
 	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
 	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
+}
+
+func (app *CetChainApp) deliverGenTxs(genTxs []json.RawMessage) {
+	for _, genTx := range genTxs {
+		var tx auth.StdTx
+		err := app.cdc.UnmarshalJSON(genTx, &tx)
+		if err != nil {
+			panic(err)
+		}
+		bz := app.cdc.MustMarshalBinaryLengthPrefixed(tx)
+		res := app.BaseApp.DeliverTx(bz)
+		if !res.IsOK() {
+			panic(res.Log)
+		}
+	}
 }
 
 // load a particular height
