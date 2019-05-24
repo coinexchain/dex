@@ -188,8 +188,7 @@ func (app *CetChainApp) initKeepers() {
 	)
 	app.crisisKeeper = crisis.NewKeeper(
 		app.paramsKeeper.Subspace(crisis.DefaultParamspace),
-		app.distrKeeper,
-		app.bankKeeper,
+		app.distrKeeper, app.bankKeeper,
 		app.feeCollectionKeeper,
 	)
 
@@ -208,21 +207,17 @@ func (app *CetChainApp) initKeepers() {
 	)
 	app.bankxKeeper = bankx.NewKeeper(
 		app.paramsKeeper.Subspace(bankx.DefaultParamSpace),
-		app.accountXKeeper,
-		app.bankKeeper,
-		app.accountKeeper,
+		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
 		app.feeCollectionKeeper,
 	)
 	app.incentiveKeeper = incentive.NewKeeper(
-		app.feeCollectionKeeper,
-		app.bankKeeper,
+		app.feeCollectionKeeper, app.bankKeeper,
 	)
 	app.assetKeeper = asset.NewKeeper(
 		app.cdc,
 		app.keyAsset,
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
-		app.accountKeeper,
-		app.feeCollectionKeeper,
+		app.accountKeeper, app.feeCollectionKeeper,
 	)
 	app.marketKeeper = market.NewKeeper(
 		app.keyMarket,
