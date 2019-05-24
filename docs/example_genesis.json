@@ -188,7 +188,7 @@
     },
     "bankx": {
       "param": {
-        "activated_fee": "1"
+        "activated_fee": "100000000"
       }
     },
     "staking": {
