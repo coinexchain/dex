@@ -389,6 +389,36 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /bank/accounts/memo:
+    post:
+      summary: Mark if memo is required to receive coins
+      tags:
+        - ICS20
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: account
+          description: The mark
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              amount:
+                type: boolean
+      responses:
+        202:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
   /auth/accounts/{address}:
     get:
       summary: Get the account information on blockchain

@@ -214,10 +214,10 @@ func registerRoutes(rs *lcd.RestServer) {
 }
 
 func registerSwaggerUI(rs *lcd.RestServer) {
-	staticFS, err := fs.New()
+	statikFS, err := fs.New()
 	if err != nil {
 		panic(err)
 	}
-	staticServer := http.FileServer(staticFS)
+	staticServer := http.FileServer(statikFS)
 	rs.Mux.PathPrefix("/swagger-ui/").Handler(http.StripPrefix("/swagger-ui/", staticServer))
 }
