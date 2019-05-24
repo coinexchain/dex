@@ -173,6 +173,14 @@
         "end_time": "1704067200"
       }
     ],
+    "accountsx": [
+      {
+        "address": "cosmos1fjn9htuylwclsflh4cnuhzl0e4jp6fem6dkwym",
+        "activated": true,
+        "memo_required": true,
+        "locked_coins": null
+      }
+    ],
     "auth": {
       "collected_fees": null,
       "params": {
