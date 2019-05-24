@@ -357,17 +357,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	genesisState.Sanitize()
 
 	// load the accounts
-	for _, gacc := range genesisState.Accounts {
-		acc := gacc.ToAccount()
-		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
-		app.accountKeeper.SetAccount(ctx, acc)
-
-		accx := authx.AccountX{Address: gacc.Address, Activated: true}
-		app.accountXKeeper.SetAccountX(ctx, accx)
-	}
-	for _, accx := range genesisState.AccountsX {
-		app.accountXKeeper.SetAccountX(ctx, accx)
-	}
+	app.loadGenesisAccounts(ctx, genesisState)
 
 	// initialize distribution (must happen before staking)
 	distr.InitGenesis(ctx, app.distrKeeper, genesisState.DistrData)
@@ -410,6 +400,20 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 		validators = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
 	}
 	return validators
+}
+
+func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState GenesisState) {
+	for _, gacc := range genesisState.Accounts {
+		acc := gacc.ToAccount()
+		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
+		app.accountKeeper.SetAccount(ctx, acc)
+
+		accx := authx.AccountX{Address: gacc.Address, Activated: true}
+		app.accountXKeeper.SetAccountX(ctx, accx)
+	}
+	for _, accx := range genesisState.AccountsX {
+		app.accountXKeeper.SetAccountX(ctx, accx)
+	}
 }
 
 // load a particular height
