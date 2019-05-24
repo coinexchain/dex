@@ -1,0 +1,20 @@
+{
+  "name": "swagger-ui",
+  "main": "swagger-ui.js",
+  "homepage": "https://github.com/coinexchain/dex",
+  "authors": [
+    "jjz"
+  ],
+  "description": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "swagger-ui": "^3.22.2"
+  }
+}
