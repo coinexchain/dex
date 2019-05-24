@@ -86,35 +86,14 @@ type CetChainApp struct {
 
 // NewCetChainApp returns a reference to an initialized CetChainApp.
 func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
-	invCheckPeriod uint,
-	baseAppOptions ...func(*bam.BaseApp)) *CetChainApp {
+	invCheckPeriod uint, baseAppOptions ...func(*bam.BaseApp)) *CetChainApp {
 
 	cdc := MakeCodec()
 
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
 
-	var app = &CetChainApp{
-		BaseApp:          bApp,
-		cdc:              cdc,
-		invCheckPeriod:   invCheckPeriod,
-		keyMain:          sdk.NewKVStoreKey(bam.MainStoreKey),
-		keyAccount:       sdk.NewKVStoreKey(auth.StoreKey),
-		keyAccountX:      sdk.NewKVStoreKey(authx.StoreKey),
-		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
-		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
-		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
-		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
-		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
-		keySlashing:      sdk.NewKVStoreKey(slashing.StoreKey),
-		keyGov:           sdk.NewKVStoreKey(gov.StoreKey),
-		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
-		keyParams:        sdk.NewKVStoreKey(params.StoreKey),
-		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
-		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
-		keyMarket:        sdk.NewKVStoreKey(market.MarketKey),
-	}
-
+	app := newCetChainApp(bApp, cdc, invCheckPeriod)
 	app.initKeepers()
 	app.registerCrisisRoutes()
 	app.registerMessageRoutes()
@@ -139,6 +118,29 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	}
 
 	return app
+}
+
+func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *CetChainApp {
+	return &CetChainApp{
+		BaseApp:          bApp,
+		cdc:              cdc,
+		invCheckPeriod:   invCheckPeriod,
+		keyMain:          sdk.NewKVStoreKey(bam.MainStoreKey),
+		keyAccount:       sdk.NewKVStoreKey(auth.StoreKey),
+		keyAccountX:      sdk.NewKVStoreKey(authx.StoreKey),
+		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
+		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
+		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
+		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
+		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
+		keySlashing:      sdk.NewKVStoreKey(slashing.StoreKey),
+		keyGov:           sdk.NewKVStoreKey(gov.StoreKey),
+		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
+		keyParams:        sdk.NewKVStoreKey(params.StoreKey),
+		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
+		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
+		keyMarket:        sdk.NewKVStoreKey(market.MarketKey),
+	}
 }
 
 func (app *CetChainApp) initKeepers() {
