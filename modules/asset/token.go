@@ -61,10 +61,10 @@ type BaseToken struct {
 	TotalSupply int64          `json:"total_supply"` //  The total supply for this token [0]
 	Owner       sdk.AccAddress `json:"owner"`        // The initial issuer of this token
 
-	Mintable        bool `json:"mintable"`         // Whether this token could be minted after the issuing
-	Burnable        bool `json:"burnable"`         // Whether this token could be burned
-	AddrFreezeable  bool `json:"addr_freezeable"`  // whether could freeze some addresses to forbid transaction
-	TokenFreezeable bool `json:"token_freezeable"` // whether token could be global freeze
+	Mintable       bool `json:"mintable"`        // Whether this token could be minted after the issuing
+	Burnable       bool `json:"burnable"`        // Whether this token could be burned
+	AddrFreezable  bool `json:"addr_freezable"`  // whether could freeze some addresses to forbid transaction
+	TokenFreezable bool `json:"token_freezable"` // whether token could be global freeze
 
 	TotalBurn int64 `json:"total_burn"` // Total amount of burn
 	TotalMint int64 `json:"total_mint"` // Total amount of mint
@@ -107,7 +107,7 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 
 func (t *BaseToken) IsValid() error {
 	_, err := NewToken(t.Name, t.Symbol, t.TotalSupply, t.Owner,
-		t.Mintable, t.Burnable, t.AddrFreezeable, t.TokenFreezeable)
+		t.Mintable, t.Burnable, t.AddrFreezable, t.TokenFreezable)
 
 	if err != nil {
 		return err
@@ -194,19 +194,19 @@ func (t *BaseToken) SetBurnable(enable bool) {
 }
 
 func (t BaseToken) GetAddrFreezable() bool {
-	return t.AddrFreezeable
+	return t.AddrFreezable
 }
 
 func (t *BaseToken) SetAddrFreezable(enable bool) {
-	t.AddrFreezeable = enable
+	t.AddrFreezable = enable
 }
 
 func (t BaseToken) GetTokenFreezable() bool {
-	return t.TokenFreezeable
+	return t.TokenFreezable
 }
 
 func (t *BaseToken) SetTokenFreezable(enable bool) {
-	t.TokenFreezeable = enable
+	t.TokenFreezable = enable
 }
 
 func (t BaseToken) GetTotalBurn() int64 {
@@ -243,19 +243,19 @@ func (t *BaseToken) SetIsFrozen(enable bool) {
 
 func (t BaseToken) String() string {
 	return fmt.Sprintf(`Token Info: [
-  Name:            %s
-  Symbol:          %s
-  TotalSupply:     %d
-  Owner:           %s
-  Mintable:        %t
-  Burnable:        %t 
-  AddrFreezeable:  %t
-  TokenFreezeable: %t
-  TotalBurn:       %d
-  TotalMint:       %d
-  IsFrozen:        %t ]`,
+  Name:           %s
+  Symbol:         %s
+  TotalSupply:    %d
+  Owner:          %s
+  Mintable:       %t
+  Burnable:       %t 
+  AddrFreezable:  %t
+  TokenFreezable: %t
+  TotalBurn:      %d
+  TotalMint:      %d
+  IsFrozen:       %t ]`,
 		t.Name, t.Symbol, t.TotalSupply, t.Owner.String(), t.Mintable, t.Burnable,
-		t.AddrFreezeable, t.TokenFreezeable, t.TotalBurn, t.TotalMint, t.IsFrozen,
+		t.AddrFreezable, t.TokenFreezable, t.TotalBurn, t.TotalMint, t.IsFrozen,
 	)
 }
 
