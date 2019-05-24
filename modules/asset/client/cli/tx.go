@@ -19,11 +19,11 @@ import (
 const (
 	FlagName            = "name"
 	FlagSymbol          = "symbol"
-	FlagTotalSupply     = "totalSupply"
+	FlagTotalSupply     = "total-supply"
 	FlagMintable        = "mintable"
 	FlagBurnable        = "burnable"
-	FlagAddrFreezeable  = "addrFreezeable"
-	FlagTokenFreezeable = "tokenFreezeable"
+	FlagAddrFreezeable  = "addr-freezeable"
+	FlagTokenFreezeable = "token-freezeable"
 )
 
 type issue struct {
@@ -50,31 +50,29 @@ var issueFlags = []string{
 func IssueTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "issue-token",
-		Short: "Create and sign a issue token tx",
+		Short: "Create and sign a issue-token tx",
 		Long: strings.TrimSpace(
-			fmt.Sprintf(`Create and sign a issue token tx, broadcast to nodes.
+			fmt.Sprintf(`Create and sign a issue-token tx, broadcast to nodes.
 
 Example:
 $ cetcli tx asset issue-token --name="my first token" \
 	--symbol="token1" \
-	--totalSupply=2100000000000000 \
+	--total-supply=2100000000000000 \
 	--mintable=false \
 	--burnable=false \
-	--addrFreezeable=false \
-	--tokenFreezeable=false --from mykey
+	--addr-freezeable=false \
+	--token-freezeable=false --from mykey
 `,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithAccountDecoder(cdc)
-
 			issue, err := parseIssueFlags()
 			if err != nil {
 				return err
 			}
+
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
 			name := issue.Name
 			if utf8.RuneCountInString(name) > 32 {
