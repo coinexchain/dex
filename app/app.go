@@ -97,17 +97,14 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	app.initKeepers()
 	app.registerCrisisRoutes()
 	app.registerMessageRoutes()
+	app.mountStores()
 
-	// initialize BaseApp
-	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyMint, app.keyDistr,
-		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
-		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
-		app.keyAccountX, app.keyAsset,
-	)
+	ah := authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper,
+		anteHelper{accountXKeeper: app.accountXKeeper})
+
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetAnteHandler(authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper,
-		anteHelper{accountXKeeper: app.accountXKeeper}))
+	app.SetAnteHandler(ah)
 	app.SetEndBlocker(app.EndBlocker)
 
 	if loadLatest {
@@ -254,6 +251,15 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
 		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.assetKeeper, app.cdc))
+}
+
+// initialize BaseApp
+func (app *CetChainApp) mountStores() {
+	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyMint, app.keyDistr,
+		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
+		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
+		app.keyAccountX, app.keyAsset,
+	)
 }
 
 // custom tx codec
