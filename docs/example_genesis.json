@@ -20,22 +20,6 @@
   "app_state": {
     "accounts": [
       {
-        "address": "cosmos1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "1000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": null,
-        "delegated_free": null,
-        "delegated_vesting": null,
-        "start_time": "0",
-        "end_time": "0"
-      },
-      {
         "address": "cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy",
         "coins": [
           {
