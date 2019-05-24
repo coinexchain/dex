@@ -29,11 +29,11 @@ type Token interface {
 	GetBurnable() bool
 	SetBurnable(bool)
 
-	GetAddrFreezeable() bool
-	SetAddrFreezeable(bool)
+	GetAddrFreezable() bool
+	SetAddrFreezable(bool)
 
-	GetTokenFreezeable() bool
-	SetTokenFreezeable(bool)
+	GetTokenFreezable() bool
+	SetTokenFreezable(bool)
 
 	GetTotalBurn() int64
 	SetTotalBurn(int64) error
@@ -91,8 +91,8 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 
 	t.SetMintable(mintable)
 	t.SetBurnable(burnable)
-	t.SetAddrFreezeable(addrfreezeable)
-	t.SetTokenFreezeable(tokenfreezeable)
+	t.SetAddrFreezable(addrfreezeable)
+	t.SetTokenFreezable(tokenfreezeable)
 
 	if err := t.SetTotalMint(0); err != nil {
 		return nil, ErrorInvalidTotalMint(err.Error())
@@ -193,19 +193,19 @@ func (t *BaseToken) SetBurnable(enable bool) {
 	t.Burnable = enable
 }
 
-func (t BaseToken) GetAddrFreezeable() bool {
+func (t BaseToken) GetAddrFreezable() bool {
 	return t.AddrFreezeable
 }
 
-func (t *BaseToken) SetAddrFreezeable(enable bool) {
+func (t *BaseToken) SetAddrFreezable(enable bool) {
 	t.AddrFreezeable = enable
 }
 
-func (t BaseToken) GetTokenFreezeable() bool {
+func (t BaseToken) GetTokenFreezable() bool {
 	return t.TokenFreezeable
 }
 
-func (t *BaseToken) SetTokenFreezeable(enable bool) {
+func (t *BaseToken) SetTokenFreezable(enable bool) {
 	t.TokenFreezeable = enable
 }
 
