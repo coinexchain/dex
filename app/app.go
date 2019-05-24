@@ -204,6 +204,7 @@ func (app *CetChainApp) initKeepers() {
 	app.accountXKeeper = authx.NewKeeper(
 		app.cdc,
 		app.keyAccountX,
+		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 	)
 	app.bankxKeeper = bankx.NewKeeper(
 		app.paramsKeeper.Subspace(bankx.DefaultParamSpace),
@@ -379,6 +380,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 
 	// initialize module-specific stores
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
+	authx.InitGenesis(ctx, app.accountXKeeper, genesisState.AuthXData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())

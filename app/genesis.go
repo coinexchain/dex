@@ -31,8 +31,9 @@ var (
 // State to Unmarshal
 type GenesisState struct {
 	Accounts     []GenesisAccount          `json:"accounts"`
-	AccountsX    []authx.AccountX          `json:"accountsx"` // additional account info bused by CoinEx chain
+	AccountsX    []authx.AccountX          `json:"accountsx"` // additional account info used by CoinEx chain
 	AuthData     auth.GenesisState         `json:"auth"`
+	AuthXData    authx.GenesisState        `json:"authx"`
 	BankData     bank.GenesisState         `json:"bank"`
 	BankXData    bankx.GenesisState        `json:"bankx"`
 	StakingData  staking.GenesisState      `json:"staking"`
@@ -50,6 +51,7 @@ func NewDefaultGenesisState() GenesisState {
 		Accounts:     nil,
 		AccountsX:    nil,
 		AuthData:     auth.DefaultGenesisState(),
+		AuthXData:    authx.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
 		BankXData:    bankx.DefaultGenesisState(),
 		StakingData:  staking.DefaultGenesisState(),
@@ -71,6 +73,7 @@ func NewGenesisState(
 	accounts []GenesisAccount,
 	accountsX []authx.AccountX,
 	authData auth.GenesisState,
+	authxData authx.GenesisState,
 	bankData bank.GenesisState,
 	bankxData bankx.GenesisState,
 	stakingData staking.GenesisState,
@@ -84,6 +87,7 @@ func NewGenesisState(
 		Accounts:     accounts,
 		AccountsX:    accountsX,
 		AuthData:     authData,
+		AuthXData:    authxData,
 		BankData:     bankData,
 		BankXData:    bankxData,
 		StakingData:  stakingData,
@@ -127,10 +131,13 @@ func ValidateGenesisState(genesisState GenesisState) error {
 	if err := auth.ValidateGenesis(genesisState.AuthData); err != nil {
 		return err
 	}
+	if err := genesisState.AuthXData.Validate(); err != nil {
+		return err
+	}
 	if err := bank.ValidateGenesis(genesisState.BankData); err != nil {
 		return err
 	}
-	if err := bankx.ValidateGenesis(genesisState.BankXData); err != nil {
+	if err := genesisState.BankXData.Validate(); err != nil {
 		return err
 	}
 	if err := staking.ValidateGenesis(genesisState.StakingData); err != nil {

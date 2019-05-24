@@ -4,6 +4,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -27,7 +29,11 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(authXKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
-	axk := NewKeeper(cdc, authXKey)
+	skey := sdk.NewKVStoreKey("test")
+	tkey := sdk.NewTransientStoreKey("transient_test")
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+
+	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(bank.DefaultParamspace))
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 
 	return testInput{ctx: ctx, axk: axk}
