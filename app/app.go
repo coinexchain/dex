@@ -369,14 +369,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	}
 
 	// initialize module-specific stores
-	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
-	authx.InitGenesis(ctx, app.accountXKeeper, genesisState.AuthXData)
-	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
-	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
-	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
-	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
-	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
+	app.initModuleStores(ctx, genesisState)
 
 	// validate genesis state
 	if err := genesisState.Validate(); err != nil {
@@ -414,6 +407,17 @@ func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState Genesi
 	for _, accx := range genesisState.AccountsX {
 		app.accountXKeeper.SetAccountX(ctx, accx)
 	}
+}
+
+func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisState) {
+	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
+	authx.InitGenesis(ctx, app.accountXKeeper, genesisState.AuthXData)
+	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
+	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
+	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
+	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
+	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
+	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
 }
 
 // load a particular height
