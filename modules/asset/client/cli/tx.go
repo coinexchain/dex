@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/types"
+	"github.com/cosmos/cosmos-sdk/client"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -52,35 +53,31 @@ func IssueTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Use:   "issue-token",
 		Short: "Create and sign a issue-token tx",
 		Long: strings.TrimSpace(
-			fmt.Sprintf(`Create and sign a issue-token tx, broadcast to nodes.
+			`Create and sign a issue-token tx, broadcast to nodes.
 
 Example:
-$ cetcli tx asset issue-token --name="my first token" \
-	--symbol="token1" \
+$ cetcli tx asset issue-token --name="ABC Token" \
+	--symbol="abc" \
 	--total-supply=2100000000000000 \
 	--mintable=false \
-	--burnable=false \
+	--burnable=true \
 	--addr-freezeable=false \
-	--token-freezeable=false --from mykey
-`,
-			),
-		),
+	--token-freezeable=false \
+    --from mykey
+`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			issue, err := parseIssueFlags()
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseIssueFlags(owner)
 			if err != nil {
 				return err
 			}
 
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-
-			name := issue.Name
-			if utf8.RuneCountInString(name) > 32 {
+			if utf8.RuneCountInString(msg.Name) > 32 {
 				return fmt.Errorf("issue token name limited to 32 unicode characters")
 			}
 
-			symbol := issue.Symbol
-			if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", symbol); !m {
+			if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", msg.Symbol); !m {
 				return fmt.Errorf("issue token symbol limited to [a-z][a-z0-9]{1,7}")
 			}
 
@@ -90,35 +87,32 @@ $ cetcli tx asset issue-token --name="my first token" \
 				cdc.MustUnmarshalJSON(res, &tokens)
 
 				for _, t := range tokens {
-					if symbol == t.GetSymbol() {
+					if msg.Symbol == t.GetSymbol() {
 						return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")
 					}
 				}
 			}
 
-			totalSupply := issue.TotalSupply
-			if totalSupply > asset.MaxTokenAmount {
+			if msg.TotalSupply > asset.MaxTokenAmount {
 				return fmt.Errorf("issue token totalSupply limited to 9E18")
 			}
-			if totalSupply < 0 {
+			if msg.TotalSupply < 0 {
 				return fmt.Errorf("issue token totalSupply should be a positive")
 			}
 
-			owner := cliCtx.GetFromAddress()
+			// ensure account has enough coins
 			account, err := cliCtx.GetAccount(owner)
 			if err != nil {
 				return err
 			}
 
-			// ensure account has enough coins
 			issueFee := types.NewCetCoins(asset.IssueTokenFee)
 			if !account.GetCoins().IsAllGTE(issueFee) {
 				return fmt.Errorf("address %s doesn't have enough cet to issue token", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			msg := asset.NewMsgIssueToken(name, symbol, totalSupply, owner, issue.Mintable,
-				issue.Burnable, issue.AddrFreezeable, issue.TokenFreezeable)
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
 		},
 	}
@@ -130,6 +124,7 @@ $ cetcli tx asset issue-token --name="my first token" \
 	cmd.Flags().String(FlagBurnable, "", "whether this token could be burned")
 	cmd.Flags().String(FlagAddrFreezeable, "", " whether could freeze some addresses to forbid transaction")
 	cmd.Flags().String(FlagTokenFreezeable, "", "whether token could be global freeze")
+	cmd.MarkFlagRequired(client.FlagFrom)
 
 	return cmd
 }
