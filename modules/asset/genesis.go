@@ -40,7 +40,7 @@ func ExportGenesis(ctx sdk.Context, tk TokenKeeper) GenesisState {
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
-func ValidateGenesis(data GenesisState) error {
+func (data GenesisState) Validate() error {
 	err := data.Params.ValidateGenesis()
 	if err != nil {
 		return err

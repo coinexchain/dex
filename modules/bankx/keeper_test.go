@@ -36,7 +36,7 @@ func defaultContext() (sdk.Context, params.Keeper) {
 func TestParamGetSet(t *testing.T) {
 
 	ctx, paramsKeeper := defaultContext()
-	subspace := paramsKeeper.Subspace(DefaultParamSpace)
+	subspace := paramsKeeper.Subspace(DefaultParamspace)
 	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{})
 
 	//expect DefaultActivatedFees=1

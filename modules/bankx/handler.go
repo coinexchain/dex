@@ -67,7 +67,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 
 	aux, ok := k.axk.GetAccountX(ctx, msg.ToAddress)
 	if !ok {
-		return authx.ErrInvalidAccoutx("No AccoutX exist").Result()
+		return authx.ErrInvalidAccountx("No AccoutX exist").Result()
 	}
 
 	time := msg.UnlockTime

@@ -92,7 +92,7 @@ following delegation and commission default parameters:
 				return err
 			}
 
-			if err = app.ValidateGenesisState(genesisState); err != nil {
+			if err = genesisState.Validate(); err != nil {
 				return err
 			}
 

@@ -380,6 +380,9 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/Coin"
+              unlocked_time:
+                type: int64
+                example: 675132000
       responses:
         202:
           description: Tx was succesfully generated

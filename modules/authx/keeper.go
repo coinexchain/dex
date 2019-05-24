@@ -3,6 +3,7 @@ package authx
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 const (
@@ -21,18 +22,24 @@ type AccountXKeeper struct {
 
 	// The codec codec for binary encoding/decoding of accounts.
 	cdc *codec.Codec
+
+	paramSubspace params.Subspace
 }
 
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey) AccountXKeeper {
+func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace) AccountXKeeper {
 	return AccountXKeeper{
-		key: key,
-		cdc: cdc,
+		key:           key,
+		cdc:           cdc,
+		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
 	}
 }
 
 func AddressStoreKey(addr sdk.AccAddress) []byte {
 	return append(AddressStoreKeyPrefix, addr.Bytes()...)
 }
+
+// -----------------------------------------------------------------------------
+// AccountX
 
 func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax AccountX, ok bool) {
 	store := ctx.KVStore(axk.key)
@@ -69,6 +76,20 @@ func (axk AccountXKeeper) IterateAccounts(ctx sdk.Context, process func(AccountX
 		}
 		iter.Next()
 	}
+}
+
+// -----------------------------------------------------------------------------
+// Params
+
+// SetParams sets the asset module's parameters.
+func (axk AccountXKeeper) SetParams(ctx sdk.Context, params Params) {
+	axk.paramSubspace.SetParamSet(ctx, &params)
+}
+
+// GetParams gets the asset module's parameters.
+func (axk AccountXKeeper) GetParams(ctx sdk.Context) (params Params) {
+	axk.paramSubspace.GetParamSet(ctx, &params)
+	return
 }
 
 // -----------------------------------------------------------------------------

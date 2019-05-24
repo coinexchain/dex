@@ -178,6 +178,7 @@ func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
 
 	return NewGenesisState(accounts, accountsX,
 		auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
+		authx.ExportGenesis(ctx, app.accountXKeeper),
 		bank.ExportGenesis(ctx, app.bankKeeper),
 		bankx.ExportGenesis(ctx, app.bankxKeeper),
 		staking.ExportGenesis(ctx, app.stakingKeeper),

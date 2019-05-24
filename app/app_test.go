@@ -43,6 +43,13 @@ func initApp(accs ...auth.BaseAccount) *CetChainApp {
 	return app
 }
 
+//func TestMinGasPrice(t *testing.T) {
+//	app := newApp()
+//	ctx := app.NewContext(true, abci.Header{})
+//	minGasPrice := ctx.MinGasPrices()
+//	require.False(t, minGasPrice.IsZero())
+//}
+
 func TestSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()

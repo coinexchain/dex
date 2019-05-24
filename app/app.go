@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -19,7 +20,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -57,7 +57,6 @@ type CetChainApp struct {
 	keyStaking       *sdk.KVStoreKey
 	tkeyStaking      *sdk.TransientStoreKey
 	keySlashing      *sdk.KVStoreKey
-	keyMint          *sdk.KVStoreKey
 	keyDistr         *sdk.KVStoreKey
 	tkeyDistr        *sdk.TransientStoreKey
 	keyGov           *sdk.KVStoreKey
@@ -86,49 +85,25 @@ type CetChainApp struct {
 
 // NewCetChainApp returns a reference to an initialized CetChainApp.
 func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
-	invCheckPeriod uint,
-	baseAppOptions ...func(*bam.BaseApp)) *CetChainApp {
+	invCheckPeriod uint, baseAppOptions ...func(*bam.BaseApp)) *CetChainApp {
 
 	cdc := MakeCodec()
 
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
 
-	var app = &CetChainApp{
-		BaseApp:          bApp,
-		cdc:              cdc,
-		invCheckPeriod:   invCheckPeriod,
-		keyMain:          sdk.NewKVStoreKey(bam.MainStoreKey),
-		keyAccount:       sdk.NewKVStoreKey(auth.StoreKey),
-		keyAccountX:      sdk.NewKVStoreKey(authx.StoreKey),
-		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
-		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
-		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
-		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
-		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
-		keySlashing:      sdk.NewKVStoreKey(slashing.StoreKey),
-		keyGov:           sdk.NewKVStoreKey(gov.StoreKey),
-		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
-		keyParams:        sdk.NewKVStoreKey(params.StoreKey),
-		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
-		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
-		keyMarket:        sdk.NewKVStoreKey(market.MarketKey),
-	}
-
+	app := newCetChainApp(bApp, cdc, invCheckPeriod)
 	app.initKeepers()
 	app.registerCrisisRoutes()
 	app.registerMessageRoutes()
+	app.mountStores()
 
-	// initialize BaseApp
-	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyMint, app.keyDistr,
-		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
-		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
-		app.keyAccountX, app.keyAsset,
-	)
+	ah := authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper,
+		anteHelper{accountXKeeper: app.accountXKeeper})
+
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetAnteHandler(authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper,
-		anteHelper{accountXKeeper: app.accountXKeeper}))
+	app.SetAnteHandler(ah)
 	app.SetEndBlocker(app.EndBlocker)
 
 	if loadLatest {
@@ -139,6 +114,28 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	}
 
 	return app
+}
+
+func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *CetChainApp {
+	return &CetChainApp{
+		BaseApp:          bApp,
+		cdc:              cdc,
+		invCheckPeriod:   invCheckPeriod,
+		keyMain:          sdk.NewKVStoreKey(bam.MainStoreKey),
+		keyAccount:       sdk.NewKVStoreKey(auth.StoreKey),
+		keyAccountX:      sdk.NewKVStoreKey(authx.StoreKey),
+		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
+		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
+		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
+		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
+		keySlashing:      sdk.NewKVStoreKey(slashing.StoreKey),
+		keyGov:           sdk.NewKVStoreKey(gov.StoreKey),
+		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
+		keyParams:        sdk.NewKVStoreKey(params.StoreKey),
+		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
+		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
+		keyMarket:        sdk.NewKVStoreKey(market.MarketKey),
+	}
 }
 
 func (app *CetChainApp) initKeepers() {
@@ -188,8 +185,7 @@ func (app *CetChainApp) initKeepers() {
 	)
 	app.crisisKeeper = crisis.NewKeeper(
 		app.paramsKeeper.Subspace(crisis.DefaultParamspace),
-		app.distrKeeper,
-		app.bankKeeper,
+		app.distrKeeper, app.bankKeeper,
 		app.feeCollectionKeeper,
 	)
 
@@ -204,24 +200,21 @@ func (app *CetChainApp) initKeepers() {
 	app.accountXKeeper = authx.NewKeeper(
 		app.cdc,
 		app.keyAccountX,
+		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 	)
 	app.bankxKeeper = bankx.NewKeeper(
-		app.paramsKeeper.Subspace(bankx.DefaultParamSpace),
-		app.accountXKeeper,
-		app.bankKeeper,
-		app.accountKeeper,
+		app.paramsKeeper.Subspace(bankx.DefaultParamspace),
+		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
 		app.feeCollectionKeeper,
 	)
 	app.incentiveKeeper = incentive.NewKeeper(
-		app.feeCollectionKeeper,
-		app.bankKeeper,
+		app.feeCollectionKeeper, app.bankKeeper,
 	)
 	app.assetKeeper = asset.NewKeeper(
 		app.cdc,
 		app.keyAsset,
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
-		app.accountKeeper,
-		app.feeCollectionKeeper,
+		app.accountKeeper, app.feeCollectionKeeper,
 	)
 	app.marketKeeper = market.NewKeeper(
 		app.keyMarket,
@@ -255,6 +248,15 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
 		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.assetKeeper, app.cdc))
+}
+
+// initialize BaseApp
+func (app *CetChainApp) mountStores() {
+	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyDistr,
+		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
+		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
+		app.keyAccountX, app.keyAsset,
+	)
 }
 
 // custom tx codec
@@ -355,17 +357,7 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	genesisState.Sanitize()
 
 	// load the accounts
-	for _, gacc := range genesisState.Accounts {
-		acc := gacc.ToAccount()
-		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
-		app.accountKeeper.SetAccount(ctx, acc)
-
-		accx := authx.AccountX{Address: gacc.Address, Activated: true}
-		app.accountXKeeper.SetAccountX(ctx, accx)
-	}
-	for _, accx := range genesisState.AccountsX {
-		app.accountXKeeper.SetAccountX(ctx, accx)
-	}
+	app.loadGenesisAccounts(ctx, genesisState)
 
 	// initialize distribution (must happen before staking)
 	distr.InitGenesis(ctx, app.distrKeeper, genesisState.DistrData)
@@ -377,96 +369,62 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	}
 
 	// initialize module-specific stores
-	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
-	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
-	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
-	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
-	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
-	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
+	app.initModuleStores(ctx, genesisState)
 
 	// validate genesis state
-	if err := ValidateGenesisState(genesisState); err != nil {
+	if err := genesisState.Validate(); err != nil {
 		panic(err) // TODO find a way to do this w/o panics
 	}
 
 	if len(genesisState.GenTxs) > 0 {
-		for _, genTx := range genesisState.GenTxs {
-			var tx auth.StdTx
-			err = app.cdc.UnmarshalJSON(genTx, &tx)
-			if err != nil {
-				panic(err)
-			}
-			bz := app.cdc.MustMarshalBinaryLengthPrefixed(tx)
-			res := app.BaseApp.DeliverTx(bz)
-			if !res.IsOK() {
-				panic(res.Log)
-			}
-		}
+		app.deliverGenTxs(genesisState.GenTxs)
 
 		validators = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
 	}
 	return validators
 }
 
+func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState GenesisState) {
+	for _, gacc := range genesisState.Accounts {
+		acc := gacc.ToAccount()
+		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
+		app.accountKeeper.SetAccount(ctx, acc)
+
+		accx := authx.AccountX{Address: gacc.Address, Activated: true}
+		app.accountXKeeper.SetAccountX(ctx, accx)
+	}
+	for _, accx := range genesisState.AccountsX {
+		app.accountXKeeper.SetAccountX(ctx, accx)
+	}
+}
+
+func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisState) {
+	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
+	authx.InitGenesis(ctx, app.accountXKeeper, genesisState.AuthXData)
+	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
+	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
+	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
+	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
+	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
+	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
+}
+
+func (app *CetChainApp) deliverGenTxs(genTxs []json.RawMessage) {
+	for _, genTx := range genTxs {
+		var tx auth.StdTx
+		err := app.cdc.UnmarshalJSON(genTx, &tx)
+		if err != nil {
+			panic(err)
+		}
+		bz := app.cdc.MustMarshalBinaryLengthPrefixed(tx)
+		res := app.BaseApp.DeliverTx(bz)
+		if !res.IsOK() {
+			panic(res.Log)
+		}
+	}
+}
+
 // load a particular height
 func (app *CetChainApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height, app.keyMain)
-}
-
-// ______________________________________________________________________________________________
-
-var _ sdk.StakingHooks = StakingHooks{}
-
-// StakingHooks contains combined distribution and slashing hooks needed for the
-// staking module.
-type StakingHooks struct {
-	dh distr.Hooks
-	sh slashing.Hooks
-}
-
-func NewStakingHooks(dh distr.Hooks, sh slashing.Hooks) StakingHooks {
-	return StakingHooks{dh, sh}
-}
-
-// nolint
-func (h StakingHooks) AfterValidatorCreated(ctx sdk.Context, valAddr sdk.ValAddress) {
-	h.dh.AfterValidatorCreated(ctx, valAddr)
-	h.sh.AfterValidatorCreated(ctx, valAddr)
-}
-func (h StakingHooks) BeforeValidatorModified(ctx sdk.Context, valAddr sdk.ValAddress) {
-	h.dh.BeforeValidatorModified(ctx, valAddr)
-	h.sh.BeforeValidatorModified(ctx, valAddr)
-}
-func (h StakingHooks) AfterValidatorRemoved(ctx sdk.Context, consAddr sdk.ConsAddress, valAddr sdk.ValAddress) {
-	h.dh.AfterValidatorRemoved(ctx, consAddr, valAddr)
-	h.sh.AfterValidatorRemoved(ctx, consAddr, valAddr)
-}
-func (h StakingHooks) AfterValidatorBonded(ctx sdk.Context, consAddr sdk.ConsAddress, valAddr sdk.ValAddress) {
-	h.dh.AfterValidatorBonded(ctx, consAddr, valAddr)
-	h.sh.AfterValidatorBonded(ctx, consAddr, valAddr)
-}
-func (h StakingHooks) AfterValidatorBeginUnbonding(ctx sdk.Context, consAddr sdk.ConsAddress, valAddr sdk.ValAddress) {
-	h.dh.AfterValidatorBeginUnbonding(ctx, consAddr, valAddr)
-	h.sh.AfterValidatorBeginUnbonding(ctx, consAddr, valAddr)
-}
-func (h StakingHooks) BeforeDelegationCreated(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) {
-	h.dh.BeforeDelegationCreated(ctx, delAddr, valAddr)
-	h.sh.BeforeDelegationCreated(ctx, delAddr, valAddr)
-}
-func (h StakingHooks) BeforeDelegationSharesModified(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) {
-	h.dh.BeforeDelegationSharesModified(ctx, delAddr, valAddr)
-	h.sh.BeforeDelegationSharesModified(ctx, delAddr, valAddr)
-}
-func (h StakingHooks) BeforeDelegationRemoved(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) {
-	h.dh.BeforeDelegationRemoved(ctx, delAddr, valAddr)
-	h.sh.BeforeDelegationRemoved(ctx, delAddr, valAddr)
-}
-func (h StakingHooks) AfterDelegationModified(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) {
-	h.dh.AfterDelegationModified(ctx, delAddr, valAddr)
-	h.sh.AfterDelegationModified(ctx, delAddr, valAddr)
-}
-func (h StakingHooks) BeforeValidatorSlashed(ctx sdk.Context, valAddr sdk.ValAddress, fraction sdk.Dec) {
-	h.dh.BeforeValidatorSlashed(ctx, valAddr, fraction)
-	h.sh.BeforeValidatorSlashed(ctx, valAddr, fraction)
 }
