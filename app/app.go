@@ -19,7 +19,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -57,7 +56,6 @@ type CetChainApp struct {
 	keyStaking       *sdk.KVStoreKey
 	tkeyStaking      *sdk.TransientStoreKey
 	keySlashing      *sdk.KVStoreKey
-	keyMint          *sdk.KVStoreKey
 	keyDistr         *sdk.KVStoreKey
 	tkeyDistr        *sdk.TransientStoreKey
 	keyGov           *sdk.KVStoreKey
@@ -127,7 +125,6 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 		keyAccountX:      sdk.NewKVStoreKey(authx.StoreKey),
 		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
 		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
-		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
 		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
 		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
 		keySlashing:      sdk.NewKVStoreKey(slashing.StoreKey),
@@ -255,7 +252,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 
 // initialize BaseApp
 func (app *CetChainApp) mountStores() {
-	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyMint, app.keyDistr,
+	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyDistr,
 		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
 		app.keyAccountX, app.keyAsset,
