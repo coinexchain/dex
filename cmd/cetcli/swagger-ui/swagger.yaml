@@ -408,7 +408,7 @@ paths:
             properties:
               base_req:
                 $ref: "#/definitions/BaseReq"
-              amount:
+              memo_required:
                 type: boolean
       responses:
         202:

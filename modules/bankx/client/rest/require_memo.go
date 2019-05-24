@@ -17,7 +17,7 @@ import (
 
 type MmeoReq struct {
 	BaseReq  rest.BaseReq `json:"base_req"`
-	Required bool         `json:"required"`
+	Required bool         `json:"memo_required"`
 }
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
