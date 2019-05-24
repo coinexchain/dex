@@ -49,21 +49,20 @@ func (msg MsgIssueToken) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgIssueToken) ValidateBasic() sdk.Error {
-
 	if utf8.RuneCountInString(msg.Name) > 32 {
-		return ErrorInvalidTokenName(CodeSpaceAsset, "issue token name limited to 32 unicode characters")
+		return ErrorInvalidTokenName("issue token name limited to 32 unicode characters")
 	}
 	if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", msg.Symbol); !m {
-		return ErrorInvalidTokenSymbol(CodeSpaceAsset, "issue token symbol limited to [a-z][a-z0-9]{1,7}")
+		return ErrorInvalidTokenSymbol("issue token symbol limited to [a-z][a-z0-9]{1,7}")
 	}
 	if msg.TotalSupply > MaxTokenAmount {
-		return ErrorInvalidTokenSupply(CodeSpaceAsset, "issue token supply amt limited to 90 billion")
+		return ErrorInvalidTokenSupply("issue token supply amt limited to 90 billion")
 	}
 	if msg.TotalSupply < 0 {
-		return ErrorInvalidTokenSupply(CodeSpaceAsset, "issue token supply amt should be positive")
+		return ErrorInvalidTokenSupply("issue token supply amt should be positive")
 	}
 	if msg.Owner.Empty() {
-		return ErrorInvalidTokenOwner(CodeSpaceAsset, "missing owner address")
+		return ErrorInvalidTokenOwner("missing owner address")
 	}
 
 	return nil

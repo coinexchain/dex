@@ -77,16 +77,16 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 
 	t := &BaseToken{}
 	if err := t.SetName(name); err != nil {
-		return nil, ErrorInvalidTokenName(CodeSpaceAsset, err.Error())
+		return nil, ErrorInvalidTokenName(err.Error())
 	}
 	if err := t.SetSymbol(symbol); err != nil {
-		return nil, ErrorInvalidTokenSymbol(CodeSpaceAsset, err.Error())
+		return nil, ErrorInvalidTokenSymbol(err.Error())
 	}
 	if err := t.SetOwner(owner); err != nil {
-		return nil, ErrorInvalidTokenOwner(CodeSpaceAsset, err.Error())
+		return nil, ErrorInvalidTokenOwner(err.Error())
 	}
 	if err := t.SetTotalSupply(amt); err != nil {
-		return nil, ErrorInvalidTokenSupply(CodeSpaceAsset, err.Error())
+		return nil, ErrorInvalidTokenSupply(err.Error())
 	}
 
 	t.SetMintable(mintable)
@@ -95,10 +95,10 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 	t.SetTokenFreezeable(tokenfreezeable)
 
 	if err := t.SetTotalMint(0); err != nil {
-		return nil, ErrorInvalidTotalMint(CodeSpaceAsset, err.Error())
+		return nil, ErrorInvalidTotalMint(err.Error())
 	}
 	if err := t.SetTotalBurn(0); err != nil {
-		return nil, ErrorInvalidTotalBurn(CodeSpaceAsset, err.Error())
+		return nil, ErrorInvalidTotalBurn(err.Error())
 	}
 	t.SetIsFrozen(false)
 
@@ -114,11 +114,11 @@ func (t *BaseToken) IsValid() error {
 	}
 
 	if t.TotalMint < 0 {
-		return ErrorInvalidTotalMint(CodeSpaceAsset, fmt.Sprintf("Invalid total mint: %d", t.TotalMint))
+		return ErrorInvalidTotalMint(fmt.Sprintf("Invalid total mint: %d", t.TotalMint))
 	}
 
 	if t.TotalBurn < 0 {
-		return ErrorInvalidTotalMint(CodeSpaceAsset, fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
+		return ErrorInvalidTotalMint(fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
 	}
 
 	return nil

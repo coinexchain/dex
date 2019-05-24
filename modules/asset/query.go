@@ -48,7 +48,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte,
 
 	token := tk.GetToken(ctx, params.Symbol)
 	if token == nil {
-		return nil, ErrorNoTokenPersist(CodeSpaceAsset, fmt.Sprintf("can not query token %s", params.Symbol))
+		return nil, ErrorNoTokenPersist(fmt.Sprintf("can not query token %s", params.Symbol))
 	}
 
 	bz, err := codec.MarshalJSONIndent(tk.cdc, token)
@@ -63,7 +63,7 @@ func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) (
 
 	tokenList := tk.GetAllTokens(ctx)
 	if tokenList == nil {
-		return nil, ErrorNoTokenPersist(CodeSpaceAsset, fmt.Sprintf("can not query any token"))
+		return nil, ErrorNoTokenPersist(fmt.Sprintf("can not query any token"))
 	}
 
 	bz, err := codec.MarshalJSONIndent(tk.cdc, tokenList)

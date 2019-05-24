@@ -15,27 +15,27 @@ const (
 	CodeDuplicateTokenSymbol = 208
 )
 
-func ErrorInvalidTokenName(codespace sdk.CodespaceType, fmt string) sdk.Error {
-	return sdk.NewError(codespace, CodeInvalidTokenName, fmt)
+func ErrorInvalidTokenName(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenName, fmt)
 }
-func ErrorInvalidTokenSymbol(codespace sdk.CodespaceType, fmt string) sdk.Error {
-	return sdk.NewError(codespace, CodeInvalidTokenSymbol, fmt)
+func ErrorInvalidTokenSymbol(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenSymbol, fmt)
 }
-func ErrorInvalidTokenSupply(codespace sdk.CodespaceType, fmt string) sdk.Error {
-	return sdk.NewError(codespace, CodeInvalidTokenSupply, fmt)
+func ErrorInvalidTokenSupply(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenSupply, fmt)
 }
-func ErrorInvalidTokenOwner(codespace sdk.CodespaceType, fmt string) sdk.Error {
-	return sdk.NewError(codespace, CodeInvalidTokenOwner, fmt)
+func ErrorInvalidTokenOwner(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenOwner, fmt)
 }
-func ErrorNoTokenPersist(codespace sdk.CodespaceType, fmt string) sdk.Error {
-	return sdk.NewError(codespace, CodeNoTokenPersist, fmt)
+func ErrorNoTokenPersist(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeNoTokenPersist, fmt)
 }
-func ErrorInvalidTotalMint(codespace sdk.CodespaceType, fmt string) sdk.Error {
-	return sdk.NewError(codespace, CodeInvalidTotalMint, fmt)
+func ErrorInvalidTotalMint(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTotalMint, fmt)
 }
-func ErrorInvalidTotalBurn(codespace sdk.CodespaceType, fmt string) sdk.Error {
-	return sdk.NewError(codespace, CodeInvalidTotalBurn, fmt)
+func ErrorInvalidTotalBurn(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTotalBurn, fmt)
 }
-func ErrorDuplicateTokenSymbol(codespace sdk.CodespaceType, fmt string) sdk.Error {
-	return sdk.NewError(codespace, CodeDuplicateTokenSymbol, fmt)
+func ErrorDuplicateTokenSymbol(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeDuplicateTokenSymbol, fmt)
 }

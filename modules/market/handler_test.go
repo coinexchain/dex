@@ -57,7 +57,7 @@ func prepareBankx(db dbm.DB, ctx sdk.Context) testBankxInput {
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
-	axk := authx.NewKeeper(cdc, authxKey)
+	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.StoreKey))
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck)
 	bk.SetSendEnabled(ctx, true)
 	bxkKeeper.SetParam(ctx, bankx.DefaultParam())

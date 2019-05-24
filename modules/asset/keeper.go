@@ -112,7 +112,7 @@ func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) sdk.Error {
 	store := ctx.KVStore(tk.key)
 
 	if tk.IsTokenExists(ctx, symbol) {
-		return ErrorDuplicateTokenSymbol(CodeSpaceAsset, fmt.Sprintf("token symbol already exists in store"))
+		return ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
 	}
 
 	bz, err := tk.cdc.MarshalBinaryBare(token)
