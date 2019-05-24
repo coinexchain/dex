@@ -3,7 +3,7 @@ package bankx
 import "github.com/cosmos/cosmos-sdk/x/params"
 
 const (
-	DefaultParamSpace = "bankx"
+	DefaultParamspace = "bankx"
 )
 
 var ParamStoreKeyActivatedFee = []byte("ActivatedFee")
