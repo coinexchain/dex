@@ -93,12 +93,12 @@ func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
 			return newCtx, err.Result(), true
 		}
 
-		newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
+		newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize") // TODO
 
 		if res := ValidateMemoSize(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
 		}
-		if res := CheckMissingMemo(stdTx, newCtx, anteHelper); !res.IsOK() {
+		if res := checkMemo(stdTx, newCtx, anteHelper); !res.IsOK() {
 			return newCtx, res, true
 		}
 
@@ -174,7 +174,7 @@ func ValidateMemoSize(stdTx auth.StdTx, params auth.Params) sdk.Result {
 	return sdk.Result{}
 }
 
-func CheckMissingMemo(stdTx auth.StdTx, ctx sdk.Context, anteHelper AnteHelper) sdk.Result {
+func checkMemo(stdTx auth.StdTx, ctx sdk.Context, anteHelper AnteHelper) sdk.Result {
 	memo := stdTx.Memo
 	for _, msg := range stdTx.Msgs {
 		if err := anteHelper.CheckMemo(msg, memo, ctx); err != nil {
