@@ -19,7 +19,7 @@ func (mb MockBankxKeeper) UnfreezeCoins(acc sdk.AccAddress, amt sdk.Coins) error
 	return nil
 }
 
-func (mb MockBankxKeeper) IsFrozenByCoinOwner(acc sdk.AccAddress, denom string) error {
+func (mb MockBankxKeeper) DeductFeeFromAddressAndCollectFeetoIncentive(acc sdk.AccAddress, coins sdk.Coins) error {
 	return nil
 }
 
@@ -32,14 +32,14 @@ func (mb MockBankxKeeper) HaveSufficientCoins(addr sdk.AccAddress, amt sdk.Coins
 type MockAssertKeeper struct {
 }
 
-func (ma MockAssertKeeper) IsFrozen(denom string) error {
-	return nil
+func (ma MockAssertKeeper) IsTokenFrozen(addr sdk.AccAddress, denom string) bool {
+	return true
 }
 
-func (ma MockAssertKeeper) Exists(denom string) error {
-	return nil
+func (ma MockAssertKeeper) IsTokenExists(denom string) bool {
+	return true
 }
 
-func (ma MockAssertKeeper) IsTokenIssuer(denom string, addr sdk.AccAddress) error {
-	return nil
+func (ma MockAssertKeeper) IsTokenIssuer(denom string, addr sdk.AccAddress) bool {
+	return true
 }

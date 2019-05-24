@@ -25,11 +25,6 @@ type Order struct {
 	DealMoney sdk.Dec
 }
 
-func (or *Order) CheckOrderValidToMempool(keeper bankx.Keeper) bool {
-
-	return true
-}
-
 func (or *Order) CheckOrderValidToExecute(keeper bankx.Keeper) bool {
 
 	return true
@@ -45,10 +40,6 @@ type OrderBook struct {
 }
 
 func (ob *OrderBook) InsertOrder(or *Order) bool {
-	if !or.CheckOrderValidToMempool(ob.bankKeeper) {
-		return false
-	}
-
 	if _, ok := ob.orders[or.OrderID()]; ok {
 		return false
 	}

@@ -227,7 +227,6 @@ func (app *CetChainApp) initKeepers() {
 		app.keyMarket,
 		market.MockAssertKeeper{},
 		market.MockBankxKeeper{},
-		app.feeCollectionKeeper,
 	)
 }
 

@@ -1,7 +1,6 @@
 package market
 
 import (
-	"github.com/coinexchain/dex/modules/incentive"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -17,9 +16,9 @@ type Keeper struct {
 	markeyKey sdk.StoreKey
 	axk       ExpectedAssertStatusKeeper
 	bnk       ExpectedBankxKeeper
-	fek       incentive.FeeCollectionKeeper
+	//fek       incentive.FeeCollectionKeeper
 }
 
-func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper, bnkVal ExpectedBankxKeeper, fekVal incentive.FeeCollectionKeeper) Keeper {
-	return Keeper{markeyKey: key, axk: axkVal, bnk: bnkVal, fek: fekVal}
+func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper, bnkVal ExpectedBankxKeeper /*, fekVal incentive.FeeCollectionKeeper*/) Keeper {
+	return Keeper{markeyKey: key, axk: axkVal, bnk: bnkVal /*fek: fekVal*/}
 }

@@ -15,6 +15,8 @@ const (
 	CodeNotHaveSufficientCoin = 127
 	CodeInvalidTradeSide      = 128
 	CodeInvalidOrderType      = 129
+	CodeInvalidSymbol         = 130
+	CodeTokenFrozenByIssuer   = 131
 )
 
 func ErrTokenNoExist() sdk.Result {
@@ -65,4 +67,14 @@ func ErrInvalidTradeSide() sdk.Result {
 func ErrInvalidOrderType() sdk.Result {
 
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderType, "Invalid order type").Result()
+}
+
+func ErrInvalidSymbol() sdk.Result {
+
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "Invalid trade symbol").Result()
+}
+
+func ErrTokenFrozenByIssuer() sdk.Result {
+
+	return sdk.NewError(CodeSpaceMarket, CodeTokenFrozenByIssuer, "Token is frozen by the issuer").Result()
 }
