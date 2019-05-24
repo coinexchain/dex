@@ -1,6 +1,6 @@
 {
   "genesis_time": "2019-05-20T07:31:22.844616Z",
-  "chain_id": "test_chain",
+  "chain_id": "coinexdex",
   "consensus_params": {
     "block": {
       "max_bytes": "22020096",
@@ -185,7 +185,7 @@
     },
     "staking": {
       "pool": {
-        "not_bonded_tokens": "1000000000",
+        "not_bonded_tokens": "598800000000000000",
         "bonded_tokens": "0"
       },
       "params": {
@@ -361,7 +361,7 @@
               "type": "cosmos-sdk/MsgCreateValidator",
               "value": {
                 "description": {
-                  "moniker": "moniker123",
+                  "moniker": "moniker0",
                   "identity": "",
                   "website": "",
                   "details": ""
@@ -377,7 +377,7 @@
                 "pubkey": "cosmosvalconspub1zcjduepq7u2hwyy8yjuvgpalznhq5npv25smv9y6a37w506slm2f3u65ts6q7x53ej",
                 "value": {
                   "denom": "cet",
-                  "amount": "100000000"
+                  "amount": "10000000000000000"
                 }
               }
             }
