@@ -2475,10 +2475,10 @@ definitions:
       burnable:
         type: boolean
         example: true
-      addr_freezeable:
+      addr_freezable:
         type: boolean
         example: false
-      token_freezeable:
+      token_freezable:
         type: boolean
         example: false
   Token:

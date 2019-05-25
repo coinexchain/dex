@@ -20,14 +20,14 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 
 // SendReq defines the properties of a send request's body.
 type issueReq struct {
-	BaseReq         rest.BaseReq `json:"basereq"`
-	Name            string       `json:"name"`
-	Symbol          string       `json:"symbol"`
-	TotalSupply     int64        `json:"total_supply"`
-	Mintable        bool         `json:"mintable"`
-	Burnable        bool         `json:"burnable"`
-	AddrFreezeable  bool         `json:"addrfreezeable"`
-	TokenFreezeable bool         `json:"tokenfreezeable"`
+	BaseReq        rest.BaseReq `json:"base_req"`
+	Name           string       `json:"name"`
+	Symbol         string       `json:"symbol"`
+	TotalSupply    int64        `json:"total_supply"`
+	Mintable       bool         `json:"mintable"`
+	Burnable       bool         `json:"burnable"`
+	AddrFreezable  bool         `json:"addr_freezable"`
+	TokenFreezable bool         `json:"token_freezable"`
 }
 
 // issueRequestHandlerFn - http request handler to issue new token.
@@ -50,7 +50,7 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 
 		msg := asset.NewMsgIssueToken(req.Name, req.Symbol, req.TotalSupply, owner,
-			req.Mintable, req.Burnable, req.AddrFreezeable, req.TokenFreezeable)
+			req.Mintable, req.Burnable, req.AddrFreezable, req.TokenFreezable)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

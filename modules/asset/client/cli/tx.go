@@ -18,23 +18,23 @@ import (
 )
 
 const (
-	FlagName            = "name"
-	FlagSymbol          = "symbol"
-	FlagTotalSupply     = "total-supply"
-	FlagMintable        = "mintable"
-	FlagBurnable        = "burnable"
-	FlagAddrFreezeable  = "addr-freezeable"
-	FlagTokenFreezeable = "token-freezeable"
+	FlagName           = "name"
+	FlagSymbol         = "symbol"
+	FlagTotalSupply    = "total-supply"
+	FlagMintable       = "mintable"
+	FlagBurnable       = "burnable"
+	FlagAddrFreezable  = "addr-freezable"
+	FlagTokenFreezable = "token-freezable"
 )
 
 type issue struct {
-	Name            string
-	Symbol          string
-	TotalSupply     int64
-	Mintable        bool
-	Burnable        bool
-	AddrFreezeable  bool
-	TokenFreezeable bool
+	Name           string
+	Symbol         string
+	TotalSupply    int64
+	Mintable       bool
+	Burnable       bool
+	AddrFreezable  bool
+	TokenFreezable bool
 }
 
 var issueFlags = []string{
@@ -43,8 +43,8 @@ var issueFlags = []string{
 	FlagTotalSupply,
 	FlagMintable,
 	FlagBurnable,
-	FlagAddrFreezeable,
-	FlagTokenFreezeable,
+	FlagAddrFreezable,
+	FlagTokenFreezable,
 }
 
 // IssueTokenCmd will create a issue token tx and sign.
@@ -61,8 +61,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	--total-supply=2100000000000000 \
 	--mintable=false \
 	--burnable=true \
-	--addr-freezeable=false \
-	--token-freezeable=false \
+	--addr-freezable=false \
+	--token-freezable=false \
     --from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -122,8 +122,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	cmd.Flags().String(FlagTotalSupply, "", "issue token totalSupply limited to 9E18")
 	cmd.Flags().String(FlagMintable, "", "whether this token could be minted after the issuing")
 	cmd.Flags().String(FlagBurnable, "", "whether this token could be burned")
-	cmd.Flags().String(FlagAddrFreezeable, "", " whether could freeze some addresses to forbid transaction")
-	cmd.Flags().String(FlagTokenFreezeable, "", "whether token could be global freeze")
+	cmd.Flags().String(FlagAddrFreezable, "", " whether could freeze some addresses to forbid transaction")
+	cmd.Flags().String(FlagTokenFreezable, "", "whether token could be global freeze")
 	cmd.MarkFlagRequired(client.FlagFrom)
 
 	return cmd

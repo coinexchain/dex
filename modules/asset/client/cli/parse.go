@@ -20,11 +20,11 @@ func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 	totalSupply := viper.GetInt64(FlagTotalSupply)
 	mintable := viper.GetBool(FlagMintable)
 	burnable := viper.GetBool(FlagBurnable)
-	addrFreezeable := viper.GetBool(FlagAddrFreezeable)
-	tokenFreezeable := viper.GetBool(FlagTokenFreezeable)
+	addrFreezable := viper.GetBool(FlagAddrFreezable)
+	tokenFreezable := viper.GetBool(FlagTokenFreezable)
 
 	msg := asset.NewMsgIssueToken(name, symbol, totalSupply, owner,
-		mintable, burnable, addrFreezeable, tokenFreezeable)
+		mintable, burnable, addrFreezable, tokenFreezable)
 
 	return &msg, nil
 }

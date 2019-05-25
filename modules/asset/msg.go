@@ -13,17 +13,17 @@ type MsgIssueToken struct {
 	TotalSupply int64          //  The total supply for this token [0]
 	Owner       sdk.AccAddress // The initial issuer of this token [1]
 
-	Mintable        bool // Whether this token could be minted after the issuing
-	Burnable        bool // Whether this token could be burned
-	AddrFreezeable  bool // whether could freeze some addresses to forbid transaction
-	TokenFreezeable bool // whether token could be global freeze
+	Mintable       bool // Whether this token could be minted after the issuing
+	Burnable       bool // Whether this token could be burned
+	AddrFreezable  bool // whether could freeze some addresses to forbid transaction
+	TokenFreezable bool // whether token could be global freeze
 }
 
 var _ sdk.Msg = MsgIssueToken{}
 
 // NewMsgIssueToken
 func NewMsgIssueToken(name string, symbol string, amt int64, owner sdk.AccAddress,
-	mintable bool, burnable bool, addrFreezeable bool, tokenFreezeable bool) MsgIssueToken {
+	mintable bool, burnable bool, addrFreezable bool, tokenFreezable bool) MsgIssueToken {
 
 	return MsgIssueToken{
 		name,
@@ -32,8 +32,8 @@ func NewMsgIssueToken(name string, symbol string, amt int64, owner sdk.AccAddres
 		owner,
 		mintable,
 		burnable,
-		addrFreezeable,
-		tokenFreezeable,
+		addrFreezable,
+		tokenFreezable,
 	}
 }
 

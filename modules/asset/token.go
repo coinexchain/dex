@@ -73,7 +73,7 @@ type BaseToken struct {
 
 // NewToken - new base token
 func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
-	mintable bool, burnable bool, addrfreezeable bool, tokenfreezeable bool) (*BaseToken, sdk.Error) {
+	mintable bool, burnable bool, addrfreezable bool, tokenfreezable bool) (*BaseToken, sdk.Error) {
 
 	t := &BaseToken{}
 	if err := t.SetName(name); err != nil {
@@ -91,8 +91,8 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 
 	t.SetMintable(mintable)
 	t.SetBurnable(burnable)
-	t.SetAddrFreezable(addrfreezeable)
-	t.SetTokenFreezable(tokenfreezeable)
+	t.SetAddrFreezable(addrfreezable)
+	t.SetTokenFreezable(tokenfreezable)
 
 	if err := t.SetTotalMint(0); err != nil {
 		return nil, ErrorInvalidTotalMint(err.Error())
