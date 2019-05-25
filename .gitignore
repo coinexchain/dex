@@ -13,4 +13,4 @@ cetcli
 !cetcli/
 
 cmd/cetcli/statik/statik.go
-/cmd/cetcli/swagger-ui/bower_components/
+/cmd/cetcli/swagger/bower_components/
