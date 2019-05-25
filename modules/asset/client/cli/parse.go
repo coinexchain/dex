@@ -8,23 +8,22 @@ import (
 )
 
 func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
-	for _, flag := range issueFlags {
+	for _, flag := range issueTokenFlags {
 		if viper.GetString(flag) == "" {
 			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
 				"$ cetcli tx asset issue-token -h", flag)
 		}
 	}
 
-	name := viper.GetString(FlagName)
-	symbol := viper.GetString(FlagSymbol)
-	totalSupply := viper.GetInt64(FlagTotalSupply)
-	mintable := viper.GetBool(FlagMintable)
-	burnable := viper.GetBool(FlagBurnable)
-	addrFreezable := viper.GetBool(FlagAddrFreezable)
-	tokenFreezable := viper.GetBool(FlagTokenFreezable)
-
-	msg := asset.NewMsgIssueToken(name, symbol, totalSupply, owner,
-		mintable, burnable, addrFreezable, tokenFreezable)
+	msg := asset.NewMsgIssueToken(
+		viper.GetString(FlagName),
+		viper.GetString(FlagSymbol),
+		viper.GetInt64(FlagTotalSupply),
+		owner,
+		viper.GetBool(FlagMintable),
+		viper.GetBool(FlagBurnable),
+		viper.GetBool(FlagAddrFreezable),
+		viper.GetBool(FlagTokenFreezable))
 
 	return &msg, nil
 }

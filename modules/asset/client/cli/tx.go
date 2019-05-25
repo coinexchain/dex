@@ -27,17 +27,7 @@ const (
 	FlagTokenFreezable = "token-freezable"
 )
 
-type issue struct {
-	Name           string
-	Symbol         string
-	TotalSupply    int64
-	Mintable       bool
-	Burnable       bool
-	AddrFreezable  bool
-	TokenFreezable bool
-}
-
-var issueFlags = []string{
+var issueTokenFlags = []string{
 	FlagName,
 	FlagSymbol,
 	FlagTotalSupply,
@@ -67,8 +57,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseIssueFlags(owner)
+			tokenOwner := cliCtx.GetFromAddress()
+			msg, err := parseIssueFlags(tokenOwner)
 			if err != nil {
 				return err
 			}
@@ -96,19 +86,19 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 			if msg.TotalSupply > asset.MaxTokenAmount {
 				return fmt.Errorf("issue token totalSupply limited to 9E18")
 			}
-			if msg.TotalSupply < 0 {
-				return fmt.Errorf("issue token totalSupply should be a positive")
+			if msg.TotalSupply <= 0 {
+				return fmt.Errorf("issue token totalSupply should be positive")
 			}
 
 			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
+			account, err := cliCtx.GetAccount(tokenOwner)
 			if err != nil {
 				return err
 			}
 
 			issueFee := types.NewCetCoins(asset.IssueTokenFee)
 			if !account.GetCoins().IsAllGTE(issueFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to issue token", owner)
+				return fmt.Errorf("address %s doesn't have enough cet to issue token", tokenOwner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -117,14 +107,20 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 		},
 	}
 
-	cmd.Flags().String(FlagName, "", "issue token name limited to 32 unicode characters")
-	cmd.Flags().String(FlagSymbol, "", "issue token symbol limited to [a-z][a-z0-9]{1,7}")
-	cmd.Flags().String(FlagTotalSupply, "", "issue token totalSupply limited to 9E18")
-	cmd.Flags().String(FlagMintable, "", "whether this token could be minted after the issuing")
-	cmd.Flags().String(FlagBurnable, "", "whether this token could be burned")
-	cmd.Flags().String(FlagAddrFreezable, "", " whether could freeze some addresses to forbid transaction")
-	cmd.Flags().String(FlagTokenFreezable, "", "whether token could be global freeze")
+	cmd.Flags().String(FlagName, "", "Issue token name limited to 32 unicode characters")
+	cmd.Flags().String(FlagSymbol, "", "Issue token symbol limited to [a-z][a-z0-9]{1,7}")
+	cmd.Flags().String(FlagTotalSupply, "", "The total supply for token can have a maximum of " +
+		"8 digits of decimal and is boosted by 1e8 in order to store as int64. " +
+		"The amount before boosting should not exceed 90 billion.")
+	cmd.Flags().String(FlagMintable, "", "Whether this token could be minted after the issuing")
+	cmd.Flags().String(FlagBurnable, "", "Whether this token could be burned")
+	cmd.Flags().String(FlagAddrFreezable, "", " Whether the token holder address can be frozen by token owner")
+	cmd.Flags().String(FlagTokenFreezable, "", "Whether the token can be frozen")
+
 	cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range issueTokenFlags {
+		cmd.MarkFlagRequired(flag)
+	}
 
 	return cmd
 }
