@@ -109,8 +109,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 
 	cmd.Flags().String(FlagName, "", "Issue token name limited to 32 unicode characters")
 	cmd.Flags().String(FlagSymbol, "", "Issue token symbol limited to [a-z][a-z0-9]{1,7}")
-	cmd.Flags().String(FlagTotalSupply, "", "The total supply for token can have a maximum of " +
-		"8 digits of decimal and is boosted by 1e8 in order to store as int64. " +
+	cmd.Flags().String(FlagTotalSupply, "", "The total supply for token can have a maximum of "+
+		"8 digits of decimal and is boosted by 1e8 in order to store as int64. "+
 		"The amount before boosting should not exceed 90 billion.")
 	cmd.Flags().String(FlagMintable, "", "Whether this token could be minted after the issuing")
 	cmd.Flags().String(FlagBurnable, "", "Whether this token could be burned")
