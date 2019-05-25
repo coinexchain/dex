@@ -23,8 +23,13 @@ func TestExportGenesisState(t *testing.T) {
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	accx := authx.AccountX{
-		Address: addr, Activated: true, MemoRequired: true,
-		LockedCoins: []authx.LockedCoin{authx.LockedCoin{Coin: dex.NewCetCoin(10), UnlockTime: 10}}}
+		Address:      addr,
+		Activated:    true,
+		MemoRequired: true,
+		LockedCoins: []authx.LockedCoin{
+			{Coin: dex.NewCetCoin(10), UnlockTime: 10},
+		},
+	}
 	app.accountXKeeper.SetAccountX(ctx, accx)
 
 	state := app.exportGenesisState(ctx)

@@ -38,8 +38,8 @@ func ParamKeyTable() params.KeyTable {
 // pairs of authx module's parameters.
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
-		{KeyMinGasPrice, &p.MinGasPrice},
-		{KeyMsgSendGasCost, &p.MsgSendGasCost},
+		{Key: KeyMinGasPrice, Value: &p.MinGasPrice},
+		{Key: KeyMsgSendGasCost, Value: &p.MsgSendGasCost},
 	}
 }
 

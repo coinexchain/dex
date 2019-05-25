@@ -112,11 +112,12 @@ func ExecuteOrder(price sdk.Dec, currOrder OrderForTrade, orderList []OrderForTr
 			break
 		}
 	}
+
 	if firstNonZeroIndex < len(orderList) {
 		return orderList[firstNonZeroIndex:]
-	} else {
-		return nil
 	}
+
+	return nil
 }
 
 type PricePoint struct {
@@ -206,17 +207,17 @@ func accumulateForPricePointList(ppList []PricePoint) {
 }
 
 // return true if a should precede b in a sorted list, i.e. index of a is smaller
-func (a PricePoint) precede(b PricePoint) bool {
-	if a.executionAmount > b.executionAmount {
+func (pp PricePoint) precede(b PricePoint) bool {
+	if pp.executionAmount > b.executionAmount {
 		return true
-	} else if a.executionAmount < b.executionAmount {
+	} else if pp.executionAmount < b.executionAmount {
 		return false
-	} else if a.absImbalance < b.absImbalance {
+	} else if pp.absImbalance < b.absImbalance {
 		return true
-	} else if a.absImbalance > b.absImbalance {
+	} else if pp.absImbalance > b.absImbalance {
 		return false
 	} else {
-		return a.price.GT(b.price)
+		return pp.price.GT(b.price)
 	}
 }
 

@@ -126,7 +126,7 @@ func newMocOrder(price int64, height int64, totalAmount int64, orderType int, ow
 	}
 }
 
-func createOrders_1() []OrderForTrade {
+func createOrders1() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(100, 1, 150, BUY, "buyer1"),
@@ -136,7 +136,7 @@ func createOrders_1() []OrderForTrade {
 	}
 }
 
-func createOrders_2() []OrderForTrade {
+func createOrders2() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(100, 1, 150, BUY, "buyer1"),
@@ -147,7 +147,7 @@ func createOrders_2() []OrderForTrade {
 	}
 }
 
-func createOrders_2_1() []OrderForTrade {
+func createOrders2_1() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(100, 3, 50, BUY, "buyer1a"),
@@ -163,7 +163,7 @@ func createOrders_2_1() []OrderForTrade {
 	}
 }
 
-func createOrders_3() []OrderForTrade {
+func createOrders3() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(102, 1, 300, BUY, "buyer1"),
@@ -176,7 +176,7 @@ func createOrders_3() []OrderForTrade {
 	}
 }
 
-func createOrders_4() []OrderForTrade {
+func createOrders4() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(102, 1, 30, BUY, "buyer1"),
@@ -189,7 +189,7 @@ func createOrders_4() []OrderForTrade {
 	}
 }
 
-func createOrders_4_1() []OrderForTrade {
+func createOrders4_1() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(102, 1, 30, BUY, "buyer1"),
@@ -202,7 +202,7 @@ func createOrders_4_1() []OrderForTrade {
 	}
 }
 
-func createOrders_5_1() []OrderForTrade {
+func createOrders5_1() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(102, 1, 10, BUY, "buyer1"),
@@ -211,7 +211,7 @@ func createOrders_5_1() []OrderForTrade {
 	}
 }
 
-func createOrders_5_2() []OrderForTrade {
+func createOrders5_2() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(99, 1, 10, BUY, "buyer1"),
@@ -220,7 +220,7 @@ func createOrders_5_2() []OrderForTrade {
 	}
 }
 
-func createOrders_5_3() []OrderForTrade {
+func createOrders5_3() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(99, 1, 100, BUY, "buyer1"),
@@ -228,7 +228,7 @@ func createOrders_5_3() []OrderForTrade {
 	}
 }
 
-func createOrders_5_4() []OrderForTrade {
+func createOrders5_4() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(101, 1, 10, BUY, "buyer1"),
@@ -237,7 +237,7 @@ func createOrders_5_4() []OrderForTrade {
 	}
 }
 
-func createOrders_6() []OrderForTrade {
+func createOrders6() []OrderForTrade {
 	//             price height totalAmount orderType owner
 	return []OrderForTrade{
 		newMocOrder(100, 1, 25, BUY, "buyer1"),
@@ -247,14 +247,14 @@ func createOrders_6() []OrderForTrade {
 	}
 }
 
-func createDealRecord_1() []dealRecord {
+func createDealRecord1() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller2", 50, 98),
 		newDR("buyer1", "seller1", 100, 98),
 		newDR("seller1", "buyer2", 150, 98),
 	}
 }
-func createDealRecord_2() []dealRecord {
+func createDealRecord2() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller2", 100, 97),
 		newDR("buyer1", "seller1", 50, 97),
@@ -262,7 +262,7 @@ func createDealRecord_2() []dealRecord {
 		newDR("seller1", "buyer3", 100, 97),
 	}
 }
-func createDealRecord_2_1() []dealRecord {
+func createDealRecord2_1() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1c", "seller2", 50, 97),
 		newDR("seller2", "buyer1b", 50, 97),
@@ -271,7 +271,7 @@ func createDealRecord_2_1() []dealRecord {
 		newDR("seller1", "buyer3c", 100, 97),
 	}
 }
-func createDealRecord_3() []dealRecord {
+func createDealRecord3() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller3", 300, 96),
 		newDR("seller3", "buyer2", 100, 96),
@@ -279,7 +279,7 @@ func createDealRecord_3() []dealRecord {
 		newDR("seller3", "buyer4", 300, 96),
 	}
 }
-func createDealRecord_4() []dealRecord {
+func createDealRecord4() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller3", 30, 97),
 		newDR("seller3", "buyer2", 10, 97),
@@ -287,7 +287,7 @@ func createDealRecord_4() []dealRecord {
 		newDR("buyer3", "seller2", 40, 97),
 	}
 }
-func createDealRecord_4_1() []dealRecord {
+func createDealRecord4_1() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller3", 30, 97),
 		newDR("seller3", "buyer2", 10, 97),
@@ -295,55 +295,55 @@ func createDealRecord_4_1() []dealRecord {
 		newDR("buyer5", "seller2", 10, 97),
 	}
 }
-func createDealRecord_5_1() []dealRecord {
+func createDealRecord5_1() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller1", 10, 95),
 		newDR("seller1", "buyer2", 10, 95),
 	}
 }
-func createDealRecord_5_2() []dealRecord {
+func createDealRecord5_2() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller1", 10, 94),
 		newDR("seller1", "buyer2", 10, 94),
 	}
 }
-func createDealRecord_5_3a() []dealRecord {
+func createDealRecord5_3a() []dealRecord {
 	return []dealRecord{
 		newDRDec("buyer1", "seller1", 50, sdk.NewDec(945).QuoInt(sdk.NewInt(10))),
 	}
 }
-func createDealRecord_5_3b() []dealRecord {
+func createDealRecord5_3b() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller1", 50, 99),
 	}
 }
-func createDealRecord_5_3c() []dealRecord {
+func createDealRecord5_3c() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller1", 50, 92),
 	}
 }
-func createDealRecord_5_4() []dealRecord {
+func createDealRecord5_4() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller1", 10, 95),
 		newDR("seller1", "buyer2", 10, 95),
 	}
 }
-func createDealRecord_6_1() []dealRecord {
+func createDealRecord6_1() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller2", 25, 99),
 	}
 }
-func createDealRecord_6_2() []dealRecord {
+func createDealRecord6_2() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller2", 25, 97),
 	}
 }
-func createDealRecord_6_3() []dealRecord {
+func createDealRecord6_3() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller2", 25, 95),
 	}
 }
-func createDealRecord_6_4() []dealRecord {
+func createDealRecord6_4() []dealRecord {
 	return []dealRecord{
 		newDR("buyer1", "seller2", 25, 100),
 	}
@@ -380,78 +380,77 @@ func testMatch(tag string, mid int64, orders []OrderForTrade, dealRecordList []d
 }
 
 func TestPrice_1(t *testing.T) {
-	var p sdk.Dec
-	p = testGetExecutionPrice(100, createOrders_1())
+	p := testGetExecutionPrice(100, createOrders1())
 	fmt.Printf("==================1: %s\n", p)
 	if !p.Equal(sdk.NewDec(98)) {
 		t.Errorf("::::1:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(100, createOrders_2())
+	p = testGetExecutionPrice(100, createOrders2())
 	fmt.Printf("==================2: %s\n", p)
 	if !p.Equal(sdk.NewDec(97)) {
 		t.Errorf("::::2:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(100, createOrders_3())
+	p = testGetExecutionPrice(100, createOrders3())
 	fmt.Printf("==================3: %s\n", p)
 	if !p.Equal(sdk.NewDec(96)) {
 		t.Errorf("::::3:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(100, createOrders_4())
+	p = testGetExecutionPrice(100, createOrders4())
 	fmt.Printf("==================4: %s\n", p)
 	if !p.Equal(sdk.NewDec(97)) {
 		t.Errorf("::::4:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(80, createOrders_4_1())
+	p = testGetExecutionPrice(80, createOrders4_1())
 	fmt.Printf("==================4_1: %s\n", p)
 	if !p.Equal(sdk.NewDec(97)) {
 		t.Errorf("::::4_1:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(80, createOrders_5_1())
+	p = testGetExecutionPrice(80, createOrders5_1())
 	fmt.Printf("==================5_1: %s\n", p)
 	if !p.Equal(sdk.NewDec(95)) {
 		t.Errorf("::::5_1:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(100, createOrders_5_2())
+	p = testGetExecutionPrice(100, createOrders5_2())
 	fmt.Printf("==================5_2: %s\n", p)
 	if !p.Equal(sdk.NewDec(94)) {
 		t.Errorf("::::5_2:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(90, createOrders_5_3())
+	p = testGetExecutionPrice(90, createOrders5_3())
 	fmt.Printf("==================5_3a: %s\n", p)
 	if !p.Equal(sdk.NewDec(945).Quo(sdk.NewDec(10))) {
 		t.Errorf("::::5_3a:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(97, createOrders_5_3())
+	p = testGetExecutionPrice(97, createOrders5_3())
 	fmt.Printf("==================5_3b: %s\n", p)
 	if !p.Equal(sdk.NewDec(99)) {
 		t.Errorf("::::5_3b:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(80, createOrders_5_3())
+	p = testGetExecutionPrice(80, createOrders5_3())
 	fmt.Printf("==================5_3c: %s\n", p)
 	if !p.Equal(sdk.NewDec(92)) {
 		t.Errorf("::::5_3c:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(100, createOrders_5_4())
+	p = testGetExecutionPrice(100, createOrders5_4())
 	fmt.Printf("==================5_4: %s\n", p)
 	if !p.Equal(sdk.NewDec(95)) {
 		t.Errorf("::::5_4:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(99, createOrders_6())
+	p = testGetExecutionPrice(99, createOrders6())
 	fmt.Printf("==================6_1: %s\n", p)
 	if !p.Equal(sdk.NewDec(99)) {
 		t.Errorf("::::6_1:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(97, createOrders_6())
+	p = testGetExecutionPrice(97, createOrders6())
 	fmt.Printf("==================6_2: %s\n", p)
 	if !p.Equal(sdk.NewDec(97)) {
 		t.Errorf("::::6_2:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(90, createOrders_6())
+	p = testGetExecutionPrice(90, createOrders6())
 	fmt.Printf("==================6_3: %s\n", p)
 	if !p.Equal(sdk.NewDec(95)) {
 		t.Errorf("::::6_3:::: Wrong:%s\n", p)
 	}
-	p = testGetExecutionPrice(110, createOrders_6())
+	p = testGetExecutionPrice(110, createOrders6())
 	fmt.Printf("==================6_4: %s\n", p)
 	if !p.Equal(sdk.NewDec(100)) {
 		t.Errorf("::::6_4:::: Wrong:%s\n", p)
@@ -460,20 +459,20 @@ func TestPrice_1(t *testing.T) {
 
 func TestMatch_1(t *testing.T) {
 	testHandler = t
-	testMatch("1", 100, createOrders_1(), createDealRecord_1())
-	testMatch("2", 100, createOrders_2(), createDealRecord_2())
-	testMatch("2_1", 100, createOrders_2_1(), createDealRecord_2_1())
-	testMatch("3", 100, createOrders_3(), createDealRecord_3())
-	testMatch("4", 100, createOrders_4(), createDealRecord_4())
-	testMatch("4_1", 80, createOrders_4_1(), createDealRecord_4_1())
-	testMatch("5_1", 80, createOrders_5_1(), createDealRecord_5_1())
-	testMatch("5_2", 100, createOrders_5_2(), createDealRecord_5_2())
-	testMatch("5_3a", 90, createOrders_5_3(), createDealRecord_5_3a())
-	testMatch("5_3b", 97, createOrders_5_3(), createDealRecord_5_3b())
-	testMatch("5_3c", 80, createOrders_5_3(), createDealRecord_5_3c())
-	testMatch("5_4", 100, createOrders_5_4(), createDealRecord_5_4())
-	testMatch("6_1", 99, createOrders_6(), createDealRecord_6_1())
-	testMatch("6_2", 97, createOrders_6(), createDealRecord_6_2())
-	testMatch("6_3", 90, createOrders_6(), createDealRecord_6_3())
-	testMatch("6_4", 110, createOrders_6(), createDealRecord_6_4())
+	testMatch("1", 100, createOrders1(), createDealRecord1())
+	testMatch("2", 100, createOrders2(), createDealRecord2())
+	testMatch("2_1", 100, createOrders2_1(), createDealRecord2_1())
+	testMatch("3", 100, createOrders3(), createDealRecord3())
+	testMatch("4", 100, createOrders4(), createDealRecord4())
+	testMatch("4_1", 80, createOrders4_1(), createDealRecord4_1())
+	testMatch("5_1", 80, createOrders5_1(), createDealRecord5_1())
+	testMatch("5_2", 100, createOrders5_2(), createDealRecord5_2())
+	testMatch("5_3a", 90, createOrders5_3(), createDealRecord5_3a())
+	testMatch("5_3b", 97, createOrders5_3(), createDealRecord5_3b())
+	testMatch("5_3c", 80, createOrders5_3(), createDealRecord5_3c())
+	testMatch("5_4", 100, createOrders5_4(), createDealRecord5_4())
+	testMatch("6_1", 99, createOrders6(), createDealRecord6_1())
+	testMatch("6_2", 97, createOrders6(), createDealRecord6_2())
+	testMatch("6_3", 90, createOrders6(), createDealRecord6_3())
+	testMatch("6_4", 110, createOrders6(), createDealRecord6_4())
 }
