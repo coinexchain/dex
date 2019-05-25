@@ -109,13 +109,13 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 
 	cmd.Flags().String(FlagName, "", "Issue token name limited to 32 unicode characters")
 	cmd.Flags().String(FlagSymbol, "", "Issue token symbol limited to [a-z][a-z0-9]{1,7}")
-	cmd.Flags().String(FlagTotalSupply, "", "The total supply for token can have a maximum of "+
+	cmd.Flags().Int64(FlagTotalSupply, 0, "The total supply for token can have a maximum of "+
 		"8 digits of decimal and is boosted by 1e8 in order to store as int64. "+
 		"The amount before boosting should not exceed 90 billion.")
-	cmd.Flags().String(FlagMintable, "", "Whether this token could be minted after the issuing")
-	cmd.Flags().String(FlagBurnable, "", "Whether this token could be burned")
-	cmd.Flags().String(FlagAddrFreezable, "", " Whether the token holder address can be frozen by token owner")
-	cmd.Flags().String(FlagTokenFreezable, "", "Whether the token can be frozen")
+	cmd.Flags().Bool(FlagMintable, false, "Whether this token could be minted after the issuing")
+	cmd.Flags().Bool(FlagBurnable, true, "Whether this token could be burned")
+	cmd.Flags().Bool(FlagAddrFreezable, false, " Whether the token holder address can be frozen by token owner")
+	cmd.Flags().Bool(FlagTokenFreezable, false, "Whether the token can be frozen")
 
 	cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range issueTokenFlags {
