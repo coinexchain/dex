@@ -53,7 +53,8 @@ func initApp(accs ...auth.BaseAccount) *CetChainApp {
 func TestSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
-	acc0 := auth.BaseAccount{Address: fromAddr, Coins: dex.NewCetCoins(10000000000)}
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10000000000), sdk.NewInt64Coin("eth", 100000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
 	app := initApp(acc0)
@@ -63,12 +64,19 @@ func TestSend(t *testing.T) {
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
 	// deliver tx
-	coins := dex.NewCetCoins(1000000000)
+	coins = dex.NewCetCoins(1000000000)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
 	tx := testutil.NewStdTxBuilder("c1").
 		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
+	require.Equal(t, bankx.CodeCetBeErrorLocked, result.Code)
+
+	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
+	tx = testutil.NewStdTxBuilder("c1").
+		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	result = app.Deliver(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
 }
 

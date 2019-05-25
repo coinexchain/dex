@@ -75,10 +75,17 @@ func (msg MsgSend) ValidateBasic() sdk.Error {
 	if !msg.Amount.IsAllPositive() {
 		return sdk.ErrInsufficientCoins("send amount must be positive")
 	}
+	amt := msg.Amount
+	for _, c := range amt {
+		if c.Denom == "cet" && msg.UnlockTime != 0 {
+			return ErrCetCantBeLocked("Cet cannot be locked")
+		}
+	}
 	t := time.Now().Unix()
 	if msg.UnlockTime <= t && msg.UnlockTime != 0 {
 		return ErrUnlockTime("Invalid Unlock Time")
 	}
+
 	return nil
 }
 
