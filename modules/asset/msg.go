@@ -8,15 +8,15 @@ import (
 
 // MsgIssueToken
 type MsgIssueToken struct {
-	Name        string         `json:"name"`//  Name of the newly issued asset, limited to 32 unicode characters
-	Symbol      string         `json:"symbol"`//  token symbol, [a-z][a-z0-9]{1,7}
-	TotalSupply int64          `json:"total_supply"`//  The total supply for this token [0]
-	Owner       sdk.AccAddress `json:"owner"`// The initial issuer of this token [1]
+	Name        string         `json:"name"`         //  Name of the newly issued asset, limited to 32 unicode characters
+	Symbol      string         `json:"symbol"`       //  token symbol, [a-z][a-z0-9]{1,7}
+	TotalSupply int64          `json:"total_supply"` //  The total supply for this token [0]
+	Owner       sdk.AccAddress `json:"owner"`        // The initial issuer of this token [1]
 
-	Mintable       bool `json:"mintable"`// Whether this token could be minted after the issuing
-	Burnable       bool `json:"burnable"`// Whether this token could be burned
-	AddrFreezable  bool `json:"addr_freezable"`// whether could freeze some addresses to forbid transaction
-	TokenFreezable bool `json:"token_freezable"`// whether token could be global freeze
+	Mintable       bool `json:"mintable"`        // Whether this token could be minted after the issuing
+	Burnable       bool `json:"burnable"`        // Whether this token could be burned
+	AddrFreezable  bool `json:"addr_freezable"`  // whether could freeze some addresses to forbid transaction
+	TokenFreezable bool `json:"token_freezable"` // whether token could be global freeze
 }
 
 var _ sdk.Msg = MsgIssueToken{}
