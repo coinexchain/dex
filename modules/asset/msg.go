@@ -2,7 +2,6 @@ package asset
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"regexp"
 	"unicode/utf8"
 )
 
@@ -52,9 +51,11 @@ func (msg MsgIssueToken) ValidateBasic() sdk.Error {
 	if utf8.RuneCountInString(msg.Name) > 32 {
 		return ErrorInvalidTokenName("issue token name limited to 32 unicode characters")
 	}
-	if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", msg.Symbol); !m {
-		return ErrorInvalidTokenSymbol("issue token symbol limited to [a-z][a-z0-9]{1,7}")
+
+	if !TokenSymbolRegex.MatchString(msg.Symbol) {
+		return ErrorInvalidTokenSymbol("symbol of token should match to [a-z][a-z0-9]{1,7}")
 	}
+
 	if msg.TotalSupply > MaxTokenAmount {
 		return ErrorInvalidTokenSupply("issue token supply amt limited to 90 billion")
 	}

@@ -71,6 +71,12 @@ type BaseToken struct {
 	IsFrozen  bool  `json:"is_frozen"`  // Whether token being frozen currently
 }
 
+var (
+	// Token symbol can be 2 ~ 8 characters long.
+	TokenSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}$")
+)
+
+
 // NewToken - new base token
 func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrfreezable bool, tokenfreezable bool) (*BaseToken, sdk.Error) {
