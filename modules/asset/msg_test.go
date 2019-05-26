@@ -7,8 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var tAccAddr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
-
 func TestMsgIssueToken_Route(t *testing.T) {
 	tests := []struct {
 		name string
@@ -112,6 +110,7 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgIssueToken_GetSignBytes(t *testing.T) {
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
 	tests := []struct {
 		name string
 		msg  MsgIssueToken
@@ -119,7 +118,7 @@ func TestMsgIssueToken_GetSignBytes(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgIssueToken("ABC Token", "abc", 100000, tAccAddr,
+			NewMsgIssueToken("ABC Token", "abc", 100000, addr,
 				false, false, false, false),
 			`{"type":"asset/MsgIssueToken","value":{"addr_freezable":false,"burnable":false,"mintable":false,"name":"ABC Token","owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","token_freezable":false,"total_supply":"100000"}}`,
 		},
