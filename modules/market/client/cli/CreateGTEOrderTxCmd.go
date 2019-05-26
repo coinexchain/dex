@@ -37,7 +37,7 @@ func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			symbols := strings.Split(args[2], market.SymbolSeparator)
 			userToken := symbols[0]
 			side, err := strconv.Atoi(args[7])
-			if err != nil || (side != market.Buy || side != market.Sell) {
+			if err != nil || (side != market.Buy && side != market.Sell) {
 				return errors.New("side out of range")
 			}
 			if side == market.Buy {
@@ -83,7 +83,7 @@ func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				Side:           byte(side),
 				TimeInForce:    timeInForce,
 			}
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, sdk.Msg(msg), false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
 		},
 	}
 
