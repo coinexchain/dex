@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/coinexchain/dex/modules/asset"
@@ -36,7 +37,8 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return errors.New("No have insufficient cet to create market in blockchain")
 			}
 
-			res, _ := cliCtx.QueryWithData(queryRoute, nil)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
+			res, _ := cliCtx.QueryWithData(route, nil)
 			if res == nil {
 				return errors.New("Not query asset info from blockchain")
 			}
