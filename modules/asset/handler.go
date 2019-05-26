@@ -34,20 +34,17 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 	}
 }
 
-func setCoins(ctx sdk.Context, am auth.AccountKeeper, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if !amt.IsValid() {
-		return sdk.ErrInvalidCoins(amt.String())
+func setCoins(ctx sdk.Context, ak auth.AccountKeeper, acc auth.Account, coins sdk.Coins) sdk.Error {
+	if !coins.IsValid() {
+		return sdk.ErrInvalidCoins(coins.String())
 	}
-	acc := am.GetAccount(ctx, addr)
-	if acc == nil {
-		return sdk.ErrUnknownAddress("no issue address")
-	}
-	err := acc.SetCoins(amt)
+
+	err := acc.SetCoins(coins)
 	if err != nil {
 		// Handle w/ #870
 		panic(err)
 	}
-	am.SetAccount(ctx, acc)
+	ak.SetAccount(ctx, acc)
 	return nil
 }
 
@@ -68,7 +65,7 @@ func subTokenFee(ctx sdk.Context, tk TokenKeeper, addr sdk.AccAddress, fee sdk.C
 	}
 
 	newCoins := oldCoins.Sub(fee) // should not panic as spendable coins was already checked
-	if err := setCoins(ctx, tk.ak, addr, newCoins); err != nil {
+	if err := setCoins(ctx, tk.ak, acc, newCoins); err != nil {
 		return err
 	}
 
@@ -87,6 +84,7 @@ func addTokenCoins(ctx sdk.Context, tk TokenKeeper, addr sdk.AccAddress, amt sdk
 
 	oldCoins := acc.GetCoins()
 	newCoins := oldCoins.Add(amt)
+	newCoins.Sort()
 
 	if newCoins.IsAnyNegative() {
 		return sdk.ErrInsufficientCoins(
@@ -94,7 +92,7 @@ func addTokenCoins(ctx sdk.Context, tk TokenKeeper, addr sdk.AccAddress, amt sdk
 		)
 	}
 
-	err := setCoins(ctx, tk.ak, addr, newCoins)
+	err := setCoins(ctx, tk.ak, acc, newCoins)
 
 	return err
 }

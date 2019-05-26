@@ -142,19 +142,17 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 
 //IsTokenFrozen - check whether the coin's owner has frozen "denom", forbiding transmission and exchange.
 func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, symbol string) bool {
-	return tk.GetToken(ctx, symbol).GetIsFrozen()
+	token := tk.GetToken(ctx, symbol)
+	if token != nil {
+		return token.GetIsFrozen()
+	}
+
+	return true
 }
 
 // IsTokenExists - check whether there is a coin named "denom"
 func (tk TokenKeeper) IsTokenExists(ctx sdk.Context, symbol string) bool {
-	tokens := tk.GetAllTokens(ctx)
-	//TODO: optimize with out loop
-	for _, t := range tokens {
-		if symbol == t.GetSymbol() {
-			return true
-		}
-	}
-	return false
+	return tk.GetToken(ctx, symbol) != nil
 }
 
 // -----------------------------------------------------------------------------
