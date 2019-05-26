@@ -15,11 +15,5 @@ A public chain built for the decentralized exchange
 * Smart contracts and open public chain ecosystem
 
 ### build
-```
-go build ./...
-```
 
-### generate vender folder
-```
-go mod vendor
-```
+Reference [quick start](docs/quickstart.md)
