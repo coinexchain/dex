@@ -80,13 +80,13 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 			"case-totalSupply1",
 			NewMsgIssueToken("name", "coin", 9E18+1, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenSupply("issue token supply amt limited to 90 billion"),
+			ErrorInvalidTokenSupply("token total supply limited to 90 billion"),
 		},
 		{
 			"case-totalSupply2",
 			NewMsgIssueToken("name", "coin", -1, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenSupply("issue token supply amt should be positive"),
+			ErrorInvalidTokenSupply("token total supply must a positive"),
 		},
 	}
 

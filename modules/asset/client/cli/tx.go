@@ -69,6 +69,7 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 				var tokens []asset.Token
 				cdc.MustUnmarshalJSON(res, &tokens)
 
+				//TODO: optimize with direct query for the provided token
 				for _, t := range tokens {
 					if msg.Symbol == t.GetSymbol() {
 						return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")

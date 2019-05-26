@@ -5,6 +5,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.34.4
 	github.com/gorilla/mux v1.7.0
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/pkg/errors v0.8.0
 	github.com/rakyll/statik v0.1.6
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.0.3

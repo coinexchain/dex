@@ -148,6 +148,7 @@ func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, symbol string) bool {
 // IsTokenExists - check whether there is a coin named "denom"
 func (tk TokenKeeper) IsTokenExists(ctx sdk.Context, symbol string) bool {
 	tokens := tk.GetAllTokens(ctx)
+	//TODO: optimize with out loop
 	for _, t := range tokens {
 		if symbol == t.GetSymbol() {
 			return true

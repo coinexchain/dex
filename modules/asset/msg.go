@@ -2,7 +2,6 @@ package asset
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"unicode/utf8"
 )
 
 // MsgIssueToken
@@ -48,25 +47,9 @@ func (msg MsgIssueToken) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgIssueToken) ValidateBasic() sdk.Error {
-	if utf8.RuneCountInString(msg.Name) > 32 {
-		return ErrorInvalidTokenName("issue token name limited to 32 unicode characters")
-	}
-
-	if !TokenSymbolRegex.MatchString(msg.Symbol) {
-		return ErrorInvalidTokenSymbol("symbol of token should match to [a-z][a-z0-9]{1,7}")
-	}
-
-	if msg.TotalSupply > MaxTokenAmount {
-		return ErrorInvalidTokenSupply("issue token supply amt limited to 90 billion")
-	}
-	if msg.TotalSupply <= 0 {
-		return ErrorInvalidTokenSupply("issue token supply amt should be positive")
-	}
-	if msg.Owner.Empty() {
-		return ErrorInvalidTokenOwner("missing owner address")
-	}
-
-	return nil
+	_, err := NewToken(msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
+		msg.Mintable, msg.Burnable, msg.AddrFreezable, msg.TokenFreezable)
+	return err
 }
 
 // GetSignBytes Implements Msg.

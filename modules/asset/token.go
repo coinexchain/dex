@@ -72,14 +72,13 @@ type BaseToken struct {
 }
 
 var (
-	// Token symbol can be 2 ~ 8 characters long.
+	// TokenSymbolRegex : Token symbol can be 2 ~ 8 characters long.
 	TokenSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}$")
 )
 
-
 // NewToken - new base token
-func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
-	mintable bool, burnable bool, addrfreezable bool, tokenfreezable bool) (*BaseToken, sdk.Error) {
+func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddress,
+	mintable bool, burnable bool, addrFreezable bool, tokenFreezable bool) (*BaseToken, sdk.Error) {
 
 	t := &BaseToken{}
 	if err := t.SetName(name); err != nil {
@@ -91,14 +90,14 @@ func NewToken(name string, symbol string, amt int64, owner sdk.AccAddress,
 	if err := t.SetOwner(owner); err != nil {
 		return nil, ErrorInvalidTokenOwner(err.Error())
 	}
-	if err := t.SetTotalSupply(amt); err != nil {
+	if err := t.SetTotalSupply(totalSupply); err != nil {
 		return nil, ErrorInvalidTokenSupply(err.Error())
 	}
 
 	t.SetMintable(mintable)
 	t.SetBurnable(burnable)
-	t.SetAddrFreezable(addrfreezable)
-	t.SetTokenFreezable(tokenfreezable)
+	t.SetAddrFreezable(addrFreezable)
+	t.SetTokenFreezable(tokenFreezable)
 
 	if err := t.SetTotalMint(0); err != nil {
 		return nil, ErrorInvalidTotalMint(err.Error())
@@ -148,7 +147,7 @@ func (t BaseToken) GetSymbol() string {
 }
 
 func (t *BaseToken) SetSymbol(symbol string) error {
-	if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", symbol); !m {
+	if !TokenSymbolRegex.MatchString(symbol) {
 		return errors.New("issue token symbol limited to [a-z][a-z0-9]{1,7}")
 	}
 	t.Symbol = symbol
@@ -164,7 +163,7 @@ func (t *BaseToken) SetTotalSupply(amt int64) error {
 	if amt > MaxTokenAmount {
 		return errors.New("token total supply limited to 90 billion")
 	}
-	if amt < 0 {
+	if amt <= 0 {
 		return errors.New("token total supply must a positive")
 	}
 	t.TotalSupply = amt
