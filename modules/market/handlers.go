@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"github.com/btcsuite/btcutil/bech32"
+	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"math"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 
 const (
 	MinimumTokenPricePrecision           = 8
-	MaxTokenPricePrecision               = 12
+	MaxTokenPricePrecision               = 18
 	Buy                                  = 1
 	Sell                                 = 2
 	LimitOrder                 OrderType = 2
@@ -23,7 +24,7 @@ type OrderType = byte
 var CreateMarketSpendCet sdk.Coin
 
 func init() {
-	CreateMarketSpendCet = sdk.NewCoin("cet", sdk.NewInt(1000))
+	CreateMarketSpendCet = types.NewCetCoin(1000)
 }
 
 func NewHandler(k Keeper) sdk.Handler {
