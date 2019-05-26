@@ -58,7 +58,7 @@ func (msg MsgIssueToken) ValidateBasic() sdk.Error {
 	if msg.TotalSupply > MaxTokenAmount {
 		return ErrorInvalidTokenSupply("issue token supply amt limited to 90 billion")
 	}
-	if msg.TotalSupply < 0 {
+	if msg.TotalSupply <= 0 {
 		return ErrorInvalidTokenSupply("issue token supply amt should be positive")
 	}
 	if msg.Owner.Empty() {

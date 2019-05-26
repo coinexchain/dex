@@ -5,16 +5,13 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/client"
-	"regexp"
-	"strings"
-	"unicode/utf8"
-
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 const (
@@ -63,12 +60,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 				return err
 			}
 
-			if utf8.RuneCountInString(msg.Name) > 32 {
-				return fmt.Errorf("issue token name limited to 32 unicode characters")
-			}
-
-			if m, _ := regexp.MatchString("^[a-z][a-z0-9]{1,7}$", msg.Symbol); !m {
-				return fmt.Errorf("issue token symbol limited to [a-z][a-z0-9]{1,7}")
+			if err = msg.ValidateBasic(); err != nil {
+				return err
 			}
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
@@ -81,13 +74,6 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 						return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")
 					}
 				}
-			}
-
-			if msg.TotalSupply > asset.MaxTokenAmount {
-				return fmt.Errorf("issue token totalSupply limited to 9E18")
-			}
-			if msg.TotalSupply <= 0 {
-				return fmt.Errorf("issue token totalSupply should be positive")
 			}
 
 			// ensure account has enough coins
