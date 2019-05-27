@@ -141,8 +141,8 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 }
 
 //IsTokenFrozen - check whether the coin's owner has frozen "denom", forbiding transmission and exchange.
-func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, symbol string) bool {
-	token := tk.GetToken(ctx, symbol)
+func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, denom string) bool {
+	token := tk.GetToken(ctx, denom)
 	if token != nil {
 		return token.GetIsFrozen()
 	}
@@ -151,8 +151,17 @@ func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, symbol string) bool {
 }
 
 // IsTokenExists - check whether there is a coin named "denom"
-func (tk TokenKeeper) IsTokenExists(ctx sdk.Context, symbol string) bool {
-	return tk.GetToken(ctx, symbol) != nil
+func (tk TokenKeeper) IsTokenExists(ctx sdk.Context, denom string) bool {
+	return tk.GetToken(ctx, denom) != nil
+}
+
+// IsTokenIssuer - check whether addr is a token issuer
+func (tk TokenKeeper) IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
+	token := tk.GetToken(ctx, denom)
+	if token != nil && token.GetOwner().Equals(addr) {
+		return true
+	}
+	return false
 }
 
 // -----------------------------------------------------------------------------
