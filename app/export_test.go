@@ -35,9 +35,27 @@ func TestExportGenesisState(t *testing.T) {
 	state := app.exportGenesisState(ctx)
 	require.Equal(t, 1, len(state.Accounts))
 	require.Equal(t, sdk.NewInt(int64(1000)), state.Accounts[0].Coins.AmountOf("cet"))
+	require.Equal(t, true, state.Accounts[0].Activated)
 	require.Equal(t, true, state.Accounts[0].MemoRequired)
 	require.Equal(t, int64(10), state.Accounts[0].LockedCoins[0].UnlockTime)
 	require.Equal(t, sdk.NewInt(int64(10)), state.Accounts[0].LockedCoins[0].Coin.Amount)
 	require.Equal(t, "cet", state.Accounts[0].LockedCoins[0].Coin.Denom)
+
+}
+
+func TestExportDefaultAccountXState(t *testing.T) {
+	_, _, addr := testutil.KeyPubAddr()
+	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
+
+	// app
+	app := initApp(acc)
+	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
+
+	state := app.exportGenesisState(ctx)
+	require.Equal(t, 1, len(state.Accounts))
+	require.Equal(t, sdk.NewInt(int64(1000)), state.Accounts[0].Coins.AmountOf("cet"))
+	require.Equal(t, true, state.Accounts[0].Activated)
+	require.Equal(t, false, state.Accounts[0].MemoRequired)
+	require.Nil(t, state.Accounts[0].LockedCoins)
 
 }

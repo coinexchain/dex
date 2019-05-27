@@ -86,3 +86,35 @@ func TestAddGenesisAccount(t *testing.T) {
 		})
 	}
 }
+
+func TestAddGenesisAccountX(t *testing.T) {
+	addr1 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address())
+	type args struct {
+		appState     app.GenesisState
+		addr         sdk.AccAddress
+		coins        sdk.Coins
+		vestingAmt   sdk.Coins
+		vestingStart int64
+		vestingEnd   int64
+	}
+
+	testcase := []args{
+		{
+			app.GenesisState{},
+			addr1,
+			sdk.NewCoins(),
+			sdk.NewCoins(),
+			0,
+			0,
+		},
+	}
+
+	newstate, err := addGenesisAccount(testcase[0].appState, &accountInfo{testcase[0].addr, testcase[0].coins, testcase[0].vestingAmt, testcase[0].vestingStart, testcase[0].vestingEnd})
+
+	require.Nil(t, err)
+	require.Equal(t, 1, len(newstate.Accounts))
+	require.Equal(t, true, newstate.Accounts[0].Activated)
+	require.Equal(t, false, newstate.Accounts[0].MemoRequired)
+	require.Nil(t, newstate.Accounts[0].LockedCoins)
+
+}
