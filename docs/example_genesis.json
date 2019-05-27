@@ -33,7 +33,10 @@
         "delegated_free": null,
         "delegated_vesting": null,
         "start_time": "0",
-        "end_time": "0"
+        "end_time": "0",
+        "activated": true,
+        "memo_required": false,
+        "locked_coins": null
       },
       {
         "address": "cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20",
@@ -49,7 +52,10 @@
         "delegated_free": null,
         "delegated_vesting": null,
         "start_time": "0",
-        "end_time": "0"
+        "end_time": "0",
+        "activated": true,
+        "memo_required": false,
+        "locked_coins": null
       },
       {
         "address": "cosmos1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q",
@@ -70,7 +76,10 @@
         "delegated_free": null,
         "delegated_vesting": null,
         "start_time": "0",
-        "end_time": "1577836800"
+        "end_time": "1577836800",
+        "activated": true,
+        "memo_required": false,
+        "locked_coins": null
       },
       {
         "address": "cosmos1966f22al7r23h3melq8yt8tnglhweunrxkcezl",
@@ -91,7 +100,10 @@
         "delegated_free": null,
         "delegated_vesting": null,
         "start_time": "0",
-        "end_time": "1609459200"
+        "end_time": "1609459200",
+        "activated": true,
+        "memo_required": false,
+        "locked_coins": null
       },
       {
         "address": "cosmos12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv",
@@ -112,7 +124,10 @@
         "delegated_free": null,
         "delegated_vesting": null,
         "start_time": "0",
-        "end_time": "1640995200"
+        "end_time": "1640995200",
+        "activated": true,
+        "memo_required": false,
+        "locked_coins": null
       },
       {
         "address": "cosmos1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj",
@@ -133,7 +148,10 @@
         "delegated_free": null,
         "delegated_vesting": null,
         "start_time": "0",
-        "end_time": "1672531200"
+        "end_time": "1672531200",
+        "activated": true,
+        "memo_required": false,
+        "locked_coins": null
       },
       {
         "address": "cosmos1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p",
@@ -154,48 +172,7 @@
         "delegated_free": null,
         "delegated_vesting": null,
         "start_time": "0",
-        "end_time": "1704067200"
-      }
-    ],
-    "accountsx": [
-      {
-        "address": "cosmos1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj",
-        "activated": true,
-        "memo_required": false,
-        "locked_coins": null
-      },
-      {
-        "address": "cosmos1966f22al7r23h3melq8yt8tnglhweunrxkcezl",
-        "activated": true,
-        "memo_required": false,
-        "locked_coins": null
-      },
-      {
-        "address": "cosmos1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q",
-        "activated": true,
-        "memo_required": false,
-        "locked_coins": null
-      },
-      {
-        "address": "cosmos12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv",
-        "activated": true,
-        "memo_required": false,
-        "locked_coins": null
-      },
-      {
-        "address": "cosmos1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p",
-        "activated": true,
-        "memo_required": false,
-        "locked_coins": null
-      },
-      {
-        "address": "cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20",
-        "activated": true,
-        "memo_required": false,
-        "locked_coins": null
-      },
-      {
-        "address": "cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy",
+        "end_time": "1704067200",
         "activated": true,
         "memo_required": false,
         "locked_coins": null

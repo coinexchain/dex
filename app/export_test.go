@@ -34,9 +34,10 @@ func TestExportGenesisState(t *testing.T) {
 
 	state := app.exportGenesisState(ctx)
 	require.Equal(t, 1, len(state.Accounts))
-	require.Equal(t, 1, len(state.AccountsX))
-	require.Equal(t, true, state.AccountsX[0].MemoRequired)
-	require.Equal(t, int64(10), state.AccountsX[0].LockedCoins[0].UnlockTime)
-	require.Equal(t, sdk.NewInt(int64(10)), state.AccountsX[0].LockedCoins[0].Coin.Amount)
-	require.Equal(t, "cet", state.AccountsX[0].LockedCoins[0].Coin.Denom)
+	require.Equal(t, sdk.NewInt(int64(1000)), state.Accounts[0].Coins.AmountOf("cet"))
+	require.Equal(t, true, state.Accounts[0].MemoRequired)
+	require.Equal(t, int64(10), state.Accounts[0].LockedCoins[0].UnlockTime)
+	require.Equal(t, sdk.NewInt(int64(10)), state.Accounts[0].LockedCoins[0].Coin.Amount)
+	require.Equal(t, "cet", state.Accounts[0].LockedCoins[0].Coin.Denom)
+
 }

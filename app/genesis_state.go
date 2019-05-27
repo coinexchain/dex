@@ -30,7 +30,6 @@ var (
 // State to Unmarshal
 type GenesisState struct {
 	Accounts     []GenesisAccount          `json:"accounts"`
-	AccountsX    []authx.AccountX          `json:"accountsx"` // additional account info used by CoinEx chain
 	AuthData     auth.GenesisState         `json:"auth"`
 	AuthXData    authx.GenesisState        `json:"authx"`
 	BankData     bank.GenesisState         `json:"bank"`
@@ -48,7 +47,6 @@ type GenesisState struct {
 func NewDefaultGenesisState() GenesisState {
 	gs := GenesisState{
 		Accounts:     nil,
-		AccountsX:    nil,
 		AuthData:     auth.DefaultGenesisState(),
 		AuthXData:    authx.DefaultGenesisState(),
 		BankData:     bank.DefaultGenesisState(),
@@ -70,7 +68,6 @@ func NewDefaultGenesisState() GenesisState {
 
 func NewGenesisState(
 	accounts []GenesisAccount,
-	accountsX []authx.AccountX,
 	authData auth.GenesisState,
 	authxData authx.GenesisState,
 	bankData bank.GenesisState,
@@ -84,7 +81,6 @@ func NewGenesisState(
 
 	return GenesisState{
 		Accounts:     accounts,
-		AccountsX:    accountsX,
 		AuthData:     authData,
 		AuthXData:    authxData,
 		BankData:     bankData,

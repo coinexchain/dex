@@ -5,6 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/authx"
 )
 
 // GenesisAccount defines an account initialized at genesis.
@@ -20,6 +22,11 @@ type GenesisAccount struct {
 	DelegatedVesting sdk.Coins `json:"delegated_vesting"` // delegated vesting coins at time of delegation
 	StartTime        int64     `json:"start_time"`        // vesting start time (UNIX Epoch time)
 	EndTime          int64     `json:"end_time"`          // vesting end time (UNIX Epoch time)
+
+	//accountx fields
+	Activated    bool               `json:"activated"`
+	MemoRequired bool               `json:"memo_required"` // if memo is required for receiving coins
+	LockedCoins  []authx.LockedCoin `json:"locked_coins"`
 }
 
 // convert GenesisAccount to auth.BaseAccount
@@ -63,6 +70,7 @@ func NewGenesisAccount(acc *auth.BaseAccount) GenesisAccount {
 		Coins:         acc.Coins,
 		AccountNumber: acc.AccountNumber,
 		Sequence:      acc.Sequence,
+		Activated:     true,
 	}
 }
 
@@ -83,5 +91,6 @@ func NewGenesisAccountI(acc auth.Account) GenesisAccount {
 		gacc.EndTime = vacc.GetEndTime()
 	}
 
+	gacc.Activated = true
 	return gacc
 }

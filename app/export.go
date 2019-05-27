@@ -173,10 +173,10 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 
 func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
 	// iterate to get the accounts
-	accounts := app.getAllAccountsForGenesis(ctx)
-	accountsX := app.getAllAccountsXForGenesis(ctx)
+	accountsX := app.getAccountsXMapForGenesis(ctx)
+	accounts := app.getAllAccountsForGenesis(ctx, accountsX)
 
-	return NewGenesisState(accounts, accountsX,
+	return NewGenesisState(accounts,
 		auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
 		authx.ExportGenesis(ctx, app.accountXKeeper),
 		bank.ExportGenesis(ctx, app.bankKeeper),
@@ -190,9 +190,12 @@ func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
 	)
 }
 
-func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context) (accounts []GenesisAccount) {
+func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context, accountsX map[string]authx.AccountX) (accounts []GenesisAccount) {
 	appendFn := func(acc auth.Account) (stop bool) {
 		account := NewGenesisAccountI(acc)
+		account.Activated = accountsX[account.Address.String()].Activated
+		account.MemoRequired = accountsX[account.Address.String()].MemoRequired
+		account.LockedCoins = accountsX[account.Address.String()].LockedCoins
 		accounts = append(accounts, account)
 		return false
 	}
@@ -203,6 +206,15 @@ func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context) (accounts []Ge
 func (app *CetChainApp) getAllAccountsXForGenesis(ctx sdk.Context) (accountsX []authx.AccountX) {
 	appendFn := func(accountX authx.AccountX) (stop bool) {
 		accountsX = append(accountsX, accountX)
+		return false
+	}
+	app.accountXKeeper.IterateAccounts(ctx, appendFn)
+	return
+}
+func (app *CetChainApp) getAccountsXMapForGenesis(ctx sdk.Context) (accountsX map[string]authx.AccountX) {
+	accountsX = make(map[string]authx.AccountX)
+	appendFn := func(accountX authx.AccountX) (stop bool) {
+		accountsX[accountX.Address.String()] = accountX
 		return false
 	}
 	app.accountXKeeper.IterateAccounts(ctx, appendFn)
