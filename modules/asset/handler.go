@@ -2,6 +2,7 @@ package asset
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset/tags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 )
@@ -114,7 +115,14 @@ func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk
 		return err.Result()
 	}
 
-	return sdk.Result{}
+	resTags := sdk.NewTags(
+		tags.Category, tags.TxCategory,
+		tags.Token, msg.Symbol,
+		tags.Owner, msg.Owner.String(),
+	)
+	return sdk.Result{
+		Tags: resTags,
+	}
 }
 
 // handleMsgTransferOwnership - Handle MsgTransferOwnership
