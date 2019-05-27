@@ -2,8 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
-	"strconv"
 	"strings"
 
 	"github.com/coinexchain/dex/modules/market"
@@ -15,6 +13,7 @@ import (
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
