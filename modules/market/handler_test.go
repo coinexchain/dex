@@ -1,6 +1,9 @@
 package market
 
 import (
+	"testing"
+	"time"
+
 	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -8,8 +11,6 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
-	"testing"
-	"time"
 )
 
 type testInput struct {
@@ -39,7 +40,7 @@ func prepareMockInput() testInput {
 
 func TestMarketInfoSetFailed(t *testing.T) {
 	input := prepareMockInput()
-	msgMarketInfo := MsgCreateMarketInfo{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 8}
+	msgMarketInfo := MsgCreateMarketInfo{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 6}
 	ret := input.handler(input.ctx, msgMarketInfo)
 	require.Equal(t, false, ret.IsOK(), "create market info should failed")
 }
@@ -47,8 +48,8 @@ func TestMarketInfoSetFailed(t *testing.T) {
 func TestMarketInfoSetSuccess(t *testing.T) {
 	input := prepareMockInput()
 	msgMarketInfo := MsgCreateMarketInfo{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 8}
-	/*ret := */ input.handler(input.ctx, msgMarketInfo)
-	//require.Equal(t, true, ret.IsOK(), "create market info should succeed")
+	ret := input.handler(input.ctx, msgMarketInfo)
+	require.Equal(t, true, ret.IsOK(), "create market info should succeed")
 }
 
 func TestCreateGTEOrderFailed(t *testing.T) {

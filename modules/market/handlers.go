@@ -71,8 +71,8 @@ func handlerMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper
 func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
 	key := marketStoreKey(marketIdetifierPrefix, msg.Stock+SymbolSeparator+msg.Money)
 	store := ctx.KVStore(keeper.marketKey)
-	if v := store.Get(key); v == nil {
-		return ErrNoExistKeyInStore().Result()
+	if v := store.Get(key); v != nil {
+		return ErrInvalidSymbol().Result()
 	}
 
 	if !keeper.axk.IsTokenExists(msg.Money) || !keeper.axk.IsTokenExists(msg.Stock) {
@@ -141,22 +141,14 @@ func checkMsgCreateGTEOrder(store sdk.KVStore, msg MsgCreateGTEOrder, keeper Kee
 		marketInfo MarketInfo
 	)
 
-	if msg.Side != match.BUY && msg.Side != match.SELL {
-		return ErrInvalidTradeSide().Result()
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
 	}
 
 	values := strings.Split(msg.Symbol, SymbolSeparator)
-	if len(values) != 2 {
-		return ErrInvalidSymbol().Result()
-	}
-
 	denom = values[0]
 	if msg.Side == match.BUY {
 		denom = values[1]
-	}
-
-	if msg.OrderType != LimitOrder {
-		return ErrInvalidOrderType().Result()
 	}
 
 	if value = store.Get(marketStoreKey(marketIdetifierPrefix, msg.Symbol)); value == nil {

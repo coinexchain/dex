@@ -2,6 +2,7 @@ package market
 
 import (
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/market/match"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strings"
 )
@@ -89,11 +90,15 @@ func (msg MsgCreateGTEOrder) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("price precision value out of range[0, 18]")
 	}
 
+	if msg.Side != match.BUY && msg.Side != match.SELL {
+		return ErrInvalidTradeSide()
+	}
+
 	if msg.OrderType != LimitOrder {
 		return ErrInvalidOrderType()
 	}
 
-	if len(strings.Split(msg.Symbol, SymbolSeparator)) < 2 {
+	if len(strings.Split(msg.Symbol, SymbolSeparator)) != 2 {
 		return ErrInvalidSymbol()
 	}
 
