@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
+func RegisterTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
 	r.HandleFunc("/market/creategteorder", createGTEOrderHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc("/market/createmarket", createMarketHandlerFn(cdc, cliCtx)).Methods("POST")
 }

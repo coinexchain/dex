@@ -18,7 +18,6 @@ import (
 
 var (
 	FlagSymbol      = "symbol"
-	FlagSender      = "sender"
 	FlagOrderType   = "order-type"
 	FlagPrice       = "price"
 	FlagQuantity    = "quantity"
@@ -28,7 +27,6 @@ var (
 
 var createGTEOrderFlags = []string{
 	FlagSymbol,
-	FlagSender,
 	FlagOrderType,
 	FlagPrice,
 	FlagQuantity,
@@ -39,14 +37,28 @@ var createGTEOrderFlags = []string{
 func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "creategteoreder",
-		Short: "",
-		Long:  "",
+		Short: "Create an GTE order and sign tx",
+		Long: `Create an GTE order and sign tx, broadcast to nodes.
+
+Example:
+$ cetcli tx market creategteoreder --symbol="btc/cet"
+	--order-type=2 \
+	--price=520 \
+	--quantity=10000000 \
+	--side=1 \
+	--time-in-force=1000
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
 			sender := cliCtx.GetFromAddress()
-			msg, err := parseCreateOrderFlags(sender)
+			sequence, err := cliCtx.GetAccountSequence(sender)
+			if err != nil {
+				return err
+			}
+
+			msg, err := parseCreateOrderFlags(sender, sequence)
 			if err != nil {
 				return errors.Errorf("tx flag is error, pls see help : " +
 					"$ cetcli tx market creategteoreder -h")
@@ -73,7 +85,6 @@ func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String(FlagSender, "", "The address to create a order")
 	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
 	cmd.Flags().Int(FlagOrderType, -1, "The order type limited to 2")
 	cmd.Flags().Int(FlagPrice, -1, "The price in the order")
@@ -88,7 +99,7 @@ func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return cmd
 }
 
-func parseCreateOrderFlags(sender sdk.AccAddress) (*market.MsgCreateGTEOrder, error) {
+func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgCreateGTEOrder, error) {
 	for _, flag := range createGTEOrderFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
@@ -105,6 +116,7 @@ func parseCreateOrderFlags(sender sdk.AccAddress) (*market.MsgCreateGTEOrder, er
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
 		Quantity:       viper.GetInt64(FlagQuantity),
 		TimeInForce:    viper.GetInt(FlagTimeInForce),
+		Sequence:       sequence,
 	}
 
 	return msg, nil

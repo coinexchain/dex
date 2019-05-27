@@ -17,14 +17,12 @@ import (
 )
 
 const (
-	FlagCreator        = "creator"
 	FlagStock          = "stock"
 	FlagMoney          = "money"
 	FlagPricePrecision = "price-precision"
 )
 
 var createMarketFlags = []string{
-	FlagCreator,
 	FlagStock,
 	FlagMoney,
 	FlagPricePrecision,
@@ -40,7 +38,9 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-			msg, err := parseCreateMarketFlags()
+
+			creator := cliCtx.GetFromAddress()
+			msg, err := parseCreateMarketFlags(creator)
 			if err != nil {
 				return errors.Errorf("tx flag is error, pls see help : " +
 					"$ cetcli tx market createmarket -h")
@@ -78,7 +78,6 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String(FlagCreator, "", "The address to create a trading market")
 	cmd.Flags().String(FlagStock, "", "The exist token symbol as stock")
 	cmd.Flags().String(FlagMoney, "", "The exist token symbol as money")
 	cmd.Flags().Int(FlagPricePrecision, -1, "The trading market price precision")
@@ -109,7 +108,7 @@ func IsExistStockAndMoneySymbol(stock, money string, tokens []asset.Token) bool 
 	return false
 }
 
-func parseCreateMarketFlags() (*market.MsgCreateMarketInfo, error) {
+func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo, error) {
 	for _, flag := range createMarketFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
@@ -117,16 +116,11 @@ func parseCreateMarketFlags() (*market.MsgCreateMarketInfo, error) {
 		}
 	}
 
-	addr, err := sdk.AccAddressFromBech32(viper.GetString(FlagCreator))
-	if err != nil {
-		return nil, err
-	}
-
 	msg := &market.MsgCreateMarketInfo{
 		Stock:          viper.GetString(FlagStock),
 		Money:          viper.GetString(FlagMoney),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
-		Creator:        addr,
+		Creator:        creator,
 	}
 	return msg, nil
 }

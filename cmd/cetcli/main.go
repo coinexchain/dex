@@ -47,6 +47,9 @@ import (
 	assrest "github.com/coinexchain/dex/modules/asset/client/rest"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
 	bankxrest "github.com/coinexchain/dex/modules/bankx/client/rest"
+	"github.com/coinexchain/dex/modules/market"
+	mktclient "github.com/coinexchain/dex/modules/market/client"
+	mktrest "github.com/coinexchain/dex/modules/market/client/rest"
 )
 
 func main() {
@@ -95,6 +98,7 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 	// TODO: Make the lcd command take a list of ModuleClient
 	mc := []sdk.ModuleClients{
 		assclient.NewModuleClient(as.StoreKey, cdc),
+		mktclient.NewModuleClient(market.MarketKey, cdc),
 		govClient.NewModuleClient(gv.StoreKey, cdc),
 		distClient.NewModuleClient(distcmd.StoreKey, cdc),
 		stakingclient.NewModuleClient(st.StoreKey, cdc),
@@ -211,6 +215,7 @@ func registerRoutes(rs *lcd.RestServer) {
 	slashing.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	gov.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	assrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, as.StoreKey)
+	mktrest.RegisterTXRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 }
 
 func registerSwaggerUI(rs *lcd.RestServer) {
