@@ -19,6 +19,10 @@ Generating configuration files
 
 > $HOME/.cetd/config/genesis.json
 
+## bootstrap single node test env
+```bash
+./scripts/setup_single_testing_node.sh
+```
 
 ## Start cetd
 
