@@ -422,6 +422,82 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /market/gteorder:
+    post:
+      summary: Create GTE order in blockchain
+      tags:
+        - ICS20
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: create order tx
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              order-type:
+                type: string
+              symbol:
+                type: string
+              price-precision:
+                type: integer
+              side:
+                type: integer
+              price:
+                type: integer
+              quantity:
+                type: integer
+              time-in-force:
+                type: integer
+      responses:
+        202:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /market/marketinfo:
+    post:
+      summary: Create market in blockchain
+      tags:
+        - ICS20
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Create market tx
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              stock:
+                type: string
+              money:
+                type: string
+              price-precision:
+                type: integer
+      responses:
+        202:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
   /auth/accounts/{address}:
     get:
       summary: Get the account information on blockchain
@@ -1923,6 +1999,19 @@ paths:
         500:
           description: Internal Server Error
 definitions:
+  MarketInfo:
+    type: object
+    properties:
+      stock:
+        type: string
+      money:
+        type: string
+      price-precision:
+        type: integer
+    example:
+      stock: bch
+      money: cet
+      price-precision: 8
   CheckTxResult:
     type: object
     properties:
