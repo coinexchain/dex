@@ -129,9 +129,11 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeInsufficientCoins, result.Code)
 
+	// end block & commit
 	app.EndBlock(abci.RequestEndBlock{Height: 1})
 	app.Commit()
 
+	// check coins
 	ctx := app.NewContext(true, abci.Header{})
 	require.Equal(t, int64(10000000000-100),
 		app.accountKeeper.GetAccount(ctx, fromAddr).GetCoins().AmountOf("cet").Int64())
