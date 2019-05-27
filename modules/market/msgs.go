@@ -19,7 +19,7 @@ type MsgCreateMarketInfo struct {
 	Stock          string         `json:"stock"`
 	Money          string         `json:"money"`
 	Creator        sdk.AccAddress `json:"crater"`
-	PricePrecision byte           `json:"priceprecision"`
+	PricePrecision byte           `json:"price_precision"`
 }
 
 func NewMsgCreateMarketInfo(stock, money string, crater sdk.AccAddress, priceprecision byte) MsgCreateMarketInfo {
