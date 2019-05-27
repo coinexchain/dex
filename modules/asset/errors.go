@@ -13,6 +13,7 @@ const (
 	CodeInvalidTotalMint     = 206
 	CodeInvalidTotalBurn     = 207
 	CodeDuplicateTokenSymbol = 208
+	CodeInvalidFrozenState   = 209
 )
 
 func ErrorInvalidTokenName(fmt string) sdk.Error {
@@ -38,4 +39,7 @@ func ErrorInvalidTotalBurn(fmt string) sdk.Error {
 }
 func ErrorDuplicateTokenSymbol(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeDuplicateTokenSymbol, fmt)
+}
+func ErrorInvalidFrozenState(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidFrozenState, fmt)
 }

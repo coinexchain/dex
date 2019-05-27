@@ -118,6 +118,10 @@ func (t *BaseToken) IsValid() error {
 		return err
 	}
 
+	if !t.TokenFreezable && t.IsFrozen {
+		return ErrorInvalidFrozenState("Invalid Frozen state")
+	}
+
 	if t.TotalMint < 0 {
 		return ErrorInvalidTotalMint(fmt.Sprintf("Invalid total mint: %d", t.TotalMint))
 	}
