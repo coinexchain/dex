@@ -83,17 +83,20 @@ func (msg MsgTransferOwnership) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgTransferOwnership) ValidateBasic() sdk.Error {
-	panic("implement me")
+	if msg.OriginalOwner.Empty() || msg.NewOwner.Empty() {
+		return ErrorInvalidTokenOwner("transfer owner ship need a valid addr")
+	}
+	return nil
 }
 
 // GetSignBytes Implements Msg.
 func (msg MsgTransferOwnership) GetSignBytes() []byte {
-	panic("implement me")
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
 func (msg MsgTransferOwnership) GetSigners() []sdk.AccAddress {
-	panic("implement me")
+	return []sdk.AccAddress{msg.OriginalOwner}
 }
 
 // MsgFreezeAddress

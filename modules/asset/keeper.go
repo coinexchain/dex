@@ -140,6 +140,25 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 	return nil
 }
 
+//TransferOwnership - transfer token owner
+func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnership) sdk.Error {
+	token := tk.GetToken(ctx, msg.Symbol)
+	if token == nil {
+		return ErrorNoTokenPersist("transfer invalid token ownership")
+	}
+	if !token.GetOwner().Equals(msg.OriginalOwner) {
+		return ErrorInvalidTokenOwner("token original owner is invalid")
+	}
+
+	if err := token.SetOwner(msg.NewOwner); err != nil {
+		return ErrorInvalidTokenOwner("token new owner is invalid")
+	}
+	return nil
+}
+
+// -----------------------------------------------------------------------------
+// ExpectedAssertStatusKeeper
+
 //IsTokenFrozen - check whether the coin's owner has frozen "denom", forbiding transmission and exchange.
 func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, denom string) bool {
 	token := tk.GetToken(ctx, denom)
