@@ -40,7 +40,7 @@ func TestIssueTokenMsg(t *testing.T) {
 	res := h(input.ctx, msg)
 	require.False(t, res.IsOK())
 
-	//case2: base-case is ok
+	//case 2: base-case is ok
 	acc := input.tk.ak.NewAccountWithAddress(input.ctx, tAccAddr)
 	require.NoError(t, acc.SetCoins(types.NewCetCoins(1E18)))
 	input.tk.ak.SetAccount(input.ctx, acc)

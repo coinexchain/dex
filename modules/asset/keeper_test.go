@@ -1,11 +1,11 @@
 package asset
 
 import (
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTokenKeeper_IssueToken(t *testing.T) {
@@ -74,7 +74,44 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 	input.tk.RemoveToken(input.ctx, token1)
 
 	// get token
-	bz := input.tk.GetToken(input.ctx, token1.GetSymbol())
-	require.Nil(t, bz)
+	res := input.tk.GetToken(input.ctx, token1.GetSymbol())
+	require.Nil(t, res)
 
+}
+
+func TestTokenKeeper_TransferOwnership(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	var addr1, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		false, false, false, false)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg := NewMsgTransferOwnership(symbol, tAccAddr, addr1)
+	err = input.tk.TransferOwnership(input.ctx, msg)
+	require.NoError(t, err)
+
+	// get token
+	token := input.tk.GetToken(input.ctx, symbol)
+	require.NotNil(t, token)
+	require.Equal(t, addr1.String(), token.GetOwner().String())
+
+	//case2: invalid token
+	msg = NewMsgTransferOwnership("xyz", tAccAddr, addr1)
+	err = input.tk.TransferOwnership(input.ctx, msg)
+	require.Error(t, err)
+
+	//case3: invalid original owner
+	msg = NewMsgTransferOwnership(symbol, tAccAddr, addr1)
+	err = input.tk.TransferOwnership(input.ctx, msg)
+	require.Error(t, err)
+
+	//case4: invalid new owner
+	msg = NewMsgTransferOwnership(symbol, addr1, sdk.AccAddress{})
+	err = input.tk.TransferOwnership(input.ctx, msg)
+	require.Error(t, err)
 }
