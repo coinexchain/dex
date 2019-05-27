@@ -7,4 +7,4 @@ fi
 
 statik -src=./cmd/cetcli/swagger -dest=./cmd/cetcli -f -m
 
-(go build github.com/coinexchain/dex/cmd/cetd && go build github.com/coinexchain/dex/cmd/cetcli) && echo "---------- build OK" || echo "---------- build Failed"
+(go build -gcflags='all=-N -l' github.com/coinexchain/dex/cmd/cetd  && go build -gcflags='all=-N -l' github.com/coinexchain/dex/cmd/cetcli ) && echo "---------- build OK" || echo "---------- build Failed"
