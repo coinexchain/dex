@@ -111,10 +111,6 @@ func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) sdk.Error {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(tk.key)
 
-	if tk.IsTokenExists(ctx, symbol) {
-		return ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
-	}
-
 	bz, err := tk.cdc.MarshalBinaryBare(token)
 	if err != nil {
 		return sdk.ErrInternal(err.Error())
@@ -132,6 +128,11 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 	if err != nil {
 		return err
 	}
+
+	if tk.IsTokenExists(ctx, token.Symbol) {
+		return ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
+	}
+
 	err = tk.SetToken(ctx, token)
 	if err != nil {
 		return err
@@ -144,7 +145,7 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnership) sdk.Error {
 	token := tk.GetToken(ctx, msg.Symbol)
 	if token == nil {
-		return ErrorNoTokenPersist("transfer invalid token ownership")
+		return ErrorNoTokenPersist("transfer invalid token`s ownership")
 	}
 	if !token.GetOwner().Equals(msg.OriginalOwner) {
 		return ErrorInvalidTokenOwner("token original owner is invalid")
@@ -152,6 +153,9 @@ func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnershi
 
 	if err := token.SetOwner(msg.NewOwner); err != nil {
 		return ErrorInvalidTokenOwner("token new owner is invalid")
+	}
+	if err := tk.SetToken(ctx, token); err != nil {
+		return nil
 	}
 	return nil
 }

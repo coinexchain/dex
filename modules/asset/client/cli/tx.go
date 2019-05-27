@@ -125,11 +125,11 @@ func TransferOwnershipCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 Example:
 $ cetcli tx asset transfer-ownership --symbol="abc" \
-	--new-owner=newkey
+	--new-owner=newkey \
     --from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 			originalOwner := cliCtx.GetFromAddress()
 			msg, err := parseTransferOwnershipFlags(originalOwner)
 			if err != nil {
@@ -138,6 +138,15 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 
 			if err = msg.ValidateBasic(); err != nil {
 				return err
+			}
+
+			bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(msg.Symbol))
+			if err != nil {
+				return err
+			}
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
+			if res, _ := cliCtx.QueryWithData(route, bz); res == nil {
+				return fmt.Errorf("transfer invalid token`s ownership")
 			}
 
 			// ensure account has enough coins
@@ -157,7 +166,7 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token ownership be transferred")
+	cmd.Flags().String(FlagSymbol, "", "Which token`s ownership be transferred")
 	cmd.Flags().String(FlagNewOwner, "", "Who do you want to transfer to ?")
 
 	cmd.MarkFlagRequired(client.FlagFrom)
