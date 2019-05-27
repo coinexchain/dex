@@ -72,7 +72,7 @@ func precede(a, b OrderForTrade) bool {
 
 // Given price, execute the orders in bidList and askList
 func ExecuteOrderList(price sdk.Dec, bidList []OrderForTrade, askList []OrderForTrade) (newBidList []OrderForTrade, newAskList []OrderForTrade) {
-	for i := 0; i < 10; i++ {
+	for {
 		if len(askList) == 0 || len(bidList) == 0 ||
 			bidList[0].GetPrice().LT(price) || askList[0].GetPrice().GT(price) {
 			break
@@ -262,10 +262,12 @@ func calculateExecutionPriceWithRef(highPrice, midPrice, lowPrice sdk.Dec, ppLis
 	allImbalanceIsPositive := true
 	ppWithHighestPrice := ppListSameImbalance[0]
 	ppWithLowestPrice := ppListSameImbalance[len(ppListSameImbalance)-1]
-	allPriceLargerThanHigh := ppWithLowestPrice.price.GT(highPrice)
-	allPriceSmallerThanHigh := ppWithHighestPrice.price.LT(highPrice)
-	allPriceLargerThanLow := ppWithLowestPrice.price.GT(lowPrice)
-	allPriceSmallerThanLow := ppWithHighestPrice.price.LT(lowPrice)
+	ppWithMiddlePrice := ppListSameImbalance[len(ppListSameImbalance)/2]
+	midPriceIsZero := midPrice.Equal(sdk.ZeroDec())
+	allPriceLargerThanHigh := ppWithLowestPrice.price.GT(highPrice) && !midPriceIsZero
+	allPriceSmallerThanHigh := ppWithHighestPrice.price.LT(highPrice) && !midPriceIsZero
+	allPriceLargerThanLow := ppWithLowestPrice.price.GT(lowPrice) && !midPriceIsZero
+	allPriceSmallerThanLow := ppWithHighestPrice.price.LT(lowPrice) && !midPriceIsZero
 	for _, pp := range ppListSameImbalance {
 		if pp.imbalance < 0 {
 			allImbalanceIsPositive = false
@@ -303,7 +305,9 @@ func calculateExecutionPriceWithRef(highPrice, midPrice, lowPrice sdk.Dec, ppLis
 			When both positive and negative surplus amounts exists at the lowest, if the reference price falls at / into these prices, the reference price should be chose, otherwise the price closest to the reference price would be chosen.
 		*/
 		//fmt.Println("Imbalance : Negative and Positive")
-		if ppWithHighestPrice.price.LT(midPrice) {
+		if midPriceIsZero {
+			return ppWithMiddlePrice.price
+		} else if ppWithHighestPrice.price.LT(midPrice) {
 			return ppWithHighestPrice.price
 		} else if ppWithLowestPrice.price.GT(midPrice) {
 			return ppWithLowestPrice.price

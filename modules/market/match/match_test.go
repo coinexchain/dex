@@ -348,6 +348,11 @@ func createDealRecord6_4() []dealRecord {
 		newDR("buyer1", "seller2", 25, 100),
 	}
 }
+func createDealRecord6_5() []dealRecord {
+	return []dealRecord{
+		newDR("buyer1", "seller2", 25, 97),
+	}
+}
 
 func testGetExecutionPrice(mid int64, orders []OrderForTrade) sdk.Dec {
 	midPrice := sdk.NewDec(mid)
@@ -475,4 +480,5 @@ func TestMatch_1(t *testing.T) {
 	testMatch("6_2", 97, createOrders6(), createDealRecord6_2())
 	testMatch("6_3", 90, createOrders6(), createDealRecord6_3())
 	testMatch("6_4", 110, createOrders6(), createDealRecord6_4())
+	testMatch("6_5", 0, createOrders6(), createDealRecord6_5())
 }
