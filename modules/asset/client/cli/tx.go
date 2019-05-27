@@ -72,7 +72,7 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 			}
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
 			if res, _ := cliCtx.QueryWithData(route, bz); res != nil {
-				return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")
+				return fmt.Errorf("token symbol already exists，please query tokens and issue another symbol")
 			}
 
 			// ensure account has enough coins
