@@ -2,10 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"strconv"
-
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market"
+	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
@@ -20,9 +19,16 @@ import (
 const (
 	FlagCreator        = "creator"
 	FlagStock          = "stock"
-	FlagMonet          = "money"
+	FlagMoney          = "money"
 	FlagPricePrecision = "price-precision"
 )
+
+var createMarketFlags = []string{
+	FlagCreator,
+	FlagStock,
+	FlagMoney,
+	FlagPricePrecision,
+}
 
 func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
@@ -30,14 +36,19 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Short: "generate tx to create market",
 		Long: "generate a tx and sign it to create market in dex blockchain." +
 			"Example : createmarket [creator] [stock] [money] [priceprecision]",
-		Args: cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-			accout, err := cliCtx.GetAccount([]byte(args[0]))
+			msg, err := parseCreateMarketFlags()
 			if err != nil {
-				return errors.Errorf("Not find account with the addr : %s", args[0])
+				return errors.Errorf("tx flag is error, pls see help : " +
+					"$ cetcli tx market createmarket -h")
+			}
+
+			accout, err := cliCtx.GetAccount(msg.Creator)
+			if err != nil {
+				return errors.Errorf("Not find account with the addr : %s", msg.Creator)
 			}
 
 			if !accout.GetCoins().IsAllGTE(sdk.Coins{market.CreateMarketSpendCet}) {
@@ -53,18 +64,15 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			var tokens []asset.Token
 			cdc.MustUnmarshalJSON(res, &tokens)
 
-			if !IsExistStockAndMoneySymbol(args[1], args[1], tokens) {
+			if !IsExistStockAndMoneySymbol(msg.Stock, msg.Money, tokens) {
 				return errors.New("stock or monry is not exist in blockchain")
 			}
 
-			pricePrecision, err := strconv.Atoi(args[3])
-			if err != nil || (pricePrecision < market.MinimumTokenPricePrecision ||
-				pricePrecision > market.MaxTokenPricePrecision) {
+			if msg.PricePrecision < market.MinimumTokenPricePrecision ||
+				msg.PricePrecision > market.MaxTokenPricePrecision {
 				return errors.Errorf("price precision out of range [%d, %d]",
 					market.MinimumTokenPricePrecision, market.MaxTokenPricePrecision)
 			}
-
-			msg := market.NewMsgCreateMarketInfo(args[1], args[2], []byte(args[0]), byte(pricePrecision))
 
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
 		},
@@ -72,8 +80,12 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 	cmd.Flags().String(FlagCreator, "", "The address to create a trading market")
 	cmd.Flags().String(FlagStock, "", "The exist token symbol as stock")
-	cmd.Flags().String(FlagMonet, "", "")
+	cmd.Flags().String(FlagMoney, "", "The exist token symbol as money")
+	cmd.Flags().Int(FlagPricePrecision, -1, "The trading market price precision")
 
+	for _, flag := range createMarketFlags {
+		cmd.MarkFlagRequired(flag)
+	}
 	return cmd
 }
 
@@ -95,4 +107,26 @@ func IsExistStockAndMoneySymbol(stock, money string, tokens []asset.Token) bool 
 		return true
 	}
 	return false
+}
+
+func parseCreateMarketFlags() (*market.MsgCreateMarketInfo, error) {
+	for _, flag := range createMarketFlags {
+		if viper.Get(flag) == nil {
+			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+				"$ cetcli tx market createmarket", flag)
+		}
+	}
+
+	addr, err := sdk.AccAddressFromBech32(viper.GetString(FlagCreator))
+	if err != nil {
+		return nil, err
+	}
+
+	msg := &market.MsgCreateMarketInfo{
+		Stock:          viper.GetString(FlagStock),
+		Money:          viper.GetString(FlagMoney),
+		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
+		Creator:        addr,
+	}
+	return msg, nil
 }

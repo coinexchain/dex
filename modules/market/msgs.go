@@ -1,7 +1,9 @@
 package market
 
 import (
+	"github.com/coinexchain/dex/modules/asset"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"strings"
 )
 
 // RouterKey is the name of the bankx module
@@ -82,8 +84,21 @@ func (msg MsgCreateGTEOrder) ValidateBasic() sdk.Error {
 	if len(msg.Symbol) == 0 {
 		return sdk.ErrInvalidAddress("missing GTE order symbol identifier")
 	}
-	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
+	if msg.PricePrecision < MinimumTokenPricePrecision ||
+		msg.PricePrecision > MaxTokenPricePrecision {
 		return sdk.ErrInvalidAddress("price precision value out of range[0, 18]")
+	}
+
+	if msg.OrderType != LimitOrder {
+		return ErrInvalidOrderType()
+	}
+
+	if len(strings.Split(msg.Symbol, SymbolSeparator)) < 2 {
+		return ErrInvalidSymbol()
+	}
+
+	if msg.Price < 0 || msg.Price > asset.MaxTokenAmount {
+		return ErrInvalidPrice()
 	}
 
 	//TODO: Add Other checks

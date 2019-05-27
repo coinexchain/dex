@@ -29,6 +29,11 @@ func ErrInvalidPricePrecision() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price precision out of range")
 }
 
+func ErrInvalidPrice() sdk.Error {
+
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price out of range [0, 9E18]")
+}
+
 func ErrInvalidTokenIssuer() sdk.Error {
 
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidTokenIssuer, "Invalid token issuer")

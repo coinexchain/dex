@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+	"github.com/spf13/viper"
 	"strconv"
 	"strings"
 
@@ -15,78 +17,96 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	FlagSymbol      = "symbol"
+	FlagSender      = "sender"
+	FlagOrderType   = "order-type"
+	FlagPrice       = "price"
+	FlagQuantity    = "quantity"
+	FlagSide        = "side"
+	FlagTimeInForce = "time-in-force"
+)
+
+var createGTEOrderFlags = []string{
+	FlagSymbol,
+	FlagSender,
+	FlagOrderType,
+	FlagPrice,
+	FlagQuantity,
+	FlagSide,
+	FlagTimeInForce,
+}
+
 func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "creategteoreder",
 		Short: "",
 		Long:  "",
-		Args:  cobra.ExactArgs(9),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			accout, err := cliCtx.GetAccount([]byte(args[0]))
+			sender := cliCtx.GetFromAddress()
+			msg, err := parseCreateOrderFlags(sender)
 			if err != nil {
-				return errors.Errorf("Not find account with the addr : %s", args[0])
+				return errors.Errorf("tx flag is error, pls see help : " +
+					"$ cetcli tx market creategteoreder -h")
 			}
-
-			sequence, err := strconv.Atoi(args[1])
-			if err != nil {
+			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}
 
 			symbols := strings.Split(args[2], market.SymbolSeparator)
 			userToken := symbols[0]
-			side, err := strconv.Atoi(args[7])
-			if err != nil || (side != match.BUY && side != match.SELL) {
-				return errors.New("side out of range")
-			}
-			if side == match.BUY {
+			if msg.Side == match.BUY {
 				userToken = symbols[1]
 			}
 
-			quantity, err := strconv.Atoi(args[6])
+			account, err := cliCtx.GetAccount(sender)
 			if err != nil {
 				return err
 			}
-			if !accout.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(int64(quantity)))}) {
+			if !account.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(msg.Quantity))}) {
 				return errors.New("No have insufficient cet to create market in blockchain")
 			}
 
-			ordertype, err := strconv.Atoi(args[3])
-			if err != nil || (ordertype != int(market.LimitOrder)) {
-				return errors.Errorf("order type out of range")
-			}
-
-			pricePrecision, err := strconv.Atoi(args[4])
-			if err != nil {
-				return err
-			}
-
-			price, err := strconv.Atoi(args[5])
-			if err != nil {
-				return err
-			}
-
-			timeInForce, err := strconv.Atoi(args[8])
-			if err != nil {
-				return err
-			}
-
-			msg := market.MsgCreateGTEOrder{
-				Sender:         []byte(args[0]),
-				Sequence:       uint64(sequence),
-				Symbol:         args[2],
-				OrderType:      byte(ordertype),
-				PricePrecision: byte(pricePrecision),
-				Price:          int64(price),
-				Quantity:       int64(quantity),
-				Side:           byte(side),
-				TimeInForce:    timeInForce,
-			}
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
 		},
 	}
 
+	cmd.Flags().String(FlagSender, "", "The address to create a order")
+	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
+	cmd.Flags().Int(FlagOrderType, -1, "The order type limited to 2")
+	cmd.Flags().Int(FlagPrice, -1, "The price in the order")
+	cmd.Flags().Int(FlagQuantity, -1, "The number of tokens will be trade in the order ")
+	cmd.Flags().Int(FlagSide, -1, "The side in the order")
+	cmd.Flags().Int(FlagTimeInForce, -1, "The time-in-force for GTE order")
+
+	for _, flag := range createGTEOrderFlags {
+		cmd.MarkFlagRequired(flag)
+	}
+
 	return cmd
+}
+
+func parseCreateOrderFlags(sender sdk.AccAddress) (*market.MsgCreateGTEOrder, error) {
+	for _, flag := range createGTEOrderFlags {
+		if viper.Get(flag) == nil {
+			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+				"$ cetcli tx market creategteoreder -h", flag)
+		}
+	}
+
+	msg := &market.MsgCreateGTEOrder{
+		Sender:         sender,
+		Symbol:         viper.GetString(FlagSymbol),
+		OrderType:      byte(viper.GetInt(FlagOrderType)),
+		Side:           byte(viper.GetInt(FlagSide)),
+		Price:          viper.GetInt64(FlagPrice),
+		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
+		Quantity:       viper.GetInt64(FlagQuantity),
+		TimeInForce:    viper.GetInt(FlagTimeInForce),
+	}
+
+	return msg, nil
 }
