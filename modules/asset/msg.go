@@ -71,6 +71,14 @@ type MsgTransferOwnership struct {
 
 var _ sdk.Msg = MsgTransferOwnership{}
 
+func NewMsgTransferOwnership(symbol string, originalOwner sdk.AccAddress, newOwner sdk.AccAddress) MsgTransferOwnership {
+	return MsgTransferOwnership{
+		symbol,
+		originalOwner,
+		newOwner,
+	}
+}
+
 // Route Implements Msg.
 func (msg MsgTransferOwnership) Route() string {
 	return RouterKey

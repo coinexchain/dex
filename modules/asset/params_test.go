@@ -39,6 +39,7 @@ func TestParams_ValidateGenesis(t *testing.T) {
 			"case-invalidate",
 			Params{
 				sdk.Coins{},
+				types.NewCetCoins(TransferOwnershipFee),
 				types.NewCetCoins(FreezeAddrFee),
 				types.NewCetCoins(UnFreezeAddrFee),
 				types.NewCetCoins(FreezeTokenFee),
@@ -55,6 +56,7 @@ func TestParams_ValidateGenesis(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Params{
 				tt.p.IssueTokenFee,
+				tt.p.TransferOwnershipFee,
 				tt.p.FreezeAddrFee,
 				tt.p.UnFreezeAddrFee,
 				tt.p.FreezeTokenFee,

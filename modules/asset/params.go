@@ -14,6 +14,7 @@ const (
 	MaxTokenAmount    = 9E18 // 90 billion * 10 ^ 8
 
 	IssueTokenFee                 = 1E12 // 10000 * 10 ^8
+	TransferOwnershipFee          = 1E9  // 10 * 10 ^ 8
 	FreezeAddrFee                 = 1E9  // 10 * 10 ^ 8
 	UnFreezeAddrFee               = 1E9  // 10 * 10 ^ 8
 	FreezeTokenFee                = 1E11 //1000 * 10 ^ 8
@@ -27,6 +28,7 @@ const (
 // Parameter keys
 var (
 	KeyIssueTokenFee                 = []byte("IssueTokenFee")
+	KeyTransferOwnershipFee          = []byte("TransferOwnershipFee")
 	KeyFreezeAddrFee                 = []byte("FreezeAddrFee")
 	KeyUnFreezeAddrFee               = []byte("UnFreezeAddrFee")
 	KeyFreezeTokenFee                = []byte("FreezeTokenFee")
@@ -43,6 +45,7 @@ var _ params.ParamSet = &Params{}
 type Params struct {
 	// FeeParams define the rules according to which fee are charged.
 	IssueTokenFee                 sdk.Coins `json:"issue_token_fee"`
+	TransferOwnershipFee          sdk.Coins `json:"transfer_ownership_fee"`
 	FreezeAddrFee                 sdk.Coins `json:"freeze_address_fee"`
 	UnFreezeAddrFee               sdk.Coins `json:"unfreeze_address_fee"`
 	FreezeTokenFee                sdk.Coins `json:"freeze_token_fee"`
@@ -65,6 +68,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 
 		{KeyIssueTokenFee, &p.IssueTokenFee},
+		{KeyTransferOwnershipFee, &p.TransferOwnershipFee},
 		{KeyFreezeAddrFee, &p.FreezeAddrFee},
 		{KeyUnFreezeAddrFee, &p.UnFreezeAddrFee},
 		{KeyFreezeTokenFee, &p.FreezeTokenFee},
@@ -98,6 +102,7 @@ func DefaultParams() Params {
 
 	return Params{
 		types.NewCetCoins(IssueTokenFee),
+		types.NewCetCoins(TransferOwnershipFee),
 		types.NewCetCoins(FreezeAddrFee),
 		types.NewCetCoins(UnFreezeAddrFee),
 		types.NewCetCoins(FreezeTokenFee),
