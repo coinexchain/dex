@@ -22,3 +22,13 @@ Compile
 ```bash
 ./cetd start
 ```
+
+## Start rest-server
+
+Start with the command：
+```bash
+./cetcli rest-server --chain-id=coinexdex  --laddr=tcp://localhost:8080  --node tcp://localhost:26657 --trust-node=false
+```
+
+Local access :
+> http://localhost:1317/swagger/
