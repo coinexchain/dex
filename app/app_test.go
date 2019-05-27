@@ -106,3 +106,33 @@ func TestMemo(t *testing.T) {
 	result2 := app.Deliver(tx2)
 	require.Equal(t, bankx.CodeMemoMissing, result2.Code)
 }
+
+func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
+	toAddr := sdk.AccAddress([]byte("addr"))
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	// app
+	app := initApp(acc0)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	// deliver tx
+	coins = dex.NewCetCoins(100000000000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
+	tx := testutil.NewStdTxBuilder("c1").
+		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeInsufficientCoins, result.Code)
+
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	ctx := app.NewContext(true, abci.Header{})
+	require.Equal(t, int64(10000000000-100),
+		app.accountKeeper.GetAccount(ctx, fromAddr).GetCoins().AmountOf("cet").Int64())
+}
