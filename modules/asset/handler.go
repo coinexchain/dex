@@ -117,6 +117,7 @@ func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk
 
 	resTags := sdk.NewTags(
 		tags.Category, tags.TxCategory,
+		tags.Action, tags.Issue,
 		tags.Token, msg.Symbol,
 		tags.Owner, msg.Owner.String(),
 	)
@@ -127,8 +128,20 @@ func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk
 
 // handleMsgTransferOwnership - Handle MsgTransferOwnership
 func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransferOwnership) (res sdk.Result) {
+	if err := tk.TransferOwnership(ctx, msg); err != nil {
+		return err.Result()
+	}
 
-	return
+	resTags := sdk.NewTags(
+		tags.Category, tags.TxCategory,
+		tags.Action, tags.TransferOwnership,
+		tags.Token, msg.Symbol,
+		tags.Owner, msg.OriginalOwner.String(),
+		tags.NewOwner, msg.NewOwner.String(),
+	)
+	return sdk.Result{
+		Tags: resTags,
+	}
 }
 
 // handleMsgFreezeAddress - Handle MsgFreezeAddress

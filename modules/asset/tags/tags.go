@@ -5,11 +5,16 @@ import (
 )
 
 const (
-	Category = "category"
-	Token    = "token"
-	Owner    = "owner"
-
+	Category   = "category"
 	TxCategory = "asset"
+
+	Issue = "issue"
+	Token = "token"
+	Owner = "owner"
+
+	TransferOwnership = "TransferOwnership"
+	OriginalOwner     = "OriginalOwner"
+	NewOwner          = "NewOwner"
 )
 
 // Tag keys and values

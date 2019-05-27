@@ -64,7 +64,7 @@ func TestNewToken(t *testing.T) {
 				false,
 			},
 			nil,
-			ErrorInvalidTokenOwner("token must set a valid token owner"),
+			ErrorInvalidTokenOwner("token owner is invalid"),
 		},
 	}
 
