@@ -135,7 +135,7 @@ func (t BaseToken) GetName() string {
 
 func (t *BaseToken) SetName(name string) error {
 	if utf8.RuneCountInString(name) > 32 {
-		return errors.New("issue token name limited to 32 unicode characters")
+		return errors.New("token name limited to 32 unicode characters")
 	}
 	t.Name = name
 
@@ -148,7 +148,7 @@ func (t BaseToken) GetSymbol() string {
 
 func (t *BaseToken) SetSymbol(symbol string) error {
 	if !TokenSymbolRegex.MatchString(symbol) {
-		return errors.New("issue token symbol limited to [a-z][a-z0-9]{1,7}")
+		return errors.New("token symbol limited to [a-z][a-z0-9]{1,7}")
 	}
 	t.Symbol = symbol
 
@@ -176,7 +176,7 @@ func (t BaseToken) GetOwner() sdk.AccAddress {
 
 func (t *BaseToken) SetOwner(addr sdk.AccAddress) error {
 	if addr.Empty() {
-		return errors.New("issue token must set a valid token owner")
+		return errors.New("token owner is invalid")
 	}
 	t.Owner = addr
 	return nil
@@ -220,7 +220,7 @@ func (t BaseToken) GetTotalBurn() int64 {
 
 func (t *BaseToken) SetTotalBurn(amt int64) error {
 	if amt > MaxTokenAmount || amt < 0 {
-		return errors.New("invalid total burn amt")
+		return errors.New("token total burn amt is invalid")
 	}
 	t.TotalBurn = amt
 	return nil
@@ -232,7 +232,7 @@ func (t BaseToken) GetTotalMint() int64 {
 
 func (t *BaseToken) SetTotalMint(amt int64) error {
 	if amt > MaxTokenAmount || amt < 0 {
-		return errors.New("invalid total mint amt")
+		return errors.New("token total mint amt is invalid")
 	}
 	t.TotalMint = amt
 	return nil

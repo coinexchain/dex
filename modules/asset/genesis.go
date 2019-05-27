@@ -55,7 +55,7 @@ func (data GenesisState) Validate() error {
 		}
 
 		if _, exists := tokenSymbols[token.GetSymbol()]; exists {
-			return errors.New("Duplicate token symbol found during asset ValidateGenesis")
+			return errors.New("duplicate token symbol found during asset ValidateGenesis")
 		}
 
 		tokenSymbols[token.GetSymbol()] = nil
