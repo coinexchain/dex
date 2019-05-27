@@ -121,7 +121,7 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 		Quantity:       sdk.NewDec(msg.Quantity),
 		Side:           msg.Side,
 		TimeInForce:    msg.TimeInForce,
-		Height:         0,
+		Height:         ctx.BlockHeight(),
 		LeftStock:      sdk.NewDec(0),
 		Freeze:         sdk.NewDec(0),
 		DealMoney:      sdk.NewDec(0),

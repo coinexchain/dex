@@ -16,7 +16,7 @@ type Order struct {
 	Quantity       sdk.Dec
 	Side           byte
 	TimeInForce    int
-	Height         uint64
+	Height         int64
 
 	// These field will change when order filled/cancel.
 	LeftStock sdk.Dec
