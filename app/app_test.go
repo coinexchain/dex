@@ -70,7 +70,7 @@ func TestSend(t *testing.T) {
 		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
-	require.Equal(t, bankx.CodeCetBeErrorLocked, result.Code)
+	require.Equal(t, bankx.CodeCetCantBeLocked, result.Code)
 
 	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
 	tx = testutil.NewStdTxBuilder("c1").

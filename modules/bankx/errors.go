@@ -10,7 +10,7 @@ const (
 	CodeInsufficientCETForActivatedFee sdk.CodeType = 113
 	CodeInvalidActivatedFee            sdk.CodeType = 114
 	CodeInvalidUnlockTime              sdk.CodeType = 115
-	CodeCetBeErrorLocked               sdk.CodeType = 116
+	CodeCetCantBeLocked                sdk.CodeType = 116
 )
 
 func ErrUnactivatedAddress(msg string) sdk.Error {
@@ -30,5 +30,5 @@ func ErrUnlockTime(msg string) sdk.Error {
 }
 
 func ErrCetCantBeLocked(msg string) sdk.Error {
-	return sdk.NewError(CodeSpaceBankx, CodeCetBeErrorLocked, msg)
+	return sdk.NewError(CodeSpaceBankx, CodeCetCantBeLocked, msg)
 }
