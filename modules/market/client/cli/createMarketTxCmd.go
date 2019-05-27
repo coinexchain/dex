@@ -17,6 +17,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	FlagCreator        = "creator"
+	FlagStock          = "stock"
+	FlagMonet          = "money"
+	FlagPricePrecision = "price-precision"
+)
+
 func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "createmarket ",
@@ -62,6 +69,10 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
 		},
 	}
+
+	cmd.Flags().String(FlagCreator, "", "The address to create a trading market")
+	cmd.Flags().String(FlagStock, "", "The exist token symbol as stock")
+	cmd.Flags().String(FlagMonet, "", "")
 
 	return cmd
 }

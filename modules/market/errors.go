@@ -19,62 +19,62 @@ const (
 	CodeTokenFrozenByIssuer   = 131
 )
 
-func ErrTokenNoExist() sdk.Result {
+func ErrTokenNoExist() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidToken, "Token not exsit").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidToken, "Token not exsit")
 }
 
-func ErrInvalidPricePrecision() sdk.Result {
+func ErrInvalidPricePrecision() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price precision out of range").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price precision out of range")
 }
 
-func ErrInvalidTokenIssuer() sdk.Result {
+func ErrInvalidTokenIssuer() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidTokenIssuer, "Invalid token issuer").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidTokenIssuer, "Invalid token issuer")
 }
 
-func ErrSendTokenFailed(errStr string) sdk.Result {
+func ErrSendTokenFailed(errStr string) sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeSendTokenFailed, "Send token failed %s", errStr).Result()
+	return sdk.NewError(CodeSpaceMarket, CodeSendTokenFailed, "Send token failed %s", errStr)
 }
 
-func ErrNoStoreEngine() sdk.Result {
+func ErrNoStoreEngine() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeNoStoreEngine, "market No store engine").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeNoStoreEngine, "market No store engine")
 }
 
-func ErrInvalidAddress() sdk.Result {
+func ErrInvalidAddress() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidAddress, "Invalid address").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidAddress, "Invalid address")
 }
 
-func ErrNoExistKeyInStore() sdk.Result {
+func ErrNoExistKeyInStore() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeNotExistKeyInStore, "Not exist key in store").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeNotExistKeyInStore, "Not exist key in store")
 }
 
-func ErrNoHaveSufficientCoins() sdk.Result {
+func ErrNoHaveSufficientCoins() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeNotHaveSufficientCoin, "Not sufficient coin").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeNotHaveSufficientCoin, "Not sufficient coin")
 }
 
-func ErrInvalidTradeSide() sdk.Result {
+func ErrInvalidTradeSide() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidTradeSide, "Invalid trade side").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidTradeSide, "Invalid trade side")
 }
 
-func ErrInvalidOrderType() sdk.Result {
+func ErrInvalidOrderType() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderType, "Invalid order type").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderType, "Invalid order type")
 }
 
-func ErrInvalidSymbol() sdk.Result {
+func ErrInvalidSymbol() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "Invalid trade symbol").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "Invalid trade symbol")
 }
 
-func ErrTokenFrozenByIssuer() sdk.Result {
+func ErrTokenFrozenByIssuer() sdk.Error {
 
-	return sdk.NewError(CodeSpaceMarket, CodeTokenFrozenByIssuer, "Token is frozen by the issuer").Result()
+	return sdk.NewError(CodeSpaceMarket, CodeTokenFrozenByIssuer, "Token is frozen by the issuer")
 }

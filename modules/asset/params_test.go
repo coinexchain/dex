@@ -54,15 +54,15 @@ func TestParams_ValidateGenesis(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Params{
-				IssueTokenFee:                 tt.p.IssueTokenFee,
-				FreezeAddrFee:                 tt.p.FreezeAddrFee,
-				UnFreezeAddrFee:               tt.p.UnFreezeAddrFee,
-				FreezeTokenFee:                tt.p.FreezeTokenFee,
-				UnFreezeTokenFee:              tt.p.UnFreezeTokenFee,
-				TokenFreezeWhitelistAddFee:    tt.p.TokenFreezeWhitelistAddFee,
-				TokenFreezeWhitelistRemoveFee: tt.p.TokenFreezeWhitelistRemoveFee,
-				BurnFee:                       tt.p.BurnFee,
-				MintFee:                       tt.p.MintFee,
+				tt.p.IssueTokenFee,
+				tt.p.FreezeAddrFee,
+				tt.p.UnFreezeAddrFee,
+				tt.p.FreezeTokenFee,
+				tt.p.UnFreezeTokenFee,
+				tt.p.TokenFreezeWhitelistAddFee,
+				tt.p.TokenFreezeWhitelistRemoveFee,
+				tt.p.BurnFee,
+				tt.p.MintFee,
 			}
 			if err := p.ValidateGenesis(); (err != nil) != tt.wantErr {
 				t.Errorf("Params.ValidateGenesis() error = %v, wantErr %v", err, tt.wantErr)

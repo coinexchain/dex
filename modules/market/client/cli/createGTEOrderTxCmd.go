@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -37,10 +38,10 @@ func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			symbols := strings.Split(args[2], market.SymbolSeparator)
 			userToken := symbols[0]
 			side, err := strconv.Atoi(args[7])
-			if err != nil || (side != market.Buy && side != market.Sell) {
+			if err != nil || (side != match.BUY && side != match.SELL) {
 				return errors.New("side out of range")
 			}
-			if side == market.Buy {
+			if side == match.BUY {
 				userToken = symbols[1]
 			}
 

@@ -1,6 +1,7 @@
 package market
 
 import (
+	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -60,7 +61,7 @@ func TestCreateGTEOrderFailed(t *testing.T) {
 		PricePrecision: 8,
 		Price:          100,
 		Quantity:       10000000,
-		Side:           Buy,
+		Side:           match.BUY,
 		TimeInForce:    time.Now().Nanosecond() + 10000,
 	}
 	ret := input.handler(input.ctx, msgGteOrder)
@@ -77,7 +78,7 @@ func TestCreateGTEOrderSuccess(t *testing.T) {
 		PricePrecision: 8,
 		Price:          100,
 		Quantity:       10000000,
-		Side:           Buy,
+		Side:           match.BUY,
 		TimeInForce:    time.Now().Nanosecond() + 10000,
 	}
 	/*ret := */ input.handler(input.ctx, msgGteOrder)

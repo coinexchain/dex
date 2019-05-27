@@ -13,12 +13,12 @@ var (
 )
 
 type Keeper struct {
-	markeyKey sdk.StoreKey
+	marketKey sdk.StoreKey
 	axk       ExpectedAssertStatusKeeper
 	bnk       ExpectedBankxKeeper
 	//fek       incentive.FeeCollectionKeeper
 }
 
 func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper, bnkVal ExpectedBankxKeeper /*, fekVal incentive.FeeCollectionKeeper*/) Keeper {
-	return Keeper{markeyKey: key, axk: axkVal, bnk: bnkVal /*fek: fekVal*/}
+	return Keeper{marketKey: key, axk: axkVal, bnk: bnkVal /*fek: fekVal*/}
 }
