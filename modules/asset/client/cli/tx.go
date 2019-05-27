@@ -64,17 +64,13 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
-			if res, _ := cliCtx.QueryWithData(route, nil); res != nil {
-				var tokens []asset.Token
-				cdc.MustUnmarshalJSON(res, &tokens)
-
-				//TODO: optimize with direct query for the provided token
-				for _, t := range tokens {
-					if msg.Symbol == t.GetSymbol() {
-						return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")
-					}
-				}
+			bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(msg.Symbol))
+			if err != nil {
+				return err
+			}
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
+			if res, _ := cliCtx.QueryWithData(route, bz);res != nil {
+				return fmt.Errorf("token symbol already exists，pls query tokens and issue another symbol")
 			}
 
 			// ensure account has enough coins
