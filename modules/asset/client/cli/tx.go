@@ -22,6 +22,8 @@ const (
 	FlagBurnable       = "burnable"
 	FlagAddrFreezable  = "addr-freezable"
 	FlagTokenFreezable = "token-freezable"
+
+	FlagNewOwner = "new-owner"
 )
 
 var issueTokenFlags = []string{
@@ -102,6 +104,64 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 
 	cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range issueTokenFlags {
+		cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
+
+var transferOwnershipFlags = []string{
+	FlagSymbol,
+	FlagNewOwner,
+}
+
+// TransferOwnershipCmd will create a transfer token  owner tx and sign.
+func TransferOwnershipCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "transfer-ownership",
+		Short: "Create and sign a transfer-ownership tx",
+		Long: strings.TrimSpace(
+			`Create and sign a transfer-ownership tx, broadcast to nodes.
+
+Example:
+$ cetcli tx asset transfer-ownership --symbol="abc" \
+	--new-owner=newkey
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			originalOwner := cliCtx.GetFromAddress()
+			msg, err := parseTransferOwnershipFlags(originalOwner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			// ensure account has enough coins
+			account, err := cliCtx.GetAccount(originalOwner)
+			if err != nil {
+				return err
+			}
+
+			issueFee := types.NewCetCoins(asset.TransferOwnershipFee)
+			if !account.GetCoins().IsAllGTE(issueFee) {
+				return fmt.Errorf("address %s doesn't have enough cet to issue token", originalOwner)
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "Which token ownership be transferred")
+	cmd.Flags().String(FlagNewOwner, "", "Who do you want to transfer to ?")
+
+	cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range transferOwnershipFlags {
 		cmd.MarkFlagRequired(flag)
 	}
 

@@ -27,3 +27,21 @@ func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 
 	return &msg, nil
 }
+
+func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransferOwnership, error) {
+	for _, flag := range transferOwnershipFlags {
+		if viper.GetString(flag) == "" {
+			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+				"$ cetcli tx asset transfer-ownership -h", flag)
+		}
+	}
+
+	newOwner, _ := sdk.AccAddressFromBech32(viper.GetString(FlagNewOwner))
+	msg := asset.NewMsgTransferOwnership(
+		viper.GetString(FlagSymbol),
+		orginalOwner,
+		newOwner,
+	)
+
+	return &msg, nil
+}
