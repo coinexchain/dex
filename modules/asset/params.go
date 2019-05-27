@@ -17,12 +17,12 @@ const (
 	TransferOwnershipFee          = 1E9  // 10 * 10 ^ 8
 	FreezeAddrFee                 = 1E9  // 10 * 10 ^ 8
 	UnFreezeAddrFee               = 1E9  // 10 * 10 ^ 8
-	FreezeTokenFee                = 1E11 //1000 * 10 ^ 8
-	UnFreezeTokenFee              = 1E11 //1000 * 10 ^ 8
-	TokenFreezeWhitelistAddFee    = 1E10 // 100 * 10 ^ 8
-	TokenFreezeWhitelistRemoveFee = 1E10 // 100 * 10 ^ 8
-	BurnFee                       = 1E11 //1000 * 10 ^ 8
-	MintFee                       = 1E11 //1000 * 10 ^ 8
+	FreezeTokenFee                = 1E9  // 10 * 10 ^ 8
+	UnFreezeTokenFee              = 1E9  // 10 * 10 ^ 8
+	TokenFreezeWhitelistAddFee    = 2E9  // 20 * 10 ^ 8
+	TokenFreezeWhitelistRemoveFee = 2E9  // 20 * 10 ^ 8
+	BurnFee                       = 1E9  // 10 * 10 ^ 8
+	MintFee                       = 1E9  // 10 * 10 ^ 8
 )
 
 // Parameter keys
