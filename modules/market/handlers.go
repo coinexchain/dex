@@ -65,7 +65,7 @@ func handlerMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper
 	value := msgCdc.MustMarshalBinaryBare(info)
 	ctx.KVStore(keeper.marketKey).Set(key, value)
 
-	return sdk.Result{}
+	return sdk.Result{Tags: info.GetTags()}
 }
 
 func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
@@ -130,7 +130,7 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 	value := msgCdc.MustMarshalBinaryBare(order)
 	store.Set(key, value)
 
-	return sdk.Result{}
+	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
 
 func checkMsgCreateGTEOrder(store sdk.KVStore, msg MsgCreateGTEOrder, keeper Keeper) sdk.Result {

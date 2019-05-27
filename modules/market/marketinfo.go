@@ -9,3 +9,8 @@ type MarketInfo struct {
 	PricePrecision    byte
 	LastExecutedPrice sdk.Dec
 }
+
+func (info *MarketInfo) GetTags() sdk.Tags {
+
+	return sdk.NewTags("stock", info.Stock, "money", info.Money, "creator", info.Creator, "price-precision", info.PricePrecision, "last-execute-price", info.LastExecutedPrice)
+}
