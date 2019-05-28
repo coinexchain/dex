@@ -5,6 +5,7 @@ import (
 	"github.com/coinexchain/dex/modules/asset/tags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"strconv"
 )
 
 // NewHandler returns a handler for "asset" type messages.
@@ -117,7 +118,6 @@ func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk
 
 	resTags := sdk.NewTags(
 		tags.Category, tags.TxCategory,
-		tags.Action, tags.Issue,
 		tags.Token, msg.Symbol,
 		tags.Owner, msg.Owner.String(),
 	)
@@ -134,7 +134,6 @@ func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransfer
 
 	resTags := sdk.NewTags(
 		tags.Category, tags.TxCategory,
-		tags.Action, tags.TransferOwnership,
 		tags.Token, msg.Symbol,
 		tags.OriginalOwner, msg.OriginalOwner.String(),
 		tags.NewOwner, msg.NewOwner.String(),
@@ -180,9 +179,8 @@ func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) (res 
 
 	resTags := sdk.NewTags(
 		tags.Category, tags.TxCategory,
-		tags.Action, tags.MintToken,
 		tags.Token, msg.Symbol,
-		tags.Amt, msg.Amount,
+		tags.Amt, strconv.FormatInt(msg.Amount, 10),
 	)
 	return sdk.Result{
 		Tags: resTags,
