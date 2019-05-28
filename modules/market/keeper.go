@@ -71,14 +71,72 @@ func (k Keeper) RegisterCodec() {
 }
 
 func registerCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(Order{}, "cet-chain/Order", nil)
-	cdc.RegisterConcrete(MarketInfo{}, "cet-chain/MarketInfo", nil)
+	cdc.RegisterConcrete(Order{}, "cet-chain/order", nil)
+	cdc.RegisterConcrete(MarketInfo{}, "cet-chain/market", nil)
 }
 
-func (k Keeper) GetAllTokens(ctx sdk.Context) []Order {
-	return nil
+func (k Keeper) GetAllOrders(ctx sdk.Context) []Order {
+	var orders []Order
+	appendOrder := func(order Order) (stop bool) {
+		orders = append(orders, order)
+		return false
+	}
+	k.IterateOrder(ctx, appendOrder)
+	return orders
 }
 
 func (k Keeper) GetAllMarketInfos(ctx sdk.Context) []MarketInfo {
-	return nil
+	var infos []MarketInfo
+	appendMarket := func(order MarketInfo) (stop bool) {
+		infos = append(infos, order)
+		return false
+	}
+	k.IterateMarket(ctx, appendMarket)
+	return infos
+}
+
+func (k Keeper) IterateOrder(ctx sdk.Context, process func(Order) bool) {
+	store := ctx.KVStore(k.marketKey)
+	iter := sdk.KVStorePrefixIterator(store, orderBookIdetifierPrefix)
+	defer iter.Close()
+	for {
+		if !iter.Valid() {
+			return
+		}
+		val := iter.Value()
+		if process(k.decodeOrder(val)) {
+			return
+		}
+		iter.Next()
+	}
+}
+
+func (k Keeper) IterateMarket(ctx sdk.Context, process func(info MarketInfo) bool) {
+	store := ctx.KVStore(k.marketKey)
+	iter := sdk.KVStorePrefixIterator(store, marketIdetifierPrefix)
+	defer iter.Close()
+	for {
+		if !iter.Valid() {
+			return
+		}
+		val := iter.Value()
+		if process(k.decodeMarket(val)) {
+			return
+		}
+		iter.Next()
+	}
+}
+
+func (k Keeper) decodeOrder(bz []byte) (order Order) {
+	if err := k.cdc.UnmarshalBinaryBare(bz, &order); err != nil {
+		panic(err)
+	}
+	return
+}
+
+func (k Keeper) decodeMarket(bz []byte) (info MarketInfo) {
+	if err := k.cdc.UnmarshalBinaryBare(bz, &info); err != nil {
+		panic(err)
+	}
+	return
 }

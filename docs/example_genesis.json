@@ -365,6 +365,61 @@
         }
       ]
     },
+    "market": {
+      "params": {
+        "create_market_fee": [
+          {
+            "denom": "cet",
+            "amount": "100000000000"
+          }
+        ],
+        "filter_stale_order_interval": 10,
+        "gte_order_lifetime": 10,
+        "max_executed_price_change_ratio": 25
+      },
+      "orders":[
+        {
+          "type": "cet-chain/order",
+          "value": {
+            "sender": "cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v",
+            "sequence": 100,
+            "symbol": "abc/cet",
+            "order_type": 2,
+            "price": 100,
+            "quantity": 100000,
+            "side": 1,
+            "time_in_force": 10092839,
+            "height": 100
+          }
+        },
+        {
+          "type": "cet-chain/order",
+          "value": {
+            "sender": "cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v",
+            "sequence": 170,
+            "symbol": "btc/cet",
+            "order_type": 2,
+            "price": 121920,
+            "quantity": 100000,
+            "side": 2,
+            "time_in_force": 1002682839,
+            "height": 120
+          }
+        }
+      ],
+      "market_infos": [
+        {
+          "type": "cet-chain/market",
+          "value": {
+            "stock": "abc",
+            "money": "cet",
+            "creator": "cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v",
+            "price_precision":8,
+            "last_executed_price": 8568
+          }
+        }
+      ]
+    },
     "gentxs": [
       {
         "type": "auth/StdTx",

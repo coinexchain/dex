@@ -40,7 +40,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
-	return NewGenesisState(k.GetParams(ctx), k.GetAllTokens(ctx), k.GetAllMarketInfos(ctx))
+	return NewGenesisState(k.GetParams(ctx), k.GetAllOrders(ctx), k.GetAllMarketInfos(ctx))
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an

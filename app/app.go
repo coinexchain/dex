@@ -257,7 +257,7 @@ func (app *CetChainApp) mountStores() {
 	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyDistr,
 		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
-		app.keyAccountX, app.keyAsset,
+		app.keyAccountX, app.keyAsset, app.keyMarket,
 	)
 }
 

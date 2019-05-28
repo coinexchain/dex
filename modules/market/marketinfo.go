@@ -1,16 +1,17 @@
 package market
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strconv"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type MarketInfo struct {
-	Stock             string
-	Money             string
-	Creator           sdk.AccAddress
-	PricePrecision    byte
-	LastExecutedPrice sdk.Dec
+	Stock             string         `json:"stock"`
+	Money             string         `json:"money"`
+	Creator           sdk.AccAddress `json:"creator"`
+	PricePrecision    byte           `json:"price_precision"`
+	LastExecutedPrice sdk.Dec        `json:"last_executed_price"`
 }
 
 func (info *MarketInfo) GetTags() sdk.Tags {

@@ -6,21 +6,21 @@ import (
 )
 
 type Order struct {
-	Sender      sdk.AccAddress
-	Sequence    uint64
-	Symbol      string
-	OrderType   byte
-	Price       sdk.Dec
-	Quantity    int64
-	Side        byte
-	TimeInForce int
-	Height      int64
+	Sender      sdk.AccAddress `json:"sender"`
+	Sequence    uint64         `json:"sequence"`
+	Symbol      string         `json:"symbol"`
+	OrderType   byte           `json:"order_type"`
+	Price       sdk.Dec        `json:"price"`
+	Quantity    int64          `json:"quantity"`
+	Side        byte           `json:"side"`
+	TimeInForce int            `json:"time_in_force"`
+	Height      int64          `json:"height"`
 
 	// These field will change when order filled/cancel.
-	LeftStock int64
-	Freeze    int64
-	DealStock int64
-	DealMoney int64
+	LeftStock int64 `json:"left_stock"`
+	Freeze    int64 `json:"freeze"`
+	DealStock int64 `json:"deal_stock"`
+	DealMoney int64 `json:"deal_money"`
 }
 
 func (or *Order) OrderID() string {
