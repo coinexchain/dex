@@ -1957,7 +1957,7 @@ paths:
     get:
       tags:
         - ICS100
-      summary: list tokens
+      summary: List tokens
       description: List all existing tokens
       produces:
         - application/json
@@ -1973,7 +1973,7 @@ paths:
     post:
       tags:
         - ICS100
-      summary: issue token
+      summary: Issue token
       description: Issue a new Token
       consumes:
         - application/json
@@ -1994,6 +1994,41 @@ paths:
       responses:
         200:
           description: Token issuance result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/ownerships:
+    post:
+      tags:
+        - ICS100
+      summary: Transfer ownership
+      description: Transfer token owner ship
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: Token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: newOwner
+          description: Transfer ownership to new owner
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/TransferOwnerReq"
+      responses:
+        200:
+          description: Token transfer ownership result
           schema:
             $ref: "#/definitions/StdTx"
         500:
@@ -2584,3 +2619,8 @@ definitions:
           is_frozen:
             type: boolean
             example: false
+  TransferOwnerReq:
+    type: object
+    properties:
+      new_owner:
+        $ref: "#/definitions/Address"

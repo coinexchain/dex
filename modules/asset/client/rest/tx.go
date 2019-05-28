@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"github.com/coinexchain/dex/modules/asset"
 	"net/http"
 
@@ -13,12 +14,17 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/rest"
 )
 
+const (
+	symbol = "symbol"
+)
+
 // registerTXRoutes -
 func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
 	r.HandleFunc("/asset/tokens", issueRequestHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/ownerships", symbol), transferOwnerRequestHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
-// SendReq defines the properties of a send request's body.
+// issueReq defines the properties of a issue token request's body.
 type issueReq struct {
 	BaseReq        rest.BaseReq `json:"base_req"`
 	Name           string       `json:"name"`
@@ -51,6 +57,43 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		msg := asset.NewMsgIssueToken(req.Name, req.Symbol, req.TotalSupply, owner,
 			req.Mintable, req.Burnable, req.AddrFreezable, req.TokenFreezable)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// transferOwnerReq defines the properties of a transfer ownership request's body.
+type transferOwnerReq struct {
+	BaseReq  rest.BaseReq   `json:"base_req"`
+	NewOwner sdk.AccAddress `json:"new_owner"`
+}
+
+// transferOwnershipRequestHandlerFn - http request handler to transfer token owner ship.
+func transferOwnerRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req transferOwnerReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		original, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars["symbol"]
+		msg := asset.NewMsgTransferOwnership(symbol, original, req.NewOwner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
