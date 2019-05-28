@@ -13,7 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/testutil"
@@ -99,7 +98,7 @@ func TestMemo(t *testing.T) {
 	require.Equal(t, errors.CodeOK, result1.Code)
 
 	coins := dex.NewCetCoins(100)
-	msgSend := bank.NewMsgSend(addr, addr, coins)
+	msgSend := bankx.NewMsgSend(addr, addr, coins, 0)
 	tx2 := testutil.NewStdTxBuilder("c1").
 		Msgs(msgSend).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 

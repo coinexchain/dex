@@ -19,3 +19,4 @@ rm -rdf ~/.cetd ~/.cetcli
 ./cetd gentx --name bob <<<$'12345678\n12345678\n'
 ./cetd collect-gentxs
 
+echo DONE!
