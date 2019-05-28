@@ -31,10 +31,10 @@ func ErrorInvalidTokenOwner(fmt string) sdk.Error {
 func ErrorNoTokenPersist(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeNoTokenPersist, fmt)
 }
-func ErrorInvalidTotalMint(fmt string) sdk.Error {
+func ErrorInvalidTokenMint(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTotalMint, fmt)
 }
-func ErrorInvalidTotalBurn(fmt string) sdk.Error {
+func ErrorInvalidTokenBurn(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTotalBurn, fmt)
 }
 func ErrorDuplicateTokenSymbol(fmt string) sdk.Error {

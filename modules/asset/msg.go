@@ -242,8 +242,8 @@ func (msg MsgUnfreezeToken) GetSigners() []sdk.AccAddress {
 // MsgBurnToken
 type MsgBurnToken struct {
 	Symbol       string
-	Amount       uint64         //[0]
-	ownerAddress sdk.AccAddress //token owner address
+	Amount       int64
+	OwnerAddress sdk.AccAddress //token owner address
 }
 
 var _ sdk.Msg = MsgBurnToken{}
@@ -276,8 +276,8 @@ func (msg MsgBurnToken) GetSigners() []sdk.AccAddress {
 // MsgMintToken
 type MsgMintToken struct {
 	Symbol       string
-	Amount       uint64 //[0]
-	ownerAddress sdk.AccAddress
+	Amount       int64
+	OwnerAddress sdk.AccAddress
 }
 
 var _ sdk.Msg = MsgMintToken{}
@@ -294,15 +294,24 @@ func (msg MsgMintToken) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgMintToken) ValidateBasic() sdk.Error {
-	panic("implement me")
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("mint token need a valid addr")
+	}
+	if msg.Amount > MaxTokenAmount {
+		return ErrorInvalidTokenMint("token total supply limited to 90 billion")
+	}
+	if msg.Amount < 0 {
+		return ErrorInvalidTokenMint("mint amount should be positive")
+	}
+	return nil
 }
 
 // GetSignBytes Implements Msg.
 func (msg MsgMintToken) GetSignBytes() []byte {
-	panic("implement me")
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
 func (msg MsgMintToken) GetSigners() []sdk.AccAddress {
-	panic("implement me")
+	return []sdk.AccAddress{msg.OwnerAddress}
 }

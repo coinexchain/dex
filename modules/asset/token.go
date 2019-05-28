@@ -100,10 +100,10 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	t.SetTokenFreezable(tokenFreezable)
 
 	if err := t.SetTotalMint(0); err != nil {
-		return nil, ErrorInvalidTotalMint(err.Error())
+		return nil, ErrorInvalidTokenMint(err.Error())
 	}
 	if err := t.SetTotalBurn(0); err != nil {
-		return nil, ErrorInvalidTotalBurn(err.Error())
+		return nil, ErrorInvalidTokenBurn(err.Error())
 	}
 	t.SetIsFrozen(false)
 
@@ -123,11 +123,11 @@ func (t *BaseToken) IsValid() error {
 	}
 
 	if t.TotalMint < 0 {
-		return ErrorInvalidTotalMint(fmt.Sprintf("Invalid total mint: %d", t.TotalMint))
+		return ErrorInvalidTokenMint(fmt.Sprintf("Invalid total mint: %d", t.TotalMint))
 	}
 
 	if t.TotalBurn < 0 {
-		return ErrorInvalidTotalMint(fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
+		return ErrorInvalidTokenMint(fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
 	}
 
 	return nil

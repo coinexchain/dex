@@ -15,6 +15,9 @@ const (
 	TransferOwnership = "TransferOwnership"
 	OriginalOwner     = "OriginalOwner"
 	NewOwner          = "NewOwner"
+
+	MintToken = "MintToken"
+	Amt       = "Amount"
 )
 
 // Tag keys and values

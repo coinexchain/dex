@@ -143,6 +143,10 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 
 //TransferOwnership - transfer token owner
 func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnership) sdk.Error {
+	if err := msg.ValidateBasic(); err != nil {
+		return ErrorInvalidTokenOwner(err.Error())
+	}
+
 	token := tk.GetToken(ctx, msg.Symbol)
 	if token == nil {
 		return ErrorNoTokenPersist("transfer invalid token`s ownership")
@@ -154,6 +158,39 @@ func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnershi
 	if err := token.SetOwner(msg.NewOwner); err != nil {
 		return ErrorInvalidTokenOwner("token new owner is invalid")
 	}
+	if err := tk.SetToken(ctx, token); err != nil {
+		return nil
+	}
+	return nil
+}
+
+//MintToken - mint token amt
+func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
+	if err := msg.ValidateBasic(); err != nil {
+		return ErrorInvalidTokenMint(err.Error())
+	}
+
+	token := tk.GetToken(ctx, msg.Symbol)
+	if token == nil {
+		return ErrorNoTokenPersist("mint invalid token")
+	}
+	if !token.GetOwner().Equals(msg.OwnerAddress) {
+		return ErrorInvalidTokenOwner("only token owner can mint token")
+	}
+	if !token.GetMintable() {
+		return ErrorInvalidTokenMint("token that cannot be minted")
+	}
+
+	amt := msg.Amount
+	preMint := token.GetTotalMint()
+	if err := token.SetTotalMint(amt + preMint); err != nil {
+		return ErrorInvalidTokenMint(err.Error())
+	}
+	preSupply := token.GetTotalSupply()
+	if err := token.SetTotalSupply(amt + preSupply); err != nil {
+		return ErrorInvalidTokenSupply(err.Error())
+	}
+
 	if err := tk.SetToken(ctx, token); err != nil {
 		return nil
 	}

@@ -119,7 +119,7 @@ func TestBaseToken_IsValid(t *testing.T) {
 				-100000000,
 				false,
 			},
-			ErrorInvalidTotalMint("Invalid total mint: -100000000"),
+			ErrorInvalidTokenMint("Invalid total mint: -100000000"),
 		},
 	}
 

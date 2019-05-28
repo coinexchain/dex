@@ -136,7 +136,7 @@ func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransfer
 		tags.Category, tags.TxCategory,
 		tags.Action, tags.TransferOwnership,
 		tags.Token, msg.Symbol,
-		tags.Owner, msg.OriginalOwner.String(),
+		tags.OriginalOwner, msg.OriginalOwner.String(),
 		tags.NewOwner, msg.NewOwner.String(),
 	)
 	return sdk.Result{
@@ -174,6 +174,17 @@ func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) (res 
 
 // handleMsgMintToken - Handle MsgMintToken
 func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) (res sdk.Result) {
+	if err := tk.MintToken(ctx, msg); err != nil {
+		return err.Result()
+	}
 
-	return
+	resTags := sdk.NewTags(
+		tags.Category, tags.TxCategory,
+		tags.Action, tags.MintToken,
+		tags.Token, msg.Symbol,
+		tags.Amt, msg.Amount,
+	)
+	return sdk.Result{
+		Tags: resTags,
+	}
 }
