@@ -15,11 +15,10 @@ type anteHelper struct {
 }
 
 func (ah anteHelper) CheckMemo(msg sdk.Msg, memo string, ctx sdk.Context) sdk.Error {
-	memoLen := len(memo)
 	switch msg := msg.(type) {
 	case bank.MsgSend:
 		if ax, ok := ah.accountXKeeper.GetAccountX(ctx, msg.ToAddress); ok && ax.MemoRequired {
-			if memoLen == 0 {
+			if len(memo) == 0 {
 				return bankx.ErrMemoMissing()
 			}
 		}

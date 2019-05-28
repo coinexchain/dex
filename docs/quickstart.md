@@ -1,3 +1,9 @@
+##  Install tools
+Install bower for download swagger-ui dependency
+```
+npm install -g bower
+```
+
 ## Compile cetd and cetcli
 
 ```bash
