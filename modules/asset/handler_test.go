@@ -36,7 +36,7 @@ func TestIssueTokenMsg(t *testing.T) {
 	msg := NewMsgIssueToken("ABC Token", "abc", 210000000000, tAccAddr,
 		false, false, false, false)
 
-	//case 1: issue token need valid address
+	//case 1: issue token need valid account
 	res := h(input.ctx, msg)
 	require.False(t, res.IsOK())
 

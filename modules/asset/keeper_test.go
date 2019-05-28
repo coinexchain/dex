@@ -115,3 +115,92 @@ func TestTokenKeeper_TransferOwnership(t *testing.T) {
 	err = input.tk.TransferOwnership(input.ctx, msg)
 	require.Error(t, err)
 }
+
+func TestTokenKeeper_MintToken1(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, false, false, false)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg := NewMsgMintToken(symbol, 1000, tAccAddr)
+	err = input.tk.MintToken(input.ctx, msg)
+	require.NoError(t, err)
+
+	token := input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, int64(3100), token.GetTotalSupply())
+	require.Equal(t, int64(1000), token.GetTotalMint())
+
+	err = input.tk.MintToken(input.ctx, msg)
+	require.NoError(t, err)
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, int64(4100), token.GetTotalSupply())
+	require.Equal(t, int64(2000), token.GetTotalMint())
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 2: un mintable token
+	// set token mintable: false
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		false, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg = NewMsgMintToken(symbol, 1000, tAccAddr)
+	err = input.tk.MintToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 3: mint invalid token
+	issueMsg = NewMsgIssueToken("ABC token", "xyz", 2100, tAccAddr,
+		true, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgMintToken(symbol, 1000, tAccAddr)
+	err = input.tk.MintToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 4: only token owner can mint token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, addr,
+		true, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgMintToken(symbol, 1000, tAccAddr)
+	err = input.tk.MintToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 5: token total mint amt is invalid
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgMintToken(symbol, 9E18+1, tAccAddr)
+	err = input.tk.MintToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 6: token total supply limited to 90 billion
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgMintToken(symbol, 9E18, tAccAddr)
+	err = input.tk.MintToken(input.ctx, msg)
+	require.Error(t, err)
+}

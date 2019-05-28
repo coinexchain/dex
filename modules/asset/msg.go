@@ -282,6 +282,14 @@ type MsgMintToken struct {
 
 var _ sdk.Msg = MsgMintToken{}
 
+func NewMsgMintToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToken {
+	return MsgMintToken{
+		symbol,
+		amt,
+		owner,
+	}
+}
+
 // Route Implements Msg.
 func (msg MsgMintToken) Route() string {
 	return RouterKey
