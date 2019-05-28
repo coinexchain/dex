@@ -204,7 +204,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 		msg := staking.NewMsgCreateValidator(
 			sdk.ValAddress(addr),
 			valPubKeys[i],
-			sdk.NewCoin(sdk.DefaultBondDenom, valTokens),
+			sdk.NewCoin(dex.DefaultBondDenom, valTokens),
 			staking.NewDescription(nodeDirName, "", "", ""),
 			staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
 			sdk.OneInt(),
@@ -235,8 +235,8 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 			return err
 		}
 
-		gaiaConfigFilePath := filepath.Join(nodeDir, "config/cetd.toml")
-		srvconfig.WriteConfigFile(gaiaConfigFilePath, dexConfig)
+		configFilePath := filepath.Join(nodeDir, "config/cetd.toml")
+		srvconfig.WriteConfigFile(configFilePath, dexConfig)
 	}
 
 	if err := initGenFiles(cdc, chainID, accs, genFiles, numValidators); err != nil {
