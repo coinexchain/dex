@@ -2,6 +2,8 @@ package bankx
 
 import (
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/testutil"
+	"github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -48,5 +50,76 @@ func TestParamGetSet(t *testing.T) {
 
 	//expect GetParam equals defaultParam
 	require.Equal(t, defaultParam, bkxKepper.GetParam(ctx))
+
+}
+
+func TestFreezeUnFreezeOK(t *testing.T) {
+	input := setupTestInput()
+	myaddr := testutil.ToAccAddress("myaddr")
+
+	acc := auth.NewBaseAccountWithAddress(myaddr)
+	coins := types.NewCetCoins(1000000000)
+	acc.SetCoins(coins)
+	input.ak.SetAccount(input.ctx, &acc)
+
+	accx := authx.AccountX{
+		Address:   myaddr,
+		Activated: true,
+	}
+	input.axk.SetAccountX(input.ctx, accx)
+
+	freezeCoins := types.NewCetCoins(500000000)
+	err := input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
+
+	require.Nil(t, err)
+	require.Equal(t, "500000000cet", input.ak.GetAccount(input.ctx, myaddr).GetCoins().String())
+	accx, _ = input.axk.GetAccountX(input.ctx, myaddr)
+	require.Equal(t, "500000000cet", accx.FrozenCoins.String())
+
+	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, freezeCoins)
+
+	require.Nil(t, err)
+	require.Equal(t, "1000000000cet", input.ak.GetAccount(input.ctx, myaddr).GetCoins().String())
+	accx, _ = input.axk.GetAccountX(input.ctx, myaddr)
+	require.Equal(t, "", accx.FrozenCoins.String())
+}
+
+func TestFreezeUnFreezeInvalidAccount(t *testing.T) {
+	input := setupTestInput()
+	myaddr := testutil.ToAccAddress("myaddr")
+
+	freezeCoins := types.NewCetCoins(500000000)
+	err := input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
+	require.Equal(t, sdk.ErrInvalidAddress("account doesn't exist yet"), err)
+
+	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, freezeCoins)
+	require.Equal(t, sdk.ErrInvalidAddress("account doesn't exist yet"), err)
+
+}
+func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {
+	input := setupTestInput()
+	myaddr := testutil.ToAccAddress("myaddr")
+
+	acc := auth.NewBaseAccountWithAddress(myaddr)
+	coins := types.NewCetCoins(1000000000)
+	acc.SetCoins(coins)
+	input.ak.SetAccount(input.ctx, &acc)
+
+	accx := authx.AccountX{
+		Address:   myaddr,
+		Activated: true,
+	}
+	input.axk.SetAccountX(input.ctx, accx)
+
+	InvalidFreezeCoins := types.NewCetCoins(5000000000)
+	err := input.bxk.FreezeCoins(input.ctx, myaddr, InvalidFreezeCoins)
+	require.Equal(t, sdk.ErrInsufficientCoins("account has insufficient coins to freeze"), err)
+
+	freezeCoins := types.NewCetCoins(500000000)
+	err = input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
+	require.Nil(t, err)
+
+	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, InvalidFreezeCoins)
+	require.Equal(t, sdk.ErrInsufficientCoins("account has insufficient coins to unfreeze"), err)
 
 }

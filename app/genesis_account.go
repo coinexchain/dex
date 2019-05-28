@@ -27,6 +27,7 @@ type GenesisAccount struct {
 	Activated    bool               `json:"activated"`
 	MemoRequired bool               `json:"memo_required"` // if memo is required for receiving coins
 	LockedCoins  []authx.LockedCoin `json:"locked_coins"`
+	FrozenCoins  sdk.Coins          `json:"frozen_coins""`
 }
 
 // convert GenesisAccount to auth.BaseAccount

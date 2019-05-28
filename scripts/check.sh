@@ -4,10 +4,12 @@
 set -ex
 
 if [ ! -x "$(type -p glide)" ]; then
+    echo "glide not installed ?"
     exit 1
 fi
 
 if [ ! -x "$(type -p golangci-lint)" ]; then
+    echo "golangci-lint not installed ?"
     exit 1
 fi
 

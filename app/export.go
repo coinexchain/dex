@@ -198,6 +198,7 @@ func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context, accountsX map[
 		account.Activated = accountsX[account.Address.String()].Activated
 		account.MemoRequired = accountsX[account.Address.String()].MemoRequired
 		account.LockedCoins = accountsX[account.Address.String()].LockedCoins
+		account.FrozenCoins = accountsX[account.Address.String()].FrozenCoins
 		accounts = append(accounts, account)
 		return false
 	}

@@ -39,3 +39,45 @@ func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bo
 func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) (sdk.Tags, sdk.Error) {
 	return k.bk.SendCoins(ctx, from, to, amt)
 }
+func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+
+	acc := k.ak.GetAccount(ctx, addr)
+	if acc == nil {
+		return sdk.ErrInvalidAddress("account doesn't exist yet")
+	}
+
+	newCoins, neg := acc.GetCoins().SafeSub(amt)
+	if neg {
+		return sdk.ErrInsufficientCoins("account has insufficient coins to freeze")
+	}
+	acc.SetCoins(newCoins)
+	k.ak.SetAccount(ctx, acc)
+
+	accx, _ := k.axk.GetAccountX(ctx, addr)
+	frozenCoins := accx.FrozenCoins.Add(amt)
+	accx.FrozenCoins = frozenCoins
+	k.axk.SetAccountX(ctx, accx)
+
+	return nil
+}
+
+func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+
+	accx, ok := k.axk.GetAccountX(ctx, addr)
+	if !ok {
+		return sdk.ErrInvalidAddress("account doesn't exist yet")
+	}
+	frozenCoins, neg := accx.FrozenCoins.SafeSub(amt)
+	if neg {
+		return sdk.ErrInsufficientCoins("account has insufficient coins to unfreeze")
+	}
+	accx.FrozenCoins = frozenCoins
+	k.axk.SetAccountX(ctx, accx)
+
+	acc := k.ak.GetAccount(ctx, addr)
+	newcoins := acc.GetCoins().Add(amt)
+	acc.SetCoins(newcoins)
+	k.ak.SetAccount(ctx, acc)
+
+	return nil
+}

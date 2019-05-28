@@ -10,6 +10,7 @@ type AccountX struct {
 	Activated    bool           `json:"activated"`
 	MemoRequired bool           `json:"memo_required"` // if memo is required for receiving coins
 	LockedCoins  []LockedCoin   `json:"locked_coins"`
+	FrozenCoins  sdk.Coins      `json:"frozen_coins"`
 }
 
 func (acc *AccountX) GetAddress() sdk.AccAddress {
