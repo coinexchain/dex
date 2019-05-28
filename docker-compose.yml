@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  cetdnode0:
+    container_name: cetdnode0
+    image: "coinexchain/cetdnode"
+    ports:
+      - "26656-26657:26656-26657"
+    environment:
+      - ID=0
+      - LOG=${LOG:-cetd.log}
+    volumes:
+      - ./build:/cetd:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.2
+
+  cetdnode1:
+    container_name: cetdnode1
+    image: "coinexchain/cetdnode"
+    ports:
+      - "26659-26660:26656-26657"
+    environment:
+      - ID=1
+      - LOG=${LOG:-cetd.log}
+    volumes:
+      - ./build:/cetd:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.3
+
+  cetdnode2:
+    container_name: cetdnode2
+    image: "coinexchain/cetdnode"
+    environment:
+      - ID=2
+      - LOG=${LOG:-cetd.log}
+    ports:
+      - "26661-26662:26656-26657"
+    volumes:
+      - ./build:/cetd:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.4
+
+  cetdnode3:
+    container_name: cetdnode3
+    image: "coinexchain/cetdnode"
+    environment:
+      - ID=3
+      - LOG=${LOG:-cetd.log}
+    ports:
+      - "26663-26664:26656-26657"
+    volumes:
+      - ./build:/cetd:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.5
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: 192.168.10.0/16
+

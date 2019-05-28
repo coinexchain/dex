@@ -62,6 +62,12 @@ Example:
 		},
 	}
 
+	prepareFlagsForTestnetCmd(cmd)
+
+	return cmd
+}
+
+func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 	cmd.Flags().Int(flagNumValidators, 4,
 		"Number of validators to initialize the testnet with",
 	)
@@ -87,8 +93,6 @@ Example:
 		server.FlagMinGasPrices, fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom),
 		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 0.01photino,0.001stake)",
 	)
-
-	return cmd
 }
 
 func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
