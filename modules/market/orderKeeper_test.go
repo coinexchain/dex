@@ -1,30 +1,30 @@
 package market
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/store/transient"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"testing"
 )
 
 func bytes2str(slice []byte) string {
-	s:=""
+	s := ""
 	for _, v := range slice {
-		s=s+fmt.Sprintf("%d ",v)
+		s = s + fmt.Sprintf("%d ", v)
 	}
 	return s
 }
 
 func Test_concatCopyPreAllocate(t *testing.T) {
 	res := concatCopyPreAllocate([][]byte{
-		[]byte{0, 1, 2, 3},
-		[]byte{4, 5},
-		[]byte{},
-		[]byte{6, 7},
+		{0, 1, 2, 3},
+		{4, 5},
+		{},
+		{6, 7},
 	})
 	ref := []byte{0, 1, 2, 3, 4, 5, 6, 7}
-	if bytes.Compare(res, ref) != 0 {
+	if !bytes.Compare(res, ref) {
 		t.Errorf("mismatch in concatCopyPreAllocate")
 	}
 }
@@ -54,59 +54,59 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 }
 
 func sameTO(a, b *Order) bool {
-	return bytes.Compare(a.Sender, b.Sender) == 0 && a.Sequence == b.Sequence &&
+	return !bytes.Compare(a.Sender, b.Sender) && a.Sequence == b.Sequence &&
 		a.Symbol == b.Symbol && a.OrderType == b.OrderType && a.Price.Equal(b.Price) &&
 		a.Quantity == b.Quantity && a.Side == b.Side && a.TimeInForce == b.TimeInForce &&
 		a.Height == b.Height
 }
 
-func createTO_1() []*Order {
+func createTO1() []*Order {
 	return []*Order{
 		//sender seq   price quantity       height
-		newTO("00001", 1, 11051, 50, Buy, GTE, 998), //0
-		newTO("00002", 2, 11080, 50, Buy, GTE, 998), //1 good
-		newTO("00002", 3, 10900, 50, Buy, GTE, 992), //2
+		newTO("00001", 1, 11051, 50, Buy, GTE, 998),   //0
+		newTO("00002", 2, 11080, 50, Buy, GTE, 998),   //1 good
+		newTO("00002", 3, 10900, 50, Buy, GTE, 992),   //2
 		newTO("00003", 2, 11010, 100, Sell, IOC, 997), //3 good
-		newTO("00004", 4, 11032, 60, Sell,  GTE, 990), //4
+		newTO("00004", 4, 11032, 60, Sell, GTE, 990),  //4
 		newTO("00005", 5, 12039, 120, Sell, GTE, 996), //5
 	}
 }
 
-func createTO_3() []*Order {
+func createTO3() []*Order {
 	return []*Order{
 		//sender seq   price quantity       height
-		newTO("00001", 1, 11051, 50, Buy, GTE, 998), //0
-		newTO("00002", 2, 11080, 50, Buy, GTE, 998), //1
-		newTO("00002", 3, 10900, 50, Buy, GTE, 992), //2
+		newTO("00001", 1, 11051, 50, Buy, GTE, 998),   //0
+		newTO("00002", 2, 11080, 50, Buy, GTE, 998),   //1
+		newTO("00002", 3, 10900, 50, Buy, GTE, 992),   //2
 		newTO("00003", 2, 12010, 100, Sell, IOC, 997), //3
-		newTO("00004", 4, 12032, 60, Sell,  GTE, 990), //4
+		newTO("00004", 4, 12032, 60, Sell, GTE, 990),  //4
 		newTO("00005", 5, 12039, 120, Sell, GTE, 996), //5
 	}
 }
 
-func TestOrderBook_1(t *testing.T) {
-	orders := createTO_1()
+func TestOrderBook1(t *testing.T) {
+	orders := createTO1()
 	keeper := newKeeperForTest()
 	for _, order := range orders {
 		keeper.Add(order)
-		fmt.Printf("0: %s %d\n",order.OrderID(),order.Height)
+		fmt.Printf("0: %s %d\n", order.OrderID(), order.Height)
 	}
-	newOrder :=newTO("00005", 6, 11030, 20, Sell, GTE, 993)
-	if keeper.Remove(newOrder)==nil {
+	newOrder := newTO("00005", 6, 11030, 20, Sell, GTE, 993)
+	if keeper.Remove(newOrder) == nil {
 		t.Errorf("Error in Remove")
 	}
 	orders1 := keeper.GetOlderThan(997)
-	if !( sameTO(orders1[0], orders[5]) && sameTO(orders1[1], orders[2]) && sameTO(orders1[2], orders[4]) ) {
+	if !(sameTO(orders1[0], orders[5]) && sameTO(orders1[1], orders[2]) && sameTO(orders1[2], orders[4])) {
 		t.Errorf("Error in GetOlderThan")
 	}
 	orders2 := keeper.GetOrdersAtHeight(998)
-	if !( sameTO(orders2[0], orders[0]) && sameTO(orders2[1], orders[1]) ) {
+	if !(sameTO(orders2[0], orders[0]) && sameTO(orders2[1], orders[1])) {
 		t.Errorf("Error in GetOlderThan")
 	}
-	addr,_ := simpleAddr("00002")
+	addr, _ := simpleAddr("00002")
 	orderList := keeper.GetOrdersFromUser(addr.String())
-	refOrderList := []string{addr.String()+"-3",addr.String()+"-2"}
-	if orderList[0]!=refOrderList[0] || orderList[1]!=refOrderList[1] {
+	refOrderList := []string{addr.String() + "-3", addr.String() + "-2"}
+	if orderList[0] != refOrderList[0] || orderList[1] != refOrderList[1] {
 		t.Errorf("Error in GetOrdersFromUser")
 	}
 	for _, order := range keeper.GetMatchingCandidates() {
@@ -117,7 +117,7 @@ func TestOrderBook_1(t *testing.T) {
 			t.Errorf("Can not find added orders!")
 			continue
 		}
-		qorder:=keeper.QueryOrder(order.OrderID())
+		qorder := keeper.QueryOrder(order.OrderID())
 		if !sameTO(order, qorder) {
 			t.Errorf("Order's content is changed!")
 		}
@@ -129,33 +129,33 @@ func TestOrderBook_1(t *testing.T) {
 	}
 }
 
-func TestOrderBook_2(t *testing.T) {
-	orders := createTO_1()
+func TestOrderBook2(t *testing.T) {
+	orders := createTO1()
 	keeper1 := newKeeperForTest()
 	keeper2 := newKeeperForTest()
 	for _, order := range orders {
-		if order.Side==Buy {
+		if order.Side == Buy {
 			keeper1.Add(order)
 		}
-		if order.Side==Sell {
+		if order.Side == Sell {
 			keeper2.Add(order)
 		}
 	}
-	if len(keeper1.GetMatchingCandidates())!=0 {
+	if len(keeper1.GetMatchingCandidates()) != 0 {
 		t.Errorf("Matching result must be nil!")
 	}
-	if len(keeper2.GetMatchingCandidates())!=0 {
+	if len(keeper2.GetMatchingCandidates()) != 0 {
 		t.Errorf("Matching result must be nil!")
 	}
 }
 
-func TestOrderBook_3(t *testing.T) {
+func TestOrderBook3(t *testing.T) {
 	orders := createTO_3()
 	keeper := newKeeperForTest()
 	for _, order := range orders {
 		keeper.Add(order)
 	}
-	if len(keeper.GetMatchingCandidates())!=0 {
+	if len(keeper.GetMatchingCandidates()) != 0 {
 		t.Errorf("Matching result must be nil!")
 	}
 }

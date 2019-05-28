@@ -10,14 +10,14 @@ import (
 
 //nolint
 var (
-	OrderBookKeyPrefix      = []byte{0x11}
-	BidListKeyPrefix        = []byte{0x12}
-	BidListKeyPrefixPlusOne = []byte{0x13}
-	AskListKeyPrefix        = []byte{0x13}
-	AskListKeyPrefixPlusOne = []byte{0x14}
-	OrderQueueKeyPrefix     = []byte{0x14}
-	OrderQueueKeyPrefixPlusOne     = []byte{0x15}
-	IocListKeyPrefix        = []byte{0x15}
+	OrderBookKeyPrefix         = []byte{0x11}
+	BidListKeyPrefix           = []byte{0x12}
+	BidListKeyPrefixPlusOne    = []byte{0x13}
+	AskListKeyPrefix           = []byte{0x13}
+	AskListKeyPrefixPlusOne    = []byte{0x14}
+	OrderQueueKeyPrefix        = []byte{0x14}
+	OrderQueueKeyPrefixPlusOne = []byte{0x15}
+	IocListKeyPrefix           = []byte{0x15}
 )
 
 const (
@@ -62,7 +62,7 @@ func concatCopyPreAllocate(slices [][]byte) []byte {
 func (keeper *PersistentOrderKeeper) orderBookKey(orderID string) []byte {
 	return concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		OrderBookKeyPrefix,
 		[]byte(orderID),
 	})
@@ -71,7 +71,7 @@ func (keeper *PersistentOrderKeeper) orderBookKey(orderID string) []byte {
 func (keeper *PersistentOrderKeeper) bidListKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		BidListKeyPrefix,
 		decToBigEndianBytes(order.Price),
 		[]byte(order.OrderID()),
@@ -81,7 +81,7 @@ func (keeper *PersistentOrderKeeper) bidListKey(order *Order) []byte {
 func (keeper *PersistentOrderKeeper) askListKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		AskListKeyPrefix,
 		decToBigEndianBytes(order.Price),
 		[]byte(order.OrderID()),
@@ -91,7 +91,7 @@ func (keeper *PersistentOrderKeeper) askListKey(order *Order) []byte {
 func (keeper *PersistentOrderKeeper) orderQueueKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		OrderQueueKeyPrefix,
 		int64ToBigEndianBytes(order.Height),
 		[]byte(order.OrderID()),
@@ -174,12 +174,12 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(height int64) []*Order {
 	var result []*Order
 	start := concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		OrderQueueKeyPrefix,
 	})
 	end := concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		OrderQueueKeyPrefix,
 		int64ToBigEndianBytes(height),
 	})
@@ -195,13 +195,13 @@ func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(height int64) []*Order {
 	var result []*Order
 	start := concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		OrderQueueKeyPrefix,
 		int64ToBigEndianBytes(height),
 	})
 	end := concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		OrderQueueKeyPrefix,
 		int64ToBigEndianBytes(height + 1),
 	})
@@ -238,22 +238,22 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates() []*Order {
 	priceEndPos := priceStartPos + DecByteCount
 	bidListStart := concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		BidListKeyPrefix,
 	})
 	bidListEnd := concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		BidListKeyPrefixPlusOne,
 	})
 	askListStart := concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		AskListKeyPrefix,
 	})
 	askListEnd := concatCopyPreAllocate([][]byte{
 		[]byte(keeper.symbol),
-		[]byte{0x0},
+		{0x0},
 		AskListKeyPrefixPlusOne,
 	})
 	bidIter := keeper.store.ReverseIterator(bidListStart, bidListEnd)
@@ -270,7 +270,7 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates() []*Order {
 	}
 	orderIDList := []string{string(firstBidKey[priceEndPos:]), string(firstAskKey[priceEndPos:])}
 	for _, s := range orderIDList {
-		fmt.Printf("here! %s\n",s)
+		fmt.Printf("here! %s\n", s)
 	}
 	for askIter.Next(); askIter.Valid(); askIter.Next() {
 		askKey := askIter.Key()
