@@ -3,10 +3,8 @@ package market
 import (
 	"bytes"
 	"math"
-	"strconv"
 	"strings"
 
-	"github.com/btcsuite/btcutil/bech32"
 	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -62,7 +60,7 @@ func handlerMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper
 		return ErrSendTokenFailed(err.Error()).Result()
 	}
 	key := marketStoreKey(marketIdetifierPrefix, info.Stock+SymbolSeparator+info.Money)
-	value := msgCdc.MustMarshalBinaryBare(info)
+	value := keeper.cdc.MustMarshalBinaryBare(info)
 	ctx.KVStore(keeper.marketKey).Set(key, value)
 
 	return sdk.Result{Tags: info.GetTags()}
@@ -105,12 +103,6 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 		return ret
 	}
 
-	//TODO, bech32 encode need to solve.
-	addr, err := bech32.Encode("", msg.Sender)
-	if err != nil {
-		return ErrInvalidAddress().Result()
-	}
-
 	order := Order{
 		Sender:      msg.Sender,
 		Sequence:    msg.Sequence,
@@ -126,8 +118,8 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 		DealMoney:   0,
 		DealStock:   0,
 	}
-	key := marketStoreKey(orderBookIdetifierPrefix, msg.Symbol, addr+"-"+strconv.Itoa(int(msg.Sequence)))
-	value := msgCdc.MustMarshalBinaryBare(order)
+	key := marketStoreKey(orderBookIdetifierPrefix, msg.Symbol, order.OrderID())
+	value := keeper.cdc.MustMarshalBinaryBare(order)
 	store.Set(key, value)
 
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
@@ -155,7 +147,7 @@ func checkMsgCreateGTEOrder(store sdk.KVStore, msg MsgCreateGTEOrder, keeper Kee
 		return ErrNoExistKeyInStore().Result()
 	}
 
-	msgCdc.MustUnmarshalBinaryBare(value, &marketInfo)
+	keeper.cdc.MustUnmarshalBinaryBare(value, &marketInfo)
 	if msg.PricePrecision > marketInfo.PricePrecision {
 		return ErrInvalidPricePrecision().Result()
 	}

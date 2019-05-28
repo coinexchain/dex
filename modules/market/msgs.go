@@ -3,6 +3,7 @@ package market
 import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market/match"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strings"
 )
@@ -12,6 +13,14 @@ const (
 	RouterKey = "market"
 	MarketKey = RouterKey
 )
+
+var (
+	msgCdc = codec.New()
+)
+
+func init() {
+	registerCodec(msgCdc)
+}
 
 ///////////////////////////////////////////////////////////
 // MsgCreateMarketInfo

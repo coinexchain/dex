@@ -1,6 +1,8 @@
 package market
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	"testing"
 	"time"
 
@@ -28,12 +30,18 @@ var (
 func prepareMockInput() testInput {
 	db := dbm.NewMemDB()
 	marketKey := sdk.NewKVStoreKey(MarketKey)
+	keyParams := sdk.NewKVStoreKey(params.StoreKey)
+	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(marketKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-	mk := NewKeeper(marketKey, MockAssertKeeper{}, MockBankxKeeper{})
+	cdc := codec.New()
+
+	mk := NewKeeper(marketKey, MockAssertKeeper{}, MockBankxKeeper{}, cdc,
+		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(MarketKey))
+	mk.RegisterCodec()
 	handler := NewHandler(mk)
 	return testInput{ctx: ctx, mk: mk, handler: handler}
 }

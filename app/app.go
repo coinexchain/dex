@@ -220,6 +220,8 @@ func (app *CetChainApp) initKeepers() {
 		app.keyMarket,
 		market.MockAssertKeeper{},
 		market.MockBankxKeeper{},
+		app.cdc,
+		app.paramsKeeper.Subspace(market.MarketKey),
 	)
 }
 
@@ -274,7 +276,6 @@ func MakeCodec() *codec.Codec {
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 	asset.RegisterCodec(cdc)
-	market.RegisterCodec(cdc)
 	return cdc
 }
 
@@ -404,6 +405,7 @@ func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisSt
 	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
 	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
+	market.InitGenesis(ctx, app.marketKeeper, genesisState.MarketData)
 }
 
 func (app *CetChainApp) deliverGenTxs(genTxs []json.RawMessage) {

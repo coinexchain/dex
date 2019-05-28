@@ -20,6 +20,7 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/market"
 )
 
 // export the state of gaia for a genesis file
@@ -187,6 +188,7 @@ func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
 		crisis.ExportGenesis(ctx, app.crisisKeeper),
 		slashing.ExportGenesis(ctx, app.slashingKeeper),
 		asset.ExportGenesis(ctx, app.assetKeeper),
+		market.ExportGenesis(ctx, app.marketKeeper),
 	)
 }
 

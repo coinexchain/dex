@@ -21,6 +21,7 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/market"
 )
 
 var (
@@ -41,6 +42,7 @@ type GenesisState struct {
 	SlashingData slashing.GenesisState     `json:"slashing"`
 	AssetData    asset.GenesisState        `json:"asset"`
 	GenTxs       []json.RawMessage         `json:"gentxs"`
+	MarketData   market.GenesisState       `json:"market"`
 }
 
 // NewDefaultGenesisState generates the default state for coindex.
@@ -57,6 +59,7 @@ func NewDefaultGenesisState() GenesisState {
 		CrisisData:   crisis.DefaultGenesisState(),
 		SlashingData: slashing.DefaultGenesisState(),
 		AssetData:    asset.DefaultGenesisState(),
+		MarketData:   market.DefaultGenesisState(),
 		GenTxs:       nil,
 	}
 	// TODO: create staking.GenesisState & gov.GenesisState & crisis.GenesisState from scratch
@@ -77,7 +80,8 @@ func NewGenesisState(
 	govData gov.GenesisState,
 	crisisData crisis.GenesisState,
 	slashingData slashing.GenesisState,
-	assetData asset.GenesisState) GenesisState {
+	assetData asset.GenesisState,
+	marketData market.GenesisState) GenesisState {
 
 	return GenesisState{
 		Accounts:     accounts,
@@ -91,6 +95,7 @@ func NewGenesisState(
 		CrisisData:   crisisData,
 		SlashingData: slashingData,
 		AssetData:    assetData,
+		MarketData:   marketData,
 	}
 }
 
@@ -121,6 +126,9 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 	if err := gs.AssetData.Validate(); err != nil {
+		return err
+	}
+	if err := gs.MarketData.Validate(); err != nil {
 		return err
 	}
 
