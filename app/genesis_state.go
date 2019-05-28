@@ -114,6 +114,16 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
+	if err := gs.AuthXData.Validate(); err != nil {
+		return err
+	}
+	if err := gs.BankXData.Validate(); err != nil {
+		return err
+	}
+	if err := gs.AssetData.Validate(); err != nil {
+		return err
+	}
+
 	// skip stakingData validation as genesis is created from txs
 	if len(gs.GenTxs) > 0 {
 		return nil
@@ -138,16 +148,6 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 	if err := slashing.ValidateGenesis(gs.SlashingData); err != nil {
-		return err
-	}
-
-	if err := gs.AuthXData.Validate(); err != nil {
-		return err
-	}
-	if err := gs.BankXData.Validate(); err != nil {
-		return err
-	}
-	if err := gs.AssetData.Validate(); err != nil {
 		return err
 	}
 
