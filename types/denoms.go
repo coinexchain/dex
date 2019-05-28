@@ -4,6 +4,9 @@ import "strings"
 
 const CET = "cet"
 
+// default bond denomination
+const DefaultBondDenom = CET
+
 // reserved token names
 var reserved = []string{
 	CET,

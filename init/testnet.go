@@ -29,6 +29,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var (
@@ -90,7 +91,7 @@ func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 		client.FlagChainID, "", "genesis file chain-id, if left blank will be randomly created",
 	)
 	cmd.Flags().String(
-		server.FlagMinGasPrices, fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom),
+		server.FlagMinGasPrices, fmt.Sprintf("0.000006%s", dex.DefaultBondDenom),
 		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 0.01photino,0.001stake)",
 	)
 }
@@ -131,6 +132,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 		err := mkNodeHomeDirs(outDir, nodeDir, clientDir)
 		if err != nil {
+			_ = os.RemoveAll(outDir)
 			return err
 		}
 
@@ -194,7 +196,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 			Address: addr,
 			Coins: sdk.Coins{
 				sdk.NewCoin(fmt.Sprintf("%stoken", nodeDirName), accTokens),
-				sdk.NewCoin(sdk.DefaultBondDenom, accStakingTokens),
+				sdk.NewCoin(dex.DefaultBondDenom, accStakingTokens),
 			},
 		})
 

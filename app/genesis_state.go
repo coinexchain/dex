@@ -22,10 +22,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
-)
-
-var (
-	defaultBondDenom = "cet"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // State to Unmarshal
@@ -63,9 +60,9 @@ func NewDefaultGenesisState() GenesisState {
 		GenTxs:       nil,
 	}
 	// TODO: create staking.GenesisState & gov.GenesisState & crisis.GenesisState from scratch
-	gs.StakingData.Params.BondDenom = defaultBondDenom
-	gs.GovData.DepositParams.MinDeposit[0].Denom = defaultBondDenom
-	gs.CrisisData.ConstantFee.Denom = defaultBondDenom
+	gs.StakingData.Params.BondDenom = dex.DefaultBondDenom
+	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
+	gs.CrisisData.ConstantFee.Denom = dex.DefaultBondDenom
 	return gs
 }
 
