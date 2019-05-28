@@ -1,7 +1,6 @@
 vendor/
 .idea/
 .DS_Store
-.idea
 *.iml
 
 *.out
@@ -12,5 +11,6 @@ cetcli
 !cetd/
 !cetcli/
 
+build/
 cmd/cetcli/statik/statik.go
 /cmd/cetcli/swagger/bower_components/
