@@ -381,7 +381,7 @@ paths:
                 items:
                   $ref: "#/definitions/Coin"
               unlocked_time:
-                type: int64
+                type: integer
                 example: 675132000
       responses:
         202:
