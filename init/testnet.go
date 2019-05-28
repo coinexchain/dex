@@ -129,15 +129,8 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 		config.SetRoot(nodeDir)
 
-		err := os.MkdirAll(filepath.Join(nodeDir, "config"), nodeDirPerm)
+		err := mkNodeHomeDirs(outDir, nodeDir, clientDir)
 		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-
-		err = os.MkdirAll(clientDir, nodeDirPerm)
-		if err != nil {
-			_ = os.RemoveAll(outDir)
 			return err
 		}
 
@@ -257,6 +250,22 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 	}
 
 	fmt.Printf("Successfully initialized %d node directories\n", numValidators)
+	return nil
+}
+
+func mkNodeHomeDirs(outDir, nodeDir, clientDir string) error {
+	err := os.MkdirAll(filepath.Join(nodeDir, "config"), nodeDirPerm)
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return err
+	}
+
+	err = os.MkdirAll(clientDir, nodeDirPerm)
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return err
+	}
+
 	return nil
 }
 
