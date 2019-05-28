@@ -233,7 +233,6 @@ func (app *CetChainApp) registerCrisisRoutes() {
 
 func (app *CetChainApp) registerMessageRoutes() {
 	app.Router().
-		AddRoute(bank.RouterKey, bankx.NewHandler(app.bankxKeeper)).
 		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
 		AddRoute(distr.RouterKey, distr.NewHandler(app.distrKeeper)).
 		AddRoute(slashing.RouterKey, slashing.NewHandler(app.slashingKeeper)).
@@ -264,7 +263,6 @@ func (app *CetChainApp) mountStores() {
 // custom tx codec
 func MakeCodec() *codec.Codec {
 	var cdc = codec.New()
-	bank.RegisterCodec(cdc)
 	bankx.RegisterCodec(cdc)
 	staking.RegisterCodec(cdc)
 	distr.RegisterCodec(cdc)

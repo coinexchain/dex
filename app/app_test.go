@@ -10,6 +10,7 @@ import (
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 
+	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -48,6 +49,13 @@ func initApp(accs ...auth.BaseAccount) *CetChainApp {
 //	minGasPrice := ctx.MinGasPrices()
 //	require.False(t, minGasPrice.IsZero())
 //}
+
+func TestRouter(t *testing.T) {
+	bApp := bam.NewBaseApp(appName, nil, nil, nil)
+	app := &CetChainApp{BaseApp: bApp}
+	app.registerMessageRoutes()
+	require.Nil(t, app.Router().Route("bank"))
+}
 
 func TestSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
