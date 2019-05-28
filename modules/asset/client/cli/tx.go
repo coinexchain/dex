@@ -24,6 +24,7 @@ const (
 	FlagTokenFreezable = "token-freezable"
 
 	FlagNewOwner = "new-owner"
+	FlagAmount   = "amount"
 )
 
 var issueTokenFlags = []string{
@@ -171,6 +172,64 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 
 	cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range transferOwnershipFlags {
+		cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
+
+var mintTokenFlags = []string{
+	FlagSymbol,
+	FlagAmount,
+}
+
+// MintTokenCmd will create a mint token tx and sign.
+func MintTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "mint-token",
+		Short: "Create and sign a mint token tx",
+		Long: strings.TrimSpace(
+			`Create and sign a mint token tx, broadcast to nodes.
+
+Example:
+$ cetcli tx asset mint-token --symbol="abc" \
+	--amount=10000000000000000 \
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseMintTokenFlags(owner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			// ensure account has enough coins
+			account, err := cliCtx.GetAccount(owner)
+			if err != nil {
+				return err
+			}
+
+			issueFee := types.NewCetCoins(asset.TransferOwnershipFee)
+			if !account.GetCoins().IsAllGTE(issueFee) {
+				return fmt.Errorf("address %s doesn't have enough cet to issue token", owner)
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "Which token will be minted")
+	cmd.Flags().String(FlagAmount, "", "The amount of mint")
+
+	cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range mintTokenFlags {
 		cmd.MarkFlagRequired(flag)
 	}
 

@@ -45,3 +45,20 @@ func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransfe
 
 	return &msg, nil
 }
+
+func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
+	for _, flag := range mintTokenFlags {
+		if viper.GetString(flag) == "" {
+			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+				"$ cetcli tx asset transfer-ownership -h", flag)
+		}
+	}
+
+	msg := asset.NewMsgMintToken(
+		viper.GetString(FlagSymbol),
+		viper.GetInt64(FlagAmount),
+		owner,
+	)
+
+	return &msg, nil
+}
