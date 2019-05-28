@@ -16,11 +16,10 @@ go:
 cache:
   ccache:  true
   apt: true
-
-directories:
-  - ${TRAVIS_BUILD_DIR}/vendor
-  - $GOPATH/src
-  - $GOPATH/pkg
+  directories:
+    - ${TRAVIS_BUILD_DIR}/vendor
+    - $GOPATH/src
+    - $GOPATH/pkg
 
 before_cache:
   - find $HOME/.glide/cache -name ORIG_HEAD -exec rm {} \;
