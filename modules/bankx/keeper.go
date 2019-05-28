@@ -33,3 +33,9 @@ func (k Keeper) GetParam(ctx sdk.Context) (param Param) {
 func (k Keeper) SetParam(ctx sdk.Context, param Param) {
 	k.paramSubspace.Set(ctx, ParamStoreKeyActivatedFee, param)
 }
+func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
+	return k.bk.HasCoins(ctx, addr, amt)
+}
+func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) (sdk.Tags, sdk.Error) {
+	return k.bk.SendCoins(ctx, from, to, amt)
+}
