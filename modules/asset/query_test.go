@@ -20,6 +20,7 @@ func Test_queryToken(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, res)
 
+	// set token
 	token, err := NewToken("ABC Token", "abc", 2100, tAccAddr,
 		false, false, false, false)
 	require.NoError(t, err)
@@ -32,6 +33,11 @@ func Test_queryToken(t *testing.T) {
 	require.Nil(t, res)
 
 	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams("www"))
+	res, err = queryToken(input.ctx, req, input.tk)
+	require.Error(t, err)
+	require.Nil(t, res)
+
+	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams("a*B12345……6789"))
 	res, err = queryToken(input.ctx, req, input.tk)
 	require.Error(t, err)
 	require.Nil(t, res)
