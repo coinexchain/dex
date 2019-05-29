@@ -12,10 +12,10 @@ const (
 	Token = "token"
 	Owner = "owner"
 
-	OriginalOwner = "OriginalOwner"
-	NewOwner      = "NewOwner"
+	OriginalOwner = "original-owner"
+	NewOwner      = "new-owner"
 
-	Amt = "Amount"
+	Amt = "amount"
 )
 
 // Tag keys and values
