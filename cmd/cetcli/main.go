@@ -47,7 +47,6 @@ import (
 	assrest "github.com/coinexchain/dex/modules/asset/client/rest"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
 	bankxrest "github.com/coinexchain/dex/modules/bankx/client/rest"
-	"github.com/coinexchain/dex/modules/market"
 	mktclient "github.com/coinexchain/dex/modules/market/client"
 	mktrest "github.com/coinexchain/dex/modules/market/client/rest"
 )
@@ -98,7 +97,7 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 	// TODO: Make the lcd command take a list of ModuleClient
 	mc := []sdk.ModuleClients{
 		assclient.NewModuleClient(as.StoreKey, cdc),
-		mktclient.NewModuleClient(market.MarketKey, cdc),
+		mktclient.NewModuleClient(as.StoreKey, cdc),
 		govClient.NewModuleClient(gv.StoreKey, cdc),
 		distClient.NewModuleClient(distcmd.StoreKey, cdc),
 		stakingclient.NewModuleClient(st.StoreKey, cdc),

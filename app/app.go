@@ -274,6 +274,7 @@ func MakeCodec() *codec.Codec {
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 	asset.RegisterCodec(cdc)
+	market.RegisterCodec(cdc)
 	return cdc
 }
 

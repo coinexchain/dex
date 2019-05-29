@@ -1,11 +1,13 @@
 package market
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"strings"
 )
 
 // RouterKey is the name of the bankx module
@@ -19,7 +21,7 @@ var (
 )
 
 func init() {
-	registerCodec(msgCdc)
+	RegisterCodec(msgCdc)
 }
 
 ///////////////////////////////////////////////////////////
@@ -96,7 +98,7 @@ func (msg MsgCreateGTEOrder) ValidateBasic() sdk.Error {
 	}
 	if msg.PricePrecision < MinimumTokenPricePrecision ||
 		msg.PricePrecision > MaxTokenPricePrecision {
-		return sdk.ErrInvalidAddress("price precision value out of range[0, 18]")
+		return sdk.ErrInvalidAddress("price precision value out of range[8, 18]. actual : " + strconv.Itoa(int(msg.PricePrecision)))
 	}
 
 	if msg.Side != match.BUY && msg.Side != match.SELL {

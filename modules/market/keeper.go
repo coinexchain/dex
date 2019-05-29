@@ -67,12 +67,14 @@ func (k Keeper) SetMarket(ctx sdk.Context, info MarketInfo) sdk.Error {
 
 // RegisterCodec registers concrete types on the codec
 func (k Keeper) RegisterCodec() {
-	registerCodec(k.cdc)
+	RegisterCodec(k.cdc)
 }
 
-func registerCodec(cdc *codec.Codec) {
+func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(Order{}, "cet-chain/order", nil)
 	cdc.RegisterConcrete(MarketInfo{}, "cet-chain/market", nil)
+	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "cet-chain/info", nil)
+	cdc.RegisterConcrete(MsgCreateGTEOrder{}, "cet-chain/orderinfo", nil)
 }
 
 func (k Keeper) GetAllOrders(ctx sdk.Context) []Order {

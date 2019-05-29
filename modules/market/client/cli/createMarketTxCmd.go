@@ -55,17 +55,8 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return errors.New("No have insufficient cet to create market in blockchain")
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
-			res, _ := cliCtx.QueryWithData(route, nil)
-			if res == nil {
-				return errors.New("Not query asset info from blockchain")
-			}
-
-			var tokens []asset.Token
-			cdc.MustUnmarshalJSON(res, &tokens)
-
-			if !IsExistStockAndMoneySymbol(msg.Stock, msg.Money, tokens) {
-				return errors.New("stock or monry is not exist in blockchain")
+			if err := hasTokens(cliCtx, cdc, queryRoute, msg.Stock, msg.Money); err != nil {
+				return err
 			}
 
 			if msg.PricePrecision < market.MinimumTokenPricePrecision ||
@@ -88,24 +79,21 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return cmd
 }
 
-func IsExistStockAndMoneySymbol(stock, money string, tokens []asset.Token) bool {
-	var (
-		findStock bool
-		findMoney bool
-	)
-
-	for _, t := range tokens {
-		if stock == t.GetSymbol() {
-			findStock = true
-		} else if money == t.GetSymbol() {
-			findMoney = true
+func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, queryRoute string, tokens ...string) error {
+	route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
+	for _, token := range tokens {
+		bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(token))
+		if err != nil {
+			return err
+		}
+		fmt.Printf("token :%s\n ", token)
+		if _, err := cliCtx.QueryWithData(route, bz); err != nil {
+			fmt.Printf("route : %s\n", route)
+			return err
 		}
 	}
 
-	if findMoney && findStock {
-		return true
-	}
-	return false
+	return nil
 }
 
 func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo, error) {

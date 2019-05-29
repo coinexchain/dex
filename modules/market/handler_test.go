@@ -136,7 +136,7 @@ func TestMarketInfoSetFailed(t *testing.T) {
 
 	// failed by coins
 	msgMarketInfo.Money = money
-	msgMarketInfo.Creator = []byte(notHaveCetAddress)
+	msgMarketInfo.Creator = notHaveCetAddress
 	ret = input.handler(input.ctx, msgMarketInfo)
 	require.Equal(t, sdk.CodeType(CodeInvalidTokenIssuer), ret.Code, "create market info should failed")
 

@@ -32,6 +32,7 @@ var createGTEOrderFlags = []string{
 	FlagQuantity,
 	FlagSide,
 	FlagTimeInForce,
+	FlagPricePrecision,
 }
 
 func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
@@ -67,7 +68,7 @@ $ cetcli tx market creategteoreder --symbol="btc/cet"
 				return err
 			}
 
-			symbols := strings.Split(args[2], market.SymbolSeparator)
+			symbols := strings.Split(msg.Symbol, market.SymbolSeparator)
 			userToken := symbols[0]
 			if msg.Side == match.BUY {
 				userToken = symbols[1]
@@ -91,6 +92,7 @@ $ cetcli tx market creategteoreder --symbol="btc/cet"
 	cmd.Flags().Int(FlagQuantity, -1, "The number of tokens will be trade in the order ")
 	cmd.Flags().Int(FlagSide, -1, "The side in the order")
 	cmd.Flags().Int(FlagTimeInForce, -1, "The time-in-force for GTE order")
+	cmd.Flags().Int(FlagPricePrecision, -1, "The price precision in order")
 
 	for _, flag := range createGTEOrderFlags {
 		cmd.MarkFlagRequired(flag)
