@@ -2,6 +2,8 @@ package market
 
 import (
 	"fmt"
+	"strconv"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -29,14 +31,15 @@ func (or *Order) OrderID() string {
 
 func (or *Order) GetTagsInOrderCreate() sdk.Tags {
 
-	return sdk.NewTags("sender", or.Sender, "sequence", or.Sequence, "symbol",
-		or.Symbol, "order-type", or.OrderType, "price", or.Price, "quantity", or.Quantity,
-		"side", or.Side, "time-in-force", or.TimeInForce, "height", or.Height)
+	return sdk.NewTags("sender", string(or.Sender), "sequence", strconv.FormatInt(int64(or.Sequence), 10), "symbol",
+		or.Symbol, "order-type", strconv.Itoa(int(or.OrderType)), "price", or.Price.String(), "quantity", strconv.FormatInt(or.Quantity, 10),
+		"side", strconv.Itoa(int(or.Side)), "time-in-force", strconv.Itoa(or.TimeInForce), "height", strconv.FormatInt(or.Height, 10))
 }
 
 func (or *Order) GetTagsInOrderFilled() sdk.Tags {
 
 	tags := or.GetTagsInOrderCreate()
-	return tags.AppendTags(sdk.NewTags("left-stock", or.LeftStock, "freeze",
-		or.Freeze, "deal-stock", or.DealStock, "deal-money", or.DealMoney))
+	return tags.AppendTags(sdk.NewTags("left-stock", strconv.FormatInt(or.LeftStock, 10), "freeze",
+		strconv.FormatInt(or.Freeze, 10), "deal-stock", strconv.FormatInt(or.DealStock, 10),
+		"deal-money", strconv.FormatInt(or.DealMoney, 10)))
 }

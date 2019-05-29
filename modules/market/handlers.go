@@ -56,9 +56,6 @@ func handlerMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper
 		LastExecutedPrice: sdk.NewDec(0),
 	}
 
-	if err := keeper.bnk.DeductFeeFromAddressAndCollectFeetoIncentive(msg.Creator, sdk.Coins{CreateMarketSpendCet}); err != nil {
-		return ErrSendTokenFailed(err.Error()).Result()
-	}
 	key := marketStoreKey(marketIdetifierPrefix, info.Stock+SymbolSeparator+info.Money)
 	value := keeper.cdc.MustMarshalBinaryBare(info)
 	ctx.KVStore(keeper.marketKey).Set(key, value)
@@ -73,11 +70,11 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 		return ErrInvalidSymbol().Result()
 	}
 
-	if !keeper.axk.IsTokenExists(msg.Money) || !keeper.axk.IsTokenExists(msg.Stock) {
+	if !keeper.axk.IsTokenExists(ctx, msg.Money) || !keeper.axk.IsTokenExists(ctx, msg.Stock) {
 		return ErrTokenNoExist().Result()
 	}
 
-	if !keeper.axk.IsTokenIssuer(msg.Stock, []byte(msg.Creator)) && !keeper.axk.IsTokenIssuer(msg.Money, []byte(msg.Creator)) {
+	if !keeper.axk.IsTokenIssuer(ctx, msg.Stock, []byte(msg.Creator)) && !keeper.axk.IsTokenIssuer(ctx, msg.Money, []byte(msg.Creator)) {
 		return ErrInvalidTokenIssuer().Result()
 	}
 
@@ -85,7 +82,7 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 		return ErrInvalidPricePrecision().Result()
 	}
 
-	if !keeper.bnk.HaveSufficientCoins(msg.Creator, sdk.Coins{CreateMarketSpendCet}) {
+	if !keeper.bnk.HasCoins(ctx, msg.Creator, sdk.Coins{CreateMarketSpendCet}) {
 		return ErrNoHaveSufficientCoins().Result()
 	}
 
@@ -99,7 +96,7 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 		return ErrNoStoreEngine().Result()
 	}
 
-	if ret := checkMsgCreateGTEOrder(store, msg, keeper); !ret.IsOK() {
+	if ret := checkMsgCreateGTEOrder(ctx, store, msg, keeper); !ret.IsOK() {
 		return ret
 	}
 
@@ -125,7 +122,7 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
 
-func checkMsgCreateGTEOrder(store sdk.KVStore, msg MsgCreateGTEOrder, keeper Keeper) sdk.Result {
+func checkMsgCreateGTEOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateGTEOrder, keeper Keeper) sdk.Result {
 
 	var (
 		value      []byte
@@ -153,11 +150,11 @@ func checkMsgCreateGTEOrder(store sdk.KVStore, msg MsgCreateGTEOrder, keeper Kee
 	}
 
 	coin := sdk.NewCoin(denom, calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt())
-	if !keeper.bnk.HaveSufficientCoins(msg.Sender, sdk.Coins{coin}) {
+	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{coin}) {
 		return ErrNoHaveSufficientCoins().Result()
 	}
 
-	if keeper.axk.IsTokenFrozen(msg.Sender, denom) {
+	if keeper.axk.IsTokenFrozen(ctx, denom) {
 		return ErrTokenFrozenByIssuer().Result()
 	}
 
