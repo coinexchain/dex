@@ -78,14 +78,14 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 }
 
 func deductActivationFee(ctx sdk.Context, k Keeper,
-	fromAccount auth.Account, amt sdk.Coins) (sdk.Coins, sdk.Error) {
+	fromAccount auth.Account, sendAmt sdk.Coins) (sdk.Coins, sdk.Error) {
 
 	activatedFee := k.GetParam(ctx).ActivatedFee
 
 	//check whether the first transfer contains at least activatedFee cet
-	amt, neg := amt.SafeSub(dex.NewCetCoins(activatedFee))
+	sendAmt, neg := sendAmt.SafeSub(dex.NewCetCoins(activatedFee))
 	if neg {
-		return amt, ErrorInsufficientCETForActivatingFee()
+		return sendAmt, ErrorInsufficientCETForActivatingFee()
 	}
 
 	// sub the activatedFees from fromAddress
@@ -97,7 +97,7 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 	//collect account activation fees
 	k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activatedFee))
 
-	return amt, nil
+	return sendAmt, nil
 }
 
 func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg MsgSetMemoRequired) sdk.Result {
