@@ -29,42 +29,47 @@ type testInput struct {
 
 var (
 	haveCetAddress = []byte("have-cet")
-	stock          = "ludete"
-	money          = "cet"
+	stock          = "usdt"
+	money          = "eos"
 )
 
-func prepareAssetKeeper(ms store.CommitMultiStore, db dbm.DB, cdc *codec.Codec, ctx sdk.Context) ExpectedAssertStatusKeeper {
+type storeKeys struct {
+	assetCapKey *sdk.KVStoreKey
+	authCapKey  *sdk.KVStoreKey
+	fckCapKey   *sdk.KVStoreKey
+	keyParams   *sdk.KVStoreKey
+	tkeyParams  *sdk.TransientStoreKey
+	marketKey   *sdk.KVStoreKey
+}
+
+func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context) ExpectedAssertStatusKeeper {
 	asset.RegisterCodec(cdc)
 	auth.RegisterBaseAccount(cdc)
 
-	assetCapKey := sdk.NewKVStoreKey(asset.StoreKey)
-	authCapKey := sdk.NewKVStoreKey(auth.StoreKey)
-	fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
-	keyParams := sdk.NewKVStoreKey(params.StoreKey)
-	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
+	//create auth, asset keeper
+	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, params.NewKeeper(cdc, keys.keyParams,
+		keys.tkeyParams).Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 
-	//create account keeper, create account
-	ak := auth.NewAccountKeeper(
-		cdc,
-		authCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(auth.DefaultParamspace),
-		auth.ProtoBaseAccount,
-	)
+	fck := auth.NewFeeCollectionKeeper(cdc, keys.fckCapKey)
+	tk := asset.NewKeeper(cdc, keys.assetCapKey, params.NewKeeper(cdc, keys.keyParams,
+		keys.tkeyParams).Subspace(asset.DefaultParamspace), ak, fck)
+	tk.SetParams(ctx, asset.DefaultParams())
+
+	// create an account by auth keeper
 	acc := ak.NewAccountWithAddress(ctx, haveCetAddress)
 	acc.SetCoins(types.NewCetCoins(1E13))
 	ak.SetAccount(ctx, acc)
 
-	fck := auth.NewFeeCollectionKeeper(
-		cdc,
-		fckCapKey,
-	)
-	tk := asset.NewKeeper(
-		cdc,
-		assetCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(asset.DefaultParamspace),
-		ak,
-		fck,
-	)
+	// issue tokens
+	msgStock := asset.NewMsgIssueToken(stock, stock, 210000000000, haveCetAddress,
+		false, false, false, false)
+	msgMoney := asset.NewMsgIssueToken(money, money, 210000000000, haveCetAddress,
+		false, false, false, false)
+	handler := asset.NewHandler(tk)
+	ret := handler(ctx, msgStock)
+	require.Equal(t, true, ret.IsOK(), "issue token should succeed", ret)
+	ret = handler(ctx, msgMoney)
+	require.Equal(t, true, ret.IsOK(), "issue token should succeed", ret)
 
 	return tk
 }
@@ -93,54 +98,34 @@ func prepareMockInput(t *testing.T) testInput {
 	db := dbm.NewMemDB()
 	ms := store.NewCommitMultiStore(db)
 
-	marketKey := sdk.NewKVStoreKey(MarketKey)
-	assetCapKey := sdk.NewKVStoreKey(asset.StoreKey)
-	authCapKey := sdk.NewKVStoreKey(auth.StoreKey)
-	fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
-	keyParams := sdk.NewKVStoreKey(params.StoreKey)
-	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
-	//
-	//keyParams := sdk.NewKVStoreKey(params.StoreKey)
-	//tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
-	//assetCapKey := sdk.NewKVStoreKey(asset.StoreKey)
-	//authCapKey := sdk.NewKVStoreKey(auth.StoreKey)
-	//fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
+	keys := storeKeys{}
+	keys.marketKey = sdk.NewKVStoreKey(MarketKey)
+	keys.assetCapKey = sdk.NewKVStoreKey(asset.StoreKey)
+	keys.authCapKey = sdk.NewKVStoreKey(auth.StoreKey)
+	keys.fckCapKey = sdk.NewKVStoreKey(auth.FeeStoreKey)
+	keys.keyParams = sdk.NewKVStoreKey(params.StoreKey)
+	keys.tkeyParams = sdk.NewTransientStoreKey(params.TStoreKey)
+	ms.MountStoreWithDB(keys.assetCapKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.authCapKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.fckCapKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.keyParams, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.tkeyParams, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
+	ms.LoadLatestVersion()
+
 	//TODO. Can we remove these two keys
 	//skey := sdk.NewKVStoreKey("test")
 	//tkey := sdk.NewTransientStoreKey("transient_test")
 	//authxKey := sdk.NewKVStoreKey(authx.StoreKey)
 
-	ms.MountStoreWithDB(marketKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(assetCapKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(authCapKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(fckCapKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
-	//ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
-	//ms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
-	//ms.MountStoreWithDB(authxKey, sdk.StoreTypeIAVL, db)
-	ms.LoadLatestVersion()
-
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-	ak := prepareAssetKeeper(ms, db, cdc, ctx)
+	ak := prepareAssetKeeper(t, keys, cdc, ctx)
 	bk := prepareBankxKeeper(ms, db, cdc)
 
-	mk := NewKeeper(marketKey, ak, bk, cdc,
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(MarketKey))
+	mk := NewKeeper(keys.marketKey, ak, bk, cdc, params.NewKeeper(
+		cdc, keys.keyParams, keys.tkeyParams).Subspace(MarketKey))
 	mk.RegisterCodec()
-	handler := NewHandler(mk)
-	tinput := testInput{ctx: ctx, mk: mk, handler: handler}
-	issueTokens(t, tinput)
-	return tinput
-}
-
-func issueTokens(t *testing.T, input testInput) {
-	msg := asset.NewMsgIssueToken("ABC Token", stock, 210000000000, haveCetAddress,
-		false, false, false, false)
-	tk := input.mk.axk.(asset.TokenKeeper)
-	handler := asset.NewHandler(tk)
-	ret := handler(input.ctx, msg)
-	require.Equal(t, true, ret.IsOK(), "issue token should succeed")
+	return testInput{ctx: ctx, mk: mk, handler: NewHandler(mk)}
 }
 
 func TestMarketInfoSetFailed(t *testing.T) {
