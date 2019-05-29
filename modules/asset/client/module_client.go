@@ -47,6 +47,7 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 		assCli.IssueTokenCmd(mc.storeKey, mc.cdc),
 		assCli.TransferOwnershipCmd(mc.storeKey, mc.cdc),
 		assCli.MintTokenCmd(mc.storeKey, mc.cdc),
+		assCli.BurnTokenCmd(mc.storeKey, mc.cdc),
 	)...)
 
 	return assTxCmd

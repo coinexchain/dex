@@ -156,9 +156,9 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 				return err
 			}
 
-			issueFee := types.NewCetCoins(asset.TransferOwnershipFee)
-			if !account.GetCoins().IsAllGTE(issueFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to issue token", originalOwner)
+			transferFee := types.NewCetCoins(asset.TransferOwnershipFee)
+			if !account.GetCoins().IsAllGTE(transferFee) {
+				return fmt.Errorf("address %s doesn't have enough cet to transfer ownership", originalOwner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -214,9 +214,9 @@ $ cetcli tx asset mint-token --symbol="abc" \
 				return err
 			}
 
-			issueFee := types.NewCetCoins(asset.TransferOwnershipFee)
-			if !account.GetCoins().IsAllGTE(issueFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to issue token", owner)
+			mintFee := types.NewCetCoins(asset.MintFee)
+			if !account.GetCoins().IsAllGTE(mintFee) {
+				return fmt.Errorf("address %s doesn't have enough cet to mint token", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -230,6 +230,64 @@ $ cetcli tx asset mint-token --symbol="abc" \
 
 	cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range mintTokenFlags {
+		cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
+
+var burnTokenFlags = []string{
+	FlagSymbol,
+	FlagAmount,
+}
+
+// BurnTokenCmd will create a burn token tx and sign.
+func BurnTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "burn-token",
+		Short: "Create and sign a burn token tx",
+		Long: strings.TrimSpace(
+			`Create and sign a burn token tx, broadcast to nodes.
+
+Example:
+$ cetcli tx asset burn-token --symbol="abc" \
+	--amount=10000000000000000 \
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseBurnTokenFlags(owner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			// ensure account has enough coins
+			account, err := cliCtx.GetAccount(owner)
+			if err != nil {
+				return err
+			}
+
+			burnFee := types.NewCetCoins(asset.BurnFee)
+			if !account.GetCoins().IsAllGTE(burnFee) {
+				return fmt.Errorf("address %s doesn't have enough cet to burn token", owner)
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "Which token will be burned")
+	cmd.Flags().String(FlagAmount, "", "The amount of burn")
+
+	cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range burnTokenFlags {
 		cmd.MarkFlagRequired(flag)
 	}
 

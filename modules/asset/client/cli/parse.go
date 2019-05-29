@@ -50,11 +50,28 @@ func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
 	for _, flag := range mintTokenFlags {
 		if viper.GetString(flag) == "" {
 			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
-				"$ cetcli tx asset transfer-ownership -h", flag)
+				"$ cetcli tx asset mint-token -h", flag)
 		}
 	}
 
 	msg := asset.NewMsgMintToken(
+		viper.GetString(FlagSymbol),
+		viper.GetInt64(FlagAmount),
+		owner,
+	)
+
+	return &msg, nil
+}
+
+func parseBurnTokenFlags(owner sdk.AccAddress) (*asset.MsgBurnToken, error) {
+	for _, flag := range burnTokenFlags {
+		if viper.GetString(flag) == "" {
+			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+				"$ cetcli tx asset burn-token -h", flag)
+		}
+	}
+
+	msg := asset.NewMsgBurnToken(
 		viper.GetString(FlagSymbol),
 		viper.GetInt64(FlagAmount),
 		owner,
