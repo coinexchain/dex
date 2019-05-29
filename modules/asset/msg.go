@@ -248,8 +248,8 @@ type MsgBurnToken struct {
 
 var _ sdk.Msg = MsgBurnToken{}
 
-func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToken {
-	return MsgMintToken{
+func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgBurnToken {
+	return MsgBurnToken{
 		symbol,
 		amt,
 		owner,
@@ -272,10 +272,10 @@ func (msg MsgBurnToken) ValidateBasic() sdk.Error {
 		return ErrorInvalidTokenOwner("burn token need a valid addr")
 	}
 	if msg.Amount > MaxTokenAmount {
-		return ErrorInvalidTokenMint("token total supply limited to 90 billion")
+		return ErrorInvalidTokenBurn("token total supply limited to 90 billion")
 	}
 	if msg.Amount < 0 {
-		return ErrorInvalidTokenMint("mint amount should be positive")
+		return ErrorInvalidTokenBurn("burn amount should be positive")
 	}
 	return nil
 }

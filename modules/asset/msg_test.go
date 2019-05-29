@@ -197,7 +197,7 @@ func TestMsgTransferOwnership_Route(t *testing.T) {
 				tt.msg.NewOwner,
 			}
 			if got := msg.Route(); got != tt.want {
-				t.Errorf("MsgIssueToken.Route() = %v, want %v", got, tt.want)
+				t.Errorf("MsgTransferOwnership.Route() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -229,7 +229,7 @@ func TestMsgTransferOwnership_ValidateBasic(t *testing.T) {
 				tt.msg.NewOwner,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MsgIssueToken.ValidateBasic() = %v, want %v", got, tt.want)
+				t.Errorf("MsgTransferOwnership.ValidateBasic() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -258,7 +258,7 @@ func TestMsgTransferOwnership_GetSignBytes(t *testing.T) {
 				tt.msg.NewOwner,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
-				t.Errorf("MsgIssueToken.GetSignBytes() = %s, want %s", got, tt.want)
+				t.Errorf("MsgTransferOwnership.GetSignBytes() = %s, want %s", got, tt.want)
 			}
 		})
 	}
@@ -285,7 +285,7 @@ func TestMsgTransferOwnership_GetSigners(t *testing.T) {
 				tt.msg.NewOwner,
 			}
 			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MsgIssueToken.GetSigners() = %v, want %v", got, tt.want)
+				t.Errorf("MsgTransferOwnership.GetSigners() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -312,7 +312,7 @@ func TestMsgMintToken_Route(t *testing.T) {
 				tt.msg.OwnerAddress,
 			}
 			if got := msg.Route(); got != tt.want {
-				t.Errorf("MsgIssueToken.Route() = %v, want %v", got, tt.want)
+				t.Errorf("MsgMintToken.Route() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -349,7 +349,7 @@ func TestMsgMintToken_ValidateBasic(t *testing.T) {
 				tt.msg.OwnerAddress,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MsgIssueToken.ValidateBasic() = %v, want %v", got, tt.want)
+				t.Errorf("MsgMintToken.ValidateBasic() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -377,7 +377,7 @@ func TestMsgMintToken_GetSignBytes(t *testing.T) {
 				tt.msg.OwnerAddress,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
-				t.Errorf("MsgIssueToken.GetSignBytes() = %s, want %s", got, tt.want)
+				t.Errorf("MsgMintToken.GetSignBytes() = %s, want %s", got, tt.want)
 			}
 		})
 	}
@@ -404,7 +404,126 @@ func TestMsgMintToken_GetSigners(t *testing.T) {
 				tt.msg.OwnerAddress,
 			}
 			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MsgIssueToken.GetSigners() = %v, want %v", got, tt.want)
+				t.Errorf("MsgMintToken.GetSigners() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgBurnToken_Route(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgBurnToken
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgBurnToken("abc", 1000000, tAccAddr),
+			RouterKey,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgBurnToken{
+				tt.msg.Symbol,
+				tt.msg.Amount,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.Route(); got != tt.want {
+				t.Errorf("MsgBurnToken.Route() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgBurnToken_ValidateBasic(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgBurnToken
+		want sdk.Error
+	}{
+		{
+			"case-invalidOwner",
+			NewMsgBurnToken("abc", 10000, sdk.AccAddress{}),
+			ErrorInvalidTokenOwner("burn token need a valid addr"),
+		},
+		{
+			"case-invalidAmt1",
+			NewMsgBurnToken("abc", 9E18+1, tAccAddr),
+			ErrorInvalidTokenBurn("token total supply limited to 90 billion"),
+		},
+		{
+			"case-invalidAmt2",
+			NewMsgBurnToken("abc", -1, tAccAddr),
+			ErrorInvalidTokenBurn("burn amount should be positive"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgBurnToken{
+				tt.msg.Symbol,
+				tt.msg.Amount,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgBurnToken.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgBurnToken_GetSignBytes(t *testing.T) {
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	tests := []struct {
+		name string
+		msg  MsgBurnToken
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgBurnToken("abc", 100000, addr),
+			`{"type":"asset/MsgBurnToken","value":{"Amount":"100000","OwnerAddress":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","Symbol":"abc"}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgBurnToken{
+				tt.msg.Symbol,
+				tt.msg.Amount,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
+				t.Errorf("MsgBurnToken.GetSignBytes() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgBurnToken_GetSigners(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgBurnToken
+		want []sdk.AccAddress
+	}{
+		{
+			"base-case",
+			NewMsgBurnToken("abc", 100000, tAccAddr),
+			[]sdk.AccAddress{tAccAddr},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgBurnToken{
+				tt.msg.Symbol,
+				tt.msg.Amount,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgBurnToken.GetSigners() = %v, want %v", got, tt.want)
 			}
 		})
 	}

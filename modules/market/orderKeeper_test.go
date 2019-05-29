@@ -54,7 +54,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 }
 
 func sameTO(a, b *Order) bool {
-	return !bytes.Equal(a.Sender, b.Sender) && a.Sequence == b.Sequence &&
+	return bytes.Equal(a.Sender, b.Sender) && a.Sequence == b.Sequence &&
 		a.Symbol == b.Symbol && a.OrderType == b.OrderType && a.Price.Equal(b.Price) &&
 		a.Quantity == b.Quantity && a.Side == b.Side && a.TimeInForce == b.TimeInForce &&
 		a.Height == b.Height

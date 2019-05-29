@@ -116,7 +116,7 @@ func TestTokenKeeper_TransferOwnership(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestTokenKeeper_MintToken1(t *testing.T) {
+func TestTokenKeeper_MintToken(t *testing.T) {
 	input := setupTestInput()
 	symbol := "abc"
 	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
@@ -202,5 +202,94 @@ func TestTokenKeeper_MintToken1(t *testing.T) {
 	require.NoError(t, err)
 	msg = NewMsgMintToken(symbol, 9E18, tAccAddr)
 	err = input.tk.MintToken(input.ctx, msg)
+	require.Error(t, err)
+}
+
+func TestTokenKeeper_BurnToken(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, false)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg := NewMsgBurnToken(symbol, 1000, tAccAddr)
+	err = input.tk.BurnToken(input.ctx, msg)
+	require.NoError(t, err)
+
+	token := input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, int64(1100), token.GetTotalSupply())
+	require.Equal(t, int64(1000), token.GetTotalBurn())
+
+	err = input.tk.BurnToken(input.ctx, msg)
+	require.NoError(t, err)
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, int64(100), token.GetTotalSupply())
+	require.Equal(t, int64(2000), token.GetTotalBurn())
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 2: un burnable token
+	// set token burnable: false
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		false, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg = NewMsgBurnToken(symbol, 1000, tAccAddr)
+	err = input.tk.BurnToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 3: burn invalid token
+	issueMsg = NewMsgIssueToken("ABC token", "xyz", 2100, tAccAddr,
+		true, true, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgBurnToken(symbol, 1000, tAccAddr)
+	err = input.tk.BurnToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 4: only token owner can burn token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, addr,
+		true, true, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgBurnToken(symbol, 1000, tAccAddr)
+	err = input.tk.BurnToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 5: token total burn amt is invalid
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgBurnToken(symbol, 9E18+1, tAccAddr)
+	err = input.tk.BurnToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.RemoveToken(input.ctx, token)
+
+	//case 6: token total supply limited to > 0
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgBurnToken(symbol, 2100, tAccAddr)
+	err = input.tk.BurnToken(input.ctx, msg)
 	require.Error(t, err)
 }
