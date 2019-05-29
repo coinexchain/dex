@@ -50,19 +50,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 
 	time := msg.UnlockTime
 	if time != 0 {
-		ax := k.axk.GetOrCreateAccountX(ctx, msg.ToAddress)
-
-		for _, coin := range amt {
-			ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: time})
-		}
-		k.axk.SetAccountX(ctx, ax)
-		_, tag, err := k.bk.SubtractCoins(ctx, msg.FromAddress, amt)
-		if err != nil {
-			return err.Result()
-		}
-		return sdk.Result{
-			Tags: tag,
-		}
+		return sendLockedCoins(ctx, k, msg.FromAddress, msg.ToAddress, amt, time)
 	}
 
 	//handle coins transfer
@@ -98,6 +86,25 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 	k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activatedFee))
 
 	return sendAmt, nil
+}
+
+func sendLockedCoins(ctx sdk.Context, k Keeper,
+	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Result {
+
+	ax := k.axk.GetOrCreateAccountX(ctx, toAddr)
+	for _, coin := range amt {
+		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
+	}
+	k.axk.SetAccountX(ctx, ax)
+
+	_, tag, err := k.bk.SubtractCoins(ctx, fromAddr, amt)
+	if err != nil {
+		return err.Result()
+	}
+
+	return sdk.Result{
+		Tags: tag,
+	}
 }
 
 func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg MsgSetMemoRequired) sdk.Result {
