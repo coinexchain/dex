@@ -14,6 +14,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/incentive"
 )
 
 var (
@@ -50,6 +52,11 @@ func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
 			// during runTx.
 			newCtx = SetGasMeter(simulate, ctx, 0)
 			return newCtx, sdk.ErrInternal("tx must be StdTx").Result(), true
+		}
+
+		//Check whether the sender addr is enabled to send tx
+		if err := checkAddr(stdTx); err != nil {
+			return newCtx, sdk.ErrUnauthorized("tx not allowed to be sent from the sender addr").Result(), true
 		}
 
 		params := ak.GetParams(ctx)
@@ -411,4 +418,17 @@ func GetSignBytes(chainID string, stdTx auth.StdTx, acc auth.Account, genesis bo
 	return auth.StdSignBytes(
 		chainID, accNum, acc.GetSequence(), stdTx.Fee, stdTx.Msgs, stdTx.Memo,
 	)
+}
+
+func checkAddr(tx auth.StdTx) sdk.Error {
+	for _, msg := range tx.Msgs {
+		signers := msg.GetSigners()
+		for _, signer := range signers {
+			if signer.Equals(incentive.IncentiveCoinsAccAddr) {
+				return sdk.ErrUnauthorized("tx not allowed to be sent from the sender addr")
+			}
+		}
+
+	}
+	return nil
 }

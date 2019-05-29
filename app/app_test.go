@@ -16,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -144,4 +145,30 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 	ctx := app.NewContext(true, abci.Header{})
 	require.Equal(t, int64(10000000000-100),
 		app.accountKeeper.GetAccount(ctx, fromAddr).GetCoins().AmountOf("cet").Int64())
+}
+
+func TestSendFromIncentiveAddr(t *testing.T) {
+	toAddr := sdk.AccAddress([]byte("addr"))
+	fromAddr := incentive.IncentiveCoinsAccAddr
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	// app
+	app := initApp(acc0)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	// deliver tx
+	coins = dex.NewCetCoins(100000000000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
+	msgs := make([]sdk.Msg, 1)
+	msgs[0] = msg
+	tx := auth.StdTx{
+		Msgs: msgs,
+	}
+
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeUnauthorized, result.Code)
 }
