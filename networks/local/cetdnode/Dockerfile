@@ -1,5 +1,5 @@
 FROM alpine:3.7
-MAINTAINER CoinEx <dev@coinex.org>
+LABEL maintainer="dev@coinex.org"
 
 RUN apk update && \
     apk upgrade && \
