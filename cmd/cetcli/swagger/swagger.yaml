@@ -382,7 +382,7 @@ paths:
                   $ref: "#/definitions/Coin"
               unlocked_time:
                 type: integer
-                example: 675132000
+                example: "675132000"
       responses:
         202:
           description: Tx was succesfully generated

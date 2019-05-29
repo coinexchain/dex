@@ -39,7 +39,7 @@ func TestSetMemoRequiredGetSignBytes(t *testing.T) {
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	sign := msg.GetSignBytes()
 
-	expected := `{"type":"cet-chain/MsgSetMemoRequired","value":{"address":"cosmos1v9jxguspv4h2u","required":true}}`
+	expected := `{"type":"bankx/MsgSetMemoRequired","value":{"address":"cosmos1v9jxguspv4h2u","required":true}}`
 	require.Equal(t, expected, string(sign))
 }
 
@@ -108,7 +108,7 @@ func TestMsgSendGetSignBytes(t *testing.T) {
 	var msg = NewMsgSend(addr1, addr2, coins, 0)
 	res := msg.GetSignBytes()
 
-	expected := `{"type":"cet-chain/MsgSend","value":{"amount":[{"amount":"10","denom":"cet"}],"from_address":"cosmos1d9h8qat57ljhcm","to_address":"cosmos1da6hgur4wsmpnjyg","unlock_time":"0"}}`
+	expected := `{"type":"bankx/MsgSend","value":{"amount":[{"amount":"10","denom":"cet"}],"from_address":"cosmos1d9h8qat57ljhcm","to_address":"cosmos1da6hgur4wsmpnjyg","unlock_time":"0"}}`
 	require.Equal(t, expected, string(res))
 }
 
