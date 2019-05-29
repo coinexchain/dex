@@ -24,7 +24,7 @@ func Test_concatCopyPreAllocate(t *testing.T) {
 		{6, 7},
 	})
 	ref := []byte{0, 1, 2, 3, 4, 5, 6, 7}
-	if !bytes.Compare(res, ref) {
+	if !bytes.Equal(res, ref) {
 		t.Errorf("mismatch in concatCopyPreAllocate")
 	}
 }
@@ -54,7 +54,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 }
 
 func sameTO(a, b *Order) bool {
-	return !bytes.Compare(a.Sender, b.Sender) && a.Sequence == b.Sequence &&
+	return bytes.Equal(a.Sender, b.Sender) && a.Sequence == b.Sequence &&
 		a.Symbol == b.Symbol && a.OrderType == b.OrderType && a.Price.Equal(b.Price) &&
 		a.Quantity == b.Quantity && a.Side == b.Side && a.TimeInForce == b.TimeInForce &&
 		a.Height == b.Height
@@ -150,7 +150,7 @@ func TestOrderBook2(t *testing.T) {
 }
 
 func TestOrderBook3(t *testing.T) {
-	orders := createTO_3()
+	orders := createTO3()
 	keeper := newKeeperForTest()
 	for _, order := range orders {
 		keeper.Add(order)
