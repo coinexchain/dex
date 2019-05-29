@@ -24,7 +24,7 @@ func Test_concatCopyPreAllocate(t *testing.T) {
 		{6, 7},
 	})
 	ref := []byte{0, 1, 2, 3, 4, 5, 6, 7}
-	if !bytes.Equal(res, ref) {
+	if bytes.Equal(res, ref) {
 		t.Errorf("mismatch in concatCopyPreAllocate")
 	}
 }
@@ -89,19 +89,33 @@ func TestOrderBook1(t *testing.T) {
 	keeper := newKeeperForTest()
 	for _, order := range orders {
 		keeper.Add(order)
-		fmt.Printf("0: %s %d\n", order.OrderID(), order.Height)
+		fmt.Printf("AA: %s %d\n", order.OrderID(), order.Height)
+	}
+	orderseq:=[]int{5,0,3,4,1,2}
+	for i, order := range keeper.GetAllOrders() {
+		j:=orderseq[i]
+		if !sameTO(orders[j], order) {
+			t.Errorf("Error in GetAllOrders")
+		}
+		fmt.Printf("BB: %s %d\n", order.OrderID(), order.Height)
 	}
 	newOrder := newTO("00005", 6, 11030, 20, Sell, GTE, 993)
 	if keeper.Remove(newOrder) == nil {
 		t.Errorf("Error in Remove")
 	}
 	orders1 := keeper.GetOlderThan(997)
+	for _, order := range orders1 {
+		fmt.Printf("11: %s %d\n", order.OrderID(), order.Height)
+	}
 	if !(sameTO(orders1[0], orders[5]) && sameTO(orders1[1], orders[2]) && sameTO(orders1[2], orders[4])) {
 		t.Errorf("Error in GetOlderThan")
 	}
 	orders2 := keeper.GetOrdersAtHeight(998)
+	for _, order := range orders2 {
+		fmt.Printf("22: %s %d\n", order.OrderID(), order.Height)
+	}
 	if !(sameTO(orders2[0], orders[0]) && sameTO(orders2[1], orders[1])) {
-		t.Errorf("Error in GetOlderThan")
+		t.Errorf("Error in GetOrdersAtHeight")
 	}
 	addr, _ := simpleAddr("00002")
 	orderList := keeper.GetOrdersFromUser(addr.String())

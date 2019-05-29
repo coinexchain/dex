@@ -11,6 +11,7 @@ import (
 //nolint
 var (
 	OrderBookKeyPrefix         = []byte{0x11}
+	OrderBookKeyPrefixPlusOne  = []byte{0x12}
 	BidListKeyPrefix           = []byte{0x12}
 	BidListKeyPrefixPlusOne    = []byte{0x13}
 	AskListKeyPrefix           = []byte{0x13}
@@ -34,6 +35,7 @@ type OrderKeeper interface {
 	Exists(orderID string) bool
 	Remove(order *Order) sdk.Error
 	GetOlderThan(height int64) []*Order
+	GetAllOrders() []*Order
 	GetOrdersAtHeight(height int64) []*Order
 	QueryOrder(orderID string) *Order
 	GetOrdersFromUser(user string) []string
@@ -187,6 +189,26 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(height int64) []*Order {
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
 		result = append(result, keeper.QueryOrder(orderID))
+	}
+	return result
+}
+
+func (keeper *PersistentOrderKeeper) GetAllOrders() []*Order {
+	var result []*Order
+	start := concatCopyPreAllocate([][]byte{
+		[]byte(keeper.symbol),
+		{0x0},
+		OrderBookKeyPrefix,
+	})
+	end := concatCopyPreAllocate([][]byte{
+		[]byte(keeper.symbol),
+		{0x0},
+		OrderBookKeyPrefixPlusOne,
+	})
+	for iter := keeper.store.Iterator(start, end); iter.Valid(); iter.Next() {
+		order := &Order{}
+		keeper.codec.MustUnmarshalBinaryBare(iter.Value(), order)
+		result = append(result, order)
 	}
 	return result
 }
