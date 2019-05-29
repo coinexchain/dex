@@ -16,7 +16,9 @@ type Keeper struct {
 	fck           auth.FeeCollectionKeeper
 }
 
-func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper, bk bank.BaseKeeper, ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) Keeper {
+func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
+	bk bank.BaseKeeper, ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) Keeper {
+
 	return Keeper{
 		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
 		axk:           axk,
@@ -33,6 +35,7 @@ func (k Keeper) GetParam(ctx sdk.Context) (param Param) {
 func (k Keeper) SetParam(ctx sdk.Context, param Param) {
 	k.paramSubspace.Set(ctx, ParamStoreKeyActivatedFee, param)
 }
+
 func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
 	return k.bk.HasCoins(ctx, addr, amt)
 }
@@ -40,8 +43,8 @@ func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddres
 	_, ret := k.bk.SendCoins(ctx, from, to, amt)
 	return ret
 }
-func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 
+func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	acc := k.ak.GetAccount(ctx, addr)
 	if acc == nil {
 		return sdk.ErrInvalidAddress("account doesn't exist yet")
@@ -54,7 +57,7 @@ func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins)
 	acc.SetCoins(newCoins)
 	k.ak.SetAccount(ctx, acc)
 
-	accx, _ := k.axk.GetAccountX(ctx, addr)
+	accx := k.axk.GetOrCreateAccountX(ctx, addr)
 	frozenCoins := accx.FrozenCoins.Add(amt)
 	accx.FrozenCoins = frozenCoins
 	k.axk.SetAccountX(ctx, accx)
@@ -63,7 +66,6 @@ func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins)
 }
 
 func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-
 	accx, ok := k.axk.GetAccountX(ctx, addr)
 	if !ok {
 		return sdk.ErrInvalidAddress("account doesn't exist yet")
