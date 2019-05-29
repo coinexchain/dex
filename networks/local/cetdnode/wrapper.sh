@@ -23,12 +23,12 @@ fi
 ##
 ## Run binary with all parameters
 ##
-export GAIADHOME="/cetd/node${ID}/cetd"
+export CETDHOME="/cetd/node${ID}/cetd"
 
-if [ -d "`dirname ${GAIADHOME}/${LOG}`" ]; then
-  "$BINARY" --home "$GAIADHOME" "$@" | tee "${GAIADHOME}/${LOG}"
+if [ -d "`dirname ${CETDHOME}/${LOG}`" ]; then
+  "$BINARY" --home "$CETDHOME" "$@" | tee "${CETDHOME}/${LOG}"
 else
-  "$BINARY" --home "$GAIADHOME" "$@"
+  "$BINARY" --home "$CETDHOME" "$@"
 fi
 
 chmod 777 -R /cetd
