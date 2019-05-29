@@ -1,20 +1,24 @@
 package bankx
 
 import (
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/types"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	dbm "github.com/tendermint/tendermint/libs/db"
-	"github.com/tendermint/tendermint/libs/log"
-	"testing"
+
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/testutil"
+	"github.com/coinexchain/dex/types"
 )
 
 func defaultContext() (sdk.Context, params.Keeper) {
@@ -63,8 +67,7 @@ func TestFreezeUnFreezeOK(t *testing.T) {
 	input.ak.SetAccount(input.ctx, &acc)
 
 	accx := authx.AccountX{
-		Address:   myaddr,
-		Activated: true,
+		Address: myaddr,
 	}
 	input.axk.SetAccountX(input.ctx, accx)
 
@@ -106,8 +109,7 @@ func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {
 	input.ak.SetAccount(input.ctx, &acc)
 
 	accx := authx.AccountX{
-		Address:   myaddr,
-		Activated: true,
+		Address: myaddr,
 	}
 	input.axk.SetAccountX(input.ctx, accx)
 

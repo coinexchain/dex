@@ -113,8 +113,6 @@ func TestAddGenesisAccountX(t *testing.T) {
 
 	require.Nil(t, err)
 	require.Equal(t, 1, len(newstate.Accounts))
-	require.Equal(t, true, newstate.Accounts[0].Activated)
 	require.Equal(t, false, newstate.Accounts[0].MemoRequired)
 	require.Nil(t, newstate.Accounts[0].LockedCoins)
-
 }

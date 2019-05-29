@@ -389,7 +389,7 @@ func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState Genesi
 		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
 		app.accountKeeper.SetAccount(ctx, acc)
 
-		accx := authx.AccountX{Address: gacc.Address, Activated: gacc.Activated, MemoRequired: gacc.MemoRequired, LockedCoins: gacc.LockedCoins}
+		accx := authx.AccountX{Address: gacc.Address, MemoRequired: gacc.MemoRequired, LockedCoins: gacc.LockedCoins}
 		app.accountXKeeper.SetAccountX(ctx, accx)
 	}
 }

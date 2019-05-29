@@ -1,16 +1,19 @@
 package authx
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	dbm "github.com/tendermint/tendermint/libs/db"
-	"github.com/tendermint/tendermint/libs/log"
-	"testing"
 )
 
 type testInput struct {
@@ -40,7 +43,6 @@ func setupTestInput() testInput {
 }
 
 func TestAccountXGetSet(t *testing.T) {
-
 	input := setupTestInput()
 	addr := sdk.AccAddress([]byte("some-address"))
 
@@ -56,11 +58,6 @@ func TestAccountXGetSet(t *testing.T) {
 	acc, ok = input.axk.GetAccountX(input.ctx, addr)
 	require.True(t, ok)
 
-	acc.Activated = true
-	input.axk.SetAccountX(input.ctx, acc)
-	acc, _ = input.axk.GetAccountX(input.ctx, addr)
-	require.Equal(t, true, acc.Activated)
-
 	acc.MemoRequired = false
 	input.axk.SetAccountX(input.ctx, acc)
 	acc, _ = input.axk.GetAccountX(input.ctx, addr)
@@ -71,7 +68,6 @@ func TestAccountXGetSet(t *testing.T) {
 }
 
 func TestAddressStoreKey(t *testing.T) {
-
 	addr := sdk.AccAddress([]byte("some-address1"))
 	addrStoreKey := AddressStoreKey(addr)
 	expectedOutput := []byte{0x1, 0x73, 0x6f, 0x6d, 0x65, 0x2d, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x31}

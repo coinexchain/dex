@@ -1,19 +1,20 @@
 package authx
 
 import (
-	"github.com/coinexchain/dex/testutil"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/tendermint/tendermint/libs/log"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-	dbm "github.com/tendermint/tendermint/libs/db"
-
-	"github.com/stretchr/testify/require"
-	"testing"
+	"github.com/coinexchain/dex/testutil"
 )
 
 type testContext struct {
@@ -49,7 +50,7 @@ func setupTestCtx() testContext {
 }
 
 func TestAccountX_GetAllUnlockedCoinsAtTheTime(t *testing.T) {
-	var acc = AccountX{Address: []byte("123"), Activated: true, MemoRequired: false}
+	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
 		LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}, UnlockTime: 1000},
 		LockedCoin{Coin: sdk.Coin{Denom: "eth", Amount: sdk.NewInt(30)}, UnlockTime: 2000},
@@ -62,7 +63,7 @@ func TestAccountX_GetAllUnlockedCoinsAtTheTime(t *testing.T) {
 }
 
 func TestAccountX_GetUnlockedCoinsAtTheTime(t *testing.T) {
-	var acc = AccountX{Address: []byte("123"), Activated: true, MemoRequired: false}
+	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
 		LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}, UnlockTime: 1000},
 		LockedCoin{Coin: sdk.Coin{Denom: "eth", Amount: sdk.NewInt(30)}, UnlockTime: 2000},
@@ -78,7 +79,7 @@ func TestAccountX_GetUnlockedCoinsAtTheTime(t *testing.T) {
 }
 
 func TestAccountX_GetAllLockedCoins(t *testing.T) {
-	var acc = AccountX{Address: []byte("123"), Activated: true, MemoRequired: false}
+	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
 		LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}, UnlockTime: 1000},
 		LockedCoin{Coin: sdk.Coin{Denom: "eth", Amount: sdk.NewInt(30)}, UnlockTime: 2000},
@@ -90,7 +91,7 @@ func TestAccountX_GetAllLockedCoins(t *testing.T) {
 }
 
 func TestAccountX_GetLockedCoinsByDemon(t *testing.T) {
-	var acc = AccountX{Address: []byte("123"), Activated: true, MemoRequired: false}
+	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
 		LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}, UnlockTime: 1000},
 		LockedCoin{Coin: sdk.Coin{Denom: "eth", Amount: sdk.NewInt(30)}, UnlockTime: 2000},
@@ -113,7 +114,7 @@ func TestAccountX_TransferUnlockedCoins(t *testing.T) {
 
 	ctx.ak.SetAccount(ctx.ctx, &fromAccount)
 
-	var acc = AccountX{Address: addr, Activated: true, MemoRequired: false}
+	var acc = AccountX{Address: addr, MemoRequired: false}
 	coins := LockedCoins{
 		LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}, UnlockTime: 1000},
 		LockedCoin{Coin: sdk.Coin{Denom: "eth", Amount: sdk.NewInt(30)}, UnlockTime: 2000},
@@ -129,20 +130,8 @@ func TestAccountX_TransferUnlockedCoins(t *testing.T) {
 	require.Equal(t, sdk.NewInt(40), ctx.ak.GetAccount(ctx.ctx, addr).GetCoins().AmountOf("bch"))
 }
 
-func TestAccountX_SetActivated(t *testing.T) {
-	var acc = AccountX{Address: []byte("123"), Activated: false, MemoRequired: false}
-	acc.SetActivated(true)
-	require.Equal(t, true, acc.IsActivated())
-}
-
-func TestAccountX_IsActivated(t *testing.T) {
-	var acc = AccountX{Address: []byte("123"), Activated: true, MemoRequired: false}
-	res := acc.IsActivated()
-	require.Equal(t, true, res)
-}
-
 func TestAccountX_AddLockedCoins(t *testing.T) {
-	var acc = AccountX{Address: []byte("123"), Activated: false, MemoRequired: false}
+	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	acc.AddLockedCoins(LockedCoins{
 		LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(10)}, UnlockTime: 1000}})
 	require.Equal(t, "bch", acc.GetLockedCoinsByDemon("bch")[0].Coin.Denom)

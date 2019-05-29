@@ -195,7 +195,6 @@ func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
 func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context, accountsX map[string]authx.AccountX) (accounts []GenesisAccount) {
 	appendFn := func(acc auth.Account) (stop bool) {
 		account := NewGenesisAccountI(acc)
-		account.Activated = accountsX[account.Address.String()].Activated
 		account.MemoRequired = accountsX[account.Address.String()].MemoRequired
 		account.LockedCoins = accountsX[account.Address.String()].LockedCoins
 		account.FrozenCoins = accountsX[account.Address.String()].FrozenCoins

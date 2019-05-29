@@ -144,8 +144,8 @@ func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
 	input := setupTestInput()
 
 	addr := testutil.ToAccAddress("myaddr")
-	accX := authx.NewAccountXWithAddress(addr)
-	input.axk.SetAccountX(input.ctx, accX)
+	//accX := authx.NewAccountXWithAddress(addr)
+	//input.axk.SetAccountX(input.ctx, accX)
 
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
@@ -158,7 +158,6 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 
 	addr := testutil.ToAccAddress("myaddr")
 	accX := authx.NewAccountXWithAddress(addr)
-	accX.Activated = true
 	input.axk.SetAccountX(input.ctx, accX)
 
 	accX, _ = input.axk.GetAccountX(input.ctx, addr)

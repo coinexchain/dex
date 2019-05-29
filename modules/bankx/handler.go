@@ -2,6 +2,7 @@ package bankx
 
 import (
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
@@ -25,7 +26,6 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
-
 	if !k.bk.GetSendEnabled(ctx) {
 		return bank.ErrSendDisabled(k.bk.Codespace()).Result()
 	}
@@ -61,7 +61,6 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 
 		//create AccountX for toaddr
 		newAccountX := authx.NewAccountXWithAddress(msg.ToAddress)
-		newAccountX.Activated = true
 		k.axk.SetAccountX(ctx, newAccountX)
 	}
 
@@ -99,7 +98,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 
 func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg MsgSetMemoRequired) sdk.Result {
 	accountX, found := axk.GetAccountX(ctx, msg.Address)
-	if !found || !accountX.Activated {
+	if !found {
 		msg := fmt.Sprintf("account %s is not activated", msg.Address)
 		return ErrUnactivatedAddress(msg).Result()
 	}

@@ -7,7 +7,6 @@ import (
 
 type AccountX struct {
 	Address      sdk.AccAddress `json:"address"`
-	Activated    bool           `json:"activated"`
 	MemoRequired bool           `json:"memo_required"` // if memo is required for receiving coins
 	LockedCoins  []LockedCoin   `json:"locked_coins"`
 	FrozenCoins  sdk.Coins      `json:"frozen_coins"`
@@ -27,14 +26,6 @@ func (acc *AccountX) SetMemoRequired(b bool) {
 
 func (acc *AccountX) IsMemoRequired() bool {
 	return acc.MemoRequired
-}
-
-func (acc *AccountX) SetActivated(b bool) {
-	acc.Activated = b
-}
-
-func (acc AccountX) IsActivated() bool {
-	return acc.Activated
 }
 
 func (acc *AccountX) AddLockedCoins(coins LockedCoins) {
