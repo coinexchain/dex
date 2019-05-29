@@ -167,8 +167,18 @@ func handleMsgUnfreezeToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnfreezeToke
 
 // handleMsgBurnToken - Handle MsgBurnToken
 func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) (res sdk.Result) {
+	if err := tk.BurnToken(ctx, msg); err != nil {
+		return err.Result()
+	}
 
-	return
+	resTags := sdk.NewTags(
+		tags.Category, tags.TxCategory,
+		tags.Token, msg.Symbol,
+		tags.Amt, strconv.FormatInt(msg.Amount, 10),
+	)
+	return sdk.Result{
+		Tags: resTags,
+	}
 }
 
 // handleMsgMintToken - Handle MsgMintToken

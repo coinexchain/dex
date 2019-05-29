@@ -12,11 +12,9 @@ const (
 	Token = "token"
 	Owner = "owner"
 
-	TransferOwnership = "TransferOwnership"
 	OriginalOwner     = "OriginalOwner"
 	NewOwner          = "NewOwner"
 
-	MintToken = "MintToken"
 	Amt       = "Amount"
 )
 

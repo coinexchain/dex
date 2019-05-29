@@ -164,7 +164,7 @@ func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnershi
 	return nil
 }
 
-//MintToken - mint token amt
+//MintToken - mint token
 func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 	if err := msg.ValidateBasic(); err != nil {
 		return ErrorInvalidTokenMint(err.Error())
@@ -188,6 +188,39 @@ func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 	}
 	preSupply := token.GetTotalSupply()
 	if err := token.SetTotalSupply(amt + preSupply); err != nil {
+		return ErrorInvalidTokenSupply(err.Error())
+	}
+
+	if err := tk.SetToken(ctx, token); err != nil {
+		return nil
+	}
+	return nil
+}
+
+//BurnToken - burn token
+func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
+	if err := msg.ValidateBasic(); err != nil {
+		return ErrorInvalidTokenMint(err.Error())
+	}
+
+	token := tk.GetToken(ctx, msg.Symbol)
+	if token == nil {
+		return ErrorNoTokenPersist("burn invalid token")
+	}
+	if !token.GetOwner().Equals(msg.OwnerAddress) {
+		return ErrorInvalidTokenOwner("only token owner can burn token")
+	}
+	if !token.GetBurnable() {
+		return ErrorInvalidTokenMint("token that cannot be burn")
+	}
+
+	amt := msg.Amount
+	preMint := token.GetTotalBurn()
+	if err := token.SetTotalBurn(amt + preMint); err != nil {
+		return ErrorInvalidTokenMint(err.Error())
+	}
+	preSupply := token.GetTotalSupply()
+	if err := token.SetTotalSupply(preSupply - amt); err != nil {
 		return ErrorInvalidTokenSupply(err.Error())
 	}
 

@@ -248,6 +248,14 @@ type MsgBurnToken struct {
 
 var _ sdk.Msg = MsgBurnToken{}
 
+func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToken {
+	return MsgMintToken{
+		symbol,
+		amt,
+		owner,
+	}
+}
+
 // Route Implements Msg.
 func (msg MsgBurnToken) Route() string {
 	return RouterKey
@@ -260,17 +268,26 @@ func (msg MsgBurnToken) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgBurnToken) ValidateBasic() sdk.Error {
-	panic("implement me")
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("burn token need a valid addr")
+	}
+	if msg.Amount > MaxTokenAmount {
+		return ErrorInvalidTokenMint("token total supply limited to 90 billion")
+	}
+	if msg.Amount < 0 {
+		return ErrorInvalidTokenMint("mint amount should be positive")
+	}
+	return nil
 }
 
 // GetSignBytes Implements Msg.
 func (msg MsgBurnToken) GetSignBytes() []byte {
-	panic("implement me")
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
 func (msg MsgBurnToken) GetSigners() []sdk.AccAddress {
-	panic("implement me")
+	return []sdk.AccAddress{msg.OwnerAddress}
 }
 
 // MsgMintToken
