@@ -6,12 +6,20 @@ RUN apt-get -y install libffi-dev
 RUN apt-get -y install build-essential checkinstall
 RUN apt-get -y install libreadline-gplv2-dev libncursesw5-dev libssl-dev \
         libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
+RUN apt-get install gcc g++ make
+
+RUN curl -sL https://deb.nodesource.com/setup_8.x -o nodesource_setup.sh
+RUN chmod 777 nodesource_setup.sh
+RUN ./nodesource_setup.sh
+RUN apt-get install nodejs
+
+RUN npm install -g bower
 
 WORKDIR /usr/src
-RUN wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tgz
-RUN tar xzf Python-3.7.0.tgz
-WORKDIR /usr/src/Python-3.7.0
-RUN ls
+RUN wget https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tgz
+RUN tar xzf Python-3.7.3.tgz
+WORKDIR /usr/src/Python-3.7.3
 RUN ./configure --enable-optimizations
 RUN make altinstall
 RUN pip3.7 install pipenv
+
