@@ -52,17 +52,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 	if time != 0 {
 		return sendLockedCoins(ctx, k, msg.FromAddress, msg.ToAddress, amt, time)
 	}
-
-	//handle coins transfer
-	t, err := k.bk.SendCoins(ctx, msg.FromAddress, msg.ToAddress, amt)
-
-	if err != nil {
-		return err.Result()
-	}
-
-	return sdk.Result{
-		Tags: t,
-	}
+	return normalSend(ctx, k, msg.FromAddress, msg.ToAddress, amt)
 }
 
 func deductActivationFee(ctx sdk.Context, k Keeper,
@@ -104,6 +94,20 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 
 	return sdk.Result{
 		Tags: tag,
+	}
+}
+
+func normalSend(ctx sdk.Context, k Keeper,
+	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) sdk.Result {
+
+	t, err := k.bk.SendCoins(ctx, fromAddr, toAddr, amt)
+
+	if err != nil {
+		return err.Result()
+	}
+
+	return sdk.Result{
+		Tags: t,
 	}
 }
 
