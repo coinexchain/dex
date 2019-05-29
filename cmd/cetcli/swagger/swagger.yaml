@@ -1940,7 +1940,7 @@ paths:
       parameters:
         - in: path
           name: symbol
-          description: Token symbol
+          description: token symbol
           required: true
           type: string
           x-example: abc
@@ -1982,7 +1982,7 @@ paths:
       parameters:
         - in: body
           name: tokenInfo
-          description: The detail info about the Token to issue
+          description: the detail info about the Token to issue
           required: true
           schema:
             type: object
@@ -2011,13 +2011,13 @@ paths:
       parameters:
         - in: path
           name: symbol
-          description: Token symbol
+          description: token symbol
           required: true
           type: string
           x-example: abc
         - in: body
           name: newOwner
-          description: Transfer ownership to new owner
+          description: transfer ownership to new owner
           required: true
           schema:
             type: object
@@ -2029,6 +2029,43 @@ paths:
       responses:
         200:
           description: Token transfer ownership result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/mints:
+    post:
+      tags:
+        - ICS100
+      summary: Mint token
+      description: Mint mintable token
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: amount
+          description: mint token amount
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - properties:
+                  amount:
+                    type: integer
+      responses:
+        200:
+          description: Mint token result
           schema:
             $ref: "#/definitions/StdTx"
         500:
