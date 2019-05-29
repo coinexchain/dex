@@ -6,19 +6,19 @@ const (
 	DefaultParamspace = "bankx"
 )
 
-var ParamStoreKeyActivatedFee = []byte("ActivatedFee")
+var ParamStoreKeyActivationFee = []byte("ActivationFee")
 
 type Param struct {
-	ActivatedFee int64 `json:"activated_fee"`
+	ActivationFee int64 `json:"activation_fee"`
 }
 
 func DefaultParam() Param {
 	return Param{
-		ActivatedFee: 100000000,
+		ActivationFee: 100000000,
 	}
 }
 
 // ParamKeyTable type declaration for parameters
 func ParamKeyTable() params.KeyTable {
-	return params.NewKeyTable().RegisterType(ParamStoreKeyActivatedFee, &Param{})
+	return params.NewKeyTable().RegisterType(ParamStoreKeyActivationFee, &Param{})
 }

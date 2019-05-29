@@ -29,11 +29,11 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 }
 
 func (k Keeper) GetParam(ctx sdk.Context) (param Param) {
-	k.paramSubspace.Get(ctx, ParamStoreKeyActivatedFee, &param)
+	k.paramSubspace.Get(ctx, ParamStoreKeyActivationFee, &param)
 	return
 }
 func (k Keeper) SetParam(ctx sdk.Context, param Param) {
-	k.paramSubspace.Set(ctx, ParamStoreKeyActivatedFee, param)
+	k.paramSubspace.Set(ctx, ParamStoreKeyActivationFee, param)
 }
 
 func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
