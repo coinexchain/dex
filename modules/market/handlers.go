@@ -82,7 +82,7 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 		return ErrInvalidPricePrecision().Result()
 	}
 
-	if !keeper.bnk.HaveSufficientCoins(msg.Creator, sdk.Coins{CreateMarketSpendCet}) {
+	if !keeper.bnk.HasCoins(ctx, msg.Creator, sdk.Coins{CreateMarketSpendCet}) {
 		return ErrNoHaveSufficientCoins().Result()
 	}
 
@@ -150,7 +150,7 @@ func checkMsgCreateGTEOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateGTE
 	}
 
 	coin := sdk.NewCoin(denom, calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt())
-	if !keeper.bnk.HaveSufficientCoins(msg.Sender, sdk.Coins{coin}) {
+	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{coin}) {
 		return ErrNoHaveSufficientCoins().Result()
 	}
 

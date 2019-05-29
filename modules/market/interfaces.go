@@ -6,10 +6,10 @@ import (
 
 // Bankx Keeper will implement the interface
 type ExpectedBankxKeeper interface {
-	HaveSufficientCoins(addr sdk.AccAddress, amt sdk.Coins) bool // to check whether have sufficient coins in special address
-	SendCoins(from, to sdk.AccAddress, amt sdk.Coins) error      // to tranfer coins
-	FreezeCoins(acc sdk.AccAddress, amt sdk.Coins) error         // freeze some coins when creating orders
-	UnfreezeCoins(acc sdk.AccAddress, amt sdk.Coins) error       // unfreeze coins and then orders can be executed
+	HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool                          // to check whether have sufficient coins in special address
+	SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error // to tranfer coins
+	FreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error                   // freeze some coins when creating orders
+	UnFreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error                 // unfreeze coins and then orders can be executed
 }
 
 // Asset Keeper will implement the interface

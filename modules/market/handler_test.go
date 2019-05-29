@@ -28,9 +28,10 @@ type testInput struct {
 }
 
 var (
-	haveCetAddress = []byte("have-cet")
-	stock          = "usdt"
-	money          = "eos"
+	haveCetAddress    = []byte("have-cet")
+	notHaveCetAddress = []byte("no-have-cet")
+	stock             = "usdt"
+	money             = "eos"
 )
 
 type storeKeys struct {
@@ -40,6 +41,7 @@ type storeKeys struct {
 	keyParams   *sdk.KVStoreKey
 	tkeyParams  *sdk.TransientStoreKey
 	marketKey   *sdk.KVStoreKey
+	authxKey    *sdk.KVStoreKey
 }
 
 func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context) ExpectedAssertStatusKeeper {
@@ -74,23 +76,18 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	return tk
 }
 
-func prepareBankxKeeper(ms store.CommitMultiStore, db dbm.DB, cdc *codec.Codec) ExpectedBankxKeeper {
-	authKey := sdk.NewKVStoreKey(auth.StoreKey)
-	skey := sdk.NewKVStoreKey("test")
-	tkey := sdk.NewTransientStoreKey("transient_test")
-	authxKey := sdk.NewKVStoreKey(authx.StoreKey)
-	fckKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
+func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) ExpectedBankxKeeper {
 
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
-	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
+	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams)
+	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
-	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
-	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
+	fck := auth.NewFeeCollectionKeeper(cdc, keys.fckCapKey)
+	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck)
-	_ = bxkKeeper
-	//bk.SetSendEnabled(ctx, true)
-	//bxkKeeper.SetParam(ctx, bankx.DefaultParam())
-	return MockBankxKeeper{}
+	bk.SetSendEnabled(ctx, true)
+	bxkKeeper.SetParam(ctx, bankx.DefaultParam())
+
+	return bxkKeeper
 }
 
 func prepareMockInput(t *testing.T) testInput {
@@ -105,6 +102,7 @@ func prepareMockInput(t *testing.T) testInput {
 	keys.fckCapKey = sdk.NewKVStoreKey(auth.FeeStoreKey)
 	keys.keyParams = sdk.NewKVStoreKey(params.StoreKey)
 	keys.tkeyParams = sdk.NewTransientStoreKey(params.TStoreKey)
+	keys.authxKey = sdk.NewKVStoreKey(authx.StoreKey)
 	ms.MountStoreWithDB(keys.assetCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.authCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.fckCapKey, sdk.StoreTypeIAVL, db)
@@ -113,14 +111,9 @@ func prepareMockInput(t *testing.T) testInput {
 	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
-	//TODO. Can we remove these two keys
-	//skey := sdk.NewKVStoreKey("test")
-	//tkey := sdk.NewTransientStoreKey("transient_test")
-	//authxKey := sdk.NewKVStoreKey(authx.StoreKey)
-
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	ak := prepareAssetKeeper(t, keys, cdc, ctx)
-	bk := prepareBankxKeeper(ms, db, cdc)
+	bk := prepareBankxKeeper(keys, cdc, ctx)
 
 	mk := NewKeeper(keys.marketKey, ak, bk, cdc, params.NewKeeper(
 		cdc, keys.keyParams, keys.tkeyParams).Subspace(MarketKey))
@@ -130,15 +123,33 @@ func prepareMockInput(t *testing.T) testInput {
 
 func TestMarketInfoSetFailed(t *testing.T) {
 	input := prepareMockInput(t)
+	// failed by price precision
 	msgMarketInfo := MsgCreateMarketInfo{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 6}
 	ret := input.handler(input.ctx, msgMarketInfo)
-	require.Equal(t, false, ret.IsOK(), "create market info should failed")
+	require.Equal(t, sdk.CodeType(CodeInvalidPricePrecision), ret.Code, "create market info should failed")
+
+	// failed by token
+	msgMarketInfo.Money = "btc"
+	msgMarketInfo.PricePrecision = 8
+	ret = input.handler(input.ctx, msgMarketInfo)
+	require.Equal(t, sdk.CodeType(CodeInvalidToken), ret.Code, "create market info should failed")
+
+	// failed by coins
+	msgMarketInfo.Money = money
+	msgMarketInfo.Creator = []byte(notHaveCetAddress)
+	ret = input.handler(input.ctx, msgMarketInfo)
+	require.Equal(t, sdk.CodeType(CodeInvalidTokenIssuer), ret.Code, "create market info should failed")
+
+}
+
+func createMarket(input testInput) sdk.Result {
+	msgMarketInfo := MsgCreateMarketInfo{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 8}
+	return input.handler(input.ctx, msgMarketInfo)
 }
 
 func TestMarketInfoSetSuccess(t *testing.T) {
 	input := prepareMockInput(t)
-	msgMarketInfo := MsgCreateMarketInfo{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 8}
-	ret := input.handler(input.ctx, msgMarketInfo)
+	ret := createMarket(input)
 	require.Equal(t, true, ret.IsOK(), "create market info should succeed")
 }
 
@@ -172,6 +183,8 @@ func TestCreateGTEOrderSuccess(t *testing.T) {
 		Side:           match.BUY,
 		TimeInForce:    time.Now().Nanosecond() + 10000,
 	}
-	/*ret := */ input.handler(input.ctx, msgGteOrder)
-	//require.Equal(t, true, ret.IsOK(), "create GTE order should succeed")
+	ret := createMarket(input)
+	require.Equal(t, true, ret.IsOK(), "create market should succeed")
+	ret = input.handler(input.ctx, msgGteOrder)
+	require.Equal(t, true, ret.IsOK(), "create GTE order should succeed")
 }
