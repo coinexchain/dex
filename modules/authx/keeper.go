@@ -41,6 +41,15 @@ func AddressStoreKey(addr sdk.AccAddress) []byte {
 // -----------------------------------------------------------------------------
 // AccountX
 
+func (axk AccountXKeeper) GetOrCreateAccountX(ctx sdk.Context, addr sdk.AccAddress) AccountX {
+	ax, ok := axk.GetAccountX(ctx, addr)
+	if !ok {
+		ax = AccountX{Address: addr}
+		axk.SetAccountX(ctx, ax)
+	}
+	return ax
+}
+
 func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax AccountX, ok bool) {
 	store := ctx.KVStore(axk.key)
 	bz := store.Get(AddressStoreKey(addr))

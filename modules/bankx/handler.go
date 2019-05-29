@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/coinexchain/dex/modules/authx"
@@ -31,50 +32,30 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 	}
 
 	fromAccount := k.ak.GetAccount(ctx, msg.FromAddress)
+	toAccount := k.ak.GetAccount(ctx, msg.ToAddress)
+
 	amt := msg.Amount
 	if !fromAccount.GetCoins().IsAllGTE(amt) {
 		return sdk.ErrInsufficientCoins("sender has insufficient coins for the transfer").Result()
 	}
 
-	_, ok := k.axk.GetAccountX(ctx, msg.ToAddress)
-
-	var neg bool
-	activatedFee := k.GetParam(ctx).ActivatedFee
-
-	//toaccount doesn't exist yet
-	if !ok {
-		//check whether the first transfer contains at least activatedFee cet
-		amt, neg = amt.SafeSub(dex.NewCetCoins(activatedFee))
-		if neg {
-			return ErrorInsufficientCETForActivatingFee().Result()
+	//toAccount doesn't exist yet
+	if toAccount == nil {
+		var err sdk.Error
+		amt, err = deductActivationFee(ctx, k, fromAccount, amt)
+		if err != nil {
+			return err.Result()
 		}
-
-		// sub the activatedfees from fromaddress
-		fromAccount = k.ak.GetAccount(ctx, msg.FromAddress)
-		oldCoins := fromAccount.GetCoins()
-		newCoins, _ := oldCoins.SafeSub(dex.NewCetCoins(activatedFee))
-		fromAccount.SetCoins(newCoins)
-		k.ak.SetAccount(ctx, fromAccount)
-
-		//collect account activation fees
-		k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activatedFee))
-
-		//create AccountX for toaddr
-		newAccountX := authx.NewAccountXWithAddress(msg.ToAddress)
-		k.axk.SetAccountX(ctx, newAccountX)
-	}
-
-	aux, ok := k.axk.GetAccountX(ctx, msg.ToAddress)
-	if !ok {
-		return authx.ErrInvalidAccountx("No AccoutX exist").Result()
 	}
 
 	time := msg.UnlockTime
 	if time != 0 {
+		ax := k.axk.GetOrCreateAccountX(ctx, msg.ToAddress)
+
 		for _, coin := range amt {
-			aux.LockedCoins = append(aux.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: time})
+			ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: time})
 		}
-		k.axk.SetAccountX(ctx, aux)
+		k.axk.SetAccountX(ctx, ax)
 		_, tag, err := k.bk.SubtractCoins(ctx, msg.FromAddress, amt)
 		if err != nil {
 			return err.Result()
@@ -94,6 +75,29 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 	return sdk.Result{
 		Tags: t,
 	}
+}
+
+func deductActivationFee(ctx sdk.Context, k Keeper,
+	fromAccount auth.Account, amt sdk.Coins) (sdk.Coins, sdk.Error) {
+
+	activatedFee := k.GetParam(ctx).ActivatedFee
+
+	//check whether the first transfer contains at least activatedFee cet
+	amt, neg := amt.SafeSub(dex.NewCetCoins(activatedFee))
+	if neg {
+		return amt, ErrorInsufficientCETForActivatingFee()
+	}
+
+	// sub the activatedFees from fromAddress
+	oldCoins := fromAccount.GetCoins()
+	newCoins, _ := oldCoins.SafeSub(dex.NewCetCoins(activatedFee))
+	fromAccount.SetCoins(newCoins)
+	k.ak.SetAccount(ctx, fromAccount)
+
+	//collect account activation fees
+	k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activatedFee))
+
+	return amt, nil
 }
 
 func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg MsgSetMemoRequired) sdk.Result {
