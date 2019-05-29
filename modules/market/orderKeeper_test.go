@@ -24,7 +24,7 @@ func Test_concatCopyPreAllocate(t *testing.T) {
 		{6, 7},
 	})
 	ref := []byte{0, 1, 2, 3, 4, 5, 6, 7}
-	if bytes.Equal(res, ref) {
+	if !bytes.Equal(res, ref) {
 		t.Errorf("mismatch in concatCopyPreAllocate")
 	}
 }
@@ -91,9 +91,9 @@ func TestOrderBook1(t *testing.T) {
 		keeper.Add(order)
 		fmt.Printf("AA: %s %d\n", order.OrderID(), order.Height)
 	}
-	orderseq:=[]int{5,0,3,4,1,2}
+	orderseq := []int{5, 0, 3, 4, 1, 2}
 	for i, order := range keeper.GetAllOrders() {
-		j:=orderseq[i]
+		j := orderseq[i]
 		if !sameTO(orders[j], order) {
 			t.Errorf("Error in GetAllOrders")
 		}
