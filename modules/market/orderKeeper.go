@@ -10,15 +10,11 @@ import (
 
 //nolint
 var (
-	OrderBookKeyPrefix         = []byte{0x11}
-	OrderBookKeyPrefixPlusOne  = []byte{0x12}
-	BidListKeyPrefix           = []byte{0x12}
-	BidListKeyPrefixPlusOne    = []byte{0x13}
-	AskListKeyPrefix           = []byte{0x13}
-	AskListKeyPrefixPlusOne    = []byte{0x14}
-	OrderQueueKeyPrefix        = []byte{0x14}
-	OrderQueueKeyPrefixPlusOne = []byte{0x15}
-	IocListKeyPrefix           = []byte{0x15}
+	OrderBookKeyPrefix     = []byte{0x11}
+	BidListKeyPrefix       = []byte{0x12}
+	AskListKeyPrefix       = []byte{0x13}
+	OrderQueueKeyPrefix    = []byte{0x14}
+	LastOrderCleanUpDayKey = []byte{0x20}
 )
 
 const (
@@ -30,6 +26,27 @@ const (
 	LIMIT        = 2
 )
 
+type OrderCleanUpDayKeeper struct {
+	store sdk.KVStore
+}
+
+func NewOrderCleanUpDayKeeper(store sdk.KVStore) *OrderCleanUpDayKeeper {
+	return &OrderCleanUpDayKeeper{
+		store: store,
+	}
+}
+
+func (keeper *OrderCleanUpDayKeeper) GetDay() int {
+	value := keeper.store.Get(LastOrderCleanUpDayKey)
+	return int(value[0])
+}
+
+func (keeper *OrderCleanUpDayKeeper) SetDay(day int) {
+	var value [1]byte
+	value[0] = byte(day)
+	keeper.store.Set(LastOrderCleanUpDayKey, value[:])
+}
+
 type OrderKeeper interface {
 	Add(order *Order) sdk.Error
 	Exists(orderID string) bool
@@ -40,6 +57,7 @@ type OrderKeeper interface {
 	QueryOrder(orderID string) *Order
 	GetOrdersFromUser(user string) []string
 	GetMatchingCandidates() []*Order
+	GetSymbol() string
 }
 
 type PersistentOrderKeeper struct {
@@ -61,20 +79,24 @@ func concatCopyPreAllocate(slices [][]byte) []byte {
 	return tmp
 }
 
+func (keeper *PersistentOrderKeeper) GetSymbol() string {
+	return keeper.symbol
+}
+
 func (keeper *PersistentOrderKeeper) orderBookKey(orderID string) []byte {
 	return concatCopyPreAllocate([][]byte{
+		OrderBookKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		OrderBookKeyPrefix,
 		[]byte(orderID),
 	})
 }
 
 func (keeper *PersistentOrderKeeper) bidListKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
+		BidListKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		BidListKeyPrefix,
 		decToBigEndianBytes(order.Price),
 		[]byte(order.OrderID()),
 	})
@@ -82,9 +104,9 @@ func (keeper *PersistentOrderKeeper) bidListKey(order *Order) []byte {
 
 func (keeper *PersistentOrderKeeper) askListKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
+		AskListKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		AskListKeyPrefix,
 		decToBigEndianBytes(order.Price),
 		[]byte(order.OrderID()),
 	})
@@ -92,9 +114,9 @@ func (keeper *PersistentOrderKeeper) askListKey(order *Order) []byte {
 
 func (keeper *PersistentOrderKeeper) orderQueueKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
+		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		OrderQueueKeyPrefix,
 		int64ToBigEndianBytes(order.Height),
 		[]byte(order.OrderID()),
 	})
@@ -175,14 +197,14 @@ func (keeper *PersistentOrderKeeper) Remove(order *Order) sdk.Error {
 func (keeper *PersistentOrderKeeper) GetOlderThan(height int64) []*Order {
 	var result []*Order
 	start := concatCopyPreAllocate([][]byte{
+		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		OrderQueueKeyPrefix,
 	})
 	end := concatCopyPreAllocate([][]byte{
+		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		OrderQueueKeyPrefix,
 		int64ToBigEndianBytes(height),
 	})
 	for iter := keeper.store.ReverseIterator(start, end); iter.Valid(); iter.Next() {
@@ -196,14 +218,14 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(height int64) []*Order {
 func (keeper *PersistentOrderKeeper) GetAllOrders() []*Order {
 	var result []*Order
 	start := concatCopyPreAllocate([][]byte{
+		OrderBookKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		OrderBookKeyPrefix,
 	})
 	end := concatCopyPreAllocate([][]byte{
+		OrderBookKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
-		OrderBookKeyPrefixPlusOne,
+		{0x1},
 	})
 	for iter := keeper.store.Iterator(start, end); iter.Valid(); iter.Next() {
 		order := &Order{}
@@ -216,15 +238,15 @@ func (keeper *PersistentOrderKeeper) GetAllOrders() []*Order {
 func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(height int64) []*Order {
 	var result []*Order
 	start := concatCopyPreAllocate([][]byte{
+		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		OrderQueueKeyPrefix,
 		int64ToBigEndianBytes(height),
 	})
 	end := concatCopyPreAllocate([][]byte{
+		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		OrderQueueKeyPrefix,
 		int64ToBigEndianBytes(height + 1),
 	})
 	for iter := keeper.store.Iterator(start, end); iter.Valid(); iter.Next() {
@@ -259,24 +281,24 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates() []*Order {
 	priceStartPos := len(keeper.symbol) + 2
 	priceEndPos := priceStartPos + DecByteCount
 	bidListStart := concatCopyPreAllocate([][]byte{
+		BidListKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		BidListKeyPrefix,
 	})
 	bidListEnd := concatCopyPreAllocate([][]byte{
+		BidListKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
-		BidListKeyPrefixPlusOne,
+		{0x1},
 	})
 	askListStart := concatCopyPreAllocate([][]byte{
+		AskListKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		AskListKeyPrefix,
 	})
 	askListEnd := concatCopyPreAllocate([][]byte{
+		AskListKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
-		AskListKeyPrefixPlusOne,
+		{0x1},
 	})
 	bidIter := keeper.store.ReverseIterator(bidListStart, bidListEnd)
 	askIter := keeper.store.Iterator(askListStart, askListEnd)

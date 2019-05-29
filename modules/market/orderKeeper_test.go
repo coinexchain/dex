@@ -29,6 +29,14 @@ func Test_concatCopyPreAllocate(t *testing.T) {
 	}
 }
 
+func TestOrderCleanUpDayKeeper(t *testing.T) {
+	k := NewOrderCleanUpDayKeeper(transient.NewStore())
+	k.SetDay(12)
+	if k.GetDay() != 12 {
+		t.Errorf("Error for OrderCleanUpDayKeeper")
+	}
+}
+
 func newKeeperForTest() OrderKeeper {
 	return NewOrderKeeper(transient.NewStore(), "CET/USDT", msgCdc)
 }
