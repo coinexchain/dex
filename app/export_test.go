@@ -29,6 +29,7 @@ func TestExportGenesisState(t *testing.T) {
 		LockedCoins: []authx.LockedCoin{
 			{Coin: dex.NewCetCoin(10), UnlockTime: 10},
 		},
+		FrozenCoins: dex.NewCetCoins(1000),
 	}
 	app.accountXKeeper.SetAccountX(ctx, accx)
 
@@ -39,6 +40,7 @@ func TestExportGenesisState(t *testing.T) {
 	require.Equal(t, int64(10), state.Accounts[0].LockedCoins[0].UnlockTime)
 	require.Equal(t, sdk.NewInt(int64(10)), state.Accounts[0].LockedCoins[0].Coin.Amount)
 	require.Equal(t, "cet", state.Accounts[0].LockedCoins[0].Coin.Denom)
+	require.Equal(t, "1000cet", state.Accounts[0].FrozenCoins.String())
 
 }
 
@@ -55,5 +57,6 @@ func TestExportDefaultAccountXState(t *testing.T) {
 	require.Equal(t, sdk.NewInt(int64(1000)), state.Accounts[0].Coins.AmountOf("cet"))
 	require.Equal(t, false, state.Accounts[0].MemoRequired)
 	require.Nil(t, state.Accounts[0].LockedCoins)
+	require.Nil(t, state.Accounts[0].FrozenCoins)
 
 }
