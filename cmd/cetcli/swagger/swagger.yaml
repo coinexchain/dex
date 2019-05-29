@@ -2070,6 +2070,43 @@ paths:
             $ref: "#/definitions/StdTx"
         500:
           description: Internal Server Error
+  /asset/tokens/{symbol}/burns:
+    post:
+      tags:
+        - ICS100
+      summary: Burn token
+      description: Burn burnable token
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: amount
+          description: burn token amount
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - properties:
+                  amount:
+                    type: integer
+      responses:
+        200:
+          description: Burn token result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
 definitions:
   MarketInfo:
     type: object

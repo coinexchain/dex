@@ -22,6 +22,7 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 	r.HandleFunc("/asset/tokens", issueRequestHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/ownerships", symbol), transferOwnerRequestHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/mints", symbol), mintTokenHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/burns", symbol), burnTokenHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
 // issueReq defines the properties of a issue token request's body.
@@ -132,6 +133,44 @@ func mintTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 		symbol := vars[symbol]
 
 		msg := asset.NewMsgMintToken(symbol, req.Amount, owner)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// burnTokenReq defines the properties of a burn token request's body.
+type burnTokenReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	Amount  int64        `json:"amount"`
+}
+
+// burnTokenHandlerFn - http request handler to burn token.
+func burnTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req burnTokenReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgBurnToken(symbol, req.Amount, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
