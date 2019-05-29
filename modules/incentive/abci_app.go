@@ -1,10 +1,16 @@
 package incentive
 
 import (
+	"github.com/tendermint/tendermint/crypto"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const BlockRewards = 50
+
+var (
+	IncentiveCoinsAccAddr = sdk.AccAddress(crypto.AddressHash([]byte("IncentiveCoins")))
+)
 
 func BeginBlocker(ctx sdk.Context, k Keeper) {
 
