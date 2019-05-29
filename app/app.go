@@ -218,7 +218,7 @@ func (app *CetChainApp) initKeepers() {
 	)
 	app.marketKeeper = market.NewKeeper(
 		app.keyMarket,
-		market.MockAssertKeeper{},
+		app.assetKeeper,
 		market.MockBankxKeeper{},
 		app.cdc,
 		app.paramsKeeper.Subspace(market.MarketKey),
