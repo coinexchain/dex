@@ -17,8 +17,7 @@ func NewHandler(k Keeper) sdk.Handler {
 		case MsgSend:
 			return handleMsgSend(ctx, k, msg)
 		case MsgSetMemoRequired:
-			return handleMsgSetMemoRequired(ctx, k.axk, msg)
-
+			return handleMsgSetMemoRequired(ctx, k, msg)
 		default:
 			errMsg := "Unrecognized bank Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -111,15 +110,24 @@ func normalSend(ctx sdk.Context, k Keeper,
 	}
 }
 
-func handleMsgSetMemoRequired(ctx sdk.Context, axk authx.AccountXKeeper, msg MsgSetMemoRequired) sdk.Result {
-	accountX, found := axk.GetAccountX(ctx, msg.Address)
-	if !found {
-		msg := fmt.Sprintf("account %s is not activated", msg.Address)
+func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg MsgSetMemoRequired) sdk.Result {
+	addr := msg.Address
+	required := msg.Required
+
+	account := k.ak.GetAccount(ctx, addr)
+	if account == nil {
+		msg := fmt.Sprintf("account %s is not activated", addr)
 		return ErrUnactivatedAddress(msg).Result()
 	}
 
-	accountX.MemoRequired = msg.Required
-	axk.SetAccountX(ctx, accountX)
+	accountX := k.axk.GetOrCreateAccountX(ctx, addr)
+	accountX.MemoRequired = required
+	k.axk.SetAccountX(ctx, accountX)
 
-	return sdk.Result{}
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			TagKeyMemoRequired, fmt.Sprintf("%v", required),
+			TagKeyAddr, addr.String(),
+		),
+	}
 }
