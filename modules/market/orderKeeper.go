@@ -27,41 +27,43 @@ const (
 )
 
 type OrderCleanUpDayKeeper struct {
-	store sdk.KVStore
+	marketKey     sdk.StoreKey
 }
 
-func NewOrderCleanUpDayKeeper(store sdk.KVStore) *OrderCleanUpDayKeeper {
+func NewOrderCleanUpDayKeeper(key sdk.StoreKey) *OrderCleanUpDayKeeper {
 	return &OrderCleanUpDayKeeper{
-		store: store,
+		marketKey: key,
 	}
 }
 
-func (keeper *OrderCleanUpDayKeeper) GetDay() int {
-	value := keeper.store.Get(LastOrderCleanUpDayKey)
+func (keeper *OrderCleanUpDayKeeper) GetDay(ctx sdk.Context) int {
+	store := ctx.KVStore(keeper.marketKey)
+	value := store.Get(LastOrderCleanUpDayKey)
 	return int(value[0])
 }
 
-func (keeper *OrderCleanUpDayKeeper) SetDay(day int) {
+func (keeper *OrderCleanUpDayKeeper) SetDay(ctx sdk.Context, day int) {
 	var value [1]byte
 	value[0] = byte(day)
-	keeper.store.Set(LastOrderCleanUpDayKey, value[:])
+	store := ctx.KVStore(keeper.marketKey)
+	store.Set(LastOrderCleanUpDayKey, value[:])
 }
 
 type OrderKeeper interface {
-	Add(order *Order) sdk.Error
-	Exists(orderID string) bool
-	Remove(order *Order) sdk.Error
-	GetOlderThan(height int64) []*Order
-	GetAllOrders() []*Order
-	GetOrdersAtHeight(height int64) []*Order
-	QueryOrder(orderID string) *Order
-	GetOrdersFromUser(user string) []string
-	GetMatchingCandidates() []*Order
+	Add(ctx sdk.Context, order *Order) sdk.Error
+	Exists(ctx sdk.Context, orderID string) bool
+	Remove(ctx sdk.Context, order *Order) sdk.Error
+	GetOlderThan(ctx sdk.Context, height int64) []*Order
+	GetAllOrders(ctx sdk.Context) []*Order
+	GetOrdersAtHeight(ctx sdk.Context, height int64) []*Order
+	QueryOrder(ctx sdk.Context, orderID string) *Order
+	GetOrdersFromUser(ctx sdk.Context, user string) []string
+	GetMatchingCandidates(ctx sdk.Context) []*Order
 	GetSymbol() string
 }
 
 type PersistentOrderKeeper struct {
-	store  sdk.KVStore
+	marketKey     sdk.StoreKey
 	symbol string
 	codec  *codec.Codec
 }
@@ -122,9 +124,9 @@ func (keeper *PersistentOrderKeeper) orderQueueKey(order *Order) []byte {
 	})
 }
 
-func NewOrderKeeper(store sdk.KVStore, symbol string, codec *codec.Codec) OrderKeeper {
+func NewOrderKeeper(key sdk.StoreKey, symbol string, codec *codec.Codec) OrderKeeper {
 	return &PersistentOrderKeeper{
-		store:  store,
+		marketKey:  key,
 		symbol: symbol,
 		codec:  codec,
 	}
@@ -147,54 +149,58 @@ func int64ToBigEndianBytes(n int64) []byte {
 	return result[:]
 }
 
-func (keeper *PersistentOrderKeeper) Add(order *Order) sdk.Error {
+func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *Order) sdk.Error {
+	store := ctx.KVStore(keeper.marketKey)
 	key := keeper.orderBookKey(order.OrderID())
 	value := keeper.codec.MustMarshalBinaryBare(order)
-	keeper.store.Set(key, value)
+	store.Set(key, value)
 
 	if order.TimeInForce == GTE {
 		key = keeper.orderQueueKey(order)
-		keeper.store.Set(key, nil)
+		store.Set(key, []byte{})
 	}
 	if order.Side == match.BID {
 		key = keeper.bidListKey(order)
-		keeper.store.Set(key, nil)
+		store.Set(key, []byte{})
 	}
 	if order.Side == match.ASK {
 		key = keeper.askListKey(order)
-		keeper.store.Set(key, nil)
+		store.Set(key, []byte{})
 	}
 	return nil
 }
 
-func (keeper *PersistentOrderKeeper) Exists(orderID string) bool {
+func (keeper *PersistentOrderKeeper) Exists(ctx sdk.Context, orderID string) bool {
+	store := ctx.KVStore(keeper.marketKey)
 	key := keeper.orderBookKey(orderID)
-	return keeper.store.Has(key)
+	return store.Has(key)
 }
 
-func (keeper *PersistentOrderKeeper) Remove(order *Order) sdk.Error {
-	if !keeper.Exists(order.OrderID()) {
+func (keeper *PersistentOrderKeeper) Remove(ctx sdk.Context, order *Order) sdk.Error {
+	store := ctx.KVStore(keeper.marketKey)
+	if !keeper.Exists(ctx, order.OrderID()) {
 		return ErrNoExistKeyInStore()
 	}
 	key := keeper.orderBookKey(order.OrderID())
-	keeper.store.Delete(key)
+	store.Delete(key)
 
 	if order.TimeInForce == GTE {
 		key = keeper.orderQueueKey(order)
-		keeper.store.Delete(key)
+		store.Delete(key)
 	}
 	if order.Side == match.BID {
 		key = keeper.bidListKey(order)
-		keeper.store.Delete(key)
+		store.Delete(key)
 	}
 	if order.Side == match.ASK {
 		key = keeper.askListKey(order)
-		keeper.store.Delete(key)
+		store.Delete(key)
 	}
 	return nil
 }
 
-func (keeper *PersistentOrderKeeper) GetOlderThan(height int64) []*Order {
+func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64) []*Order {
+	store := ctx.KVStore(keeper.marketKey)
 	var result []*Order
 	start := concatCopyPreAllocate([][]byte{
 		OrderQueueKeyPrefix,
@@ -207,15 +213,16 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(height int64) []*Order {
 		{0x0},
 		int64ToBigEndianBytes(height),
 	})
-	for iter := keeper.store.ReverseIterator(start, end); iter.Valid(); iter.Next() {
+	for iter := store.ReverseIterator(start, end); iter.Valid(); iter.Next() {
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
-		result = append(result, keeper.QueryOrder(orderID))
+		result = append(result, keeper.QueryOrder(ctx, orderID))
 	}
 	return result
 }
 
-func (keeper *PersistentOrderKeeper) GetAllOrders() []*Order {
+func (keeper *PersistentOrderKeeper) GetAllOrders(ctx sdk.Context) []*Order {
+	store := ctx.KVStore(keeper.marketKey)
 	var result []*Order
 	start := concatCopyPreAllocate([][]byte{
 		OrderBookKeyPrefix,
@@ -227,7 +234,7 @@ func (keeper *PersistentOrderKeeper) GetAllOrders() []*Order {
 		[]byte(keeper.symbol),
 		{0x1},
 	})
-	for iter := keeper.store.Iterator(start, end); iter.Valid(); iter.Next() {
+	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
 		order := &Order{}
 		keeper.codec.MustUnmarshalBinaryBare(iter.Value(), order)
 		result = append(result, order)
@@ -235,7 +242,8 @@ func (keeper *PersistentOrderKeeper) GetAllOrders() []*Order {
 	return result
 }
 
-func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(height int64) []*Order {
+func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height int64) []*Order {
+	store := ctx.KVStore(keeper.marketKey)
 	var result []*Order
 	start := concatCopyPreAllocate([][]byte{
 		OrderQueueKeyPrefix,
@@ -249,35 +257,38 @@ func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(height int64) []*Order {
 		{0x0},
 		int64ToBigEndianBytes(height + 1),
 	})
-	for iter := keeper.store.Iterator(start, end); iter.Valid(); iter.Next() {
+	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
-		result = append(result, keeper.QueryOrder(orderID))
+		result = append(result, keeper.QueryOrder(ctx, orderID))
 	}
 	return result
 }
 
-func (keeper *PersistentOrderKeeper) QueryOrder(orderID string) *Order {
+func (keeper *PersistentOrderKeeper) QueryOrder(ctx sdk.Context, orderID string) *Order {
+	store := ctx.KVStore(keeper.marketKey)
 	key := keeper.orderBookKey(orderID)
-	orderBytes := keeper.store.Get(key)
+	orderBytes := store.Get(key)
 	order := &Order{}
 	keeper.codec.MustUnmarshalBinaryBare(orderBytes, order)
 	return order
 }
 
-func (keeper *PersistentOrderKeeper) GetOrdersFromUser(user string) []string {
+func (keeper *PersistentOrderKeeper) GetOrdersFromUser(ctx sdk.Context, user string) []string {
+	store := ctx.KVStore(keeper.marketKey)
 	key := keeper.orderBookKey(user + "-")
 	nextKey := keeper.orderBookKey(user + string([]byte{0xFF}))
 	startPos := len(key) - len(user) - 1
 	var result []string
-	for iter := keeper.store.ReverseIterator(key, nextKey); iter.Valid(); iter.Next() {
+	for iter := store.ReverseIterator(key, nextKey); iter.Valid(); iter.Next() {
 		k := iter.Key()
 		result = append(result, string(k[startPos:]))
 	}
 	return result
 }
 
-func (keeper *PersistentOrderKeeper) GetMatchingCandidates() []*Order {
+func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*Order {
+	store := ctx.KVStore(keeper.marketKey)
 	priceStartPos := len(keeper.symbol) + 2
 	priceEndPos := priceStartPos + DecByteCount
 	bidListStart := concatCopyPreAllocate([][]byte{
@@ -300,8 +311,8 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates() []*Order {
 		[]byte(keeper.symbol),
 		{0x1},
 	})
-	bidIter := keeper.store.ReverseIterator(bidListStart, bidListEnd)
-	askIter := keeper.store.Iterator(askListStart, askListEnd)
+	bidIter := store.ReverseIterator(bidListStart, bidListEnd)
+	askIter := store.Iterator(askListStart, askListEnd)
 	if !bidIter.Valid() || !askIter.Valid() {
 		return nil
 	}
@@ -336,7 +347,7 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates() []*Order {
 	}
 	result := make([]*Order, 0, len(orderIDList))
 	for _, orderID := range orderIDList {
-		result = append(result, keeper.QueryOrder(orderID))
+		result = append(result, keeper.QueryOrder(ctx, orderID))
 	}
 	return result
 }
