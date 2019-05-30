@@ -152,6 +152,13 @@ benchmark:
 build-docker-cetdnode:
 	$(MAKE) -C networks/local
 
+build-test-docker: build-linux
+	cp build/cetd networks/test/cetdnode/
+	cp build/cetcli networks/test/cetdnode/
+	$(MAKE) -C networks/test
+	rm networks/test/cetdnode/cetd
+	rm networks/test/cetdnode/cetcli
+
 # Run a 4-node testnet locally
 localnet-start: localnet-stop
 	@if ! [ -f build/node0/cetd/config/genesis.json ]; then docker run --rm -v $(CURDIR)/build:/cetd:Z coinexchain/cetdnode testnet --v 4 -o . --starting-ip-address 192.168.10.2 ; fi
