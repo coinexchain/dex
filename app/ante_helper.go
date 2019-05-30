@@ -14,17 +14,17 @@ type anteHelper struct {
 	accountXKeeper authx.AccountXKeeper
 }
 
-func (ah anteHelper) CheckMsg(msg sdk.Msg, memo string, ctx sdk.Context) sdk.Error {
+func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Error {
 	switch msg := msg.(type) {
 	case bank.MsgSend: // should not be here!
-		return ah.checkMemo(msg.ToAddress, memo, ctx)
+		return ah.checkMemo(ctx, msg.ToAddress, memo)
 	case bankx.MsgSend:
-		return ah.checkMemo(msg.ToAddress, memo, ctx)
+		return ah.checkMemo(ctx, msg.ToAddress, memo)
 	}
 	return nil
 }
 
-func (ah anteHelper) checkMemo(addr sdk.AccAddress, memo string, ctx sdk.Context) sdk.Error {
+func (ah anteHelper) checkMemo(ctx sdk.Context, addr sdk.AccAddress, memo string) sdk.Error {
 	if ax, ok := ah.accountXKeeper.GetAccountX(ctx, addr); ok && ax.MemoRequired {
 		if len(memo) == 0 {
 			return bankx.ErrMemoMissing()
