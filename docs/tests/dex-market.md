@@ -32,6 +32,14 @@
    
 ## 创建订单
 
-`./cetcli tx market creategteoreder --symbol="btc/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --time-in-force=1000 --from bob --price-precision=9 --chain-id=coinexdex  `   
+`./cetcli tx market creategteoreder --symbol="eth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --time-in-force=1000 --from bob --price-precision=9 --chain-id=coinexdex  `   
+
+## 查询指定市场信息
+
+`./cetcli query market marketinfo eth/cet --trust-node=true`
+
+## 查询指定订单信息
+
+`./cetcli query market orderinfo --symbol=eth/cet --order-id=cosmos16gvnhynu7veexyyaadk60k28cn5s9k7p7p5v9p-13 --trust-node=true`
 
 
