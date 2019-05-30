@@ -115,9 +115,11 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 		DealMoney:   0,
 		DealStock:   0,
 	}
-	key := marketStoreKey(OrderBookKeyPrefix, msg.Symbol, order.OrderID())
-	value := keeper.cdc.MustMarshalBinaryBare(order)
-	store.Set(key, value)
+
+	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
+	if err := ork.Add(ctx, &order); err != nil {
+		return err.Result()
+	}
 
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
@@ -125,7 +127,6 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 func checkMsgCreateGTEOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateGTEOrder, keeper Keeper) sdk.Result {
 
 	var (
-		value      []byte
 		denom      string
 		marketInfo MarketInfo
 	)
@@ -140,12 +141,8 @@ func checkMsgCreateGTEOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateGTE
 		denom = values[1]
 	}
 
-	if value = store.Get(marketStoreKey(MarketIdentifierPrefix, msg.Symbol)); value == nil {
-		return ErrNoExistKeyInStore().Result()
-	}
-
-	keeper.cdc.MustUnmarshalBinaryBare(value, &marketInfo)
-	if msg.PricePrecision > marketInfo.PricePrecision {
+	marketInfo, err := keeper.GetMarketInfo(ctx, msg.Symbol)
+	if err != nil || msg.PricePrecision > marketInfo.PricePrecision {
 		return ErrInvalidPricePrecision().Result()
 	}
 

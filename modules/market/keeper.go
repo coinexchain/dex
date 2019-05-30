@@ -89,16 +89,16 @@ func (k Keeper) IterateOrder(ctx sdk.Context, process func(*Order) bool) {
 		if !iter.Valid() {
 			return
 		}
-		val := iter.Value()
-		if process(k.decodeOrder(val)) {
+		or := k.decodeOrder(iter.Value())
+		if process(&or) {
 			return
 		}
 		iter.Next()
 	}
 }
 
-func (k Keeper) decodeOrder(bz []byte) (order *Order) {
-	if err := k.cdc.UnmarshalBinaryBare(bz, order); err != nil {
+func (k Keeper) decodeOrder(bz []byte) (order Order) {
+	if err := k.cdc.UnmarshalBinaryBare(bz, &order); err != nil {
 		panic(err)
 	}
 	return
@@ -128,6 +128,15 @@ func (k Keeper) IterateMarket(ctx sdk.Context, process func(info MarketInfo) boo
 		}
 		iter.Next()
 	}
+}
+
+func (k Keeper) GetMarketInfo(ctx sdk.Context, symbol string) (info MarketInfo, err error) {
+	store := ctx.KVStore(k.marketKey)
+	value := store.Get(marketStoreKey(MarketIdentifierPrefix, symbol))
+
+	//TODO. will modify, because the function maybe panic in case of error .
+	err = k.cdc.UnmarshalBinaryBare(value, &info)
+	return
 }
 
 func (k Keeper) decodeMarket(bz []byte) (info MarketInfo) {

@@ -23,6 +23,7 @@ var (
 	FlagQuantity    = "quantity"
 	FlagSide        = "side"
 	FlagTimeInForce = "time-in-force"
+	FlagOrderID     = "orderid"
 )
 
 var createGTEOrderFlags = []string{
@@ -122,4 +123,35 @@ func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgC
 	}
 
 	return msg, nil
+}
+
+func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "orderinfo",
+		Short: "Query order info",
+		Long:  "cetcli query market orderinfo --symbol=[eth/cet] --orderid=[orderid]",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(viper.GetString(FlagSymbol), viper.GetString(FlagOrderID)))
+			if err != nil {
+				return err
+			}
+
+			route := fmt.Sprintf("custom/%s/%s", market.MarketKey, market.QueryOrder)
+			res, err := cliCtx.QueryWithData(route, bz)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(res))
+			return nil
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
+	cmd.Flags().String(FlagOrderID, "", "The order id")
+	cmd.MarkFlagRequired(FlagOrderID)
+	cmd.MarkFlagRequired(FlagSymbol)
+	return cmd
 }

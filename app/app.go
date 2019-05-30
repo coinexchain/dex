@@ -249,7 +249,9 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(gov.QuerierRoute, gov.NewQuerier(app.govKeeper)).
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
-		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.assetKeeper, app.cdc))
+		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.assetKeeper, app.cdc)).
+		AddRoute(market.MarketKey, market.NewQuerier(app.marketKeeper, app.cdc))
+
 }
 
 // initialize BaseApp
