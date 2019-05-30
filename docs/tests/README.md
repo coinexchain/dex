@@ -2,9 +2,9 @@
 
 一些约定：
 
-|           | 约定                   |      |
-| --------- | ---------------------- | ---- |
-| moniker   | moniker0（想个更好的） |      |
-| chain-id  | coinexdex              |      |
-| key names | alice, bob, charles    |      |
+|           | 约定                     |      |
+| --------- | ------------------------ | ---- |
+| moniker   | node0, node1, ...        |      |
+| chain-id  | coinexdex                |      |
+| key names | alice, bob, charles, ... |      |
 

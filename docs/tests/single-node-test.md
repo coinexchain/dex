@@ -27,7 +27,7 @@ go run github.com/coinexchain/dex/cmd/cetcli
 
 ```bash
 # cetd init [moniker] [flags]
-./cetd init moniker0 --chain-id=coinexdex # --overwrite
+./cetd init node0 --chain-id=coinexdex # --overwrite
 ```
 
 运行完上面这条命令后，会生成配置文件`$HOME/.cetd/config/genesis.json`，内容看起来是下面这样：
@@ -229,7 +229,7 @@ go run github.com/coinexchain/dex/cmd/cetcli
             "type":"cosmos-sdk/MsgCreateValidator",
             "value":{  
                "description":{  
-                  "moniker":"moniker0",
+                  "moniker":"node0",
                   "identity":"",
                   "website":"",
                   "details":""
@@ -305,7 +305,7 @@ go run github.com/coinexchain/dex/cmd/cetcli
               "type": "cosmos-sdk/MsgCreateValidator",
               "value": {
                 "description": {
-                  "moniker": "moniker0",
+                  "moniker": "node0",
                   "identity": "",
                   "website": "",
                   "details": ""
