@@ -1,3 +1,10 @@
+## install statik
+
+```bash
+go get -d github.com/rakyll/statik
+go install github.com/rakyll/statik
+```
+
 ## install bower
 [bower](https://bower.io/)
 

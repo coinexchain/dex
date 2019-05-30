@@ -8,3 +8,4 @@ Push docker image to docker hub
 docker login
 docker push coinexchain/basic:tag
 ```
+
