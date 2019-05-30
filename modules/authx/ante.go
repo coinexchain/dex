@@ -31,7 +31,7 @@ func init() {
 }
 
 type AnteHelper interface {
-	CheckMemo(msg sdk.Msg, memo string, ctx sdk.Context) sdk.Error
+	CheckMsg(msg sdk.Msg, memo string, ctx sdk.Context) sdk.Error
 	GasFee(msg sdk.Msg) sdk.Coins
 }
 
@@ -181,10 +181,11 @@ func ValidateMemoSize(stdTx auth.StdTx, params auth.Params) sdk.Result {
 	return sdk.Result{}
 }
 
+// additional check
 func checkMemo(stdTx auth.StdTx, ctx sdk.Context, anteHelper AnteHelper) sdk.Result {
 	memo := stdTx.Memo
 	for _, msg := range stdTx.Msgs {
-		if err := anteHelper.CheckMemo(msg, memo, ctx); err != nil {
+		if err := anteHelper.CheckMsg(msg, memo, ctx); err != nil {
 			return err.Result()
 		}
 	}

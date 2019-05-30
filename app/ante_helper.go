@@ -14,7 +14,7 @@ type anteHelper struct {
 	accountXKeeper authx.AccountXKeeper
 }
 
-func (ah anteHelper) CheckMemo(msg sdk.Msg, memo string, ctx sdk.Context) sdk.Error {
+func (ah anteHelper) CheckMsg(msg sdk.Msg, memo string, ctx sdk.Context) sdk.Error {
 	switch msg := msg.(type) {
 	case bank.MsgSend: // should not be here!
 		return ah.checkMemo(msg.ToAddress, memo, ctx)
