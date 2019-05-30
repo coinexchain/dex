@@ -86,11 +86,10 @@ func addTokenCoins(ctx sdk.Context, tk TokenKeeper, addr sdk.AccAddress, amt sdk
 
 	oldCoins := acc.GetCoins()
 	newCoins := oldCoins.Add(amt)
-	newCoins.Sort()
 
-	if newCoins.IsAnyNegative() {
-		return sdk.ErrInsufficientCoins(
-			fmt.Sprintf("insufficient account funds; %s < %s", oldCoins, amt),
+	if !newCoins.IsValid() {
+		return sdk.ErrInvalidCoins(
+			fmt.Sprintf("invalid account funds; %s", amt),
 		)
 	}
 
