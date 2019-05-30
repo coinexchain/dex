@@ -11,3 +11,7 @@ func NewCetCoin(amount int64) sdk.Coin {
 func NewCetCoins(amount int64) sdk.Coins {
 	return sdk.NewCoins(NewCetCoin(amount))
 }
+
+func IsCET(coin sdk.Coin) bool {
+	return coin.Denom == CET
+}
