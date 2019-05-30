@@ -150,7 +150,7 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 func TestSendFromIncentiveAddr(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	fromAddr := incentive.IncentiveCoinsAccAddr
-	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10000000000))
+	coins := dex.NewCetCoinsE8(100)
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
@@ -161,7 +161,7 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
 	// deliver tx
-	coins = dex.NewCetCoins(100000000000)
+	coins = dex.NewCetCoins(1000)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
 	msgs := make([]sdk.Msg, 1)
 	msgs[0] = msg
@@ -171,4 +171,8 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeUnauthorized, result.Code)
+}
+
+func TestMinSelfDelegation(t *testing.T) {
+
 }

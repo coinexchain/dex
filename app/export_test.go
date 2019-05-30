@@ -41,7 +41,7 @@ func TestExportGenesisState(t *testing.T) {
 	require.Equal(t, sdk.NewInt(int64(10)), state.Accounts[0].LockedCoins[0].Coin.Amount)
 	require.Equal(t, "cet", state.Accounts[0].LockedCoins[0].Coin.Denom)
 	require.Equal(t, "1000cet", state.Accounts[0].FrozenCoins.String())
-
+	require.True(t, state.StakingXData.Params.MinSelfDelegation.IsPositive())
 }
 
 func TestExportDefaultAccountXState(t *testing.T) {
@@ -58,5 +58,4 @@ func TestExportDefaultAccountXState(t *testing.T) {
 	require.Equal(t, false, state.Accounts[0].MemoRequired)
 	require.Nil(t, state.Accounts[0].LockedCoins)
 	require.Nil(t, state.Accounts[0].FrozenCoins)
-
 }
