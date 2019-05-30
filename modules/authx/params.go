@@ -12,7 +12,7 @@ const DefaultParamspace = "authx"
 
 // Default parameter values
 const (
-	DefaultMinSelfDelegation        = 1
+	DefaultMinSelfDelegation        = 1   // 1 CET
 	DefaultMinGasPrice       uint64 = 1e8 // 1 CET/Gas
 
 	DefaultMsgSendGasCost uint64 = 1
