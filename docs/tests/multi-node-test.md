@@ -213,7 +213,7 @@ Response:
 
 ```bash
 $ docker exec -it cetdnode0 /cetd/cetcli query tx 9B5888F7309C1C965145F5D1C75F884304A325A6CBA1A5CB563ED3FF7B93B480 \
- --chain-id=chain-0ze4Qg
+ --chain-id=chain-0ze4Qg --home /cetd/node0/cetcli
 Response:
   Height: 3501
   TxHash: 9B5888F7309C1C965145F5D1C75F884304A325A6CBA1A5CB563ED3FF7B93B480
@@ -233,7 +233,7 @@ Response:
 
 ```bash
 $ docker exec -it cetdnode1 /cetd/cetcli query tx 9B5888F7309C1C965145F5D1C75F884304A325A6CBA1A5CB563ED3FF7B93B480 \
- --chain-id=chain-0ze4Qg
+ --chain-id=chain-0ze4Qg --home /cetd/node1/cetcli
  Response:
   Height: 3501
   TxHash: 9B5888F7309C1C965145F5D1C75F884304A325A6CBA1A5CB563ED3FF7B93B480
