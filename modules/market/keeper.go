@@ -16,7 +16,6 @@ type Keeper struct {
 	axk           ExpectedAssertStatusKeeper
 	bnk           ExpectedBankxKeeper
 	cdc           *codec.Codec
-	ork           OrderKeeper
 	orderClean    *OrderCleanUpDayKeeper
 	//fek       incentive.FeeCollectionKeeper
 }
@@ -26,8 +25,8 @@ func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper,
 
 	return Keeper{marketKey: key, axk: axkVal, bnk: bnkVal,
 		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
-		cdc:           cdcVal, ork: NewOrderKeeper(key, MarketKey, cdcVal),
-		orderClean: NewOrderCleanUpDayKeeper(key)}
+		cdc:           cdcVal,
+		orderClean:    NewOrderCleanUpDayKeeper(key)}
 }
 
 // -----------------------------------------------------------------------------
@@ -46,7 +45,7 @@ func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
 
 // SetOrder implements token Keeper.
 func (k Keeper) SetOrder(ctx sdk.Context, order *Order) sdk.Error {
-	return k.ork.Add(ctx, order)
+	return NewOrderKeeper(k.marketKey, order.Symbol, k.cdc).Add(ctx, order)
 }
 
 // SetMarket implements token Keeper.
@@ -73,7 +72,36 @@ func RegisterCodec(cdc *codec.Codec) {
 }
 
 func (k Keeper) GetAllOrders(ctx sdk.Context) []*Order {
-	return k.ork.GetAllOrders(ctx)
+	var orders []*Order
+	appendOrder := func(order *Order) (stop bool) {
+		orders = append(orders, order)
+		return false
+	}
+	k.IterateOrder(ctx, appendOrder)
+	return orders
+}
+
+func (k Keeper) IterateOrder(ctx sdk.Context, process func(*Order) bool) {
+	store := ctx.KVStore(k.marketKey)
+	iter := sdk.KVStorePrefixIterator(store, OrderBookKeyPrefix)
+	defer iter.Close()
+	for {
+		if !iter.Valid() {
+			return
+		}
+		val := iter.Value()
+		if process(k.decodeOrder(val)) {
+			return
+		}
+		iter.Next()
+	}
+}
+
+func (k Keeper) decodeOrder(bz []byte) (order *Order) {
+	if err := k.cdc.UnmarshalBinaryBare(bz, order); err != nil {
+		panic(err)
+	}
+	return
 }
 
 func (k Keeper) GetAllMarketInfos(ctx sdk.Context) []MarketInfo {
