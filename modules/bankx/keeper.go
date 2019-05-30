@@ -1,6 +1,7 @@
 package bankx
 
 import (
+	"fmt"
 	"github.com/coinexchain/dex/modules/authx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -47,13 +48,14 @@ func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddres
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	acc := k.ak.GetAccount(ctx, addr)
 	if acc == nil {
-		return sdk.ErrInvalidAddress("account doesn't exist yet")
+		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
 	}
 
 	newCoins, neg := acc.GetCoins().SafeSub(amt)
 	if neg {
 		return sdk.ErrInsufficientCoins("account has insufficient coins to freeze")
 	}
+
 	acc.SetCoins(newCoins)
 	k.ak.SetAccount(ctx, acc)
 
@@ -68,12 +70,14 @@ func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins)
 func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	accx, ok := k.axk.GetAccountX(ctx, addr)
 	if !ok {
-		return sdk.ErrInvalidAddress("account doesn't exist yet")
+		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
 	}
+
 	frozenCoins, neg := accx.FrozenCoins.SafeSub(amt)
 	if neg {
 		return sdk.ErrInsufficientCoins("account has insufficient coins to unfreeze")
 	}
+
 	accx.FrozenCoins = frozenCoins
 	k.axk.SetAccountX(ctx, accx)
 

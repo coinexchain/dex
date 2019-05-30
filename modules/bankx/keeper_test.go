@@ -1,6 +1,7 @@
 package bankx
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -93,10 +94,10 @@ func TestFreezeUnFreezeInvalidAccount(t *testing.T) {
 
 	freezeCoins := types.NewCetCoins(500000000)
 	err := input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
-	require.Equal(t, sdk.ErrInvalidAddress("account doesn't exist yet"), err)
+	require.Equal(t, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", myaddr)), err)
 
 	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, freezeCoins)
-	require.Equal(t, sdk.ErrInvalidAddress("account doesn't exist yet"), err)
+	require.Equal(t, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", myaddr)), err)
 
 }
 func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {

@@ -104,6 +104,7 @@ func (gs GenesisState) Sanitize() {
 
 	for _, acc := range gs.Accounts {
 		acc.Coins = acc.Coins.Sort()
+		acc.FrozenCoins = acc.FrozenCoins.Sort()
 	}
 }
 
