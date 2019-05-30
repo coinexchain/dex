@@ -5,6 +5,7 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/spf13/viper"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
@@ -117,18 +118,35 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo
 	return msg, nil
 }
 
-//func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
-//
-//	return &cobra.Command{
-//		Use:   "marketinfo",
-//		Short: "",
-//		Long:  "",
-//		Args:  cobra.ExactArgs(1),
-//		RunE: func(cmd *cobra.Command, args []string) error {
-//			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-//			fmt.Sprint("custom/%s")
-//
-//		},
-//	}
-//
-//}
+func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
+
+	return &cobra.Command{
+		Use:   "marketinfo",
+		Short: "query market info",
+		Long: "cetcli query market marketinfo [symbol]" +
+			"Example : " +
+			"cetcli query market " +
+			"marketinfo eth/cet " +
+			"--trust-node=true",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			if len(strings.Split(args[0], market.SymbolSeparator)) != 2 {
+				return errors.Errorf("symbol illegal : %s, For example : eth/cet.", args[0])
+			}
+
+			bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(args[0]))
+			if err != nil {
+				return err
+			}
+			query := fmt.Sprintf("custom/%s/%s", market.MarketKey, market.QueryMarket)
+			res, err := cliCtx.QueryWithData(query, bz)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(res))
+			return nil
+		},
+	}
+}

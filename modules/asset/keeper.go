@@ -233,11 +233,11 @@ func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
 // -----------------------------------------------------------------------------
 // ExpectedAssertStatusKeeper
 
-//IsTokenFrozen - check whether the coin's owner has frozen "denom", forbiding transmission and exchange.
+//IsTokenForbidden - check whether the coin's owner has forbidden "denom", forbiding transmission and exchange.
 func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, denom string) bool {
 	token := tk.GetToken(ctx, denom)
 	if token != nil {
-		return token.GetIsFrozen()
+		return token.GetIsForbidden()
 	}
 
 	return true

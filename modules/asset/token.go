@@ -41,8 +41,8 @@ type Token interface {
 	GetTotalMint() int64
 	SetTotalMint(int64) error
 
-	GetIsFrozen() bool
-	SetIsFrozen(bool)
+	GetIsForbidden() bool
+	SetIsForbidden(bool)
 
 	IsValid() error
 	// Ensure that account implements stringer
@@ -66,9 +66,9 @@ type BaseToken struct {
 	AddrForbiddable  bool `json:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
 	TokenForbiddable bool `json:"token_forbiddable"` // whether token could be global forbid
 
-	TotalBurn int64 `json:"total_burn"` // Total amount of burn
-	TotalMint int64 `json:"total_mint"` // Total amount of mint
-	IsFrozen  bool  `json:"is_frozen"`  // Whether token being frozen currently
+	TotalBurn   int64 `json:"total_burn"`   // Total amount of burn
+	TotalMint   int64 `json:"total_mint"`   // Total amount of mint
+	IsForbidden bool  `json:"is_forbidden"` // Whether token being forbidden currently
 }
 
 var (
@@ -105,7 +105,7 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	if err := t.SetTotalBurn(0); err != nil {
 		return nil, ErrorInvalidTokenBurn(err.Error())
 	}
-	t.SetIsFrozen(false)
+	t.SetIsForbidden(false)
 
 	return t, nil
 }
@@ -118,8 +118,8 @@ func (t *BaseToken) IsValid() error {
 		return err
 	}
 
-	if !t.TokenForbiddable && t.IsFrozen {
-		return ErrorInvalidFrozenState("Invalid Frozen state")
+	if !t.TokenForbiddable && t.IsForbidden {
+		return ErrorInvalidForbiddenState("Invalid Forbidden state")
 	}
 
 	if t.TotalMint < 0 {
@@ -242,12 +242,12 @@ func (t *BaseToken) SetTotalMint(amt int64) error {
 	return nil
 }
 
-func (t BaseToken) GetIsFrozen() bool {
-	return t.IsFrozen
+func (t BaseToken) GetIsForbidden() bool {
+	return t.IsForbidden
 }
 
-func (t *BaseToken) SetIsFrozen(enable bool) {
-	t.IsFrozen = enable
+func (t *BaseToken) SetIsForbidden(enable bool) {
+	t.IsForbidden = enable
 }
 
 func (t BaseToken) String() string {
@@ -262,9 +262,9 @@ func (t BaseToken) String() string {
   TokenForbiddable: %t
   TotalBurn:      %d
   TotalMint:      %d
-  IsFrozen:       %t ]`,
+  IsForbidden:       %t ]`,
 		t.Name, t.Symbol, t.TotalSupply, t.Owner.String(), t.Mintable, t.Burnable,
-		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsFrozen,
+		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsForbidden,
 	)
 }
 

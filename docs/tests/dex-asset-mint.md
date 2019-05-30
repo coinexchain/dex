@@ -67,7 +67,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   },
   {
@@ -83,7 +83,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   },
   {
@@ -99,7 +99,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   }
 ]
@@ -142,7 +142,7 @@ $ cetcli q asset token coin2 --chain-id=coinexdex
     "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "100",
-    "is_frozen": false
+    "is_forbidden": false
   }
 }
 ```
@@ -283,7 +283,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin3
     "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "2000",
-    "is_frozen": false
+    "is_forbidden": false
   }
 }
 ```

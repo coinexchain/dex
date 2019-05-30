@@ -114,7 +114,7 @@ $ cetcli query asset token token1 --chain-id=coinexdex
     "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "0",
-    "is_frozen": false
+    "is_forbidden": false
   }
 }
 ```
@@ -142,7 +142,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   },
   {
@@ -158,7 +158,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   },
   {
@@ -174,7 +174,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   }
 ]
@@ -214,7 +214,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/token1
 返回token1的信息：
 
 ```bash
-{"type":"asset/Token","value":{"name":"my first token","symbol":"token1","total_supply":"2100000000000000","owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":true,"total_burn":"0","total_mint":"0","is_frozen":false}}%
+{"type":"asset/Token","value":{"name":"my first token","symbol":"token1","total_supply":"2100000000000000","owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":true,"total_burn":"0","total_mint":"0","is_forbidden":false}}%
 ```
 
 4. 查询所有token信息
@@ -240,7 +240,7 @@ $ curl -X GET http://localhost:1317/asset/tokens
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   },
   {
@@ -256,7 +256,7 @@ $ curl -X GET http://localhost:1317/asset/tokens
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   },
   {
@@ -272,7 +272,7 @@ $ curl -X GET http://localhost:1317/asset/tokens
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_frozen": false
+      "is_forbidden": false
     }
   }
 ]
@@ -397,7 +397,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin1
     "token_forbiddable": false,
     "total_burn": "0",
     "total_mint": "0",
-    "is_frozen": false
+    "is_forbidden": false
   }
 }
 ```

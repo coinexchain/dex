@@ -27,7 +27,9 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 		Use:   market.MarketKey,
 		Short: "Querying commands for the market module",
 	}
-
+	assQueryCmd.AddCommand(client.GetCommands(
+		cli.QueryMarketCmd(mc.cdc),
+		cli.QueryOrderCmd(mc.cdc))...)
 	return assQueryCmd
 }
 

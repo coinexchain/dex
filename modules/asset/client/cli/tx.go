@@ -100,8 +100,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 		"The amount before boosting should not exceed 90 billion.")
 	cmd.Flags().Bool(FlagMintable, false, "Whether this token could be minted after the issuing")
 	cmd.Flags().Bool(FlagBurnable, true, "Whether this token could be burned")
-	cmd.Flags().Bool(FlagAddrForbiddable, false, " Whether the token holder address can be frozen by token owner")
-	cmd.Flags().Bool(FlagTokenForbiddable, false, "Whether the token can be frozen")
+	cmd.Flags().Bool(FlagAddrForbiddable, false, " Whether the token holder address can be forbidden by token owner")
+	cmd.Flags().Bool(FlagTokenForbiddable, false, "Whether the token can be forbidden")
 
 	cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range issueTokenFlags {

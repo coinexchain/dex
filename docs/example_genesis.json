@@ -363,7 +363,7 @@
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         },
         {
@@ -379,7 +379,7 @@
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         }
       ]

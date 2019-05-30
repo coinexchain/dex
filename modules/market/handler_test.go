@@ -166,6 +166,7 @@ func TestCreateGTEOrderFailed(t *testing.T) {
 		Side:           match.BUY,
 		TimeInForce:    time.Now().Nanosecond() + 10000,
 	}
+	createMarket(input)
 	ret := input.handler(input.ctx, msgGteOrder)
 	require.Equal(t, false, ret.IsOK(), "create GTE order should failed")
 }
