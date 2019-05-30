@@ -16,14 +16,14 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 			return handleMsgIssueToken(ctx, tk, msg)
 		case MsgTransferOwnership:
 			return handleMsgTransferOwnership(ctx, tk, msg)
-		case MsgFreezeAddress:
-			return handleMsgFreezeAddress(ctx, tk, msg)
-		case MsgUnfreezeAddress:
-			return handleMsgUnfreezeAddress(ctx, tk, msg)
-		case MsgFreezeToken:
-			return handleMsgFreezeToken(ctx, tk, msg)
-		case MsgUnfreezeToken:
-			return handleMsgUnfreezeToken(ctx, tk, msg)
+		case MsgForbidAddress:
+			return handleMsgForbidAddress(ctx, tk, msg)
+		case MsgUnforbidAddress:
+			return handleMsgUnforbidAddress(ctx, tk, msg)
+		case MsgForbidToken:
+			return handleMsgForbidToken(ctx, tk, msg)
+		case MsgUnforbidToken:
+			return handleMsgUnforbidToken(ctx, tk, msg)
 		case MsgBurnToken:
 			return handleMsgBurnToken(ctx, tk, msg)
 		case MsgMintToken:
@@ -142,24 +142,24 @@ func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransfer
 	}
 }
 
-// handleMsgFreezeAddress - Handle MsgFreezeAddress
-func handleMsgFreezeAddress(ctx sdk.Context, tk TokenKeeper, msg MsgFreezeAddress) (res sdk.Result) {
+// handleMsgForbidAddress - Handle MsgForbidAddress
+func handleMsgForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddress) (res sdk.Result) {
 
 	return
 }
 
-// handleMsgUnfreezeAddress - Handle MsgUnfreezeAddress
-func handleMsgUnfreezeAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnfreezeAddress) (res sdk.Result) {
+// handleMsgUnforbidAddress - Handle MsgUnforbidAddress
+func handleMsgUnforbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnforbidAddress) (res sdk.Result) {
 
 	return
 }
 
-// handleMsgFreezeToken - HandleMsgFreezeToken
-func handleMsgFreezeToken(ctx sdk.Context, tk TokenKeeper, msg MsgFreezeToken) (res sdk.Result) {
+// handleMsgForbidToken - HandleMsgForbidToken
+func handleMsgForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgForbidToken) (res sdk.Result) {
 
 	return
-} // handleMsgUnfreezeToken - Handle MsgUnfreezeToken
-func handleMsgUnfreezeToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnfreezeToken) (res sdk.Result) {
+} // handleMsgUnforbidToken - Handle MsgUnforbidToken
+func handleMsgUnforbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnforbidToken) (res sdk.Result) {
 
 	return
 }

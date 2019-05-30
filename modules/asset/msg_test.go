@@ -24,14 +24,14 @@ func TestMsgIssueToken_Route(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgIssueToken{
-				Name:           tt.msg.Name,
-				Symbol:         tt.msg.Symbol,
-				TotalSupply:    tt.msg.TotalSupply,
-				Owner:          tt.msg.Owner,
-				Mintable:       tt.msg.Mintable,
-				Burnable:       tt.msg.Burnable,
-				AddrFreezable:  tt.msg.AddrFreezable,
-				TokenFreezable: tt.msg.TokenFreezable,
+				Name:             tt.msg.Name,
+				Symbol:           tt.msg.Symbol,
+				TotalSupply:      tt.msg.TotalSupply,
+				Owner:            tt.msg.Owner,
+				Mintable:         tt.msg.Mintable,
+				Burnable:         tt.msg.Burnable,
+				AddrForbiddable:  tt.msg.AddrForbiddable,
+				TokenForbiddable: tt.msg.TokenForbiddable,
 			}
 			if got := msg.Route(); got != tt.want {
 				t.Errorf("MsgIssueToken.Route() = %v, want %v", got, tt.want)
@@ -93,14 +93,14 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgIssueToken{
-				Name:           tt.msg.Name,
-				Symbol:         tt.msg.Symbol,
-				TotalSupply:    tt.msg.TotalSupply,
-				Owner:          tt.msg.Owner,
-				Mintable:       tt.msg.Mintable,
-				Burnable:       tt.msg.Burnable,
-				AddrFreezable:  tt.msg.AddrFreezable,
-				TokenFreezable: tt.msg.TokenFreezable,
+				Name:             tt.msg.Name,
+				Symbol:           tt.msg.Symbol,
+				TotalSupply:      tt.msg.TotalSupply,
+				Owner:            tt.msg.Owner,
+				Mintable:         tt.msg.Mintable,
+				Burnable:         tt.msg.Burnable,
+				AddrForbiddable:  tt.msg.AddrForbiddable,
+				TokenForbiddable: tt.msg.TokenForbiddable,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MsgIssueToken.ValidateBasic() = %v, want %v", got, tt.want)
@@ -120,21 +120,21 @@ func TestMsgIssueToken_GetSignBytes(t *testing.T) {
 			"base-case",
 			NewMsgIssueToken("ABC Token", "abc", 100000, addr,
 				false, false, false, false),
-			`{"type":"asset/MsgIssueToken","value":{"addr_freezable":false,"burnable":false,"mintable":false,"name":"ABC Token","owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","token_freezable":false,"total_supply":"100000"}}`,
+			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"mintable":false,"name":"ABC Token","owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","token_forbiddable":false,"total_supply":"100000"}}`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgIssueToken{
-				Name:           tt.msg.Name,
-				Symbol:         tt.msg.Symbol,
-				TotalSupply:    tt.msg.TotalSupply,
-				Owner:          tt.msg.Owner,
-				Mintable:       tt.msg.Mintable,
-				Burnable:       tt.msg.Burnable,
-				AddrFreezable:  tt.msg.AddrFreezable,
-				TokenFreezable: tt.msg.TokenFreezable,
+				Name:             tt.msg.Name,
+				Symbol:           tt.msg.Symbol,
+				TotalSupply:      tt.msg.TotalSupply,
+				Owner:            tt.msg.Owner,
+				Mintable:         tt.msg.Mintable,
+				Burnable:         tt.msg.Burnable,
+				AddrForbiddable:  tt.msg.AddrForbiddable,
+				TokenForbiddable: tt.msg.TokenForbiddable,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
 				t.Errorf("MsgIssueToken.GetSignBytes() = %s, want %s", got, tt.want)
@@ -160,14 +160,14 @@ func TestMsgIssueToken_GetSigners(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgIssueToken{
-				Name:           tt.msg.Name,
-				Symbol:         tt.msg.Symbol,
-				TotalSupply:    tt.msg.TotalSupply,
-				Owner:          tt.msg.Owner,
-				Mintable:       tt.msg.Mintable,
-				Burnable:       tt.msg.Burnable,
-				AddrFreezable:  tt.msg.AddrFreezable,
-				TokenFreezable: tt.msg.TokenFreezable,
+				Name:             tt.msg.Name,
+				Symbol:           tt.msg.Symbol,
+				TotalSupply:      tt.msg.TotalSupply,
+				Owner:            tt.msg.Owner,
+				Mintable:         tt.msg.Mintable,
+				Burnable:         tt.msg.Burnable,
+				AddrForbiddable:  tt.msg.AddrForbiddable,
+				TokenForbiddable: tt.msg.TokenForbiddable,
 			}
 			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MsgIssueToken.GetSigners() = %v, want %v", got, tt.want)

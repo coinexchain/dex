@@ -9,14 +9,14 @@ import (
 
 func TestNewToken(t *testing.T) {
 	type args struct {
-		name           string
-		symbol         string
-		amt            int64
-		owner          sdk.AccAddress
-		mintable       bool
-		burnable       bool
-		addrfreezable  bool
-		tokenfreezable bool
+		name             string
+		symbol           string
+		amt              int64
+		owner            sdk.AccAddress
+		mintable         bool
+		burnable         bool
+		addrforbiddable  bool
+		tokenforbiddable bool
 	}
 	tests := []struct {
 		name    string
@@ -70,7 +70,7 @@ func TestNewToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := NewToken(tt.args.name, tt.args.symbol, tt.args.amt, tt.args.owner, tt.args.mintable, tt.args.burnable, tt.args.addrfreezable, tt.args.tokenfreezable)
+			got, got1 := NewToken(tt.args.name, tt.args.symbol, tt.args.amt, tt.args.owner, tt.args.mintable, tt.args.burnable, tt.args.addrforbiddable, tt.args.tokenforbiddable)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewToken() got = %v, want %v", got, tt.want)
 			}
@@ -126,17 +126,17 @@ func TestBaseToken_IsValid(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			base := &BaseToken{
-				Name:           tt.token.Name,
-				Symbol:         tt.token.Symbol,
-				TotalSupply:    tt.token.TotalSupply,
-				Owner:          tt.token.Owner,
-				Mintable:       tt.token.Mintable,
-				Burnable:       tt.token.Burnable,
-				AddrFreezable:  tt.token.AddrFreezable,
-				TokenFreezable: tt.token.TokenFreezable,
-				TotalBurn:      tt.token.TotalBurn,
-				TotalMint:      tt.token.TotalMint,
-				IsFrozen:       tt.token.IsFrozen,
+				Name:             tt.token.Name,
+				Symbol:           tt.token.Symbol,
+				TotalSupply:      tt.token.TotalSupply,
+				Owner:            tt.token.Owner,
+				Mintable:         tt.token.Mintable,
+				Burnable:         tt.token.Burnable,
+				AddrForbiddable:  tt.token.AddrForbiddable,
+				TokenForbiddable: tt.token.TokenForbiddable,
+				TotalBurn:        tt.token.TotalBurn,
+				TotalMint:        tt.token.TotalMint,
+				IsFrozen:         tt.token.IsFrozen,
 			}
 			if err := base.IsValid(); !reflect.DeepEqual(err, tt.wantErr) {
 				t.Errorf("BaseToken.IsValid() error = %v, wantErr %v", err, tt.wantErr)

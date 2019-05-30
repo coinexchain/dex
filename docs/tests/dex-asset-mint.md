@@ -32,8 +32,8 @@ $ cetcli tx asset issue-token --name="first token" \
         --total-supply=2100000000000000 \
         --mintable=true \
         --burnable=true \
-        --addr-freezable=0 \
-        --token-freezable=1 \
+        --addr-forbiddable=0 \
+        --token-forbiddable=1 \
         --from $(cetcli keys show alice -a) --chain-id=coinexdex
 ```
 
@@ -63,8 +63,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos16cyga47yh3cv6pzemy0fjtkeqjtrjjukgngey6",
       "mintable": true,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -79,8 +79,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
       "mintable": true,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -95,8 +95,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
       "mintable": true,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -138,8 +138,8 @@ $ cetcli q asset token coin2 --chain-id=coinexdex
     "owner": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
     "mintable": true,
     "burnable": true,
-    "addr_freezable": false,
-    "token_freezable": true,
+    "addr_forbiddable": false,
+    "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "100",
     "is_frozen": false
@@ -279,8 +279,8 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin3
     "owner": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
     "mintable": true,
     "burnable": true,
-    "addr_freezable": false,
-    "token_freezable": true,
+    "addr_forbiddable": false,
+    "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "2000",
     "is_frozen": false

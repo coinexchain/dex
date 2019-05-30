@@ -22,8 +22,8 @@ func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 		owner,
 		viper.GetBool(FlagMintable),
 		viper.GetBool(FlagBurnable),
-		viper.GetBool(FlagAddrFreezable),
-		viper.GetBool(FlagTokenFreezable))
+		viper.GetBool(FlagAddrForbiddable),
+		viper.GetBool(FlagTokenForbiddable))
 
 	return &msg, nil
 }

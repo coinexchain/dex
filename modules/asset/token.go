@@ -29,11 +29,11 @@ type Token interface {
 	GetBurnable() bool
 	SetBurnable(bool)
 
-	GetAddrFreezable() bool
-	SetAddrFreezable(bool)
+	GetAddrForbiddable() bool
+	SetAddrForbiddable(bool)
 
-	GetTokenFreezable() bool
-	SetTokenFreezable(bool)
+	GetTokenForbiddable() bool
+	SetTokenForbiddable(bool)
 
 	GetTotalBurn() int64
 	SetTotalBurn(int64) error
@@ -61,10 +61,10 @@ type BaseToken struct {
 	TotalSupply int64          `json:"total_supply"` //  The total supply for this token [0]
 	Owner       sdk.AccAddress `json:"owner"`        // The initial issuer of this token
 
-	Mintable       bool `json:"mintable"`        // Whether this token could be minted after the issuing
-	Burnable       bool `json:"burnable"`        // Whether this token could be burned
-	AddrFreezable  bool `json:"addr_freezable"`  // whether could freeze some addresses to forbid transaction
-	TokenFreezable bool `json:"token_freezable"` // whether token could be global freeze
+	Mintable         bool `json:"mintable"`          // Whether this token could be minted after the issuing
+	Burnable         bool `json:"burnable"`          // Whether this token could be burned
+	AddrForbiddable  bool `json:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
+	TokenForbiddable bool `json:"token_forbiddable"` // whether token could be global forbid
 
 	TotalBurn int64 `json:"total_burn"` // Total amount of burn
 	TotalMint int64 `json:"total_mint"` // Total amount of mint
@@ -78,7 +78,7 @@ var (
 
 // NewToken - new base token
 func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddress,
-	mintable bool, burnable bool, addrFreezable bool, tokenFreezable bool) (*BaseToken, sdk.Error) {
+	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool) (*BaseToken, sdk.Error) {
 
 	t := &BaseToken{}
 	if err := t.SetName(name); err != nil {
@@ -96,8 +96,8 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 
 	t.SetMintable(mintable)
 	t.SetBurnable(burnable)
-	t.SetAddrFreezable(addrFreezable)
-	t.SetTokenFreezable(tokenFreezable)
+	t.SetAddrForbiddable(addrForbiddable)
+	t.SetTokenForbiddable(tokenForbiddable)
 
 	if err := t.SetTotalMint(0); err != nil {
 		return nil, ErrorInvalidTokenMint(err.Error())
@@ -112,13 +112,13 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 
 func (t *BaseToken) IsValid() error {
 	_, err := NewToken(t.Name, t.Symbol, t.TotalSupply, t.Owner,
-		t.Mintable, t.Burnable, t.AddrFreezable, t.TokenFreezable)
+		t.Mintable, t.Burnable, t.AddrForbiddable, t.TokenForbiddable)
 
 	if err != nil {
 		return err
 	}
 
-	if !t.TokenFreezable && t.IsFrozen {
+	if !t.TokenForbiddable && t.IsFrozen {
 		return ErrorInvalidFrozenState("Invalid Frozen state")
 	}
 
@@ -202,20 +202,20 @@ func (t *BaseToken) SetBurnable(enable bool) {
 	t.Burnable = enable
 }
 
-func (t BaseToken) GetAddrFreezable() bool {
-	return t.AddrFreezable
+func (t BaseToken) GetAddrForbiddable() bool {
+	return t.AddrForbiddable
 }
 
-func (t *BaseToken) SetAddrFreezable(enable bool) {
-	t.AddrFreezable = enable
+func (t *BaseToken) SetAddrForbiddable(enable bool) {
+	t.AddrForbiddable = enable
 }
 
-func (t BaseToken) GetTokenFreezable() bool {
-	return t.TokenFreezable
+func (t BaseToken) GetTokenForbiddable() bool {
+	return t.TokenForbiddable
 }
 
-func (t *BaseToken) SetTokenFreezable(enable bool) {
-	t.TokenFreezable = enable
+func (t *BaseToken) SetTokenForbiddable(enable bool) {
+	t.TokenForbiddable = enable
 }
 
 func (t BaseToken) GetTotalBurn() int64 {
@@ -258,13 +258,13 @@ func (t BaseToken) String() string {
   Owner:          %s
   Mintable:       %t
   Burnable:       %t 
-  AddrFreezable:  %t
-  TokenFreezable: %t
+  AddrForbiddable:  %t
+  TokenForbiddable: %t
   TotalBurn:      %d
   TotalMint:      %d
   IsFrozen:       %t ]`,
 		t.Name, t.Symbol, t.TotalSupply, t.Owner.String(), t.Mintable, t.Burnable,
-		t.AddrFreezable, t.TokenFreezable, t.TotalBurn, t.TotalMint, t.IsFrozen,
+		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsFrozen,
 	)
 }
 

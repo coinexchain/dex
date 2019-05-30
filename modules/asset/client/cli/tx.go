@@ -15,13 +15,13 @@ import (
 )
 
 const (
-	FlagName           = "name"
-	FlagSymbol         = "symbol"
-	FlagTotalSupply    = "total-supply"
-	FlagMintable       = "mintable"
-	FlagBurnable       = "burnable"
-	FlagAddrFreezable  = "addr-freezable"
-	FlagTokenFreezable = "token-freezable"
+	FlagName             = "name"
+	FlagSymbol           = "symbol"
+	FlagTotalSupply      = "total-supply"
+	FlagMintable         = "mintable"
+	FlagBurnable         = "burnable"
+	FlagAddrForbiddable  = "addr-forbiddable"
+	FlagTokenForbiddable = "token-forbiddable"
 
 	FlagNewOwner = "new-owner"
 	FlagAmount   = "amount"
@@ -33,8 +33,8 @@ var issueTokenFlags = []string{
 	FlagTotalSupply,
 	FlagMintable,
 	FlagBurnable,
-	FlagAddrFreezable,
-	FlagTokenFreezable,
+	FlagAddrForbiddable,
+	FlagTokenForbiddable,
 }
 
 // IssueTokenCmd will create a issue token tx and sign.
@@ -51,8 +51,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	--total-supply=2100000000000000 \
 	--mintable=false \
 	--burnable=true \
-	--addr-freezable=false \
-	--token-freezable=false \
+	--addr-forbiddable=false \
+	--token-forbiddable=false \
     --from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -100,8 +100,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 		"The amount before boosting should not exceed 90 billion.")
 	cmd.Flags().Bool(FlagMintable, false, "Whether this token could be minted after the issuing")
 	cmd.Flags().Bool(FlagBurnable, true, "Whether this token could be burned")
-	cmd.Flags().Bool(FlagAddrFreezable, false, " Whether the token holder address can be frozen by token owner")
-	cmd.Flags().Bool(FlagTokenFreezable, false, "Whether the token can be frozen")
+	cmd.Flags().Bool(FlagAddrForbiddable, false, " Whether the token holder address can be frozen by token owner")
+	cmd.Flags().Bool(FlagTokenForbiddable, false, "Whether the token can be frozen")
 
 	cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range issueTokenFlags {

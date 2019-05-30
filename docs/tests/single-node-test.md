@@ -138,12 +138,12 @@ go run github.com/coinexchain/dex/cmd/cetcli
     "asset": {
       "params": {
         "issue_token_fee": [{"denom": "cet", "amount": "10000"}],
-        "freeze_address_fee": [{"denom": "cet", "amount": "10"}],
-        "unfreeze_address_fee": [{"denom": "cet", "amount": "10"}],
-        "freeze_token_fee": [{"denom": "cet", "amount": "1000"}],
-        "unfreeze_token_fee": [{"denom": "cet", "amount": "1000"}],
-        "token_freeze_whitelist_add_fee": [{"denom": "cet", "amount": "100"}],
-        "token_freeze_whitelist_remove_fee": [{"denom": "cet", "amount": "100"}],
+        "forbid_address_fee": [{"denom": "cet", "amount": "10"}],
+        "unforbid_address_fee": [{"denom": "cet", "amount": "10"}],
+        "forbid_token_fee": [{"denom": "cet", "amount": "1000"}],
+        "unforbid_token_fee": [{"denom": "cet", "amount": "1000"}],
+        "token_forbid_whitelist_add_fee": [{"denom": "cet", "amount": "100"}],
+        "token_forbid_whitelist_remove_fee": [{"denom": "cet", "amount": "100"}],
         "burn_fee": [{"denom": "cet", "amount": "1000"}],
         "mint_fee": [{"denom": "cet", "amount": "1000"}]
       }

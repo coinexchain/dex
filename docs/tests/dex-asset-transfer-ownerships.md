@@ -55,8 +55,8 @@ $ cetcli tx asset issue-token --name="bob first token" \
         --total-supply=2100000000000000 \
         --mintable=false \
         --burnable=true \
-        --addr-freezable=0 \
-        --token-freezable=1 \
+        --addr-forbiddable=0 \
+        --token-forbiddable=1 \
         --from $(cetcli keys show bob -a) --chain-id=coinexdex
 ```
 
@@ -86,8 +86,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -102,8 +102,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -118,8 +118,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -161,8 +161,8 @@ $ cetcli q asset token coin1 --chain-id=coinexdex
     "owner": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
     "mintable": false,
     "burnable": true,
-    "addr_freezable": false,
-    "token_freezable": true,
+    "addr_forbiddable": false,
+    "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "0",
     "is_frozen": false
@@ -216,8 +216,8 @@ $ curl -X GET http://localhost:1317/asset/tokens | jq
       "owner": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -232,8 +232,8 @@ $ curl -X GET http://localhost:1317/asset/tokens | jq
       "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -248,8 +248,8 @@ $ curl -X GET http://localhost:1317/asset/tokens | jq
       "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -363,8 +363,8 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin2
     "owner": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
     "mintable": false,
     "burnable": true,
-    "addr_freezable": false,
-    "token_freezable": true,
+    "addr_forbiddable": false,
+    "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "0",
     "is_frozen": false

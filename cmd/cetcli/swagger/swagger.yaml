@@ -2673,10 +2673,10 @@ definitions:
       burnable:
         type: boolean
         example: true
-      addr_freezable:
+      addr_forbiddable:
         type: boolean
         example: false
-      token_freezable:
+      token_forbiddable:
         type: boolean
         example: false
   Token:

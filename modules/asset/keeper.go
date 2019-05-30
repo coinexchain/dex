@@ -123,7 +123,7 @@ func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) sdk.Error {
 func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 
 	token, err := NewToken(msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
-		msg.Mintable, msg.Burnable, msg.AddrFreezable, msg.TokenFreezable)
+		msg.Mintable, msg.Burnable, msg.AddrForbiddable, msg.TokenForbiddable)
 
 	if err != nil {
 		return err

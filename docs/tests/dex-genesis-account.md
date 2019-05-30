@@ -621,37 +621,37 @@
                "amount": "1000000000000"
              }
            ],
-           "freeze_address_fee": [
+           "forbid_address_fee": [
              {
                "denom": "cet",
                "amount": "1000000000"
              }
            ],
-           "unfreeze_address_fee": [
+           "unforbid_address_fee": [
              {
                "denom": "cet",
                "amount": "1000000000"
              }
            ],
-           "freeze_token_fee": [
+           "forbid_token_fee": [
              {
                "denom": "cet",
                "amount": "100000000000"
              }
            ],
-           "unfreeze_token_fee": [
+           "unforbid_token_fee": [
              {
                "denom": "cet",
                "amount": "100000000000"
              }
            ],
-           "token_freeze_whitelist_add_fee": [
+           "token_forbid_whitelist_add_fee": [
              {
                "denom": "cet",
                "amount": "10000000000"
              }
            ],
-           "token_freeze_whitelist_remove_fee": [
+           "token_forbid_whitelist_remove_fee": [
              {
                "denom": "cet",
                "amount": "10000000000"

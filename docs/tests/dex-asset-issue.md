@@ -21,7 +21,7 @@
 - Rest-curl命令
   - `$ curl -X GET http://localhost:1317/asset/tokens/symbol`
   - `$ curl -X GET http://localhost:1317/asset/tokens`
-  - `$ curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"from":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","chain_id":"coinexdex","sequence":"4","account_number":"0"},"name":"my first rest coin","symbol":"coin1","total_supply":"10000000000","mintable":"false","burnable":"true","addr_freezable":"false","token_freezable":"true"}'`
+  - `$ curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"from":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","chain_id":"coinexdex","sequence":"4","account_number":"0"},"name":"my first rest coin","symbol":"coin1","total_supply":"10000000000","mintable":"false","burnable":"true","addr_forbiddable":"false","token_forbiddable":"true"}'`
 
 ## IssueToken CLI Example
 
@@ -59,8 +59,8 @@ $ cetcli tx asset issue-token --name="my first token" \
         --total-supply=2100000000000000 \
         --mintable=false \
         --burnable=true \
-        --addr-freezable=0 \
-        --token-freezable=1 \
+        --addr-forbiddable=0 \
+        --token-forbiddable=1 \
         --from $(cetcli keys show bob -a) \
         --chain-id=coinexdex
 ```
@@ -80,8 +80,8 @@ $ cetcli tx asset issue-token --name="my duplicat token" \
         --total-supply=2100000000000000 \
         --mintable=false \
         --burnable=true \
-        --addr-freezable=false \
-        --token-freezable=true \
+        --addr-forbiddable=false \
+        --token-forbiddable=true \
         --from $(cetcli keys show bob -a) \
         --chain-id=coinexdex
 ```
@@ -110,8 +110,8 @@ $ cetcli query asset token token1 --chain-id=coinexdex
     "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
     "mintable": false,
     "burnable": true,
-    "addr_freezable": false,
-    "token_freezable": true,
+    "addr_forbiddable": false,
+    "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "0",
     "is_frozen": false
@@ -138,8 +138,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -154,8 +154,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -170,8 +170,8 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -214,7 +214,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/token1
 返回token1的信息：
 
 ```bash
-{"type":"asset/Token","value":{"name":"my first token","symbol":"token1","total_supply":"2100000000000000","owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","mintable":false,"burnable":true,"addr_freezable":false,"token_freezable":true,"total_burn":"0","total_mint":"0","is_frozen":false}}%
+{"type":"asset/Token","value":{"name":"my first token","symbol":"token1","total_supply":"2100000000000000","owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":true,"total_burn":"0","total_mint":"0","is_frozen":false}}%
 ```
 
 4. 查询所有token信息
@@ -236,8 +236,8 @@ $ curl -X GET http://localhost:1317/asset/tokens
       "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -252,8 +252,8 @@ $ curl -X GET http://localhost:1317/asset/tokens
       "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -268,8 +268,8 @@ $ curl -X GET http://localhost:1317/asset/tokens
       "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
       "mintable": false,
       "burnable": true,
-      "addr_freezable": false,
-      "token_freezable": true,
+      "addr_forbiddable": false,
+      "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
       "is_frozen": false
@@ -281,7 +281,7 @@ $ curl -X GET http://localhost:1317/asset/tokens
 5. 通过Rest API 发行token
 
 ```bash
-curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"from":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","chain_id":"coinexdex","sequence":"3","account_number":"0"},"name":"my first rest coin","symbol":"coin1","total_supply":"10000000000","mintable":false,"burnable":true,"addr_freezable":false,"token_freezable":true}' > unsignedSendTx.json
+curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"from":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","chain_id":"coinexdex","sequence":"3","account_number":"0"},"name":"my first rest coin","symbol":"coin1","total_supply":"10000000000","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":true}' > unsignedSendTx.json
 ```
 
 返回未签名交易存入unsignedSendTx.json
@@ -300,8 +300,8 @@ curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"fro
           "owner": "cosmos1n9emr2kwt70aajjreklu2w9d3jamm4nwkpnp2l",
           "mintable": false,
           "burnable": true,
-          "addr_freezable": false,
-          "token_freezable": true
+          "addr_forbiddable": false,
+          "token_forbiddable": true
         }
       }
     ],
@@ -339,8 +339,8 @@ $ cetcli tx sign \
           "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
           "mintable": false,
           "burnable": true,
-          "addr_freezable": false,
-          "token_freezable": true
+          "addr_forbiddable": false,
+          "token_forbiddable": true
         }
       }
     ],
@@ -393,8 +393,8 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin1
     "owner": "cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
     "mintable": false,
     "burnable": false,
-    "addr_freezable": false,
-    "token_freezable": false,
+    "addr_forbiddable": false,
+    "token_forbiddable": false,
     "total_burn": "0",
     "total_mint": "0",
     "is_frozen": false

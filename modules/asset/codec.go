@@ -11,10 +11,10 @@ func RegisterCodec(cdc *codec.Codec) {
 
 	cdc.RegisterConcrete(MsgIssueToken{}, "asset/MsgIssueToken", nil)
 	cdc.RegisterConcrete(MsgTransferOwnership{}, "asset/MsgTransferOwnership", nil)
-	cdc.RegisterConcrete(MsgFreezeAddress{}, "asset/MsgFreezeAddress", nil)
-	cdc.RegisterConcrete(MsgUnfreezeAddress{}, "asset/MsgUnfreezeAddress", nil)
-	cdc.RegisterConcrete(MsgFreezeToken{}, "asset/MsgFreezeToken", nil)
-	cdc.RegisterConcrete(MsgUnfreezeToken{}, "asset/MsgUnfreezeToken", nil)
+	cdc.RegisterConcrete(MsgForbidAddress{}, "asset/MsgForbidAddress", nil)
+	cdc.RegisterConcrete(MsgUnforbidAddress{}, "asset/MsgUnforbidAddress", nil)
+	cdc.RegisterConcrete(MsgForbidToken{}, "asset/MsgForbidToken", nil)
+	cdc.RegisterConcrete(MsgUnforbidToken{}, "asset/MsgUnforbidToken", nil)
 	cdc.RegisterConcrete(MsgBurnToken{}, "asset/MsgBurnToken", nil)
 	cdc.RegisterConcrete(MsgMintToken{}, "asset/MsgMintToken", nil)
 }

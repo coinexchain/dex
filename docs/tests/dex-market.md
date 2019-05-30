@@ -10,11 +10,11 @@
 
 1. 发行 eth
 
-`./cetcli tx asset issue-token --name="eth" --symbol="eth" --total-supply=2100000000000000 --mintable=false --burnable=true --addr-freezable=false --token-freezable=false --from bob --chain-id=coinexdex`
+`./cetcli tx asset issue-token --name="eth" --symbol="eth" --total-supply=2100000000000000 --mintable=false --burnable=true --addr-forbiddable=false --token-forbiddable=false --from bob --chain-id=coinexdex`
 
 2. 发行 cet 
 
-`./cetcli tx asset issue-token --name="cet" --symbol="cet" --total-supply=2100000000000000 --mintable=false --burnable=true --addr-freezable=false --token-freezable=false --from bob --chain-id=coinexdex`
+`./cetcli tx asset issue-token --name="cet" --symbol="cet" --total-supply=2100000000000000 --mintable=false --burnable=true --addr-forbiddable=false --token-forbiddable=false --from bob --chain-id=coinexdex`
 
 
 ## 查询token

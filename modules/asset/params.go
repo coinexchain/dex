@@ -15,12 +15,12 @@ const (
 
 	IssueTokenFee                 = 1E12 // 10000 * 10 ^8
 	TransferOwnershipFee          = 1E9  // 10 * 10 ^ 8
-	FreezeAddrFee                 = 1E9  // 10 * 10 ^ 8
-	UnFreezeAddrFee               = 1E9  // 10 * 10 ^ 8
-	FreezeTokenFee                = 1E9  // 10 * 10 ^ 8
-	UnFreezeTokenFee              = 1E9  // 10 * 10 ^ 8
-	TokenFreezeWhitelistAddFee    = 2E9  // 20 * 10 ^ 8
-	TokenFreezeWhitelistRemoveFee = 2E9  // 20 * 10 ^ 8
+	ForbidAddrFee                 = 1E9  // 10 * 10 ^ 8
+	UnForbidAddrFee               = 1E9  // 10 * 10 ^ 8
+	ForbidTokenFee                = 1E9  // 10 * 10 ^ 8
+	UnForbidTokenFee              = 1E9  // 10 * 10 ^ 8
+	TokenForbidWhitelistAddFee    = 2E9  // 20 * 10 ^ 8
+	TokenForbidWhitelistRemoveFee = 2E9  // 20 * 10 ^ 8
 	BurnFee                       = 1E9  // 10 * 10 ^ 8
 	MintFee                       = 1E9  // 10 * 10 ^ 8
 )
@@ -29,12 +29,12 @@ const (
 var (
 	KeyIssueTokenFee                 = []byte("IssueTokenFee")
 	KeyTransferOwnershipFee          = []byte("TransferOwnershipFee")
-	KeyFreezeAddrFee                 = []byte("FreezeAddrFee")
-	KeyUnFreezeAddrFee               = []byte("UnFreezeAddrFee")
-	KeyFreezeTokenFee                = []byte("FreezeTokenFee")
-	KeyUnFreezeTokenFee              = []byte("UnFreezeTokenFee")
-	KeyTokenFreezeWhitelistAddFee    = []byte("TokenFreezeWhitelistAddFee")
-	KeyTokenFreezeWhitelistRemoveFee = []byte("TokenFreezeWhitelistRemoveFee")
+	KeyForbidAddrFee                 = []byte("ForbidAddrFee")
+	KeyUnForbidAddrFee               = []byte("UnForbidAddrFee")
+	KeyForbidTokenFee                = []byte("ForbidTokenFee")
+	KeyUnForbidTokenFee              = []byte("UnForbidTokenFee")
+	KeyTokenForbidWhitelistAddFee    = []byte("TokenForbidWhitelistAddFee")
+	KeyTokenForbidWhitelistRemoveFee = []byte("TokenForbidWhitelistRemoveFee")
 	KeyBurnFee                       = []byte("BurnFee")
 	KeyMintFee                       = []byte("MintFee")
 )
@@ -46,12 +46,12 @@ type Params struct {
 	// FeeParams define the rules according to which fee are charged.
 	IssueTokenFee                 sdk.Coins `json:"issue_token_fee"`
 	TransferOwnershipFee          sdk.Coins `json:"transfer_ownership_fee"`
-	FreezeAddrFee                 sdk.Coins `json:"freeze_address_fee"`
-	UnFreezeAddrFee               sdk.Coins `json:"unfreeze_address_fee"`
-	FreezeTokenFee                sdk.Coins `json:"freeze_token_fee"`
-	UnFreezeTokenFee              sdk.Coins `json:"unfreeze_token_fee"`
-	TokenFreezeWhitelistAddFee    sdk.Coins `json:"token_freeze_whitelist_add_fee"`
-	TokenFreezeWhitelistRemoveFee sdk.Coins `json:"token_freeze_whitelist_remove_fee"`
+	ForbidAddrFee                 sdk.Coins `json:"forbid_address_fee"`
+	UnForbidAddrFee               sdk.Coins `json:"unforbid_address_fee"`
+	ForbidTokenFee                sdk.Coins `json:"forbid_token_fee"`
+	UnForbidTokenFee              sdk.Coins `json:"unforbid_token_fee"`
+	TokenForbidWhitelistAddFee    sdk.Coins `json:"token_forbid_whitelist_add_fee"`
+	TokenForbidWhitelistRemoveFee sdk.Coins `json:"token_forbid_whitelist_remove_fee"`
 	BurnFee                       sdk.Coins `json:"burn_fee"`
 	MintFee                       sdk.Coins `json:"mint_fee"`
 }
@@ -69,12 +69,12 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 
 		{KeyIssueTokenFee, &p.IssueTokenFee},
 		{KeyTransferOwnershipFee, &p.TransferOwnershipFee},
-		{KeyFreezeAddrFee, &p.FreezeAddrFee},
-		{KeyUnFreezeAddrFee, &p.UnFreezeAddrFee},
-		{KeyFreezeTokenFee, &p.FreezeTokenFee},
-		{KeyUnFreezeTokenFee, &p.UnFreezeTokenFee},
-		{KeyTokenFreezeWhitelistAddFee, &p.TokenFreezeWhitelistAddFee},
-		{KeyTokenFreezeWhitelistRemoveFee, &p.TokenFreezeWhitelistRemoveFee},
+		{KeyForbidAddrFee, &p.ForbidAddrFee},
+		{KeyUnForbidAddrFee, &p.UnForbidAddrFee},
+		{KeyForbidTokenFee, &p.ForbidTokenFee},
+		{KeyUnForbidTokenFee, &p.UnForbidTokenFee},
+		{KeyTokenForbidWhitelistAddFee, &p.TokenForbidWhitelistAddFee},
+		{KeyTokenForbidWhitelistRemoveFee, &p.TokenForbidWhitelistRemoveFee},
 		{KeyBurnFee, &p.BurnFee},
 		{KeyMintFee, &p.MintFee},
 	}
@@ -103,12 +103,12 @@ func DefaultParams() Params {
 	return Params{
 		types.NewCetCoins(IssueTokenFee),
 		types.NewCetCoins(TransferOwnershipFee),
-		types.NewCetCoins(FreezeAddrFee),
-		types.NewCetCoins(UnFreezeAddrFee),
-		types.NewCetCoins(FreezeTokenFee),
-		types.NewCetCoins(UnFreezeTokenFee),
-		types.NewCetCoins(TokenFreezeWhitelistAddFee),
-		types.NewCetCoins(TokenFreezeWhitelistRemoveFee),
+		types.NewCetCoins(ForbidAddrFee),
+		types.NewCetCoins(UnForbidAddrFee),
+		types.NewCetCoins(ForbidTokenFee),
+		types.NewCetCoins(UnForbidTokenFee),
+		types.NewCetCoins(TokenForbidWhitelistAddFee),
+		types.NewCetCoins(TokenForbidWhitelistRemoveFee),
 		types.NewCetCoins(BurnFee),
 		types.NewCetCoins(MintFee),
 	}
