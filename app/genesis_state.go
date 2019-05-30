@@ -22,6 +22,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -33,13 +34,14 @@ type GenesisState struct {
 	BankData     bank.GenesisState         `json:"bank"`
 	BankXData    bankx.GenesisState        `json:"bankx"`
 	StakingData  staking.GenesisState      `json:"staking"`
+	StakingXData stakingx.GenesisState     `json:"stakingx"`
 	DistrData    distribution.GenesisState `json:"distr"`
 	GovData      gov.GenesisState          `json:"gov"`
 	CrisisData   crisis.GenesisState       `json:"crisis"`
 	SlashingData slashing.GenesisState     `json:"slashing"`
 	AssetData    asset.GenesisState        `json:"asset"`
-	GenTxs       []json.RawMessage         `json:"gentxs"`
 	MarketData   market.GenesisState       `json:"market"`
+	GenTxs       []json.RawMessage         `json:"gentxs"`
 }
 
 // NewDefaultGenesisState generates the default state for coindex.
@@ -51,6 +53,7 @@ func NewDefaultGenesisState() GenesisState {
 		BankData:     bank.DefaultGenesisState(),
 		BankXData:    bankx.DefaultGenesisState(),
 		StakingData:  staking.DefaultGenesisState(),
+		StakingXData: stakingx.DefaultGenesisState(),
 		DistrData:    distribution.DefaultGenesisState(),
 		GovData:      gov.DefaultGenesisState(),
 		CrisisData:   crisis.DefaultGenesisState(),
@@ -73,6 +76,7 @@ func NewGenesisState(
 	bankData bank.GenesisState,
 	bankxData bankx.GenesisState,
 	stakingData staking.GenesisState,
+	stakingxData stakingx.GenesisState,
 	distrData distribution.GenesisState,
 	govData gov.GenesisState,
 	crisisData crisis.GenesisState,
@@ -87,6 +91,7 @@ func NewGenesisState(
 		BankData:     bankData,
 		BankXData:    bankxData,
 		StakingData:  stakingData,
+		StakingXData: stakingxData,
 		DistrData:    distrData,
 		GovData:      govData,
 		CrisisData:   crisisData,
@@ -121,6 +126,9 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 	if err := gs.BankXData.Validate(); err != nil {
+		return err
+	}
+	if err := gs.StakingXData.Validate(); err != nil {
 		return err
 	}
 	if err := gs.AssetData.Validate(); err != nil {

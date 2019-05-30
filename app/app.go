@@ -29,6 +29,7 @@ import (
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/stakingx"
 )
 
 const (
@@ -71,8 +72,9 @@ type CetChainApp struct {
 	accountXKeeper      authx.AccountXKeeper
 	feeCollectionKeeper auth.FeeCollectionKeeper
 	bankKeeper          bank.BaseKeeper
-	bankxKeeper         bankx.Keeper
+	bankxKeeper         bankx.Keeper // TODO rename to bankXKeeper
 	stakingKeeper       staking.Keeper
+	stakingXKeeper      stakingx.Keeper
 	slashingKeeper      slashing.Keeper
 	distrKeeper         distr.Keeper
 	govKeeper           gov.Keeper
@@ -99,7 +101,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	app.mountStores()
 
 	ah := authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper,
-		anteHelper{accountXKeeper: app.accountXKeeper})
+		newAnteHelper(app.accountXKeeper, app.stakingXKeeper))
 
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
@@ -207,6 +209,8 @@ func (app *CetChainApp) initKeepers() {
 		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
 		app.feeCollectionKeeper,
 	)
+	app.stakingXKeeper = stakingx.NewKeeper(
+		app.paramsKeeper.Subspace(stakingx.DefaultParamspace))
 	app.incentiveKeeper = incentive.NewKeeper(
 		app.feeCollectionKeeper, app.bankKeeper,
 	)
@@ -401,6 +405,7 @@ func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisSt
 	authx.InitGenesis(ctx, app.accountXKeeper, genesisState.AuthXData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
+	stakingx.InitGenesis(ctx, app.stakingXKeeper, genesisState.StakingXData)
 	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
 	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)

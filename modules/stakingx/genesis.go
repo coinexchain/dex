@@ -1,4 +1,4 @@
-package authx
+package stakingx
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,12 +20,12 @@ func DefaultGenesisState() GenesisState {
 }
 
 // InitGenesis - Init store state from genesis data
-func InitGenesis(ctx sdk.Context, keeper AccountXKeeper, data GenesisState) {
+func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
-func ExportGenesis(ctx sdk.Context, keeper AccountXKeeper) GenesisState {
+func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	params := keeper.GetParams(ctx)
 	return NewGenesisState(params)
 }
@@ -33,9 +33,9 @@ func ExportGenesis(ctx sdk.Context, keeper AccountXKeeper) GenesisState {
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) Validate() error {
-	minGasPrice := data.Params.MinGasPrice
-	if minGasPrice == 0 {
-		return ErrInvalidMinGasPrice("invalid min gas price: 0")
+	msd := data.Params.MinSelfDelegation
+	if !msd.IsPositive() {
+		return ErrInvalidMinSelfDelegation(msd)
 	}
 	return nil
 }

@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -16,6 +14,14 @@ var _ authx.AnteHelper = anteHelper{}
 
 type anteHelper struct {
 	accountXKeeper authx.AccountXKeeper
+	stakingXKeeper stakingx.Keeper
+}
+
+func newAnteHelper(accountXKeeper authx.AccountXKeeper, stakingXKeeper stakingx.Keeper) anteHelper {
+	return anteHelper{
+		accountXKeeper: accountXKeeper,
+		stakingXKeeper: stakingXKeeper,
+	}
 }
 
 func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Error {
@@ -40,10 +46,9 @@ func (ah anteHelper) checkMemo(ctx sdk.Context, addr sdk.AccAddress, memo string
 }
 
 func (ah anteHelper) checkMinSelfDelegation(ctx sdk.Context, actual sdk.Int) sdk.Error {
-	expected := ah.accountXKeeper.GetParams(ctx).MinSelfDelegation
+	expected := ah.stakingXKeeper.GetParams(ctx).MinSelfDelegation
 	if actual.LT(expected) {
-		return stakingx.ErrMinSelfDelegationBelowRequired(
-			fmt.Sprintf("expected:%v actual:%v", expected, actual))
+		return stakingx.ErrMinSelfDelegationBelowRequired(expected, actual)
 	}
 	return nil
 }
