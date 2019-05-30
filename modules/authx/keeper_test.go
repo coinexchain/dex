@@ -28,18 +28,28 @@ func setupTestInput() testInput {
 
 	authXKey := sdk.NewKVStoreKey("authXKey")
 
+	skey := sdk.NewKVStoreKey("params")
+	tkey := sdk.NewTransientStoreKey("transient_params")
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(authXKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(tkey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
-
-	skey := sdk.NewKVStoreKey("test")
-	tkey := sdk.NewTransientStoreKey("transient_test")
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
 
 	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(bank.DefaultParamspace))
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 
 	return testInput{ctx: ctx, axk: axk}
+}
+
+func TestGetSetParams(t *testing.T) {
+	input := setupTestInput()
+	params := DefaultParams()
+	input.axk.SetParams(input.ctx, params)
+	params2 := input.axk.GetParams(input.ctx)
+	require.True(t, params.Equal(params2))
 }
 
 func TestAccountXGetSet(t *testing.T) {
