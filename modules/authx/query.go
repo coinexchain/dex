@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -37,7 +38,8 @@ func NewQueryAccountxParams(addr sdk.AccAddress) QueryAccountxParams {
 }
 
 func queryAccountx(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper) ([]byte, sdk.Error) {
-	var params QueryAccountxParams
+	var params auth.QueryAccountParams
+
 	if err := keeper.cdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}

@@ -1,6 +1,7 @@
 package authx
 
 import (
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 )
@@ -8,7 +9,7 @@ import (
 type AccountX struct {
 	Address      sdk.AccAddress `json:"address"`
 	MemoRequired bool           `json:"memo_required"` // if memo is required for receiving coins
-	LockedCoins  []LockedCoin   `json:"locked_coins"`
+	LockedCoins  LockedCoins    `json:"locked_coins"`
 	FrozenCoins  sdk.Coins      `json:"frozen_coins"`
 }
 
@@ -85,9 +86,14 @@ func (acc *AccountX) TransferUnlockedCoins(time int64, ctx sdk.Context, kx Accou
 	kx.SetAccountX(ctx, *acc)
 }
 
-type LockedCoin struct {
-	Coin       sdk.Coin `json:"coin"`
-	UnlockTime int64    `json:"unlock_time"`
+func (acc AccountX) String() string {
+
+	return fmt.Sprintf(`
+  LockedCoins:   %s
+  FrozenCoins:   %s
+  MemoRequired:  %t`,
+		acc.LockedCoins, acc.FrozenCoins, acc.MemoRequired,
+	)
 }
 
 func NewAccountXWithAddress(addr sdk.AccAddress) AccountX {
@@ -95,4 +101,13 @@ func NewAccountXWithAddress(addr sdk.AccAddress) AccountX {
 		Address: addr,
 	}
 	return acc
+}
+
+type AccountAll struct {
+	Account  auth.Account `json:"account"`
+	AccountX AccountX     `json:"account_x"`
+}
+
+func (accAll AccountAll) String() string {
+	return accAll.Account.String() + accAll.AccountX.String()
 }

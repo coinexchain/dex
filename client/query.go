@@ -1,17 +1,14 @@
 package client
 
 import (
-	"errors"
 	"fmt"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
-func GetAccount(ctx context.CLIContext, address []byte) (authx.AccountX, error) {
-	if ctx.AccDecoder == nil {
-		return authx.AccountX{}, errors.New("account decoder required but not provided")
-	}
+func GetAccountX(ctx context.CLIContext, address []byte) (authx.AccountX, error) {
 
 	res, err := QueryAccountx(ctx, address)
 	if err != nil {
@@ -32,7 +29,7 @@ func EnsureAccountExistsFromAddr(ctx context.CLIContext, addr sdk.AccAddress) er
 }
 
 func QueryAccountx(ctx context.CLIContext, addr sdk.AccAddress) ([]byte, error) {
-	bz, err := ctx.Codec.MarshalJSON(authx.NewQueryAccountxParams(addr))
+	bz, err := ctx.Codec.MarshalJSON(auth.NewQueryAccountParams(addr))
 	if err != nil {
 		return nil, err
 	}

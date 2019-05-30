@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/authx"
 	"net/http"
 	"os"
 	"path"
@@ -30,7 +31,6 @@ import (
 	slashing "github.com/cosmos/cosmos-sdk/x/slashing/client/rest"
 	st "github.com/cosmos/cosmos-sdk/x/staking"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/client/rest"
-
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	crisisclient "github.com/cosmos/cosmos-sdk/x/crisis/client"
 	distcmd "github.com/cosmos/cosmos-sdk/x/distribution"
@@ -44,6 +44,7 @@ import (
 	as "github.com/coinexchain/dex/modules/asset"
 	assclient "github.com/coinexchain/dex/modules/asset/client"
 	assrest "github.com/coinexchain/dex/modules/asset/client/rest"
+	authxcmd "github.com/coinexchain/dex/modules/authx/client/cli"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
 	bankxrest "github.com/coinexchain/dex/modules/bankx/client/rest"
 	mktclient "github.com/coinexchain/dex/modules/market/client"
@@ -161,7 +162,7 @@ func queryCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 		tx.SearchTxCmd(cdc),
 		tx.QueryTxCmd(cdc),
 		client.LineBreak,
-		authcmd.GetAccountCmd(at.StoreKey, cdc),
+		authxcmd.GetAccountXCmd(authx.StoreKey, cdc),
 	)
 
 	for _, m := range mc {
