@@ -21,20 +21,23 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
+type genesisStateCallback func(state GenesisState)
+
 func newApp() *CetChainApp {
 	logger := log.NewNopLogger()
 	db := dbm.NewMemDB()
 	return NewCetChainApp(logger, db, nil, true, 10000)
 }
 
-func initApp(accs ...auth.BaseAccount) *CetChainApp {
+func initApp(acc auth.BaseAccount, cb genesisStateCallback) *CetChainApp {
 	app := newApp()
 
 	// genesis state
 	genState := NewDefaultGenesisState()
-	for _, acc := range accs {
-		genAcc := NewGenesisAccount(&acc)
-		genState.Accounts = append(genState.Accounts, genAcc)
+	genAcc := NewGenesisAccount(&acc)
+	genState.Accounts = append(genState.Accounts, genAcc)
+	if cb != nil {
+		cb(genState)
 	}
 
 	// init chain
@@ -65,7 +68,7 @@ func TestSend(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
-	app := initApp(acc0)
+	app := initApp(acc0, nil)
 
 	// begin block
 	header := abci.Header{Height: 1}
@@ -93,7 +96,7 @@ func TestMemo(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
 
 	// app
-	app := initApp(acc0)
+	app := initApp(acc0, nil)
 
 	// begin block
 	header := abci.Header{Height: 1}
@@ -122,7 +125,7 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
-	app := initApp(acc0)
+	app := initApp(acc0, nil)
 
 	// begin block
 	header := abci.Header{Height: 1}
@@ -154,7 +157,7 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
-	app := initApp(acc0)
+	app := initApp(acc0, nil)
 
 	// begin block
 	header := abci.Header{Height: 1}

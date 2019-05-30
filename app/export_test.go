@@ -20,7 +20,7 @@ func TestExportGenesisState(t *testing.T) {
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
 
 	// app
-	app := initApp(acc)
+	app := initApp(acc, nil)
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	accx := authx.AccountX{
@@ -49,7 +49,7 @@ func TestExportDefaultAccountXState(t *testing.T) {
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
 
 	// app
-	app := initApp(acc)
+	app := initApp(acc, nil)
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	state := app.exportGenesisState(ctx)
