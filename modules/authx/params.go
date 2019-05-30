@@ -29,7 +29,7 @@ var _ params.ParamSet = &Params{}
 
 // Params defines the parameters for the authx module.
 type Params struct {
-	MinSelfDelegation sdk.Int `json:min_self_delegation`
+	MinSelfDelegation sdk.Int `json:"min_self_delegation"`
 	MinGasPrice       uint64  `json:"min_gas_price"`
 	MsgSendGasCost    uint64  `json:"msg_send_gas_cost"`
 }
