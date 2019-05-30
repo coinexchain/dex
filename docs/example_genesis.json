@@ -34,7 +34,6 @@
         "delegated_vesting": null,
         "start_time": "0",
         "end_time": "0",
-        "activated": true,
         "memo_required": false,
         "locked_coins": null,
         "frozen_coins": null
@@ -54,7 +53,6 @@
         "delegated_vesting": null,
         "start_time": "0",
         "end_time": "0",
-        "activated": true,
         "memo_required": false,
         "locked_coins": null,
         "frozen_coins": null
@@ -74,7 +72,6 @@
         "delegated_vesting": null,
         "start_time": "0",
         "end_time": "0",
-        "activated": true,
         "memo_required": false,
         "locked_coins": null,
         "frozen_coins": null
@@ -99,7 +96,6 @@
         "delegated_vesting": null,
         "start_time": "0",
         "end_time": "1577836800",
-        "activated": true,
         "memo_required": false,
         "locked_coins": null,
         "frozen_coins": null
@@ -124,7 +120,6 @@
         "delegated_vesting": null,
         "start_time": "0",
         "end_time": "1609459200",
-        "activated": true,
         "memo_required": false,
         "locked_coins": null,
         "frozen_coins": null
@@ -149,7 +144,6 @@
         "delegated_vesting": null,
         "start_time": "0",
         "end_time": "1640995200",
-        "activated": true,
         "memo_required": false,
         "locked_coins": null,
         "frozen_coins": null
@@ -174,7 +168,6 @@
         "delegated_vesting": null,
         "start_time": "0",
         "end_time": "1672531200",
-        "activated": true,
         "memo_required": false,
         "locked_coins": null,
         "frozen_coins": null
@@ -199,7 +192,6 @@
         "delegated_vesting": null,
         "start_time": "0",
         "end_time": "1704067200",
-        "activated": true,
         "memo_required": false,
         "locked_coins": null,
         "frozen_coins": null
