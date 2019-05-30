@@ -33,7 +33,11 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Use:   "createmarket ",
 		Short: "generate tx to create market",
 		Long: "generate a tx and sign it to create market in dex blockchain." +
-			"Example : createmarket [creator] [stock] [money] [priceprecision]",
+			"Example : " +
+			" cetcli tx market createmarket " +
+			"--from bob --chain-id=coinexdex " +
+			"--stock=eth --money=cet " +
+			"--price-precision=8 --gas 20000 ",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -112,3 +116,19 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo
 	}
 	return msg, nil
 }
+
+//func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
+//
+//	return &cobra.Command{
+//		Use:   "marketinfo",
+//		Short: "",
+//		Long:  "",
+//		Args:  cobra.ExactArgs(1),
+//		RunE: func(cmd *cobra.Command, args []string) error {
+//			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+//			fmt.Sprint("custom/%s")
+//
+//		},
+//	}
+//
+//}

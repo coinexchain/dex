@@ -56,7 +56,7 @@ func handlerMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper
 		LastExecutedPrice: sdk.NewDec(0),
 	}
 
-	key := marketStoreKey(marketIdetifierPrefix, info.Stock+SymbolSeparator+info.Money)
+	key := marketStoreKey(MarketIdentifierPrefix, info.Stock+SymbolSeparator+info.Money)
 	value := keeper.cdc.MustMarshalBinaryBare(info)
 	ctx.KVStore(keeper.marketKey).Set(key, value)
 
@@ -64,7 +64,7 @@ func handlerMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper
 }
 
 func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
-	key := marketStoreKey(marketIdetifierPrefix, msg.Stock+SymbolSeparator+msg.Money)
+	key := marketStoreKey(MarketIdentifierPrefix, msg.Stock+SymbolSeparator+msg.Money)
 	store := ctx.KVStore(keeper.marketKey)
 	if v := store.Get(key); v != nil {
 		return ErrInvalidSymbol().Result()
@@ -115,7 +115,7 @@ func handlerMsgCreateGTEOrder(ctx sdk.Context, msg MsgCreateGTEOrder, keeper Kee
 		DealMoney:   0,
 		DealStock:   0,
 	}
-	key := marketStoreKey(orderBookIdetifierPrefix, msg.Symbol, order.OrderID())
+	key := marketStoreKey(OrderBookKeyPrefix, msg.Symbol, order.OrderID())
 	value := keeper.cdc.MustMarshalBinaryBare(order)
 	store.Set(key, value)
 
@@ -140,7 +140,7 @@ func checkMsgCreateGTEOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateGTE
 		denom = values[1]
 	}
 
-	if value = store.Get(marketStoreKey(marketIdetifierPrefix, msg.Symbol)); value == nil {
+	if value = store.Get(marketStoreKey(MarketIdentifierPrefix, msg.Symbol)); value == nil {
 		return ErrNoExistKeyInStore().Result()
 	}
 

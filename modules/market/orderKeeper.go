@@ -27,7 +27,7 @@ const (
 )
 
 type OrderCleanUpDayKeeper struct {
-	marketKey     sdk.StoreKey
+	marketKey sdk.StoreKey
 }
 
 func NewOrderCleanUpDayKeeper(key sdk.StoreKey) *OrderCleanUpDayKeeper {
@@ -63,9 +63,9 @@ type OrderKeeper interface {
 }
 
 type PersistentOrderKeeper struct {
-	marketKey     sdk.StoreKey
-	symbol string
-	codec  *codec.Codec
+	marketKey sdk.StoreKey
+	symbol    string
+	codec     *codec.Codec
 }
 
 func concatCopyPreAllocate(slices [][]byte) []byte {
@@ -126,9 +126,9 @@ func (keeper *PersistentOrderKeeper) orderQueueKey(order *Order) []byte {
 
 func NewOrderKeeper(key sdk.StoreKey, symbol string, codec *codec.Codec) OrderKeeper {
 	return &PersistentOrderKeeper{
-		marketKey:  key,
-		symbol: symbol,
-		codec:  codec,
+		marketKey: key,
+		symbol:    symbol,
+		codec:     codec,
 	}
 }
 
