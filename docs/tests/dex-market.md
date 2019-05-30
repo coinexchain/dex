@@ -40,6 +40,6 @@
 
 ## 查询指定订单信息
 
-`./cetcli query market orderinfo --symbol=eth/cet --order-id=cosmos16gvnhynu7veexyyaadk60k28cn5s9k7p7p5v9p-13 --trust-node=true`
+`./cetcli query market orderinfo --symbol=eth/cet --orderid=cosmos16gvnhynu7veexyyaadk60k28cn5s9k7p7p5v9p-13 --trust-node=true`
 
 
