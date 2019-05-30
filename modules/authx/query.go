@@ -43,7 +43,7 @@ func queryAccountx(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper
 	}
 
 	aux, ok := keeper.GetAccountX(ctx, params.Address)
-	if ok == false {
+	if !ok {
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("accountx %s does not exist", params.Address))
 	}
 

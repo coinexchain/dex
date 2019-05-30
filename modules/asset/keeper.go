@@ -257,6 +257,11 @@ func (tk TokenKeeper) IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccA
 	return false
 }
 
+func (tk TokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
+	//TODO: fzc
+	return false
+}
+
 // -----------------------------------------------------------------------------
 // Params
 
