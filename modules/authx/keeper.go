@@ -9,6 +9,8 @@ import (
 const (
 	// StoreKey is string representation of the store key for authx
 	StoreKey = "accx"
+	// QuerierRoute is the querier route for accx
+	QuerierRoute = StoreKey
 )
 
 var (
