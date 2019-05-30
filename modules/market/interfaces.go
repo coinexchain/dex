@@ -14,7 +14,7 @@ type ExpectedBankxKeeper interface {
 
 // Asset Keeper will implement the interface
 type ExpectedAssertStatusKeeper interface {
-	IsTokenFrozen(ctx sdk.Context, denom string) bool // the coin's issuer has frozen "denom", forbiding transmission and exchange.
+	IsTokenFrozen(ctx sdk.Context, denom string) bool // the coin's issuer has forbidden "denom", forbiding transmission and exchange.
 	IsTokenExists(ctx sdk.Context, denom string) bool // check whether there is a coin named "denom"
 	IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool
 	IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool

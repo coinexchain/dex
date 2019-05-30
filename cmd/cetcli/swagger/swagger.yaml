@@ -2690,7 +2690,7 @@ definitions:
           total_mint:
             type: integer
             example: "0"
-          is_frozen:
+          is_forbidden:
             type: boolean
             example: false
   TransferOwnerReq:

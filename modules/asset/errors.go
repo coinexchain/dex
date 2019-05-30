@@ -5,15 +5,15 @@ import sdk "github.com/cosmos/cosmos-sdk/types"
 const (
 	CodeSpaceAsset = ModuleName
 
-	CodeInvalidTokenName     = 201
-	CodeInvalidTokenSymbol   = 202
-	CodeInvalidTokenSupply   = 203
-	CodeInvalidTokenOwner    = 204
-	CodeNoTokenPersist       = 205
-	CodeInvalidTotalMint     = 206
-	CodeInvalidTotalBurn     = 207
-	CodeDuplicateTokenSymbol = 208
-	CodeInvalidFrozenState   = 209
+	CodeInvalidTokenName      = 201
+	CodeInvalidTokenSymbol    = 202
+	CodeInvalidTokenSupply    = 203
+	CodeInvalidTokenOwner     = 204
+	CodeNoTokenPersist        = 205
+	CodeInvalidTotalMint      = 206
+	CodeInvalidTotalBurn      = 207
+	CodeDuplicateTokenSymbol  = 208
+	CodeInvalidForbiddenState = 209
 )
 
 func ErrorInvalidTokenName(fmt string) sdk.Error {
@@ -40,6 +40,6 @@ func ErrorInvalidTokenBurn(fmt string) sdk.Error {
 func ErrorDuplicateTokenSymbol(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeDuplicateTokenSymbol, fmt)
 }
-func ErrorInvalidFrozenState(fmt string) sdk.Error {
-	return sdk.NewError(CodeSpaceAsset, CodeInvalidFrozenState, fmt)
+func ErrorInvalidForbiddenState(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidForbiddenState, fmt)
 }

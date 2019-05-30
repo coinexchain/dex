@@ -77,7 +77,7 @@ BJ00609 ~/lab/dex (master) $ ./cetd export
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
         }
         }
     ]
@@ -114,7 +114,7 @@ rm -rdf ~/.cetd ~/.cetcli
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         }
       ]
@@ -326,7 +326,7 @@ rm -rdf ~/.cetd ~/.cetcli
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         }
       ]
@@ -411,7 +411,7 @@ Token Info: [
   TokenForbiddable: false
   TotalBurn:       411211452994260000
   TotalMint:       0
-  IsFrozen:        false ]
+  IsForbidden:        false ]
 ```
 
 
@@ -432,7 +432,7 @@ Token Info: [
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         },
         {
@@ -448,7 +448,7 @@ Token Info: [
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         }
       ]
@@ -477,7 +477,7 @@ panic: Duplicate token symbol found during asset ValidateGenesis
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         },
         {
@@ -493,7 +493,7 @@ panic: Duplicate token symbol found during asset ValidateGenesis
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         }
       ]
@@ -524,7 +524,7 @@ I[2019-05-23|00:02:11.151] Committed state                              module=s
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_frozen": false
+            "is_forbidden": false
           }
         },
 ```

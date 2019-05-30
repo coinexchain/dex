@@ -136,7 +136,7 @@ func TestBaseToken_IsValid(t *testing.T) {
 				TokenForbiddable: tt.token.TokenForbiddable,
 				TotalBurn:        tt.token.TotalBurn,
 				TotalMint:        tt.token.TotalMint,
-				IsFrozen:         tt.token.IsFrozen,
+				IsForbidden:      tt.token.IsForbidden,
 			}
 			if err := base.IsValid(); !reflect.DeepEqual(err, tt.wantErr) {
 				t.Errorf("BaseToken.IsValid() error = %v, wantErr %v", err, tt.wantErr)
