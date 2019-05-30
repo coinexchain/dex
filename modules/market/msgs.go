@@ -32,7 +32,7 @@ var _ sdk.Msg = MsgCreateMarketInfo{}
 type MsgCreateMarketInfo struct {
 	Stock          string         `json:"stock"`
 	Money          string         `json:"money"`
-	Creator        sdk.AccAddress `json:"crater"`
+	Creator        sdk.AccAddress `json:"creator"`
 	PricePrecision byte           `json:"price_precision"`
 }
 

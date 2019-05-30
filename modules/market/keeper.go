@@ -71,10 +71,10 @@ func (k Keeper) RegisterCodec() {
 }
 
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(Order{}, "cet-chain/order", nil)
-	cdc.RegisterConcrete(MarketInfo{}, "cet-chain/market", nil)
-	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "cet-chain/info", nil)
-	cdc.RegisterConcrete(MsgCreateGTEOrder{}, "cet-chain/orderinfo", nil)
+	cdc.RegisterConcrete(Order{}, "market/order", nil)
+	cdc.RegisterConcrete(MarketInfo{}, "market/market", nil)
+	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "market/market-info", nil)
+	cdc.RegisterConcrete(MsgCreateGTEOrder{}, "market/order-info", nil)
 }
 
 func (k Keeper) GetAllOrders(ctx sdk.Context) []Order {

@@ -22,7 +22,7 @@ type OrderType = byte
 var CreateMarketSpendCet sdk.Coin
 
 func init() {
-	CreateMarketSpendCet = types.NewCetCoin(1000)
+	CreateMarketSpendCet = types.NewCetCoin(CreateMarketFee)
 }
 
 func NewHandler(k Keeper) sdk.Handler {
