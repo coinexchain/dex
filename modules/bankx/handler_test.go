@@ -136,8 +136,8 @@ func TestHandleMsgSetMemoRequiredAccountNotExisted(t *testing.T) {
 
 	msg := NewMsgSetTransferMemoRequired(testutil.ToAccAddress("xxx"), true)
 	result := input.handle(msg)
-	require.Equal(t, CodeSpaceBankx, result.Codespace)
-	require.Equal(t, CodeUnactivatedAddress, result.Code)
+	require.Equal(t, sdk.CodespaceRoot, result.Codespace)
+	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
 }
 
 func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
@@ -149,8 +149,8 @@ func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
 
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
-	require.Equal(t, CodeSpaceBankx, result.Codespace)
-	require.Equal(t, CodeUnactivatedAddress, result.Code)
+	require.Equal(t, sdk.CodespaceRoot, result.Codespace)
+	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
 }
 
 func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {

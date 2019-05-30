@@ -202,7 +202,7 @@ account　是发款人的信息及发款数量，
       "amount": "1300000000"
     }
   ],
-  "unlocked_time": "0"
+  "unlock_time": "0"
 }
 
 ```
@@ -210,7 +210,7 @@ account　是发款人的信息及发款数量，
 
 6. 上一步中对应的CURL请求是：
 ```
-curl -X POST "http://localhost:1317/bank/accounts/cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79/transfers" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"cosmos1esmxfjyanvdevfkrznt00lemhftca7as2vavhk\", \"memo\": \"from bob to ddd\", \"chain_id\": \"coinexdex\", \"account_number\": \"0\", \"sequence\": \"2\", \"gas\": \"200000\", \"gas_adjustment\": \"1.2\", \"fees\": [ { \"denom\": \"cet\", \"amount\": \"200000000\" } ], \"simulate\": false }, \"amount\": [ { \"denom\": \"cet\", \"amount\": \"1300000000\" } ], \"unlocked_time\": \"0\"}" > unsignedSendTx.json
+curl -X POST "http://localhost:1317/bank/accounts/cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79/transfers" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"cosmos1esmxfjyanvdevfkrznt00lemhftca7as2vavhk\", \"memo\": \"from bob to ddd\", \"chain_id\": \"coinexdex\", \"account_number\": \"0\", \"sequence\": \"2\", \"gas\": \"200000\", \"gas_adjustment\": \"1.2\", \"fees\": [ { \"denom\": \"cet\", \"amount\": \"200000000\" } ], \"simulate\": false }, \"amount\": [ { \"denom\": \"cet\", \"amount\": \"1300000000\" } ], \"unlock_time\": \"0\"}" > unsignedSendTx.json
 ```
 得到的是未签名的交易：
 ```
@@ -331,7 +331,7 @@ BJ00609:~/lab/dex$
 
 9. 再次bob转帐给ddd时，　因为ddd已经激活，就不会再次收ddd激活费用了。
 ```
-BJ00609:~/lab/dex$ curl -X POST "http://localhost:1317/bank/accounts/cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79/transfers" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"cosmos1esmxfjyanvdevfkrznt00lemhftca7as2vavhk\", \"memo\": \"from bob to ddd\", \"chain_id\": \"coinexdex\", \"account_number\": \"0\", \"sequence\": \"3\", \"gas\": \"200000\", \"gas_adjustment\": \"1.2\", \"fees\": [ { \"denom\": \"cet\", \"amount\": \"200000000\" } ], \"simulate\": false }, \"amount\": [ { \"denom\": \"cet\", \"amount\": \"1300000000\" } ], \"unlocked_time\": \"0\"}" > unsignedSendTx.json
+BJ00609:~/lab/dex$ curl -X POST "http://localhost:1317/bank/accounts/cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79/transfers" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"cosmos1esmxfjyanvdevfkrznt00lemhftca7as2vavhk\", \"memo\": \"from bob to ddd\", \"chain_id\": \"coinexdex\", \"account_number\": \"0\", \"sequence\": \"3\", \"gas\": \"200000\", \"gas_adjustment\": \"1.2\", \"fees\": [ { \"denom\": \"cet\", \"amount\": \"200000000\" } ], \"simulate\": false }, \"amount\": [ { \"denom\": \"cet\", \"amount\": \"1300000000\" } ], \"unlock_time\": \"0\"}" > unsignedSendTx.json
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   741  100   379  100   362  38438  36713 --:--:-- --:--:-- --:--:-- 42111

@@ -116,8 +116,7 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg MsgSetMemoRequired)
 
 	account := k.ak.GetAccount(ctx, addr)
 	if account == nil {
-		msg := fmt.Sprintf("account %s is not activated", addr)
-		return ErrUnactivatedAddress(msg).Result()
+		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr)).Result()
 	}
 
 	accountX := k.axk.GetOrCreateAccountX(ctx, addr)

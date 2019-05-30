@@ -27,7 +27,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, 
 }
 
 // SendRequestHandlerFn - http request handler to send coins to a address.
-func SendRequestHandlerFn(cdc *codec.Codec, kb keys.Keybase, cliCtx context.CLIContext) http.HandlerFunc {
+func SendRequestHandlerFn(cdc *codec.Codec, _ keys.Keybase, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req MmeoReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {

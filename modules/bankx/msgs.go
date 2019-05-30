@@ -83,6 +83,8 @@ func (msg MsgSend) ValidateBasic() sdk.Error {
 			return ErrCetCantBeLocked("Cet cannot be locked")
 		}
 	}
+
+	//TODO: should not compare with lock time.
 	t := time.Now().Unix()
 	if msg.UnlockTime <= t && msg.UnlockTime != 0 {
 		return ErrUnlockTime("Invalid Unlock Time")

@@ -380,7 +380,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/Coin"
-              unlocked_time:
+              unlock_time:
                 type: integer
                 example: "675132000"
       responses:

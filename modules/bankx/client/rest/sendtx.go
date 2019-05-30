@@ -16,9 +16,9 @@ import (
 
 // SendReq defines the properties of a send request's body.
 type SendReq struct {
-	BaseReq      rest.BaseReq `json:"base_req"`
-	Amount       sdk.Coins    `json:"amount"`
-	UnlockedTime int64        `json:"unlocked_time"`
+	BaseReq    rest.BaseReq `json:"base_req"`
+	Amount     sdk.Coins    `json:"amount"`
+	UnlockTime int64        `json:"unlock_time"`
 }
 
 // SendRequestHandlerFn - http request handler to send coins to a address.
@@ -49,7 +49,7 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, kb keys.Keybase, cliCtx context.CL
 			return
 		}
 
-		msg := bankx.NewMsgSend(fromAddr, toAddr, req.Amount, req.UnlockedTime)
+		msg := bankx.NewMsgSend(fromAddr, toAddr, req.Amount, req.UnlockTime)
 		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }

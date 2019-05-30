@@ -40,6 +40,7 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
+			//TODO: check req.UnlockTime can not be negative
 			time := viper.GetInt64(FlagUnlockTime)
 
 			from := cliCtx.GetFromAddress()

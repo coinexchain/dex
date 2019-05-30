@@ -5,17 +5,12 @@ import sdk "github.com/cosmos/cosmos-sdk/types"
 const (
 	CodeSpaceBankx sdk.CodespaceType = "bankx"
 
-	CodeUnactivatedAddress              sdk.CodeType = 111
-	CodeMemoMissing                     sdk.CodeType = 112
-	CodeInsufficientCETForActivationFee sdk.CodeType = 113
-	CodeInvalidActivationFee            sdk.CodeType = 114
-	CodeInvalidUnlockTime               sdk.CodeType = 115
-	CodeCetCantBeLocked                 sdk.CodeType = 116
+	CodeMemoMissing                     sdk.CodeType = 111
+	CodeInsufficientCETForActivationFee sdk.CodeType = 112
+	CodeInvalidActivationFee            sdk.CodeType = 113
+	CodeInvalidUnlockTime               sdk.CodeType = 114
+	CodeCetCantBeLocked                 sdk.CodeType = 115
 )
-
-func ErrUnactivatedAddress(msg string) sdk.Error {
-	return sdk.NewError(CodeSpaceBankx, CodeUnactivatedAddress, msg)
-}
 
 func ErrMemoMissing() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeMemoMissing, "memo is empty")
