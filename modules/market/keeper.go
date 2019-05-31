@@ -52,6 +52,27 @@ func (keeper *DelistKeeper) GetDelistSymbolsAtHeight(ctx sdk.Context, height int
 	return result
 }
 
+func (keeper *DelistKeeper) RemoveDelistRequestsAtHeight(ctx sdk.Context, height int64) {
+	store := ctx.KVStore(keeper.marketKey)
+	start := concatCopyPreAllocate([][]byte{
+		DelistKey,
+		int64ToBigEndianBytes(height),
+		{0x0},
+	})
+	end := concatCopyPreAllocate([][]byte{
+		DelistKey,
+		int64ToBigEndianBytes(height),
+		{0x1},
+	})
+	var keys [][]byte
+	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
+		keys = append(keys, iter.Key())
+	}
+	for _, key := range keys {
+		store.Delete(key)
+	}
+}
+
 type Keeper struct {
 	paramSubspace params.Subspace
 	marketKey     sdk.StoreKey

@@ -162,6 +162,16 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	ordersForUpdateList := make([]map[string]*Order, len(marketInfoList))
 	newPrices := make([]sdk.Dec, len(marketInfoList))
 	currHeight := ctx.BlockHeight()
+
+	delistKeeper := NewDelistKeeper(keeper.marketKey)
+	delistSymbols := delistKeeper.GetDelistSymbolsAtHeight(ctx, ctx.BlockHeight())
+	for _, symbol := range delistSymbols {
+		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+		orderKeeper.RemoveAllOrders(ctx)
+		keeper.RemoveMarket(ctx, symbol)
+	}
+	delistKeeper.RemoveDelistRequestsAtHeight(ctx, ctx.BlockHeight())
+
 	if currDay != recordDay {
 		keeper.orderClean.SetDay(ctx, currDay)
 		for _, mi := range marketInfoList {
