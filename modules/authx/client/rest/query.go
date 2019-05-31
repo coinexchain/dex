@@ -59,9 +59,9 @@ func QueryAccountRequestHandlerFn(
 			return
 		}
 
-		all := authx.AccountAll{Account: acc, AccountX: aux}
+		mix := authx.NewAccountMix(acc, aux)
 
-		rest.PostProcessResponse(w, cdc, all, cliCtx.Indent)
+		rest.PostProcessResponse(w, cdc, mix, cliCtx.Indent)
 	}
 }
 
