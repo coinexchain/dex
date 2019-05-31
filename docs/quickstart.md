@@ -1,7 +1,9 @@
 ##  Install tools
-Install bower for download swagger-ui dependency
+Install bower and statik for download swagger-ui dependency
 ```
 npm install -g bower
+go get -d github.com/rakyll/statik
+go install github.com/rakyll/statik
 ```
 
 ## Compile cetd and cetcli
