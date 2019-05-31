@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	QueryMarket = "market-info"
-	QueryOrder  = "order-info"
+	QueryMarket     = "market-info"
+	QueryOrder      = "order-info"
+	QueryUserOrders = "user-order-list"
 )
 
 // creates a querier for asset REST endpoints
@@ -21,6 +22,8 @@ func NewQuerier(mk Keeper, cdc *codec.Codec) sdk.Querier {
 			return queryMarket(ctx, req, mk)
 		case QueryOrder:
 			return queryOrder(ctx, req, mk)
+		case QueryUserOrders:
+			return queryUserOrderList(ctx, req, mk)
 		default:
 			return nil, sdk.ErrUnknownRequest("query symbol : " + path[0])
 		}
@@ -29,6 +32,12 @@ func NewQuerier(mk Keeper, cdc *codec.Codec) sdk.Querier {
 
 type QueryMarketParam struct {
 	Symbol string
+}
+
+func NewQueryMarketParam(symbol string) QueryMarketParam {
+	return QueryMarketParam{
+		Symbol: symbol,
+	}
 }
 
 func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
@@ -48,20 +57,12 @@ func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sd
 	return bz, nil
 }
 
-func NewQueryMarketParam(symbol string) QueryMarketParam {
-	return QueryMarketParam{
-		Symbol: symbol,
-	}
-}
-
 type QueryOrderParam struct {
-	Symbol  string
 	OrderID string
 }
 
-func NewQueryOrderParam(symbol, orderID string) QueryOrderParam {
+func NewQueryOrderParam(orderID string) QueryOrderParam {
 	return QueryOrderParam{
-		Symbol:  symbol,
 		OrderID: orderID,
 	}
 }
@@ -80,4 +81,13 @@ func queryOrder(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk
 	}
 
 	return bz, nil
+}
+
+type QueryUserOrderList struct {
+	User sdk.AccAddress
+}
+
+func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
+
+	return nil, nil
 }

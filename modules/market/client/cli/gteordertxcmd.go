@@ -1,7 +1,9 @@
 package cli
 
 import (
+	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/coinexchain/dex/modules/market"
@@ -16,27 +18,48 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	FlagSymbol      = "symbol"
-	FlagOrderType   = "order-type"
-	FlagPrice       = "price"
-	FlagQuantity    = "quantity"
-	FlagSide        = "side"
-	FlagTimeInForce = "time-in-force"
-	FlagOrderID     = "orderid"
+const (
+	FlagSymbol    = "symbol"
+	FlagOrderType = "order-type"
+	FlagPrice     = "price"
+	FlagQuantity  = "quantity"
+	FlagSide      = "side"
+	FlagOrderID   = "orderid"
+	FlagUserAddr  = "address"
 )
 
-var createGTEOrderFlags = []string{
+var createOrderFlags = []string{
 	FlagSymbol,
 	FlagOrderType,
 	FlagPrice,
 	FlagQuantity,
 	FlagSide,
-	FlagTimeInForce,
 	FlagPricePrecision,
 }
 
-func CreateGTEOrderTxCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
+
+	cmd := &cobra.Command{
+		Use:   "createiocorder",
+		Short: "",
+		Long: `Create an IOC order and sign tx, broadcast to nodes.
+		Example:
+		$ cetcli tx market creategteoreder --symbol="btc/cet"
+		--order-type=2 \
+		--price=520 \
+		--quantity=10000000 \
+		--side=1 \
+		`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return createAndBroadCastOrder(cdc, false)
+		},
+	}
+
+	markCreateOrderFlags(cmd)
+	return cmd
+}
+
+func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "creategteoreder",
 		Short: "Create an GTE order and sign tx",
@@ -51,66 +74,64 @@ $ cetcli tx market creategteoreder --symbol="btc/cet"
 	--time-in-force=1000
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-
-			sender := cliCtx.GetFromAddress()
-			sequence, err := cliCtx.GetAccountSequence(sender)
-			if err != nil {
-				return err
-			}
-
-			msg, err := parseCreateOrderFlags(sender, sequence)
-			if err != nil {
-				return errors.Errorf("tx flag is error, pls see help : " +
-					"$ cetcli tx market creategteoreder -h")
-			}
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			symbols := strings.Split(msg.Symbol, market.SymbolSeparator)
-			userToken := symbols[0]
-			if msg.Side == match.BUY {
-				userToken = symbols[1]
-			}
-
-			account, err := cliCtx.GetAccount(sender)
-			if err != nil {
-				return err
-			}
-			if !account.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(msg.Quantity))}) {
-				return errors.New("No have insufficient cet to create market in blockchain")
-			}
-
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return createAndBroadCastOrder(cdc, true)
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
-	cmd.Flags().Int(FlagOrderType, -1, "The order type limited to 2")
-	cmd.Flags().Int(FlagPrice, -1, "The price in the order")
-	cmd.Flags().Int(FlagQuantity, -1, "The number of tokens will be trade in the order ")
-	cmd.Flags().Int(FlagSide, -1, "The side in the order")
-	cmd.Flags().Int(FlagTimeInForce, -1, "The time-in-force for GTE order")
-	cmd.Flags().Int(FlagPricePrecision, -1, "The price precision in order")
-
-	for _, flag := range createGTEOrderFlags {
-		cmd.MarkFlagRequired(flag)
-	}
-
+	markCreateOrderFlags(cmd)
 	return cmd
 }
 
-func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgCreateGTEOrder, error) {
-	for _, flag := range createGTEOrderFlags {
+func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
+	txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+	cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+	sender := cliCtx.GetFromAddress()
+	sequence, err := cliCtx.GetAccountSequence(sender)
+	if err != nil {
+		return err
+	}
+
+	msg, err := parseCreateOrderFlags(sender, sequence)
+	if err != nil {
+		return errors.Errorf("tx flag is error, pls see help : " +
+			"$ cetcli tx market creategteoreder -h")
+	}
+	if err = msg.ValidateBasic(); err != nil {
+		return err
+	}
+
+	symbols := strings.Split(msg.Symbol, market.SymbolSeparator)
+	userToken := symbols[0]
+	if msg.Side == match.BUY {
+		userToken = symbols[1]
+	}
+
+	account, err := cliCtx.GetAccount(sender)
+	if err != nil {
+		return err
+	}
+	if !account.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(msg.Quantity))}) {
+		return errors.New("No have insufficient cet to create market in blockchain")
+	}
+
+	msg.TimeInForce = market.IOC
+	if isGTE {
+		msg.TimeInForce = market.GTE
+	}
+
+	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+}
+
+func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgCreateOrder, error) {
+	for _, flag := range createOrderFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
 				"$ cetcli tx market creategteoreder -h", flag)
 		}
 	}
 
-	msg := &market.MsgCreateGTEOrder{
+	msg := &market.MsgCreateOrder{
 		Sender:         sender,
 		Symbol:         viper.GetString(FlagSymbol),
 		OrderType:      byte(viper.GetInt(FlagOrderType)),
@@ -118,11 +139,23 @@ func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgC
 		Price:          viper.GetInt64(FlagPrice),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
 		Quantity:       viper.GetInt64(FlagQuantity),
-		TimeInForce:    viper.GetInt(FlagTimeInForce),
 		Sequence:       sequence,
 	}
 
 	return msg, nil
+}
+
+func markCreateOrderFlags(cmd *cobra.Command) {
+	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
+	cmd.Flags().Int(FlagOrderType, -1, "The order type limited to 2")
+	cmd.Flags().Int(FlagPrice, -1, "The price in the order")
+	cmd.Flags().Int(FlagQuantity, -1, "The number of tokens will be trade in the order ")
+	cmd.Flags().Int(FlagSide, -1, "The side in the order")
+	cmd.Flags().Int(FlagPricePrecision, -1, "The price precision in order")
+
+	for _, flag := range createOrderFlags {
+		cmd.MarkFlagRequired(flag)
+	}
 }
 
 func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
@@ -133,7 +166,7 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(viper.GetString(FlagSymbol), viper.GetString(FlagOrderID)))
+			bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(viper.GetString(FlagOrderID)))
 			if err != nil {
 				return err
 			}
@@ -149,9 +182,85 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
+	markQueryOrDelCmd(cmd)
+	return cmd
+}
+
+func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
+
+	cmd := &cobra.Command{
+		Use:   "userorderlist [userAddress]",
+		Short: "Query user order list in blockchain",
+		Long: "Example:" +
+			"cetcli query market userorderlist [userAddress]",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: []byte(args[0])})
+			if err != nil {
+				return err
+			}
+
+			route := fmt.Sprintf("custom/%s/%s", market.MarketKey, market.QueryUserOrderList{})
+			res, err := cliCtx.QueryWithData(route, bz)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(res))
+			return nil
+		},
+	}
+
+	cmd.Flags().String(FlagUserAddr, "", "The query user address")
+	cmd.MarkFlagRequired(FlagUserAddr)
+
+	return cmd
+}
+
+func CancleOrder(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "cancelorder",
+		Short: "cancel order in blockchain",
+		Long: "Examples:" +
+			"cetcli tx market cancelorder --orderid=[id]",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+
+			sender := cliCtx.GetFromAddress()
+
+			orderid := viper.GetString(FlagOrderID)
+			contents := strings.Split(orderid, "-")
+			if len(contents) != 2 {
+				return errors.Errorf("")
+			}
+
+			if bytes.Equal(sender, []byte(contents[0])) {
+				return errors.Errorf("")
+			}
+
+			if sequence, err := strconv.Atoi(contents[1]); err != nil || sequence < 0 {
+				return errors.Errorf("")
+			}
+
+			msg := market.MsgCancelOrder{
+				Sender:  sender,
+				OrderID: orderid,
+			}
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	markQueryOrDelCmd(cmd)
+	return cmd
+}
+
+func markQueryOrDelCmd(cmd *cobra.Command) {
 	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
 	cmd.Flags().String(FlagOrderID, "", "The order id")
 	cmd.MarkFlagRequired(FlagOrderID)
 	cmd.MarkFlagRequired(FlagSymbol)
-	return cmd
 }

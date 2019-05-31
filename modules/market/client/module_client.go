@@ -29,7 +29,8 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 	}
 	assQueryCmd.AddCommand(client.GetCommands(
 		cli.QueryMarketCmd(mc.cdc),
-		cli.QueryOrderCmd(mc.cdc))...)
+		cli.QueryOrderCmd(mc.cdc),
+		cli.QueryUserOrderList(mc.cdc))...)
 	return assQueryCmd
 }
 
@@ -42,7 +43,7 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 
 	assTxCmd.AddCommand(client.PostCommands(
 		cli.CreateMarketCmd(mc.storeKey, mc.cdc),
-		cli.CreateGTEOrderTxCmd(mc.storeKey, mc.cdc),
+		cli.CreateGTEOrderTxCmd(mc.cdc),
 	)...)
 
 	return assTxCmd

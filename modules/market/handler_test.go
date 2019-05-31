@@ -155,7 +155,7 @@ func TestMarketInfoSetSuccess(t *testing.T) {
 
 func TestCreateGTEOrderFailed(t *testing.T) {
 	input := prepareMockInput(t)
-	msgGteOrder := MsgCreateGTEOrder{
+	msgGteOrder := MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Sequence:       1,
 		Symbol:         stock + SymbolSeparator + "noExist",
@@ -173,7 +173,7 @@ func TestCreateGTEOrderFailed(t *testing.T) {
 
 func TestCreateGTEOrderSuccess(t *testing.T) {
 	input := prepareMockInput(t)
-	msgGteOrder := MsgCreateGTEOrder{
+	msgGteOrder := MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Sequence:       1,
 		Symbol:         stock + SymbolSeparator + money,

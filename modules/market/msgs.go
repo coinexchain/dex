@@ -69,11 +69,11 @@ func (msg MsgCreateMarketInfo) GetSigners() []sdk.AccAddress {
 }
 
 ///////////////////////////////////////////////////////////
-// MsgCreateGTEOrder
+// MsgCreateOrder
 
-var _ sdk.Msg = MsgCreateGTEOrder{}
+var _ sdk.Msg = MsgCreateOrder{}
 
-type MsgCreateGTEOrder struct {
+type MsgCreateOrder struct {
 	Sender         sdk.AccAddress `json:"sender"`
 	Sequence       uint64         `json:"sequence"`
 	Symbol         string         `json:"symbol"`
@@ -85,11 +85,11 @@ type MsgCreateGTEOrder struct {
 	TimeInForce    int            `json:"timeinforce"`
 }
 
-func (msg MsgCreateGTEOrder) Route() string { return RouterKey }
+func (msg MsgCreateOrder) Route() string { return RouterKey }
 
-func (msg MsgCreateGTEOrder) Type() string { return "create_gte_order_required" }
+func (msg MsgCreateOrder) Type() string { return "create_order_required" }
 
-func (msg MsgCreateGTEOrder) ValidateBasic() sdk.Error {
+func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return sdk.ErrInvalidAddress("missing creator address")
 	}
@@ -121,22 +121,52 @@ func (msg MsgCreateGTEOrder) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgCreateGTEOrder) GetSignBytes() []byte {
+func (msg MsgCreateOrder) GetSignBytes() []byte {
 	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
-func (msg MsgCreateGTEOrder) GetSigners() []sdk.AccAddress {
+func (msg MsgCreateOrder) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{[]byte(msg.Sender)}
 }
 
-///////////////////////////////////////////////////////////
-// MsgCreateIOCOrder
-
-type MsgCreateIOCOrder struct {
+func (msg MsgCreateOrder) IsGTEOrder() bool {
+	return msg.TimeInForce == GTE
 }
 
 ///////////////////////////////////////////////////////////
 // MsgCancelOrder
 
 type MsgCancelOrder struct {
+	Sender  sdk.AccAddress `json:"sender"`
+	OrderID string         `json:"order_id"`
+}
+
+func (msg MsgCancelOrder) Route() string {
+	return MarketKey
+}
+
+func (msg MsgCancelOrder) Type() string {
+	return "cancel_order_required"
+}
+
+func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
+	if len(msg.Sender) == 0 {
+		return ErrInvalidAddress()
+	}
+
+	if len(strings.Split(msg.OrderID, "-")) != 2 {
+		return ErrInvalidOrderID()
+	}
+
+	return nil
+}
+
+func (msg MsgCancelOrder) GetSignBytes() []byte {
+
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+}
+
+func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
+
+	return []sdk.AccAddress{msg.Sender}
 }

@@ -17,11 +17,17 @@ const (
 	CodeInvalidOrderType      = 129
 	CodeInvalidSymbol         = 130
 	CodeTokenFrozenByIssuer   = 131
+	CodeInvalidOrderID        = 132
 )
 
 func ErrTokenNoExist() sdk.Error {
 
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidToken, "Token not exsit")
+}
+
+func ErrInvalidOrderID() sdk.Error {
+
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderID, "Invalid order id")
 }
 
 func ErrInvalidPricePrecision() sdk.Error {

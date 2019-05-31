@@ -40,7 +40,7 @@ func createGTEOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 			return
 		}
 
-		msg := market.MsgCreateGTEOrder{
+		msg := market.MsgCreateOrder{
 			Sender:         creator,
 			Sequence:       req.BaseReq.Sequence,
 			Symbol:         req.Symbol,
