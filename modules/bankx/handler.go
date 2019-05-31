@@ -105,6 +105,9 @@ func normalSend(ctx sdk.Context, k Keeper,
 		return err.Result()
 	}
 
+	ax := k.axk.GetOrCreateAccountX(ctx, toAddr)
+	k.axk.SetAccountX(ctx, ax)
+
 	return sdk.Result{
 		Tags: t,
 	}
