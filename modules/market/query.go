@@ -87,7 +87,22 @@ type QueryUserOrderList struct {
 	User sdk.AccAddress
 }
 
-func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
+type OrderList struct {
+	ids []string
+}
 
-	return nil, nil
+func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
+	var param QueryUserOrderList
+	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
+		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse param: %s", err))
+	}
+
+	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
+	orders := okp.GetOrdersFromUser(ctx, string(param.User))
+
+	bz, err := codec.MarshalJSONIndent(mk.cdc, OrderList{orders})
+	if err != nil {
+		return nil, sdk.ErrInternal("could not marshal result to JSON" + err.Error())
+	}
+	return bz, nil
 }
