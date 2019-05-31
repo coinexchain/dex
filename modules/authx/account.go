@@ -117,15 +117,15 @@ func (accAll AccountAll) String() string {
 type AccountMix struct {
 	Address       sdk.AccAddress `json:"address"`
 	Coins         sdk.Coins      `json:"coins"`
-	LockedCoins  LockedCoins     `json:"locked_coins"`
-	FrozenCoins  sdk.Coins       `json:"frozen_coins"`
+	LockedCoins   LockedCoins    `json:"locked_coins"`
+	FrozenCoins   sdk.Coins      `json:"frozen_coins"`
 	PubKey        crypto.PubKey  `json:"public_key"`
 	AccountNumber uint64         `json:"account_number"`
 	Sequence      uint64         `json:"sequence"`
-	MemoRequired bool            `json:"memo_required"` // if memo is required for receiving coins
+	MemoRequired  bool           `json:"memo_required"` // if memo is required for receiving coins
 }
 
-func NewAccountMix(acc auth.Account, x AccountX) AccountMix{
+func NewAccountMix(acc auth.Account, x AccountX) AccountMix {
 	return AccountMix{
 		acc.GetAddress(),
 		acc.GetCoins(),
