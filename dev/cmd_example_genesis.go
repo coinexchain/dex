@@ -136,6 +136,40 @@ func createGenesisAssetData() asset.GenesisState {
 }
 
 func createGenesisMarketData() market.GenesisState {
-	// TODO
-	return market.DefaultGenesisState()
+	order0 := &market.Order{
+		Sender:      accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Sequence:    100,
+		Symbol:      "abc/cet",
+		OrderType:   2,
+		Price:       sdk.NewDec(100),
+		Quantity:    100000,
+		Side:        1,
+		TimeInForce: 10092839,
+		Height:      100,
+	}
+	order1 := &market.Order{
+		Sender:      accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Sequence:    170,
+		Symbol:      "btc/cet",
+		OrderType:   2,
+		Price:       sdk.NewDec(121920),
+		Quantity:    100000,
+		Side:        1,
+		TimeInForce: 1002682839,
+		Height:      100,
+	}
+
+	market0 := market.MarketInfo{
+		Stock:             "abc",
+		Money:             "cet",
+		Creator:           accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		PricePrecision:    8,
+		LastExecutedPrice: sdk.NewDec(8568),
+	}
+
+	state := market.DefaultGenesisState()
+	state.Orders = append(state.Orders, order0, order1)
+	state.MarketInfos = append(state.MarketInfos, market0)
+
+	return state
 }
