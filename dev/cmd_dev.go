@@ -15,6 +15,7 @@ func DevCmd(cdc *codec.Codec) *cobra.Command {
 
 	devCmd.AddCommand(
 		ExampleGenesisCmd(cdc),
+		DefaultParamsCmd(cdc),
 	)
 
 	return devCmd

@@ -5,6 +5,8 @@ require (
 	github.com/cosmos/cosmos-sdk v0.34.5
 	github.com/gorilla/mux v1.7.0
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/mattn/go-runewidth v0.0.4 // indirect
+	github.com/olekukonko/tablewriter v0.0.1
 	github.com/pkg/errors v0.8.1
 	github.com/rakyll/statik v0.1.6
 	github.com/spf13/cobra v0.0.3
