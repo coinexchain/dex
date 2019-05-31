@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -246,16 +247,16 @@ func (keeper *PersistentOrderKeeper) GetAllOrders(ctx sdk.Context) []*Order {
 func (keeper *PersistentOrderKeeper) RemoveAllOrders(ctx sdk.Context) {
 	store := ctx.KVStore(keeper.marketKey)
 	keys := make([][]byte, 0, 10)
-	keeper.fillKeys(store, keys, OrderBookKeyPrefix)
-	keeper.fillKeys(store, keys, BidListKeyPrefix)
-	keeper.fillKeys(store, keys, AskListKeyPrefix)
-	keeper.fillKeys(store, keys, OrderQueueKeyPrefix)
+	keeper.fillKeys(store, &keys, OrderBookKeyPrefix)
+	keeper.fillKeys(store, &keys, BidListKeyPrefix)
+	keeper.fillKeys(store, &keys, AskListKeyPrefix)
+	keeper.fillKeys(store, &keys, OrderQueueKeyPrefix)
 	for _, key := range keys {
 		store.Delete(key)
 	}
 }
 
-func (keeper *PersistentOrderKeeper) fillKeys(store sdk.KVStore, keys [][]byte, keyPrefix []byte) {
+func (keeper *PersistentOrderKeeper) fillKeys(store sdk.KVStore, keys *[][]byte, keyPrefix []byte) {
 	start := concatCopyPreAllocate([][]byte{
 		keyPrefix,
 		[]byte(keeper.symbol),
@@ -267,7 +268,7 @@ func (keeper *PersistentOrderKeeper) fillKeys(store sdk.KVStore, keys [][]byte, 
 		{0x1},
 	})
 	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
-		keys = append(keys, iter.Key())
+		*keys = append(*keys, iter.Key())
 	}
 }
 
