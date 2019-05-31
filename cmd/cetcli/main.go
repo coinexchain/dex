@@ -20,10 +20,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
-
-	at "github.com/cosmos/cosmos-sdk/x/auth"
+	
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
-	auth "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 	crisisclient "github.com/cosmos/cosmos-sdk/x/crisis/client"
 	distcmd "github.com/cosmos/cosmos-sdk/x/distribution"
 	distClient "github.com/cosmos/cosmos-sdk/x/distribution/client"
