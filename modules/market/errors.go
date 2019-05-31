@@ -18,6 +18,8 @@ const (
 	CodeInvalidSymbol         = 130
 	CodeTokenFrozenByIssuer   = 131
 	CodeInvalidOrderID        = 132
+	CodeMarshalFailed         = 133
+	CodeUnMarshalFailed       = 134
 )
 
 func ErrTokenNoExist() sdk.Error {

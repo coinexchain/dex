@@ -48,11 +48,11 @@ func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sd
 
 	info, err := mk.GetMarketInfo(ctx, param.Symbol)
 	if err != nil {
-		return nil, sdk.ErrInternal("could not get market from blockchain" + err.Error())
+		return nil, sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "could not get market from blockchain")
 	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, info)
 	if err != nil {
-		return nil, sdk.ErrInternal("could not marshal result to JSON" + err.Error())
+		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
 	}
 	return bz, nil
 }
@@ -70,14 +70,14 @@ func NewQueryOrderParam(orderID string) QueryOrderParam {
 func queryOrder(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
 	var param QueryOrderParam
 	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
-		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse param: %s", err))
+		return nil, sdk.NewError(CodeSpaceMarket, CodeUnMarshalFailed, "failed to parse param")
 	}
 
 	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
 	order := okp.QueryOrder(ctx, param.OrderID)
 	bz, err := codec.MarshalJSONIndent(mk.cdc, *order)
 	if err != nil {
-		return nil, sdk.ErrInternal("could not marshal result to JSON" + err.Error())
+		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
 	}
 
 	return bz, nil
@@ -94,7 +94,7 @@ type OrderList struct {
 func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
 	var param QueryUserOrderList
 	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
-		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse param: %s", err))
+		return nil, sdk.NewError(CodeSpaceMarket, CodeUnMarshalFailed, "failed to parse param")
 	}
 
 	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
@@ -102,7 +102,7 @@ func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]b
 
 	bz, err := codec.MarshalJSONIndent(mk.cdc, OrderList{orders})
 	if err != nil {
-		return nil, sdk.ErrInternal("could not marshal result to JSON" + err.Error())
+		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
 	}
 	return bz, nil
 }
