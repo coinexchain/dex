@@ -12,7 +12,7 @@ func NewCetCoin(amount int64) sdk.Coin {
 	return sdk.NewCoin(CET, sdk.NewInt(amount))
 }
 func NewCetCoinE8(amount int64) sdk.Coin {
-	return sdk.NewCoin(CET, sdk.NewInt(amount * E8))
+	return sdk.NewCoin(CET, sdk.NewInt(amount*E8))
 }
 
 func NewCetCoins(amount int64) sdk.Coins {

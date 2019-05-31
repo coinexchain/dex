@@ -14,14 +14,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
 
-type genesisStateCallback func(state GenesisState)
+type genesisStateCallback func(state *GenesisState)
 
 func newApp() *CetChainApp {
 	logger := log.NewNopLogger()
@@ -37,7 +39,7 @@ func initApp(acc auth.BaseAccount, cb genesisStateCallback) *CetChainApp {
 	genAcc := NewGenesisAccount(&acc)
 	genState.Accounts = append(genState.Accounts, genAcc)
 	if cb != nil {
-		cb(genState)
+		cb(&genState)
 	}
 
 	// init chain
@@ -166,10 +168,8 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 	// deliver tx
 	coins = dex.NewCetCoins(1000)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
-	msgs := make([]sdk.Msg, 1)
-	msgs[0] = msg
 	tx := auth.StdTx{
-		Msgs: msgs,
+		Msgs: []sdk.Msg{msg},
 	}
 
 	result := app.Deliver(tx)
@@ -177,5 +177,30 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 }
 
 func TestMinSelfDelegation(t *testing.T) {
+	key0, pubKey0, addr0 := testutil.KeyPubAddr()
+	coins := dex.NewCetCoins(1000)
+	acc0 := auth.BaseAccount{Address: addr0, Coins: coins}
+	val0 := sdk.ValAddress(addr0)
 
+	// init app
+	app := initApp(acc0, func(genState *GenesisState) {
+		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(500)
+	})
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	// deliver
+	msg := staking.NewMsgCreateValidator(val0, pubKey0,
+		dex.NewCetCoin(450), // selfDelegation
+		staking.NewDescription("node0", "node0", "www.node0.com", "node0"),
+		staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
+		sdk.NewInt(400))
+	tx := testutil.NewStdTxBuilder("c1").
+		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key0).Build()
+
+	result := app.Deliver(tx)
+	//require.Nil(t, result.Codespace)
+	require.Equal(t, stakingx.CodeMinSelfDelegationBelowRequired, result.Code)
 }
