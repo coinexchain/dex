@@ -29,14 +29,20 @@
 创建 eth/cet 对交易市场
 
 `./cetcli tx market createmarket --from bob --chain-id=coinexdex  --gas 20000 --stock=eth --money=cet --price-precision=8`
-   
-## 创建订单
 
-`./cetcli tx market creategteoreder --symbol="eth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --time-in-force=1000 --from bob --price-precision=9 --chain-id=coinexdex  `   
 
 ## 查询指定市场信息
 
 `./cetcli query market marketinfo eth/cet --trust-node=true`
+
+## 创建订单
+
+1. 创建**GTE**类型的订单
+`./cetcli tx market creategteoreder --symbol="eth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  `   
+
+2. 创建**IOC**类型的订单
+
+`./cetcli tx market createiocorder --symbol="eth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  `
 
 ## 查询指定订单信息
 
