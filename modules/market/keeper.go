@@ -101,6 +101,16 @@ func (k Keeper) SetMarket(ctx sdk.Context, info MarketInfo) sdk.Error {
 	return nil
 }
 
+func (k Keeper) RemoveMarket(ctx sdk.Context, symbol string) sdk.Error {
+	store := ctx.KVStore(k.marketKey)
+	key := marketStoreKey(MarketIdentifierPrefix, symbol)
+	value := store.Get(key)
+	if value != nil {
+		store.Delete(key)
+	}
+	return nil
+}
+
 // RegisterCodec registers concrete types on the codec
 func (k Keeper) RegisterCodec() {
 	RegisterCodec(k.cdc)
