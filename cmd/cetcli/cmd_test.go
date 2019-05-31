@@ -19,5 +19,5 @@ func TestCreateRootCmd(t *testing.T) {
 	cdc := app.MakeCodec()
 
 	rootCmd := createRootCmd(cdc)
-	require.Equal(t, 11, len(rootCmd.Commands()))
+	require.Equal(t, 13, len(rootCmd.Commands()))
 }

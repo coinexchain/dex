@@ -38,6 +38,7 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
+	"github.com/coinexchain/dex/dev"
 	as "github.com/coinexchain/dex/modules/asset"
 	assclient "github.com/coinexchain/dex/modules/asset/client"
 	assrest "github.com/coinexchain/dex/modules/asset/client/rest"
@@ -120,6 +121,8 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		client.LineBreak,
 		version.VersionCmd,
 		client.NewCompletionCmd(rootCmd, true),
+		client.LineBreak,
+		dev.DevCmd(cdc),
 	)
 
 	return rootCmd
