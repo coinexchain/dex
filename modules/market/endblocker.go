@@ -8,11 +8,11 @@ import (
 )
 
 type InfoForDeal struct {
-	bxKeeper        ExpectedBankxKeeper
-	dataHash        []byte
-	fulfilledOrders map[string]*Order
-	lastPrice       sdk.Dec
-	context         sdk.Context
+	bxKeeper      ExpectedBankxKeeper
+	dataHash      []byte
+	changedOrders map[string]*Order
+	lastPrice     sdk.Dec
+	context       sdk.Context
 }
 
 type WrappedOrder struct {
@@ -74,12 +74,8 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	wo.infoForDeal.bxKeeper.SendCoins(ctx, seller.Sender, buyer.Sender, stockCoins)
 	wo.infoForDeal.bxKeeper.UnFreezeCoins(ctx, buyer.Sender, moneyCoins)
 	wo.infoForDeal.bxKeeper.SendCoins(ctx, buyer.Sender, seller.Sender, moneyCoins)
-	if buyer.LeftStock == 0 {
-		wo.infoForDeal.fulfilledOrders[buyer.OrderID()] = buyer
-	}
-	if seller.LeftStock == 0 {
-		wo.infoForDeal.fulfilledOrders[seller.OrderID()] = seller
-	}
+	wo.infoForDeal.changedOrders[buyer.OrderID()] = buyer
+	wo.infoForDeal.changedOrders[seller.OrderID()] = seller
 	wo.infoForDeal.lastPrice = price
 }
 
@@ -118,7 +114,7 @@ func filterCandidates(ctx sdk.Context, asKeeper ExpectedAssertStatusKeeper, orde
 	return ordersOut
 }
 
-func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Keeper, dataHash []byte, currHeight int64) (toBeDeleted map[string]*Order, lastPrice sdk.Dec) {
+func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Keeper, dataHash []byte, currHeight int64) (map[string]*Order, sdk.Dec) {
 	orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
 	asKeeper := keeper.axk
 	bxKeeper := keeper.bnk
@@ -126,11 +122,11 @@ func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Kee
 	highPrice := midPrice.Mul(sdk.NewDec(100 + MaxExecutedPriceChangeRatio)).Quo(sdk.NewDec(100))
 
 	infoForDeal := &InfoForDeal{
-		bxKeeper:        bxKeeper,
-		dataHash:        dataHash,
-		fulfilledOrders: make(map[string]*Order),
-		context:         ctx,
-		lastPrice:       sdk.NewDec(0),
+		bxKeeper:      bxKeeper,
+		dataHash:      dataHash,
+		changedOrders: make(map[string]*Order),
+		context:       ctx,
+		lastPrice:     sdk.NewDec(0),
 	}
 	stockAndMoney := strings.Split(orderKeeper.GetSymbol(), "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
@@ -150,20 +146,20 @@ func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Kee
 		}
 	}
 	match.Match(highPrice, midPrice, lowPrice, bidList, askList)
-	tobeDel := infoForDeal.fulfilledOrders
+	ordersForUpdate := infoForDeal.changedOrders
 	for _, order := range orderKeeper.GetOrdersAtHeight(ctx, currHeight) {
 		if order.OrderType == IOC {
-			tobeDel[order.OrderID()] = order
+			ordersForUpdate[order.OrderID()] = order
 		}
 	}
-	return tobeDel, infoForDeal.lastPrice
+	return ordersForUpdate, infoForDeal.lastPrice
 }
 
 func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	recordDay := keeper.orderClean.GetDay(ctx)
 	currDay := ctx.BlockHeader().Time.Day()
 	marketInfoList := keeper.GetAllMarketInfos(ctx)
-	toBeDeletedOrderMaps := make([]map[string]*Order, len(marketInfoList))
+	ordersForUpdateList := make([]map[string]*Order, len(marketInfoList))
 	newPrices := make([]sdk.Dec, len(marketInfoList))
 	currHeight := ctx.BlockHeight()
 	if currDay != recordDay {
@@ -181,20 +177,24 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 			}
 			symbol := mi.Stock + "/" + mi.Money
 			dataHash := ctx.BlockHeader().DataHash
-			toDel, newPrice := matchForMarket(ctx, mi.LastExecutedPrice, symbol, keeper, dataHash, currHeight)
+			oUpdate, newPrice := matchForMarket(ctx, mi.LastExecutedPrice, symbol, keeper, dataHash, currHeight)
 			if !newPrice.IsZero() {
 				newPrices[idx] = newPrice
-				toBeDeletedOrderMaps[idx] = toDel
+				ordersForUpdateList[idx] = oUpdate
 			}
 		}
 		for idx, mi := range marketInfoList {
-			if toBeDeletedOrderMaps[idx] == nil {
+			if ordersForUpdateList[idx] == nil {
 				continue
 			}
 			symbol := mi.Stock + "/" + mi.Money
 			orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-			for _, order := range toBeDeletedOrderMaps[idx] {
-				removeOrder(ctx, orderKeeper, keeper.bnk, order)
+			for _, order := range ordersForUpdateList[idx] {
+				if order.OrderType == IOC || order.Freeze == 0 {
+					removeOrder(ctx, orderKeeper, keeper.bnk, order)
+				} else {
+					orderKeeper.Add(ctx, order)
+				}
 			}
 			mi.LastExecutedPrice = newPrices[idx]
 			keeper.SetMarket(ctx, mi)
