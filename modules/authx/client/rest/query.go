@@ -55,7 +55,7 @@ func QueryAccountRequestHandlerFn(
 
 		aux, err := clientx.GetAccountX(cliCtx, addr)
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			rest.PostProcessResponse(w, cdc, acc, cliCtx.Indent)
 			return
 		}
 
@@ -94,7 +94,7 @@ func QueryBalancesRequestHandlerFn(
 
 		aux, err := clientx.GetAccountX(cliCtx, addr)
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			rest.PostProcessResponse(w, cdc, acc, cliCtx.Indent)
 			return
 		}
 

@@ -36,7 +36,7 @@ func GetAccountXCmd(storeName string, cdc *codec.Codec) *cobra.Command {
 
 			aux, err := clientx.GetAccountX(cliCtx, key)
 			if err != nil {
-				return err
+				return cliCtx.PrintOutput(acc)
 			}
 
 			all := authx.AccountAll{Account: acc, AccountX: aux}
