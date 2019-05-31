@@ -55,6 +55,7 @@ type OrderKeeper interface {
 	Remove(ctx sdk.Context, order *Order) sdk.Error
 	GetOlderThan(ctx sdk.Context, height int64) []*Order
 	GetAllOrders(ctx sdk.Context) []*Order
+	RemoveAllOrders(ctx sdk.Context)
 	GetOrdersAtHeight(ctx sdk.Context, height int64) []*Order
 	QueryOrder(ctx sdk.Context, orderID string) *Order
 	GetOrdersFromUser(ctx sdk.Context, user string) []string
@@ -240,6 +241,34 @@ func (keeper *PersistentOrderKeeper) GetAllOrders(ctx sdk.Context) []*Order {
 		result = append(result, order)
 	}
 	return result
+}
+
+func (keeper *PersistentOrderKeeper) RemoveAllOrders(ctx sdk.Context) {
+	store := ctx.KVStore(keeper.marketKey)
+	var keys [][]byte
+	keeper.fillKeys(store, keys, OrderBookKeyPrefix)
+	keeper.fillKeys(store, keys, BidListKeyPrefix)
+	keeper.fillKeys(store, keys, AskListKeyPrefix)
+	keeper.fillKeys(store, keys, OrderQueueKeyPrefix)
+	for _, key := range keys {
+		store.Delete(key)
+	}
+}
+
+func (keeper *PersistentOrderKeeper) fillKeys(store sdk.KVStore, keys [][]byte, keyPrefix []byte) {
+	start := concatCopyPreAllocate([][]byte{
+		keyPrefix,
+		[]byte(keeper.symbol),
+		{0x0},
+	})
+	end := concatCopyPreAllocate([][]byte{
+		keyPrefix,
+		[]byte(keeper.symbol),
+		{0x1},
+	})
+	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
+		keys = append(keys, iter.Key())
+	}
 }
 
 func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height int64) []*Order {
