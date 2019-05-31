@@ -79,6 +79,7 @@ func (acc *AccountX) TransferUnlockedCoins(time int64, ctx sdk.Context, kx Accou
 			temp = append(temp, c)
 		}
 	}
+	coins=coins.Sort()
 	newCoins := oldCoins.Add(coins)
 	account.SetCoins(newCoins)
 	keeper.SetAccount(ctx, account)
