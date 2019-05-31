@@ -7,6 +7,7 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
@@ -14,6 +15,30 @@ import (
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
+
+func TestExportRestore(t *testing.T) {
+	_, _, addr := testutil.KeyPubAddr()
+	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
+
+	// export
+	app1 := initApp(acc, nil)
+	ctx1 := app1.NewContext(false, abci.Header{Height: app1.LastBlockHeight()})
+	genState1 := app1.exportGenesisState(ctx1)
+
+	// restore & reexport
+	app2 := initApp(acc, func(genState *GenesisState) {
+		*genState = genState1
+	})
+	ctx2 := app2.NewContext(false, abci.Header{Height: app2.LastBlockHeight()})
+	genState2 := app2.exportGenesisState(ctx2)
+
+	// check
+	json1, err1 := codec.MarshalJSONIndent(app1.cdc, genState1)
+	json2, err2 := codec.MarshalJSONIndent(app2.cdc, genState2)
+	require.Nil(t, err1)
+	require.Nil(t, err2)
+	require.Equal(t, json1, json2)
+}
 
 func TestExportGenesisState(t *testing.T) {
 	_, _, addr := testutil.KeyPubAddr()
