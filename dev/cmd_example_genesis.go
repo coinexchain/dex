@@ -16,11 +16,11 @@ func ExampleGenesisCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			genState := app.NewDefaultGenesisState()
-			gsJson, err := codec.MarshalJSONIndent(cdc, genState)
+			gsJSON, err := codec.MarshalJSONIndent(cdc, genState)
 			if err != nil {
 				return err
 			}
-			fmt.Println(string(gsJson))
+			fmt.Println(string(gsJSON))
 			return nil
 		},
 	}
