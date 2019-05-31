@@ -85,7 +85,7 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) Expec
 	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck)
 	bk.SetSendEnabled(ctx, true)
-	bxkKeeper.SetParam(ctx, bankx.DefaultParam())
+	bxkKeeper.SetParam(ctx, bankx.DefaultParams())
 
 	return bxkKeeper
 }

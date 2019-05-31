@@ -49,7 +49,7 @@ func TestParamGetSet(t *testing.T) {
 	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{})
 
 	//expect DefaultActivationFees=1
-	defaultParam := DefaultParam()
+	defaultParam := DefaultParams()
 	require.Equal(t, int64(100000000), defaultParam.ActivationFee)
 
 	//expect SetParam don't panic

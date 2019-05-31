@@ -64,7 +64,7 @@ func setupTestInput() testInput {
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
-	bxkKeeper.SetParam(ctx, DefaultParam())
+	bxkKeeper.SetParam(ctx, DefaultParams())
 
 	handler := NewHandler(bxkKeeper)
 	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, handler: handler}

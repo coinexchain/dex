@@ -29,11 +29,11 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	}
 }
 
-func (k Keeper) GetParam(ctx sdk.Context) (param Param) {
+func (k Keeper) GetParam(ctx sdk.Context) (param Params) {
 	k.paramSubspace.Get(ctx, ParamStoreKeyActivationFee, &param)
 	return
 }
-func (k Keeper) SetParam(ctx sdk.Context, param Param) {
+func (k Keeper) SetParam(ctx sdk.Context, param Params) {
 	k.paramSubspace.Set(ctx, ParamStoreKeyActivationFee, param)
 }
 

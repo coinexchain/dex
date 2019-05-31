@@ -6,11 +6,11 @@ import (
 
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
-	Param Param `json:"param"`
+	Param Params `json:"params"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(param Param) GenesisState {
+func NewGenesisState(param Params) GenesisState {
 	return GenesisState{
 		Param: param,
 	}
@@ -18,7 +18,7 @@ func NewGenesisState(param Param) GenesisState {
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParam())
+	return NewGenesisState(DefaultParams())
 }
 
 // InitGenesis - Init store state from genesis data
