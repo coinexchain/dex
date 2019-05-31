@@ -40,7 +40,7 @@ func newContextAndMarketKey() (sdk.Context, sdk.StoreKey) {
 	ms.MountStoreWithDB(marketKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
-	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
+	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1000}, false, log.NewNopLogger())
 	return ctx, marketKey
 }
 
@@ -116,6 +116,9 @@ func TestOrderBook1(t *testing.T) {
 	orders := createTO1()
 	ctx, marketKey := newContextAndMarketKey()
 	keeper := newKeeperForTest(marketKey)
+	if keeper.GetSymbol() != "CET/USDT" {
+		t.Errorf("Error in GetSymbol")
+	}
 	gkeeper := newGlobalKeeperForTest(marketKey)
 	for _, order := range orders {
 		keeper.Add(ctx, order)
@@ -165,9 +168,15 @@ func TestOrderBook1(t *testing.T) {
 		if !sameTO(order, qorder) {
 			t.Errorf("Order's content is changed!")
 		}
-		keeper.Remove(ctx, order)
+	}
+	keeper.RemoveAllOrders(ctx)
+	fmt.Printf("height:%d\n", ctx.BlockHeight())
+	for _, order := range orders {
+		if order.TimeInForce == IOC {
+			continue
+		}
 		if gkeeper.QueryOrder(ctx, order.OrderID()) != nil {
-			t.Errorf("Can find a deleted order!")
+			t.Errorf("Order %s is not removed!", order.OrderID())
 			continue
 		}
 	}

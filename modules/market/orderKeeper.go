@@ -215,7 +215,9 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64)
 }
 
 func (keeper *PersistentOrderKeeper) RemoveAllOrders(ctx sdk.Context) {
+	fmt.Printf("height::: %d\n", ctx.BlockHeight()+1)
 	for _, order := range keeper.GetOlderThan(ctx, ctx.BlockHeight()+1) {
+		fmt.Printf("Now remove: %s\n", order.OrderID())
 		keeper.Remove(ctx, order)
 	}
 }
