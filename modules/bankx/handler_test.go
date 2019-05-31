@@ -93,7 +93,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
 	_, found := input.axk.GetAccountX(input.ctx, toAddr)
-	require.Equal(t, true, found)
+	require.Equal(t, false, found)
 	require.Equal(t, sdk.NewInt(int64(100000000)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 
 	fromAccount.SetCoins(dex.NewCetCoins(1000000000))
