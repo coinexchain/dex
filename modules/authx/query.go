@@ -11,33 +11,22 @@ import (
 
 // query endpoints supported by the auth Querier
 const (
-	QueryAccountx = "accountx"
+	QueryAccountX = "accountx"
 )
 
 // creates a querier for auth REST endpoints
 func NewQuerier(keeper AccountXKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
-		case QueryAccountx:
-			return queryAccountx(ctx, req, keeper)
+		case QueryAccountX:
+			return queryAccountX(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown authx query endpoint")
 		}
 	}
 }
 
-// defines the params for query: "custom/accx/accountx"
-type QueryAccountxParams struct {
-	Address sdk.AccAddress
-}
-
-func NewQueryAccountxParams(addr sdk.AccAddress) QueryAccountxParams {
-	return QueryAccountxParams{
-		Address: addr,
-	}
-}
-
-func queryAccountx(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper) ([]byte, sdk.Error) {
+func queryAccountX(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper) ([]byte, sdk.Error) {
 	var params auth.QueryAccountParams
 
 	if err := keeper.cdc.UnmarshalJSON(req.Data, &params); err != nil {

@@ -10,31 +10,31 @@ import (
 
 func GetAccountX(ctx context.CLIContext, address []byte) (authx.AccountX, error) {
 
-	res, err := QueryAccountx(ctx, address)
+	res, err := QueryAccountX(ctx, address)
 	if err != nil {
 		return authx.AccountX{}, err
 	}
 
-	var accountx authx.AccountX
-	if err := ctx.Codec.UnmarshalJSON(res, &accountx); err != nil {
+	var accountX authx.AccountX
+	if err := ctx.Codec.UnmarshalJSON(res, &accountX); err != nil {
 		return authx.AccountX{}, err
 	}
 
-	return accountx, nil
+	return accountX, nil
 }
 
 func EnsureAccountExistsFromAddr(ctx context.CLIContext, addr sdk.AccAddress) error {
-	_, err := QueryAccountx(ctx, addr)
+	_, err := QueryAccountX(ctx, addr)
 	return err
 }
 
-func QueryAccountx(ctx context.CLIContext, addr sdk.AccAddress) ([]byte, error) {
+func QueryAccountX(ctx context.CLIContext, addr sdk.AccAddress) ([]byte, error) {
 	bz, err := ctx.Codec.MarshalJSON(auth.NewQueryAccountParams(addr))
 	if err != nil {
 		return nil, err
 	}
 
-	route := fmt.Sprintf("custom/%s/%s", authx.StoreKey, authx.QueryAccountx)
+	route := fmt.Sprintf("custom/%s/%s", authx.StoreKey, authx.QueryAccountX)
 
 	res, err := ctx.QueryWithData(route, bz)
 	if err != nil {
