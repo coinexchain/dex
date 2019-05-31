@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tm "github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -13,7 +11,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/coinexchain/dex/modules/market"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -55,6 +55,8 @@ func printExampleGenesis(cdc *codec.Codec) error {
 func createExampleGenesisState() app.GenesisState {
 	genState := app.NewDefaultGenesisState()
 	genState.Accounts = createGenesisAccounts()
+	genState.AssetData = createGenesisAssetData()
+	genState.MarketData = createGenesisMarketData()
 	return genState
 }
 
@@ -100,6 +102,40 @@ func accAddressFromBech32(address string) sdk.AccAddress {
 	return addr
 }
 
-func randomAccAddress() sdk.AccAddress {
-	return sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address())
+func createGenesisAssetData() asset.GenesisState {
+	t0 := &asset.BaseToken{
+		Name:             "CoinEx Chain Native Token",
+		Symbol:           "cet",
+		TotalSupply:      588788547005740000,
+		Owner:            accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Mintable:         false,
+		Burnable:         true,
+		AddrForbiddable:  false,
+		TokenForbiddable: false,
+		TotalBurn:        411211452994260000,
+		TotalMint:        0,
+		IsForbidden:      false,
+	}
+	t1 := &asset.BaseToken{
+		Name:             "ABC Chain Native Token",
+		Symbol:           "abc",
+		TotalSupply:      588788547005740000,
+		Owner:            accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Mintable:         false,
+		Burnable:         true,
+		AddrForbiddable:  false,
+		TokenForbiddable: false,
+		TotalBurn:        411211452994260000,
+		TotalMint:        0,
+		IsForbidden:      false,
+	}
+
+	state := asset.DefaultGenesisState()
+	state.Tokens = append(state.Tokens, t0, t1)
+	return state
+}
+
+func createGenesisMarketData() market.GenesisState {
+	// TODO
+	return market.DefaultGenesisState()
 }
