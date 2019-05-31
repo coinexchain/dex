@@ -72,7 +72,7 @@ func queryOrder(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse param: %s", err))
 	}
 
-	okp := NewOrderKeeper(mk.marketKey, param.Symbol, mk.cdc)
+	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
 	order := okp.QueryOrder(ctx, param.OrderID)
 	bz, err := codec.MarshalJSONIndent(mk.cdc, *order)
 	if err != nil {

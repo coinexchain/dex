@@ -50,16 +50,14 @@ func (keeper *OrderCleanUpDayKeeper) SetDay(ctx sdk.Context, day int) {
 	store.Set(LastOrderCleanUpDayKey, value[:])
 }
 
+/////////////////////////////////////////////////////////////////////
+
 type OrderKeeper interface {
 	Add(ctx sdk.Context, order *Order) sdk.Error
-	Exists(ctx sdk.Context, orderID string) bool
 	Remove(ctx sdk.Context, order *Order) sdk.Error
 	GetOlderThan(ctx sdk.Context, height int64) []*Order
-	GetAllOrders(ctx sdk.Context) []*Order
 	RemoveAllOrders(ctx sdk.Context)
 	GetOrdersAtHeight(ctx sdk.Context, height int64) []*Order
-	QueryOrder(ctx sdk.Context, orderID string) *Order
-	GetOrdersFromUser(ctx sdk.Context, user string) []string
 	GetMatchingCandidates(ctx sdk.Context) []*Order
 	GetSymbol() string
 }
@@ -87,10 +85,9 @@ func (keeper *PersistentOrderKeeper) GetSymbol() string {
 	return keeper.symbol
 }
 
-func (keeper *PersistentOrderKeeper) orderBookKey(orderID string) []byte {
+func orderBookKey(orderID string) []byte {
 	return concatCopyPreAllocate([][]byte{
 		OrderBookKeyPrefix,
-		[]byte(keeper.symbol),
 		{0x0},
 		[]byte(orderID),
 	})
@@ -153,7 +150,7 @@ func int64ToBigEndianBytes(n int64) []byte {
 
 func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *Order) sdk.Error {
 	store := ctx.KVStore(keeper.marketKey)
-	key := keeper.orderBookKey(order.OrderID())
+	key := orderBookKey(order.OrderID())
 	value := keeper.codec.MustMarshalBinaryBare(order)
 	store.Set(key, value)
 
@@ -172,18 +169,12 @@ func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *Order) sdk.Erro
 	return nil
 }
 
-func (keeper *PersistentOrderKeeper) Exists(ctx sdk.Context, orderID string) bool {
-	store := ctx.KVStore(keeper.marketKey)
-	key := keeper.orderBookKey(orderID)
-	return store.Has(key)
-}
-
 func (keeper *PersistentOrderKeeper) Remove(ctx sdk.Context, order *Order) sdk.Error {
 	store := ctx.KVStore(keeper.marketKey)
-	if !keeper.Exists(ctx, order.OrderID()) {
+	if keeper.getOrder(ctx, order.OrderID()) == nil {
 		return ErrNoExistKeyInStore()
 	}
-	key := keeper.orderBookKey(order.OrderID())
+	key := orderBookKey(order.OrderID())
 	store.Delete(key)
 
 	if order.TimeInForce == GTE {
@@ -218,28 +209,7 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64)
 	for iter := store.ReverseIterator(start, end); iter.Valid(); iter.Next() {
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
-		result = append(result, keeper.QueryOrder(ctx, orderID))
-	}
-	return result
-}
-
-func (keeper *PersistentOrderKeeper) GetAllOrders(ctx sdk.Context) []*Order {
-	store := ctx.KVStore(keeper.marketKey)
-	var result []*Order
-	start := concatCopyPreAllocate([][]byte{
-		OrderBookKeyPrefix,
-		[]byte(keeper.symbol),
-		{0x0},
-	})
-	end := concatCopyPreAllocate([][]byte{
-		OrderBookKeyPrefix,
-		[]byte(keeper.symbol),
-		{0x1},
-	})
-	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
-		order := &Order{}
-		keeper.codec.MustUnmarshalBinaryBare(iter.Value(), order)
-		result = append(result, order)
+		result = append(result, keeper.getOrder(ctx, orderID))
 	}
 	return result
 }
@@ -290,14 +260,14 @@ func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height i
 	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
-		result = append(result, keeper.QueryOrder(ctx, orderID))
+		result = append(result, keeper.getOrder(ctx, orderID))
 	}
 	return result
 }
 
-func (keeper *PersistentOrderKeeper) QueryOrder(ctx sdk.Context, orderID string) *Order {
+func (keeper *PersistentOrderKeeper) getOrder(ctx sdk.Context, orderID string) *Order {
 	store := ctx.KVStore(keeper.marketKey)
-	key := keeper.orderBookKey(orderID)
+	key := orderBookKey(orderID)
 	orderBytes := store.Get(key)
 	if len(orderBytes) == 0 {
 		return nil
@@ -305,19 +275,6 @@ func (keeper *PersistentOrderKeeper) QueryOrder(ctx sdk.Context, orderID string)
 	order := &Order{}
 	keeper.codec.MustUnmarshalBinaryBare(orderBytes, order)
 	return order
-}
-
-func (keeper *PersistentOrderKeeper) GetOrdersFromUser(ctx sdk.Context, user string) []string {
-	store := ctx.KVStore(keeper.marketKey)
-	key := keeper.orderBookKey(user + "-")
-	nextKey := keeper.orderBookKey(user + string([]byte{0xFF}))
-	startPos := len(key) - len(user) - 1
-	var result []string
-	for iter := store.ReverseIterator(key, nextKey); iter.Valid(); iter.Next() {
-		k := iter.Key()
-		result = append(result, string(k[startPos:]))
-	}
-	return result
 }
 
 func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*Order {
@@ -380,7 +337,71 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*O
 	}
 	result := make([]*Order, 0, len(orderIDList))
 	for _, orderID := range orderIDList {
-		result = append(result, keeper.QueryOrder(ctx, orderID))
+		result = append(result, keeper.getOrder(ctx, orderID))
 	}
 	return result
+}
+
+////////////////////////////////////////////////
+
+type GlobalOrderKeeper interface {
+	GetAllOrders(ctx sdk.Context) []*Order
+	QueryOrder(ctx sdk.Context, orderID string) *Order
+	GetOrdersFromUser(ctx sdk.Context, user string) []string
+}
+
+type PersistentGlobalOrderKeeper struct {
+	marketKey sdk.StoreKey
+	codec     *codec.Codec
+}
+
+func NewGlobalOrderKeeper(key sdk.StoreKey, codec *codec.Codec) GlobalOrderKeeper {
+	return &PersistentGlobalOrderKeeper{
+		marketKey: key,
+		codec:     codec,
+	}
+}
+
+func (keeper *PersistentGlobalOrderKeeper) GetOrdersFromUser(ctx sdk.Context, user string) []string {
+	store := ctx.KVStore(keeper.marketKey)
+	key := orderBookKey(user + "-")
+	nextKey := orderBookKey(user + string([]byte{0xFF}))
+	startPos := len(key) - len(user) - 1
+	var result []string
+	for iter := store.Iterator(key, nextKey); iter.Valid(); iter.Next() {
+		k := iter.Key()
+		result = append(result, string(k[startPos:]))
+	}
+	return result
+}
+
+func (keeper *PersistentGlobalOrderKeeper) GetAllOrders(ctx sdk.Context) []*Order {
+	store := ctx.KVStore(keeper.marketKey)
+	var result []*Order
+	start := concatCopyPreAllocate([][]byte{
+		OrderBookKeyPrefix,
+		{0x0},
+	})
+	end := concatCopyPreAllocate([][]byte{
+		OrderBookKeyPrefix,
+		{0x1},
+	})
+	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
+		order := &Order{}
+		keeper.codec.MustUnmarshalBinaryBare(iter.Value(), order)
+		result = append(result, order)
+	}
+	return result
+}
+
+func (keeper *PersistentGlobalOrderKeeper) QueryOrder(ctx sdk.Context, orderID string) *Order {
+	store := ctx.KVStore(keeper.marketKey)
+	key := orderBookKey(orderID)
+	orderBytes := store.Get(key)
+	if len(orderBytes) == 0 {
+		return nil
+	}
+	order := &Order{}
+	keeper.codec.MustUnmarshalBinaryBare(orderBytes, order)
+	return order
 }
