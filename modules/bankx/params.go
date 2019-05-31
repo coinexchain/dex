@@ -1,15 +1,27 @@
 package bankx
 
-import "github.com/cosmos/cosmos-sdk/x/params"
+import (
+	"github.com/cosmos/cosmos-sdk/x/params"
+)
 
 const (
 	DefaultParamspace = "bankx"
 )
 
-var ParamStoreKeyActivationFee = []byte("ActivationFee")
+var _ params.ParamSet = &Params{}
+
+var (
+	KeyActivationFee = []byte("ActivationFee")
+)
 
 type Params struct {
 	ActivationFee int64 `json:"activation_fee"`
+}
+
+func (p *Params) ParamSetPairs() params.ParamSetPairs {
+	return params.ParamSetPairs{
+		{Key: KeyActivationFee, Value: &p.ActivationFee},
+	}
 }
 
 func DefaultParams() Params {
@@ -20,5 +32,5 @@ func DefaultParams() Params {
 
 // ParamKeyTable type declaration for parameters
 func ParamKeyTable() params.KeyTable {
-	return params.NewKeyTable().RegisterType(ParamStoreKeyActivationFee, &Params{})
+	return params.NewKeyTable().RegisterParamSet(&Params{})
 }

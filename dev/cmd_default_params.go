@@ -13,6 +13,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
@@ -42,7 +43,8 @@ func printDefaultParams() {
 
 	authxParams := authx.DefaultParams()
 	fillParamsTable(table, "authx", &authxParams)
-	//bankxParams := bankx.DefaultParam();
+	bankxParams := bankx.DefaultParams()
+	fillParamsTable(table, "bankx", &bankxParams)
 	stakingxParams := stakingx.DefaultParams()
 	fillParamsTable(table, "stakingx", &stakingxParams)
 	assetParams := asset.DefaultParams()

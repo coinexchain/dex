@@ -2,11 +2,13 @@ package bankx
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/authx"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/modules/authx"
 )
 
 type Keeper struct {
@@ -30,11 +32,11 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 }
 
 func (k Keeper) GetParam(ctx sdk.Context) (param Params) {
-	k.paramSubspace.Get(ctx, ParamStoreKeyActivationFee, &param)
+	k.paramSubspace.GetParamSet(ctx, &param)
 	return
 }
-func (k Keeper) SetParam(ctx sdk.Context, param Params) {
-	k.paramSubspace.Set(ctx, ParamStoreKeyActivationFee, param)
+func (k Keeper) SetParam(ctx sdk.Context, params Params) {
+	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
 func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
