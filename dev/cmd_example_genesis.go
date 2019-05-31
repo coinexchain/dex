@@ -1,7 +1,10 @@
 package dev
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/coinexchain/dex/testutil"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/spf13/cobra"
 	tm "github.com/tendermint/tendermint/types"
@@ -30,7 +33,7 @@ func ExampleGenesisCmd(cdc *codec.Codec) *cobra.Command {
 }
 
 func printExampleGenesis(cdc *codec.Codec) error {
-	genState := createExampleGenesisState()
+	genState := createExampleGenesisState(cdc)
 	gneStateBytes, err := codec.MarshalJSONIndent(cdc, genState)
 	if err != nil {
 		return err
@@ -41,7 +44,9 @@ func printExampleGenesis(cdc *codec.Codec) error {
 		Validators: nil,
 		AppState:   gneStateBytes,
 	}
-	genDoc.ValidateAndComplete()
+	if err := genDoc.ValidateAndComplete(); err != nil {
+		return err
+	}
 
 	genDocBytes, err := cdc.MarshalJSONIndent(genDoc, "", "  ")
 	if err != nil {
@@ -52,11 +57,12 @@ func printExampleGenesis(cdc *codec.Codec) error {
 	return nil
 }
 
-func createExampleGenesisState() app.GenesisState {
+func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 	genState := app.NewDefaultGenesisState()
 	genState.Accounts = createGenesisAccounts()
 	genState.AssetData = createGenesisAssetData()
 	genState.MarketData = createGenesisMarketData()
+	genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
 	return genState
 }
 
@@ -172,4 +178,34 @@ func createGenesisMarketData() market.GenesisState {
 	state.MarketInfos = append(state.MarketInfos, market0)
 
 	return state
+}
+
+func createExampleGenTx(cdc *codec.Codec) json.RawMessage {
+	key, pk, addr := testutil.KeyPubAddr()
+
+	amount := dex.NewCetCoin(10000000000000000)
+	description := staking.NewDescription("node0", "node0", "http://node0.coinexchain.org", "")
+
+	rate, _ := sdk.NewDecFromStr("0.1")
+	maxRate, _ := sdk.NewDecFromStr("0.2")
+	maxChangeRate, _ := sdk.NewDecFromStr("0.01")
+	commissionMsg := staking.NewCommissionMsg(rate, maxRate, maxChangeRate)
+
+	minSelfDelegation := sdk.NewInt(10000000000000000)
+
+	msg := staking.NewMsgCreateValidator(
+		sdk.ValAddress(addr), pk, amount, description, commissionMsg, minSelfDelegation,
+	)
+
+	stdTx := testutil.NewStdTxBuilder("coinexdex").
+		Msgs(msg).
+		AccNumSeqKey(0, 0, key).
+		Fee(200000, 10).
+		Build()
+
+	txBytes, err := codec.MarshalJSONIndent(cdc, stdTx)
+	if err != nil {
+		panic(err)
+	}
+	return txBytes
 }
