@@ -298,6 +298,9 @@ func (keeper *PersistentOrderKeeper) QueryOrder(ctx sdk.Context, orderID string)
 	store := ctx.KVStore(keeper.marketKey)
 	key := keeper.orderBookKey(orderID)
 	orderBytes := store.Get(key)
+	if len(orderBytes) == 0 {
+		return nil
+	}
 	order := &Order{}
 	keeper.codec.MustUnmarshalBinaryBare(orderBytes, order)
 	return order

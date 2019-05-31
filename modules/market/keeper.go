@@ -8,7 +8,49 @@ import (
 
 var (
 	MarketIdentifierPrefix = []byte{0x15}
+	DelistKey              = []byte{0x40}
 )
+
+type DelistKeeper struct {
+	marketKey sdk.StoreKey
+}
+
+func NewDelistKeeper(key sdk.StoreKey) *DelistKeeper {
+	return &DelistKeeper{
+		marketKey: key,
+	}
+}
+func getDelistKey(height int64, symbol string) []byte {
+	return concatCopyPreAllocate([][]byte{
+		DelistKey,
+		int64ToBigEndianBytes(height),
+		{0x0},
+		[]byte(symbol),
+	})
+}
+func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, height int64, symbol string) {
+	store := ctx.KVStore(keeper.marketKey)
+	store.Set(getDelistKey(height, symbol), []byte{})
+}
+func (keeper *DelistKeeper) GetDelistSymbolsAtHeight(ctx sdk.Context, height int64) []string {
+	store := ctx.KVStore(keeper.marketKey)
+	start := concatCopyPreAllocate([][]byte{
+		DelistKey,
+		int64ToBigEndianBytes(height),
+		{0x0},
+	})
+	end := concatCopyPreAllocate([][]byte{
+		DelistKey,
+		int64ToBigEndianBytes(height),
+		{0x1},
+	})
+	var result []string
+	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
+		key := iter.Key()
+		result = append(result, string(key[len(start):]))
+	}
+	return result
+}
 
 type Keeper struct {
 	paramSubspace params.Subspace
