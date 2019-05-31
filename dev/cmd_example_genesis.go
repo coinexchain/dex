@@ -63,6 +63,11 @@ func createGenesisAccounts() (accs []app.GenesisAccount) {
 		newBaseGenesisAccount(incentive.IncentiveCoinsAccAddr.String(), 30000000000000000),
 		newBaseGenesisAccount("cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy", 258788547005740000),
 		newBaseGenesisAccount("cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20", 120000000000000000),
+		newVestingGenesisAccount("cosmos1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q", 36000000000000000, 1577836800),
+		newVestingGenesisAccount("cosmos1966f22al7r23h3melq8yt8tnglhweunrxkcezl", 36000000000000000, 1609459200),
+		newVestingGenesisAccount("cosmos12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv", 36000000000000000, 1640995200),
+		newVestingGenesisAccount("cosmos1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj", 36000000000000000, 1672531200),
+		newVestingGenesisAccount("cosmos1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p", 36000000000000000, 1704067200),
 	)
 	return
 }
@@ -71,6 +76,19 @@ func newBaseGenesisAccount(address string, amt int64) app.GenesisAccount {
 	return app.NewGenesisAccount(&auth.BaseAccount{
 		Address: accAddressFromBech32(address),
 		Coins:   dex.NewCetCoins(amt),
+	})
+}
+
+func newVestingGenesisAccount(address string, amt int64, endTime int64) app.GenesisAccount {
+	return app.NewGenesisAccountI(&auth.DelayedVestingAccount{
+		BaseVestingAccount: &auth.BaseVestingAccount{
+			BaseAccount: &auth.BaseAccount{
+				Address: accAddressFromBech32(address),
+				Coins:   dex.NewCetCoins(amt),
+			},
+			OriginalVesting: dex.NewCetCoins(amt),
+			EndTime:         endTime,
+		},
 	})
 }
 
