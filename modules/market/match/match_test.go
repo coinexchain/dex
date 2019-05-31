@@ -49,7 +49,7 @@ type mocOrder struct {
 	height       int64
 	totalAmount  int64
 	remainAmount int64
-	orderType    int
+	side         int
 	owner        mocAccount
 }
 
@@ -73,8 +73,8 @@ func (order *mocOrder) GetHash() []byte {
 	return res[:]
 }
 
-func (order *mocOrder) GetType() int {
-	return order.orderType
+func (order *mocOrder) GetSide() int {
+	return order.side
 }
 
 func (order *mocOrder) GetOwner() Account {
@@ -108,26 +108,26 @@ func (order *mocOrder) Deal(otherSide OrderForTrade, amount int64, price sdk.Dec
 
 func (order *mocOrder) String() string {
 	s := "sell"
-	if order.GetType() == BUY {
+	if order.GetSide() == BUY {
 		s = "buy"
 	}
 	return fmt.Sprintf("%s %s %d at %s (%d)", order.GetOwner().String(), s, order.GetAmount(),
 		order.GetPrice().String(), order.GetHeight())
 }
 
-func newMocOrder(price int64, height int64, totalAmount int64, orderType int, owner string) OrderForTrade {
+func newMocOrder(price int64, height int64, totalAmount int64, side int, owner string) OrderForTrade {
 	return &mocOrder{
 		price:        sdk.NewDec(price),
 		height:       height,
 		totalAmount:  totalAmount,
 		remainAmount: totalAmount,
-		orderType:    orderType,
+		side:         side,
 		owner:        mocAccount{name: owner},
 	}
 }
 
 func createOrders1() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(100, 1, 150, BUY, "buyer1"),
 		newMocOrder(98, 1, 150, BUY, "buyer2"),
@@ -137,7 +137,7 @@ func createOrders1() []OrderForTrade {
 }
 
 func createOrders2() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(100, 1, 150, BUY, "buyer1"),
 		newMocOrder(99, 1, 50, BUY, "buyer2"),
@@ -148,7 +148,7 @@ func createOrders2() []OrderForTrade {
 }
 
 func createOrders2_1() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(100, 3, 50, BUY, "buyer1a"),
 		newMocOrder(100, 2, 50, BUY, "buyer1b"),
@@ -164,7 +164,7 @@ func createOrders2_1() []OrderForTrade {
 }
 
 func createOrders3() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(102, 1, 300, BUY, "buyer1"),
 		newMocOrder(100, 1, 100, BUY, "buyer2"),
@@ -177,7 +177,7 @@ func createOrders3() []OrderForTrade {
 }
 
 func createOrders4() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(102, 1, 30, BUY, "buyer1"),
 		newMocOrder(101, 1, 10, BUY, "buyer2"),
@@ -190,7 +190,7 @@ func createOrders4() []OrderForTrade {
 }
 
 func createOrders4_1() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(102, 1, 30, BUY, "buyer1"),
 		newMocOrder(101, 1, 10, BUY, "buyer2"),
@@ -203,7 +203,7 @@ func createOrders4_1() []OrderForTrade {
 }
 
 func createOrders5_1() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(102, 1, 10, BUY, "buyer1"),
 		newMocOrder(97, 1, 10, BUY, "buyer2"),
@@ -212,7 +212,7 @@ func createOrders5_1() []OrderForTrade {
 }
 
 func createOrders5_2() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(99, 1, 10, BUY, "buyer1"),
 		newMocOrder(94, 1, 10, BUY, "buyer2"),
@@ -221,7 +221,7 @@ func createOrders5_2() []OrderForTrade {
 }
 
 func createOrders5_3() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(99, 1, 100, BUY, "buyer1"),
 		newMocOrder(92, 1, 50, SELL, "seller1"),
@@ -229,7 +229,7 @@ func createOrders5_3() []OrderForTrade {
 }
 
 func createOrders5_4() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(101, 1, 10, BUY, "buyer1"),
 		newMocOrder(96, 1, 10, BUY, "buyer2"),
@@ -238,7 +238,7 @@ func createOrders5_4() []OrderForTrade {
 }
 
 func createOrders6() []OrderForTrade {
-	//             price height totalAmount orderType owner
+	//             price height totalAmount side owner
 	return []OrderForTrade{
 		newMocOrder(100, 1, 25, BUY, "buyer1"),
 		newMocOrder(97, 1, 25, BUY, "buyer2"),
@@ -368,10 +368,10 @@ func testMatch(tag string, mid int64, orders []OrderForTrade, dealRecordList []d
 	bidList := make([]OrderForTrade, 0, 10)
 	askList := make([]OrderForTrade, 0, 10)
 	for _, order := range orders {
-		if order.GetType() == BID {
+		if order.GetSide() == BID {
 			bidList = append(bidList, order)
 		}
-		if order.GetType() == ASK {
+		if order.GetSide() == ASK {
 			askList = append(askList, order)
 		}
 	}

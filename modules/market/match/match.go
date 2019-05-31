@@ -22,7 +22,7 @@ type OrderForTrade interface {
 	GetAmount() int64
 	GetHeight() int64
 	GetHash() []byte
-	GetType() int
+	GetSide() int
 	GetOwner() Account
 	Deal(otherSide OrderForTrade, amount int64, price sdk.Dec)
 	String() string
@@ -55,11 +55,11 @@ func Match(highPrice, midPrice, lowPrice sdk.Dec, bidList []OrderForTrade, askLi
 
 // return true if a should precede b in a sorted list, i.e. index of a is smaller
 func precede(a, b OrderForTrade) bool {
-	if (a.GetType() == ASK && a.GetPrice().LT(b.GetPrice())) || //for ask, lower price has priority
-		(a.GetType() == BID && a.GetPrice().GT(b.GetPrice())) { //for bid, higher price has priority
+	if (a.GetSide() == ASK && a.GetPrice().LT(b.GetPrice())) || //for ask, lower price has priority
+		(a.GetSide() == BID && a.GetPrice().GT(b.GetPrice())) { //for bid, higher price has priority
 		return true
-	} else if (a.GetType() == ASK && a.GetPrice().GT(b.GetPrice())) ||
-		(a.GetType() == BID && a.GetPrice().LT(b.GetPrice())) {
+	} else if (a.GetSide() == ASK && a.GetPrice().GT(b.GetPrice())) ||
+		(a.GetSide() == BID && a.GetPrice().LT(b.GetPrice())) {
 		return false
 	} else if a.GetHeight() < b.GetHeight() { //lower height has priority
 		return true
@@ -167,9 +167,9 @@ func createPricePointList(orders []OrderForTrade) []PricePoint {
 			})
 		}
 		//fmt.Printf("ppList[%d]: %s\n", offset, ppList[offset].String())
-		if order.GetType() == ASK {
+		if order.GetSide() == ASK {
 			ppList[offset].askAmount += order.GetAmount()
-		} else if order.GetType() == BID {
+		} else if order.GetSide() == BID {
 			ppList[offset].bidAmount += order.GetAmount()
 		}
 	}
