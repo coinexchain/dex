@@ -29,6 +29,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -190,8 +191,9 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 			return err
 		}
 
-		accTokens := sdk.TokensFromTendermintPower(1000)
-		accStakingTokens := sdk.TokensFromTendermintPower(500)
+		minSelfDel := stakingx.DefaultParams().MinSelfDelegation
+		accTokens := minSelfDel.MulRaw(10)
+		accStakingTokens := minSelfDel.MulRaw(10)
 		accs = append(accs, app.GenesisAccount{
 			Address: addr,
 			Coins: sdk.Coins{
@@ -200,14 +202,13 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 			},
 		})
 
-		valTokens := sdk.TokensFromTendermintPower(100)
 		msg := staking.NewMsgCreateValidator(
 			sdk.ValAddress(addr),
 			valPubKeys[i],
-			sdk.NewCoin(dex.DefaultBondDenom, valTokens),
+			sdk.NewCoin(dex.DefaultBondDenom, minSelfDel),
 			staking.NewDescription(nodeDirName, "", "", ""),
 			staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-			sdk.OneInt(),
+			minSelfDel,
 		)
 		kb, err := keys.NewKeyBaseFromDir(clientDir)
 		if err != nil {
