@@ -234,6 +234,11 @@
       "redelegations": null,
       "exported": false
     },
+    "stakingx": {
+      "params": {
+        "min_self_delegation": "1"
+      }
+    },
     "distr": {
       "fee_pool": {
         "community_pool": null
