@@ -33,15 +33,16 @@ import (
 	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/stakingx"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var (
-	defaultTokens                  = sdk.TokensFromTendermintPower(100)
-	defaultAmount                  = defaultTokens.String() + "cet" // TODO: replace "cet" with constant
 	defaultCommissionRate          = "0.1"
 	defaultCommissionMaxRate       = "0.2"
 	defaultCommissionMaxChangeRate = "0.01"
-	defaultMinSelfDelegation       = "1"
+	defaultMinSelfDelegation       = stakingx.DefaultParams().MinSelfDelegation.String()
+	defaultAmount                  = defaultMinSelfDelegation + dex.CET
 )
 
 // GenTxCmd builds the cetd gentx command.
