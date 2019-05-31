@@ -197,12 +197,14 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: []byte(args[0])})
+			fmt.Println(string(args[0]))
+			bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: args[0]})
 			if err != nil {
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", market.MarketKey, market.QueryUserOrderList{})
+			route := fmt.Sprintf("custom/%s/%s", market.MarketKey, market.QueryUserOrders)
+			fmt.Println(route)
 			res, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
@@ -212,9 +214,6 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 			return nil
 		},
 	}
-
-	cmd.Flags().String(FlagUserAddr, "", "The query user address")
-	cmd.MarkFlagRequired(FlagUserAddr)
 
 	return cmd
 }

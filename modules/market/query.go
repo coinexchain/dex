@@ -84,7 +84,7 @@ func queryOrder(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk
 }
 
 type QueryUserOrderList struct {
-	User sdk.AccAddress
+	User string
 }
 
 type OrderList struct {
@@ -98,9 +98,11 @@ func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]b
 	}
 
 	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
-	orders := okp.GetOrdersFromUser(ctx, string(param.User))
+	orders := okp.GetOrdersFromUser(ctx, param.User)
+	fmt.Println(param.User)
+	fmt.Println(orders)
 
-	bz, err := codec.MarshalJSONIndent(mk.cdc, OrderList{orders})
+	bz, err := codec.MarshalJSONIndent(mk.cdc, orders)
 	if err != nil {
 		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
 	}
