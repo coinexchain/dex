@@ -57,6 +57,10 @@ func newKeeperForTest(key sdk.StoreKey) OrderKeeper {
 	return NewOrderKeeper(key, "CET/USDT", msgCdc)
 }
 
+func newGlobalKeeperForTest(key sdk.StoreKey) GlobalOrderKeeper {
+	return NewGlobalOrderKeeper(key, msgCdc)
+}
+
 func simpleAddr(s string) (sdk.AccAddress, error) {
 	return sdk.AccAddressFromHex("01234567890123456789012345678901234" + s)
 }
@@ -112,12 +116,13 @@ func TestOrderBook1(t *testing.T) {
 	orders := createTO1()
 	ctx, marketKey := newContextAndMarketKey()
 	keeper := newKeeperForTest(marketKey)
+	gkeeper := newGlobalKeeperForTest(marketKey)
 	for _, order := range orders {
 		keeper.Add(ctx, order)
 		fmt.Printf("AA: %s %d\n", order.OrderID(), order.Height)
 	}
 	orderseq := []int{5, 0, 3, 4, 1, 2}
-	for i, order := range keeper.GetAllOrders(ctx) {
+	for i, order := range gkeeper.GetAllOrders(ctx) {
 		j := orderseq[i]
 		if !sameTO(orders[j], order) {
 			t.Errorf("Error in GetAllOrders")
@@ -143,25 +148,25 @@ func TestOrderBook1(t *testing.T) {
 		t.Errorf("Error in GetOrdersAtHeight")
 	}
 	addr, _ := simpleAddr("00002")
-	orderList := keeper.GetOrdersFromUser(ctx, addr.String())
+	orderList := gkeeper.GetOrdersFromUser(ctx, addr.String())
 	refOrderList := []string{addr.String() + "-3", addr.String() + "-2"}
-	if orderList[0] != refOrderList[0] || orderList[1] != refOrderList[1] {
+	if orderList[0] != refOrderList[1] || orderList[1] != refOrderList[0] {
 		t.Errorf("Error in GetOrdersFromUser")
 	}
 	for _, order := range keeper.GetMatchingCandidates(ctx) {
 		fmt.Printf("orderID %s %s\n", order.OrderID(), order.Price.String())
 	}
 	for _, order := range orders {
-		if !keeper.Exists(ctx, order.OrderID()) {
+		if gkeeper.QueryOrder(ctx, order.OrderID()) == nil {
 			t.Errorf("Can not find added orders!")
 			continue
 		}
-		qorder := keeper.QueryOrder(ctx, order.OrderID())
+		qorder := gkeeper.QueryOrder(ctx, order.OrderID())
 		if !sameTO(order, qorder) {
 			t.Errorf("Order's content is changed!")
 		}
 		keeper.Remove(ctx, order)
-		if keeper.Exists(ctx, order.OrderID()) {
+		if gkeeper.QueryOrder(ctx, order.OrderID()) != nil {
 			t.Errorf("Can find a deleted order!")
 			continue
 		}
