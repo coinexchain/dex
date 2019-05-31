@@ -2,10 +2,11 @@ package asset
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/coinexchain/dex/modules/asset/tags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"strconv"
 )
 
 // NewHandler returns a handler for "asset" type messages.
@@ -186,12 +187,11 @@ func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) (res 
 		return err.Result()
 	}
 
-	resTags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Token, msg.Symbol,
-		tags.Amt, strconv.FormatInt(msg.Amount, 10),
-	)
 	return sdk.Result{
-		Tags: resTags,
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Amt, strconv.FormatInt(msg.Amount, 10),
+		),
 	}
 }

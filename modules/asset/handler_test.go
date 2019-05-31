@@ -57,3 +57,6 @@ func TestIssueTokenMsg(t *testing.T) {
 	amt := input.tk.ak.GetAccount(input.ctx, tAccAddr).GetCoins().AmountOf("abc").String()
 	require.Equal(t, "210000000000", amt)
 }
+
+//TODO: TestMintToken
+//TODO: TestBurnToken

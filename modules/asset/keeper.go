@@ -2,6 +2,7 @@ package asset
 
 import (
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -66,8 +67,7 @@ func (tk TokenKeeper) GetToken(ctx sdk.Context, symbol string) Token {
 	if bz == nil {
 		return nil
 	}
-	token := tk.decodeToken(bz)
-	return token
+	return tk.decodeToken(bz)
 }
 
 // GetAllTokens returns all tokens in the token Keeper.
@@ -159,7 +159,7 @@ func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnershi
 		return ErrorInvalidTokenOwner("token new owner is invalid")
 	}
 	if err := tk.SetToken(ctx, token); err != nil {
-		return nil
+		return err
 	}
 	return nil
 }
@@ -192,7 +192,7 @@ func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 	}
 
 	if err := tk.SetToken(ctx, token); err != nil {
-		return nil
+		return err
 	}
 	return nil
 }
@@ -225,7 +225,7 @@ func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
 	}
 
 	if err := tk.SetToken(ctx, token); err != nil {
-		return nil
+		return err
 	}
 	return nil
 }
