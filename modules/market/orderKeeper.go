@@ -245,7 +245,7 @@ func (keeper *PersistentOrderKeeper) GetAllOrders(ctx sdk.Context) []*Order {
 
 func (keeper *PersistentOrderKeeper) RemoveAllOrders(ctx sdk.Context) {
 	store := ctx.KVStore(keeper.marketKey)
-	var keys [][]byte
+	keys := make([][]byte, 0, 10)
 	keeper.fillKeys(store, keys, OrderBookKeyPrefix)
 	keeper.fillKeys(store, keys, BidListKeyPrefix)
 	keeper.fillKeys(store, keys, AskListKeyPrefix)

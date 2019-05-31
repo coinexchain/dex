@@ -25,7 +25,6 @@ func TestSetMemoRequiredValidation(t *testing.T) {
 	validAddr := sdk.AccAddress([]byte("addr"))
 	var emptyAddr sdk.AccAddress
 
-	// nolint
 	testutil.ValidateBasic(t, []testutil.TestCase{
 		{Valid: true, Msg: NewMsgSetTransferMemoRequired(validAddr, true)},
 		{Valid: true, Msg: NewMsgSetTransferMemoRequired(validAddr, false)},

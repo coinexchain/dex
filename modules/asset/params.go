@@ -64,7 +64,6 @@ func ParamKeyTable() params.KeyTable {
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 // pairs of asset module's parameters.
-// nolint
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyIssueTokenFee, Value: &p.IssueTokenFee},
