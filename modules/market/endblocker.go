@@ -32,8 +32,8 @@ func (wo *WrappedOrder) GetHeight() int64 {
 	return wo.order.Height
 }
 
-func (wo *WrappedOrder) GetType() int {
-	return int(wo.order.OrderType)
+func (wo *WrappedOrder) GetSide() int {
+	return int(wo.order.Side)
 }
 
 func (wo *WrappedOrder) GetOwner() match.Account {
@@ -52,7 +52,7 @@ func (wo *WrappedOrder) GetHash() []byte {
 func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price sdk.Dec) {
 	other := otherSide.(*WrappedOrder)
 	buyer, seller := wo.order, other.order
-	if buyer.OrderType == match.SELL {
+	if buyer.Side == match.SELL {
 		buyer, seller = other.order, wo.order
 	}
 	stockAndMoney := strings.Split(buyer.Symbol, "/")
@@ -83,7 +83,7 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order 
 	stockAndMoney := strings.Split(order.Symbol, "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	frozenToken := stock
-	if order.OrderType == match.BUY {
+	if order.Side == match.BUY {
 		frozenToken = money
 	}
 	coins := sdk.NewCoins(sdk.NewCoin(frozenToken, sdk.NewInt(order.Freeze)))
@@ -139,7 +139,7 @@ func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Kee
 			order:       orderCandidate,
 			infoForDeal: infoForDeal,
 		}
-		if wrappedOrder.order.OrderType == match.BID {
+		if wrappedOrder.order.Side == match.BID {
 			bidList = append(bidList, wrappedOrder)
 		} else {
 			askList = append(askList, wrappedOrder)
@@ -148,7 +148,7 @@ func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Kee
 	match.Match(highPrice, midPrice, lowPrice, bidList, askList)
 	ordersForUpdate := infoForDeal.changedOrders
 	for _, order := range orderKeeper.GetOrdersAtHeight(ctx, currHeight) {
-		if order.OrderType == IOC {
+		if order.TimeInForce == IOC {
 			ordersForUpdate[order.OrderID()] = order
 		}
 	}
@@ -169,36 +169,37 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 			orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
 			removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight-GTEOrderLifetime)
 		}
-	} else {
-		for idx, mi := range marketInfoList {
-			if keeper.axk.IsTokenFrozen(ctx, mi.Stock) ||
-				keeper.axk.IsTokenFrozen(ctx, mi.Money) {
-				continue
-			}
-			symbol := mi.Stock + "/" + mi.Money
-			dataHash := ctx.BlockHeader().DataHash
-			oUpdate, newPrice := matchForMarket(ctx, mi.LastExecutedPrice, symbol, keeper, dataHash, currHeight)
-			if !newPrice.IsZero() {
-				newPrices[idx] = newPrice
-				ordersForUpdateList[idx] = oUpdate
+		return nil
+	}
+
+	for idx, mi := range marketInfoList {
+		if keeper.axk.IsTokenFrozen(ctx, mi.Stock) ||
+			keeper.axk.IsTokenFrozen(ctx, mi.Money) {
+			continue
+		}
+		symbol := mi.Stock + "/" + mi.Money
+		dataHash := ctx.BlockHeader().DataHash
+		oUpdate, newPrice := matchForMarket(ctx, mi.LastExecutedPrice, symbol, keeper, dataHash, currHeight)
+		if !newPrice.IsZero() {
+			newPrices[idx] = newPrice
+			ordersForUpdateList[idx] = oUpdate
+		}
+	}
+	for idx, mi := range marketInfoList {
+		if ordersForUpdateList[idx] == nil {
+			continue
+		}
+		symbol := mi.Stock + "/" + mi.Money
+		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+		for _, order := range ordersForUpdateList[idx] {
+			if order.TimeInForce == IOC || order.Freeze == 0 {
+				removeOrder(ctx, orderKeeper, keeper.bnk, order)
+			} else {
+				orderKeeper.Add(ctx, order)
 			}
 		}
-		for idx, mi := range marketInfoList {
-			if ordersForUpdateList[idx] == nil {
-				continue
-			}
-			symbol := mi.Stock + "/" + mi.Money
-			orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-			for _, order := range ordersForUpdateList[idx] {
-				if order.OrderType == IOC || order.Freeze == 0 {
-					removeOrder(ctx, orderKeeper, keeper.bnk, order)
-				} else {
-					orderKeeper.Add(ctx, order)
-				}
-			}
-			mi.LastExecutedPrice = newPrices[idx]
-			keeper.SetMarket(ctx, mi)
-		}
+		mi.LastExecutedPrice = newPrices[idx]
+		keeper.SetMarket(ctx, mi)
 	}
 	return nil
 }
