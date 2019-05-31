@@ -3,6 +3,7 @@ package asset
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -63,20 +64,18 @@ func ParamKeyTable() params.KeyTable {
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 // pairs of asset module's parameters.
-// nolint
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
-
-		{KeyIssueTokenFee, &p.IssueTokenFee},
-		{KeyTransferOwnershipFee, &p.TransferOwnershipFee},
-		{KeyForbidAddrFee, &p.ForbidAddrFee},
-		{KeyUnForbidAddrFee, &p.UnForbidAddrFee},
-		{KeyForbidTokenFee, &p.ForbidTokenFee},
-		{KeyUnForbidTokenFee, &p.UnForbidTokenFee},
-		{KeyTokenForbidWhitelistAddFee, &p.TokenForbidWhitelistAddFee},
-		{KeyTokenForbidWhitelistRemoveFee, &p.TokenForbidWhitelistRemoveFee},
-		{KeyBurnFee, &p.BurnFee},
-		{KeyMintFee, &p.MintFee},
+		{Key: KeyIssueTokenFee, Value: &p.IssueTokenFee},
+		{Key: KeyTransferOwnershipFee, Value: &p.TransferOwnershipFee},
+		{Key: KeyForbidAddrFee, Value: &p.ForbidAddrFee},
+		{Key: KeyUnForbidAddrFee, Value: &p.UnForbidAddrFee},
+		{Key: KeyForbidTokenFee, Value: &p.ForbidTokenFee},
+		{Key: KeyUnForbidTokenFee, Value: &p.UnForbidTokenFee},
+		{Key: KeyTokenForbidWhitelistAddFee, Value: &p.TokenForbidWhitelistAddFee},
+		{Key: KeyTokenForbidWhitelistRemoveFee, Value: &p.TokenForbidWhitelistRemoveFee},
+		{Key: KeyBurnFee, Value: &p.BurnFee},
+		{Key: KeyMintFee, Value: &p.MintFee},
 	}
 }
 

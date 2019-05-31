@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -34,10 +35,10 @@ type Params struct {
 // nolint
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
-		{KeyCreateMarketFee, &p.CreateMarketFee},
-		{KeyFilterStaleOrderInterval, &p.FilterStaleOrderInterval},
-		{KeyGTEOrderLifetime, &p.GTEOrderLifetime},
-		{KeyMaxExecutedPriceChangeRatio, &p.MaxExecutedPriceChangeRatio},
+		{Key: KeyCreateMarketFee, Value: &p.CreateMarketFee},
+		{Key: KeyFilterStaleOrderInterval, Value: &p.FilterStaleOrderInterval},
+		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
+		{Key: KeyMaxExecutedPriceChangeRatio, Value: &p.MaxExecutedPriceChangeRatio},
 	}
 }
 

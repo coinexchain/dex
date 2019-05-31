@@ -54,7 +54,7 @@ func (msg MsgCreateMarketInfo) ValidateBasic() sdk.Error {
 	if len(msg.Stock) == 0 || len(msg.Money) == 0 {
 		return sdk.ErrInvalidAddress("missing stock or money identifier")
 	}
-	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
+	if msg.PricePrecision > sdk.Precision {
 		return sdk.ErrInvalidAddress("proceprecision value out of range[0, 18]")
 	}
 	return nil
