@@ -98,7 +98,6 @@ func (p *Params) ValidateGenesis() error {
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
-
 	return Params{
 		types.NewCetCoins(IssueTokenFee),
 		types.NewCetCoins(TransferOwnershipFee),

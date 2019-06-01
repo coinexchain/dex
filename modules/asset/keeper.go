@@ -47,8 +47,7 @@ type TokenKeeper struct {
 // NewKeeper returns a new Keeper that uses go-amino to
 // (binary) encode and decode concrete Token.
 // nolint
-func NewKeeper(
-	cdc *codec.Codec, key sdk.StoreKey, paramstore params.Subspace,
+func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramstore params.Subspace,
 	ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) TokenKeeper {
 
 	return TokenKeeper{
@@ -74,11 +73,11 @@ func (tk TokenKeeper) GetToken(ctx sdk.Context, symbol string) Token {
 func (tk TokenKeeper) GetAllTokens(ctx sdk.Context) []Token {
 	tokens := make([]Token, 0)
 
-	appendToken := func(token Token) (stop bool) {
+	tk.IterateToken(ctx, func(token Token) (stop bool) {
 		tokens = append(tokens, token)
 		return false
-	}
-	tk.IterateToken(ctx, appendToken)
+	})
+
 	return tokens
 }
 
@@ -98,8 +97,7 @@ func (tk TokenKeeper) IterateToken(ctx sdk.Context, process func(Token) (stop bo
 		if !iter.Valid() {
 			return
 		}
-		val := iter.Value()
-		acc := tk.decodeToken(val)
+		acc := tk.decodeToken(iter.Value())
 		if process(acc) {
 			return
 		}
@@ -122,7 +120,6 @@ func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) sdk.Error {
 
 //IssueToken - new token and store
 func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
-
 	token, err := NewToken(msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
 		msg.Mintable, msg.Burnable, msg.AddrForbiddable, msg.TokenForbiddable)
 
@@ -134,12 +131,7 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 		return ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
 	}
 
-	err = tk.SetToken(ctx, token)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tk.SetToken(ctx, token)
 }
 
 func (tk TokenKeeper) checkPrecondition(ctx sdk.Context, msg sdk.Msg, symbol string, owner sdk.AccAddress) (Token, sdk.Error) {
@@ -170,10 +162,7 @@ func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnershi
 		return ErrorInvalidTokenOwner("token new owner is invalid")
 	}
 
-	if err := tk.SetToken(ctx, token); err != nil {
-		return err
-	}
-	return nil
+	return tk.SetToken(ctx, token)
 }
 
 //MintToken - mint token
@@ -195,10 +184,7 @@ func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 		return ErrorInvalidTokenSupply(err.Error())
 	}
 
-	if err := tk.SetToken(ctx, token); err != nil {
-		return err
-	}
-	return nil
+	return tk.SetToken(ctx, token)
 }
 
 //BurnToken - burn token
@@ -220,11 +206,7 @@ func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
 		return ErrorInvalidTokenSupply(err.Error())
 	}
 
-	if err := tk.SetToken(ctx, token); err != nil {
-		return err
-	}
-
-	return nil
+	return tk.SetToken(ctx, token)
 }
 
 // -----------------------------------------------------------------------------
@@ -247,15 +229,16 @@ func (tk TokenKeeper) IsTokenExists(ctx sdk.Context, denom string) bool {
 
 // IsTokenIssuer - check whether addr is a token issuer
 func (tk TokenKeeper) IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
-	token := tk.GetToken(ctx, denom)
-	if token != nil && token.GetOwner().Equals(addr) {
-		return true
+	if addr.Empty() {
+		return false
 	}
-	return false
+
+	token := tk.GetToken(ctx, denom)
+	return token != nil && token.GetOwner().Equals(addr)
 }
 
 func (tk TokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
-	//TODO: fzc
+	//TODO:
 	return false
 }
 
@@ -282,8 +265,7 @@ func TokenStoreKey(symbol string) []byte {
 }
 
 func (tk TokenKeeper) decodeToken(bz []byte) (token Token) {
-	err := tk.cdc.UnmarshalBinaryBare(bz, &token)
-	if err != nil {
+	if err := tk.cdc.UnmarshalBinaryBare(bz, &token); err != nil {
 		panic(err)
 	}
 	return

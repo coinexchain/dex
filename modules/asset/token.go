@@ -12,7 +12,6 @@ import (
 // Token is an interface used to store asset at a given token within state.
 // Many complex conditions can be used in the concrete struct which implements Token.
 type Token interface {
-	GetName() string
 	SetName(string) error
 
 	GetSymbol() string
@@ -134,16 +133,12 @@ func (t *BaseToken) Validate() error {
 	return nil
 }
 
-func (t BaseToken) GetName() string {
-	return t.Name
-}
-
 func (t *BaseToken) SetName(name string) error {
 	if utf8.RuneCountInString(name) > 32 {
 		return errors.New("token name limited to 32 unicode characters")
 	}
-	t.Name = name
 
+	t.Name = name
 	return nil
 }
 
