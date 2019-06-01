@@ -80,7 +80,7 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 			"case-totalSupply1",
 			NewMsgIssueToken("name", "coin", 9E18+1, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenSupply("token total supply limited to 90 billion"),
+			ErrorInvalidTokenSupply("token total supply before 1e8 boosting should be less than 90 billion"),
 		},
 		{
 			"case-totalSupply2",
@@ -246,7 +246,7 @@ func TestMsgTransferOwnership_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgTransferOwnership("abc", addr1, addr2),
-			`{"type":"asset/MsgTransferOwnership","value":{"NewOwner":"cosmos1r8rjvkawsq379z7qndtqtkks0pvqxxepnk0frr","OriginalOwner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","Symbol":"abc"}}`,
+			`{"type":"asset/MsgTransferOwnership","value":{"new_owner":"cosmos1r8rjvkawsq379z7qndtqtkks0pvqxxepnk0frr","original_owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
 		},
 	}
 
@@ -332,7 +332,7 @@ func TestMsgMintToken_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidAmt1",
 			NewMsgMintToken("abc", 9E18+1, tAccAddr),
-			ErrorInvalidTokenMint("token total supply limited to 90 billion"),
+			ErrorInvalidTokenMint("token total supply before 1e8 boosting should be less than 90 billion"),
 		},
 		{
 			"case-invalidAmt2",
@@ -365,7 +365,7 @@ func TestMsgMintToken_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgMintToken("abc", 100000, addr),
-			`{"type":"asset/MsgMintToken","value":{"Amount":"100000","OwnerAddress":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","Symbol":"abc"}}`,
+			`{"type":"asset/MsgMintToken","value":{"amount":"100000","owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
 		},
 	}
 
@@ -451,7 +451,7 @@ func TestMsgBurnToken_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidAmt1",
 			NewMsgBurnToken("abc", 9E18+1, tAccAddr),
-			ErrorInvalidTokenBurn("token total supply limited to 90 billion"),
+			ErrorInvalidTokenBurn("token total supply before 1e8 boosting should be less than 90 billion"),
 		},
 		{
 			"case-invalidAmt2",
@@ -484,7 +484,7 @@ func TestMsgBurnToken_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgBurnToken("abc", 100000, addr),
-			`{"type":"asset/MsgBurnToken","value":{"Amount":"100000","OwnerAddress":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","Symbol":"abc"}}`,
+			`{"type":"asset/MsgBurnToken","value":{"amount":"100000","owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
 		},
 	}
 

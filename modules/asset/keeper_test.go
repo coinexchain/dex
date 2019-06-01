@@ -195,7 +195,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	// remove token
 	input.tk.RemoveToken(input.ctx, token)
 
-	//case 6: token total supply limited to 90 billion
+	//case 6: token total supply before 1e8 boosting should be less than 90 billion
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
 		true, false, false, false)
 	err = input.tk.IssueToken(input.ctx, issueMsg)

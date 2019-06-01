@@ -3,9 +3,10 @@ package asset
 import (
 	"errors"
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"regexp"
 	"unicode/utf8"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Token is an interface used to store asset at a given token within state.
@@ -165,7 +166,7 @@ func (t BaseToken) GetTotalSupply() int64 {
 
 func (t *BaseToken) SetTotalSupply(amt int64) error {
 	if amt > MaxTokenAmount {
-		return errors.New("token total supply limited to 90 billion")
+		return errors.New("token total supply before 1e8 boosting should be less than 90 billion")
 	}
 	if amt <= 0 {
 		return errors.New("token total supply must a positive")
