@@ -242,6 +242,25 @@ Response:
   TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
 ```
 
+查询相关交易,可见本次burn token使用了16425 个GAS
+```
+~/lab/dex$ cetcli query tx 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5  --chain-id=coinexdex
+Response:
+  Height: 840
+  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 200000
+  GasUsed: 16425
+  Tags:
+    - action = burnToken
+    - category = asset
+    - token = coin3
+    - amount = 2000
+
+  Timestamp: 2019-06-01T03:52:17Z
+```
+
 7. 此时查询coin3已经减少
 
 ```bash
