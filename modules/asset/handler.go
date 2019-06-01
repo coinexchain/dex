@@ -115,13 +115,12 @@ func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk
 		return err.Result()
 	}
 
-	resTags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Token, msg.Symbol,
-		tags.Owner, msg.Owner.String(),
-	)
 	return sdk.Result{
-		Tags: resTags,
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Owner, msg.Owner.String(),
+		),
 	}
 }
 
@@ -131,14 +130,13 @@ func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransfer
 		return err.Result()
 	}
 
-	resTags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Token, msg.Symbol,
-		tags.OriginalOwner, msg.OriginalOwner.String(),
-		tags.NewOwner, msg.NewOwner.String(),
-	)
 	return sdk.Result{
-		Tags: resTags,
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.OriginalOwner, msg.OriginalOwner.String(),
+			tags.NewOwner, msg.NewOwner.String(),
+		),
 	}
 }
 
@@ -170,13 +168,12 @@ func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) (res 
 		return err.Result()
 	}
 
-	resTags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Token, msg.Symbol,
-		tags.Amt, strconv.FormatInt(msg.Amount, 10),
-	)
 	return sdk.Result{
-		Tags: resTags,
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Amt, strconv.FormatInt(msg.Amount, 10),
+		),
 	}
 }
 

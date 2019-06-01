@@ -91,6 +91,10 @@ func (msg MsgTransferOwnership) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgTransferOwnership) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+
 	if msg.OriginalOwner.Empty() || msg.NewOwner.Empty() {
 		return ErrorInvalidTokenOwner("transfer owner ship need a valid addr")
 	}
@@ -272,6 +276,10 @@ func (msg MsgBurnToken) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgBurnToken) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+
 	if msg.OwnerAddress.Empty() {
 		return ErrorInvalidTokenOwner("burn token need a valid addr")
 	}
@@ -326,6 +334,10 @@ func (msg MsgMintToken) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgMintToken) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+
 	if msg.OwnerAddress.Empty() {
 		return ErrorInvalidTokenOwner("mint token need a valid addr")
 	}

@@ -146,10 +146,6 @@ func (tk TokenKeeper) checkPrecondition(ctx sdk.Context, msg sdk.Msg, symbol str
 		return nil, err
 	}
 
-	if err := ValidateTokenSymbol(symbol); err != nil {
-		return nil, ErrorInvalidTokenSymbol(err.Error())
-	}
-
 	token := tk.GetToken(ctx, symbol)
 	if token == nil {
 		return nil, ErrorNoTokenPersist(fmt.Sprintf("token %s do not exist", symbol))
