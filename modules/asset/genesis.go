@@ -2,6 +2,7 @@ package asset
 
 import (
 	"errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -29,7 +30,9 @@ func InitGenesis(ctx sdk.Context, tk TokenKeeper, data GenesisState) {
 	tk.SetParams(ctx, data.Params)
 
 	for _, token := range data.Tokens {
-		tk.SetToken(ctx, token)
+		if err := tk.SetToken(ctx, token); err != nil {
+			panic(err)
+		}
 	}
 }
 

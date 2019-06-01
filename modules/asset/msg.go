@@ -64,9 +64,9 @@ func (msg MsgIssueToken) GetSigners() []sdk.AccAddress {
 
 // MsgTransferOwnership
 type MsgTransferOwnership struct {
-	Symbol        string
-	OriginalOwner sdk.AccAddress
-	NewOwner      sdk.AccAddress
+	Symbol        string         `json:"symbol"`
+	OriginalOwner sdk.AccAddress `json:"original_owner"`
+	NewOwner      sdk.AccAddress `json:"new_owner"`
 }
 
 var _ sdk.Msg = MsgTransferOwnership{}
@@ -241,9 +241,9 @@ func (msg MsgUnforbidToken) GetSigners() []sdk.AccAddress {
 
 // MsgBurnToken
 type MsgBurnToken struct {
-	Symbol       string
-	Amount       int64
-	OwnerAddress sdk.AccAddress //token owner address
+	Symbol       string         `json:"symbol"`
+	Amount       int64          `json:"amount"`
+	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
 }
 
 var _ sdk.Msg = MsgBurnToken{}
@@ -271,12 +271,15 @@ func (msg MsgBurnToken) ValidateBasic() sdk.Error {
 	if msg.OwnerAddress.Empty() {
 		return ErrorInvalidTokenOwner("burn token need a valid addr")
 	}
+
 	if msg.Amount > MaxTokenAmount {
-		return ErrorInvalidTokenBurn("token total supply limited to 90 billion")
+		return ErrorInvalidTokenBurn("token total supply before 1e8 boosting should be less than 90 billion")
 	}
-	if msg.Amount < 0 {
+
+	if msg.Amount <= 0 {
 		return ErrorInvalidTokenBurn("burn amount should be positive")
 	}
+
 	return nil
 }
 
@@ -292,9 +295,9 @@ func (msg MsgBurnToken) GetSigners() []sdk.AccAddress {
 
 // MsgMintToken
 type MsgMintToken struct {
-	Symbol       string
-	Amount       int64
-	OwnerAddress sdk.AccAddress
+	Symbol       string         `json:"symbol"`
+	Amount       int64          `json:"amount"`
+	OwnerAddress sdk.AccAddress `json:"owner_address"`
 }
 
 var _ sdk.Msg = MsgMintToken{}
@@ -322,10 +325,12 @@ func (msg MsgMintToken) ValidateBasic() sdk.Error {
 	if msg.OwnerAddress.Empty() {
 		return ErrorInvalidTokenOwner("mint token need a valid addr")
 	}
+
 	if msg.Amount > MaxTokenAmount {
-		return ErrorInvalidTokenMint("token total supply limited to 90 billion")
+		return ErrorInvalidTokenMint("token total supply before 1e8 boosting should be less than 90 billion")
 	}
-	if msg.Amount < 0 {
+
+	if msg.Amount <= 0 {
 		return ErrorInvalidTokenMint("mint amount should be positive")
 	}
 	return nil

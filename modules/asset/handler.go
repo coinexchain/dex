@@ -44,7 +44,6 @@ func setCoins(ctx sdk.Context, ak auth.AccountKeeper, acc auth.Account, coins sd
 
 	err := acc.SetCoins(coins)
 	if err != nil {
-		// Handle w/ #870
 		panic(err)
 	}
 	ak.SetAccount(ctx, acc)

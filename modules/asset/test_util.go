@@ -43,7 +43,7 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
 
-	ms.LoadLatestVersion()
+	_ = ms.LoadLatestVersion()
 
 	ak := auth.NewAccountKeeper(
 		cdc,
