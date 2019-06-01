@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -162,7 +161,7 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "orderinfo",
 		Short: "Query order info",
-		Long:  "cetcli query market orderinfo --symbol=[eth/cet] --orderid=[orderid]",
+		Long:  "cetcli query market orderinfo --orderid=[orderid]",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
@@ -218,30 +217,31 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 	return cmd
 }
 
-func CancleOrder(cdc *codec.Codec) *cobra.Command {
+func CancelOrder(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cancelorder",
 		Short: "cancel order in blockchain",
 		Long: "Examples:" +
 			"cetcli tx market cancelorder --orderid=[id]",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 			sender := cliCtx.GetFromAddress()
 
 			orderid := viper.GetString(FlagOrderID)
 			contents := strings.Split(orderid, "-")
 			if len(contents) != 2 {
-				return errors.Errorf("")
+				return errors.Errorf(" illegal order-id")
 			}
-
-			if bytes.Equal(sender, []byte(contents[0])) {
-				return errors.Errorf("")
-			}
+			//
+			//fmt.Println(sender)
+			//fmt.Println([]byte(contents[0]))
+			//if !bytes.Equal(sender, []byte(contents[0])) {
+			//	return errors.Errorf("sender address is not match order sender, sender : %s, order issuer : %s", sender, contents[0])
+			//}
 
 			if sequence, err := strconv.Atoi(contents[1]); err != nil || sequence < 0 {
-				return errors.Errorf("")
+				return errors.Errorf("illegal order sequence, actual %d", sequence)
 			}
 
 			msg := market.MsgCancelOrder{
@@ -258,8 +258,6 @@ func CancleOrder(cdc *codec.Codec) *cobra.Command {
 }
 
 func markQueryOrDelCmd(cmd *cobra.Command) {
-	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
 	cmd.Flags().String(FlagOrderID, "", "The order id")
 	cmd.MarkFlagRequired(FlagOrderID)
-	cmd.MarkFlagRequired(FlagSymbol)
 }

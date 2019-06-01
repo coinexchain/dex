@@ -44,7 +44,7 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 	assTxCmd.AddCommand(client.PostCommands(
 		cli.CreateMarketCmd(mc.storeKey, mc.cdc),
 		cli.CreateGTEOrderTxCmd(mc.cdc),
-		cli.CancleOrder(mc.cdc),
+		cli.CancelOrder(mc.cdc),
 		cli.CreateIOCOrderTxCmd(mc.cdc),
 	)...)
 

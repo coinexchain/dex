@@ -20,6 +20,8 @@ const (
 	CodeInvalidOrderID        = 132
 	CodeMarshalFailed         = 133
 	CodeUnMarshalFailed       = 134
+	CodeNotFindOrder          = 135
+	CodeNotMatchOrderSender   = 135
 )
 
 func ErrTokenNoExist() sdk.Error {

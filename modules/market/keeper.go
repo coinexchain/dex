@@ -142,6 +142,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MarketInfo{}, "market/market", nil)
 	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "market/market-info", nil)
 	cdc.RegisterConcrete(MsgCreateOrder{}, "market/order-info", nil)
+	cdc.RegisterConcrete(MsgCancelOrder{}, "market/cancel-order", nil)
 }
 
 func (k Keeper) GetAllOrders(ctx sdk.Context) []*Order {

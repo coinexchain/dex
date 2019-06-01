@@ -34,6 +34,8 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handlerMsgCreateMarketInfo(ctx, msg, k)
 		case MsgCreateOrder:
 			return handlerMsgCreateOrder(ctx, msg, k)
+		case MsgCancelOrder:
+			return handlerMsgCancelOrder(ctx, msg, k)
 		default:
 			errMsg := "Unrecognized market Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -153,6 +155,30 @@ func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder,
 
 	if keeper.axk.IsTokenFrozen(ctx, denom) {
 		return ErrTokenFrozenByIssuer().Result()
+	}
+
+	return sdk.Result{}
+}
+
+func handlerMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sdk.Result {
+
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	globalKeeper := NewGlobalOrderKeeper(keeper.marketKey, keeper.cdc)
+	order := globalKeeper.QueryOrder(ctx, msg.OrderID)
+	if order == nil {
+		return sdk.NewError(MarketKey, CodeNotFindOrder, "Not find order in blockchain").Result()
+	}
+
+	if !bytes.Equal(order.Sender, msg.Sender) {
+		return sdk.NewError(MarketKey, CodeNotMatchOrderSender, "The cancel addr is not match order sender").Result()
+	}
+
+	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
+	if err := ork.Remove(ctx, order); err != nil {
+		return err.Result()
 	}
 
 	return sdk.Result{}
