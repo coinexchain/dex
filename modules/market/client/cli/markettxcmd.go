@@ -2,10 +2,11 @@ package cli
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/spf13/viper"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
@@ -47,7 +48,7 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			creator := cliCtx.GetFromAddress()
 			msg, err := parseCreateMarketFlags(creator)
 			if err != nil {
-				return errors.Errorf("tx flag is error, pls see help : " +
+				return errors.Errorf("tx flag is error, please see help : " +
 					"$ cetcli tx market createmarket -h")
 			}
 
@@ -104,7 +105,7 @@ func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, queryRoute string, t
 func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo, error) {
 	for _, flag := range createMarketFlags {
 		if viper.Get(flag) == nil {
-			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
 				"$ cetcli tx market createmarket", flag)
 		}
 	}

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+
 	"github.com/coinexchain/dex/modules/asset"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/viper"
@@ -10,7 +11,7 @@ import (
 func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 	for _, flag := range issueTokenFlags {
 		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
 				"$ cetcli tx asset issue-token -h", flag)
 		}
 	}
@@ -31,7 +32,7 @@ func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransferOwnership, error) {
 	for _, flag := range transferOwnershipFlags {
 		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
 				"$ cetcli tx asset transfer-ownership -h", flag)
 		}
 	}
@@ -49,7 +50,7 @@ func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransfe
 func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
 	for _, flag := range mintTokenFlags {
 		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
 				"$ cetcli tx asset mint-token -h", flag)
 		}
 	}
@@ -66,7 +67,7 @@ func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
 func parseBurnTokenFlags(owner sdk.AccAddress) (*asset.MsgBurnToken, error) {
 	for _, flag := range burnTokenFlags {
 		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
 				"$ cetcli tx asset burn-token -h", flag)
 		}
 	}

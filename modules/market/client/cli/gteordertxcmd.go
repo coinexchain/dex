@@ -94,7 +94,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 
 	msg, err := parseCreateOrderFlags(sender, sequence)
 	if err != nil {
-		return errors.Errorf("tx flag is error, pls see help : " +
+		return errors.Errorf("tx flag is error, please see help : " +
 			"$ cetcli tx market creategteoreder -h")
 	}
 	if err = msg.ValidateBasic(); err != nil {
@@ -126,7 +126,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgCreateOrder, error) {
 	for _, flag := range createOrderFlags {
 		if viper.Get(flag) == nil {
-			return nil, fmt.Errorf("--%s flag is a noop, pls see help : "+
+			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
 				"$ cetcli tx market creategteoreder -h", flag)
 		}
 	}
