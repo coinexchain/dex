@@ -2,9 +2,10 @@ package cli
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/spf13/cobra"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -27,8 +28,7 @@ $ cetcli query asset token btc
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			symbol := args[0]
 

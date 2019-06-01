@@ -2,8 +2,9 @@ package asset
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -61,8 +62,8 @@ func Test_queryAllTokenList(t *testing.T) {
 	}
 
 	res, err := queryAllTokenList(input.ctx, req, input.tk)
-	require.Error(t, err)
-	require.Nil(t, res)
+	require.NoError(t, err)
+	require.Equal(t, []byte("[]"), res)
 
 	token1, err := NewToken("ABC Token", "abc", 2100, tAccAddr,
 		false, false, false, false)

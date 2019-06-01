@@ -2,6 +2,8 @@ package cli
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -11,7 +13,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -103,9 +104,9 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	cmd.Flags().Bool(FlagAddrForbiddable, false, " Whether the token holder address can be forbidden by token owner")
 	cmd.Flags().Bool(FlagTokenForbiddable, false, "Whether the token can be forbidden")
 
-	cmd.MarkFlagRequired(client.FlagFrom)
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range issueTokenFlags {
-		cmd.MarkFlagRequired(flag)
+		_ = cmd.MarkFlagRequired(flag)
 	}
 
 	return cmd
@@ -170,9 +171,9 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 	cmd.Flags().String(FlagSymbol, "", "Which token`s ownership be transferred")
 	cmd.Flags().String(FlagNewOwner, "", "Who do you want to transfer to ?")
 
-	cmd.MarkFlagRequired(client.FlagFrom)
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range transferOwnershipFlags {
-		cmd.MarkFlagRequired(flag)
+		_ = cmd.MarkFlagRequired(flag)
 	}
 
 	return cmd
@@ -228,9 +229,9 @@ $ cetcli tx asset mint-token --symbol="abc" \
 	cmd.Flags().String(FlagSymbol, "", "Which token will be minted")
 	cmd.Flags().String(FlagAmount, "", "The amount of mint")
 
-	cmd.MarkFlagRequired(client.FlagFrom)
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range mintTokenFlags {
-		cmd.MarkFlagRequired(flag)
+		_ = cmd.MarkFlagRequired(flag)
 	}
 
 	return cmd
@@ -286,9 +287,9 @@ $ cetcli tx asset burn-token --symbol="abc" \
 	cmd.Flags().String(FlagSymbol, "", "Which token will be burned")
 	cmd.Flags().String(FlagAmount, "", "The amount of burn")
 
-	cmd.MarkFlagRequired(client.FlagFrom)
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range burnTokenFlags {
-		cmd.MarkFlagRequired(flag)
+		_ = cmd.MarkFlagRequired(flag)
 	}
 
 	return cmd

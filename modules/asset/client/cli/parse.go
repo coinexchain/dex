@@ -8,12 +8,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
-	for _, flag := range issueTokenFlags {
+func checkFlags(flags []string, help string) error {
+	for _, flag := range flags {
 		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
-				"$ cetcli tx asset issue-token -h", flag)
+			return fmt.Errorf("--%s flag is a noop, please see help : "+help, flag)
 		}
+	}
+
+	return nil
+}
+
+func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
+	if err := checkFlags(issueTokenFlags, "$ cetcli tx asset issue-token -h"); err != nil {
+		return nil, err
 	}
 
 	msg := asset.NewMsgIssueToken(
@@ -30,11 +37,8 @@ func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 }
 
 func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransferOwnership, error) {
-	for _, flag := range transferOwnershipFlags {
-		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
-				"$ cetcli tx asset transfer-ownership -h", flag)
-		}
+	if err := checkFlags(transferOwnershipFlags, "$ cetcli tx asset transfer-ownership -h"); err != nil {
+		return nil, err
 	}
 
 	newOwner, _ := sdk.AccAddressFromBech32(viper.GetString(FlagNewOwner))
@@ -48,11 +52,8 @@ func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransfe
 }
 
 func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
-	for _, flag := range mintTokenFlags {
-		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
-				"$ cetcli tx asset mint-token -h", flag)
-		}
+	if err := checkFlags(mintTokenFlags, "$ cetcli tx asset mint-token -h"); err != nil {
+		return nil, err
 	}
 
 	msg := asset.NewMsgMintToken(
@@ -65,11 +66,8 @@ func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
 }
 
 func parseBurnTokenFlags(owner sdk.AccAddress) (*asset.MsgBurnToken, error) {
-	for _, flag := range burnTokenFlags {
-		if viper.GetString(flag) == "" {
-			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
-				"$ cetcli tx asset burn-token -h", flag)
-		}
+	if err := checkFlags(burnTokenFlags, "$ cetcli tx asset burn-token -h"); err != nil {
+		return nil, err
 	}
 
 	msg := asset.NewMsgBurnToken(

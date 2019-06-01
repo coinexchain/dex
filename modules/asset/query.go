@@ -60,13 +60,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte,
 }
 
 func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
-
-	tokenList := tk.GetAllTokens(ctx)
-	if tokenList == nil {
-		return nil, ErrorNoTokenPersist(fmt.Sprintf("can not query any token"))
-	}
-
-	bz, err := codec.MarshalJSONIndent(tk.cdc, tokenList)
+	bz, err := codec.MarshalJSONIndent(tk.cdc, tk.GetAllTokens(ctx))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

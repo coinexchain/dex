@@ -72,7 +72,8 @@ func (tk TokenKeeper) GetToken(ctx sdk.Context, symbol string) Token {
 
 // GetAllTokens returns all tokens in the token Keeper.
 func (tk TokenKeeper) GetAllTokens(ctx sdk.Context) []Token {
-	var tokens []Token
+	tokens := make([]Token, 0)
+
 	appendToken := func(token Token) (stop bool) {
 		tokens = append(tokens, token)
 		return false
