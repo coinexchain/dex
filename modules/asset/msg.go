@@ -94,6 +94,10 @@ func (msg MsgTransferOwnership) ValidateBasic() sdk.Error {
 	if msg.OriginalOwner.Empty() || msg.NewOwner.Empty() {
 		return ErrorInvalidTokenOwner("transfer owner ship need a valid addr")
 	}
+
+	if msg.OriginalOwner.Equals(msg.NewOwner) {
+		return ErrorInvalidTokenOwner("Can not and no need to transfer ownership to self")
+	}
 	return nil
 }
 
