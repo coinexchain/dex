@@ -1975,6 +1975,7 @@ paths:
         - ICS100
       summary: Issue token
       description: Issue a new Token
+      operationId: issueToken
       consumes:
         - application/json
       produces:
