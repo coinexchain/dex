@@ -45,7 +45,7 @@ type Token interface {
 	GetIsForbidden() bool
 	SetIsForbidden(bool)
 
-	IsValid() error
+	Validate() error
 	// Ensure that account implements stringer
 	String() string
 }
@@ -111,7 +111,7 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	return t, nil
 }
 
-func (t *BaseToken) IsValid() error {
+func (t *BaseToken) Validate() error {
 	_, err := NewToken(t.Name, t.Symbol, t.TotalSupply, t.Owner,
 		t.Mintable, t.Burnable, t.AddrForbiddable, t.TokenForbiddable)
 
@@ -123,11 +123,11 @@ func (t *BaseToken) IsValid() error {
 		return ErrorInvalidForbiddenState("Invalid Forbidden state")
 	}
 
-	if t.TotalMint < 0 {
+	if t.TotalMint < 0 || (!t.Mintable && t.TotalMint > 0) {
 		return ErrorInvalidTokenMint(fmt.Sprintf("Invalid total mint: %d", t.TotalMint))
 	}
 
-	if t.TotalBurn < 0 {
+	if t.TotalBurn < 0 || (!t.Burnable && t.TotalBurn > 0) {
 		return ErrorInvalidTokenMint(fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
 	}
 

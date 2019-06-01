@@ -48,7 +48,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte,
 
 	token := tk.GetToken(ctx, params.Symbol)
 	if token == nil {
-		return nil, ErrorNoTokenPersist(fmt.Sprintf("can not query token %s", params.Symbol))
+		return nil, ErrorTokenNotFound(fmt.Sprintf("token %s not found", params.Symbol))
 	}
 
 	bz, err := codec.MarshalJSONIndent(tk.cdc, token)

@@ -149,7 +149,7 @@ func (tk TokenKeeper) checkPrecondition(ctx sdk.Context, msg sdk.Msg, symbol str
 
 	token := tk.GetToken(ctx, symbol)
 	if token == nil {
-		return nil, ErrorNoTokenPersist(fmt.Sprintf("token %s do not exist", symbol))
+		return nil, ErrorTokenNotFound(fmt.Sprintf("token %s not found", symbol))
 	}
 
 	if !token.GetOwner().Equals(owner) {

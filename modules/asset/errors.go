@@ -9,7 +9,7 @@ const (
 	CodeInvalidTokenSymbol    = 202
 	CodeInvalidTokenSupply    = 203
 	CodeInvalidTokenOwner     = 204
-	CodeNoTokenPersist        = 205
+	CodeTokenNotFound         = 205
 	CodeInvalidTotalMint      = 206
 	CodeInvalidTotalBurn      = 207
 	CodeDuplicateTokenSymbol  = 208
@@ -28,8 +28,8 @@ func ErrorInvalidTokenSupply(fmt string) sdk.Error {
 func ErrorInvalidTokenOwner(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenOwner, fmt)
 }
-func ErrorNoTokenPersist(fmt string) sdk.Error {
-	return sdk.NewError(CodeSpaceAsset, CodeNoTokenPersist, fmt)
+func ErrorTokenNotFound(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeTokenNotFound, fmt)
 }
 func ErrorInvalidTokenMint(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTotalMint, fmt)

@@ -44,21 +44,20 @@ func ExportGenesis(ctx sdk.Context, tk TokenKeeper) GenesisState {
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) Validate() error {
-	err := data.Params.ValidateGenesis()
-	if err != nil {
+	if err := data.Params.ValidateGenesis(); err != nil {
 		return err
 	}
 
-	tokenSymbols := make(map[string]interface{})
-
 	for _, token := range data.Tokens {
-		err = token.IsValid()
-		if err != nil {
+		if err := token.Validate(); err != nil {
 			return err
 		}
+	}
 
+	tokenSymbols := make(map[string]interface{})
+	for _, token := range data.Tokens {
 		if _, exists := tokenSymbols[token.GetSymbol()]; exists {
-			return errors.New("duplicate token symbol found during asset ValidateGenesis")
+			return errors.New("duplicate token symbol found in GenesisState")
 		}
 
 		tokenSymbols[token.GetSymbol()] = nil

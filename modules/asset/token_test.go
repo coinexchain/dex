@@ -138,8 +138,8 @@ func TestBaseToken_IsValid(t *testing.T) {
 				TotalMint:        tt.token.TotalMint,
 				IsForbidden:      tt.token.IsForbidden,
 			}
-			if err := base.IsValid(); !reflect.DeepEqual(err, tt.wantErr) {
-				t.Errorf("BaseToken.IsValid() error = %v, wantErr %v", err, tt.wantErr)
+			if err := base.Validate(); !reflect.DeepEqual(err, tt.wantErr) {
+				t.Errorf("BaseToken.Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
