@@ -41,6 +41,7 @@ func TestMsgIssueToken_Route(t *testing.T) {
 }
 
 func TestMsgIssueToken_ValidateBasic(t *testing.T) {
+	invalidTokenSymbol := ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}")
 	tests := []struct {
 		name string
 		msg  MsgIssueToken
@@ -56,25 +57,25 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 			"case-symbol1",
 			NewMsgIssueToken("name", "1a", 100000, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenSymbol("token symbol limited to [a-z][a-z0-9]{1,7}"),
+			invalidTokenSymbol,
 		},
 		{
 			"case-symbol2",
 			NewMsgIssueToken("name", "A999", 100000, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenSymbol("token symbol limited to [a-z][a-z0-9]{1,7}"),
+			invalidTokenSymbol,
 		},
 		{
 			"case-symbol3",
 			NewMsgIssueToken("name", "aa1234567", 100000, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenSymbol("token symbol limited to [a-z][a-z0-9]{1,7}"),
+			invalidTokenSymbol,
 		},
 		{
 			"case-symbol4",
 			NewMsgIssueToken("name", "a*aa", 100000, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenSymbol("token symbol limited to [a-z][a-z0-9]{1,7}"),
+			invalidTokenSymbol,
 		},
 		{
 			"case-totalSupply1",

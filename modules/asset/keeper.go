@@ -141,23 +141,38 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 	return nil
 }
 
-//TransferOwnership - transfer token owner
-func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnership) sdk.Error {
+func (tk TokenKeeper) checkPrecondition(ctx sdk.Context, msg sdk.Msg, symbol string, owner sdk.AccAddress) (Token, sdk.Error) {
 	if err := msg.ValidateBasic(); err != nil {
-		return ErrorInvalidTokenOwner(err.Error())
+		return nil, err
 	}
 
-	token := tk.GetToken(ctx, msg.Symbol)
-	if token == nil {
-		return ErrorNoTokenPersist("transfer invalid token`s ownership")
+	if err := ValidateTokenSymbol(symbol); err != nil {
+		return nil, ErrorInvalidTokenSymbol(err.Error())
 	}
-	if !token.GetOwner().Equals(msg.OriginalOwner) {
-		return ErrorInvalidTokenOwner("token original owner is invalid")
+
+	token := tk.GetToken(ctx, symbol)
+	if token == nil {
+		return nil, ErrorNoTokenPersist(fmt.Sprintf("token %s do not exist", symbol))
+	}
+
+	if !token.GetOwner().Equals(owner) {
+		return nil, ErrorInvalidTokenOwner("Only token owner can do this action")
+	}
+
+	return token, nil
+}
+
+//TransferOwnership - transfer token owner
+func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnership) sdk.Error {
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OriginalOwner)
+	if err != nil {
+		return err
 	}
 
 	if err := token.SetOwner(msg.NewOwner); err != nil {
 		return ErrorInvalidTokenOwner("token new owner is invalid")
 	}
+
 	if err := tk.SetToken(ctx, token); err != nil {
 		return err
 	}
@@ -166,28 +181,20 @@ func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnershi
 
 //MintToken - mint token
 func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
-	if err := msg.ValidateBasic(); err != nil {
-		return ErrorInvalidTokenMint(err.Error())
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
+	if err != nil {
+		return err
 	}
 
-	token := tk.GetToken(ctx, msg.Symbol)
-	if token == nil {
-		return ErrorNoTokenPersist("mint invalid token")
-	}
-	if !token.GetOwner().Equals(msg.OwnerAddress) {
-		return ErrorInvalidTokenOwner("only token owner can mint token")
-	}
 	if !token.GetMintable() {
-		return ErrorInvalidTokenMint("token that cannot be minted")
+		return ErrorInvalidTokenMint(fmt.Sprintf("token %s do not support mint", msg.Symbol))
 	}
 
-	amt := msg.Amount
-	preMint := token.GetTotalMint()
-	if err := token.SetTotalMint(amt + preMint); err != nil {
+	if err := token.SetTotalMint(msg.Amount + token.GetTotalMint()); err != nil {
 		return ErrorInvalidTokenMint(err.Error())
 	}
-	preSupply := token.GetTotalSupply()
-	if err := token.SetTotalSupply(amt + preSupply); err != nil {
+
+	if err := token.SetTotalSupply(msg.Amount + token.GetTotalSupply()); err != nil {
 		return ErrorInvalidTokenSupply(err.Error())
 	}
 
@@ -199,34 +206,27 @@ func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 
 //BurnToken - burn token
 func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
-	if err := msg.ValidateBasic(); err != nil {
-		return ErrorInvalidTokenMint(err.Error())
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
+	if err != nil {
+		return err
 	}
 
-	token := tk.GetToken(ctx, msg.Symbol)
-	if token == nil {
-		return ErrorNoTokenPersist("burn invalid token")
-	}
-	if !token.GetOwner().Equals(msg.OwnerAddress) {
-		return ErrorInvalidTokenOwner("only token owner can burn token")
-	}
 	if !token.GetBurnable() {
-		return ErrorInvalidTokenMint("token that cannot be burn")
+		return ErrorInvalidTokenMint(fmt.Sprintf("token %s do not support burn", msg.Symbol))
 	}
 
-	amt := msg.Amount
-	preMint := token.GetTotalBurn()
-	if err := token.SetTotalBurn(amt + preMint); err != nil {
+	if err := token.SetTotalBurn(msg.Amount + token.GetTotalBurn()); err != nil {
 		return ErrorInvalidTokenMint(err.Error())
 	}
-	preSupply := token.GetTotalSupply()
-	if err := token.SetTotalSupply(preSupply - amt); err != nil {
+
+	if err := token.SetTotalSupply(token.GetTotalSupply() - msg.Amount); err != nil {
 		return ErrorInvalidTokenSupply(err.Error())
 	}
 
 	if err := tk.SetToken(ctx, token); err != nil {
 		return err
 	}
+
 	return nil
 }
 

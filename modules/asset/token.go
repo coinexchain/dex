@@ -151,12 +151,19 @@ func (t BaseToken) GetSymbol() string {
 	return t.Symbol
 }
 
-func (t *BaseToken) SetSymbol(symbol string) error {
+func ValidateTokenSymbol(symbol string) error {
 	if !TokenSymbolRegex.MatchString(symbol) {
-		return errors.New("token symbol limited to [a-z][a-z0-9]{1,7}")
+		return errors.New("token symbol not match with [a-z][a-z0-9]{1,7}")
 	}
-	t.Symbol = symbol
+	return nil
+}
 
+func (t *BaseToken) SetSymbol(symbol string) error {
+	if err := ValidateTokenSymbol(symbol); err != nil {
+		return err
+	}
+
+	t.Symbol = symbol
 	return nil
 }
 
@@ -183,6 +190,7 @@ func (t *BaseToken) SetOwner(addr sdk.AccAddress) error {
 	if addr.Empty() {
 		return errors.New("token owner is invalid")
 	}
+
 	t.Owner = addr
 	return nil
 }
