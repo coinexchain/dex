@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -161,7 +162,8 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "orderinfo",
 		Short: "Query order info",
-		Long:  "cetcli query market orderinfo --orderid=[orderid]",
+		Long: "cetcli query market orderinfo " +
+			"--orderid=[orderid] --trust-node=true",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
@@ -191,13 +193,16 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 		Use:   "userorderlist [userAddress]",
 		Short: "Query user order list in blockchain",
 		Long: "Example:" +
-			"cetcli query market userorderlist [userAddress]",
-		Args: cobra.ExactArgs(1),
+			"cetcli query market userorderlist --address=[userAddress] --trust-node=true",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			fmt.Println(string(args[0]))
-			bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: args[0]})
+			queryAddr := viper.GetString(FlagUserAddr)
+			if _, err := sdk.AccAddressFromBech32(queryAddr); err != nil {
+				return err
+			}
+
+			bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: queryAddr})
 			if err != nil {
 				return err
 			}
@@ -214,6 +219,8 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().String(FlagUserAddr, "", "The address of the user to be queried")
+	cmd.MarkFlagRequired(FlagUserAddr)
 	return cmd
 }
 
@@ -222,8 +229,13 @@ func CancelOrder(cdc *codec.Codec) *cobra.Command {
 		Use:   "cancelorder",
 		Short: "cancel order in blockchain",
 		Long: "Examples:" +
-			"cetcli tx market cancelorder --orderid=[id]",
+			"cetcli tx market cancelorder --orderid=[id] " +
+			"--trust-node=true --from=bob --chain-id=coinexdex",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			var (
+				addr sdk.AccAddress
+				err  error
+			)
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 			sender := cliCtx.GetFromAddress()
@@ -233,12 +245,13 @@ func CancelOrder(cdc *codec.Codec) *cobra.Command {
 			if len(contents) != 2 {
 				return errors.Errorf(" illegal order-id")
 			}
-			//
-			//fmt.Println(sender)
-			//fmt.Println([]byte(contents[0]))
-			//if !bytes.Equal(sender, []byte(contents[0])) {
-			//	return errors.Errorf("sender address is not match order sender, sender : %s, order issuer : %s", sender, contents[0])
-			//}
+
+			if addr, err = sdk.AccAddressFromBech32(contents[0]); err != nil {
+				return err
+			}
+			if !bytes.Equal(addr, sender) {
+				return errors.Errorf("sender address is not match order sender, sender : %s, order issuer : %s", sender, addr)
+			}
 
 			if sequence, err := strconv.Atoi(contents[1]); err != nil || sequence < 0 {
 				return errors.Errorf("illegal order sequence, actual %d", sequence)

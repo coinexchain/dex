@@ -2,6 +2,7 @@ package market
 
 import (
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/abci/types"
@@ -87,10 +88,6 @@ type QueryUserOrderList struct {
 	User string
 }
 
-type OrderList struct {
-	ids []string
-}
-
 func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
 	var param QueryUserOrderList
 	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
@@ -99,8 +96,6 @@ func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]b
 
 	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
 	orders := okp.GetOrdersFromUser(ctx, param.User)
-	fmt.Println(param.User)
-	fmt.Println(orders)
 
 	bz, err := codec.MarshalJSONIndent(mk.cdc, orders)
 	if err != nil {

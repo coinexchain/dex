@@ -48,4 +48,10 @@
 
 `./cetcli query market orderinfo --symbol=eth/cet --orderid=cosmos16gvnhynu7veexyyaadk60k28cn5s9k7p7p5v9p-13 --trust-node=true`
 
+## 查询指定地址的所有订单列表
 
+`./cetcli query market userorderlist --address=cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z --trust-node=true`
+
+## 取消区块链上的指定订单
+
+`./cetcli tx market cancelorder --orderid=cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-6 --trust-node=true --from=bob --chain-id=coinexdex`
