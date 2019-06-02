@@ -34,4 +34,3 @@ else
 fi
 
 chmod 777 -R /cetd
-

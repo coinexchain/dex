@@ -78,6 +78,10 @@ endif
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
 
+build-linux-swagger: go.sum
+	statik -src=./cmd/cetcli/swagger -dest=./cmd/cetcli -f -m
+	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
+
 install: go.sum check-ledger
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetd
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetcli
@@ -152,7 +156,7 @@ benchmark:
 build-docker-cetdnode:
 	$(MAKE) -C networks/local
 
-build-test-docker: build-linux
+build-test-docker: build-linux-swagger
 	cp build/cetd networks/test/cetdnode/
 	cp build/cetcli networks/test/cetdnode/
 	$(MAKE) -C networks/test

@@ -45,6 +45,7 @@ paths:
       tags:
         - version
       description: Get the version of the SDK running on the connected node to compare against expected
+      operationId: nodeVersion
       responses:
         200:
           description: Plaintext version i.e. "v0.25.0"
@@ -54,6 +55,7 @@ paths:
     get:
       description: Information about the connected node
       summary: The properties of the connected node
+      operationId: nodeInfo
       tags:
         - ICS0
       produces:
@@ -1975,7 +1977,7 @@ paths:
         - ICS100
       summary: Issue token
       description: Issue a new Token
-      operationId: issueToken
+      operationId: issueTokens
       consumes:
         - application/json
       produces:
