@@ -2,6 +2,7 @@ package dev
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"os"
 	"reflect"
 
@@ -9,7 +10,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/slashing"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
@@ -38,13 +42,21 @@ func DefaultParamsCmd(cdc *codec.Codec) *cobra.Command {
 }
 
 func getParamSets() []moduleParamSet {
-	return []moduleParamSet{
+	set := []moduleParamSet{
 		toParamSet("authx", authx.DefaultParams()),
 		toParamSet("bankx", bankx.DefaultParams()),
 		toParamSet("stakingx", stakingx.DefaultParams()),
 		toParamSet("asset", asset.DefaultParams()),
 		toParamSet("market", market.DefaultParams()),
 	}
+	if viper.GetBool("include-sdk") {
+		set = append(set,
+			toParamSet("auth", auth.DefaultParams()),
+			toParamSet("staking", staking.DefaultParams()),
+			toParamSet("slashing", slashing.DefaultParams()),
+		)
+	}
+	return set
 }
 
 func toParamSet(moduleName string, obj interface{}) moduleParamSet {
