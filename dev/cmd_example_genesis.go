@@ -69,8 +69,8 @@ func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 func createGenesisAccounts() (accs []app.GenesisAccount) {
 	accs = append(accs,
 		newBaseGenesisAccount(incentive.IncentiveCoinsAccAddr.String(), 30000000000000000),
-		newBaseGenesisAccount("cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy", 258788547005740000),
-		newBaseGenesisAccount("cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20", 120000000000000000),
+		newBaseGenesisAccount("cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy", 288788547005740000),
+		newBaseGenesisAccount("cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20", 90000000000000000),
 		newVestingGenesisAccount("cosmos1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q", 36000000000000000, 1577836800),
 		newVestingGenesisAccount("cosmos1966f22al7r23h3melq8yt8tnglhweunrxkcezl", 36000000000000000, 1609459200),
 		newVestingGenesisAccount("cosmos12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv", 36000000000000000, 1640995200),

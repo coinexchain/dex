@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-05-31T07:58:29.223704Z",
+  "genesis_time": "2019-06-03T02:39:53.229813Z",
   "chain_id": "coinexdex",
   "consensus_params": {
     "block": {
@@ -43,7 +43,7 @@
         "coins": [
           {
             "denom": "cet",
-            "amount": "258788547005740000"
+            "amount": "288788547005740000"
           }
         ],
         "sequence_number": "0",
@@ -62,7 +62,7 @@
         "coins": [
           {
             "denom": "cet",
-            "amount": "120000000000000000"
+            "amount": "90000000000000000"
           }
         ],
         "sequence_number": "0",
@@ -217,7 +217,7 @@
       "send_enabled": true
     },
     "bankx": {
-      "param": {
+      "params": {
         "activation_fee": "100000000"
       }
     },
@@ -475,9 +475,9 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "10000000000000000",
-                "delegator_address": "cosmos1tau6wwyjl9ydfqpz60ndh08urlwwkxyu2yqaln",
-                "validator_address": "cosmosvaloper1tau6wwyjl9ydfqpz60ndh08urlwwkxyu0s5gnq",
-                "pubkey": "cosmosvalconspub1addwnpepqv2u9l4hvad0m7p7zrma3q9374v6eu6avs7kfynvzs0g92fh7kadwx7p7ql",
+                "delegator_address": "cosmos1meh2xwgft0qsfakj9eyqzhfazwvzpvam79yncc",
+                "validator_address": "cosmosvaloper1meh2xwgft0qsfakj9eyqzhfazwvzpvamm3sx5t",
+                "pubkey": "cosmosvalconspub1addwnpepqgtw9uy4t52yh4a7xxw9s2704xwlcwd5787asjgz3sh79r0gfykcjtxcq3v",
                 "value": {
                   "denom": "cet",
                   "amount": "10000000000000000"
@@ -498,9 +498,9 @@
             {
               "pub_key": {
                 "type": "tendermint/PubKeySecp256k1",
-                "value": "AxXC/rdnWv34PhD32ICx9Vms811kPWSSbBQegqk39brX"
+                "value": "Ahbi8JVdFEvXvjGcWCvPqZ38ObTx/dhJAowv4o3oSS2J"
               },
-              "signature": "vsEbPqwJMLhe6hWK9mdc28ut1oey7L3PrcDT3h2Isj0Qf5QEMiXEPSppgi1U8GNdGoyTvbappMfTTSBRdAu2bQ=="
+              "signature": "DcHS8ubk6ds71nZtEcJCW/5/LRku0wJ5xesVFOy2iGwHt3kirffIkiLspXT8WJIjsoSze+YPWfTG0Vs1vmWgtA=="
             }
           ],
           "memo": ""
