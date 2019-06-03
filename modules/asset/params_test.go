@@ -3,9 +3,11 @@ package asset
 import (
 	"testing"
 
-	"github.com/coinexchain/dex/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/types"
 )
 
 func TestParams_Equal(t *testing.T) {

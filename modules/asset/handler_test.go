@@ -5,10 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coinexchain/dex/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/types"
 )
 
 func TestInvalidMsg(t *testing.T) {

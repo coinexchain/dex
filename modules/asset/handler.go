@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/coinexchain/dex/modules/asset/tags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/asset/tags"
 )
 
 // NewHandler returns a handler for "asset" type messages.
@@ -51,7 +52,6 @@ func setCoins(ctx sdk.Context, ak auth.AccountKeeper, acc auth.Account, coins sd
 }
 
 func subTokenFee(ctx sdk.Context, tk TokenKeeper, addr sdk.AccAddress, fee sdk.Coins) sdk.Error {
-
 	acc := tk.ak.GetAccount(ctx, addr)
 	if acc == nil {
 		return sdk.ErrUnknownAddress("no valid address")
