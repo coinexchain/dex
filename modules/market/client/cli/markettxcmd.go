@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/market"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -14,8 +14,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/market"
 )
 
 const (
@@ -120,7 +120,6 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo
 }
 
 func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
-
 	return &cobra.Command{
 		Use:   "marketinfo",
 		Short: "query market info",

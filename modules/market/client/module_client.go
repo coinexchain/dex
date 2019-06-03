@@ -1,13 +1,13 @@
 package client
 
 import (
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/market/client/cli"
-
 	"github.com/spf13/cobra"
 	"github.com/tendermint/go-amino"
 
 	"github.com/cosmos/cosmos-sdk/client"
+
+	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/client/cli"
 )
 
 // ModuleClient exports all client functionality from this module

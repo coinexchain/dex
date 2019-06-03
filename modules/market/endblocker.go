@@ -3,9 +3,11 @@ package market
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/coinexchain/dex/modules/market/match"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strings"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/market/match"
 )
 
 type InfoForDeal struct {

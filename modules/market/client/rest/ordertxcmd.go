@@ -1,13 +1,15 @@
 package rest
 
 import (
-	"github.com/coinexchain/dex/modules/market"
+	"net/http"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	clientrest "github.com/cosmos/cosmos-sdk/client/rest"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"net/http"
+
+	"github.com/coinexchain/dex/modules/market"
 )
 
 // SendReq defines the properties of a send request's body.

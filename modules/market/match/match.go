@@ -3,8 +3,9 @@ package match
 import (
 	"bytes"
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"sort"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const BID = 1

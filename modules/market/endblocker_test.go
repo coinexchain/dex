@@ -3,9 +3,10 @@ package market
 import (
 	"bytes"
 	"fmt"
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"testing"
 )
 
 type mocBankxKeeper struct {

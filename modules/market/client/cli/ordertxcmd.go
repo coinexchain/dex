@@ -6,16 +6,18 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/market/match"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+
+	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/match"
 )
 
 const (
@@ -38,7 +40,6 @@ var createOrderFlags = []string{
 }
 
 func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
-
 	cmd := &cobra.Command{
 		Use:   "createiocorder",
 		Short: "",
@@ -188,7 +189,6 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 }
 
 func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
-
 	cmd := &cobra.Command{
 		Use:   "userorderlist [userAddress]",
 		Short: "Query user order list in blockchain",

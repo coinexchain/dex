@@ -3,8 +3,9 @@ package match
 import (
 	"crypto/sha256"
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"testing"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type dealRecord struct {
