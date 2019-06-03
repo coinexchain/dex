@@ -102,7 +102,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if len(msg.Symbol) == 0 {
 		return sdk.ErrInvalidAddress("missing GTE order symbol identifier")
 	}
-	if msg.PricePrecision < MinimumTokenPricePrecision ||
+	if msg.PricePrecision < MinTokenPricePrecision ||
 		msg.PricePrecision > MaxTokenPricePrecision {
 		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [8, 18]. actual : %d", msg.PricePrecision))
 	}

@@ -65,10 +65,10 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			if msg.PricePrecision < market.MinimumTokenPricePrecision ||
+			if msg.PricePrecision < market.MinTokenPricePrecision ||
 				msg.PricePrecision > market.MaxTokenPricePrecision {
 				return errors.Errorf("price precision out of range [%d, %d]",
-					market.MinimumTokenPricePrecision, market.MaxTokenPricePrecision)
+					market.MinTokenPricePrecision, market.MaxTokenPricePrecision)
 			}
 
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)

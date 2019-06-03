@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	MinimumTokenPricePrecision           = 8
-	MaxTokenPricePrecision               = 18
-	LimitOrder                 OrderType = 2
-	SymbolSeparator                      = "/"
+	MinTokenPricePrecision           = 8
+	MaxTokenPricePrecision           = 18
+	LimitOrder             OrderType = 2
+	SymbolSeparator                  = "/"
 )
 
 type OrderType = byte
@@ -80,7 +80,7 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 		return ErrInvalidTokenIssuer().Result()
 	}
 
-	if msg.PricePrecision < MinimumTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
+	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
 		return ErrInvalidPricePrecision().Result()
 	}
 
