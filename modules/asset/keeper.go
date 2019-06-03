@@ -275,7 +275,22 @@ func (tk TokenKeeper) AddTokenForbidWhitelist(ctx sdk.Context, msg MsgAddForbidW
 	if err = tk.addWhitelist(ctx, msg.Symbol, msg.Whitelist); err != nil {
 		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
 	}
-	return tk.setToken(ctx, token)
+	return nil
+}
+
+func (tk TokenKeeper) RemoveTokenForbidWhitelist(ctx sdk.Context, msg MsgRemoveForbidWhitelist) sdk.Error {
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
+	if err != nil {
+		return err
+	}
+
+	if !token.GetTokenForbiddable() {
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid and remove whitelist", msg.Symbol))
+	}
+	if err = tk.removeWhitelist(ctx, msg.Symbol, msg.Whitelist); err != nil {
+		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
+	}
+	return nil
 }
 
 // -----------------------------------------------------------------------------

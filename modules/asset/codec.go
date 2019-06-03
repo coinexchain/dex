@@ -18,6 +18,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgBurnToken{}, "asset/MsgBurnToken", nil)
 	cdc.RegisterConcrete(MsgMintToken{}, "asset/MsgMintToken", nil)
 	cdc.RegisterConcrete(MsgAddForbidWhitelist{}, "asset/MsgAddForbidWhitelist", nil)
+	cdc.RegisterConcrete(MsgRemoveForbidWhitelist{}, "asset/MsgRemoveForbidWhitelist", nil)
 }
 
 var msgCdc = codec.New()

@@ -415,3 +415,46 @@ func (msg MsgAddForbidWhitelist) GetSignBytes() []byte {
 func (msg MsgAddForbidWhitelist) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddress}
 }
+
+// MsgRemoveWhitelist
+type MsgRemoveForbidWhitelist struct {
+	Symbol       string           `json:"symbol"`
+	OwnerAddress sdk.AccAddress   `json:"owner_address"`
+	Whitelist    []sdk.AccAddress `json:"whitelist"`
+}
+
+var _ sdk.Msg = MsgRemoveForbidWhitelist{}
+
+// Route Implements Msg.
+func (msg MsgRemoveForbidWhitelist) Route() string {
+	return RouterKey
+}
+
+// Type Implements Msg.
+func (msg MsgRemoveForbidWhitelist) Type() string {
+	return "remove_forbid_whitelist"
+}
+
+// ValidateBasic Implements Msg.
+func (msg MsgRemoveForbidWhitelist) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("remove forbid whitelist need a valid owner")
+	}
+	if len(msg.Whitelist) == 0 {
+		return ErrorInvalidTokenWhitelist("remove nil forbid whitelist")
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgRemoveForbidWhitelist) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgRemoveForbidWhitelist) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.OwnerAddress}
+}
