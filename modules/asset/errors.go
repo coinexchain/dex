@@ -1,19 +1,21 @@
 package asset
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 const (
-	CodeSpaceAsset = ModuleName
+	CodeSpaceAsset sdk.CodespaceType = ModuleName
 
-	CodeInvalidTokenName      = 201
-	CodeInvalidTokenSymbol    = 202
-	CodeInvalidTokenSupply    = 203
-	CodeInvalidTokenOwner     = 204
-	CodeTokenNotFound         = 205
-	CodeInvalidTotalMint      = 206
-	CodeInvalidTotalBurn      = 207
-	CodeDuplicateTokenSymbol  = 208
-	CodeInvalidForbiddenState = 209
+	CodeInvalidTokenName      sdk.CodeType = 201
+	CodeInvalidTokenSymbol    sdk.CodeType = 202
+	CodeInvalidTokenSupply    sdk.CodeType = 203
+	CodeInvalidTokenOwner     sdk.CodeType = 204
+	CodeTokenNotFound         sdk.CodeType = 205
+	CodeInvalidTotalMint      sdk.CodeType = 206
+	CodeInvalidTotalBurn      sdk.CodeType = 207
+	CodeDuplicateTokenSymbol  sdk.CodeType = 208
+	CodeInvalidForbiddenState sdk.CodeType = 209
 )
 
 func ErrorInvalidTokenName(fmt string) sdk.Error {
