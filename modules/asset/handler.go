@@ -189,7 +189,6 @@ func handleMsgForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgForbidToken) (
 		Tags: sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Token, msg.Symbol,
-			tags.AddWhitelist, msg.OwnerAddress.String(),
 		),
 	}
 } // handleMsgUnForbidToken - Handle MsgUnForbidToken
@@ -202,7 +201,6 @@ func handleMsgUnForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidToke
 		Tags: sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Token, msg.Symbol,
-			tags.RemoveWhitelist, msg.OwnerAddress.String(),
 		),
 	}
 }

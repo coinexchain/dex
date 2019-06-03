@@ -240,10 +240,6 @@ func (tk TokenKeeper) ForbidToken(ctx sdk.Context, msg MsgForbidToken) sdk.Error
 	if token.GetIsForbidden() {
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has been forbidden", msg.Symbol))
 	}
-
-	if err = tk.addWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
-		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
-	}
 	token.SetIsForbidden(true)
 
 	return tk.setToken(ctx, token)
@@ -261,10 +257,6 @@ func (tk TokenKeeper) UnForbidToken(ctx sdk.Context, msg MsgUnForbidToken) sdk.E
 	}
 	if !token.GetIsForbidden() {
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has not been forbidden", msg.Symbol))
-	}
-
-	if err = tk.removeWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
-		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
 	}
 	token.SetIsForbidden(false)
 
