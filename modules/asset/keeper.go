@@ -59,6 +59,19 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramstore params.Subspace,
 	}
 }
 
+// setToken  implements token Keeper.
+func (tk TokenKeeper) setToken(ctx sdk.Context, token Token) sdk.Error {
+	symbol := token.GetSymbol()
+	store := ctx.KVStore(tk.key)
+
+	bz, err := tk.cdc.MarshalBinaryBare(token)
+	if err != nil {
+		return sdk.ErrInternal(err.Error())
+	}
+	store.Set(TokenStoreKey(symbol), bz)
+	return nil
+}
+
 // GetToken implements token Keeper.
 func (tk TokenKeeper) GetToken(ctx sdk.Context, symbol string) Token {
 	store := ctx.KVStore(tk.key)
@@ -81,13 +94,6 @@ func (tk TokenKeeper) GetAllTokens(ctx sdk.Context) []Token {
 	return tokens
 }
 
-// removeToken removes an token for the asset mapper store.
-func (tk TokenKeeper) removeToken(ctx sdk.Context, token Token) {
-	symbol := token.GetSymbol()
-	store := ctx.KVStore(tk.key)
-	store.Delete(TokenStoreKey(symbol))
-}
-
 // IterateToken implements token Keeper
 func (tk TokenKeeper) IterateToken(ctx sdk.Context, process func(Token) (stop bool)) {
 	store := ctx.KVStore(tk.key)
@@ -105,17 +111,11 @@ func (tk TokenKeeper) IterateToken(ctx sdk.Context, process func(Token) (stop bo
 	}
 }
 
-// setToken  implements token Keeper.
-func (tk TokenKeeper) setToken(ctx sdk.Context, token Token) sdk.Error {
+// removeToken remove an token for the asset mapper store.
+func (tk TokenKeeper) removeToken(ctx sdk.Context, token Token) {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(tk.key)
-
-	bz, err := tk.cdc.MarshalBinaryBare(token)
-	if err != nil {
-		return sdk.ErrInternal(err.Error())
-	}
-	store.Set(TokenStoreKey(symbol), bz)
-	return nil
+	store.Delete(TokenStoreKey(symbol))
 }
 
 //IssueToken - new token and store
@@ -187,6 +187,28 @@ func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 	return tk.setToken(ctx, token)
 }
 
+//BurnToken - burn token
+func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
+	if err != nil {
+		return err
+	}
+
+	if !token.GetBurnable() {
+		return ErrorInvalidTokenBurn(fmt.Sprintf("token %s do not support burn", msg.Symbol))
+	}
+
+	if err := token.SetTotalBurn(msg.Amount + token.GetTotalBurn()); err != nil {
+		return ErrorInvalidTokenBurn(err.Error())
+	}
+
+	if err := token.SetTotalSupply(token.GetTotalSupply() - msg.Amount); err != nil {
+		return ErrorInvalidTokenSupply(err.Error())
+	}
+
+	return tk.setToken(ctx, token)
+}
+
 func (tk TokenKeeper) addWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(tk.key)
 	for _, acc := range whitelist {
@@ -249,25 +271,18 @@ func (tk TokenKeeper) UnForbidToken(ctx sdk.Context, msg MsgUnForbidToken) sdk.E
 	return tk.setToken(ctx, token)
 }
 
-//BurnToken - burn token
-func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
+func (tk TokenKeeper) AddTokenForbidWhitelist(ctx sdk.Context, msg MsgAddForbidWhitelist) sdk.Error {
 	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
 	if err != nil {
 		return err
 	}
 
-	if !token.GetBurnable() {
-		return ErrorInvalidTokenBurn(fmt.Sprintf("token %s do not support burn", msg.Symbol))
+	if !token.GetTokenForbiddable() {
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid and add whitelist", msg.Symbol))
 	}
-
-	if err := token.SetTotalBurn(msg.Amount + token.GetTotalBurn()); err != nil {
-		return ErrorInvalidTokenBurn(err.Error())
+	if err = tk.addWhitelist(ctx, msg.Symbol, msg.Whitelist); err != nil {
+		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
 	}
-
-	if err := token.SetTotalSupply(token.GetTotalSupply() - msg.Amount); err != nil {
-		return ErrorInvalidTokenSupply(err.Error())
-	}
-
 	return tk.setToken(ctx, token)
 }
 

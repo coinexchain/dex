@@ -18,6 +18,10 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 			return handleMsgIssueToken(ctx, tk, msg)
 		case MsgTransferOwnership:
 			return handleMsgTransferOwnership(ctx, tk, msg)
+		case MsgBurnToken:
+			return handleMsgBurnToken(ctx, tk, msg)
+		case MsgMintToken:
+			return handleMsgMintToken(ctx, tk, msg)
 		case MsgForbidAddress:
 			return handleMsgForbidAddress(ctx, tk, msg)
 		case MsgUnForbidAddress:
@@ -26,10 +30,8 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 			return handleMsgForbidToken(ctx, tk, msg)
 		case MsgUnForbidToken:
 			return handleMsgUnForbidToken(ctx, tk, msg)
-		case MsgBurnToken:
-			return handleMsgBurnToken(ctx, tk, msg)
-		case MsgMintToken:
-			return handleMsgMintToken(ctx, tk, msg)
+		case MsgAddForbidWhitelist:
+			return handleMsgAddForbidWhitelist(ctx, tk, msg)
 
 		default:
 			errMsg := "Unrecognized asset Msg type: %s" + msg.Type()
@@ -135,6 +137,36 @@ func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransfer
 	}
 }
 
+// handleMsgBurnToken - Handle MsgBurnToken
+func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) (res sdk.Result) {
+	if err := tk.BurnToken(ctx, msg); err != nil {
+		return err.Result()
+	}
+
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Amt, strconv.FormatInt(msg.Amount, 10),
+		),
+	}
+}
+
+// handleMsgMintToken - Handle MsgMintToken
+func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) (res sdk.Result) {
+	if err := tk.MintToken(ctx, msg); err != nil {
+		return err.Result()
+	}
+
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Amt, strconv.FormatInt(msg.Amount, 10),
+		),
+	}
+}
+
 // handleMsgForbidAddress - Handle MsgForbidAddress
 func handleMsgForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddress) (res sdk.Result) {
 
@@ -175,9 +207,8 @@ func handleMsgUnForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidToke
 	}
 }
 
-// handleMsgBurnToken - Handle MsgBurnToken
-func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) (res sdk.Result) {
-	if err := tk.BurnToken(ctx, msg); err != nil {
+func handleMsgAddForbidWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgAddForbidWhitelist) (res sdk.Result) {
+	if err := tk.AddTokenForbidWhitelist(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -185,22 +216,7 @@ func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) (res 
 		Tags: sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Token, msg.Symbol,
-			tags.Amt, strconv.FormatInt(msg.Amount, 10),
-		),
-	}
-}
-
-// handleMsgMintToken - Handle MsgMintToken
-func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) (res sdk.Result) {
-	if err := tk.MintToken(ctx, msg); err != nil {
-		return err.Result()
-	}
-
-	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.Amt, strconv.FormatInt(msg.Amount, 10),
+			tags.AddWhitelist, msg.Whitelist,
 		),
 	}
 }

@@ -114,6 +114,121 @@ func (msg MsgTransferOwnership) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OriginalOwner}
 }
 
+// MsgMintToken
+type MsgMintToken struct {
+	Symbol       string         `json:"symbol"`
+	Amount       int64          `json:"amount"`
+	OwnerAddress sdk.AccAddress `json:"owner_address"`
+}
+
+var _ sdk.Msg = MsgMintToken{}
+
+func NewMsgMintToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToken {
+	return MsgMintToken{
+		symbol,
+		amt,
+		owner,
+	}
+}
+
+// Route Implements Msg.
+func (msg MsgMintToken) Route() string {
+	return RouterKey
+}
+
+// Type Implements Msg.
+func (msg MsgMintToken) Type() string {
+	return "mint_token"
+}
+
+// ValidateBasic Implements Msg.
+func (msg MsgMintToken) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("mint token need a valid owner addr")
+	}
+
+	if msg.Amount > MaxTokenAmount {
+		return ErrorInvalidTokenMint("token total supply before 1e8 boosting should be less than 90 billion")
+	}
+
+	if msg.Amount <= 0 {
+		return ErrorInvalidTokenMint("mint amount should be positive")
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgMintToken) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgMintToken) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.OwnerAddress}
+}
+
+// MsgBurnToken
+type MsgBurnToken struct {
+	Symbol       string         `json:"symbol"`
+	Amount       int64          `json:"amount"`
+	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
+}
+
+var _ sdk.Msg = MsgBurnToken{}
+
+func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgBurnToken {
+	return MsgBurnToken{
+		symbol,
+		amt,
+		owner,
+	}
+}
+
+// Route Implements Msg.
+func (msg MsgBurnToken) Route() string {
+	return RouterKey
+}
+
+// Type Implements Msg.
+func (msg MsgBurnToken) Type() string {
+	return "burn_token"
+}
+
+// ValidateBasic Implements Msg.
+func (msg MsgBurnToken) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("burn token need a valid owner addr")
+	}
+
+	if msg.Amount > MaxTokenAmount {
+		return ErrorInvalidTokenBurn("token total supply before 1e8 boosting should be less than 90 billion")
+	}
+
+	if msg.Amount <= 0 {
+		return ErrorInvalidTokenBurn("burn amount should be positive")
+	}
+
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgBurnToken) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgBurnToken) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.OwnerAddress}
+}
+
 // MsgForbidAddress
 type MsgForbidAddress struct {
 	Symbol  string
@@ -258,117 +373,45 @@ func (msg MsgUnForbidToken) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddress}
 }
 
-// MsgBurnToken
-type MsgBurnToken struct {
-	Symbol       string         `json:"symbol"`
-	Amount       int64          `json:"amount"`
-	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
+// MsgAddWhitelist
+type MsgAddForbidWhitelist struct {
+	Symbol       string           `json:"symbol"`
+	OwnerAddress sdk.AccAddress   `json:"owner_address"`
+	Whitelist    []sdk.AccAddress `json:"whitelist"`
 }
 
-var _ sdk.Msg = MsgBurnToken{}
-
-func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgBurnToken {
-	return MsgBurnToken{
-		symbol,
-		amt,
-		owner,
-	}
-}
+var _ sdk.Msg = MsgAddForbidWhitelist{}
 
 // Route Implements Msg.
-func (msg MsgBurnToken) Route() string {
+func (msg MsgAddForbidWhitelist) Route() string {
 	return RouterKey
 }
 
 // Type Implements Msg.
-func (msg MsgBurnToken) Type() string {
-	return "burn_token"
+func (msg MsgAddForbidWhitelist) Type() string {
+	return "add_forbid_whitelist"
 }
 
 // ValidateBasic Implements Msg.
-func (msg MsgBurnToken) ValidateBasic() sdk.Error {
+func (msg MsgAddForbidWhitelist) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
 		return ErrorInvalidTokenSymbol(err.Error())
 	}
-
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("burn token need a valid owner addr")
+		return ErrorInvalidTokenOwner("add forbid whitelist need a valid owner")
 	}
-
-	if msg.Amount > MaxTokenAmount {
-		return ErrorInvalidTokenBurn("token total supply before 1e8 boosting should be less than 90 billion")
-	}
-
-	if msg.Amount <= 0 {
-		return ErrorInvalidTokenBurn("burn amount should be positive")
-	}
-
-	return nil
-}
-
-// GetSignBytes Implements Msg.
-func (msg MsgBurnToken) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
-}
-
-// GetSigners Implements Msg.
-func (msg MsgBurnToken) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.OwnerAddress}
-}
-
-// MsgMintToken
-type MsgMintToken struct {
-	Symbol       string         `json:"symbol"`
-	Amount       int64          `json:"amount"`
-	OwnerAddress sdk.AccAddress `json:"owner_address"`
-}
-
-var _ sdk.Msg = MsgMintToken{}
-
-func NewMsgMintToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToken {
-	return MsgMintToken{
-		symbol,
-		amt,
-		owner,
-	}
-}
-
-// Route Implements Msg.
-func (msg MsgMintToken) Route() string {
-	return RouterKey
-}
-
-// Type Implements Msg.
-func (msg MsgMintToken) Type() string {
-	return "mint_token"
-}
-
-// ValidateBasic Implements Msg.
-func (msg MsgMintToken) ValidateBasic() sdk.Error {
-	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
-	}
-
-	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("mint token need a valid owner addr")
-	}
-
-	if msg.Amount > MaxTokenAmount {
-		return ErrorInvalidTokenMint("token total supply before 1e8 boosting should be less than 90 billion")
-	}
-
-	if msg.Amount <= 0 {
-		return ErrorInvalidTokenMint("mint amount should be positive")
+	if len(msg.Whitelist) == 0 {
+		return ErrorInvalidTokenWhitelist("add nil forbid whitelist")
 	}
 	return nil
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgMintToken) GetSignBytes() []byte {
+func (msg MsgAddForbidWhitelist) GetSignBytes() []byte {
 	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
-func (msg MsgMintToken) GetSigners() []sdk.AccAddress {
+func (msg MsgAddForbidWhitelist) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddress}
 }
