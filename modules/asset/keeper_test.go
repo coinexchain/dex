@@ -55,13 +55,13 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 	token1, err := NewToken("ABC token", "abc", 2100, tAccAddr,
 		false, false, false, false)
 	require.NoError(t, err)
-	err = input.tk.SetToken(input.ctx, token1)
+	err = input.tk.setToken(input.ctx, token1)
 	require.NoError(t, err)
 
 	token2, err := NewToken("XYZ token", "xyz", 2100, tAccAddr,
 		false, false, false, false)
 	require.NoError(t, err)
-	err = input.tk.SetToken(input.ctx, token2)
+	err = input.tk.setToken(input.ctx, token2)
 	require.NoError(t, err)
 
 	// get all tokens
@@ -71,7 +71,7 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 	require.Contains(t, []string{"abc", "xyz"}, tokens[1].GetSymbol())
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token1)
+	input.tk.removeToken(input.ctx, token1)
 
 	// get token
 	res := input.tk.GetToken(input.ctx, token1.GetSymbol())
@@ -143,7 +143,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Equal(t, int64(2000), token.GetTotalMint())
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 2: un mintable token
 	// set token mintable: false
@@ -157,7 +157,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 3: mint invalid token
 	issueMsg = NewMsgIssueToken("ABC token", "xyz", 2100, tAccAddr,
@@ -169,7 +169,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 4: only token owner can mint token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, addr,
@@ -181,7 +181,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 5: token total mint amt is invalid
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
@@ -193,7 +193,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 6: token total supply before 1e8 boosting should be less than 90 billion
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
@@ -232,7 +232,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Equal(t, int64(2000), token.GetTotalBurn())
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 2: un burnable token
 	// set token burnable: false
@@ -246,7 +246,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 3: burn invalid token
 	issueMsg = NewMsgIssueToken("ABC token", "xyz", 2100, tAccAddr,
@@ -258,7 +258,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 4: only token owner can burn token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, addr,
@@ -270,7 +270,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 5: token total burn amt is invalid
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
@@ -282,7 +282,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.RemoveToken(input.ctx, token)
+	input.tk.removeToken(input.ctx, token)
 
 	//case 6: token total supply limited to > 0
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,

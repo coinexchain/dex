@@ -30,7 +30,7 @@ func InitGenesis(ctx sdk.Context, tk TokenKeeper, data GenesisState) {
 	tk.SetParams(ctx, data.Params)
 
 	for _, token := range data.Tokens {
-		if err := tk.SetToken(ctx, token); err != nil {
+		if err := tk.setToken(ctx, token); err != nil {
 			panic(err)
 		}
 	}

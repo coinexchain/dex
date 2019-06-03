@@ -25,7 +25,7 @@ func Test_queryToken(t *testing.T) {
 	token, err := NewToken("ABC Token", "abc", 2100, tAccAddr,
 		false, false, false, false)
 	require.NoError(t, err)
-	err = input.tk.SetToken(input.ctx, token)
+	err = input.tk.setToken(input.ctx, token)
 	require.NoError(t, err)
 
 	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams(""))
@@ -68,12 +68,12 @@ func Test_queryAllTokenList(t *testing.T) {
 	token1, err := NewToken("ABC Token", "abc", 2100, tAccAddr,
 		false, false, false, false)
 	require.NoError(t, err)
-	err = input.tk.SetToken(input.ctx, token1)
+	err = input.tk.setToken(input.ctx, token1)
 	require.NoError(t, err)
 
 	token2, err := NewToken("XYZ Token", "xyz", 2100, tAccAddr, false, false, false, false)
 	require.NoError(t, err)
-	err = input.tk.SetToken(input.ctx, token2)
+	err = input.tk.setToken(input.ctx, token2)
 	require.NoError(t, err)
 
 	res, err = queryAllTokenList(input.ctx, req, input.tk)

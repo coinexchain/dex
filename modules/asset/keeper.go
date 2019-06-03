@@ -81,8 +81,8 @@ func (tk TokenKeeper) GetAllTokens(ctx sdk.Context) []Token {
 	return tokens
 }
 
-// RemoveToken removes an token for the asset mapper store.
-func (tk TokenKeeper) RemoveToken(ctx sdk.Context, token Token) {
+// removeToken removes an token for the asset mapper store.
+func (tk TokenKeeper) removeToken(ctx sdk.Context, token Token) {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(tk.key)
 	store.Delete(TokenStoreKey(symbol))
@@ -105,8 +105,8 @@ func (tk TokenKeeper) IterateToken(ctx sdk.Context, process func(Token) (stop bo
 	}
 }
 
-// SetToken  implements token Keeper.
-func (tk TokenKeeper) SetToken(ctx sdk.Context, token Token) sdk.Error {
+// setToken  implements token Keeper.
+func (tk TokenKeeper) setToken(ctx sdk.Context, token Token) sdk.Error {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(tk.key)
 
@@ -131,7 +131,7 @@ func (tk TokenKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 		return ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
 	}
 
-	return tk.SetToken(ctx, token)
+	return tk.setToken(ctx, token)
 }
 
 func (tk TokenKeeper) checkPrecondition(ctx sdk.Context, msg sdk.Msg, symbol string, owner sdk.AccAddress) (Token, sdk.Error) {
@@ -162,7 +162,7 @@ func (tk TokenKeeper) TransferOwnership(ctx sdk.Context, msg MsgTransferOwnershi
 		return ErrorInvalidTokenOwner("token new owner is invalid")
 	}
 
-	return tk.SetToken(ctx, token)
+	return tk.setToken(ctx, token)
 }
 
 //MintToken - mint token
@@ -184,10 +184,10 @@ func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 		return ErrorInvalidTokenSupply(err.Error())
 	}
 
-	return tk.SetToken(ctx, token)
+	return tk.setToken(ctx, token)
 }
 
-func (tk TokenKeeper) AddWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
+func (tk TokenKeeper) addWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(tk.key)
 	for _, acc := range whitelist {
 		store.Set(WhitelistKey(symbol, acc), nil)
@@ -196,7 +196,7 @@ func (tk TokenKeeper) AddWhitelist(ctx sdk.Context, symbol string, whitelist []s
 	return nil
 }
 
-func (tk TokenKeeper) RemoveWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
+func (tk TokenKeeper) removeWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(tk.key)
 	for _, acc := range whitelist {
 		store.Delete(WhitelistKey(symbol, acc))
@@ -219,12 +219,12 @@ func (tk TokenKeeper) ForbidToken(ctx sdk.Context, msg MsgForbidToken) sdk.Error
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has been forbidden", msg.Symbol))
 	}
 
-	if err = tk.AddWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
+	if err = tk.addWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
 		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
 	}
 	token.SetIsForbidden(true)
 
-	return tk.SetToken(ctx, token)
+	return tk.setToken(ctx, token)
 }
 
 //UnForbidToken - unforbid token
@@ -241,12 +241,12 @@ func (tk TokenKeeper) UnForbidToken(ctx sdk.Context, msg MsgUnForbidToken) sdk.E
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has not been forbidden", msg.Symbol))
 	}
 
-	if err = tk.RemoveWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
+	if err = tk.removeWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
 		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
 	}
 	token.SetIsForbidden(false)
 
-	return tk.SetToken(ctx, token)
+	return tk.setToken(ctx, token)
 }
 
 //BurnToken - burn token
@@ -268,7 +268,7 @@ func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
 		return ErrorInvalidTokenSupply(err.Error())
 	}
 
-	return tk.SetToken(ctx, token)
+	return tk.setToken(ctx, token)
 }
 
 // -----------------------------------------------------------------------------

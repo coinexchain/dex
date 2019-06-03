@@ -33,7 +33,7 @@ type Token interface {
 	SetAddrForbiddable(bool)
 
 	GetTokenForbiddable() bool
-	SetTokenForbiddable(bool)
+	setTokenForbiddable(bool)
 
 	GetTotalBurn() int64
 	SetTotalBurn(int64) error
@@ -97,7 +97,7 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	t.SetMintable(mintable)
 	t.SetBurnable(burnable)
 	t.SetAddrForbiddable(addrForbiddable)
-	t.SetTokenForbiddable(tokenForbiddable)
+	t.setTokenForbiddable(tokenForbiddable)
 
 	if err := t.SetTotalMint(0); err != nil {
 		return nil, ErrorInvalidTokenMint(err.Error())
@@ -218,7 +218,7 @@ func (t BaseToken) GetTokenForbiddable() bool {
 	return t.TokenForbiddable
 }
 
-func (t *BaseToken) SetTokenForbiddable(enable bool) {
+func (t *BaseToken) setTokenForbiddable(enable bool) {
 	t.TokenForbiddable = enable
 }
 
