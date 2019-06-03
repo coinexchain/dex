@@ -328,7 +328,7 @@ func TestMsgMintToken_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidOwner",
 			NewMsgMintToken("abc", 10000, sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("mint token need a valid addr"),
+			ErrorInvalidTokenOwner("mint token need a valid owner addr"),
 		},
 		{
 			"case-invalidAmt1",
@@ -447,7 +447,7 @@ func TestMsgBurnToken_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidOwner",
 			NewMsgBurnToken("abc", 10000, sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("burn token need a valid addr"),
+			ErrorInvalidTokenOwner("burn token need a valid owner addr"),
 		},
 		{
 			"case-invalidAmt1",
