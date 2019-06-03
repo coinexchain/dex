@@ -2,6 +2,7 @@ package market
 
 import (
 	"errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -43,7 +44,7 @@ func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	return NewGenesisState(k.GetParams(ctx), k.GetAllOrders(ctx), k.GetAllMarketInfos(ctx))
 }
 
-// ValidateGenesis performs basic validation of asset genesis data returning an
+// ValidateGenesis performs basic validation of market genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) Validate() error {
 	if err := data.Params.ValidateGenesis(); err != nil {
@@ -54,7 +55,7 @@ func (data GenesisState) Validate() error {
 
 	for _, order := range data.Orders {
 		if _, exists := tokenSymbols[order.OrderID()]; exists {
-			return errors.New("duplicate order found during asset ValidateGenesis")
+			return errors.New("duplicate order found during market ValidateGenesis")
 		}
 		tokenSymbols[order.OrderID()] = nil
 	}
@@ -63,7 +64,7 @@ func (data GenesisState) Validate() error {
 	for _, info := range data.MarketInfos {
 		symbol := info.Stock + SymbolSeparator + info.Money
 		if _, exists := infos[symbol]; exists {
-			return errors.New("duplicate market found during asset ValidateGenesis")
+			return errors.New("duplicate market found during market ValidateGenesis")
 		}
 		infos[symbol] = nil
 	}
