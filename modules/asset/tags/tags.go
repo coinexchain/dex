@@ -8,15 +8,14 @@ const (
 	Category   = "category"
 	TxCategory = "asset"
 
-	Issue = "issue"
-	Token = "token"
-	Owner = "owner"
-
+	Issue         = "issue"
+	Token         = "token"
+	Owner         = "owner"
 	OriginalOwner = "original-owner"
 	NewOwner      = "new-owner"
-
-	Amt = "amount"
-	Whitelist = "white-list"
+	Amt           = "amount"
+	AddWhitelist  = "add-white-list"
+	RemoveWhitelist  = "remove-white-list"
 )
 
 // Tag keys and values

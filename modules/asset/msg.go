@@ -182,8 +182,8 @@ func (msg MsgUnForbidAddress) GetSigners() []sdk.AccAddress {
 
 // MsgForbidToken
 type MsgForbidToken struct {
-	Symbol       string           `json:"symbol"`
-	OwnerAddress sdk.AccAddress   `json:"owner_address"`
+	Symbol       string         `json:"symbol"`
+	OwnerAddress sdk.AccAddress `json:"owner_address"`
 }
 
 var _ sdk.Msg = MsgForbidToken{}
@@ -221,8 +221,8 @@ func (msg MsgForbidToken) GetSigners() []sdk.AccAddress {
 
 // MsgUnForbidToken
 type MsgUnForbidToken struct {
-	Symbol  string
-	address sdk.AccAddress // Whitelist
+	Symbol       string         `json:"symbol"`
+	OwnerAddress sdk.AccAddress `json:"owner_address"`
 }
 
 var _ sdk.Msg = MsgUnForbidToken{}
@@ -239,17 +239,23 @@ func (msg MsgUnForbidToken) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgUnForbidToken) ValidateBasic() sdk.Error {
-	panic("implement me")
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("forbid token need a valid owner")
+	}
+	return nil
 }
 
 // GetSignBytes Implements Msg.
 func (msg MsgUnForbidToken) GetSignBytes() []byte {
-	panic("implement me")
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
 func (msg MsgUnForbidToken) GetSigners() []sdk.AccAddress {
-	panic("implement me")
+	return []sdk.AccAddress{msg.OwnerAddress}
 }
 
 // MsgBurnToken

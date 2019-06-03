@@ -157,13 +157,22 @@ func handleMsgForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgForbidToken) (
 		Tags: sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Token, msg.Symbol,
-			tags.Whitelist, msg.OwnerAddress.String(),
+			tags.AddWhitelist, msg.OwnerAddress.String(),
 		),
 	}
 } // handleMsgUnForbidToken - Handle MsgUnForbidToken
 func handleMsgUnForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidToken) (res sdk.Result) {
+	if err := tk.UnForbidToken(ctx, msg); err != nil {
+		return err.Result()
+	}
 
-	return
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.RemoveWhitelist, msg.OwnerAddress.String(),
+		),
+	}
 }
 
 // handleMsgBurnToken - Handle MsgBurnToken

@@ -187,10 +187,19 @@ func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 	return tk.SetToken(ctx, token)
 }
 
-func (tk TokenKeeper) AddTokenWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
+func (tk TokenKeeper) AddWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(tk.key)
 	for _, acc := range whitelist {
 		store.Set(WhitelistKey(symbol, acc), nil)
+	}
+
+	return nil
+}
+
+func (tk TokenKeeper) RemoveWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
+	store := ctx.KVStore(tk.key)
+	for _, acc := range whitelist {
+		store.Delete(WhitelistKey(symbol, acc))
 	}
 
 	return nil
@@ -204,16 +213,38 @@ func (tk TokenKeeper) ForbidToken(ctx sdk.Context, msg MsgForbidToken) sdk.Error
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbidden", msg.Symbol))
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid", msg.Symbol))
 	}
 	if token.GetIsForbidden() {
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has been forbidden", msg.Symbol))
 	}
 
-	if err = tk.AddTokenWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
+	if err = tk.AddWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
 		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
 	}
 	token.SetIsForbidden(true)
+
+	return tk.SetToken(ctx, token)
+}
+
+//UnForbidToken - unforbid token
+func (tk TokenKeeper) UnForbidToken(ctx sdk.Context, msg MsgUnForbidToken) sdk.Error {
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
+	if err != nil {
+		return err
+	}
+
+	if !token.GetTokenForbiddable() {
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid", msg.Symbol))
+	}
+	if !token.GetIsForbidden() {
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has not been forbidden", msg.Symbol))
+	}
+
+	if err = tk.RemoveWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
+		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
+	}
+	token.SetIsForbidden(false)
 
 	return tk.SetToken(ctx, token)
 }
