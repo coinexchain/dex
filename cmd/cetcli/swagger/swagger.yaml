@@ -346,9 +346,16 @@ paths:
         200:
           description: Account balances
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Coin"
+            type: object
+            properties:
+              coins:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
+              locked_coins:
+                type: array
+                items:
+                  $ref: "#/definitions/LockedCoin"
         204:
           description: There is no data for the requested account
         500:
@@ -383,7 +390,7 @@ paths:
                 items:
                   $ref: "#/definitions/Coin"
               unlock_time:
-                type: integer
+                type: string
                 example: "675132000"
       responses:
         202:
@@ -520,23 +527,28 @@ paths:
           schema:
             type: object
             properties:
-              type:
+              address:
                 type: string
-              value:
-                type: object
-                properties:
-                  account_number:
-                    type: string
-                  address:
-                    type: string
-                  coins:
-                    type: array
-                    items:
-                      $ref: "#/definitions/Coin"
-                  public_key:
-                    type: string
-                  sequence:
-                    type: string
+              coins:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
+              locked_coins:
+                type: array
+                items:
+                  $ref: "#/definitions/LockedCoin"
+              frozen_coins:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
+              public_key:
+                type: string
+              account_number:
+                type: string
+              sequence:
+                type: string
+              memo_required:
+                type: boolean
         204:
           description: No content about this account address
         500:
@@ -2219,6 +2231,14 @@ definitions:
       amount:
         type: string
         example: "50"
+  LockedCoin:
+    type: object
+    properties:
+      coin:
+        $ref: "#/definitions/Coin"
+      unlock_time:
+        type: string
+        example: "1559549834"
   Hash:
     type: string
     example: EE5F3404034C524501629B56E0DDC38FAD651F04
