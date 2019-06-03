@@ -1,7 +1,7 @@
 package market
 
 import (
-	"strconv"
+	"fmt"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -46,7 +46,7 @@ func NewMsgCreateMarketInfo(stock, money string, crater sdk.AccAddress, pricepre
 
 func (msg MsgCreateMarketInfo) Route() string { return RouterKey }
 
-func (msg MsgCreateMarketInfo) Type() string { return "create_market_required" }
+func (msg MsgCreateMarketInfo) Type() string { return "create_market_info" }
 
 func (msg MsgCreateMarketInfo) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
@@ -56,7 +56,7 @@ func (msg MsgCreateMarketInfo) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("missing stock or money identifier")
 	}
 	if msg.PricePrecision > sdk.Precision {
-		return sdk.ErrInvalidAddress("proceprecision value out of range[0, 18]")
+		return sdk.ErrInvalidAddress("price precision value out of range [0, 18]")
 	}
 	return nil
 }
@@ -78,17 +78,17 @@ type MsgCreateOrder struct {
 	Sender         sdk.AccAddress `json:"sender"`
 	Sequence       uint64         `json:"sequence"`
 	Symbol         string         `json:"symbol"`
-	OrderType      byte           `json:"ordertype"`
-	PricePrecision byte           `json:"priceprecision"`
+	OrderType      byte           `json:"order_type"`
+	PricePrecision byte           `json:"price_precision"`
 	Price          int64          `json:"price"`
 	Quantity       int64          `json:"quantity"`
 	Side           byte           `json:"side"`
-	TimeInForce    int            `json:"timeinforce"`
+	TimeInForce    int            `json:"time_in_force"`
 }
 
 func (msg MsgCreateOrder) Route() string { return RouterKey }
 
-func (msg MsgCreateOrder) Type() string { return "create_order_required" }
+func (msg MsgCreateOrder) Type() string { return "create_order" }
 
 func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
@@ -99,7 +99,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	}
 	if msg.PricePrecision < MinimumTokenPricePrecision ||
 		msg.PricePrecision > MaxTokenPricePrecision {
-		return sdk.ErrInvalidAddress("price precision value out of range[8, 18]. actual : " + strconv.Itoa(int(msg.PricePrecision)))
+		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [8, 18]. actual : %d", msg.PricePrecision))
 	}
 
 	if msg.Side != match.BUY && msg.Side != match.SELL {
@@ -147,7 +147,7 @@ func (msg MsgCancelOrder) Route() string {
 }
 
 func (msg MsgCancelOrder) Type() string {
-	return "cancel_order_required"
+	return "cancel_order"
 }
 
 func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
@@ -163,11 +163,9 @@ func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgCancelOrder) GetSignBytes() []byte {
-
 	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
-
 	return []sdk.AccAddress{msg.Sender}
 }
