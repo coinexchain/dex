@@ -3,6 +3,7 @@ package stakingx
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 // DefaultParamspace defines the default stakingx module parameter subspace
@@ -11,6 +12,9 @@ const DefaultParamspace = "stakingx"
 // Default parameter values
 const (
 	DefaultMinSelfDelegation = 10000e8
+
+	// Default maximum number of bonded validators
+	DefaultMaxValidators uint16 = staking.DefaultMaxValidators // TODO
 )
 
 // Parameter keys
