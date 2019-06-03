@@ -5,9 +5,10 @@ import (
 	"math"
 	"strings"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/coinexchain/dex/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (
@@ -26,9 +27,7 @@ func init() {
 }
 
 func NewHandler(k Keeper) sdk.Handler {
-
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
-
 		switch msg := msg.(type) {
 		case MsgCreateMarketInfo:
 			return handlerMsgCreateMarketInfo(ctx, msg, k)
@@ -43,9 +42,7 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
-// handlerMsgCreateMarketinfo:
 func handlerMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
-
 	if ret := checkMsgCreateMarketInfo(ctx, msg, keeper); !ret.IsOK() {
 		return ret
 	}
@@ -92,7 +89,6 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 }
 
 func handlerMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sdk.Result {
-
 	store := ctx.KVStore(keeper.marketKey)
 	if store == nil {
 		return ErrNoStoreEngine().Result()
@@ -127,7 +123,6 @@ func handlerMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) s
 }
 
 func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder, keeper Keeper) sdk.Result {
-
 	var (
 		denom      string
 		marketInfo MarketInfo
@@ -161,7 +156,6 @@ func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder,
 }
 
 func handlerMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sdk.Result {
-
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
