@@ -23,30 +23,30 @@ func NewModuleClient(storeKey string, cdc *amino.Codec) ModuleClient {
 // GetQueryCmd returns the cli query commands for this module
 func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 	// Group asset queries under a subcommand
-	assQueryCmd := &cobra.Command{
+	mktQueryCmd := &cobra.Command{
 		Use:   market.StoreKey,
 		Short: "Querying commands for the market module",
 	}
-	assQueryCmd.AddCommand(client.GetCommands(
+	mktQueryCmd.AddCommand(client.GetCommands(
 		cli.QueryMarketCmd(mc.cdc),
 		cli.QueryOrderCmd(mc.cdc),
 		cli.QueryUserOrderList(mc.cdc))...)
-	return assQueryCmd
+	return mktQueryCmd
 }
 
 // GetTxCmd returns the transaction commands for this module
 func (mc ModuleClient) GetTxCmd() *cobra.Command {
-	assTxCmd := &cobra.Command{
+	mktTxCmd := &cobra.Command{
 		Use:   market.StoreKey,
 		Short: "market transactions subcommands",
 	}
 
-	assTxCmd.AddCommand(client.PostCommands(
+	mktTxCmd.AddCommand(client.PostCommands(
 		cli.CreateMarketCmd(mc.storeKey, mc.cdc),
 		cli.CreateGTEOrderTxCmd(mc.cdc),
-		cli.CancelOrder(mc.cdc),
 		cli.CreateIOCOrderTxCmd(mc.cdc),
+		cli.CancelOrder(mc.cdc),
 	)...)
 
-	return assTxCmd
+	return mktTxCmd
 }
