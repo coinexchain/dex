@@ -30,11 +30,11 @@ func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case MsgCreateMarketInfo:
-			return handlerMsgCreateMarketInfo(ctx, msg, k)
+			return handleMsgCreateMarketInfo(ctx, msg, k)
 		case MsgCreateOrder:
-			return handlerMsgCreateOrder(ctx, msg, k)
+			return handleMsgCreateOrder(ctx, msg, k)
 		case MsgCancelOrder:
-			return handlerMsgCancelOrder(ctx, msg, k)
+			return handleMsgCancelOrder(ctx, msg, k)
 		default:
 			errMsg := "Unrecognized market Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -42,7 +42,7 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
-func handlerMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
+func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
 	if ret := checkMsgCreateMarketInfo(ctx, msg, keeper); !ret.IsOK() {
 		return ret
 	}
@@ -88,7 +88,7 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 	return sdk.Result{}
 }
 
-func handlerMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sdk.Result {
+func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sdk.Result {
 	store := ctx.KVStore(keeper.marketKey)
 	if store == nil {
 		return ErrNoStoreEngine().Result()
@@ -155,7 +155,7 @@ func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder,
 	return sdk.Result{}
 }
 
-func handlerMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sdk.Result {
+func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
