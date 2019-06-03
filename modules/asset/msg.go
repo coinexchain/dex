@@ -147,36 +147,36 @@ func (msg MsgForbidAddress) GetSigners() []sdk.AccAddress {
 	panic("implement me")
 }
 
-// MsgUnforbidAddress
-type MsgUnforbidAddress struct {
+// MsgUnForbidAddress
+type MsgUnForbidAddress struct {
 	Symbol  string
 	address sdk.AccAddress
 }
 
-var _ sdk.Msg = MsgUnforbidAddress{}
+var _ sdk.Msg = MsgUnForbidAddress{}
 
 // Route Implements Msg.
-func (msg MsgUnforbidAddress) Route() string {
+func (msg MsgUnForbidAddress) Route() string {
 	return RouterKey
 }
 
 // Type Implements Msg.
-func (msg MsgUnforbidAddress) Type() string {
+func (msg MsgUnForbidAddress) Type() string {
 	return "unforbid_address"
 }
 
 // ValidateBasic Implements Msg.
-func (msg MsgUnforbidAddress) ValidateBasic() sdk.Error {
+func (msg MsgUnForbidAddress) ValidateBasic() sdk.Error {
 	panic("implement me")
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgUnforbidAddress) GetSignBytes() []byte {
+func (msg MsgUnForbidAddress) GetSignBytes() []byte {
 	panic("implement me")
 }
 
 // GetSigners Implements Msg.
-func (msg MsgUnforbidAddress) GetSigners() []sdk.AccAddress {
+func (msg MsgUnForbidAddress) GetSigners() []sdk.AccAddress {
 	panic("implement me")
 }
 
@@ -213,36 +213,36 @@ func (msg MsgForbidToken) GetSigners() []sdk.AccAddress {
 	panic("implement me")
 }
 
-// MsgUnforbidToken
-type MsgUnforbidToken struct {
+// MsgUnForbidToken
+type MsgUnForbidToken struct {
 	Symbol  string
 	address sdk.AccAddress // Whitelist
 }
 
-var _ sdk.Msg = MsgUnforbidToken{}
+var _ sdk.Msg = MsgUnForbidToken{}
 
 // Route Implements Msg.
-func (msg MsgUnforbidToken) Route() string {
+func (msg MsgUnForbidToken) Route() string {
 	return RouterKey
 }
 
 // Type Implements Msg.
-func (msg MsgUnforbidToken) Type() string {
+func (msg MsgUnForbidToken) Type() string {
 	return "unforbid_token"
 }
 
 // ValidateBasic Implements Msg.
-func (msg MsgUnforbidToken) ValidateBasic() sdk.Error {
+func (msg MsgUnForbidToken) ValidateBasic() sdk.Error {
 	panic("implement me")
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgUnforbidToken) GetSignBytes() []byte {
+func (msg MsgUnForbidToken) GetSignBytes() []byte {
 	panic("implement me")
 }
 
 // GetSigners Implements Msg.
-func (msg MsgUnforbidToken) GetSigners() []sdk.AccAddress {
+func (msg MsgUnForbidToken) GetSigners() []sdk.AccAddress {
 	panic("implement me")
 }
 

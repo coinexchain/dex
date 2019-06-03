@@ -20,12 +20,12 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 			return handleMsgTransferOwnership(ctx, tk, msg)
 		case MsgForbidAddress:
 			return handleMsgForbidAddress(ctx, tk, msg)
-		case MsgUnforbidAddress:
-			return handleMsgUnforbidAddress(ctx, tk, msg)
+		case MsgUnForbidAddress:
+			return handleMsgUnForbidAddress(ctx, tk, msg)
 		case MsgForbidToken:
 			return handleMsgForbidToken(ctx, tk, msg)
-		case MsgUnforbidToken:
-			return handleMsgUnforbidToken(ctx, tk, msg)
+		case MsgUnForbidToken:
+			return handleMsgUnForbidToken(ctx, tk, msg)
 		case MsgBurnToken:
 			return handleMsgBurnToken(ctx, tk, msg)
 		case MsgMintToken:
@@ -141,8 +141,8 @@ func handleMsgForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddres
 	return
 }
 
-// handleMsgUnforbidAddress - Handle MsgUnforbidAddress
-func handleMsgUnforbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnforbidAddress) (res sdk.Result) {
+// handleMsgUnForbidAddress - Handle MsgUnForbidAddress
+func handleMsgUnForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidAddress) (res sdk.Result) {
 
 	return
 }
@@ -151,8 +151,8 @@ func handleMsgUnforbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnforbidAd
 func handleMsgForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgForbidToken) (res sdk.Result) {
 
 	return
-} // handleMsgUnforbidToken - Handle MsgUnforbidToken
-func handleMsgUnforbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnforbidToken) (res sdk.Result) {
+} // handleMsgUnForbidToken - Handle MsgUnForbidToken
+func handleMsgUnForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidToken) (res sdk.Result) {
 
 	return
 }
