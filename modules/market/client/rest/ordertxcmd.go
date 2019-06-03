@@ -13,7 +13,7 @@ import (
 )
 
 // SendReq defines the properties of a send request's body.
-type createGteOrederReq struct {
+type createGteOrderReq struct {
 	BaseReq        rest.BaseReq `json:"base_req"`
 	OrderType      int          `json:"order_type"`
 	Symbol         string       `json:"symbol"`
@@ -26,7 +26,7 @@ type createGteOrederReq struct {
 
 func createGTEOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req createGteOrederReq
+		var req createGteOrderReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
