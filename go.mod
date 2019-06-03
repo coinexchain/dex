@@ -2,7 +2,7 @@ module github.com/coinexchain/dex
 
 require (
 	github.com/btcsuite/btcutil v0.0.0-20180706230648-ab6388e0c60a
-	github.com/cosmos/cosmos-sdk v0.34.5
+	github.com/cosmos/cosmos-sdk v0.34.7
 	github.com/gorilla/mux v1.7.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
