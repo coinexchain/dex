@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/market/client/cli"
 	"net/http"
 	"strings"
 
@@ -25,6 +26,21 @@ type createOrderReq struct {
 	Side           int          `json:"side"`
 }
 
+type queryOrderReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	OrderID string       `json:"order_id"`
+}
+
+type queryUserOrderListReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	Address string       `json:"address"`
+}
+
+type cancelOrderReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	OrderID string       `json:"order_id"`
+}
+
 func createGTEOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		createOrderAndBroadCast(w, r, cdc, cliCtx, true)
@@ -34,6 +50,105 @@ func createGTEOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 func createIOCOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		createOrderAndBroadCast(w, r, cdc, cliCtx, false)
+	}
+}
+
+func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req cancelOrderReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		sender := cliCtx.GetFromAddress()
+
+		msg, err := cli.CheckSenderAndOrderID(sender, req.OrderID)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req queryOrderReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		if len(strings.Split(req.OrderID, "-")) != 2 {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
+			return
+		}
+
+		addr := strings.Split(req.OrderID, "-")[0]
+		if _, err := sdk.AccAddressFromBech32(addr); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
+			return
+		}
+
+		bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(req.OrderID))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
+			return
+		}
+
+		route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryOrder)
+		res, err := cliCtx.QueryWithData(route, bz)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+	}
+}
+
+func queryUserOrderListHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req queryUserOrderListReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		if _, err := sdk.AccAddressFromBech32(req.Address); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
+			return
+		}
+
+		bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: req.Address})
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryUserOrders)
+		fmt.Println(route)
+		res, err := cliCtx.QueryWithData(route, bz)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
 	}
 }
 
@@ -64,7 +179,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
 		return
 	}
-	fmt.Println("sequence : ", sequence)
+
 	msg := market.MsgCreateOrder{
 		Sender:         creator,
 		Sequence:       sequence,

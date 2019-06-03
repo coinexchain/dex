@@ -232,34 +232,15 @@ func CancelOrder(cdc *codec.Codec) *cobra.Command {
 			"cetcli tx market cancelorder --orderid=[id] " +
 			"--trust-node=true --from=bob --chain-id=coinexdex",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var (
-				addr sdk.AccAddress
-				err  error
-			)
+
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
 			sender := cliCtx.GetFromAddress()
-
 			orderid := viper.GetString(FlagOrderID)
-			contents := strings.Split(orderid, "-")
-			if len(contents) != 2 {
-				return errors.Errorf(" illegal order-id")
-			}
-
-			if addr, err = sdk.AccAddressFromBech32(contents[0]); err != nil {
+			msg, err := CheckSenderAndOrderID(sender, orderid)
+			if err != nil {
 				return err
-			}
-			if !bytes.Equal(addr, sender) {
-				return errors.Errorf("sender address is not match order sender, sender : %s, order issuer : %s", sender, addr)
-			}
-
-			if sequence, err := strconv.Atoi(contents[1]); err != nil || sequence < 0 {
-				return errors.Errorf("illegal order sequence, actual %d", sequence)
-			}
-
-			msg := market.MsgCancelOrder{
-				Sender:  sender,
-				OrderID: orderid,
 			}
 
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
@@ -268,6 +249,37 @@ func CancelOrder(cdc *codec.Codec) *cobra.Command {
 
 	markQueryOrDelCmd(cmd)
 	return cmd
+}
+
+func CheckSenderAndOrderID(sender []byte, orderID string) (market.MsgCancelOrder, error) {
+	var (
+		addr sdk.AccAddress
+		err  error
+		msg  market.MsgCancelOrder
+	)
+
+	contents := strings.Split(orderID, "-")
+	if len(contents) != 2 {
+		return msg, errors.Errorf(" illegal order-id")
+	}
+
+	if addr, err = sdk.AccAddressFromBech32(contents[0]); err != nil {
+		return msg, err
+	}
+	if !bytes.Equal(addr, sender) {
+		return msg, errors.Errorf("sender address is not match order sender, sender : %s, order issuer : %s", sender, addr)
+	}
+
+	if sequence, err := strconv.Atoi(contents[1]); err != nil || sequence < 0 {
+		return msg, errors.Errorf("illegal order sequence, actual %d", sequence)
+	}
+
+	msg = market.MsgCancelOrder{
+		Sender:  sender,
+		OrderID: orderID,
+	}
+
+	return msg, nil
 }
 
 func markQueryOrDelCmd(cmd *cobra.Command) {

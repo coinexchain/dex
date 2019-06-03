@@ -1,7 +1,9 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	clientrest "github.com/cosmos/cosmos-sdk/client/rest"
@@ -18,6 +20,11 @@ type createMarketReq struct {
 	Stock          string       `json:"stock"`
 	Money          string       `json:"money"`
 	PricePrecision int          `json:"price_precision"`
+}
+
+type queryMarketReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	Symbol  string       `json:"symbol"`
 }
 
 func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -38,6 +45,13 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
+		sequence, err := cliCtx.GetAccountSequence(creator)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
+			return
+		}
+		req.BaseReq.Sequence = sequence
+
 		msg := market.NewMsgCreateMarketInfo(req.Stock, req.Money, creator, byte(req.PricePrecision))
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -45,5 +59,39 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 
 		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req queryMarketReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		if len(strings.Split(req.Symbol, market.SymbolSeparator)) != 2 {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "The invalid symbol")
+			return
+		}
+
+		bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(req.Symbol))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
+		res, err := cliCtx.QueryWithData(query, bz)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
 	}
 }

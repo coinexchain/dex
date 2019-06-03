@@ -59,31 +59,20 @@
 
 ## Rest API 创建订单
 
-### 使用REST 接口创建GTE订单
+### 使用REST 接口创建未签名的交易
 
 #### 创建未签名的GTE 订单交易
 
 `curl -X POST http://localhost:1317/market/create-gte-order  --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_type":"2", "symbol":"eth/cet", "price_precision":"8", "price":"32123", "quantity":"1267632", "side":"1"}'  > unsignedSendTx.json`
 
-#### 对上部未签名的交易签名
-
-`./cetcli tx sign --chain-id=coinexdex   --from=$(./cetcli keys show bob -a)  unsignedSendTx.json > signedSendTx.json`
-
-#### 发送签名后的交易
-
-`./cetcli tx broadcast signedSendTx.json`
-
-#### 查询用户订单列表
-
-`./cetcli query market userorderlist --address=cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z --trust-node=true`
-
-### 使用REST 接口创建 IOC订单
 
 #### 创建未签名的IOC 订单交易
 
 `curl -X POST http://localhost:1317/market/create-ioc-order  --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_type":"2", "symbol":"eth/cet", "price_precision":"8", "price":"32782123", "quantity":"77563632", "side":"1"}'  > unsignedSendTx.json`
 
-#### 对上部未签名的交易签名
+### 对未签名的交易进行处理
+
+#### 对上步未签名的交易签名
 
 `./cetcli tx sign --chain-id=coinexdex   --from=$(./cetcli keys show bob -a)  unsignedSendTx.json > signedSendTx.json`
 
@@ -91,6 +80,15 @@
 
 `./cetcli tx broadcast signedSendTx.json`
 
-#### 查询用户订单列表
 
-`./cetcli query market userorderlist --address=cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z --trust-node=true`
+### 查询市场的交易对
+ 
+
+### 查询订单
+
+
+### 取消订单
+
+
+### 查询用户订单列表
+ 
