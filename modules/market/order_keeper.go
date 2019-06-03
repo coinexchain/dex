@@ -9,15 +9,6 @@ import (
 	"github.com/coinexchain/dex/modules/market/match"
 )
 
-//nolint
-var (
-	OrderBookKeyPrefix     = []byte{0x11}
-	BidListKeyPrefix       = []byte{0x12}
-	AskListKeyPrefix       = []byte{0x13}
-	OrderQueueKeyPrefix    = []byte{0x14}
-	LastOrderCleanUpDayKey = []byte{0x20}
-)
-
 const (
 	DecByteCount = 40
 	GTE          = 3
@@ -25,6 +16,15 @@ const (
 	Buy          = match.BUY
 	Sell         = match.SELL
 	LIMIT        = 2
+)
+
+//nolint
+var (
+	OrderBookKeyPrefix     = []byte{0x11}
+	BidListKeyPrefix       = []byte{0x12}
+	AskListKeyPrefix       = []byte{0x13}
+	OrderQueueKeyPrefix    = []byte{0x14}
+	LastOrderCleanUpDayKey = []byte{0x20}
 )
 
 type OrderCleanUpDayKeeper struct {

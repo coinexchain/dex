@@ -123,17 +123,12 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 }
 
 func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder, keeper Keeper) sdk.Result {
-	var (
-		denom      string
-		marketInfo MarketInfo
-	)
-
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
 
 	values := strings.Split(msg.Symbol, SymbolSeparator)
-	denom = values[0]
+	denom := values[0]
 	if msg.Side == match.BUY {
 		denom = values[1]
 	}
