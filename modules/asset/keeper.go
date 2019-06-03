@@ -195,11 +195,11 @@ func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
 	}
 
 	if !token.GetBurnable() {
-		return ErrorInvalidTokenMint(fmt.Sprintf("token %s do not support burn", msg.Symbol))
+		return ErrorInvalidTokenBurn(fmt.Sprintf("token %s do not support burn", msg.Symbol))
 	}
 
 	if err := token.SetTotalBurn(msg.Amount + token.GetTotalBurn()); err != nil {
-		return ErrorInvalidTokenMint(err.Error())
+		return ErrorInvalidTokenBurn(err.Error())
 	}
 
 	if err := token.SetTotalSupply(token.GetTotalSupply() - msg.Amount); err != nil {
