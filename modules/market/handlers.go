@@ -118,7 +118,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 	if err := ork.Add(ctx, &order); err != nil {
 		return err.Result()
 	}
-
+	//TODO. Need Add freeze coin logic
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
 
@@ -127,6 +127,8 @@ func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder,
 		return err.Result()
 	}
 
+	//acc := authx.NewAccountXWithAddress(msg.Sender)
+	//GetAccountSequ
 	values := strings.Split(msg.Symbol, SymbolSeparator)
 	denom := values[0]
 	if msg.Side == match.BUY {
@@ -165,6 +167,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 		return sdk.NewError(StoreKey, CodeNotMatchOrderSender, "The cancel addr is not match order sender").Result()
 	}
 
+	//TODO. Need add unfreeze token logic.
 	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
 	if err := ork.Remove(ctx, order); err != nil {
 		return err.Result()
