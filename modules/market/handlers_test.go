@@ -128,19 +128,19 @@ func TestMarketInfoSetFailed(t *testing.T) {
 	// failed by price precision
 	msgMarketInfo := MsgCreateMarketInfo{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 6}
 	ret := input.handler(input.ctx, msgMarketInfo)
-	require.Equal(t, sdk.CodeType(CodeInvalidPricePrecision), ret.Code, "create market info should failed")
+	require.Equal(t, CodeInvalidPricePrecision, ret.Code, "create market info should failed")
 
 	// failed by token
 	msgMarketInfo.Money = "btc"
 	msgMarketInfo.PricePrecision = 8
 	ret = input.handler(input.ctx, msgMarketInfo)
-	require.Equal(t, sdk.CodeType(CodeInvalidToken), ret.Code, "create market info should failed")
+	require.Equal(t, CodeInvalidToken, ret.Code, "create market info should failed")
 
 	// failed by coins
 	msgMarketInfo.Money = money
 	msgMarketInfo.Creator = notHaveCetAddress
 	ret = input.handler(input.ctx, msgMarketInfo)
-	require.Equal(t, sdk.CodeType(CodeInvalidTokenIssuer), ret.Code, "create market info should failed")
+	require.Equal(t, CodeInvalidTokenIssuer, ret.Code, "create market info should failed")
 
 }
 
