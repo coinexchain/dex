@@ -169,11 +169,11 @@ func handlerMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) s
 	globalKeeper := NewGlobalOrderKeeper(keeper.marketKey, keeper.cdc)
 	order := globalKeeper.QueryOrder(ctx, msg.OrderID)
 	if order == nil {
-		return sdk.NewError(MarketKey, CodeNotFindOrder, "Not find order in blockchain").Result()
+		return sdk.NewError(StoreKey, CodeNotFindOrder, "Not find order in blockchain").Result()
 	}
 
 	if !bytes.Equal(order.Sender, msg.Sender) {
-		return sdk.NewError(MarketKey, CodeNotMatchOrderSender, "The cancel addr is not match order sender").Result()
+		return sdk.NewError(StoreKey, CodeNotMatchOrderSender, "The cancel addr is not match order sender").Result()
 	}
 
 	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)

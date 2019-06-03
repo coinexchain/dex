@@ -36,7 +36,7 @@ func newContextAndMarketKey() (sdk.Context, sdk.StoreKey) {
 	db := dbm.NewMemDB()
 	ms := sdkstore.NewCommitMultiStore(db)
 
-	marketKey := sdk.NewKVStoreKey(MarketKey)
+	marketKey := sdk.NewKVStoreKey(StoreKey)
 	ms.MountStoreWithDB(marketKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 

@@ -96,7 +96,7 @@ func prepareMockInput(t *testing.T) testInput {
 	ms := store.NewCommitMultiStore(db)
 
 	keys := storeKeys{}
-	keys.marketKey = sdk.NewKVStoreKey(MarketKey)
+	keys.marketKey = sdk.NewKVStoreKey(StoreKey)
 	keys.assetCapKey = sdk.NewKVStoreKey(asset.StoreKey)
 	keys.authCapKey = sdk.NewKVStoreKey(auth.StoreKey)
 	keys.fckCapKey = sdk.NewKVStoreKey(auth.FeeStoreKey)
@@ -116,7 +116,7 @@ func prepareMockInput(t *testing.T) testInput {
 	bk := prepareBankxKeeper(keys, cdc, ctx)
 
 	mk := NewKeeper(keys.marketKey, ak, bk, cdc, params.NewKeeper(
-		cdc, keys.keyParams, keys.tkeyParams).Subspace(MarketKey))
+		cdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey))
 	mk.RegisterCodec()
 	return testInput{ctx: ctx, mk: mk, handler: NewHandler(mk)}
 }

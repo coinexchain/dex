@@ -24,7 +24,7 @@ func NewModuleClient(storeKey string, cdc *amino.Codec) ModuleClient {
 func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 	// Group asset queries under a subcommand
 	assQueryCmd := &cobra.Command{
-		Use:   market.MarketKey,
+		Use:   market.StoreKey,
 		Short: "Querying commands for the market module",
 	}
 	assQueryCmd.AddCommand(client.GetCommands(
@@ -37,7 +37,7 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 // GetTxCmd returns the transaction commands for this module
 func (mc ModuleClient) GetTxCmd() *cobra.Command {
 	assTxCmd := &cobra.Command{
-		Use:   market.MarketKey,
+		Use:   market.StoreKey,
 		Short: "market transactions subcommands",
 	}
 

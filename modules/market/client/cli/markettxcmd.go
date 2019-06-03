@@ -140,7 +140,7 @@ func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			query := fmt.Sprintf("custom/%s/%s", market.MarketKey, market.QueryMarket)
+			query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
 			res, err := cliCtx.QueryWithData(query, bz)
 			if err != nil {
 				return err

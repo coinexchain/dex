@@ -136,7 +136,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 		keyParams:        sdk.NewKVStoreKey(params.StoreKey),
 		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
 		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
-		keyMarket:        sdk.NewKVStoreKey(market.MarketKey),
+		keyMarket:        sdk.NewKVStoreKey(market.StoreKey),
 	}
 }
 
@@ -225,7 +225,7 @@ func (app *CetChainApp) initKeepers() {
 		app.assetKeeper,
 		app.bankxKeeper,
 		app.cdc,
-		app.paramsKeeper.Subspace(market.MarketKey),
+		app.paramsKeeper.Subspace(market.StoreKey),
 	)
 }
 
@@ -254,7 +254,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
 		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.assetKeeper, app.cdc)).
-		AddRoute(market.MarketKey, market.NewQuerier(app.marketKeeper, app.cdc))
+		AddRoute(market.StoreKey, market.NewQuerier(app.marketKeeper, app.cdc))
 
 }
 

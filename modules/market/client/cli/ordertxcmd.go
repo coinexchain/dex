@@ -172,7 +172,7 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", market.MarketKey, market.QueryOrder)
+			route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryOrder)
 			res, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
@@ -207,7 +207,7 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", market.MarketKey, market.QueryUserOrders)
+			route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryUserOrders)
 			fmt.Println(route)
 			res, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {

@@ -4,16 +4,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/market/match"
 )
 
 // RouterKey is the name of the bankx module
 const (
 	RouterKey = "market"
-	MarketKey = RouterKey
+	StoreKey  = RouterKey
 )
 
 var (
@@ -142,7 +143,7 @@ type MsgCancelOrder struct {
 }
 
 func (msg MsgCancelOrder) Route() string {
-	return MarketKey
+	return StoreKey
 }
 
 func (msg MsgCancelOrder) Type() string {
