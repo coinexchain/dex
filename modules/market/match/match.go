@@ -36,20 +36,20 @@ func Match(highPrice, midPrice, lowPrice sdk.Dec, bidList []OrderForTrade, askLi
 	sort.Slice(askList, func(i, j int) bool {
 		return precede(askList[i], askList[j])
 	})
-	for _, order := range bidList {
-		fmt.Printf("bid %s\n", order.String())
-	}
-	for _, order := range askList {
-		fmt.Printf("ask %s\n", order.String())
-	}
+	//for _, order := range bidList {
+	//	fmt.Printf("bid %s\n", order.String())
+	//}
+	//for _, order := range askList {
+	//	fmt.Printf("ask %s\n", order.String())
+	//}
 	for len(bidList) != 0 && len(askList) != 0 && askList[0].GetPrice().LTE(bidList[0].GetPrice()) {
 		price := GetExecutionPrice(highPrice, midPrice, lowPrice, append(bidList, askList...))
 		//fmt.Printf("Now price is %s\n", price)
 		bidList, askList = ExecuteOrderList(price, bidList, askList)
-		if len(bidList) != 0 && len(askList) != 0 {
-			fmt.Printf("bidList len:%d p:%s askList len:%d p:%s\n",
-				len(bidList), bidList[0].GetPrice(), len(askList), askList[0].GetPrice())
-		}
+		//if len(bidList) != 0 && len(askList) != 0 {
+		//	fmt.Printf("bidList len:%d p:%s askList len:%d p:%s\n",
+		//		len(bidList), bidList[0].GetPrice(), len(askList), askList[0].GetPrice())
+		//}
 	}
 }
 
@@ -142,9 +142,9 @@ func GetExecutionPrice(highPrice, midPrice, lowPrice sdk.Dec, orders []OrderForT
 	//}
 	ppList := createPricePointList(orders)
 	accumulateForPricePointList(ppList)
-	for _, pp := range ppList {
-		fmt.Printf("%s\n", pp.String())
-	}
+	//for _, pp := range ppList {
+	//	fmt.Printf("%s\n", pp.String())
+	//}
 	return calculateExecutionPrice(highPrice, midPrice, lowPrice, ppList)
 }
 
@@ -268,6 +268,9 @@ func calculateExecutionPriceWithRef(highPrice, midPrice, lowPrice sdk.Dec, ppLis
 	allPriceSmallerThanHigh := ppWithHighestPrice.price.LT(highPrice) && !midPriceIsZero
 	allPriceLargerThanLow := ppWithLowestPrice.price.GT(lowPrice) && !midPriceIsZero
 	allPriceSmallerThanLow := ppWithHighestPrice.price.LT(lowPrice) && !midPriceIsZero
+	if midPriceIsZero {
+		return ppWithMiddlePrice.price
+	}
 	for _, pp := range ppListSameImbalance {
 		if pp.imbalance < 0 {
 			allImbalanceIsPositive = false
@@ -305,9 +308,7 @@ func calculateExecutionPriceWithRef(highPrice, midPrice, lowPrice sdk.Dec, ppLis
 			When both positive and negative surplus amounts exists at the lowest, if the reference price falls at / into these prices, the reference price should be chose, otherwise the price closest to the reference price would be chosen.
 		*/
 		//fmt.Println("Imbalance : Negative and Positive")
-		if midPriceIsZero {
-			return ppWithMiddlePrice.price
-		} else if ppWithHighestPrice.price.LT(midPrice) {
+		if ppWithHighestPrice.price.LT(midPrice) {
 			return ppWithHighestPrice.price
 		} else if ppWithLowestPrice.price.GT(midPrice) {
 			return ppWithLowestPrice.price
