@@ -11,7 +11,7 @@ import (
 	"github.com/coinexchain/dex/modules/market/match"
 )
 
-// RouterKey is the name of the bankx module
+// RouterKey is the name of the market module
 const (
 	RouterKey = "market"
 	StoreKey  = RouterKey
@@ -37,8 +37,13 @@ type MsgCreateMarketInfo struct {
 	PricePrecision byte           `json:"price_precision"`
 }
 
-func NewMsgCreateMarketInfo(stock, money string, crater sdk.AccAddress, priceprecision byte) MsgCreateMarketInfo {
-	return MsgCreateMarketInfo{Stock: stock, Money: money, Creator: crater, PricePrecision: priceprecision}
+func NewMsgCreateMarketInfo(stock, money string, crater sdk.AccAddress, pricePrecision byte) MsgCreateMarketInfo {
+	return MsgCreateMarketInfo{
+		Stock:          stock,
+		Money:          money,
+		Creator:        crater,
+		PricePrecision: pricePrecision,
+	}
 }
 
 // --------------------------------------------------------
