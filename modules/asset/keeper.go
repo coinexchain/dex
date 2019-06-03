@@ -25,8 +25,8 @@ const (
 )
 
 var (
-	// TokenStoreKeyPrefix prefix for asset-by-TokenSymbol store
 	TokenStoreKeyPrefix = []byte{0x01}
+	WhitelistKeyPrefix  = []byte{0x02}
 )
 
 // Keeper encodes/decodes tokens using the go-amino (binary)
@@ -187,6 +187,37 @@ func (tk TokenKeeper) MintToken(ctx sdk.Context, msg MsgMintToken) sdk.Error {
 	return tk.SetToken(ctx, token)
 }
 
+func (tk TokenKeeper) AddTokenWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
+	store := ctx.KVStore(tk.key)
+	for _, acc := range whitelist {
+		store.Set(WhitelistKey(symbol, acc), nil)
+	}
+
+	return nil
+}
+
+//ForbidToken - forbid token
+func (tk TokenKeeper) ForbidToken(ctx sdk.Context, msg MsgForbidToken) sdk.Error {
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
+	if err != nil {
+		return err
+	}
+
+	if !token.GetTokenForbiddable() {
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbidden", msg.Symbol))
+	}
+	if token.GetIsForbidden() {
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has been forbidden", msg.Symbol))
+	}
+
+	if err = tk.AddTokenWhitelist(ctx, msg.Symbol, []sdk.AccAddress{msg.OwnerAddress}); err != nil {
+		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
+	}
+	token.SetIsForbidden(true)
+
+	return tk.SetToken(ctx, token)
+}
+
 //BurnToken - burn token
 func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
 	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
@@ -262,6 +293,11 @@ func (tk TokenKeeper) GetParams(ctx sdk.Context) (params Params) {
 // TokenStoreKey turn an token symbol to key used to get it from the asset store
 func TokenStoreKey(symbol string) []byte {
 	return append(TokenStoreKeyPrefix, []byte(symbol)...)
+}
+
+// WhitelistKey - return WhitelistKeyPrefix-Symbol-AccAddress KEY
+func WhitelistKey(symbol string, acc sdk.AccAddress) []byte {
+	return append(append(WhitelistKeyPrefix, []byte(symbol)...), acc.Bytes()...)
 }
 
 func (tk TokenKeeper) decodeToken(bz []byte) (token Token) {

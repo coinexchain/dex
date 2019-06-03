@@ -16,6 +16,7 @@ const (
 	NewOwner      = "new-owner"
 
 	Amt = "amount"
+	Whitelist = "white-list"
 )
 
 // Tag keys and values

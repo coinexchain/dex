@@ -15,7 +15,8 @@ const (
 	CodeInvalidTotalMint      sdk.CodeType = 206
 	CodeInvalidTotalBurn      sdk.CodeType = 207
 	CodeDuplicateTokenSymbol  sdk.CodeType = 208
-	CodeInvalidForbiddenState sdk.CodeType = 209
+	CodeInvalidTokenForbidden sdk.CodeType = 209
+	CodeInvalidTokenWhitelist sdk.CodeType = 210
 )
 
 func ErrorInvalidTokenName(fmt string) sdk.Error {
@@ -42,6 +43,9 @@ func ErrorInvalidTokenBurn(fmt string) sdk.Error {
 func ErrorDuplicateTokenSymbol(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeDuplicateTokenSymbol, fmt)
 }
-func ErrorInvalidForbiddenState(fmt string) sdk.Error {
-	return sdk.NewError(CodeSpaceAsset, CodeInvalidForbiddenState, fmt)
+func ErrorInvalidTokenForbidden(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenForbidden, fmt)
+}
+func ErrorInvalidTokenWhitelist(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenWhitelist, fmt)
 }

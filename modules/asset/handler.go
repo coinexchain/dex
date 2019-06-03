@@ -149,8 +149,17 @@ func handleMsgUnForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidAd
 
 // handleMsgForbidToken - HandleMsgForbidToken
 func handleMsgForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgForbidToken) (res sdk.Result) {
+	if err := tk.ForbidToken(ctx, msg); err != nil {
+		return err.Result()
+	}
 
-	return
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Whitelist, msg.OwnerAddress.String(),
+		),
+	}
 } // handleMsgUnForbidToken - Handle MsgUnForbidToken
 func handleMsgUnForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidToken) (res sdk.Result) {
 

@@ -119,7 +119,7 @@ func (t *BaseToken) Validate() error {
 	}
 
 	if !t.TokenForbiddable && t.IsForbidden {
-		return ErrorInvalidForbiddenState("Invalid Forbidden state")
+		return ErrorInvalidTokenForbidden("Invalid Forbidden state")
 	}
 
 	if t.TotalMint < 0 || (!t.Mintable && t.TotalMint > 0) {

@@ -182,8 +182,8 @@ func (msg MsgUnForbidAddress) GetSigners() []sdk.AccAddress {
 
 // MsgForbidToken
 type MsgForbidToken struct {
-	Symbol  string
-	address sdk.AccAddress // Whitelist
+	Symbol       string           `json:"symbol"`
+	OwnerAddress sdk.AccAddress   `json:"owner_address"`
 }
 
 var _ sdk.Msg = MsgForbidToken{}
@@ -200,17 +200,23 @@ func (msg MsgForbidToken) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgForbidToken) ValidateBasic() sdk.Error {
-	panic("implement me")
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("forbid token need a valid owner")
+	}
+	return nil
 }
 
 // GetSignBytes Implements Msg.
 func (msg MsgForbidToken) GetSignBytes() []byte {
-	panic("implement me")
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
 func (msg MsgForbidToken) GetSigners() []sdk.AccAddress {
-	panic("implement me")
+	return []sdk.AccAddress{msg.OwnerAddress}
 }
 
 // MsgUnForbidToken
@@ -280,7 +286,7 @@ func (msg MsgBurnToken) ValidateBasic() sdk.Error {
 	}
 
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("burn token need a valid addr")
+		return ErrorInvalidTokenOwner("burn token need a valid owner addr")
 	}
 
 	if msg.Amount > MaxTokenAmount {
@@ -338,7 +344,7 @@ func (msg MsgMintToken) ValidateBasic() sdk.Error {
 	}
 
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("mint token need a valid addr")
+		return ErrorInvalidTokenOwner("mint token need a valid owner addr")
 	}
 
 	if msg.Amount > MaxTokenAmount {
