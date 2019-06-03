@@ -2,6 +2,7 @@ package market
 
 import (
 	"crypto/sha256"
+	"fmt"
 	"github.com/coinexchain/dex/modules/market/match"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strings"
@@ -61,6 +62,9 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	moneyAmount := price.MulInt(sdk.NewInt(amount)).RoundInt64()
 	moneyCoins := sdk.NewCoins(sdk.NewCoin(money, sdk.NewInt(moneyAmount)))
 
+	buyer.Quantity -= amount
+	seller.Quantity -= amount
+
 	buyer.LeftStock -= amount
 	seller.LeftStock -= amount
 	buyer.Freeze -= moneyAmount
@@ -86,7 +90,7 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order 
 	if order.Side == match.BUY {
 		frozenToken = money
 	}
-	coins := sdk.NewCoins(sdk.NewCoin(frozenToken, sdk.NewInt(order.Freeze)))
+	coins := sdk.Coins([]sdk.Coin{sdk.NewCoin(frozenToken, sdk.NewInt(order.Freeze))})
 	bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 }
 
@@ -146,6 +150,7 @@ func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Kee
 		}
 	}
 	match.Match(highPrice, midPrice, lowPrice, bidList, askList)
+	fmt.Printf("Finished match!!\n")
 	ordersForUpdate := infoForDeal.changedOrders
 	for _, order := range orderKeeper.GetOrdersAtHeight(ctx, currHeight) {
 		if order.TimeInForce == IOC {
@@ -159,8 +164,6 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	recordDay := keeper.orderClean.GetDay(ctx)
 	currDay := ctx.BlockHeader().Time.Day()
 	marketInfoList := keeper.GetAllMarketInfos(ctx)
-	ordersForUpdateList := make([]map[string]*Order, len(marketInfoList))
-	newPrices := make([]sdk.Dec, len(marketInfoList))
 	currHeight := ctx.BlockHeight()
 
 	if currDay != recordDay {
@@ -168,11 +171,14 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		for _, mi := range marketInfoList {
 			symbol := mi.Stock + "/" + mi.Money
 			orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-			removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight-GTEOrderLifetime)
+			lifeTime := keeper.GetParams(ctx).GTEOrderLifetime
+			removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight-int64(lifeTime))
 		}
 		return nil
 	}
 
+	ordersForUpdateList := make([]map[string]*Order, len(marketInfoList))
+	newPrices := make([]sdk.Dec, len(marketInfoList))
 	for idx, mi := range marketInfoList {
 		if keeper.axk.IsTokenFrozen(ctx, mi.Stock) ||
 			keeper.axk.IsTokenFrozen(ctx, mi.Money) {

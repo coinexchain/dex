@@ -5,6 +5,7 @@ import (
 	"fmt"
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
@@ -32,21 +33,26 @@ func Test_concatCopyPreAllocate(t *testing.T) {
 	}
 }
 
-func newContextAndMarketKey() (sdk.Context, sdk.StoreKey) {
+func newContextAndMarketKey() (sdk.Context, storeKeys) {
 	db := dbm.NewMemDB()
 	ms := sdkstore.NewCommitMultiStore(db)
 
-	marketKey := sdk.NewKVStoreKey(StoreKey)
-	ms.MountStoreWithDB(marketKey, sdk.StoreTypeIAVL, db)
+	keys := storeKeys{}
+	keys.marketKey = sdk.NewKVStoreKey(StoreKey)
+	keys.keyParams = sdk.NewKVStoreKey(params.StoreKey)
+	keys.tkeyParams = sdk.NewTransientStoreKey(params.TStoreKey)
+	ms.MountStoreWithDB(keys.keyParams, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.tkeyParams, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1000}, false, log.NewNopLogger())
-	return ctx, marketKey
+	return ctx, keys
 }
 
 func TestOrderCleanUpDayKeeper(t *testing.T) {
-	ctx, marketKey := newContextAndMarketKey()
-	k := NewOrderCleanUpDayKeeper(marketKey)
+	ctx, keys := newContextAndMarketKey()
+	k := NewOrderCleanUpDayKeeper(keys.marketKey)
 	k.SetDay(ctx, 12)
 	if k.GetDay(ctx) != 12 {
 		t.Errorf("Error for OrderCleanUpDayKeeper")
@@ -54,7 +60,7 @@ func TestOrderCleanUpDayKeeper(t *testing.T) {
 }
 
 func newKeeperForTest(key sdk.StoreKey) OrderKeeper {
-	return NewOrderKeeper(key, "CET/USDT", msgCdc)
+	return NewOrderKeeper(key, "cet/usdt", msgCdc)
 }
 
 func newGlobalKeeperForTest(key sdk.StoreKey) GlobalOrderKeeper {
@@ -71,13 +77,14 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 	return &Order{
 		Sender:      addr,
 		Sequence:    seq,
-		Symbol:      "CET/USDT",
+		Symbol:      "cet/usdt",
 		OrderType:   LIMIT,
 		Price:       decPrice,
 		Quantity:    qua,
 		Side:        side,
 		TimeInForce: tif,
 		Height:      h,
+		Freeze:      qua,
 	}
 }
 
@@ -114,12 +121,12 @@ func createTO3() []*Order {
 
 func TestOrderBook1(t *testing.T) {
 	orders := createTO1()
-	ctx, marketKey := newContextAndMarketKey()
-	keeper := newKeeperForTest(marketKey)
-	if keeper.GetSymbol() != "CET/USDT" {
+	ctx, keys := newContextAndMarketKey()
+	keeper := newKeeperForTest(keys.marketKey)
+	if keeper.GetSymbol() != "cet/usdt" {
 		t.Errorf("Error in GetSymbol")
 	}
-	gkeeper := newGlobalKeeperForTest(marketKey)
+	gkeeper := newGlobalKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		keeper.Add(ctx, order)
 		fmt.Printf("AA: %s %d\n", order.OrderID(), order.Height)
@@ -130,23 +137,23 @@ func TestOrderBook1(t *testing.T) {
 		if !sameTO(orders[j], order) {
 			t.Errorf("Error in GetAllOrders")
 		}
-		fmt.Printf("BB: %s %d\n", order.OrderID(), order.Height)
+		//fmt.Printf("BB: %s %d\n", order.OrderID(), order.Height)
 	}
 	newOrder := newTO("00005", 6, 11030, 20, Sell, GTE, 993)
 	if keeper.Remove(ctx, newOrder) == nil {
 		t.Errorf("Error in Remove")
 	}
 	orders1 := keeper.GetOlderThan(ctx, 997)
-	for _, order := range orders1 {
-		fmt.Printf("11: %s %d\n", order.OrderID(), order.Height)
-	}
+	//for _, order := range orders1 {
+	//	fmt.Printf("11: %s %d\n", order.OrderID(), order.Height)
+	//}
 	if !(sameTO(orders1[0], orders[5]) && sameTO(orders1[1], orders[2]) && sameTO(orders1[2], orders[4])) {
 		t.Errorf("Error in GetOlderThan")
 	}
 	orders2 := keeper.GetOrdersAtHeight(ctx, 998)
-	for _, order := range orders2 {
-		fmt.Printf("22: %s %d\n", order.OrderID(), order.Height)
-	}
+	//for _, order := range orders2 {
+	//	fmt.Printf("22: %s %d\n", order.OrderID(), order.Height)
+	//}
 	if !(sameTO(orders2[0], orders[0]) && sameTO(orders2[1], orders[1])) {
 		t.Errorf("Error in GetOrdersAtHeight")
 	}
@@ -156,8 +163,13 @@ func TestOrderBook1(t *testing.T) {
 	if orderList[0] != refOrderList[1] || orderList[1] != refOrderList[0] {
 		t.Errorf("Error in GetOrdersFromUser")
 	}
-	for _, order := range keeper.GetMatchingCandidates(ctx) {
-		fmt.Printf("orderID %s %s\n", order.OrderID(), order.Price.String())
+	orderseq = []int{1, 3, 4, 0}
+	for i, order := range keeper.GetMatchingCandidates(ctx) {
+		j := orderseq[i]
+		if order.OrderID() != orders[j].OrderID() {
+			t.Errorf("Error in GetMatchingCandidates")
+			//fmt.Printf("orderID %s %s\n", order.OrderID(), order.Price.String())
+		}
 	}
 	for _, order := range orders {
 		if gkeeper.QueryOrder(ctx, order.OrderID()) == nil {
@@ -184,8 +196,8 @@ func TestOrderBook1(t *testing.T) {
 
 func TestOrderBook2a(t *testing.T) {
 	orders := createTO1()
-	ctx, marketKey := newContextAndMarketKey()
-	keeper := newKeeperForTest(marketKey)
+	ctx, keys := newContextAndMarketKey()
+	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		if order.Side == Buy {
 			keeper.Add(ctx, order)
@@ -198,8 +210,8 @@ func TestOrderBook2a(t *testing.T) {
 
 func TestOrderBook2b(t *testing.T) {
 	orders := createTO1()
-	ctx, marketKey := newContextAndMarketKey()
-	keeper := newKeeperForTest(marketKey)
+	ctx, keys := newContextAndMarketKey()
+	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		if order.Side == Sell {
 			keeper.Add(ctx, order)
@@ -212,8 +224,8 @@ func TestOrderBook2b(t *testing.T) {
 
 func TestOrderBook3(t *testing.T) {
 	orders := createTO3()
-	ctx, marketKey := newContextAndMarketKey()
-	keeper := newKeeperForTest(marketKey)
+	ctx, keys := newContextAndMarketKey()
+	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		keeper.Add(ctx, order)
 	}

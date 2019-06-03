@@ -2,8 +2,6 @@ package market
 
 import (
 	"bytes"
-	"fmt"
-
 	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -215,9 +213,7 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64)
 }
 
 func (keeper *PersistentOrderKeeper) RemoveAllOrders(ctx sdk.Context) {
-	fmt.Printf("height::: %d\n", ctx.BlockHeight()+1)
 	for _, order := range keeper.GetOlderThan(ctx, ctx.BlockHeight()+1) {
-		fmt.Printf("Now remove: %s\n", order.OrderID())
 		keeper.Remove(ctx, order)
 	}
 }
@@ -294,9 +290,6 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*O
 		return nil
 	}
 	orderIDList := []string{string(firstBidKey[priceEndPos:]), string(firstAskKey[priceEndPos:])}
-	for _, s := range orderIDList {
-		fmt.Printf("here! %s\n", s)
-	}
 	for askIter.Next(); askIter.Valid(); askIter.Next() {
 		askKey := askIter.Key()
 		askPrice := askKey[priceStartPos:priceEndPos]
