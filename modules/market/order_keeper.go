@@ -2,9 +2,11 @@ package market
 
 import (
 	"bytes"
-	"github.com/coinexchain/dex/modules/market/match"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/market/match"
 )
 
 //nolint

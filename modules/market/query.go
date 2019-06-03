@@ -3,9 +3,10 @@ package market
 import (
 	"fmt"
 
+	"github.com/tendermint/tendermint/abci/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/tendermint/tendermint/abci/types"
 )
 
 const (
@@ -16,7 +17,6 @@ const (
 
 // creates a querier for asset REST endpoints
 func NewQuerier(mk Keeper, cdc *codec.Codec) sdk.Querier {
-
 	return func(ctx sdk.Context, path []string, req types.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
 		case QueryMarket:

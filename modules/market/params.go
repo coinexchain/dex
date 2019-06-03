@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/types"
 )
 
 const (

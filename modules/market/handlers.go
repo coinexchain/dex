@@ -52,7 +52,7 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 		Money:             msg.Money,
 		Creator:           msg.Creator,
 		PricePrecision:    msg.PricePrecision,
-		LastExecutedPrice: sdk.NewDec(0),
+		LastExecutedPrice: sdk.ZeroDec(),
 	}
 
 	key := marketStoreKey(MarketIdentifierPrefix, info.Stock+SymbolSeparator+info.Money)

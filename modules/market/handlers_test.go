@@ -1,24 +1,26 @@
 package market
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/types"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/params"
 	"testing"
 	"time"
 
-	"github.com/coinexchain/dex/modules/market/match"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/market/match"
+	"github.com/coinexchain/dex/types"
 )
 
 type testInput struct {
