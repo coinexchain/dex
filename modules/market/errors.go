@@ -12,7 +12,7 @@ const (
 	CodeNoStoreEngine         sdk.CodeType = 124
 	CodeInvalidAddress        sdk.CodeType = 125
 	CodeNotExistKeyInStore    sdk.CodeType = 126
-	CodeNotHaveSufficientCoin sdk.CodeType = 127
+	CodeInsufficientCoin      sdk.CodeType = 127
 	CodeInvalidTradeSide      sdk.CodeType = 128
 	CodeInvalidOrderType      sdk.CodeType = 129
 	CodeInvalidSymbol         sdk.CodeType = 130
@@ -60,8 +60,8 @@ func ErrNoExistKeyInStore() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeNotExistKeyInStore, "Not exist key in store")
 }
 
-func ErrNoHaveSufficientCoins() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeNotHaveSufficientCoin, "Not sufficient coin")
+func ErrInsufficientCoins() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInsufficientCoin, "Insufficient coin")
 }
 
 func ErrInvalidTradeSide() sdk.Error {

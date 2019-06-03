@@ -85,7 +85,7 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 	}
 
 	if !keeper.bnk.HasCoins(ctx, msg.Creator, sdk.Coins{CreateMarketSpendCet}) {
-		return ErrNoHaveSufficientCoins().Result()
+		return ErrInsufficientCoins().Result()
 	}
 
 	return sdk.Result{}
@@ -150,7 +150,7 @@ func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder,
 
 	coin := sdk.NewCoin(denom, calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt())
 	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{coin}) {
-		return ErrNoHaveSufficientCoins().Result()
+		return ErrInsufficientCoins().Result()
 	}
 
 	if keeper.axk.IsTokenFrozen(ctx, denom) {
