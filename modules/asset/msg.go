@@ -6,15 +6,14 @@ import (
 
 // MsgIssueToken
 type MsgIssueToken struct {
-	Name        string         `json:"name"`         //  Name of the newly issued asset, limited to 32 unicode characters
-	Symbol      string         `json:"symbol"`       //  token symbol, [a-z][a-z0-9]{1,7}
-	TotalSupply int64          `json:"total_supply"` //  The total supply for this token [0]
-	Owner       sdk.AccAddress `json:"owner"`        // The initial issuer of this token [1]
-
-	Mintable         bool `json:"mintable"`          // Whether this token could be minted after the issuing
-	Burnable         bool `json:"burnable"`          // Whether this token could be burned
-	AddrForbiddable  bool `json:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
-	TokenForbiddable bool `json:"token_forbiddable"` // whether token could be global forbid
+	Name             string         `json:"name"`              // Name of the newly issued asset, limited to 32 unicode characters
+	Symbol           string         `json:"symbol"`            // token symbol, [a-z][a-z0-9]{1,7}
+	TotalSupply      int64          `json:"total_supply"`      // The total supply for this token [0]
+	Owner            sdk.AccAddress `json:"owner"`             // The initial issuer of this token [1]
+	Mintable         bool           `json:"mintable"`          // Whether this token could be minted after the issuing
+	Burnable         bool           `json:"burnable"`          // Whether this token could be burned
+	AddrForbiddable  bool           `json:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
+	TokenForbiddable bool           `json:"token_forbiddable"` // whether token could be global forbid
 }
 
 var _ sdk.Msg = MsgIssueToken{}
@@ -42,7 +41,7 @@ func (msg MsgIssueToken) Route() string {
 
 // Type Implements Msg.
 func (msg MsgIssueToken) Type() string {
-	return "issueToken"
+	return "issue_token"
 }
 
 // ValidateBasic Implements Msg.
@@ -86,7 +85,7 @@ func (msg MsgTransferOwnership) Route() string {
 
 // Type Implements Msg.
 func (msg MsgTransferOwnership) Type() string {
-	return "transferOwnerShip"
+	return "transfer_ownerShip"
 }
 
 // ValidateBasic Implements Msg.
@@ -130,7 +129,7 @@ func (msg MsgForbidAddress) Route() string {
 
 // Type Implements Msg.
 func (msg MsgForbidAddress) Type() string {
-	return "forbidAddress"
+	return "forbid_address"
 }
 
 // ValidateBasic Implements Msg.
@@ -163,7 +162,7 @@ func (msg MsgUnforbidAddress) Route() string {
 
 // Type Implements Msg.
 func (msg MsgUnforbidAddress) Type() string {
-	return "unforbidAddress"
+	return "unforbid_address"
 }
 
 // ValidateBasic Implements Msg.
@@ -196,7 +195,7 @@ func (msg MsgForbidToken) Route() string {
 
 // Type Implements Msg.
 func (msg MsgForbidToken) Type() string {
-	return "forbidToken"
+	return "forbid_token"
 }
 
 // ValidateBasic Implements Msg.
@@ -229,7 +228,7 @@ func (msg MsgUnforbidToken) Route() string {
 
 // Type Implements Msg.
 func (msg MsgUnforbidToken) Type() string {
-	return "unforbidToken"
+	return "unforbid_token"
 }
 
 // ValidateBasic Implements Msg.
@@ -271,7 +270,7 @@ func (msg MsgBurnToken) Route() string {
 
 // Type Implements Msg.
 func (msg MsgBurnToken) Type() string {
-	return "burnToken"
+	return "burn_token"
 }
 
 // ValidateBasic Implements Msg.
@@ -329,7 +328,7 @@ func (msg MsgMintToken) Route() string {
 
 // Type Implements Msg.
 func (msg MsgMintToken) Type() string {
-	return "mintToken"
+	return "mint_token"
 }
 
 // ValidateBasic Implements Msg.
