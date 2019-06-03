@@ -17,27 +17,33 @@ func (k *mocBankxKeeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.
 	return true
 }
 func (k *mocBankxKeeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	k.records = append(k.records, fmt.Sprintf("send %s from %s to %s",
-		amt[0].Amount.String(), string(from), string(to)))
+	k.records = append(k.records, fmt.Sprintf("send %s %s from %s to %s",
+		amt[0].Amount.String(), amt[0].Denom, from.String(), to.String()))
 	return nil
 }
 func (k *mocBankxKeeper) FreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	k.records = append(k.records, fmt.Sprintf("freeze %s at %s",
-		amt[0].Amount.String(), string(acc)))
+	k.records = append(k.records, fmt.Sprintf("freeze %s %s at %s",
+		amt[0].Amount.String(), amt[0].Denom, string(acc)))
 	return nil
 }
 func (k *mocBankxKeeper) UnFreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	k.records = append(k.records, fmt.Sprintf("unfreeze %s at %s",
-		amt[0].Amount.String(), acc.String()))
+	k.records = append(k.records, fmt.Sprintf("unfreeze %s %s at %s",
+		amt[0].Amount.String(), amt[0].Denom, acc.String()))
 	return nil
 }
 
 type mocAssertStatusKeeper struct {
-	frzDenomList []string
-	frzAddrList  []sdk.AccAddress
+	forbiddenDenomList       []string
+	globalForbiddenDenomList []string
+	forbiddenAddrList        []sdk.AccAddress
 }
 
 func (k *mocAssertStatusKeeper) IsTokenFrozen(ctx sdk.Context, denom string) bool {
+	for _, d := range k.globalForbiddenDenomList {
+		if denom == d {
+			return true
+		}
+	}
 	return false
 }
 func (k *mocAssertStatusKeeper) IsTokenExists(ctx sdk.Context, denom string) bool {
@@ -47,8 +53,8 @@ func (k *mocAssertStatusKeeper) IsTokenIssuer(ctx sdk.Context, denom string, add
 	return false
 }
 func (k *mocAssertStatusKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
-	for i := 0; i < len(k.frzDenomList); i++ {
-		if denom == k.frzDenomList[i] && bytes.Equal(addr, k.frzAddrList[i]) {
+	for i := 0; i < len(k.forbiddenDenomList); i++ {
+		if denom == k.forbiddenDenomList[i] && bytes.Equal(addr, k.forbiddenAddrList[i]) {
 			return true
 		}
 	}
@@ -61,7 +67,7 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 	order.Freeze = 50
 	ctx, _ := newContextAndMarketKey()
 	unfreezeCoinsForOrder(ctx, bxKeeper, order)
-	refout := "unfreeze 50 at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
+	refout := "unfreeze 50 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
 	if refout != bxKeeper.records[0] {
 		t.Errorf("Error in unfreezeCoinsForOrder")
 	}
@@ -121,24 +127,26 @@ func TestRemoveOrders(t *testing.T) {
 		t.Errorf("Error in Removing Old Orders!")
 	}
 	records := []string{
-		"unfreeze 50 at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
-		"unfreeze 120 at cosmos1qy352eufqy352eufqy352eufqy35qqq9yynnh8",
-		"unfreeze 50 at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
-		"unfreeze 50 at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
-		"unfreeze 60 at cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+		"unfreeze 55 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
+		"unfreeze 120 btc at cosmos1qy352eufqy352eufqy352eufqy35qqq9yynnh8",
+		"unfreeze 55 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"unfreeze 54 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"unfreeze 60 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
 	}
 	for i, rec := range bnk.records {
 		if records[i] != rec {
 			t.Errorf("Error in Removing Old Orders!")
 		}
+		fmt.Printf("%s\n", rec)
 	}
 }
 
-//func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, height int64, symbol string) {
-//func (keeper *DelistKeeper) GetDelistSymbolsAtHeight(ctx sdk.Context, height int64) []string {
-//func NewDelistKeeper(key sdk.StoreKey) *DelistKeeper {
 func TestDelist(t *testing.T) {
 	axk := &mocAssertStatusKeeper{}
+	axk.forbiddenDenomList = []string{"bch"}
+	axk.globalForbiddenDenomList = []string{"bsv"}
+	addr01, _ := simpleAddr("00001")
+	axk.forbiddenAddrList = []sdk.AccAddress{addr01}
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey()
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
@@ -164,26 +172,89 @@ func TestDelist(t *testing.T) {
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
+	keeper.SetMarket(ctx, MarketInfo{
+		Stock:             "bch",
+		Money:             "usdt",
+		Creator:           creater2,
+		PricePrecision:    8,
+		LastExecutedPrice: sdk.NewDec(0),
+	})
+	keeper.SetMarket(ctx, MarketInfo{
+		Stock:             "bsv",
+		Money:             "cet",
+		Creator:           creater1,
+		PricePrecision:    8,
+		LastExecutedPrice: sdk.NewDec(0),
+	})
 
 	cetKeeper := NewOrderKeeper(keeper.marketKey, "cet/usdt", msgCdc)
 	btcKeeper := NewOrderKeeper(keeper.marketKey, "btc/usdt", msgCdc)
-	order := newTO("00001", 1, 11051, 50, Buy, GTE, 98)
-	order.Symbol = "btc/usdt"
-	btcKeeper.Add(ctx, order)
-	order = newTO("00005", 5, 12039, 120, Sell, GTE, 96)
-	order.Symbol = "btc/usdt"
-	btcKeeper.Add(ctx, order)
-	order = newTO("00002", 2, 11080, 50, Buy, GTE, 98)
-	cetKeeper.Add(ctx, order)
-	order = newTO("00002", 3, 10900, 50, Buy, GTE, 92)
-	cetKeeper.Add(ctx, order)
-	order = newTO("00004", 4, 11032, 60, Sell, GTE, 90)
-	cetKeeper.Add(ctx, order)
+	orders := make([]*Order, 10)
+	orders[0] = newTO("00001", 1, 11051, 60, Buy, GTE, 98)
+	orders[0].Symbol = "btc/usdt"
+	btcKeeper.Add(ctx, orders[0])
+	orders[1] = newTO("00005", 5, 12039, 120, Sell, IOC, 1000)
+	orders[1].Symbol = "btc/usdt"
+	btcKeeper.Add(ctx, orders[1])
+	orders[2] = newTO("00020", 6, 11039, 100, Sell, IOC, 1000)
+	orders[2].Symbol = "btc/usdt"
+	btcKeeper.Add(ctx, orders[2])
+
+	orders[3] = newTO("00002", 2, 11080, 50, Buy, GTE, 98)
+	cetKeeper.Add(ctx, orders[3])
+	orders[4] = newTO("00002", 3, 10900, 50, Buy, GTE, 92)
+	cetKeeper.Add(ctx, orders[4])
+	orders[5] = newTO("00004", 4, 11032, 30, Sell, GTE, 90)
+	cetKeeper.Add(ctx, orders[5])
+	orders[6] = newTO("00009", 9, 11032, 30, Sell, GTE, 90)
+	cetKeeper.Add(ctx, orders[6])
+	orders[7] = newTO("00002", 8, 11085, 5, Buy, GTE, 98)
+	cetKeeper.Add(ctx, orders[7])
+
+	orders[8] = newTO("00001", 10, 11000, 15, Buy, GTE, 998)
+	orders[8].Symbol = "bch/usdt"
+	cetKeeper.Add(ctx, orders[8])
+
+	orders[9] = newTO("00001", 7, 11000, 15, Buy, GTE, 998)
+	orders[9].Symbol = "bsv/usdt"
+	cetKeeper.Add(ctx, orders[9])
 
 	EndBlocker(ctx, keeper)
 	gKeeper := NewGlobalOrderKeeper(keeper.marketKey, msgCdc)
 	allOrders := gKeeper.GetAllOrders(ctx)
+	subList := []int{6, 8, 9, 4}
+	if len(allOrders) != 4 {
+		t.Errorf("Incorrect remain orders.")
+	}
+	for i, sub := range subList {
+		if !sameTO(orders[sub], allOrders[i]) {
+			t.Errorf("Incorrect remain orders.")
+		}
+	}
 	for _, order := range allOrders {
 		fmt.Printf("Remain: %s\n", order.OrderID())
+	}
+	records := []string{
+		"unfreeze 60 btc at cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf",
+		"send 60 btc from cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf to cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
+		"unfreeze 66 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
+		"send 66 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca to cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf",
+		"unfreeze 5 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+		"send 5 cet from cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24 to cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"unfreeze 6 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"send 6 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz to cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+		"unfreeze 25 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+		"send 25 cet from cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24 to cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"unfreeze 28 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"send 28 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz to cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+		"unfreeze 40 btc at cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf",
+		"unfreeze 120 btc at cosmos1qy352eufqy352eufqy352eufqy35qqq9yynnh8",
+		"unfreeze 27 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+	}
+	for i, rec := range bnk.records {
+		if rec != records[i] {
+			t.Errorf("Incorrect Records")
+		}
+		fmt.Printf("%s\n", rec)
 	}
 }

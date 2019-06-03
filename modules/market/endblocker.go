@@ -2,7 +2,6 @@ package market
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,6 +17,11 @@ type InfoForDeal struct {
 	context       sdk.Context
 }
 
+func notEnoughMoney(order *Order) bool {
+	return order.Side == match.BUY &&
+		order.Freeze < order.Price.Mul(sdk.NewDec(order.LeftStock)).RoundInt64()
+}
+
 type WrappedOrder struct {
 	order       *Order
 	infoForDeal *InfoForDeal
@@ -28,7 +32,10 @@ func (wo *WrappedOrder) GetPrice() sdk.Dec {
 }
 
 func (wo *WrappedOrder) GetAmount() int64 {
-	return wo.order.Quantity
+	if notEnoughMoney(wo.order) {
+		return 0
+	}
+	return wo.order.LeftStock
 }
 
 func (wo *WrappedOrder) GetHeight() int64 {
@@ -60,12 +67,11 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	}
 	stockAndMoney := strings.Split(buyer.Symbol, "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
-	stockCoins := sdk.NewCoins(sdk.NewCoin(stock, sdk.NewInt(amount)))
+	stockCoins := sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(amount))}
 	moneyAmount := price.MulInt(sdk.NewInt(amount)).RoundInt64()
-	moneyCoins := sdk.NewCoins(sdk.NewCoin(money, sdk.NewInt(moneyAmount)))
-
-	buyer.Quantity -= amount
-	seller.Quantity -= amount
+	moneyCoins := sdk.Coins{sdk.NewCoin(money, sdk.NewInt(moneyAmount))}
+	//fmt.Printf("here price:%s stock:%d money:%d seller.Freeze:%d buyer.Freeze:%d %d %s\n",
+	//price.String(), amount, moneyAmount, seller.Freeze, buyer.Freeze, buyer.Quantity, buyer.Price.String())
 
 	buyer.LeftStock -= amount
 	seller.LeftStock -= amount
@@ -152,11 +158,14 @@ func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Kee
 		}
 	}
 	match.Match(highPrice, midPrice, lowPrice, bidList, askList)
-	fmt.Printf("Finished match!!\n")
+	//fmt.Printf("Finished match!! height:%d\n", currHeight)
 	ordersForUpdate := infoForDeal.changedOrders
 	for _, order := range orderKeeper.GetOrdersAtHeight(ctx, currHeight) {
+		//fmt.Printf("Orders!! %s tif:%d\n", order.OrderID(), order.TimeInForce)
 		if order.TimeInForce == IOC {
-			ordersForUpdate[order.OrderID()] = order
+			if _, ok := ordersForUpdate[order.OrderID()]; !ok {
+				ordersForUpdate[order.OrderID()] = order
+			}
 		}
 	}
 	return ordersForUpdate, infoForDeal.lastPrice
@@ -201,10 +210,10 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		symbol := mi.Stock + "/" + mi.Money
 		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
 		for _, order := range ordersForUpdateList[idx] {
-			if order.TimeInForce == IOC || order.Freeze == 0 {
+			//fmt.Printf("orderU: %s %d\n", order.OrderID(), order.Freeze)
+			orderKeeper.Add(ctx, order)
+			if order.TimeInForce == IOC || order.LeftStock == 0 || notEnoughMoney(order) {
 				removeOrder(ctx, orderKeeper, keeper.bnk, order)
-			} else {
-				orderKeeper.Add(ctx, order)
 			}
 		}
 		mi.LastExecutedPrice = newPrices[idx]
@@ -214,8 +223,9 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	delistKeeper := NewDelistKeeper(keeper.marketKey)
 	delistSymbols := delistKeeper.GetDelistSymbolsAtHeight(ctx, ctx.BlockHeight())
 	for _, symbol := range delistSymbols {
+		//fmt.Printf("Now delist: %s\n", symbol)
 		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-		orderKeeper.RemoveAllOrders(ctx)
+		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight+1)
 		keeper.RemoveMarket(ctx, symbol)
 	}
 	delistKeeper.RemoveDelistRequestsAtHeight(ctx, ctx.BlockHeight())

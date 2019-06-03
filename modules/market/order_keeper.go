@@ -2,11 +2,9 @@ package market
 
 import (
 	"bytes"
-
+	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/coinexchain/dex/modules/market/match"
 )
 
 const (
@@ -56,7 +54,6 @@ type OrderKeeper interface {
 	Add(ctx sdk.Context, order *Order) sdk.Error
 	Remove(ctx sdk.Context, order *Order) sdk.Error
 	GetOlderThan(ctx sdk.Context, height int64) []*Order
-	RemoveAllOrders(ctx sdk.Context)
 	GetOrdersAtHeight(ctx sdk.Context, height int64) []*Order
 	GetMatchingCandidates(ctx sdk.Context) []*Order
 	GetSymbol() string
@@ -154,10 +151,8 @@ func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *Order) sdk.Erro
 	value := keeper.codec.MustMarshalBinaryBare(order)
 	store.Set(key, value)
 
-	if order.TimeInForce == GTE {
-		key = keeper.orderQueueKey(order)
-		store.Set(key, []byte{})
-	}
+	key = keeper.orderQueueKey(order)
+	store.Set(key, []byte{})
 	if order.Side == match.BID {
 		key = keeper.bidListKey(order)
 		store.Set(key, []byte{})
@@ -177,10 +172,8 @@ func (keeper *PersistentOrderKeeper) Remove(ctx sdk.Context, order *Order) sdk.E
 	key := orderBookKey(order.OrderID())
 	store.Delete(key)
 
-	if order.TimeInForce == GTE {
-		key = keeper.orderQueueKey(order)
-		store.Delete(key)
-	}
+	key = keeper.orderQueueKey(order)
+	store.Delete(key)
 	if order.Side == match.BID {
 		key = keeper.bidListKey(order)
 		store.Delete(key)
@@ -212,12 +205,6 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64)
 		result = append(result, keeper.getOrder(ctx, orderID))
 	}
 	return result
-}
-
-func (keeper *PersistentOrderKeeper) RemoveAllOrders(ctx sdk.Context) {
-	for _, order := range keeper.GetOlderThan(ctx, ctx.BlockHeight()+1) {
-		keeper.Remove(ctx, order)
-	}
 }
 
 func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height int64) []*Order {

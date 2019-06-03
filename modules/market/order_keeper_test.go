@@ -74,6 +74,10 @@ func simpleAddr(s string) (sdk.AccAddress, error) {
 func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int, h int64) *Order {
 	addr, _ := simpleAddr(sender)
 	decPrice := sdk.NewDec(price).QuoInt(sdk.NewInt(10000))
+	freeze := qua
+	if side == Buy {
+		freeze = decPrice.Mul(sdk.NewDec(qua)).RoundInt64()
+	}
 	return &Order{
 		Sender:      addr,
 		Sequence:    seq,
@@ -84,15 +88,27 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 		Side:        side,
 		TimeInForce: tif,
 		Height:      h,
-		Freeze:      qua,
+		Freeze:      freeze,
+		LeftStock:   qua,
 	}
 }
 
 func sameTO(a, b *Order) bool {
-	return bytes.Equal(a.Sender, b.Sender) && a.Sequence == b.Sequence &&
+	res := bytes.Equal(a.Sender, b.Sender) && a.Sequence == b.Sequence &&
 		a.Symbol == b.Symbol && a.OrderType == b.OrderType && a.Price.Equal(b.Price) &&
 		a.Quantity == b.Quantity && a.Side == b.Side && a.TimeInForce == b.TimeInForce &&
 		a.Height == b.Height
+	//if !res {
+	//	fmt.Printf("seq: %d %d\n", a.Sequence, b.Sequence)
+	//	fmt.Printf("symbol: %s %s\n", a.Symbol, b.Symbol)
+	//	fmt.Printf("ordertype: %d %d\n", a.OrderType, b.OrderType)
+	//	fmt.Printf("price: %s %s\n", a.Price, b.Price)
+	//	fmt.Printf("quantity: %d %d\n", a.Quantity, b.Quantity)
+	//	fmt.Printf("side: %d %d\n", a.Side, b.Side)
+	//	fmt.Printf("tif: %d %d\n", a.TimeInForce, b.TimeInForce)
+	//	fmt.Printf("height: %d %d\n", a.Height, b.Height)
+	//}
+	return res
 }
 
 func createTO1() []*Order {
@@ -179,17 +195,6 @@ func TestOrderBook1(t *testing.T) {
 		qorder := gkeeper.QueryOrder(ctx, order.OrderID())
 		if !sameTO(order, qorder) {
 			t.Errorf("Order's content is changed!")
-		}
-	}
-	keeper.RemoveAllOrders(ctx)
-	fmt.Printf("height:%d\n", ctx.BlockHeight())
-	for _, order := range orders {
-		if order.TimeInForce == IOC {
-			continue
-		}
-		if gkeeper.QueryOrder(ctx, order.OrderID()) != nil {
-			t.Errorf("Order %s is not removed!", order.OrderID())
-			continue
 		}
 	}
 }
