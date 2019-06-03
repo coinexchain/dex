@@ -41,24 +41,27 @@ func printDefaultParams() {
 		tablewriter.ALIGN_LEFT,
 	})
 
-	authxParams := authx.DefaultParams()
-	fillParamsTable(table, "authx", &authxParams)
-	bankxParams := bankx.DefaultParams()
-	fillParamsTable(table, "bankx", &bankxParams)
-	stakingxParams := stakingx.DefaultParams()
-	fillParamsTable(table, "stakingx", &stakingxParams)
-	assetParams := asset.DefaultParams()
-	fillParamsTable(table, "asset", &assetParams)
-	marketParams := market.DefaultParams()
-	fillParamsTable(table, "market", &marketParams)
+	fillParamsTable(table, "authx", authx.DefaultParams())
+	fillParamsTable(table, "bankx", bankx.DefaultParams())
+	fillParamsTable(table, "stakingx", stakingx.DefaultParams())
+	fillParamsTable(table, "asset", asset.DefaultParams())
+	fillParamsTable(table, "market", market.DefaultParams())
 
 	table.Render()
 }
 
-func fillParamsTable(table *tablewriter.Table, modname string, ps params.ParamSet) {
+func fillParamsTable(table *tablewriter.Table, modname string, obj interface{}) {
+	ps := castToParamSet(obj)
 	for _, pair := range ps.ParamSetPairs() {
 		t := reflect.Indirect(reflect.ValueOf(pair.Value)).Type().Name()
 		v := reflect.Indirect(reflect.ValueOf(pair.Value)).Interface()
 		table.Append([]string{modname, string(pair.Key), fmt.Sprintf("%v", v), t})
 	}
+}
+
+func castToParamSet(obj interface{}) params.ParamSet {
+	vp := reflect.New(reflect.TypeOf(obj))
+	vp.Elem().Set(reflect.ValueOf(obj))
+	vpi := vp.Interface()
+	return vpi.(params.ParamSet)
 }
