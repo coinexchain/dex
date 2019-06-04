@@ -293,3 +293,224 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	err = input.tk.BurnToken(input.ctx, msg)
 	require.Error(t, err)
 }
+
+func TestTokenKeeper_ForbidToken(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, true)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg := NewMsgForbidToken(symbol, tAccAddr)
+	err = input.tk.ForbidToken(input.ctx, msg)
+	require.NoError(t, err)
+
+	token := input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, true, token.GetIsForbidden())
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 2: un forbiddable token
+	// set token forbiddable: false
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		false, false, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg = NewMsgForbidToken(symbol, tAccAddr)
+	err = input.tk.ForbidToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 3: duplicate forbid token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, true)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgForbidToken(symbol, tAccAddr)
+	err = input.tk.ForbidToken(input.ctx, msg)
+	require.NoError(t, err)
+
+	err = input.tk.ForbidToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 4: only token owner can forbid token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, addr,
+		true, true, false, true)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	msg = NewMsgForbidToken(symbol, tAccAddr)
+	err = input.tk.ForbidToken(input.ctx, msg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+}
+
+func TestTokenKeeper_UnForbidToken(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, true)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	forbidMsg := NewMsgForbidToken(symbol, tAccAddr)
+	err = input.tk.ForbidToken(input.ctx, forbidMsg)
+	require.NoError(t, err)
+
+	token := input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, true, token.GetIsForbidden())
+
+	unforbidMsg := NewMsgUnForbidToken(symbol, tAccAddr)
+	err = input.tk.UnForbidToken(input.ctx, unforbidMsg)
+	require.NoError(t, err)
+
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, false, token.GetIsForbidden())
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 2: unforbid token before forbid token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, true)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	unforbidMsg = NewMsgUnForbidToken(symbol, tAccAddr)
+	err = input.tk.UnForbidToken(input.ctx, unforbidMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+}
+
+func TestTokenKeeper_AddTokenForbidWhitelist(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	whitelist := mockWhitelist()
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, true)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	token := input.tk.GetToken(input.ctx, symbol)
+
+	addMsg := NewMsgAddForbidWhitelist(symbol, tAccAddr, whitelist)
+	err = input.tk.AddTokenForbidWhitelist(input.ctx, addMsg)
+	require.NoError(t, err)
+	addresses := input.tk.GetWhitelist(input.ctx, symbol)
+	for _, addr := range addresses {
+		require.Contains(t, whitelist, addr)
+	}
+	require.Equal(t, len(whitelist), len(addresses))
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 2: un forbiddable token
+	// set token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	addMsg = NewMsgAddForbidWhitelist(symbol, tAccAddr, whitelist)
+	err = input.tk.AddTokenForbidWhitelist(input.ctx, addMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 3: nil whitelist
+	// set token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, true)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	addMsg = NewMsgAddForbidWhitelist(symbol, tAccAddr, []sdk.AccAddress{})
+	err = input.tk.AddTokenForbidWhitelist(input.ctx, addMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+}
+
+func TestTokenKeeper_RemoveTokenForbidWhitelist(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	whitelist := mockWhitelist()
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, true)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	token := input.tk.GetToken(input.ctx, symbol)
+
+	addMsg := NewMsgAddForbidWhitelist(symbol, tAccAddr, whitelist)
+	err = input.tk.AddTokenForbidWhitelist(input.ctx, addMsg)
+	require.NoError(t, err)
+	addresses := input.tk.GetWhitelist(input.ctx, symbol)
+	for _, addr := range addresses {
+		require.Contains(t, whitelist, addr)
+	}
+	require.Equal(t, len(whitelist), len(addresses))
+
+	removeMsg := NewMsgRemoveForbidWhitelist(symbol, tAccAddr, []sdk.AccAddress{whitelist[0]})
+	err = input.tk.RemoveTokenForbidWhitelist(input.ctx, removeMsg)
+	require.NoError(t, err)
+	addresses = input.tk.GetWhitelist(input.ctx, symbol)
+	require.Equal(t, len(whitelist)-1, len(addresses))
+	require.NotContains(t, addresses, whitelist[0])
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 2: un forbiddable token
+	// set token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	removeMsg = NewMsgRemoveForbidWhitelist(symbol, tAccAddr, whitelist)
+	err = input.tk.RemoveTokenForbidWhitelist(input.ctx, removeMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 3: nil whitelist
+	// set token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, true)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	removeMsg = NewMsgRemoveForbidWhitelist(symbol, tAccAddr, []sdk.AccAddress{})
+	err = input.tk.RemoveTokenForbidWhitelist(input.ctx, removeMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+}

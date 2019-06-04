@@ -303,6 +303,13 @@ type MsgForbidToken struct {
 
 var _ sdk.Msg = MsgForbidToken{}
 
+func NewMsgForbidToken(symbol string, owner sdk.AccAddress) MsgForbidToken {
+	return MsgForbidToken{
+		symbol,
+		owner,
+	}
+}
+
 // Route Implements Msg.
 func (msg MsgForbidToken) Route() string {
 	return RouterKey
@@ -319,7 +326,7 @@ func (msg MsgForbidToken) ValidateBasic() sdk.Error {
 		return ErrorInvalidTokenSymbol(err.Error())
 	}
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("forbid token need a valid owner")
+		return ErrorInvalidTokenOwner("forbid token need a valid owner addr")
 	}
 	return nil
 }
@@ -342,6 +349,13 @@ type MsgUnForbidToken struct {
 
 var _ sdk.Msg = MsgUnForbidToken{}
 
+func NewMsgUnForbidToken(symbol string, owner sdk.AccAddress) MsgUnForbidToken {
+	return MsgUnForbidToken{
+		symbol,
+		owner,
+	}
+}
+
 // Route Implements Msg.
 func (msg MsgUnForbidToken) Route() string {
 	return RouterKey
@@ -358,7 +372,7 @@ func (msg MsgUnForbidToken) ValidateBasic() sdk.Error {
 		return ErrorInvalidTokenSymbol(err.Error())
 	}
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("forbid token need a valid owner")
+		return ErrorInvalidTokenOwner("forbid token need a valid owner addr")
 	}
 	return nil
 }
@@ -382,6 +396,14 @@ type MsgAddForbidWhitelist struct {
 
 var _ sdk.Msg = MsgAddForbidWhitelist{}
 
+func NewMsgAddForbidWhitelist(symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) MsgAddForbidWhitelist {
+	return MsgAddForbidWhitelist{
+		symbol,
+		owner,
+		whitelist,
+	}
+}
+
 // Route Implements Msg.
 func (msg MsgAddForbidWhitelist) Route() string {
 	return RouterKey
@@ -398,7 +420,7 @@ func (msg MsgAddForbidWhitelist) ValidateBasic() sdk.Error {
 		return ErrorInvalidTokenSymbol(err.Error())
 	}
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("add forbid whitelist need a valid owner")
+		return ErrorInvalidTokenOwner("add forbid whitelist need a valid owner addr")
 	}
 	if len(msg.Whitelist) == 0 {
 		return ErrorInvalidTokenWhitelist("add nil forbid whitelist")
@@ -425,6 +447,14 @@ type MsgRemoveForbidWhitelist struct {
 
 var _ sdk.Msg = MsgRemoveForbidWhitelist{}
 
+func NewMsgRemoveForbidWhitelist(symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) MsgRemoveForbidWhitelist {
+	return MsgRemoveForbidWhitelist{
+		symbol,
+		owner,
+		whitelist,
+	}
+}
+
 // Route Implements Msg.
 func (msg MsgRemoveForbidWhitelist) Route() string {
 	return RouterKey
@@ -441,7 +471,7 @@ func (msg MsgRemoveForbidWhitelist) ValidateBasic() sdk.Error {
 		return ErrorInvalidTokenSymbol(err.Error())
 	}
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("remove forbid whitelist need a valid owner")
+		return ErrorInvalidTokenOwner("remove forbid whitelist need a valid owner addr")
 	}
 	if len(msg.Whitelist) == 0 {
 		return ErrorInvalidTokenWhitelist("remove nil forbid whitelist")

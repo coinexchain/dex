@@ -529,3 +529,465 @@ func TestMsgBurnToken_GetSigners(t *testing.T) {
 		})
 	}
 }
+
+func TestMsgForbidToken_Route(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgForbidToken
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgForbidToken("abc", tAccAddr),
+			RouterKey,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgForbidToken{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.Route(); got != tt.want {
+				t.Errorf("MsgForbidToken.Route() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgForbidToken_ValidateBasic(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgForbidToken
+		want sdk.Error
+	}{
+		{
+			"case-invalidOwner",
+			NewMsgForbidToken("abc", sdk.AccAddress{}),
+			ErrorInvalidTokenOwner("forbid token need a valid owner addr"),
+		},
+		{
+			"case-invalidSymbol",
+			NewMsgForbidToken("*90", sdk.AccAddress{}),
+			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgForbidToken{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgForbidToken.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgForbidToken_GetSignBytes(t *testing.T) {
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	tests := []struct {
+		name string
+		msg  MsgForbidToken
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgForbidToken("abc", addr),
+			`{"type":"asset/MsgForbidToken","value":{"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgForbidToken{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
+				t.Errorf("MsgForbidToken.GetSignBytes() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgForbidToken_GetSigners(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgForbidToken
+		want []sdk.AccAddress
+	}{
+		{
+			"base-case",
+			NewMsgForbidToken("abc", tAccAddr),
+			[]sdk.AccAddress{tAccAddr},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgForbidToken{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgForbidToken.GetSigners() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgUnForbidToken_Route(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgUnForbidToken
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgUnForbidToken("abc", tAccAddr),
+			RouterKey,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgUnForbidToken{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.Route(); got != tt.want {
+				t.Errorf("MsgUnForbidToken.Route() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgUnForbidToken_ValidateBasic(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgUnForbidToken
+		want sdk.Error
+	}{
+		{
+			"case-invalidOwner",
+			NewMsgUnForbidToken("abc", sdk.AccAddress{}),
+			ErrorInvalidTokenOwner("forbid token need a valid owner addr"),
+		},
+		{
+			"case-invalidSymbol",
+			NewMsgUnForbidToken("*90", sdk.AccAddress{}),
+			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgUnForbidToken{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgUnForbidToken.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgUnForbidToken_GetSignBytes(t *testing.T) {
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	tests := []struct {
+		name string
+		msg  MsgUnForbidToken
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgUnForbidToken("abc", addr),
+			`{"type":"asset/MsgUnForbidToken","value":{"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgUnForbidToken{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
+				t.Errorf("MsgUnForbidToken.GetSignBytes() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgUnForbidToken_GetSigners(t *testing.T) {
+	tests := []struct {
+		name string
+		msg  MsgUnForbidToken
+		want []sdk.AccAddress
+	}{
+		{
+			"base-case",
+			NewMsgUnForbidToken("abc", tAccAddr),
+			[]sdk.AccAddress{tAccAddr},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgUnForbidToken{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+			}
+			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgUnForbidToken.GetSigners() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgAddForbidWhitelist_Route(t *testing.T) {
+	whitelist := mockWhitelist()
+
+	tests := []struct {
+		name string
+		msg  MsgAddForbidWhitelist
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgAddForbidWhitelist("abc", tAccAddr, whitelist),
+			RouterKey,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgAddForbidWhitelist{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+				tt.msg.Whitelist,
+			}
+			if got := msg.Route(); got != tt.want {
+				t.Errorf("MsgAddForbidWhitelist.Route() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgAddForbidWhitelist_ValidateBasic(t *testing.T) {
+	whitelist := mockWhitelist()
+	tests := []struct {
+		name string
+		msg  MsgAddForbidWhitelist
+		want sdk.Error
+	}{
+		{
+			"case-invalidOwner",
+			NewMsgAddForbidWhitelist("abc", sdk.AccAddress{}, whitelist),
+			ErrorInvalidTokenOwner("add forbid whitelist need a valid owner addr"),
+		},
+		{
+			"case-invalidWhitelist",
+			NewMsgAddForbidWhitelist("abc", tAccAddr, []sdk.AccAddress{}),
+			ErrorInvalidTokenWhitelist("add nil forbid whitelist"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgAddForbidWhitelist{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+				tt.msg.Whitelist,
+			}
+			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgAddForbidWhitelist.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgAddForbidWhitelist_GetSignBytes(t *testing.T) {
+	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
+	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	whitelist := []sdk.AccAddress{addr1, addr2}
+	tests := []struct {
+		name string
+		msg  MsgAddForbidWhitelist
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgAddForbidWhitelist("abc", addr, whitelist),
+			`{"type":"asset/MsgAddForbidWhitelist","value":{"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","whitelist":["cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgAddForbidWhitelist{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+				tt.msg.Whitelist,
+			}
+			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
+				t.Errorf("MsgAddForbidWhitelist.GetSignBytes() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgAddForbidWhitelist_GetSigners(t *testing.T) {
+	whitelist := mockWhitelist()
+	tests := []struct {
+		name string
+		msg  MsgAddForbidWhitelist
+		want []sdk.AccAddress
+	}{
+		{
+			"base-case",
+			NewMsgAddForbidWhitelist("abc", tAccAddr, whitelist),
+			[]sdk.AccAddress{tAccAddr},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgAddForbidWhitelist{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+				tt.msg.Whitelist,
+			}
+			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgAddForbidWhitelist.GetSigners() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgRemoveForbidWhitelist_Route(t *testing.T) {
+	whitelist := mockWhitelist()
+
+	tests := []struct {
+		name string
+		msg  MsgRemoveForbidWhitelist
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgRemoveForbidWhitelist("abc", tAccAddr, whitelist),
+			RouterKey,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgRemoveForbidWhitelist{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+				tt.msg.Whitelist,
+			}
+			if got := msg.Route(); got != tt.want {
+				t.Errorf("MsgRemoveForbidWhitelist.Route() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgRemoveForbidWhitelist_ValidateBasic(t *testing.T) {
+	whitelist := mockWhitelist()
+	tests := []struct {
+		name string
+		msg  MsgRemoveForbidWhitelist
+		want sdk.Error
+	}{
+		{
+			"case-invalidOwner",
+			NewMsgRemoveForbidWhitelist("abc", sdk.AccAddress{}, whitelist),
+			ErrorInvalidTokenOwner("remove forbid whitelist need a valid owner addr"),
+		},
+		{
+			"case-invalidWhitelist",
+			NewMsgRemoveForbidWhitelist("abc", tAccAddr, []sdk.AccAddress{}),
+			ErrorInvalidTokenWhitelist("remove nil forbid whitelist"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgRemoveForbidWhitelist{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+				tt.msg.Whitelist,
+			}
+			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgRemoveForbidWhitelist.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgRemoveForbidWhitelist_GetSignBytes(t *testing.T) {
+	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
+	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	whitelist := []sdk.AccAddress{addr1, addr2}
+	tests := []struct {
+		name string
+		msg  MsgRemoveForbidWhitelist
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgRemoveForbidWhitelist("abc", addr, whitelist),
+			`{"type":"asset/MsgRemoveForbidWhitelist","value":{"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","whitelist":["cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgRemoveForbidWhitelist{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+				tt.msg.Whitelist,
+			}
+			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
+				t.Errorf("MsgRemoveForbidWhitelist.GetSignBytes() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgRemoveForbidWhitelist_GetSigners(t *testing.T) {
+	whitelist := mockWhitelist()
+	tests := []struct {
+		name string
+		msg  MsgRemoveForbidWhitelist
+		want []sdk.AccAddress
+	}{
+		{
+			"base-case",
+			NewMsgRemoveForbidWhitelist("abc", tAccAddr, whitelist),
+			[]sdk.AccAddress{tAccAddr},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgRemoveForbidWhitelist{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddress,
+				tt.msg.Whitelist,
+			}
+			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgRemoveForbidWhitelist.GetSigners() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

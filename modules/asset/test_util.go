@@ -75,3 +75,14 @@ func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
 	addr := sdk.AccAddress(pub.Address())
 	return key, pub, addr
 }
+
+func mockWhitelist() (whitelist []sdk.AccAddress) {
+	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
+	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
+	var addr3, _ = sdk.AccAddressFromBech32("cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz")
+
+	whitelist = append(whitelist, addr1)
+	whitelist = append(whitelist, addr2)
+	whitelist = append(whitelist, addr3)
+	return
+}
