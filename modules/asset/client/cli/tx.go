@@ -118,7 +118,7 @@ var transferOwnershipFlags = []string{
 }
 
 // TransferOwnershipCmd will create a transfer token  owner tx and sign.
-func TransferOwnershipCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func TransferOwnershipCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "transfer-ownership",
 		Short: "Create and sign a transfer-ownership tx",
@@ -176,7 +176,7 @@ var mintTokenFlags = []string{
 }
 
 // MintTokenCmd will create a mint token tx and sign.
-func MintTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func MintTokenCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "mint-token",
 		Short: "Create and sign a mint token tx",
@@ -234,7 +234,7 @@ var burnTokenFlags = []string{
 }
 
 // BurnTokenCmd will create a burn token tx and sign.
-func BurnTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func BurnTokenCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "burn-token",
 		Short: "Create and sign a burn token tx",
@@ -291,7 +291,7 @@ var symbolFlags = []string{
 }
 
 // ForbidTokenCmd will create a Forbid token tx and sign.
-func ForbidTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func ForbidTokenCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "forbid-token",
 		Short: "Create and sign a forbid token tx",
@@ -342,7 +342,7 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 }
 
 // UnForbidTokenCmd will create a UnForbid token tx and sign.
-func UnForbidTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func UnForbidTokenCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unforbid-token",
 		Short: "Create and sign a unforbid token tx",
