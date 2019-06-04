@@ -400,7 +400,7 @@ func TestTokenKeeper_UnForbidToken(t *testing.T) {
 	input.tk.removeToken(input.ctx, token)
 }
 
-func TestTokenKeeper_AddTokenForbidWhitelist(t *testing.T) {
+func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
 	input := setupTestInput()
 	symbol := "abc"
 	whitelist := mockWhitelist()
@@ -413,8 +413,8 @@ func TestTokenKeeper_AddTokenForbidWhitelist(t *testing.T) {
 	require.NoError(t, err)
 	token := input.tk.GetToken(input.ctx, symbol)
 
-	addMsg := NewMsgAddForbidWhitelist(symbol, tAccAddr, whitelist)
-	err = input.tk.AddTokenForbidWhitelist(input.ctx, addMsg)
+	addMsg := NewMsgAddTokenWhitelist(symbol, tAccAddr, whitelist)
+	err = input.tk.AddTokenWhitelist(input.ctx, addMsg)
 	require.NoError(t, err)
 	addresses := input.tk.GetWhitelist(input.ctx, symbol)
 	for _, addr := range addresses {
@@ -432,8 +432,8 @@ func TestTokenKeeper_AddTokenForbidWhitelist(t *testing.T) {
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
-	addMsg = NewMsgAddForbidWhitelist(symbol, tAccAddr, whitelist)
-	err = input.tk.AddTokenForbidWhitelist(input.ctx, addMsg)
+	addMsg = NewMsgAddTokenWhitelist(symbol, tAccAddr, whitelist)
+	err = input.tk.AddTokenWhitelist(input.ctx, addMsg)
 	require.Error(t, err)
 
 	// remove token
@@ -446,15 +446,15 @@ func TestTokenKeeper_AddTokenForbidWhitelist(t *testing.T) {
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
-	addMsg = NewMsgAddForbidWhitelist(symbol, tAccAddr, []sdk.AccAddress{})
-	err = input.tk.AddTokenForbidWhitelist(input.ctx, addMsg)
+	addMsg = NewMsgAddTokenWhitelist(symbol, tAccAddr, []sdk.AccAddress{})
+	err = input.tk.AddTokenWhitelist(input.ctx, addMsg)
 	require.Error(t, err)
 
 	// remove token
 	input.tk.removeToken(input.ctx, token)
 }
 
-func TestTokenKeeper_RemoveTokenForbidWhitelist(t *testing.T) {
+func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 	input := setupTestInput()
 	symbol := "abc"
 	whitelist := mockWhitelist()
@@ -467,8 +467,8 @@ func TestTokenKeeper_RemoveTokenForbidWhitelist(t *testing.T) {
 	require.NoError(t, err)
 	token := input.tk.GetToken(input.ctx, symbol)
 
-	addMsg := NewMsgAddForbidWhitelist(symbol, tAccAddr, whitelist)
-	err = input.tk.AddTokenForbidWhitelist(input.ctx, addMsg)
+	addMsg := NewMsgAddTokenWhitelist(symbol, tAccAddr, whitelist)
+	err = input.tk.AddTokenWhitelist(input.ctx, addMsg)
 	require.NoError(t, err)
 	addresses := input.tk.GetWhitelist(input.ctx, symbol)
 	for _, addr := range addresses {
@@ -476,8 +476,8 @@ func TestTokenKeeper_RemoveTokenForbidWhitelist(t *testing.T) {
 	}
 	require.Equal(t, len(whitelist), len(addresses))
 
-	removeMsg := NewMsgRemoveForbidWhitelist(symbol, tAccAddr, []sdk.AccAddress{whitelist[0]})
-	err = input.tk.RemoveTokenForbidWhitelist(input.ctx, removeMsg)
+	removeMsg := NewMsgRemoveTokenWhitelist(symbol, tAccAddr, []sdk.AccAddress{whitelist[0]})
+	err = input.tk.RemoveTokenWhitelist(input.ctx, removeMsg)
 	require.NoError(t, err)
 	addresses = input.tk.GetWhitelist(input.ctx, symbol)
 	require.Equal(t, len(whitelist)-1, len(addresses))
@@ -493,8 +493,8 @@ func TestTokenKeeper_RemoveTokenForbidWhitelist(t *testing.T) {
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
-	removeMsg = NewMsgRemoveForbidWhitelist(symbol, tAccAddr, whitelist)
-	err = input.tk.RemoveTokenForbidWhitelist(input.ctx, removeMsg)
+	removeMsg = NewMsgRemoveTokenWhitelist(symbol, tAccAddr, whitelist)
+	err = input.tk.RemoveTokenWhitelist(input.ctx, removeMsg)
 	require.Error(t, err)
 
 	// remove token
@@ -507,8 +507,8 @@ func TestTokenKeeper_RemoveTokenForbidWhitelist(t *testing.T) {
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
-	removeMsg = NewMsgRemoveForbidWhitelist(symbol, tAccAddr, []sdk.AccAddress{})
-	err = input.tk.RemoveTokenForbidWhitelist(input.ctx, removeMsg)
+	removeMsg = NewMsgRemoveTokenWhitelist(symbol, tAccAddr, []sdk.AccAddress{})
+	err = input.tk.RemoveTokenWhitelist(input.ctx, removeMsg)
 	require.Error(t, err)
 
 	// remove token

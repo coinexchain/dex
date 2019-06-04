@@ -26,10 +26,10 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 			return handleMsgForbidToken(ctx, tk, msg)
 		case MsgUnForbidToken:
 			return handleMsgUnForbidToken(ctx, tk, msg)
-		case MsgAddForbidWhitelist:
-			return handleMsgAddForbidWhitelist(ctx, tk, msg)
-		case MsgRemoveForbidWhitelist:
-			return handleMsgRemoveForbidWhitelist(ctx, tk, msg)
+		case MsgAddTokenWhitelist:
+			return handleMsgAddTokenWhitelist(ctx, tk, msg)
+		case MsgRemoveTokenWhitelist:
+			return handleMsgRemoveTokenWhitelist(ctx, tk, msg)
 		case MsgForbidAddress:
 			return handleMsgForbidAddress(ctx, tk, msg)
 		case MsgUnForbidAddress:
@@ -197,9 +197,9 @@ func handleMsgUnForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidToke
 	}
 }
 
-// handleMsgAddForbidWhitelist - Handle AddForbidWhitelist msg
-func handleMsgAddForbidWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgAddForbidWhitelist) sdk.Result {
-	if err := tk.AddTokenForbidWhitelist(ctx, msg); err != nil {
+// handleMsgAddTokenWhitelist - Handle AddTokenWhitelist msg
+func handleMsgAddTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgAddTokenWhitelist) sdk.Result {
+	if err := tk.AddTokenWhitelist(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -212,9 +212,9 @@ func handleMsgAddForbidWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgAddForb
 	}
 }
 
-// handleMsgRemoveForbidWhitelist - Handle RemoveForbidWhitelist msg
-func handleMsgRemoveForbidWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgRemoveForbidWhitelist) sdk.Result {
-	if err := tk.RemoveTokenForbidWhitelist(ctx, msg); err != nil {
+// handleMsgRemoveTokenWhitelist - Handle RemoveTokenWhitelist msg
+func handleMsgRemoveTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgRemoveTokenWhitelist) sdk.Result {
+	if err := tk.RemoveTokenWhitelist(ctx, msg); err != nil {
 		return err.Result()
 	}
 

@@ -263,8 +263,8 @@ func (tk TokenKeeper) UnForbidToken(ctx sdk.Context, msg MsgUnForbidToken) sdk.E
 	return tk.setToken(ctx, token)
 }
 
-//AddTokenForbidWhitelist - add token forbid whitelist
-func (tk TokenKeeper) AddTokenForbidWhitelist(ctx sdk.Context, msg MsgAddForbidWhitelist) sdk.Error {
+//AddTokenWhitelist - add token forbid whitelist
+func (tk TokenKeeper) AddTokenWhitelist(ctx sdk.Context, msg MsgAddTokenWhitelist) sdk.Error {
 	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
 	if err != nil {
 		return err
@@ -279,8 +279,8 @@ func (tk TokenKeeper) AddTokenForbidWhitelist(ctx sdk.Context, msg MsgAddForbidW
 	return nil
 }
 
-//RemoveTokenForbidWhitelist - remove token forbid whitelist
-func (tk TokenKeeper) RemoveTokenForbidWhitelist(ctx sdk.Context, msg MsgRemoveForbidWhitelist) sdk.Error {
+//RemoveTokenWhitelist - remove token forbid whitelist
+func (tk TokenKeeper) RemoveTokenWhitelist(ctx sdk.Context, msg MsgRemoveTokenWhitelist) sdk.Error {
 	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
 	if err != nil {
 		return err
