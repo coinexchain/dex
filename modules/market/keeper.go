@@ -20,6 +20,7 @@ func NewDelistKeeper(key sdk.StoreKey) *DelistKeeper {
 		marketKey: key,
 	}
 }
+
 func getDelistKey(height int64, symbol string) []byte {
 	return concatCopyPreAllocate([][]byte{
 		DelistKey,
@@ -143,6 +144,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "market/market-info", nil)
 	cdc.RegisterConcrete(MsgCreateOrder{}, "market/order-info", nil)
 	cdc.RegisterConcrete(MsgCancelOrder{}, "market/cancel-order", nil)
+	cdc.RegisterConcrete(MsgCancelMarket{}, "market/cancel-market", nil)
 }
 
 func (k Keeper) GetAllOrders(ctx sdk.Context) []*Order {
@@ -207,8 +209,6 @@ func (k Keeper) IterateMarket(ctx sdk.Context, process func(info MarketInfo) boo
 func (k Keeper) GetMarketInfo(ctx sdk.Context, symbol string) (info MarketInfo, err error) {
 	store := ctx.KVStore(k.marketKey)
 	value := store.Get(marketStoreKey(MarketIdentifierPrefix, symbol))
-
-	//TODO. will modify, because the function maybe panic in case of error .
 	err = k.cdc.UnmarshalBinaryBare(value, &info)
 	return
 }

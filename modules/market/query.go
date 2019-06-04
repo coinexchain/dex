@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	QueryMarket     = "market-info"
-	QueryOrder      = "order-info"
-	QueryUserOrders = "user-order-list"
+	QueryMarket            = "market-info"
+	QueryOrder             = "order-info"
+	QueryUserOrders        = "user-order-list"
+	QueryWaitCancelMarkets = "wait-cancel-markets"
 )
 
 // creates a querier for asset REST endpoints
@@ -25,6 +26,8 @@ func NewQuerier(mk Keeper, cdc *codec.Codec) sdk.Querier {
 			return queryOrder(ctx, req, mk)
 		case QueryUserOrders:
 			return queryUserOrderList(ctx, req, mk)
+		case QueryWaitCancelMarkets:
+			return queryWaitCancelMarkets(ctx, req, mk)
 		default:
 			return nil, sdk.ErrUnknownRequest("query symbol : " + path[0])
 		}
@@ -98,6 +101,25 @@ func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]b
 	orders := okp.GetOrdersFromUser(ctx, param.User)
 
 	bz, err := codec.MarshalJSONIndent(mk.cdc, orders)
+	if err != nil {
+		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
+	}
+	return bz, nil
+}
+
+type QueryCancelMarkets struct {
+	Height int64
+}
+
+func queryWaitCancelMarkets(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
+	var param QueryCancelMarkets
+	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
+		return nil, sdk.NewError(CodeSpaceMarket, CodeUnMarshalFailed, "failed to parse param")
+	}
+
+	dlk := NewDelistKeeper(mk.marketKey)
+	markets := dlk.GetDelistSymbolsAtHeight(ctx, param.Height)
+	bz, err := codec.MarshalJSONIndent(mk.cdc, markets)
 	if err != nil {
 		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
 	}

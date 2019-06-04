@@ -23,7 +23,8 @@ const (
 	CodeMarshalFailed         sdk.CodeType = 133
 	CodeUnMarshalFailed       sdk.CodeType = 134
 	CodeNotFindOrder          sdk.CodeType = 135
-	CodeNotMatchOrderSender   sdk.CodeType = 135
+	CodeNotMatchSender        sdk.CodeType = 135
+	CodeInvalidHeight         sdk.CodeType = 136
 )
 
 func ErrTokenNoExist() sdk.Error {

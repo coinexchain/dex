@@ -16,6 +16,8 @@ const (
 	MaxTokenPricePrecision           = 18
 	LimitOrder             OrderType = 2
 	SymbolSeparator                  = "/"
+
+	MinEffectHeight = 10000
 )
 
 type OrderType = byte
@@ -35,6 +37,8 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handleMsgCreateOrder(ctx, msg, k)
 		case MsgCancelOrder:
 			return handleMsgCancelOrder(ctx, msg, k)
+		case MsgCancelMarket:
+			return handleMsgCancelMarket(ctx, msg, k)
 		default:
 			errMsg := "Unrecognized market Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -164,7 +168,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 	}
 
 	if !bytes.Equal(order.Sender, msg.Sender) {
-		return sdk.NewError(StoreKey, CodeNotMatchOrderSender, "The cancel addr is not match order sender").Result()
+		return sdk.NewError(StoreKey, CodeNotMatchSender, "The cancel addr is not match order sender").Result()
 	}
 
 	//TODO. Need add unfreeze token logic.
@@ -174,6 +178,41 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 	}
 
 	return sdk.Result{}
+}
+
+func handleMsgCancelMarket(ctx sdk.Context, msg MsgCancelMarket, keeper Keeper) sdk.Result {
+
+	if err := checkMsgCancelMarket(keeper, msg, ctx); err != nil {
+		return err.Result()
+	}
+
+	dlk := NewDelistKeeper(keeper.marketKey)
+	dlk.AddDelistRequest(ctx, msg.EffectiveHeight, msg.Symbol)
+
+	return sdk.Result{}
+}
+
+func checkMsgCancelMarket(keeper Keeper, msg MsgCancelMarket, ctx sdk.Context) sdk.Error {
+
+	if err := msg.ValidateBasic(); err != nil {
+		return err
+	}
+
+	currHeight := ctx.BlockHeight()
+	if msg.EffectiveHeight < currHeight+MinEffectHeight {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidHeight, "Invalid Height")
+	}
+
+	info, err := keeper.GetMarketInfo(ctx, msg.Symbol)
+	if err != nil {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, err.Error())
+	}
+
+	if !bytes.Equal(info.Creator, msg.Sender) {
+		return sdk.NewError(CodeSpaceMarket, CodeNotMatchSender, "Not match market info sender")
+	}
+
+	return nil
 }
 
 func calculateAmount(price, quantity int64, pricePrecision byte) sdk.Dec {

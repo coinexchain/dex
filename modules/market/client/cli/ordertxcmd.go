@@ -26,8 +26,9 @@ const (
 	FlagPrice     = "price"
 	FlagQuantity  = "quantity"
 	FlagSide      = "side"
-	FlagOrderID   = "orderid"
+	FlagOrderID   = "order-id"
 	FlagUserAddr  = "address"
+	FlagHeight    = "height"
 )
 
 var createOrderFlags = []string{

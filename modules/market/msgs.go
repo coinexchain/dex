@@ -174,3 +174,44 @@ func (msg MsgCancelOrder) GetSignBytes() []byte {
 func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }
+
+///////////////////////////////////////////////////////////
+// MsgCancelMarket
+
+type MsgCancelMarket struct {
+	Sender          sdk.AccAddress `json:"sender"`
+	Symbol          string         `json:"symbol"`
+	EffectiveHeight int64          `json:"effective_height"`
+}
+
+func (msg MsgCancelMarket) Route() string {
+	return StoreKey
+}
+
+func (msg MsgCancelMarket) Type() string {
+	return "cancel_market"
+}
+
+func (msg MsgCancelMarket) ValidateBasic() sdk.Error {
+	if len(msg.Sender) == 0 {
+		return ErrInvalidAddress()
+	}
+
+	if len(strings.Split(msg.Symbol, SymbolSeparator)) != 2 {
+		return ErrInvalidSymbol()
+	}
+
+	if msg.EffectiveHeight < 0 {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidHeight, "Invalid height")
+	}
+
+	return nil
+}
+
+func (msg MsgCancelMarket) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+}
+
+func (msg MsgCancelMarket) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Sender}
+}

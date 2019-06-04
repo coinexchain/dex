@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/market/client/cli"
 	"net/http"
 	"strings"
 
@@ -25,6 +26,12 @@ type createMarketReq struct {
 type queryMarketReq struct {
 	BaseReq rest.BaseReq `json:"base_req"`
 	Symbol  string       `json:"symbol"`
+}
+
+type cancelMarketReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	Symbol  string       `json:"symbol"`
+	Height  int64        `json:"height"`
 }
 
 func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -93,5 +100,33 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 		}
 
 		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+	}
+}
+
+func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req cancelMarketReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
+		msg := market.MsgCancelMarket{
+			Sender:          sender,
+			Symbol:          req.Symbol,
+			EffectiveHeight: req.Height,
+		}
+
+		if err := cli.CheckCancelMarketMsg(cdc, cliCtx, msg); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }

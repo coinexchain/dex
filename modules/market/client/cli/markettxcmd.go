@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -149,4 +150,103 @@ func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func CancelMarket(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "cancel-market",
+		Short: "cancel market in blockchain",
+		Long:  "",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			creator := cliCtx.GetFromAddress()
+			msg := market.MsgCancelMarket{
+				Sender:          creator,
+				EffectiveHeight: viper.GetInt64(FlagHeight),
+				Symbol:          viper.GetString(FlagSymbol),
+			}
+
+			if err := CheckCancelMarketMsg(cdc, cliCtx, msg); err != nil {
+				return err
+			}
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "The market symbol")
+	cmd.Flags().Int64(FlagHeight, -1, "The block height")
+	cmd.MarkFlagRequired(FlagSymbol)
+	cmd.MarkFlagRequired(FlagHeight)
+
+	return cmd
+}
+
+func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg market.MsgCancelMarket) error {
+	if err := msg.ValidateBasic(); err != nil {
+		return err
+	}
+
+	bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(msg.Symbol))
+	if err != nil {
+		return err
+	}
+	query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
+	res, err := cliCtx.QueryWithData(query, bz)
+	if err != nil {
+		return err
+	}
+
+	var msgMarket market.MarketInfo
+	if err := cdc.UnmarshalJSON(res, &msgMarket); err != nil {
+		return err
+	}
+
+	if !bytes.Equal(msgMarket.Creator, msg.Sender) {
+		return errors.Errorf("Not match sender, actual : %s, expect : %s\n", msg.Sender, msgMarket.Creator)
+	}
+
+	return nil
+}
+
+func QueryWaitCancelMarkets(cdc *codec.Codec) *cobra.Command {
+
+	cmd := &cobra.Command{
+		Use:   "wait-cancel-markets",
+		Short: "",
+		Long:  "",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			height := viper.GetInt64(FlagHeight)
+			if height < 0 {
+				return errors.Errorf("Invalid height")
+			}
+
+			bz, err := cdc.MarshalJSON(market.QueryCancelMarkets{Height: height})
+			if err != nil {
+				return err
+			}
+
+			query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryWaitCancelMarkets)
+			res, err := cliCtx.QueryWithData(query, bz)
+			if err != nil {
+				return err
+			}
+
+			var markets []string
+			if err := cdc.UnmarshalJSON(res, &markets); err != nil {
+				return err
+			}
+			fmt.Println(markets)
+
+			return nil
+		},
+	}
+
+	cmd.Flags().Int64(FlagHeight, -1, "The query block height")
+	cmd.MarkFlagRequired(FlagHeight)
+	return cmd
 }
