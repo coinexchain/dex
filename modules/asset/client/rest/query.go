@@ -74,14 +74,11 @@ func QueryTokensRequestHandlerFn(
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+
 		if len(res) == 0 {
-			rest.PostProcessResponse(w, cdc, []asset.BaseToken{}, cliCtx.Indent)
-			return
+			res = []byte("[]")
 		}
 
-		var tokens []asset.Token
-		cdc.MustUnmarshalJSON(res, &tokens)
-
-		rest.PostProcessResponse(w, cdc, tokens, cliCtx.Indent)
+		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
 	}
 }
