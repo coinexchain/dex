@@ -13,6 +13,7 @@ import (
 const (
 	QueryToken     = "token-info"
 	QueryTokenList = "token-list"
+	QueryWhitelist = "token-whitelist"
 )
 
 // creates a querier for asset REST endpoints
@@ -23,6 +24,9 @@ func NewQuerier(tk TokenKeeper, cdc *codec.Codec) sdk.Querier {
 			return queryToken(ctx, req, tk)
 		case QueryTokenList:
 			return queryAllTokenList(ctx, req, tk)
+		case QueryWhitelist:
+			return queryWhitelist(ctx, req, tk)
+
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown asset query endpoint")
 		}
@@ -61,6 +65,32 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte,
 
 func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
 	bz, err := codec.MarshalJSONIndent(tk.cdc, tk.GetAllTokens(ctx))
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return bz, nil
+}
+
+// defines the params for query: "custom/asset/token-whitelist"
+type QueryWhitelistParams struct {
+	Symbol string
+}
+
+func NewQueryWhitelistParams(s string) QueryWhitelistParams {
+	return QueryWhitelistParams{
+		Symbol: s,
+	}
+}
+
+func queryWhitelist(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
+	var params QueryWhitelistParams
+	if err := tk.cdc.UnmarshalJSON(req.Data, &params); err != nil {
+		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
+	}
+
+	whitelist := tk.GetWhitelist(ctx, params.Symbol)
+	bz, err := codec.MarshalJSONIndent(tk.cdc, whitelist)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

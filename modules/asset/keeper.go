@@ -293,6 +293,35 @@ func (tk TokenKeeper) RemoveTokenForbidWhitelist(ctx sdk.Context, msg MsgRemoveF
 	return nil
 }
 
+// GetWhitelist returns all whitelist in the token Keeper.
+func (tk TokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddress {
+	whitelist := make([]sdk.AccAddress, 0)
+
+	tk.IterateWhitelist(ctx, symbol, func(acc sdk.AccAddress) (stop bool) {
+		whitelist = append(whitelist, acc)
+		return false
+	})
+
+	return whitelist
+}
+
+// IterateWhitelist implements token Keeper
+func (tk TokenKeeper) IterateWhitelist(ctx sdk.Context, symbol string, process func(acc sdk.AccAddress) (stop bool)) {
+	store := ctx.KVStore(tk.key)
+	iter := sdk.KVStorePrefixIterator(store, append(WhitelistKeyPrefix, symbol...))
+	defer iter.Close()
+	for {
+		if !iter.Valid() {
+			return
+		}
+		acc := iter.Value()
+		if process(acc) {
+			return
+		}
+		iter.Next()
+	}
+}
+
 // -----------------------------------------------------------------------------
 // ExpectedAssertStatusKeeper
 
