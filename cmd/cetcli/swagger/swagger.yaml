@@ -55,7 +55,7 @@ paths:
     get:
       description: Information about the connected node
       summary: The properties of the connected node
-      operationId: nodeInfo
+      operationId: getNodeInfo
       tags:
         - ICS0
       produces:
@@ -1949,6 +1949,7 @@ paths:
         - ICS100
       summary: queryToken
       description: Get token with provided `symbol`
+      operationId: getToken
       produces:
         - application/json
       parameters:
@@ -1973,6 +1974,7 @@ paths:
         - ICS100
       summary: List tokens
       description: List all existing tokens
+      operationId: getTokenList
       produces:
         - application/json
       responses:
@@ -1989,7 +1991,7 @@ paths:
         - ICS100
       summary: Issue token
       description: Issue a new Token
-      operationId: issueTokens
+      operationId: issueToken
       consumes:
         - application/json
       produces:
