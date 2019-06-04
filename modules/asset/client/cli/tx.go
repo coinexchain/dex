@@ -24,8 +24,9 @@ const (
 	FlagAddrForbiddable  = "addr-forbiddable"
 	FlagTokenForbiddable = "token-forbiddable"
 
-	FlagNewOwner = "new-owner"
-	FlagAmount   = "amount"
+	FlagNewOwner  = "new-owner"
+	FlagAmount    = "amount"
+	FlagWhitelist = "whitelist"
 )
 
 var issueTokenFlags = []string{
@@ -386,6 +387,119 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range symbolFlags {
+		_ = cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
+
+var whitelistFlags = []string{
+	FlagSymbol,
+	FlagWhitelist,
+}
+
+// AddTokenWhitelistCmd will create a add token whitelist tx and sign.
+func AddTokenWhitelistCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "add-whitelist",
+		Short: "Create and sign a add-whitelist tx",
+		Long: strings.TrimSpace(
+			`Create and sign a add-whitelist tx, broadcast to nodes.
+				Multiple addresses separated by commas.
+
+Example:
+$ cetcli tx asset add-whitelist --symbol="abc" \
+	--whitelist=key,key,key \
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseAddWhitelistFlags(owner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			// ensure account has enough coins
+			account, err := cliCtx.GetAccount(owner)
+			if err != nil {
+				return err
+			}
+
+			fee := types.NewCetCoins(asset.TokenWhitelistAddFee)
+			if !account.GetCoins().IsAllGTE(fee) {
+				return fmt.Errorf("address %s doesn't have enough cet to add token whitelist", owner)
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "Which token whitelist be added")
+	cmd.Flags().String(FlagWhitelist, "", "add token whitelist addresses")
+
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range whitelistFlags {
+		_ = cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
+
+// RemoveTokenWhitelistCmd will create a remove token whitelist tx and sign.
+func RemoveTokenWhitelistCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "remove-whitelist",
+		Short: "Create and sign a remove-whitelist tx",
+		Long: strings.TrimSpace(
+			`Create and sign a remove-whitelist tx, broadcast to nodes.
+				Multiple addresses separated by commas.
+
+Example:
+$ cetcli tx asset remove-whitelist --symbol="abc" \
+	--whitelist=key,key,key \
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseRemoveWhitelistFlags(owner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			// ensure account has enough coins
+			account, err := cliCtx.GetAccount(owner)
+			if err != nil {
+				return err
+			}
+
+			fee := types.NewCetCoins(asset.TokenWhitelistRemoveFee)
+			if !account.GetCoins().IsAllGTE(fee) {
+				return fmt.Errorf("address %s doesn't have enough cet to remove token whitelist", owner)
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "Which token whitelist be added")
+	cmd.Flags().String(FlagWhitelist, "", "remove token whitelist addresses")
+
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range whitelistFlags {
 		_ = cmd.MarkFlagRequired(flag)
 	}
 

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/coinexchain/dex/modules/asset"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -100,6 +101,58 @@ func parseUnForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgUnForbidToken, err
 	msg := asset.NewMsgUnForbidToken(
 		viper.GetString(FlagSymbol),
 		owner,
+	)
+
+	return &msg, nil
+}
+
+func parseAddWhitelistFlags(owner sdk.AccAddress) (*asset.MsgAddTokenWhitelist, error) {
+	var addr sdk.AccAddress
+	whitelist := make([]sdk.AccAddress, 0)
+	var err error
+
+	if err := checkFlags(symbolFlags, "$ cetcli tx asset add-whitelist -h"); err != nil {
+		return nil, err
+	}
+
+	str := strings.Split(viper.GetString(FlagWhitelist), ",")
+	for _, s := range str {
+		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
+			return nil, err
+		}
+		whitelist = append(whitelist, addr)
+	}
+
+	msg := asset.NewMsgAddTokenWhitelist(
+		viper.GetString(FlagSymbol),
+		owner,
+		whitelist,
+	)
+
+	return &msg, nil
+}
+
+func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*asset.MsgRemoveTokenWhitelist, error) {
+	var addr sdk.AccAddress
+	whitelist := make([]sdk.AccAddress, 0)
+	var err error
+
+	if err := checkFlags(symbolFlags, "$ cetcli tx asset remove-whitelist -h"); err != nil {
+		return nil, err
+	}
+
+	str := strings.Split(viper.GetString(FlagWhitelist), ",")
+	for _, s := range str {
+		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
+			return nil, err
+		}
+		whitelist = append(whitelist, addr)
+	}
+
+	msg := asset.NewMsgRemoveTokenWhitelist(
+		viper.GetString(FlagSymbol),
+		owner,
+		whitelist,
 	)
 
 	return &msg, nil
