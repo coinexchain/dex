@@ -2,11 +2,11 @@ package rest
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/market/client/cli"
 	"net/http"
 	"strings"
 
 	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/client/cli"
 	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	clientrest "github.com/cosmos/cosmos-sdk/client/rest"
@@ -65,8 +65,7 @@ func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			return
 		}
 
-		sender := cliCtx.GetFromAddress()
-
+		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
 		msg, err := cli.CheckSenderAndOrderID(sender, req.OrderID)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

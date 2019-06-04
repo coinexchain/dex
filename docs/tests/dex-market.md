@@ -83,12 +83,16 @@
 
 ### 查询市场的交易对
  
+`curl -X GET http://localhost:1317/market/market-info --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "symbol":"dash/cet" }'`    
 
 ### 查询订单
 
+`curl -X GET http://localhost:1317/market/order-info --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_id":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-16" }'`
 
 ### 取消订单
 
+`curl -X POST http://localhost:1317/market/cancel-order --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_id":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-16" }'`
 
 ### 查询用户订单列表
  
+ `curl -X GET http://localhost:1317/market/user-order-list --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "address":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z" }'`
