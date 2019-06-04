@@ -23,7 +23,7 @@ func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			fmt.Sprintf(`Query details for a token. You can find the token by token symbol".
 
 Example:
-$ cetcli query asset token btc
+$ cetcli query asset token abc
 `,
 			),
 		),
@@ -67,6 +67,43 @@ $ cetcli query asset tokens
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
 			res, err := cliCtx.QueryWithData(route, nil)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(res))
+			return nil
+		},
+	}
+	return cmd
+}
+
+// GetWhitelistCmd returns whitelist
+func GetWhitelistCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "whitelist [symbol]",
+		Short: "Query whitelist",
+		Args:  cobra.ExactArgs(1),
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query whitelist for a token. You can find it by token symbol".
+
+Example:
+$ cetcli query asset whitelist abc
+`,
+			),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			symbol := args[0]
+
+			bz, err := cdc.MarshalJSON(asset.NewQueryWhitelistParams(symbol))
+			if err != nil {
+				return err
+			}
+
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryWhitelist)
+			res, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
 			}

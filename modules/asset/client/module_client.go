@@ -31,6 +31,7 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 	assQueryCmd.AddCommand(client.GetCommands(
 		assCli.GetTokenCmd(mc.storeKey, mc.cdc),
 		assCli.GetTokenListCmd(mc.storeKey, mc.cdc),
+		assCli.GetWhitelistCmd(mc.storeKey, mc.cdc),
 	)...)
 
 	return assQueryCmd
