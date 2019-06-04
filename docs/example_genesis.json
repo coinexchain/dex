@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-06-03T02:39:53.229813Z",
+  "genesis_time": "2019-06-04T10:16:51.402543Z",
   "chain_id": "coinexdex",
   "consensus_params": {
     "block": {
@@ -227,7 +227,7 @@
         "bonded_tokens": "0"
       },
       "params": {
-        "unbonding_time": "259200000000000",
+        "unbonding_time": "1814400000000000",
         "max_validators": 100,
         "max_entries": 7,
         "bond_denom": "cet"
@@ -341,13 +341,13 @@
             "amount": "1000000000"
           }
         ],
-        "token_forbid_whitelist_add_fee": [
+        "token_whitelist_add_fee": [
           {
             "denom": "cet",
             "amount": "2000000000"
           }
         ],
-        "token_forbid_whitelist_remove_fee": [
+        "token_whitelist_remove_fee": [
           {
             "denom": "cet",
             "amount": "2000000000"
@@ -475,9 +475,9 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "10000000000000000",
-                "delegator_address": "cosmos1meh2xwgft0qsfakj9eyqzhfazwvzpvam79yncc",
-                "validator_address": "cosmosvaloper1meh2xwgft0qsfakj9eyqzhfazwvzpvamm3sx5t",
-                "pubkey": "cosmosvalconspub1addwnpepqgtw9uy4t52yh4a7xxw9s2704xwlcwd5787asjgz3sh79r0gfykcjtxcq3v",
+                "delegator_address": "cosmos1we4v8epy3jv8rlglwtgs2lgczadnaqphdrts8f",
+                "validator_address": "cosmosvaloper1we4v8epy3jv8rlglwtgs2lgczadnaqphghl9t6",
+                "pubkey": "cosmosvalconspub1addwnpepqgycyeda5p28sqt0p4f3unq64k363tzm4qm2htmwmmgc4dk7nmd8v2g92vp",
                 "value": {
                   "denom": "cet",
                   "amount": "10000000000000000"
@@ -498,9 +498,9 @@
             {
               "pub_key": {
                 "type": "tendermint/PubKeySecp256k1",
-                "value": "Ahbi8JVdFEvXvjGcWCvPqZ38ObTx/dhJAowv4o3oSS2J"
+                "value": "AgmCZb2gVHgBbw1THkwaraOorFuoNquvbt7Rirbentp2"
               },
-              "signature": "DcHS8ubk6ds71nZtEcJCW/5/LRku0wJ5xesVFOy2iGwHt3kirffIkiLspXT8WJIjsoSze+YPWfTG0Vs1vmWgtA=="
+              "signature": "TP4TMyFXHVgDNfuzTCaZLC47bA85OEPefOXf77op4JF++OrupEgKuzQG6Jw3Kb677ubpQdzwwnvYthEY+pf6Ig=="
             }
           ],
           "memo": ""
