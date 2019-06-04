@@ -203,11 +203,16 @@ func handleMsgAddTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgAddToken
 		return err.Result()
 	}
 
+	var str string
+	for _, addr := range msg.Whitelist {
+		str = str + addr.String() + ","
+	}
+
 	return sdk.Result{
 		Tags: sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Token, msg.Symbol,
-			tags.AddWhitelist, msg.Whitelist,
+			tags.AddWhitelist, str,
 		),
 	}
 }
@@ -218,11 +223,16 @@ func handleMsgRemoveTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgRemov
 		return err.Result()
 	}
 
+	var str string
+	for _, addr := range msg.Whitelist {
+		str = str + addr.String()
+	}
+
 	return sdk.Result{
 		Tags: sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Token, msg.Symbol,
-			tags.RemoveWhitelist, msg.Whitelist,
+			tags.RemoveWhitelist, str,
 		),
 	}
 }
