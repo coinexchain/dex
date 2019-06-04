@@ -78,3 +78,29 @@ func parseBurnTokenFlags(owner sdk.AccAddress) (*asset.MsgBurnToken, error) {
 
 	return &msg, nil
 }
+
+func parseForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgForbidToken, error) {
+	if err := checkFlags(symbolFlags, "$ cetcli tx asset forbid-token -h"); err != nil {
+		return nil, err
+	}
+
+	msg := asset.NewMsgForbidToken(
+		viper.GetString(FlagSymbol),
+		owner,
+	)
+
+	return &msg, nil
+}
+
+func parseUnForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgUnForbidToken, error) {
+	if err := checkFlags(symbolFlags, "$ cetcli tx asset unforbid-token -h"); err != nil {
+		return nil, err
+	}
+
+	msg := asset.NewMsgUnForbidToken(
+		viper.GetString(FlagSymbol),
+		owner,
+	)
+
+	return &msg, nil
+}

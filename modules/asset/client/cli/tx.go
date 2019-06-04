@@ -285,3 +285,109 @@ $ cetcli tx asset burn-token --symbol="abc" \
 
 	return cmd
 }
+
+var symbolFlags = []string{
+	FlagSymbol,
+}
+
+// ForbidTokenCmd will create a Forbid token tx and sign.
+func ForbidTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "forbid-token",
+		Short: "Create and sign a forbid token tx",
+		Long: strings.TrimSpace(
+			`Create and sign a forbid token tx, broadcast to nodes.
+
+Example:
+$ cetcli tx asset forbid-token --symbol="abc" \
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseForbidTokenFlags(owner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			// ensure account has enough coins
+			account, err := cliCtx.GetAccount(owner)
+			if err != nil {
+				return err
+			}
+
+			forbidFee := types.NewCetCoins(asset.ForbidTokenFee)
+			if !account.GetCoins().IsAllGTE(forbidFee) {
+				return fmt.Errorf("address %s doesn't have enough cet to forbid token", owner)
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "Which token will be forbidden")
+
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range symbolFlags {
+		_ = cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
+
+// UnForbidTokenCmd will create a UnForbid token tx and sign.
+func UnForbidTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "unforbid-token",
+		Short: "Create and sign a unforbid token tx",
+		Long: strings.TrimSpace(
+			`Create and sign a unforbid token tx, broadcast to nodes.
+
+Example:
+$ cetcli tx asset unforbid-token --symbol="abc" \
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseUnForbidTokenFlags(owner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			// ensure account has enough coins
+			account, err := cliCtx.GetAccount(owner)
+			if err != nil {
+				return err
+			}
+
+			unForbidFee := types.NewCetCoins(asset.UnForbidTokenFee)
+			if !account.GetCoins().IsAllGTE(unForbidFee) {
+				return fmt.Errorf("address %s doesn't have enough cet to unforbid token", owner)
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(FlagSymbol, "", "Which token will be un forbidden")
+
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range symbolFlags {
+		_ = cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
