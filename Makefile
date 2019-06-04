@@ -152,7 +152,7 @@ benchmark:
 build-docker-cetdnode:
 	$(MAKE) -C networks/local
 
-statik-swagger: go.sum
+statik-swagger:
 	statik -src=./cmd/cetcli/swagger -dest=./cmd/cetcli -f -m
 
 build-test-docker: clean statik-swagger build-linux
