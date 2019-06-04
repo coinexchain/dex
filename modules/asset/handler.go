@@ -18,14 +18,10 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 			return handleMsgIssueToken(ctx, tk, msg)
 		case MsgTransferOwnership:
 			return handleMsgTransferOwnership(ctx, tk, msg)
-		case MsgBurnToken:
-			return handleMsgBurnToken(ctx, tk, msg)
 		case MsgMintToken:
 			return handleMsgMintToken(ctx, tk, msg)
-		case MsgForbidAddress:
-			return handleMsgForbidAddress(ctx, tk, msg)
-		case MsgUnForbidAddress:
-			return handleMsgUnForbidAddress(ctx, tk, msg)
+		case MsgBurnToken:
+			return handleMsgBurnToken(ctx, tk, msg)
 		case MsgForbidToken:
 			return handleMsgForbidToken(ctx, tk, msg)
 		case MsgUnForbidToken:
@@ -34,6 +30,10 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 			return handleMsgAddForbidWhitelist(ctx, tk, msg)
 		case MsgRemoveForbidWhitelist:
 			return handleMsgRemoveForbidWhitelist(ctx, tk, msg)
+		case MsgForbidAddress:
+			return handleMsgForbidAddress(ctx, tk, msg)
+		case MsgUnForbidAddress:
+			return handleMsgUnForbidAddress(ctx, tk, msg)
 
 		default:
 			errMsg := "Unrecognized asset Msg type: %s" + msg.Type()
@@ -139,21 +139,6 @@ func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransfer
 	}
 }
 
-// handleMsgBurnToken - Handle MsgBurnToken
-func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) sdk.Result {
-	if err := tk.BurnToken(ctx, msg); err != nil {
-		return err.Result()
-	}
-
-	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.Amt, strconv.FormatInt(msg.Amount, 10),
-		),
-	}
-}
-
 // handleMsgMintToken - Handle MsgMintToken
 func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) sdk.Result {
 	if err := tk.MintToken(ctx, msg); err != nil {
@@ -169,16 +154,19 @@ func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) sdk.R
 	}
 }
 
-// handleMsgForbidAddress - Handle MsgForbidAddress
-func handleMsgForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddress) (res sdk.Result) {
+// handleMsgBurnToken - Handle MsgBurnToken
+func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) sdk.Result {
+	if err := tk.BurnToken(ctx, msg); err != nil {
+		return err.Result()
+	}
 
-	return
-}
-
-// handleMsgUnForbidAddress - Handle MsgUnForbidAddress
-func handleMsgUnForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidAddress) (res sdk.Result) {
-
-	return
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Amt, strconv.FormatInt(msg.Amount, 10),
+		),
+	}
 }
 
 // handleMsgForbidToken - Handle ForbidToken msg
@@ -237,4 +225,16 @@ func handleMsgRemoveForbidWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgRemo
 			tags.RemoveWhitelist, msg.Whitelist,
 		),
 	}
+}
+
+// handleMsgForbidAddress - Handle MsgForbidAddress
+func handleMsgForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddress) (res sdk.Result) {
+
+	return
+}
+
+// handleMsgUnForbidAddress - Handle MsgUnForbidAddress
+func handleMsgUnForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidAddress) (res sdk.Result) {
+
+	return
 }

@@ -229,72 +229,6 @@ func (msg MsgBurnToken) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddress}
 }
 
-// MsgForbidAddress
-type MsgForbidAddress struct {
-	Symbol  string
-	address sdk.AccAddress
-}
-
-var _ sdk.Msg = MsgForbidAddress{}
-
-// Route Implements Msg.
-func (msg MsgForbidAddress) Route() string {
-	return RouterKey
-}
-
-// Type Implements Msg.
-func (msg MsgForbidAddress) Type() string {
-	return "forbid_address"
-}
-
-// ValidateBasic Implements Msg.
-func (msg MsgForbidAddress) ValidateBasic() sdk.Error {
-	panic("implement me")
-}
-
-// GetSignBytes Implements Msg.
-func (msg MsgForbidAddress) GetSignBytes() []byte {
-	panic("implement me")
-}
-
-// GetSigners Implements Msg.
-func (msg MsgForbidAddress) GetSigners() []sdk.AccAddress {
-	panic("implement me")
-}
-
-// MsgUnForbidAddress
-type MsgUnForbidAddress struct {
-	Symbol  string
-	address sdk.AccAddress
-}
-
-var _ sdk.Msg = MsgUnForbidAddress{}
-
-// Route Implements Msg.
-func (msg MsgUnForbidAddress) Route() string {
-	return RouterKey
-}
-
-// Type Implements Msg.
-func (msg MsgUnForbidAddress) Type() string {
-	return "unforbid_address"
-}
-
-// ValidateBasic Implements Msg.
-func (msg MsgUnForbidAddress) ValidateBasic() sdk.Error {
-	panic("implement me")
-}
-
-// GetSignBytes Implements Msg.
-func (msg MsgUnForbidAddress) GetSignBytes() []byte {
-	panic("implement me")
-}
-
-// GetSigners Implements Msg.
-func (msg MsgUnForbidAddress) GetSigners() []sdk.AccAddress {
-	panic("implement me")
-}
-
 // MsgForbidToken
 type MsgForbidToken struct {
 	Symbol       string         `json:"symbol"`
@@ -487,4 +421,70 @@ func (msg MsgRemoveForbidWhitelist) GetSignBytes() []byte {
 // GetSigners Implements Msg.
 func (msg MsgRemoveForbidWhitelist) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddress}
+}
+
+// MsgForbidAddress
+type MsgForbidAddress struct {
+	Symbol  string
+	address sdk.AccAddress
+}
+
+var _ sdk.Msg = MsgForbidAddress{}
+
+// Route Implements Msg.
+func (msg MsgForbidAddress) Route() string {
+	return RouterKey
+}
+
+// Type Implements Msg.
+func (msg MsgForbidAddress) Type() string {
+	return "forbid_address"
+}
+
+// ValidateBasic Implements Msg.
+func (msg MsgForbidAddress) ValidateBasic() sdk.Error {
+	panic("implement me")
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgForbidAddress) GetSignBytes() []byte {
+	panic("implement me")
+}
+
+// GetSigners Implements Msg.
+func (msg MsgForbidAddress) GetSigners() []sdk.AccAddress {
+	panic("implement me")
+}
+
+// MsgUnForbidAddress
+type MsgUnForbidAddress struct {
+	Symbol  string
+	address sdk.AccAddress
+}
+
+var _ sdk.Msg = MsgUnForbidAddress{}
+
+// Route Implements Msg.
+func (msg MsgUnForbidAddress) Route() string {
+	return RouterKey
+}
+
+// Type Implements Msg.
+func (msg MsgUnForbidAddress) Type() string {
+	return "unforbid_address"
+}
+
+// ValidateBasic Implements Msg.
+func (msg MsgUnForbidAddress) ValidateBasic() sdk.Error {
+	panic("implement me")
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgUnForbidAddress) GetSignBytes() []byte {
+	panic("implement me")
+}
+
+// GetSigners Implements Msg.
+func (msg MsgUnForbidAddress) GetSigners() []sdk.AccAddress {
+	panic("implement me")
 }
