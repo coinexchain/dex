@@ -142,15 +142,6 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 				return err
 			}
 
-			bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(msg.Symbol))
-			if err != nil {
-				return err
-			}
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
-			if res, _ := cliCtx.QueryWithData(route, bz); res == nil {
-				return fmt.Errorf("transfer invalid token`s ownership")
-			}
-
 			// ensure account has enough coins
 			account, err := cliCtx.GetAccount(originalOwner)
 			if err != nil {
