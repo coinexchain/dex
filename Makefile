@@ -156,7 +156,7 @@ benchmark:
 build-docker-cetdnode:
 	$(MAKE) -C networks/local
 
-build-test-docker: build-linux-swagger
+build-test-docker: clean build-linux-swagger
 	cp build/cetd networks/test/cetdnode/
 	cp build/cetcli networks/test/cetdnode/
 	$(MAKE) -C networks/test
