@@ -459,7 +459,7 @@ func (msg MsgForbidAddr) ValidateBasic() sdk.Error {
 		return ErrorInvalidTokenOwner("forbid address need a valid owner addr")
 	}
 	if len(msg.ForbidAddr) == 0 {
-		return ErrorInvalidTokenWhitelist("forbid nil address")
+		return ErrorInvalidAddress("forbid nil address")
 	}
 	return nil
 }
@@ -510,7 +510,7 @@ func (msg MsgUnForbidAddr) ValidateBasic() sdk.Error {
 		return ErrorInvalidTokenOwner("unforbid address need a valid owner addr")
 	}
 	if len(msg.UnForbidAddr) == 0 {
-		return ErrorInvalidTokenWhitelist("unforbid nil address")
+		return ErrorInvalidAddress("unforbid nil address")
 	}
 	return nil
 }

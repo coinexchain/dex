@@ -86,3 +86,14 @@ func mockWhitelist() (whitelist []sdk.AccAddress) {
 	whitelist = append(whitelist, addr3)
 	return
 }
+
+func mockAddresses() (addr []sdk.AccAddress) {
+	var addr1, _ = sdk.AccAddressFromBech32("cosmos16cyga47yh3cv6pzemy0fjtkeqjtrjjukgngey6")
+	var addr2, _ = sdk.AccAddressFromBech32("cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy")
+	var addr3, _ = sdk.AccAddressFromBech32("cosmos1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk")
+
+	addr = append(addr, addr1)
+	addr = append(addr, addr2)
+	addr = append(addr, addr3)
+	return
+}

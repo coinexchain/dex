@@ -486,7 +486,7 @@ func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 	// remove token
 	input.tk.removeToken(input.ctx, token)
 
-	//case 2: un forbiddable token
+	//case 2: un-forbiddable token
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
 		true, true, false, false)
@@ -509,6 +509,121 @@ func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 
 	removeMsg = NewMsgRemoveTokenWhitelist(symbol, tAccAddr, []sdk.AccAddress{})
 	err = input.tk.RemoveTokenWhitelist(input.ctx, removeMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+}
+
+func TestTokenKeeper_ForbidAddress(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	mock := mockAddresses()
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, true, true)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	token := input.tk.GetToken(input.ctx, symbol)
+
+	forbidMsg := NewMsgForbidAddr(symbol, tAccAddr, mock)
+	err = input.tk.ForbidAddress(input.ctx, forbidMsg)
+	require.NoError(t, err)
+	forbidden := input.tk.GetForbiddenAddr(input.ctx, symbol)
+	for _, addr := range forbidden {
+		require.Contains(t, mock, addr)
+	}
+	require.Equal(t, len(mock), len(forbidden))
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 2: addr un-forbiddable token
+	// set token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	forbidMsg = NewMsgForbidAddr(symbol, tAccAddr, mock)
+	err = input.tk.ForbidAddress(input.ctx, forbidMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 3: nil forbid address
+	// set token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, true, true)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	forbidMsg = NewMsgForbidAddr(symbol, tAccAddr, []sdk.AccAddress{})
+	err = input.tk.ForbidAddress(input.ctx, forbidMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+}
+
+func TestTokenKeeper_UnForbidAddress(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	mock := mockAddresses()
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, true, true)
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+	token := input.tk.GetToken(input.ctx, symbol)
+
+	forbidMsg := NewMsgForbidAddr(symbol, tAccAddr, mock)
+	err = input.tk.ForbidAddress(input.ctx, forbidMsg)
+	require.NoError(t, err)
+	forbidden := input.tk.GetForbiddenAddr(input.ctx, symbol)
+	for _, addr := range forbidden {
+		require.Contains(t, mock, addr)
+	}
+	require.Equal(t, len(mock), len(forbidden))
+
+	unForbidMsg := NewMsgUnForbidAddr(symbol, tAccAddr, []sdk.AccAddress{mock[0]})
+	err = input.tk.UnForbidAddress(input.ctx, unForbidMsg)
+	require.NoError(t, err)
+	forbidden = input.tk.GetForbiddenAddr(input.ctx, symbol)
+	require.Equal(t, len(mock)-1, len(forbidden))
+	require.NotContains(t, forbidden, mock[0])
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 2: addr un-forbiddable token
+	// set token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, false, false)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	unForbidMsg = NewMsgUnForbidAddr(symbol, tAccAddr, mock)
+	err = input.tk.UnForbidAddress(input.ctx, unForbidMsg)
+	require.Error(t, err)
+
+	// remove token
+	input.tk.removeToken(input.ctx, token)
+
+	//case 3: nil un-forbid address
+	// set token
+	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, true, true, true)
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	unForbidMsg = NewMsgUnForbidAddr(symbol, tAccAddr, []sdk.AccAddress{})
+	err = input.tk.UnForbidAddress(input.ctx, unForbidMsg)
 	require.Error(t, err)
 
 	// remove token

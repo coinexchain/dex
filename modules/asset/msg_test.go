@@ -991,3 +991,245 @@ func TestMsgRemoveTokenWhitelist_GetSigners(t *testing.T) {
 		})
 	}
 }
+
+func TestMsgForbidAddr_Route(t *testing.T) {
+	addr := mockAddresses()
+
+	tests := []struct {
+		name string
+		msg  MsgForbidAddr
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgForbidAddr("abc", tAccAddr, addr),
+			RouterKey,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgForbidAddr{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddr,
+				tt.msg.ForbidAddr,
+			}
+			if got := msg.Route(); got != tt.want {
+				t.Errorf("MsgForbidAddr.Route() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
+	addr := mockAddresses()
+	tests := []struct {
+		name string
+		msg  MsgForbidAddr
+		want sdk.Error
+	}{
+		{
+			"case-invalidOwner",
+			NewMsgForbidAddr("abc", sdk.AccAddress{}, addr),
+			ErrorInvalidTokenOwner("forbid address need a valid owner addr"),
+		},
+		{
+			"case-invalidAddr",
+			NewMsgForbidAddr("abc", tAccAddr, []sdk.AccAddress{}),
+			ErrorInvalidAddress("forbid nil address"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgForbidAddr{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddr,
+				tt.msg.ForbidAddr,
+			}
+			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgForbidAddr.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgForbidAddr_GetSignBytes(t *testing.T) {
+	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
+	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	addresses := []sdk.AccAddress{addr1, addr2}
+	tests := []struct {
+		name string
+		msg  MsgForbidAddr
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgForbidAddr("abc", addr, addresses),
+			`{"type":"asset/MsgForbidAddr","value":{"forbid_addr":["cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"],"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgForbidAddr{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddr,
+				tt.msg.ForbidAddr,
+			}
+			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
+				t.Errorf("MsgForbidAddr.GetSignBytes() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgForbidAddr_GetSigners(t *testing.T) {
+	addr := mockAddresses()
+	tests := []struct {
+		name string
+		msg  MsgForbidAddr
+		want []sdk.AccAddress
+	}{
+		{
+			"base-case",
+			NewMsgForbidAddr("abc", tAccAddr, addr),
+			[]sdk.AccAddress{tAccAddr},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgForbidAddr{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddr,
+				tt.msg.ForbidAddr,
+			}
+			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgForbidAddr.GetSigners() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgUnForbidAddr_Route(t *testing.T) {
+	addr := mockAddresses()
+
+	tests := []struct {
+		name string
+		msg  MsgUnForbidAddr
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgUnForbidAddr("abc", tAccAddr, addr),
+			RouterKey,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgUnForbidAddr{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddr,
+				tt.msg.UnForbidAddr,
+			}
+			if got := msg.Route(); got != tt.want {
+				t.Errorf("MsgUnForbidAddr.Route() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
+	addr := mockAddresses()
+	tests := []struct {
+		name string
+		msg  MsgUnForbidAddr
+		want sdk.Error
+	}{
+		{
+			"case-invalidOwner",
+			NewMsgUnForbidAddr("abc", sdk.AccAddress{}, addr),
+			ErrorInvalidTokenOwner("unforbid address need a valid owner addr"),
+		},
+		{
+			"case-invalidAddr",
+			NewMsgUnForbidAddr("abc", tAccAddr, []sdk.AccAddress{}),
+			ErrorInvalidAddress("unforbid nil address"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgUnForbidAddr{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddr,
+				tt.msg.UnForbidAddr,
+			}
+			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgUnForbidAddr.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgUnForbidAddr_GetSignBytes(t *testing.T) {
+	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
+	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
+	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	addresses := []sdk.AccAddress{addr1, addr2}
+	tests := []struct {
+		name string
+		msg  MsgUnForbidAddr
+		want string
+	}{
+		{
+			"base-case",
+			NewMsgUnForbidAddr("abc", addr, addresses),
+			`{"type":"asset/MsgUnForbidAddr","value":{"owner_addr":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","unforbid_addr":["cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgUnForbidAddr{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddr,
+				tt.msg.UnForbidAddr,
+			}
+			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
+				t.Errorf("MsgUnForbidAddr.GetSignBytes() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMsgUnForbidAddr_GetSigners(t *testing.T) {
+	addr := mockAddresses()
+	tests := []struct {
+		name string
+		msg  MsgUnForbidAddr
+		want []sdk.AccAddress
+	}{
+		{
+			"base-case",
+			NewMsgUnForbidAddr("abc", tAccAddr, addr),
+			[]sdk.AccAddress{tAccAddr},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgUnForbidAddr{
+				tt.msg.Symbol,
+				tt.msg.OwnerAddr,
+				tt.msg.UnForbidAddr,
+			}
+			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgUnForbidAddr.GetSigners() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

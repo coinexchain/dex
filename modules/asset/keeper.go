@@ -296,7 +296,7 @@ func (tk TokenKeeper) RemoveTokenWhitelist(ctx sdk.Context, msg MsgRemoveTokenWh
 	return nil
 }
 
-// GetWhitelist returns all whitelist in the token Keeper.
+// GetWhitelist returns whitelist in the token Keeper.
 func (tk TokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddress {
 	whitelist := make([]sdk.AccAddress, 0)
 
@@ -355,7 +355,7 @@ func (tk TokenKeeper) ForbidAddress(ctx sdk.Context, msg MsgForbidAddr) sdk.Erro
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid address", msg.Symbol))
 	}
 	if err = tk.addForbidAddress(ctx, msg.Symbol, msg.ForbidAddr); err != nil {
-		return ErrorInvalidTokenWhitelist(fmt.Sprintf("forbid addr is invalid"))
+		return ErrorInvalidAddress(fmt.Sprintf("forbid addr is invalid"))
 	}
 	return nil
 }
@@ -371,9 +371,39 @@ func (tk TokenKeeper) UnForbidAddress(ctx sdk.Context, msg MsgUnForbidAddr) sdk.
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid address", msg.Symbol))
 	}
 	if err = tk.removeForbidAddress(ctx, msg.Symbol, msg.UnForbidAddr); err != nil {
-		return ErrorInvalidTokenWhitelist(fmt.Sprintf("unforbid addr is invalid"))
+		return ErrorInvalidAddress(fmt.Sprintf("unforbid addr is invalid"))
 	}
 	return nil
+}
+
+// GetForbidAddr returns all forbidden addr in the token Keeper.
+func (tk TokenKeeper) GetForbiddenAddr(ctx sdk.Context, symbol string) []sdk.AccAddress {
+	addresses := make([]sdk.AccAddress, 0)
+
+	tk.IterateForbiddenAddr(ctx, symbol, func(key []byte) (stop bool) {
+		addr := key[len(ForbidAddrKeyPrefix)+len(symbol):]
+		addresses = append(addresses, addr)
+		return false
+	})
+
+	return addresses
+}
+
+// IterateForbiddenAddr implements token Keeper
+func (tk TokenKeeper) IterateForbiddenAddr(ctx sdk.Context, symbol string, process func(key []byte) (stop bool)) {
+	store := ctx.KVStore(tk.key)
+	iter := sdk.KVStorePrefixIterator(store, append(ForbidAddrKeyPrefix, symbol...))
+	defer iter.Close()
+	for {
+		if !iter.Valid() {
+			return
+		}
+		key := iter.Key()
+		if process(key) {
+			return
+		}
+		iter.Next()
+	}
 }
 
 // -----------------------------------------------------------------------------

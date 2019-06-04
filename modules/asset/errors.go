@@ -17,6 +17,7 @@ const (
 	CodeDuplicateTokenSymbol  sdk.CodeType = 208
 	CodeInvalidTokenForbidden sdk.CodeType = 209
 	CodeInvalidTokenWhitelist sdk.CodeType = 210
+	CodeInvalidAddress        sdk.CodeType = 211
 )
 
 func ErrorInvalidTokenName(fmt string) sdk.Error {
@@ -48,4 +49,7 @@ func ErrorInvalidTokenForbidden(fmt string) sdk.Error {
 }
 func ErrorInvalidTokenWhitelist(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenWhitelist, fmt)
+}
+func ErrorInvalidAddress(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidAddress, fmt)
 }
