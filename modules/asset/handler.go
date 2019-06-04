@@ -30,10 +30,10 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 			return handleMsgAddTokenWhitelist(ctx, tk, msg)
 		case MsgRemoveTokenWhitelist:
 			return handleMsgRemoveTokenWhitelist(ctx, tk, msg)
-		case MsgForbidAddress:
-			return handleMsgForbidAddress(ctx, tk, msg)
-		case MsgUnForbidAddress:
-			return handleMsgUnForbidAddress(ctx, tk, msg)
+		case MsgForbidAddr:
+			return handleMsgForbidAddr(ctx, tk, msg)
+		case MsgUnForbidAddr:
+			return handleMsgUnForbidAddr(ctx, tk, msg)
 
 		default:
 			errMsg := "Unrecognized asset Msg type: %s" + msg.Type()
@@ -237,14 +237,42 @@ func handleMsgRemoveTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgRemov
 	}
 }
 
-// handleMsgForbidAddress - Handle MsgForbidAddress
-func handleMsgForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddress) (res sdk.Result) {
+// handleMsgForbidAddr - Handle MsgForbidAddr
+func handleMsgForbidAddr(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddr) (res sdk.Result) {
+	if err := tk.ForbidAddress(ctx, msg); err != nil {
+		return err.Result()
+	}
 
-	return
+	var str string
+	for _, addr := range msg.ForbidAddr {
+		str = str + addr.String() + ","
+	}
+
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Addresses, str,
+		),
+	}
 }
 
-// handleMsgUnForbidAddress - Handle MsgUnForbidAddress
-func handleMsgUnForbidAddress(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidAddress) (res sdk.Result) {
+// handleMsgUnForbidAddr - Handle MsgUnForbidAddr
+func handleMsgUnForbidAddr(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidAddr) (res sdk.Result) {
+	if err := tk.UnForbidAddress(ctx, msg); err != nil {
+		return err.Result()
+	}
 
-	return
+	var str string
+	for _, addr := range msg.UnForbidAddr {
+		str = str + addr.String() + ","
+	}
+
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Addresses, str,
+		),
+	}
 }

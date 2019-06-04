@@ -17,8 +17,8 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgUnForbidToken{}, "asset/MsgUnForbidToken", nil)
 	cdc.RegisterConcrete(MsgAddTokenWhitelist{}, "asset/MsgAddTokenWhitelist", nil)
 	cdc.RegisterConcrete(MsgRemoveTokenWhitelist{}, "asset/MsgRemoveTokenWhitelist", nil)
-	cdc.RegisterConcrete(MsgForbidAddress{}, "asset/MsgForbidAddress", nil)
-	cdc.RegisterConcrete(MsgUnForbidAddress{}, "asset/MsgUnForbidAddress", nil)
+	cdc.RegisterConcrete(MsgForbidAddr{}, "asset/MsgForbidAddr", nil)
+	cdc.RegisterConcrete(MsgUnForbidAddr{}, "asset/MsgUnForbidAddr", nil)
 }
 
 var msgCdc = codec.New()

@@ -16,6 +16,7 @@ const (
 	Amt             = "amount"
 	AddWhitelist    = "add-whitelist"
 	RemoveWhitelist = "remove-whitelist"
+	Addresses       = "addresses"
 )
 
 // Tag keys and values

@@ -27,6 +27,7 @@ const (
 var (
 	TokenStoreKeyPrefix = []byte{0x01}
 	WhitelistKeyPrefix  = []byte{0x02}
+	ForbidAddrKeyPrefix = []byte{0x03}
 )
 
 // Keeper encodes/decodes tokens using the go-amino (binary)
@@ -235,7 +236,7 @@ func (tk TokenKeeper) ForbidToken(ctx sdk.Context, msg MsgForbidToken) sdk.Error
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid", msg.Symbol))
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token", msg.Symbol))
 	}
 	if token.GetIsForbidden() {
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has been forbidden", msg.Symbol))
@@ -253,7 +254,7 @@ func (tk TokenKeeper) UnForbidToken(ctx sdk.Context, msg MsgUnForbidToken) sdk.E
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid", msg.Symbol))
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid token", msg.Symbol))
 	}
 	if !token.GetIsForbidden() {
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has not been forbidden", msg.Symbol))
@@ -271,7 +272,7 @@ func (tk TokenKeeper) AddTokenWhitelist(ctx sdk.Context, msg MsgAddTokenWhitelis
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid and add whitelist", msg.Symbol))
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token and add whitelist", msg.Symbol))
 	}
 	if err = tk.addWhitelist(ctx, msg.Symbol, msg.Whitelist); err != nil {
 		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
@@ -287,7 +288,7 @@ func (tk TokenKeeper) RemoveTokenWhitelist(ctx sdk.Context, msg MsgRemoveTokenWh
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid and remove whitelist", msg.Symbol))
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token and remove whitelist", msg.Symbol))
 	}
 	if err = tk.removeWhitelist(ctx, msg.Symbol, msg.Whitelist); err != nil {
 		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
@@ -323,6 +324,56 @@ func (tk TokenKeeper) IterateWhitelist(ctx sdk.Context, symbol string, process f
 		}
 		iter.Next()
 	}
+}
+
+func (tk TokenKeeper) addForbidAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
+	store := ctx.KVStore(tk.key)
+	for _, addr := range addresses {
+		store.Set(ForbidAddrKey(symbol, addr), []byte{})
+	}
+
+	return nil
+}
+
+func (tk TokenKeeper) removeForbidAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
+	store := ctx.KVStore(tk.key)
+	for _, addr := range addresses {
+		store.Delete(ForbidAddrKey(symbol, addr))
+	}
+
+	return nil
+}
+
+//ForbidAddress - add forbid addresses
+func (tk TokenKeeper) ForbidAddress(ctx sdk.Context, msg MsgForbidAddr) sdk.Error {
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddr)
+	if err != nil {
+		return err
+	}
+
+	if !token.GetAddrForbiddable() {
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid address", msg.Symbol))
+	}
+	if err = tk.addForbidAddress(ctx, msg.Symbol, msg.ForbidAddr); err != nil {
+		return ErrorInvalidTokenWhitelist(fmt.Sprintf("forbid addr is invalid"))
+	}
+	return nil
+}
+
+//UnForbidAddress - remove forbid addresses
+func (tk TokenKeeper) UnForbidAddress(ctx sdk.Context, msg MsgUnForbidAddr) sdk.Error {
+	token, err := tk.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddr)
+	if err != nil {
+		return err
+	}
+
+	if !token.GetAddrForbiddable() {
+		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid address", msg.Symbol))
+	}
+	if err = tk.removeForbidAddress(ctx, msg.Symbol, msg.UnForbidAddr); err != nil {
+		return ErrorInvalidTokenWhitelist(fmt.Sprintf("unforbid addr is invalid"))
+	}
+	return nil
 }
 
 // -----------------------------------------------------------------------------
@@ -383,6 +434,11 @@ func TokenStoreKey(symbol string) []byte {
 // WhitelistKey - return WhitelistKeyPrefix-Symbol-AccAddress KEY
 func WhitelistKey(symbol string, addr sdk.AccAddress) []byte {
 	return append(append(WhitelistKeyPrefix, symbol...), addr...)
+}
+
+// ForbidAddrKey - return ForbidAddrKeyPrefix-Symbol-AccAddress KEY
+func ForbidAddrKey(symbol string, addr sdk.AccAddress) []byte {
+	return append(append(ForbidAddrKeyPrefix, symbol...), addr...)
 }
 
 func (tk TokenKeeper) decodeToken(bz []byte) (token Token) {

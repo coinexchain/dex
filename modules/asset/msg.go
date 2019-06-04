@@ -423,68 +423,104 @@ func (msg MsgRemoveTokenWhitelist) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddress}
 }
 
-// MsgForbidAddress
-type MsgForbidAddress struct {
-	Symbol  string
-	address sdk.AccAddress
+// MsgForbidAddr
+type MsgForbidAddr struct {
+	Symbol     string           `json:"symbol"`
+	OwnerAddr  sdk.AccAddress   `json:"owner_address"`
+	ForbidAddr []sdk.AccAddress `json:"forbid_addr"`
 }
 
-var _ sdk.Msg = MsgForbidAddress{}
+var _ sdk.Msg = MsgForbidAddr{}
+
+func NewMsgForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) MsgForbidAddr {
+	return MsgForbidAddr{
+		symbol,
+		owner,
+		addresses,
+	}
+}
 
 // Route Implements Msg.
-func (msg MsgForbidAddress) Route() string {
+func (msg MsgForbidAddr) Route() string {
 	return RouterKey
 }
 
 // Type Implements Msg.
-func (msg MsgForbidAddress) Type() string {
-	return "forbid_address"
+func (msg MsgForbidAddr) Type() string {
+	return "forbid_addr"
 }
 
 // ValidateBasic Implements Msg.
-func (msg MsgForbidAddress) ValidateBasic() sdk.Error {
-	panic("implement me")
+func (msg MsgForbidAddr) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+	if msg.OwnerAddr.Empty() {
+		return ErrorInvalidTokenOwner("forbid address need a valid owner addr")
+	}
+	if len(msg.ForbidAddr) == 0 {
+		return ErrorInvalidTokenWhitelist("forbid nil address")
+	}
+	return nil
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgForbidAddress) GetSignBytes() []byte {
-	panic("implement me")
+func (msg MsgForbidAddr) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
-func (msg MsgForbidAddress) GetSigners() []sdk.AccAddress {
-	panic("implement me")
+func (msg MsgForbidAddr) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.OwnerAddr}
 }
 
-// MsgUnForbidAddress
-type MsgUnForbidAddress struct {
-	Symbol  string
-	address sdk.AccAddress
+// MsgUnForbidAddr
+type MsgUnForbidAddr struct {
+	Symbol       string           `json:"symbol"`
+	OwnerAddr    sdk.AccAddress   `json:"owner_addr"`
+	UnForbidAddr []sdk.AccAddress `json:"unforbid_addr"`
 }
 
-var _ sdk.Msg = MsgUnForbidAddress{}
+var _ sdk.Msg = MsgUnForbidAddr{}
+
+func NewMsgUnForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) MsgUnForbidAddr {
+	return MsgUnForbidAddr{
+		symbol,
+		owner,
+		addresses,
+	}
+}
 
 // Route Implements Msg.
-func (msg MsgUnForbidAddress) Route() string {
+func (msg MsgUnForbidAddr) Route() string {
 	return RouterKey
 }
 
 // Type Implements Msg.
-func (msg MsgUnForbidAddress) Type() string {
-	return "unforbid_address"
+func (msg MsgUnForbidAddr) Type() string {
+	return "unforbid_addr"
 }
 
 // ValidateBasic Implements Msg.
-func (msg MsgUnForbidAddress) ValidateBasic() sdk.Error {
-	panic("implement me")
+func (msg MsgUnForbidAddr) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+	if msg.OwnerAddr.Empty() {
+		return ErrorInvalidTokenOwner("unforbid address need a valid owner addr")
+	}
+	if len(msg.UnForbidAddr) == 0 {
+		return ErrorInvalidTokenWhitelist("unforbid nil address")
+	}
+	return nil
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgUnForbidAddress) GetSignBytes() []byte {
-	panic("implement me")
+func (msg MsgUnForbidAddr) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
-func (msg MsgUnForbidAddress) GetSigners() []sdk.AccAddress {
-	panic("implement me")
+func (msg MsgUnForbidAddr) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.OwnerAddr}
 }
