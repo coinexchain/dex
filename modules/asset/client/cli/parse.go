@@ -157,3 +157,55 @@ func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*asset.MsgRemoveTokenWhite
 
 	return &msg, nil
 }
+
+func parseForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgForbidAddr, error) {
+	var addr sdk.AccAddress
+	addresses := make([]sdk.AccAddress, 0)
+	var err error
+
+	if err := checkFlags(symbolFlags, "$ cetcli tx asset forbid-addr -h"); err != nil {
+		return nil, err
+	}
+
+	str := strings.Split(viper.GetString(FlagAddresses), ",")
+	for _, s := range str {
+		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
+			return nil, err
+		}
+		addresses = append(addresses, addr)
+	}
+
+	msg := asset.NewMsgForbidAddr(
+		viper.GetString(FlagSymbol),
+		owner,
+		addresses,
+	)
+
+	return &msg, nil
+}
+
+func parseUnForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgUnForbidAddr, error) {
+	var addr sdk.AccAddress
+	addresses := make([]sdk.AccAddress, 0)
+	var err error
+
+	if err := checkFlags(symbolFlags, "$ cetcli tx asset unforbid-addr -h"); err != nil {
+		return nil, err
+	}
+
+	str := strings.Split(viper.GetString(FlagAddresses), ",")
+	for _, s := range str {
+		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
+			return nil, err
+		}
+		addresses = append(addresses, addr)
+	}
+
+	msg := asset.NewMsgUnForbidAddr(
+		viper.GetString(FlagSymbol),
+		owner,
+		addresses,
+	)
+
+	return &msg, nil
+}
