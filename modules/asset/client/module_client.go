@@ -32,6 +32,7 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 		assCli.GetTokenCmd(mc.storeKey, mc.cdc),
 		assCli.GetTokenListCmd(mc.storeKey, mc.cdc),
 		assCli.GetWhitelistCmd(mc.storeKey, mc.cdc),
+		assCli.GetForbiddenAddrCmd(mc.storeKey, mc.cdc),
 	)...)
 
 	return assQueryCmd

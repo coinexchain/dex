@@ -11,9 +11,10 @@ import (
 
 // query endpoints supported by the asset Querier
 const (
-	QueryToken     = "token-info"
-	QueryTokenList = "token-list"
-	QueryWhitelist = "token-whitelist"
+	QueryToken         = "token-info"
+	QueryTokenList     = "token-list"
+	QueryWhitelist     = "token-whitelist"
+	QueryForbiddenAddr = "addr-forbidden"
 )
 
 // creates a querier for asset REST endpoints
@@ -91,6 +92,32 @@ func queryWhitelist(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]b
 
 	whitelist := tk.GetWhitelist(ctx, params.Symbol)
 	bz, err := codec.MarshalJSONIndent(tk.cdc, whitelist)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return bz, nil
+}
+
+// defines the params for query: "custom/asset/addr-forbidden"
+type QueryForbiddenAddrParams struct {
+	Symbol string
+}
+
+func NewQueryForbiddenAddrParams(s string) QueryForbiddenAddrParams {
+	return QueryForbiddenAddrParams{
+		Symbol: s,
+	}
+}
+
+func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
+	var params QueryForbiddenAddrParams
+	if err := tk.cdc.UnmarshalJSON(req.Data, &params); err != nil {
+		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
+	}
+
+	addr := tk.GetForbiddenAddr(ctx, params.Symbol)
+	bz, err := codec.MarshalJSONIndent(tk.cdc, addr)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

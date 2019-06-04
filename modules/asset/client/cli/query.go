@@ -114,3 +114,40 @@ $ cetcli query asset whitelist abc
 	}
 	return cmd
 }
+
+// GetForbiddenAddrCmd returns forbidden addr
+func GetForbiddenAddrCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "forbid-addr [symbol]",
+		Short: "Query forbidden addresses",
+		Args:  cobra.ExactArgs(1),
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query forbidden addresses for a token. You can find it by token symbol".
+
+Example:
+$ cetcli query asset forbid-addr abc
+`,
+			),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			symbol := args[0]
+
+			bz, err := cdc.MarshalJSON(asset.NewQueryForbiddenAddrParams(symbol))
+			if err != nil {
+				return err
+			}
+
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryForbiddenAddr)
+			res, err := cliCtx.QueryWithData(route, bz)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(res))
+			return nil
+		},
+	}
+	return cmd
+}
