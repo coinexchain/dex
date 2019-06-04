@@ -86,3 +86,85 @@ func Test_queryAllTokenList(t *testing.T) {
 	require.Contains(t, []string{"abc", "xyz"}, tokens[0].GetSymbol())
 	require.Contains(t, []string{"abc", "xyz"}, tokens[1].GetSymbol())
 }
+
+func Test_queryWhitelist(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	whitelist := mockWhitelist()
+	req := abci.RequestQuery{
+		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryWhitelist),
+		Data: []byte{},
+	}
+
+	// no token
+	res, err := queryWhitelist(input.ctx, req, input.tk)
+	require.Error(t, err)
+	require.Nil(t, res)
+
+	// set token
+	token, err := NewToken("ABC Token", symbol, 2100, tAccAddr,
+		false, false, false, true)
+	require.NoError(t, err)
+	err = input.tk.setToken(input.ctx, token)
+	require.NoError(t, err)
+
+	//case 1: nil whitelist
+	req.Data = input.cdc.MustMarshalJSON(NewQueryWhitelistParams(symbol))
+	res, err = queryWhitelist(input.ctx, req, input.tk)
+	require.NoError(t, err)
+	require.Equal(t, []byte("[]"), res)
+
+	//case 2: base-case ok
+	err = input.tk.addWhitelist(input.ctx, symbol, whitelist)
+	require.NoError(t, err)
+	_, err = queryWhitelist(input.ctx, req, input.tk)
+	require.NoError(t, err)
+
+	err = input.tk.removeWhitelist(input.ctx, symbol, whitelist)
+	require.NoError(t, err)
+	res, err = queryWhitelist(input.ctx, req, input.tk)
+	require.NoError(t, err)
+	require.Equal(t, []byte("[]"), res)
+
+}
+
+func Test_queryForbiddenAddr(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	mock := mockAddresses()
+	req := abci.RequestQuery{
+		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryForbiddenAddr),
+		Data: []byte{},
+	}
+
+	// no token
+	res, err := queryForbiddenAddr(input.ctx, req, input.tk)
+	require.Error(t, err)
+	require.Nil(t, res)
+
+	// set token
+	token, err := NewToken("ABC Token", symbol, 2100, tAccAddr,
+		false, false, true, true)
+	require.NoError(t, err)
+	err = input.tk.setToken(input.ctx, token)
+	require.NoError(t, err)
+
+	//case 1: nil forbidden addr
+	req.Data = input.cdc.MustMarshalJSON(NewQueryForbiddenAddrParams(symbol))
+	res, err = queryForbiddenAddr(input.ctx, req, input.tk)
+	require.NoError(t, err)
+	require.Equal(t, []byte("[]"), res)
+
+	//case 2: base-case ok
+	err = input.tk.addForbidAddress(input.ctx, symbol, mock)
+	require.NoError(t, err)
+	_, err = queryForbiddenAddr(input.ctx, req, input.tk)
+	require.NoError(t, err)
+
+	err = input.tk.removeForbidAddress(input.ctx, symbol, mock)
+	require.NoError(t, err)
+	res, err = queryForbiddenAddr(input.ctx, req, input.tk)
+	require.NoError(t, err)
+	require.Equal(t, []byte("[]"), res)
+
+}

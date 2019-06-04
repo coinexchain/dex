@@ -27,7 +27,8 @@ func NewQuerier(tk TokenKeeper, cdc *codec.Codec) sdk.Querier {
 			return queryAllTokenList(ctx, req, tk)
 		case QueryWhitelist:
 			return queryWhitelist(ctx, req, tk)
-
+		case QueryForbiddenAddr:
+			return queryForbiddenAddr(ctx, req, tk)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown asset query endpoint")
 		}
