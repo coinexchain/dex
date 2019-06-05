@@ -1943,49 +1943,7 @@ paths:
             type: string
         500:
           description: Internal Server Error
-  /asset/tokens/{symbol}:
-    get:
-      tags:
-        - ICS100
-      summary: queryToken
-      description: Get token with provided `symbol`
-      operationId: getToken
-      produces:
-        - application/json
-      parameters:
-        - in: path
-          name: symbol
-          description: token symbol
-          required: true
-          type: string
-          x-example: abc
-      responses:
-        200:
-          description: token with provided symbol
-          schema:
-            $ref: "#/definitions/Token"
-        404:
-          description: Token not found
-        500:
-          description: Internal Server Error
   /asset/tokens:
-    get:
-      tags:
-        - ICS100
-      summary: List tokens
-      description: List all existing tokens
-      operationId: getTokenList
-      produces:
-        - application/json
-      responses:
-        200:
-          description: All existing tokens
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/Token"
-        500:
-          description: Internal Server Error
     post:
       tags:
         - ICS100
@@ -2015,6 +1973,48 @@ paths:
             $ref: "#/definitions/StdTx"
         500:
           description: Internal Server Error
+    get:
+      tags:
+        - ICS100
+      summary: List tokens
+      description: List all existing tokens
+      operationId: getTokenList
+      produces:
+        - application/json
+      responses:
+        200:
+          description: All existing tokens
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Token"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}:
+    get:
+      tags:
+        - ICS100
+      summary: queryToken
+      description: Get token with provided `symbol`
+      operationId: getToken
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+      responses:
+        200:
+          description: token with provided symbol
+          schema:
+            $ref: "#/definitions/Token"
+        404:
+          description: Token not found
+        500:
+          description: Internal Server Error
   /asset/tokens/{symbol}/ownerships:
     post:
       tags:
@@ -2042,7 +2042,7 @@ paths:
               - properties:
                   base_req:
                     $ref: "#/definitions/BaseReq"
-              - $ref: "#/definitions/TransferOwnerReq"
+              - $ref: "#/definitions/TransferOwner"
       responses:
         200:
           description: Token transfer ownership result
@@ -2120,6 +2120,263 @@ paths:
       responses:
         200:
           description: Burn token result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/forbids:
+    post:
+      tags:
+        - ICS100
+      summary: Forbid token
+      description: Forbid forbiddable token
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: baseReq
+          description: base req
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+      responses:
+        200:
+          description: Forbid token result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/unforbids:
+    post:
+      tags:
+        - ICS100
+      summary: UnForbid token
+      description: UnForbid forbiddable token
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: baseReq
+          description: base req
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+      responses:
+        200:
+          description: UnForbid token result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/whitelist:
+    get:
+      tags:
+        - ICS100
+      summary: queryWhitelist
+      description: Get token whitelist with provided `symbol`
+      operationId: getwhitelist
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+      responses:
+        200:
+          description: whitelist with provided symbol
+          schema:
+            $ref: "#/definitions/Whitelist"
+        404:
+          description: Token not found
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/forbidden/whitelists:
+    post:
+      tags:
+        - ICS100
+      summary: Add forbid whitelist
+      description: Add forbiddable token whitelist addr
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: whitelist
+          description: token whitelist addr
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/Whitelist"
+      responses:
+        200:
+          description: Add forbid whitelist result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/unforbidden/whitelists:
+    post:
+      tags:
+        - ICS100
+      summary: Remove forbid whitelist
+      description: Remove forbiddable token whitelist addr
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: whitelist
+          description: token whitelist addr
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/Whitelist"
+      responses:
+        200:
+          description: Remove forbid whitelist result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/forbidden/addresses:
+    get:
+      tags:
+        - ICS100
+      summary: query forbidden addr
+      description: Get forbidden addresses with provided `symbol`
+      operationId: getForbiddenAddr
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+      responses:
+        200:
+          description: forbidden addresses with provided symbol
+          schema:
+            $ref: "#/definitions/ForbiddenAddr"
+        404:
+          description: Token not found
+        500:
+          description: Internal Server Error
+    post:
+      tags:
+        - ICS100
+      summary: Forbid address
+      description: Add forbidden address
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: addr
+          description: forbidden addr
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/ForbiddenAddr"
+      responses:
+        200:
+          description: Forbid address result
+          schema:
+            $ref: "#/definitions/StdTx"
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/unforbidden/addresses:
+    post:
+      tags:
+        - ICS100
+      summary: UnForbid address
+      description: Remove forbidden address
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: addr
+          description: forbidden addr
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/ForbiddenAddr"
+      responses:
+        200:
+          description: UnForbid address result
           schema:
             $ref: "#/definitions/StdTx"
         500:
@@ -2718,8 +2975,18 @@ definitions:
           is_forbidden:
             type: boolean
             example: false
-  TransferOwnerReq:
+  TransferOwner:
     type: object
     properties:
       new_owner:
+        $ref: "#/definitions/Address"
+  Whitelist:
+    type: object
+    properties:
+      whitelist:
+        $ref: "#/definitions/Address"
+  ForbiddenAddr:
+    type: object
+    properties:
+      forbiddenAddr:
         $ref: "#/definitions/Address"

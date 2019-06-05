@@ -260,8 +260,8 @@ func unForbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 	}
 }
 
-// addWhitelistReq defines the properties of a add whitelist request's body.
-type addWhitelistReq struct {
+// whitelistReq defines the properties of a whitelist request's body.
+type whitelistReq struct {
 	BaseReq   rest.BaseReq     `json:"base_req"`
 	Whitelist []sdk.AccAddress `json:"whitelist"`
 }
@@ -269,7 +269,7 @@ type addWhitelistReq struct {
 // addWhitelistHandlerFn - http request handler to add whitelist.
 func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req addWhitelistReq
+		var req whitelistReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -298,16 +298,10 @@ func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 	}
 }
 
-// removeWhitelistReq defines the properties of a remove whitelist request's body.
-type removeWhitelistReq struct {
-	BaseReq   rest.BaseReq     `json:"base_req"`
-	Whitelist []sdk.AccAddress `json:"whitelist"`
-}
-
 // removeWhitelistHandlerFn - http request handler to add whitelist.
 func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req removeWhitelistReq
+		var req whitelistReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -336,16 +330,16 @@ func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 	}
 }
 
-// forbidAddrReq defines the properties of a forbid addr request's body.
-type forbidAddrReq struct {
-	BaseReq rest.BaseReq     `json:"base_req"`
-	Addr    []sdk.AccAddress `json:"addr"`
+// forbiddenAddrReq defines the properties of a forbidden addr request's body.
+type forbiddenAddrReq struct {
+	BaseReq       rest.BaseReq     `json:"base_req"`
+	ForbiddenAddr []sdk.AccAddress `json:"forbidden_addr"`
 }
 
 // forbidAddrHandlerFn - http request handler to forbid addresses.
 func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req forbidAddrReq
+		var req forbiddenAddrReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -364,7 +358,7 @@ func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 		vars := mux.Vars(r)
 		symbol := vars[symbol]
 
-		msg := asset.NewMsgForbidAddr(symbol, owner, req.Addr)
+		msg := asset.NewMsgForbidAddr(symbol, owner, req.ForbiddenAddr)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -374,16 +368,10 @@ func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 	}
 }
 
-// unForbidAddrReq defines the properties of a unforbid addr request's body.
-type unForbidAddrReq struct {
-	BaseReq rest.BaseReq     `json:"base_req"`
-	Addr    []sdk.AccAddress `json:"addr"`
-}
-
 // unForbidAddrHandlerFn - http request handler to unforbid addresses.
 func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req unForbidAddrReq
+		var req forbiddenAddrReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -402,7 +390,7 @@ func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		vars := mux.Vars(r)
 		symbol := vars[symbol]
 
-		msg := asset.NewMsgUnForbidAddr(symbol, owner, req.Addr)
+		msg := asset.NewMsgUnForbidAddr(symbol, owner, req.ForbiddenAddr)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
