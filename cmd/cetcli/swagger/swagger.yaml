@@ -35,7 +35,7 @@ paths:
       summary: Version of Gaia-lite
       tags:
         - version
-      description: Get the version of gaia-lite running locally to compare against expected
+      description: Get the version of cetcli
       responses:
         200:
           description: Plaintext version i.e. "v0.25.0"
@@ -331,6 +331,7 @@ paths:
   /bank/balances/{address}:
     get:
       summary: Get the account balances
+      operationId: getAddressBalances
       tags:
         - ICS20
       produces:
@@ -356,6 +357,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/LockedCoin"
+                x-nullable: true
         204:
           description: There is no data for the requested account
         500:
