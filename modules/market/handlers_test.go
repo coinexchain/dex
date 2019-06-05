@@ -111,6 +111,7 @@ func prepareMockInput(t *testing.T) testInput {
 	ms.MountStoreWithDB(keys.keyParams, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.tkeyParams, sdk.StoreTypeTransient, db)
 	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.authxKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
@@ -119,7 +120,7 @@ func prepareMockInput(t *testing.T) testInput {
 
 	mk := NewKeeper(keys.marketKey, ak, bk, cdc, params.NewKeeper(
 		cdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey))
-	mk.RegisterCodec()
+	RegisterCodec(mk.cdc)
 	return testInput{ctx: ctx, mk: mk, handler: NewHandler(mk)}
 }
 

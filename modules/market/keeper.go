@@ -81,16 +81,22 @@ type Keeper struct {
 	bnk           ExpectedBankxKeeper
 	cdc           *codec.Codec
 	orderClean    *OrderCleanUpDayKeeper
+	gmk           GlobalMarketInfoKeeper
 	//fek       incentive.FeeCollectionKeeper
 }
 
 func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper,
 	bnkVal ExpectedBankxKeeper, cdcVal *codec.Codec, paramstore params.Subspace) Keeper {
 
-	return Keeper{marketKey: key, axk: axkVal, bnk: bnkVal,
+	return Keeper{
+		marketKey:     key,
+		axk:           axkVal,
+		bnk:           bnkVal,
 		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
 		cdc:           cdcVal,
-		orderClean:    NewOrderCleanUpDayKeeper(key)}
+		orderClean:    NewOrderCleanUpDayKeeper(key),
+		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -107,19 +113,8 @@ func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
 	return
 }
 
-// RegisterCodec registers concrete types on the codec
-func (k Keeper) RegisterCodec() {
-	RegisterCodec(k.cdc)
-}
-
-func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(Order{}, "market/order", nil)
-	cdc.RegisterConcrete(MarketInfo{}, "market/market", nil)
-	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "market/market-info", nil)
-	cdc.RegisterConcrete(MsgCreateOrder{}, "market/order-info", nil)
-	cdc.RegisterConcrete(MsgCancelOrder{}, "market/cancel-order", nil)
-	cdc.RegisterConcrete(MsgCancelMarket{}, "market/cancel-market", nil)
-}
+// -----------------------------------------------------------------------------
+// Order
 
 // SetOrder implements token Keeper.
 func (k Keeper) SetOrder(ctx sdk.Context, order *Order) sdk.Error {
@@ -130,8 +125,58 @@ func (k Keeper) GetAllOrders(ctx sdk.Context) []*Order {
 	return NewGlobalOrderKeeper(k.marketKey, k.cdc).GetAllOrders(ctx)
 }
 
-// SetMarket implements token Keeper.
+// -----------------------------------------------
+// market info
+
 func (k Keeper) SetMarket(ctx sdk.Context, info MarketInfo) sdk.Error {
+	return k.gmk.SetMarket(ctx, info)
+}
+
+func (k Keeper) RemoveMarket(ctx sdk.Context, symbol string) sdk.Error {
+	return k.gmk.RemoveMarket(ctx, symbol)
+}
+
+func (k Keeper) GetAllMarketInfos(ctx sdk.Context) []MarketInfo {
+	return k.gmk.GetAllMarketInfos(ctx)
+}
+
+func (k Keeper) GetMarketInfo(ctx sdk.Context, symbol string) (MarketInfo, error) {
+	return k.gmk.GetMarketInfo(ctx, symbol)
+}
+
+// -----------------------------------------------------------------------------
+// Codec
+
+func RegisterCodec(cdc *codec.Codec) {
+	cdc.RegisterConcrete(Order{}, "market/order", nil)
+	cdc.RegisterConcrete(MarketInfo{}, "market/market", nil)
+	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "market/market-info", nil)
+	cdc.RegisterConcrete(MsgCreateOrder{}, "market/order-info", nil)
+	cdc.RegisterConcrete(MsgCancelOrder{}, "market/cancel-order", nil)
+	cdc.RegisterConcrete(MsgCancelMarket{}, "market/cancel-market", nil)
+}
+
+type GlobalMarketInfoKeeper interface {
+	SetMarket(ctx sdk.Context, info MarketInfo) sdk.Error
+	RemoveMarket(ctx sdk.Context, symbol string) sdk.Error
+	GetAllMarketInfos(ctx sdk.Context) []MarketInfo
+	GetMarketInfo(ctx sdk.Context, symbol string) (MarketInfo, error)
+}
+
+type PersistentMarketInfoKeeper struct {
+	marketKey sdk.StoreKey
+	cdc       *codec.Codec
+}
+
+func NewGlobalMarketInfoKeeper(key sdk.StoreKey, cdcVal *codec.Codec) GlobalMarketInfoKeeper {
+	return PersistentMarketInfoKeeper{
+		marketKey: key,
+		cdc:       cdcVal,
+	}
+}
+
+// SetMarket implements token Keeper.
+func (k PersistentMarketInfoKeeper) SetMarket(ctx sdk.Context, info MarketInfo) sdk.Error {
 	store := ctx.KVStore(k.marketKey)
 	bz, err := k.cdc.MarshalBinaryBare(info)
 	if err != nil {
@@ -141,7 +186,7 @@ func (k Keeper) SetMarket(ctx sdk.Context, info MarketInfo) sdk.Error {
 	return nil
 }
 
-func (k Keeper) RemoveMarket(ctx sdk.Context, symbol string) sdk.Error {
+func (k PersistentMarketInfoKeeper) RemoveMarket(ctx sdk.Context, symbol string) sdk.Error {
 	store := ctx.KVStore(k.marketKey)
 	key := marketStoreKey(MarketIdentifierPrefix, symbol)
 	value := store.Get(key)
@@ -151,17 +196,17 @@ func (k Keeper) RemoveMarket(ctx sdk.Context, symbol string) sdk.Error {
 	return nil
 }
 
-func (k Keeper) GetAllMarketInfos(ctx sdk.Context) []MarketInfo {
+func (k PersistentMarketInfoKeeper) GetAllMarketInfos(ctx sdk.Context) []MarketInfo {
 	var infos []MarketInfo
 	appendMarket := func(order MarketInfo) (stop bool) {
 		infos = append(infos, order)
 		return false
 	}
-	k.IterateMarket(ctx, appendMarket)
+	k.iterateMarket(ctx, appendMarket)
 	return infos
 }
 
-func (k Keeper) IterateMarket(ctx sdk.Context, process func(info MarketInfo) bool) {
+func (k PersistentMarketInfoKeeper) iterateMarket(ctx sdk.Context, process func(info MarketInfo) bool) {
 	store := ctx.KVStore(k.marketKey)
 	iter := sdk.KVStorePrefixIterator(store, MarketIdentifierPrefix)
 	defer iter.Close()
@@ -177,14 +222,14 @@ func (k Keeper) IterateMarket(ctx sdk.Context, process func(info MarketInfo) boo
 	}
 }
 
-func (k Keeper) GetMarketInfo(ctx sdk.Context, symbol string) (info MarketInfo, err error) {
+func (k PersistentMarketInfoKeeper) GetMarketInfo(ctx sdk.Context, symbol string) (info MarketInfo, err error) {
 	store := ctx.KVStore(k.marketKey)
 	value := store.Get(marketStoreKey(MarketIdentifierPrefix, symbol))
 	err = k.cdc.UnmarshalBinaryBare(value, &info)
 	return
 }
 
-func (k Keeper) decodeMarket(bz []byte) (info MarketInfo) {
+func (k PersistentMarketInfoKeeper) decodeMarket(bz []byte) (info MarketInfo) {
 	if err := k.cdc.UnmarshalBinaryBare(bz, &info); err != nil {
 		panic(err)
 	}
