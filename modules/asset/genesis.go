@@ -8,21 +8,23 @@ import (
 
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
-	Params Params  `json:"params"`
-	Tokens []Token `json:"tokens"`
+	Params     Params           `json:"params"`
+	Tokens     []Token          `json:"tokens"`
+	Whitelists []sdk.AccAddress `json:"whitelists"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params Params, tokens []Token) GenesisState {
+func NewGenesisState(params Params, tokens []Token, whitelists []sdk.AccAddress) GenesisState {
 	return GenesisState{
-		Params: params,
-		Tokens: tokens,
+		Params:     params,
+		Tokens:     tokens,
+		Whitelists: whitelists,
 	}
 }
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParams(), []Token{})
+	return NewGenesisState(DefaultParams(), []Token{}, []sdk.AccAddress{})
 }
 
 // InitGenesis - Init store state from genesis data
@@ -34,11 +36,14 @@ func InitGenesis(ctx sdk.Context, tk TokenKeeper, data GenesisState) {
 			panic(err)
 		}
 	}
+	for _, addr := range data.Whitelists {
+		tk.setAddrKey(ctx, WhitelistKeyPrefix, addr)
+	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, tk TokenKeeper) GenesisState {
-	return NewGenesisState(tk.GetParams(ctx), tk.GetAllTokens(ctx))
+	return NewGenesisState(tk.GetParams(ctx), tk.GetAllTokens(ctx), tk.GetAllWhitelists(ctx))
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
