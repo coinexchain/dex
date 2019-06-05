@@ -21,7 +21,7 @@
 
 ## TransferOwnership CLI Example
 
-参考[single_node_test](https://gitlab.com/cetchain/docs/blob/master/dex/tests/single_node_test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
+参考[single_node_test](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/single-node-test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
 
 1. 查询本地bob地址
 
@@ -47,7 +47,7 @@ $ cetcli keys show alice -a
 cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t
 ```
 
-3. 本地创建token，可参考[dex-asset-iusse](https://gitlab.com/cetchain/docs/blob/master/dex/tests/dex-asset-issue.md) 
+3. 本地创建token，可参考[dex-asset-iusse](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-asset-issue.md) 
 
 ```bash
 $ cetcli tx asset issue-token --name="bob first token" \
@@ -191,7 +191,7 @@ Account:
   Sequence:      5
 ```
 
-2. 首先需要启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://gitlab.com/cetchain/docs/blob/master/dex/tests/dex_rest_api_swagger.md)
+2. 首先需要启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
 
 ```bash
 $ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --node tcp://localhost:26657 --trust-node=false

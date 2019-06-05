@@ -20,11 +20,11 @@
 - Rest-curl命令
   - `curl -X POST http://localhost:1317/asset/tokens/coin3/mints --data-binary '{"base_req":{"from":"cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"8","account_number":"0"},"amount":"2000"}'`
 
-## TransferOwnership CLI Example
+## MintToken CLI Example
 
-参考[single_node_test](https://gitlab.com/cetchain/docs/blob/master/dex/tests/single_node_test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
+参考[single_node_test](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/single-node-test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
 
-1. 本地创建token，可参考[dex-asset-iusse](https://gitlab.com/cetchain/docs/blob/master/dex/tests/dex-asset-issue.md) 
+1. 本地创建token，可参考[dex-asset-iusse](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-asset-issue.md) 
 
 ```bash
 $ cetcli tx asset issue-token --name="first token" \
@@ -120,7 +120,7 @@ Response:
   TxHash: C66A5DFB5CCAAB8F9A2BE039DAC9E3DFDDEACF044E9943760E9E71730B3B88A1
 ```
 
-6. 此时查看coin2信息，totalsupply已经增发
+4. 此时查看coin2信息，totalsupply已经增发
 
 ```bash
 $ cetcli q asset token coin2 --chain-id=coinexdex
@@ -168,7 +168,7 @@ Account:
   Sequence:      8
 ```
 
-2. 首先需要启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://gitlab.com/cetchain/docs/blob/master/dex/tests/dex_rest_api_swagger.md)
+2. 首先需要启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
 
 ```bash
 $ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --node tcp://localhost:26657 --trust-node=false
@@ -180,7 +180,7 @@ $ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --nod
 $ curl -X POST http://localhost:1317/asset/tokens/coin3/mints --data-binary '{"base_req":{"from":"cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"8","account_number":"0"},"amount":"2000"}' > unsigned.json
 ```
 
-返回未签名交易存入unsignedSendTx.json
+返回未签名交易存入unsigned.json
 
 ```bash
 {
@@ -206,7 +206,7 @@ $ curl -X POST http://localhost:1317/asset/tokens/coin3/mints --data-binary '{"b
 }
 ```
 
-5. 本地对交易进行签名
+4. 本地对交易进行签名
 
 ```bash
 $ cetcli tx sign \
@@ -214,7 +214,7 @@ $ cetcli tx sign \
   --from $(cetcli keys show bob -a)  unsigned.json > signed.json
 ```
 
-本地签名后将已签名交易存入signedSendTx.json
+本地签名后将已签名交易存入signed.json
 
 ```bash
 {
@@ -248,7 +248,7 @@ $ cetcli tx sign \
 }
 ```
 
-6. 广播交易
+5. 广播交易
 
 ```bash
 $ cetcli tx broadcast signed.json
@@ -261,7 +261,7 @@ Response:
   TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
 ```
 
-7. 此时查询coin3已经增发
+6. 此时查询coin3已经增发
 
 ```bash
 $ curl -X GET http://localhost:1317/asset/tokens/coin3

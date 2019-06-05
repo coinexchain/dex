@@ -25,7 +25,7 @@
 
 ## IssueToken CLI Example
 
-节点的搭建参考[single_node_test](https://gitlab.com/cetchain/docs/blob/master/dex/tests/single_node_test.md)，也可以从genesis.json中导入状态，节点启动后
+节点的搭建参考[single_node_test](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/single-node-test.md)，也可以从genesis.json中导入状态，节点启动后
 
 1. 尝试查询当前token-list
 
@@ -199,7 +199,7 @@ Account:
   Sequence:      4
 ```
 
-2. 首先需要启动rest-server.  可参考[本地rest-server中访问swagger-ui的方法](https://gitlab.com/cetchain/docs/blob/master/dex/tests/dex_rest_api_swagger.md)
+2. 首先需要启动rest-server.  可参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
 
 ```bash
 $ cetcli rest-server --chain-id=coinexdex --laddr=tcp://localhost:1317 --node tcp://localhost:26657 --trust-node=false
