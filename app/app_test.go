@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/incentive"
@@ -192,11 +191,9 @@ func TestMinSelfDelegation(t *testing.T) {
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
 	// deliver
-	msg := staking.NewMsgCreateValidator(val0, pubKey0,
-		dex.NewCetCoin(450), // selfDelegation
-		staking.NewDescription("node0", "node0", "www.node0.com", "node0"),
-		staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-		sdk.NewInt(400))
+	msg := testutil.NewMsgCreateValidatorBuilder(val0, pubKey0).
+		MinSelfDelegation(400).SelfDelegation(450).
+		Build()
 	tx := testutil.NewStdTxBuilder("c1").
 		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key0).Build()
 
