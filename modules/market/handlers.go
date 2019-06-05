@@ -63,6 +63,8 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 	value := keeper.cdc.MustMarshalBinaryBare(info)
 	ctx.KVStore(keeper.marketKey).Set(key, value)
 
+	//TODO. wait deduction fee decision to this function.
+
 	return sdk.Result{Tags: info.GetTags()}
 }
 
@@ -102,6 +104,14 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		return ret
 	}
 
+	values := strings.Split(msg.Symbol, SymbolSeparator)
+	denom := values[0]
+	amount := msg.Quantity
+	if msg.Side == match.BUY {
+		denom = values[1]
+		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
+	}
+
 	order := Order{
 		Sender:      msg.Sender,
 		Sequence:    msg.Sequence,
@@ -112,8 +122,8 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		Side:        msg.Side,
 		TimeInForce: msg.TimeInForce,
 		Height:      ctx.BlockHeight(),
-		LeftStock:   0,
-		Freeze:      0,
+		LeftStock:   msg.Quantity,
+		Freeze:      amount,
 		DealMoney:   0,
 		DealStock:   0,
 	}
@@ -122,7 +132,13 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 	if err := ork.Add(ctx, &order); err != nil {
 		return err.Result()
 	}
-	//TODO. Need Add freeze coin logic
+
+	coin := sdk.NewCoin(denom, sdk.NewInt(amount))
+	if err := keeper.bnk.FreezeCoins(ctx, order.Sender, sdk.Coins{coin}); err != nil {
+		// Here must be panic. Because the order has been store in the database, but deduction of failure.
+		panic(err)
+	}
+
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
 
@@ -149,7 +165,7 @@ func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder,
 		return ErrInsufficientCoins().Result()
 	}
 
-	if keeper.axk.IsTokenFrozen(ctx, denom) {
+	if keeper.axk.IsTokenForbidden(ctx, denom) {
 		return ErrTokenFrozenByIssuer().Result()
 	}
 
@@ -171,10 +187,19 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 		return sdk.NewError(StoreKey, CodeNotMatchSender, "The cancel addr is not match order sender").Result()
 	}
 
-	//TODO. Need add unfreeze token logic.
 	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
 	if err := ork.Remove(ctx, order); err != nil {
 		return err.Result()
+	}
+
+	values := strings.Split(order.Symbol, SymbolSeparator)
+	denom := values[0]
+	if order.Side == match.BUY {
+		denom = values[1]
+	}
+	coin := sdk.NewCoin(denom, sdk.NewInt(order.Freeze))
+	if err := keeper.bnk.UnFreezeCoins(ctx, order.Sender, sdk.Coins{coin}); err != nil {
+		panic(err)
 	}
 
 	return sdk.Result{}

@@ -107,9 +107,27 @@ func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
 	return
 }
 
+// RegisterCodec registers concrete types on the codec
+func (k Keeper) RegisterCodec() {
+	RegisterCodec(k.cdc)
+}
+
+func RegisterCodec(cdc *codec.Codec) {
+	cdc.RegisterConcrete(Order{}, "market/order", nil)
+	cdc.RegisterConcrete(MarketInfo{}, "market/market", nil)
+	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "market/market-info", nil)
+	cdc.RegisterConcrete(MsgCreateOrder{}, "market/order-info", nil)
+	cdc.RegisterConcrete(MsgCancelOrder{}, "market/cancel-order", nil)
+	cdc.RegisterConcrete(MsgCancelMarket{}, "market/cancel-market", nil)
+}
+
 // SetOrder implements token Keeper.
 func (k Keeper) SetOrder(ctx sdk.Context, order *Order) sdk.Error {
 	return NewOrderKeeper(k.marketKey, order.Symbol, k.cdc).Add(ctx, order)
+}
+
+func (k Keeper) GetAllOrders(ctx sdk.Context) []*Order {
+	return NewGlobalOrderKeeper(k.marketKey, k.cdc).GetAllOrders(ctx)
 }
 
 // SetMarket implements token Keeper.
@@ -131,53 +149,6 @@ func (k Keeper) RemoveMarket(ctx sdk.Context, symbol string) sdk.Error {
 		store.Delete(key)
 	}
 	return nil
-}
-
-// RegisterCodec registers concrete types on the codec
-func (k Keeper) RegisterCodec() {
-	RegisterCodec(k.cdc)
-}
-
-func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(Order{}, "market/order", nil)
-	cdc.RegisterConcrete(MarketInfo{}, "market/market", nil)
-	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "market/market-info", nil)
-	cdc.RegisterConcrete(MsgCreateOrder{}, "market/order-info", nil)
-	cdc.RegisterConcrete(MsgCancelOrder{}, "market/cancel-order", nil)
-	cdc.RegisterConcrete(MsgCancelMarket{}, "market/cancel-market", nil)
-}
-
-func (k Keeper) GetAllOrders(ctx sdk.Context) []*Order {
-	var orders []*Order
-	appendOrder := func(order *Order) (stop bool) {
-		orders = append(orders, order)
-		return false
-	}
-	k.IterateOrder(ctx, appendOrder)
-	return orders
-}
-
-func (k Keeper) IterateOrder(ctx sdk.Context, process func(*Order) bool) {
-	store := ctx.KVStore(k.marketKey)
-	iter := sdk.KVStorePrefixIterator(store, OrderBookKeyPrefix)
-	defer iter.Close()
-	for {
-		if !iter.Valid() {
-			return
-		}
-		or := k.decodeOrder(iter.Value())
-		if process(&or) {
-			return
-		}
-		iter.Next()
-	}
-}
-
-func (k Keeper) decodeOrder(bz []byte) (order Order) {
-	if err := k.cdc.UnmarshalBinaryBare(bz, &order); err != nil {
-		panic(err)
-	}
-	return
 }
 
 func (k Keeper) GetAllMarketInfos(ctx sdk.Context) []MarketInfo {

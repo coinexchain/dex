@@ -410,7 +410,7 @@ func (tk TokenKeeper) IterateForbiddenAddr(ctx sdk.Context, symbol string, proce
 // ExpectedAssertStatusKeeper
 
 //IsTokenForbidden - check whether the coin's owner has forbidden "denom", forbiding transmission and exchange.
-func (tk TokenKeeper) IsTokenFrozen(ctx sdk.Context, denom string) bool {
+func (tk TokenKeeper) IsTokenForbidden(ctx sdk.Context, denom string) bool {
 	token := tk.GetToken(ctx, denom)
 	if token != nil {
 		return token.GetIsForbidden()

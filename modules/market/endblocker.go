@@ -191,8 +191,8 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	ordersForUpdateList := make([]map[string]*Order, len(marketInfoList))
 	newPrices := make([]sdk.Dec, len(marketInfoList))
 	for idx, mi := range marketInfoList {
-		if keeper.axk.IsTokenFrozen(ctx, mi.Stock) ||
-			keeper.axk.IsTokenFrozen(ctx, mi.Money) {
+		if keeper.axk.IsTokenForbidden(ctx, mi.Stock) ||
+			keeper.axk.IsTokenForbidden(ctx, mi.Money) {
 			continue
 		}
 		symbol := mi.Stock + "/" + mi.Money

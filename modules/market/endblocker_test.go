@@ -38,7 +38,7 @@ type mocAssertStatusKeeper struct {
 	forbiddenAddrList        []sdk.AccAddress
 }
 
-func (k *mocAssertStatusKeeper) IsTokenFrozen(ctx sdk.Context, denom string) bool {
+func (k *mocAssertStatusKeeper) IsTokenForbidden(ctx sdk.Context, denom string) bool {
 	for _, d := range k.globalForbiddenDenomList {
 		if denom == d {
 			return true
@@ -253,7 +253,7 @@ func TestDelist(t *testing.T) {
 	}
 	for i, rec := range bnk.records {
 		if rec != records[i] {
-			t.Errorf("Incorrect Records")
+			t.Errorf("Incorrect Records, actual : %s, expect : %s", rec, records[i])
 		}
 		fmt.Printf("%s\n", rec)
 	}
