@@ -281,10 +281,10 @@ $ curl -X GET http://localhost:1317/asset/tokens
 5. 通过Rest API 发行token
 
 ```bash
-curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"from":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","chain_id":"coinexdex","sequence":"3","account_number":"0"},"name":"my first rest coin","symbol":"coin1","total_supply":"10000000000","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":true}' > unsignedSendTx.json
+curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"from":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","chain_id":"coinexdex","sequence":"3","account_number":"0"},"name":"my first rest coin","symbol":"coin1","total_supply":"10000000000","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":true}' > unsigned.json
 ```
 
-返回未签名交易存入unsignedSendTx.json
+返回未签名交易存入unsigned.json
 
 ```bash
 {
@@ -320,10 +320,10 @@ curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"fro
 ```bash
 $ cetcli tx sign \
   --chain-id=coinexdex \
-  --from=$(cetcli keys show bob -a)  unsignedSendTx.json > signedSendTx.json
+  --from=$(cetcli keys show bob -a)  unsigned.json > signed.json
 ```
 
-本地签名后将已签名交易存入signedSendTx.json
+本地签名后将已签名交易存入signed.json
 
 ```bash
 {
@@ -365,7 +365,7 @@ $ cetcli tx sign \
 7. 广播交易
 
 ```bash
-$ cetcli tx broadcast signedSendTx.json
+$ cetcli tx broadcast signed.json
 ```
 
 本地返回交易Hash
