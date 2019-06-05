@@ -159,6 +159,7 @@ paths:
   /validatorsets/latest:
     get:
       summary: Get the latest validator set
+      operationId: getLatestValidatorSets
       tags:
         - ICS0
       produces:
@@ -512,6 +513,7 @@ paths:
   /auth/accounts/{address}:
     get:
       summary: Get the account information on blockchain
+      operationId: getAccount
       tags:
         - ICS1
       produces:
@@ -539,12 +541,14 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/LockedCoin"
+                x-nullable: true
               frozen_coins:
                 type: array
                 items:
                   $ref: "#/definitions/Coin"
+                x-nullable: true
               public_key:
-                type: string
+                $ref: "#/definitions/PublicKey"
               account_number:
                 type: string
               sequence:
@@ -582,10 +586,11 @@ paths:
           description: Internal Server Error
     post:
       summary: Submit delegation
+      operationId: submitDelegation
       parameters:
         - in: body
           name: delegation
-          description: The password of the account to remove from the KMS
+          description: submit delegation to provided validator
           schema:
             type: object
             properties:
@@ -595,7 +600,7 @@ paths:
                 $ref: "#/definitions/Address"
               validator_address:
                 $ref: "#/definitions/ValidatorAddress"
-              delegation:
+              amount:
                 $ref: "#/definitions/Coin"
       tags:
         - ICS21
@@ -893,6 +898,7 @@ paths:
   /staking/validators:
     get:
       summary: Get all validator candidates. By default it returns only the bonded validators.
+      operationId: getValidators
       parameters:
         - in: query
           name: status
@@ -2479,6 +2485,16 @@ definitions:
     type: string
     description: bech32 encoded address
     example: cosmos1depk54cuajgkzea6zpgkq36tnjwdzv4afc3d27
+  PublicKey:
+    type: object
+    description: public key information
+    properties:
+      'type':
+        type: string
+        example: "tendermint/PubKeySecp256k1"
+      value:
+        type: string
+        example: "Alxik1yEXYJn3Q+vhUn+Da8X/u+aSUfLCY1CuprlHZzB"
   ValidatorAddress:
     type: string
     description: bech32 encoded address
