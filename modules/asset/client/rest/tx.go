@@ -23,6 +23,12 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/ownerships", symbol), transferOwnerRequestHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/mints", symbol), mintTokenHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/burns", symbol), burnTokenHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbids", symbol), forbidTokenHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbids", symbol), unForbidTokenHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/whitelists", symbol), addWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/whitelists", symbol), removeWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/addresses", symbol), forbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/addresses", symbol), unForbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
 // issueReq defines the properties of a issue token request's body.
@@ -171,6 +177,232 @@ func burnTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 		symbol := vars[symbol]
 
 		msg := asset.NewMsgBurnToken(symbol, req.Amount, owner)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// forbidTokenReq defines the properties of a forbid token request's body.
+type forbidTokenReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+}
+
+// forbidTokenHandlerFn - http request handler to forbid token.
+func forbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req forbidTokenReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgForbidToken(symbol, owner)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// unforbidTokenReq defines the properties of a unforbid token request's body.
+type unForbidTokenReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+}
+
+// unForbidTokenHandlerFn - http request handler to unforbid token.
+func unForbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req unForbidTokenReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgUnForbidToken(symbol, owner)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// addWhitelistReq defines the properties of a add whitelist request's body.
+type addWhitelistReq struct {
+	BaseReq   rest.BaseReq     `json:"base_req"`
+	Whitelist []sdk.AccAddress `json:"whitelist"`
+}
+
+// addWhitelistHandlerFn - http request handler to add whitelist.
+func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req addWhitelistReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgAddTokenWhitelist(symbol, owner, req.Whitelist)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// removeWhitelistReq defines the properties of a remove whitelist request's body.
+type removeWhitelistReq struct {
+	BaseReq   rest.BaseReq     `json:"base_req"`
+	Whitelist []sdk.AccAddress `json:"whitelist"`
+}
+
+// removeWhitelistHandlerFn - http request handler to add whitelist.
+func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req removeWhitelistReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgRemoveTokenWhitelist(symbol, owner, req.Whitelist)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// forbidAddrReq defines the properties of a forbid addr request's body.
+type forbidAddrReq struct {
+	BaseReq rest.BaseReq     `json:"base_req"`
+	Addr    []sdk.AccAddress `json:"addr"`
+}
+
+// forbidAddrHandlerFn - http request handler to forbid addresses.
+func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req forbidAddrReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgForbidAddr(symbol, owner, req.Addr)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// unForbidAddrReq defines the properties of a unforbid addr request's body.
+type unForbidAddrReq struct {
+	BaseReq rest.BaseReq     `json:"base_req"`
+	Addr    []sdk.AccAddress `json:"addr"`
+}
+
+// unForbidAddrHandlerFn - http request handler to unforbid addresses.
+func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req unForbidAddrReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgUnForbidAddr(symbol, owner, req.Addr)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

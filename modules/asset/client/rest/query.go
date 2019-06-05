@@ -18,16 +18,10 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, 
 }
 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, storeName string) {
-	r.HandleFunc(
-		"/asset/tokens/{symbol}",
-		QueryTokenRequestHandlerFn(storeName, cdc, cliCtx),
-	).Methods("GET")
-
-	r.HandleFunc(
-		"/asset/tokens",
-		QueryTokensRequestHandlerFn(storeName, cdc, cliCtx),
-	).Methods("GET")
-
+	r.HandleFunc("/asset/tokens/{symbol}", QueryTokenRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/asset/tokens", QueryTokensRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/asset/tokens/{symbol}/whitelist", QueryWhitelistRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/asset/tokens/{symbol}/forbidden/addresses", QueryForbiddenAddrRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 }
 
 // QueryTokenRequestHandlerFn - query assetREST Handler
@@ -75,6 +69,62 @@ func QueryTokensRequestHandlerFn(
 			return
 		}
 
+		if len(res) == 0 {
+			res = []byte("[]")
+		}
+
+		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+	}
+}
+
+// QueryWhitelistRequestHandlerFn - query assetREST Handler
+func QueryWhitelistRequestHandlerFn(
+	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		symbol := vars["symbol"]
+
+		bz, err := cdc.MarshalJSON(asset.NewQueryWhitelistParams(symbol))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryWhitelist)
+		res, err := cliCtx.QueryWithData(route, bz)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+			return
+		}
+		if len(res) == 0 {
+			res = []byte("[]")
+		}
+
+		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+	}
+}
+
+// QueryForbiddenAddrRequestHandlerFn - query assetREST Handler
+func QueryForbiddenAddrRequestHandlerFn(
+	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		symbol := vars["symbol"]
+
+		bz, err := cdc.MarshalJSON(asset.NewQueryForbiddenAddrParams(symbol))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryForbiddenAddr)
+		res, err := cliCtx.QueryWithData(route, bz)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+			return
+		}
 		if len(res) == 0 {
 			res = []byte("[]")
 		}
