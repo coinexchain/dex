@@ -147,26 +147,33 @@ func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder,
 		return err.Result()
 	}
 
-	//acc := authx.NewAccountXWithAddress(msg.Sender)
-	//GetAccountSequ
 	values := strings.Split(msg.Symbol, SymbolSeparator)
 	denom := values[0]
+	amount := msg.Quantity
 	if msg.Side == match.BUY {
 		denom = values[1]
+		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
 	}
 
 	marketInfo, err := keeper.GetMarketInfo(ctx, msg.Symbol)
-	if err != nil || msg.PricePrecision > marketInfo.PricePrecision {
+	if err != nil {
+		return ErrInvalidSymbol().Result()
+	}
+	if msg.PricePrecision > marketInfo.PricePrecision {
 		return ErrInvalidPricePrecision().Result()
 	}
 
-	coin := sdk.NewCoin(denom, calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt())
+	coin := sdk.NewCoin(denom, sdk.NewInt(amount))
 	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{coin}) {
 		return ErrInsufficientCoins().Result()
 	}
 
 	if keeper.axk.IsTokenForbidden(ctx, denom) {
-		return ErrTokenFrozenByIssuer().Result()
+		return ErrTokenForbidByIssuer().Result()
+	}
+
+	if keeper.axk.IsForbiddenByTokenIssuer(ctx, denom, msg.Sender) {
+		return sdk.NewError(CodeSpaceMarket, CodeAddressForbidByIssuer, "The sender is forbidden by token issuer").Result()
 	}
 
 	return sdk.Result{}

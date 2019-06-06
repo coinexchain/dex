@@ -18,13 +18,14 @@ const (
 	CodeInvalidTradeSide      sdk.CodeType = 128
 	CodeInvalidOrderType      sdk.CodeType = 129
 	CodeInvalidSymbol         sdk.CodeType = 130
-	CodeTokenFrozenByIssuer   sdk.CodeType = 131
+	CodeTokenForbidByIssuer   sdk.CodeType = 131
 	CodeInvalidOrderID        sdk.CodeType = 132
 	CodeMarshalFailed         sdk.CodeType = 133
 	CodeUnMarshalFailed       sdk.CodeType = 134
 	CodeNotFindOrder          sdk.CodeType = 135
 	CodeNotMatchSender        sdk.CodeType = 135
 	CodeInvalidHeight         sdk.CodeType = 136
+	CodeAddressForbidByIssuer sdk.CodeType = 137
 )
 
 func ErrTokenNoExist() sdk.Error {
@@ -79,6 +80,6 @@ func ErrInvalidSymbol() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "Invalid trade symbol")
 }
 
-func ErrTokenFrozenByIssuer() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeTokenFrozenByIssuer, "Token is frozen by the issuer")
+func ErrTokenForbidByIssuer() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeTokenForbidByIssuer, "Token is frozen by the issuer")
 }

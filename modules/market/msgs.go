@@ -119,7 +119,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidSymbol()
 	}
 
-	if msg.Price < 0 || msg.Price > asset.MaxTokenAmount {
+	if msg.Price <= 0 || msg.Price > asset.MaxTokenAmount {
 		return ErrInvalidPrice()
 	}
 
