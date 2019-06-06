@@ -399,6 +399,14 @@
             "is_forbidden": false
           }
         }
+      ],
+      "whitelists": [
+        "coin1:cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+        "coin1:cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt",
+        "coin1:cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+      ],
+      "forbid_addr": [
+        "coin1:cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt"
       ]
     },
     "market": {
