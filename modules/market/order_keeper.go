@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DecByteCount = 40
+	DecByteCount = 40 // Dec's BitLen would not be larger than 255+60, so 40 bytes are enough
 	GTE          = 3
 	IOC          = 4
 	Buy          = match.BUY
@@ -25,6 +25,7 @@ var (
 	LastOrderCleanUpDayKey = []byte{0x20}
 )
 
+// This keeper records at which day the last GTE-order-clean-up action was performed
 type OrderCleanUpDayKeeper struct {
 	marketKey sdk.StoreKey
 }
@@ -50,6 +51,7 @@ func (keeper *OrderCleanUpDayKeeper) SetDay(ctx sdk.Context, day int) {
 
 /////////////////////////////////////////////////////////////////////
 
+// OrderKeeper manages the order book of one market
 type OrderKeeper interface {
 	Add(ctx sdk.Context, order *Order) sdk.Error
 	Remove(ctx sdk.Context, order *Order) sdk.Error
@@ -59,12 +61,14 @@ type OrderKeeper interface {
 	GetSymbol() string
 }
 
+// PersistentOrderKeeper implements OrderKeeper interface with a KVStore
 type PersistentOrderKeeper struct {
 	marketKey sdk.StoreKey
 	symbol    string
 	codec     *codec.Codec
 }
 
+// Merge several byte slices into one
 func concatCopyPreAllocate(slices [][]byte) []byte {
 	var totalLen int
 	for _, s := range slices {
@@ -82,6 +86,7 @@ func (keeper *PersistentOrderKeeper) GetSymbol() string {
 	return keeper.symbol
 }
 
+// build the key for global order book
 func orderBookKey(orderID string) []byte {
 	return concatCopyPreAllocate([][]byte{
 		OrderBookKeyPrefix,
@@ -90,6 +95,7 @@ func orderBookKey(orderID string) []byte {
 	})
 }
 
+// build the key for bid list
 func (keeper *PersistentOrderKeeper) bidListKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
 		BidListKeyPrefix,
@@ -100,6 +106,7 @@ func (keeper *PersistentOrderKeeper) bidListKey(order *Order) []byte {
 	})
 }
 
+// build the key for ask list
 func (keeper *PersistentOrderKeeper) askListKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
 		AskListKeyPrefix,
@@ -110,6 +117,7 @@ func (keeper *PersistentOrderKeeper) askListKey(order *Order) []byte {
 	})
 }
 
+// build the key for order queue
 func (keeper *PersistentOrderKeeper) orderQueueKey(order *Order) []byte {
 	return concatCopyPreAllocate([][]byte{
 		OrderQueueKeyPrefix,
@@ -130,7 +138,7 @@ func NewOrderKeeper(key sdk.StoreKey, symbol string, codec *codec.Codec) OrderKe
 
 func decToBigEndianBytes(d sdk.Dec) []byte {
 	var result [DecByteCount]byte
-	bytes := d.Int.Bytes()
+	bytes := d.Int.Bytes() //  returns the absolute value of d as a big-endian byte slice.
 	for i := 1; i <= len(bytes); i++ {
 		result[DecByteCount-i] = bytes[len(bytes)-i]
 	}
@@ -146,13 +154,17 @@ func int64ToBigEndianBytes(n int64) []byte {
 }
 
 func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *Order) sdk.Error {
+	// add it to the global order book
 	store := ctx.KVStore(keeper.marketKey)
 	key := orderBookKey(order.OrderID())
 	value := keeper.codec.MustMarshalBinaryBare(order)
 	store.Set(key, value)
 
+	// add it to the local order queue
 	key = keeper.orderQueueKey(order)
 	store.Set(key, []byte{})
+
+	// add it to the local bidList and askList
 	if order.Side == match.BID {
 		key = keeper.bidListKey(order)
 		store.Set(key, []byte{})
@@ -165,6 +177,7 @@ func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *Order) sdk.Erro
 }
 
 func (keeper *PersistentOrderKeeper) Remove(ctx sdk.Context, order *Order) sdk.Error {
+	// remove it from the global order book
 	store := ctx.KVStore(keeper.marketKey)
 	if keeper.getOrder(ctx, order.OrderID()) == nil {
 		return ErrNoExistKeyInStore()
@@ -172,8 +185,11 @@ func (keeper *PersistentOrderKeeper) Remove(ctx sdk.Context, order *Order) sdk.E
 	key := orderBookKey(order.OrderID())
 	store.Delete(key)
 
+	// remove it from the local order queue
 	key = keeper.orderQueueKey(order)
 	store.Delete(key)
+
+	// remove it from the local bidList and askList
 	if order.Side == match.BID {
 		key = keeper.bidListKey(order)
 		store.Delete(key)
@@ -185,6 +201,7 @@ func (keeper *PersistentOrderKeeper) Remove(ctx sdk.Context, order *Order) sdk.E
 	return nil
 }
 
+// using the order queue, find orders which are older than a particular height
 func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64) []*Order {
 	store := ctx.KVStore(keeper.marketKey)
 	var result []*Order
@@ -207,6 +224,7 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64)
 	return result
 }
 
+// using the order queue, find orders which locate at a particular height
 func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height int64) []*Order {
 	store := ctx.KVStore(keeper.marketKey)
 	var result []*Order
@@ -230,6 +248,7 @@ func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height i
 	return result
 }
 
+// Get a order's pointer, given its ID
 func (keeper *PersistentOrderKeeper) getOrder(ctx sdk.Context, orderID string) *Order {
 	store := ctx.KVStore(keeper.marketKey)
 	key := orderBookKey(orderID)
@@ -242,6 +261,7 @@ func (keeper *PersistentOrderKeeper) getOrder(ctx sdk.Context, orderID string) *
 	return order
 }
 
+// Return the bid orders and ask orders which have proper prices and have possibilities for deal
 func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*Order {
 	store := ctx.KVStore(keeper.marketKey)
 	priceStartPos := len(keeper.symbol) + 2
@@ -306,6 +326,7 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*O
 
 ////////////////////////////////////////////////
 
+// Global order keep can lookup a order, given its ID or the prefix of its ID, i.e. the sender's address
 type GlobalOrderKeeper interface {
 	GetAllOrders(ctx sdk.Context) []*Order
 	QueryOrder(ctx sdk.Context, orderID string) *Order
@@ -337,6 +358,7 @@ func (keeper *PersistentGlobalOrderKeeper) GetOrdersFromUser(ctx sdk.Context, us
 	return result
 }
 
+// Get all the orders out. It is an expensive operation. Only use it for dumping state.
 func (keeper *PersistentGlobalOrderKeeper) GetAllOrders(ctx sdk.Context) []*Order {
 	store := ctx.KVStore(keeper.marketKey)
 	var result []*Order
