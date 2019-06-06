@@ -86,6 +86,7 @@ func TestRemoveOrders(t *testing.T) {
 	keeper.orderClean.SetDay(ctx, currDay-1)
 	parameters := Params{}
 	parameters.GTEOrderLifetime = 1
+	parameters.MaxExecutedPriceChangeRatio = MaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
 	creater1, _ := simpleAddr("10000")
@@ -155,6 +156,10 @@ func TestDelist(t *testing.T) {
 	delistKeeper.AddDelistRequest(ctx, ctx.BlockHeight(), "btc/usdt")
 	currDay := ctx.BlockHeader().Time.Day()
 	keeper.orderClean.SetDay(ctx, currDay)
+	parameters := Params{}
+	parameters.GTEOrderLifetime = 1
+	parameters.MaxExecutedPriceChangeRatio = MaxExecutedPriceChangeRatio
+	keeper.SetParams(ctx, parameters)
 
 	creater1, _ := simpleAddr("10000")
 	creater2, _ := simpleAddr("11000")

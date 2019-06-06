@@ -9,6 +9,7 @@ import (
 	"github.com/coinexchain/dex/modules/market/match"
 )
 
+// Some handlers which are useful when orders are matched and traded.
 type InfoForDeal struct {
 	bxKeeper      ExpectedBankxKeeper
 	dataHash      []byte
@@ -17,16 +18,19 @@ type InfoForDeal struct {
 	context       sdk.Context
 }
 
+// returns true when a buyer's frozen money is not enough to buy LeftStock.
 func notEnoughMoney(order *Order) bool {
 	return order.Side == match.BUY &&
 		order.Freeze < order.Price.Mul(sdk.NewDec(order.LeftStock)).RoundInt64()
 }
 
+// Wrapper an order with InfoForDeal, which contains useful handlers
 type WrappedOrder struct {
 	order       *Order
 	infoForDeal *InfoForDeal
 }
 
+// WrappedOrder implements OrderForTrade interface
 func (wo *WrappedOrder) GetPrice() sdk.Dec {
 	return wo.order.Price
 }
@@ -67,6 +71,7 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	}
 	stockAndMoney := strings.Split(buyer.Symbol, "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
+	// buyer and seller will exchange stockCoins and moneyCoins
 	stockCoins := sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(amount))}
 	moneyAmount := price.MulInt(sdk.NewInt(amount)).RoundInt64()
 	moneyCoins := sdk.Coins{sdk.NewCoin(money, sdk.NewInt(moneyAmount))}
@@ -82,15 +87,21 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	buyer.DealMoney += moneyAmount
 	seller.DealMoney += moneyAmount
 	ctx := wo.infoForDeal.context
+	// exchange the coins
 	wo.infoForDeal.bxKeeper.UnFreezeCoins(ctx, seller.Sender, stockCoins)
 	wo.infoForDeal.bxKeeper.SendCoins(ctx, seller.Sender, buyer.Sender, stockCoins)
 	wo.infoForDeal.bxKeeper.UnFreezeCoins(ctx, buyer.Sender, moneyCoins)
 	wo.infoForDeal.bxKeeper.SendCoins(ctx, buyer.Sender, seller.Sender, moneyCoins)
+
+	// record the changed orders for further processing
 	wo.infoForDeal.changedOrders[buyer.OrderID()] = buyer
 	wo.infoForDeal.changedOrders[seller.OrderID()] = seller
+
+	// record the last executed price, which will be stored in MarketInfo
 	wo.infoForDeal.lastPrice = price
 }
 
+// unfreeze an ask order's stock or a bid order's money
 func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order *Order) {
 	stockAndMoney := strings.Split(order.Symbol, "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
@@ -102,12 +113,14 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order 
 	bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 }
 
+// remove the orders whose age are older than height
 func removeOrderOlderThan(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBankxKeeper, height int64) {
 	for _, order := range orderKeeper.GetOlderThan(ctx, height) {
 		removeOrder(ctx, orderKeeper, bxKeeper, order)
 	}
 }
 
+// unfreeze the frozen token in the order and remove it from the market
 func removeOrder(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBankxKeeper, order *Order) {
 	if order.Freeze != 0 {
 		unfreezeCoinsForOrder(ctx, bxKeeper, order)
@@ -115,6 +128,7 @@ func removeOrder(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBank
 	orderKeeper.Remove(ctx, order)
 }
 
+// Iterate the candidate orders for matching, and remove the orders whose sender is forbidden by the money owner or the stock owner.
 func filterCandidates(ctx sdk.Context, asKeeper ExpectedAssertStatusKeeper, ordersIn []*Order, stock, money string) []*Order {
 	ordersOut := make([]*Order, 0, len(ordersIn))
 	for _, order := range ordersIn {
@@ -126,12 +140,12 @@ func filterCandidates(ctx sdk.Context, asKeeper ExpectedAssertStatusKeeper, orde
 	return ordersOut
 }
 
-func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Keeper, dataHash []byte, currHeight int64) (map[string]*Order, sdk.Dec) {
+func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keeper Keeper, dataHash []byte, currHeight int64) (map[string]*Order, sdk.Dec) {
 	orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
 	asKeeper := keeper.axk
 	bxKeeper := keeper.bnk
-	lowPrice := midPrice.Mul(sdk.NewDec(100 - MaxExecutedPriceChangeRatio)).Quo(sdk.NewDec(100))
-	highPrice := midPrice.Mul(sdk.NewDec(100 + MaxExecutedPriceChangeRatio)).Quo(sdk.NewDec(100))
+	lowPrice := midPrice.Mul(sdk.NewDec(int64(100 - ratio))).Quo(sdk.NewDec(100))
+	highPrice := midPrice.Mul(sdk.NewDec(int64(100 + ratio))).Quo(sdk.NewDec(100))
 
 	infoForDeal := &InfoForDeal{
 		bxKeeper:      bxKeeper,
@@ -140,10 +154,14 @@ func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Kee
 		context:       ctx,
 		lastPrice:     sdk.NewDec(0),
 	}
+
+	// from the order book, we fetch the candidate orders for matching and filter them
 	stockAndMoney := strings.Split(orderKeeper.GetSymbol(), "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	orderCandidates := orderKeeper.GetMatchingCandidates(ctx)
 	orderCandidates = filterCandidates(ctx, asKeeper, orderCandidates, stock, money)
+
+	// fill bidList and askList with wrapped orders
 	bidList := make([]match.OrderForTrade, 0, len(orderCandidates))
 	askList := make([]match.OrderForTrade, 0, len(orderCandidates))
 	for _, orderCandidate := range orderCandidates {
@@ -157,12 +175,15 @@ func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, symbol string, keeper Kee
 			askList = append(askList, wrappedOrder)
 		}
 	}
+
+	// call the match engine
 	match.Match(highPrice, midPrice, lowPrice, bidList, askList)
-	//fmt.Printf("Finished match!! height:%d\n", currHeight)
+
+	// both dealt orders and IOC order need further processing
 	ordersForUpdate := infoForDeal.changedOrders
 	for _, order := range orderKeeper.GetOrdersAtHeight(ctx, currHeight) {
-		//fmt.Printf("Orders!! %s tif:%d\n", order.OrderID(), order.TimeInForce)
 		if order.TimeInForce == IOC {
+			// if an IOC order is not included, we include it
 			if _, ok := ordersForUpdate[order.OrderID()]; !ok {
 				ordersForUpdate[order.OrderID()] = order
 			}
@@ -176,13 +197,15 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	currDay := ctx.BlockHeader().Time.Day()
 	marketInfoList := keeper.GetAllMarketInfos(ctx)
 	currHeight := ctx.BlockHeight()
+	marketParams := keeper.GetParams(ctx)
 
+	// if this is the first block of a new day, we clean the GTE order and there is no trade
+	lifeTime := marketParams.GTEOrderLifetime
 	if currDay != recordDay {
 		keeper.orderClean.SetDay(ctx, currDay)
 		for _, mi := range marketInfoList {
 			symbol := mi.Stock + "/" + mi.Money
 			orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-			lifeTime := keeper.GetParams(ctx).GTEOrderLifetime
 			removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight-int64(lifeTime))
 		}
 		return nil
@@ -191,39 +214,43 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	ordersForUpdateList := make([]map[string]*Order, len(marketInfoList))
 	newPrices := make([]sdk.Dec, len(marketInfoList))
 	for idx, mi := range marketInfoList {
+		// if a token is globally forbidden, exchange it is also impossible
 		if keeper.axk.IsTokenForbidden(ctx, mi.Stock) ||
 			keeper.axk.IsTokenForbidden(ctx, mi.Money) {
 			continue
 		}
 		symbol := mi.Stock + "/" + mi.Money
 		dataHash := ctx.BlockHeader().DataHash
-		oUpdate, newPrice := matchForMarket(ctx, mi.LastExecutedPrice, symbol, keeper, dataHash, currHeight)
-		if !newPrice.IsZero() {
-			newPrices[idx] = newPrice
-			ordersForUpdateList[idx] = oUpdate
-		}
+		ratio := marketParams.MaxExecutedPriceChangeRatio
+		oUpdate, newPrice := matchForMarket(ctx, mi.LastExecutedPrice, ratio, symbol, keeper, dataHash, currHeight)
+		newPrices[idx] = newPrice
+		ordersForUpdateList[idx] = oUpdate
 	}
 	for idx, mi := range marketInfoList {
-		if ordersForUpdateList[idx] == nil {
+		// ignore a market if there are no orders need further processing
+		if len(ordersForUpdateList[idx]) == 0 {
 			continue
 		}
 		symbol := mi.Stock + "/" + mi.Money
 		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+		// update the order book
 		for _, order := range ordersForUpdateList[idx] {
-			//fmt.Printf("orderU: %s %d\n", order.OrderID(), order.Freeze)
 			orderKeeper.Add(ctx, order)
 			if order.TimeInForce == IOC || order.LeftStock == 0 || notEnoughMoney(order) {
 				removeOrder(ctx, orderKeeper, keeper.bnk, order)
 			}
 		}
-		mi.LastExecutedPrice = newPrices[idx]
-		keeper.SetMarket(ctx, mi)
+		// if some orders dealt, update last executed price of this market
+		if !newPrices[idx].IsZero() {
+			mi.LastExecutedPrice = newPrices[idx]
+			keeper.SetMarket(ctx, mi)
+		}
 	}
 
+	// process the delist requests
 	delistKeeper := NewDelistKeeper(keeper.marketKey)
 	delistSymbols := delistKeeper.GetDelistSymbolsAtHeight(ctx, ctx.BlockHeight())
 	for _, symbol := range delistSymbols {
-		//fmt.Printf("Now delist: %s\n", symbol)
 		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
 		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight+1)
 		keeper.RemoveMarket(ctx, symbol)
