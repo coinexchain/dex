@@ -12,20 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const (
-	// ModuleName is the name of the module
-	ModuleName = "asset"
-
-	// StoreKey is string representation of the store key for asset
-	StoreKey = ModuleName
-
-	// RouterKey is the message route for asset
-	RouterKey = ModuleName
-
-	// QuerierRoute is the querier route for asset
-	QuerierRoute = ModuleName
-)
-
 var (
 	SeparateKeyPrefix   = []byte{0x3A}
 	TokenStoreKeyPrefix = []byte{0x01}
@@ -114,7 +100,7 @@ func (tk TokenKeeper) GetToken(ctx sdk.Context, symbol string) Token {
 func (tk TokenKeeper) GetAllTokens(ctx sdk.Context) []Token {
 	tokens := make([]Token, 0)
 
-	tk.IterateToken(ctx, func(token Token) (stop bool) {
+	tk.IterateTokenValue(ctx, func(token Token) (stop bool) {
 		tokens = append(tokens, token)
 		return false
 	})
@@ -123,7 +109,7 @@ func (tk TokenKeeper) GetAllTokens(ctx sdk.Context) []Token {
 }
 
 // IterateToken implements token Keeper
-func (tk TokenKeeper) IterateToken(ctx sdk.Context, process func(Token) (stop bool)) {
+func (tk TokenKeeper) IterateTokenValue(ctx sdk.Context, process func(Token) (stop bool)) {
 	store := ctx.KVStore(tk.key)
 	iter := sdk.KVStorePrefixIterator(store, TokenStoreKeyPrefix)
 	defer iter.Close()
@@ -306,6 +292,7 @@ func (tk TokenKeeper) RemoveTokenWhitelist(ctx sdk.Context, msg MsgRemoveTokenWh
 func (tk TokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddress {
 	whitelist := make([]sdk.AccAddress, 0)
 	keyPrefix := append(append(WhitelistKeyPrefix, symbol...), SeparateKeyPrefix...)
+
 	tk.IterateAddrKeys(ctx, keyPrefix, func(key []byte) (stop bool) {
 		addr := key[len(WhitelistKeyPrefix)+len(symbol)+len(SeparateKeyPrefix):]
 		whitelist = append(whitelist, addr)
@@ -372,6 +359,7 @@ func (tk TokenKeeper) UnForbidAddress(ctx sdk.Context, msg MsgUnForbidAddr) sdk.
 func (tk TokenKeeper) GetForbiddenAddr(ctx sdk.Context, symbol string) []sdk.AccAddress {
 	addresses := make([]sdk.AccAddress, 0)
 	keyPrefix := append(append(ForbidAddrKeyPrefix, symbol...), SeparateKeyPrefix...)
+
 	tk.IterateAddrKeys(ctx, keyPrefix, func(key []byte) (stop bool) {
 		addr := key[len(ForbidAddrKeyPrefix)+len(symbol)+len(SeparateKeyPrefix):]
 		addresses = append(addresses, addr)
@@ -441,6 +429,7 @@ func PrefixAddrKey(prefix []byte, symbol string, addr sdk.AccAddress) []byte {
 	return append(append(append(prefix, symbol...), SeparateKeyPrefix...), addr...)
 }
 
+// GetAllAddrKeys return [] symbol:addr
 func (tk TokenKeeper) GetAllAddrKeys(ctx sdk.Context, prefix []byte) []string {
 	res := make([]string, 0)
 	bech32PrefixAccAddr := sdk.GetConfig().GetBech32AccountAddrPrefix()
@@ -451,7 +440,7 @@ func (tk TokenKeeper) GetAllAddrKeys(ctx sdk.Context, prefix []byte) []string {
 		if err != nil {
 			panic(err)
 		}
-		s := string(key[1:i]) + bech32Addr
+		s := string(key[len(prefix):i]) + bech32Addr
 		res = append(res, s)
 		return false
 	})
@@ -460,9 +449,9 @@ func (tk TokenKeeper) GetAllAddrKeys(ctx sdk.Context, prefix []byte) []string {
 }
 
 // IterateAddrKeys implements token Keeper
-func (tk TokenKeeper) IterateAddrKeys(ctx sdk.Context, key []byte, process func(key []byte) (stop bool)) {
+func (tk TokenKeeper) IterateAddrKeys(ctx sdk.Context, prefix []byte, process func(key []byte) (stop bool)) {
 	store := ctx.KVStore(tk.key)
-	iter := sdk.KVStorePrefixIterator(store, key)
+	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 	for {
 		if !iter.Valid() {
@@ -479,14 +468,12 @@ func (tk TokenKeeper) IterateAddrKeys(ctx sdk.Context, key []byte, process func(
 func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefixKey []byte, addr string) error {
 	store := ctx.KVStore(tk.key)
 	index := strings.Index(addr, string(SeparateKeyPrefix))
-	acc := []byte(addr)[index+1:]
-	symbol := []byte(addr)[len(prefixKey)-1 : index]
 
-	accBech32, err := sdk.AccAddressFromBech32(string(acc))
+	accBech32, err := sdk.AccAddressFromBech32(string([]byte(addr)[index+1:]))
 	if err != nil {
 		return err
 	}
-	key := PrefixAddrKey(prefixKey, string(symbol), accBech32)
+	key := PrefixAddrKey(prefixKey, string([]byte(addr)[:index]), accBech32)
 	store.Set(key, []byte{})
 
 	return nil

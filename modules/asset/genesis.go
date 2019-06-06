@@ -9,16 +9,16 @@ import (
 type GenesisState struct {
 	Params     Params   `json:"params"`
 	Tokens     []Token  `json:"tokens"`
-	Whitelists []string `json:"whitelists"`
+	Whitelist  []string `json:"whitelist"`
 	ForbidAddr []string `json:"forbid_addr"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params Params, tokens []Token, whitelists []string, forbidAddr []string) GenesisState {
+func NewGenesisState(params Params, tokens []Token, whitelist []string, forbidAddr []string) GenesisState {
 	return GenesisState{
 		Params:     params,
 		Tokens:     tokens,
-		Whitelists: whitelists,
+		Whitelist:  whitelist,
 		ForbidAddr: forbidAddr,
 	}
 }
@@ -37,7 +37,7 @@ func InitGenesis(ctx sdk.Context, tk TokenKeeper, data GenesisState) {
 			panic(err)
 		}
 	}
-	for _, addr := range data.Whitelists {
+	for _, addr := range data.Whitelist {
 		if err := tk.setAddrKey(ctx, WhitelistKeyPrefix, addr); err != nil {
 			panic(err)
 		}
@@ -51,8 +51,11 @@ func InitGenesis(ctx sdk.Context, tk TokenKeeper, data GenesisState) {
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, tk TokenKeeper) GenesisState {
-	return NewGenesisState(tk.GetParams(ctx), tk.GetAllTokens(ctx),
-		tk.GetAllAddrKeys(ctx, WhitelistKeyPrefix), tk.GetAllAddrKeys(ctx, ForbidAddrKeyPrefix))
+	return NewGenesisState(
+		tk.GetParams(ctx),
+		tk.GetAllTokens(ctx),
+		tk.GetAllAddrKeys(ctx, WhitelistKeyPrefix),
+		tk.GetAllAddrKeys(ctx, ForbidAddrKeyPrefix))
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
