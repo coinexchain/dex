@@ -30,6 +30,13 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 		return bank.ErrSendDisabled(k.bk.Codespace()).Result()
 	}
 
+	for _, coin := range msg.Amount {
+		//TODO: add whitelist addr filter logic
+		if k.ask.IsForbiddenByTokenIssuer(ctx, coin.Denom, msg.FromAddress) || k.ask.IsTokenForbidden(ctx, coin.Denom) {
+			return ErrTokenForbiddenByOwner("transfer has been forbidden by token owner").Result()
+		}
+	}
+
 	fromAccount := k.ak.GetAccount(ctx, msg.FromAddress)
 	toAccount := k.ak.GetAccount(ctx, msg.ToAddress)
 

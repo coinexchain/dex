@@ -17,6 +17,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/coinexchain/dex/types"
@@ -46,7 +47,7 @@ func TestParamGetSet(t *testing.T) {
 
 	ctx, paramsKeeper := defaultContext()
 	subspace := paramsKeeper.Subspace(DefaultParamspace)
-	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{})
+	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{}, asset.TokenKeeper{})
 
 	//expect DefaultActivationFees=1
 	defaultParam := DefaultParams()

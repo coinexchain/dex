@@ -15,6 +15,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
@@ -75,6 +76,11 @@ func TestSend(t *testing.T) {
 	header := abci.Header{Height: 1}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
+	// issue cet token
+	ctx := app.NewContext(false, header)
+	issueCetmsg := asset.NewMsgIssueToken("CET", "cet", 10000000000000000, sdk.AccAddress("fromaddr"), false, false, false, false)
+	app.assetKeeper.IssueToken(ctx, issueCetmsg)
+
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
@@ -132,6 +138,11 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 	header := abci.Header{Height: 1}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
+	// issue cet token
+	ctx := app.NewContext(false, header)
+	issueCetmsg := asset.NewMsgIssueToken("CET", "cet", 10000000000000000, sdk.AccAddress("fromaddr"), false, false, false, false)
+	app.assetKeeper.IssueToken(ctx, issueCetmsg)
+
 	// deliver tx
 	coins = dex.NewCetCoins(100000000000)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
@@ -146,7 +157,7 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 	app.Commit()
 
 	// check coins
-	ctx := app.NewContext(true, abci.Header{})
+	ctx = app.NewContext(true, abci.Header{})
 	require.Equal(t, int64(10000000000-100),
 		app.accountKeeper.GetAccount(ctx, fromAddr).GetCoins().AmountOf("cet").Int64())
 }

@@ -204,11 +204,6 @@ func (app *CetChainApp) initKeepers() {
 		app.keyAccountX,
 		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 	)
-	app.bankxKeeper = bankx.NewKeeper(
-		app.paramsKeeper.Subspace(bankx.DefaultParamspace),
-		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
-		app.feeCollectionKeeper,
-	)
 	app.stakingXKeeper = stakingx.NewKeeper(
 		app.paramsKeeper.Subspace(stakingx.DefaultParamspace))
 	app.incentiveKeeper = incentive.NewKeeper(
@@ -220,6 +215,12 @@ func (app *CetChainApp) initKeepers() {
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
 		app.accountKeeper, app.feeCollectionKeeper,
 	)
+	app.bankxKeeper = bankx.NewKeeper(
+		app.paramsKeeper.Subspace(bankx.DefaultParamspace),
+		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
+		app.feeCollectionKeeper,
+		app.assetKeeper,
+	)
 	app.marketKeeper = market.NewKeeper(
 		app.keyMarket,
 		app.assetKeeper,
@@ -227,6 +228,7 @@ func (app *CetChainApp) initKeepers() {
 		app.cdc,
 		app.paramsKeeper.Subspace(market.StoreKey),
 	)
+
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {

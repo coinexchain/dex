@@ -15,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
@@ -27,6 +28,7 @@ type testInput struct {
 	bk      bank.Keeper
 	bxk     Keeper
 	axk     authx.AccountXKeeper
+	ask     asset.TokenKeeper
 	handler sdk.Handler
 }
 
@@ -39,12 +41,14 @@ func setupTestInput() testInput {
 	cdc := codec.New()
 	auth.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	asset.RegisterCodec(cdc)
 
 	authKey := sdk.NewKVStoreKey(auth.StoreKey)
 	skey := sdk.NewKVStoreKey("test")
 	tkey := sdk.NewTransientStoreKey("transient_test")
 	authxKey := sdk.NewKVStoreKey(authx.StoreKey)
 	fckKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
+	tkKey := sdk.NewKVStoreKey(asset.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
@@ -52,6 +56,7 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(authxKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(fckKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(tkKey, sdk.StoreTypeIAVL, db)
 
 	ms.LoadLatestVersion()
 
@@ -60,14 +65,19 @@ func setupTestInput() testInput {
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
 	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
-	bxkKeeper := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck)
+	ask := asset.NewKeeper(cdc, tkKey, paramsKeeper.Subspace(asset.DefaultParamspace), ak, fck)
+	bxkKeeper := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, ask)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
 	bxkKeeper.SetParam(ctx, DefaultParams())
 
+	//issue cet token
+	issueCetmsg := asset.NewMsgIssueToken("CET", "cet", 10000000000000000, sdk.AccAddress("fromaddr"), false, false, false, false)
+	ask.IssueToken(ctx, issueCetmsg)
+
 	handler := NewHandler(bxkKeeper)
-	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, handler: handler}
+	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, ask: ask, handler: handler}
 }
 
 func TestHandlerMsgSend(t *testing.T) {

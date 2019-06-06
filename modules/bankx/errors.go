@@ -10,6 +10,7 @@ const (
 	CodeInvalidActivationFee            sdk.CodeType = 113
 	CodeInvalidUnlockTime               sdk.CodeType = 114
 	CodeCetCantBeLocked                 sdk.CodeType = 115
+	CodeTokenForbiddenByOwner           sdk.CodeType = 116
 )
 
 func ErrMemoMissing() sdk.Error {
@@ -26,4 +27,8 @@ func ErrUnlockTime(msg string) sdk.Error {
 
 func ErrCetCantBeLocked(msg string) sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeCetCantBeLocked, msg)
+}
+
+func ErrTokenForbiddenByOwner(msg string) sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeTokenForbiddenByOwner, msg)
 }
