@@ -1,11 +1,13 @@
 package asset
 
 import (
+	"bytes"
 	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/tendermint/tendermint/libs/bech32"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -313,18 +315,6 @@ func (tk TokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddr
 	return whitelist
 }
 
-// GetAllWhitelists returns all whitelists in the token Keeper.
-func (tk TokenKeeper) GetAllWhitelists(ctx sdk.Context) []sdk.AccAddress {
-	whitelists := make([]sdk.AccAddress, 0)
-	tk.IterateAddrKeys(ctx, WhitelistKeyPrefix, func(key []byte) (stop bool) {
-		addr := key[len(WhitelistKeyPrefix):]
-		whitelists = append(whitelists, addr)
-		return false
-	})
-
-	return whitelists
-}
-
 // -----------------------------------------------------------------------------
 // Forbid address
 
@@ -451,6 +441,24 @@ func PrefixAddrKey(prefix []byte, symbol string, addr sdk.AccAddress) []byte {
 	return append(append(append(prefix, symbol...), SeparateKeyPrefix...), addr...)
 }
 
+func (tk TokenKeeper) GetAllAddrKeys(ctx sdk.Context, prefix []byte) []string {
+	res := make([]string, 0)
+	bech32PrefixAccAddr := sdk.GetConfig().GetBech32AccountAddrPrefix()
+
+	tk.IterateAddrKeys(ctx, prefix, func(key []byte) (stop bool) {
+		i := bytes.Index(key, SeparateKeyPrefix) + len(SeparateKeyPrefix)
+		bech32Addr, err := bech32.ConvertAndEncode(bech32PrefixAccAddr, key[i:])
+		if err != nil {
+			panic(err)
+		}
+		s := string(key[1:i]) + bech32Addr
+		res = append(res, s)
+		return false
+	})
+
+	return res
+}
+
 // IterateAddrKeys implements token Keeper
 func (tk TokenKeeper) IterateAddrKeys(ctx sdk.Context, key []byte, process func(key []byte) (stop bool)) {
 	store := ctx.KVStore(tk.key)
@@ -468,12 +476,22 @@ func (tk TokenKeeper) IterateAddrKeys(ctx sdk.Context, key []byte, process func(
 	}
 }
 
-func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefixKey []byte, addr sdk.AccAddress) {
+func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefixKey []byte, addr string) error {
 	store := ctx.KVStore(tk.key)
-	key := append(prefixKey, addr...)
+	index := strings.Index(addr, string(SeparateKeyPrefix))
+	acc := []byte(addr)[index+1:]
+	symbol := []byte(addr)[len(prefixKey)-1 : index]
+
+	accBech32, err := sdk.AccAddressFromBech32(string(acc))
+	if err != nil {
+		return err
+	}
+	key := PrefixAddrKey(prefixKey, string(symbol), accBech32)
 	store.Set(key, []byte{})
 
+	return nil
 }
+
 func (tk TokenKeeper) decodeToken(bz []byte) (token Token) {
 	if err := tk.cdc.UnmarshalBinaryBare(bz, &token); err != nil {
 		panic(err)
