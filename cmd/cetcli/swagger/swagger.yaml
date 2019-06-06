@@ -213,6 +213,7 @@ paths:
   /txs/{hash}:
     get:
       summary: Get a Tx by hash
+      operationId: getTxByHash
       tags:
         - ICS0
       produces:
@@ -272,6 +273,7 @@ paths:
         - ICS0
       summary: Broadcast a signed tx
       description: Broadcast a signed tx to a full node
+      operationId: broadcastTx
       consumes:
         - application/json
       produces:
