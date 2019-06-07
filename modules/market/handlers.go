@@ -8,7 +8,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/market/match"
-	"github.com/coinexchain/dex/types"
 )
 
 const (
@@ -21,12 +20,6 @@ const (
 )
 
 type OrderType = byte
-
-var CreateMarketSpendCet sdk.Coin
-
-func init() {
-	CreateMarketSpendCet = types.NewCetCoin(DefaultCreateMarketFee)
-}
 
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
@@ -87,7 +80,8 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 		return ErrInvalidPricePrecision().Result()
 	}
 
-	if !keeper.bnk.HasCoins(ctx, msg.Creator, sdk.Coins{CreateMarketSpendCet}) {
+	marketParams := keeper.GetParams(ctx)
+	if !keeper.bnk.HasCoins(ctx, msg.Creator, marketParams.CreateMarketFee) {
 		return ErrInsufficientCoins().Result()
 	}
 

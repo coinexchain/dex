@@ -181,6 +181,12 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	RegisterCodec(mk.cdc)
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams)
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
+
+	subspace := paramsKeeper.Subspace(StoreKey)
+	keeper := NewKeeper(keys.marketKey, ak, bk, msgCdc, subspace)
+	parameters := DefaultParams()
+	keeper.SetParams(ctx, parameters)
+
 	return testInput{ctx: ctx, mk: mk, handler: NewHandler(mk), akp: akp}
 }
 

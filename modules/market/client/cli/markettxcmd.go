@@ -53,14 +53,14 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 					"$ cetcli tx market createmarket -h")
 			}
 
-			accout, err := cliCtx.GetAccount(msg.Creator)
-			if err != nil {
-				return errors.Errorf("Not find account with the addr : %s", msg.Creator)
-			}
-
-			if !accout.GetCoins().IsAllGTE(sdk.Coins{market.CreateMarketSpendCet}) {
-				return errors.New("No have insufficient cet to create market in blockchain")
-			}
+			//TODO we must cache the fee rates locally
+			//accout, err := cliCtx.GetAccount(msg.Creator)
+			//if err != nil {
+			//	return errors.Errorf("Not find account with the addr : %s", msg.Creator)
+			//}
+			//if !accout.GetCoins().IsAllGTE(sdk.Coins{market.CreateMarketSpendCet}) {
+			//	return errors.New("No have insufficient cet to create market in blockchain")
+			//}
 
 			if err := hasTokens(cliCtx, cdc, queryRoute, msg.Stock, msg.Money); err != nil {
 				return err
