@@ -11,21 +11,28 @@ import (
 )
 
 const (
-	CreateMarketFee             = 1E11 // 1000 * 10 ^8
+	CreateMarketFee             = 1E12 // 10000 * 10 ^8
+	FixedTradeFee               = 1
 	GTEOrderLifetime            = 100
 	MaxExecutedPriceChangeRatio = 25
+	MarketFeeRatePrecision      = 4
+	MarketFeeRate               = 10 // 10/(10^4)=0.1%
 )
 
 var (
 	KeyCreateMarketFee             = []byte("CreateMarketFee")
+	KeyFixedTradeFee               = []byte("FixedTradeFee")
 	KeyGTEOrderLifetime            = []byte("GTEOrderLifetime")
 	KeyMaxExecutedPriceChangeRatio = []byte("MaxExecutedPriceChangeRatio")
+	KeyMarketFeeRate               = []byte("MarketFeeRate")
 )
 
 type Params struct {
 	CreateMarketFee             sdk.Coins `json:"create_market_fee"`
+	FixedTradeFee               sdk.Coins `json:"fixed_trade_fee"`
 	GTEOrderLifetime            int       `json:"gte_order_lifetime"`
 	MaxExecutedPriceChangeRatio int       `json:"max_executed_price_change_ratio"`
+	MarketFeeRate               int       `json:"market_fee_rate"`
 }
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
@@ -34,8 +41,10 @@ type Params struct {
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyCreateMarketFee, Value: &p.CreateMarketFee},
+		{Key: KeyFixedTradeFee, Value: &p.FixedTradeFee},
 		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
 		{Key: KeyMaxExecutedPriceChangeRatio, Value: &p.MaxExecutedPriceChangeRatio},
+		{Key: KeyMarketFeeRate, Value: &p.MarketFeeRate},
 	}
 }
 
@@ -50,8 +59,10 @@ func (p Params) Equal(p2 Params) bool {
 func DefaultParams() Params {
 	return Params{
 		types.NewCetCoins(CreateMarketFee),
+		types.NewCetCoins(FixedTradeFee),
 		GTEOrderLifetime,
 		MaxExecutedPriceChangeRatio,
+		MarketFeeRate,
 	}
 }
 
@@ -59,11 +70,14 @@ func (p *Params) ValidateGenesis() error {
 	if p.CreateMarketFee.Empty() || p.CreateMarketFee.IsAnyNegative() {
 		return fmt.Errorf("%s must be a valid sdk.Coins, is %s", KeyCreateMarketFee, p.CreateMarketFee.String())
 	}
+	if p.FixedTradeFee.Empty() || p.FixedTradeFee.IsAnyNegative() {
+		return fmt.Errorf("%s must be a valid sdk.Coins, is %s", KeyFixedTradeFee, p.FixedTradeFee.String())
+	}
 
-	if p.MaxExecutedPriceChangeRatio < 0 || p.GTEOrderLifetime < 0 {
+	if p.MaxExecutedPriceChangeRatio < 0 || p.MarketFeeRate < 0 || p.GTEOrderLifetime < 0 {
 		return fmt.Errorf("params must be positive, MaxExecutedPriceChangeRatio "+
-			": %d, GTEOrderLifetime : %d",
-			p.MaxExecutedPriceChangeRatio, p.GTEOrderLifetime)
+			": %d, MarketFeeRate: %d, GTEOrderLifetime : %d",
+			p.MaxExecutedPriceChangeRatio, p.MarketFeeRate, p.GTEOrderLifetime)
 	}
 	return nil
 }
