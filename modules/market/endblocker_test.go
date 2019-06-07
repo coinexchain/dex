@@ -86,7 +86,7 @@ func TestRemoveOrders(t *testing.T) {
 	keeper.orderClean.SetDay(ctx, currDay-1)
 	parameters := Params{}
 	parameters.GTEOrderLifetime = 1
-	parameters.MaxExecutedPriceChangeRatio = MaxExecutedPriceChangeRatio
+	parameters.MaxExecutedPriceChangeRatio = DefaultMaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
 	creater1, _ := simpleAddr("10000")
@@ -158,7 +158,7 @@ func TestDelist(t *testing.T) {
 	keeper.orderClean.SetDay(ctx, currDay)
 	parameters := Params{}
 	parameters.GTEOrderLifetime = 1
-	parameters.MaxExecutedPriceChangeRatio = MaxExecutedPriceChangeRatio
+	parameters.MaxExecutedPriceChangeRatio = DefaultMaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
 	creater1, _ := simpleAddr("10000")

@@ -11,12 +11,12 @@ import (
 )
 
 const (
-	CreateMarketFee             = 1E12 // 10000 * 10 ^8
-	FixedTradeFee               = 1
-	GTEOrderLifetime            = 100
-	MaxExecutedPriceChangeRatio = 25
-	MarketFeeRatePrecision      = 4
-	MarketFeeRate               = 10 // 10/(10^4)=0.1%
+	DefaultCreateMarketFee             = 1E12 // 10000 * 10 ^8
+	DefaultFixedTradeFee               = 1
+	DefaultGTEOrderLifetime            = 100
+	DefaultMaxExecutedPriceChangeRatio = 25
+	MarketFeeRatePrecision             = 4
+	DefaultMarketFeeRate               = 10 // 10/(10^4)=0.1%
 )
 
 var (
@@ -58,11 +58,11 @@ func (p Params) Equal(p2 Params) bool {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		types.NewCetCoins(CreateMarketFee),
-		types.NewCetCoins(FixedTradeFee),
-		GTEOrderLifetime,
-		MaxExecutedPriceChangeRatio,
-		MarketFeeRate,
+		types.NewCetCoins(DefaultCreateMarketFee),
+		types.NewCetCoins(DefaultFixedTradeFee),
+		DefaultGTEOrderLifetime,
+		DefaultMaxExecutedPriceChangeRatio,
+		DefaultMarketFeeRate,
 	}
 }
 
