@@ -227,19 +227,20 @@ func TestMinSelfDelegation(t *testing.T) {
 }
 
 func TestDelegatorShares(t *testing.T) {
+	// prepare accounts
 	valKey, valAcc := testutil.NewBaseAccount(10000, 0, 0)
 	valAddr := sdk.ValAddress(valAcc.Address)
 	del1Key, del1Acc := testutil.NewBaseAccount(10000, 1, 0)
 	del2Key, del2Acc := testutil.NewBaseAccount(10000, 2, 0)
 
+	// init app
 	app := initApp(func(genState *GenesisState) {
 		addGenesisAccounts(genState, valAcc, del1Acc, del2Acc)
 		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1)
 	})
-
 	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
 
-	// create validator
+	// create validator & self delegate 100 CET
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
 		MinSelfDelegation(1).SelfDelegation(100).
 		Build()
@@ -248,24 +249,35 @@ func TestDelegatorShares(t *testing.T) {
 	createValResult := app.Deliver(createValTx)
 	require.Equal(t, sdk.CodeOK, createValResult.Code)
 
-	// delegate1
+	// delegator1 delegate 100 CET
 	del1Msg := staking.NewMsgDelegate(del1Acc.Address, valAddr, dex.NewCetCoin(100))
 	del1Tx := testutil.NewStdTxBuilder("c1").
 		Msgs(del1Msg).Fee(1000000, 100).AccNumSeqKey(1, 0, del1Key).Build()
 	del1Result := app.Deliver(del1Tx)
 	require.Equal(t, sdk.CodeOK, del1Result.Code)
 
-	// simulate slash
+	// simulate slash (50 CET)
 	ctx := app.NewContext(false, abci.Header{Height: 1})
 	val, found := app.stakingKeeper.GetValidator(ctx, valAddr)
 	require.True(t, found)
 	val.Tokens = val.Tokens.SubRaw(50)
 	app.stakingKeeper.SetValidator(ctx, val)
 
-	// delegate2
+	// delegator2 delegate 150 CET
 	del2Msg := staking.NewMsgDelegate(del2Acc.Address, valAddr, dex.NewCetCoin(150))
 	del2Tx := testutil.NewStdTxBuilder("c1").
 		Msgs(del2Msg).Fee(1000000, 100).AccNumSeqKey(2, 0, del2Key).Build()
 	del2Result := app.Deliver(del2Tx)
 	require.Equal(t, sdk.CodeOK, del2Result.Code)
+
+	// assertions
+	val, _ = app.stakingKeeper.GetValidator(ctx, valAddr)
+	del0, _ := app.stakingKeeper.GetDelegation(ctx, valAcc.Address, valAddr)
+	del1, _ := app.stakingKeeper.GetDelegation(ctx, del1Acc.Address, valAddr)
+	del2, _ := app.stakingKeeper.GetDelegation(ctx, del2Acc.Address, valAddr)
+	require.Equal(t, sdk.NewInt(300), val.Tokens)
+	require.Equal(t, sdk.NewDec(400), val.DelegatorShares)
+	require.Equal(t, sdk.NewDec(100), del0.Shares)
+	require.Equal(t, sdk.NewDec(100), del1.Shares)
+	require.Equal(t, sdk.NewDec(200), del2.Shares)
 }
