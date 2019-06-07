@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -33,11 +34,15 @@ func newApp() *CetChainApp {
 
 func initAppWithBaseAccounts(accs ...auth.BaseAccount) *CetChainApp {
 	return initApp(func(genState *GenesisState) {
-		for _, acc := range accs {
-			genAcc := NewGenesisAccount(&acc)
-			genState.Accounts = append(genState.Accounts, genAcc)
-		}
+		addGenesisAccounts(genState, accs...)
 	})
+}
+
+func addGenesisAccounts(genState *GenesisState, accs ...auth.BaseAccount) {
+	for _, acc := range accs {
+		genAcc := NewGenesisAccount(&acc)
+		genState.Accounts = append(genState.Accounts, genAcc)
+	}
 }
 
 func initApp(cb genesisStateCallback) *CetChainApp {
@@ -222,9 +227,45 @@ func TestMinSelfDelegation(t *testing.T) {
 }
 
 func TestDelegatorShares(t *testing.T) {
-	//valKey, valAcc := testutil.NewBaseAccount(10000, 0, 0)
-	//del1Key, del1Acc := testutil.NewBaseAccount(10000, 0, 0)
-	//del2Key, del2Acc := testutil.NewBaseAccount(10000, 0, 0)
-	//
-	//app := initAppWithBaseAccounts(valAcc, del1Acc, del2Acc)
+	valKey, valAcc := testutil.NewBaseAccount(10000, 0, 0)
+	valAddr := sdk.ValAddress(valAcc.Address)
+	del1Key, del1Acc := testutil.NewBaseAccount(10000, 1, 0)
+	del2Key, del2Acc := testutil.NewBaseAccount(10000, 2, 0)
+
+	app := initApp(func(genState *GenesisState) {
+		addGenesisAccounts(genState, valAcc, del1Acc, del2Acc)
+		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1)
+	})
+
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
+
+	// create validator
+	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
+		MinSelfDelegation(1).SelfDelegation(100).
+		Build()
+	createValTx := testutil.NewStdTxBuilder("c1").
+		Msgs(createValMsg).Fee(1000000, 100).AccNumSeqKey(0, 0, valKey).Build()
+	createValResult := app.Deliver(createValTx)
+	require.Equal(t, sdk.CodeOK, createValResult.Code)
+
+	// delegate1
+	del1Msg := staking.NewMsgDelegate(del1Acc.Address, valAddr, dex.NewCetCoin(100))
+	del1Tx := testutil.NewStdTxBuilder("c1").
+		Msgs(del1Msg).Fee(1000000, 100).AccNumSeqKey(1, 0, del1Key).Build()
+	del1Result := app.Deliver(del1Tx)
+	require.Equal(t, sdk.CodeOK, del1Result.Code)
+
+	// simulate slash
+	ctx := app.NewContext(false, abci.Header{Height: 1})
+	val, found := app.stakingKeeper.GetValidator(ctx, valAddr)
+	require.True(t, found)
+	val.Tokens = val.Tokens.SubRaw(50)
+	app.stakingKeeper.SetValidator(ctx, val)
+
+	// delegate2
+	del2Msg := staking.NewMsgDelegate(del2Acc.Address, valAddr, dex.NewCetCoin(150))
+	del2Tx := testutil.NewStdTxBuilder("c1").
+		Msgs(del2Msg).Fee(1000000, 100).AccNumSeqKey(2, 0, del2Key).Build()
+	del2Result := app.Deliver(del2Tx)
+	require.Equal(t, sdk.CodeOK, del2Result.Code)
 }
