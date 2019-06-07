@@ -106,12 +106,13 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
 	}
 
+	actualPrice := sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision)))))
 	order := Order{
 		Sender:      msg.Sender,
 		Sequence:    msg.Sequence,
 		Symbol:      msg.Symbol,
 		OrderType:   msg.OrderType,
-		Price:       sdk.NewDec(msg.Price),
+		Price:       actualPrice,
 		Quantity:    msg.Quantity,
 		Side:        msg.Side,
 		TimeInForce: msg.TimeInForce,

@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -252,13 +253,24 @@ func TestDelist(t *testing.T) {
 		"send 25 cet from cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24 to cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
 		"unfreeze 28 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
 		"send 28 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz to cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+	}
+	unfreezeRecords := []string{
 		"unfreeze 40 btc at cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf",
 		"unfreeze 120 btc at cosmos1qy352eufqy352eufqy352eufqy35qqq9yynnh8",
 		"unfreeze 27 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
 	}
-	for i, rec := range bnk.records {
-		if rec != records[i] {
-			t.Errorf("Incorrect Records, actual : %s, expect : %s", rec, records[i])
+	for i, rec := range records {
+		if rec != bnk.records[i] {
+			t.Errorf("Incorrect Records, actual : %s, expect : %s", bnk.records[i], rec)
+		}
+		fmt.Printf("%s\n", rec)
+	}
+	unf := bnk.records[len(records):]
+	sort.Strings(unf)
+	sort.Strings(unfreezeRecords)
+	for i, rec := range unfreezeRecords {
+		if rec != unf[i] {
+			t.Errorf("Incorrect Records, actual : %s, expect : %s", unf[i], rec)
 		}
 		fmt.Printf("%s\n", rec)
 	}

@@ -7,6 +7,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
+	"math"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -361,8 +362,10 @@ func assemblyOrderID(addr sdk.AccAddress, seq uint64) string {
 }
 
 func isSameOrderAndMsg(order *Order, msg MsgCreateOrder) bool {
+	p := sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision)))))
+	samePrice := order.Price.Equal(p)
 	return bytes.Equal(order.Sender, msg.Sender) && order.Sequence == msg.Sequence &&
-		order.Symbol == msg.Symbol && order.OrderType == msg.OrderType && order.Price.Equal(sdk.NewDec(msg.Price)) &&
+		order.Symbol == msg.Symbol && order.OrderType == msg.OrderType && samePrice &&
 		order.Quantity == msg.Quantity && order.Side == msg.Side && order.TimeInForce == msg.TimeInForce
 }
 
