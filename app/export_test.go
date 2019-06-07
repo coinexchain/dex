@@ -21,12 +21,12 @@ func TestExportRestore(t *testing.T) {
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
 
 	// export
-	app1 := initApp(acc, nil)
+	app1 := initAppWithBaseAccounts(acc)
 	ctx1 := app1.NewContext(false, abci.Header{Height: app1.LastBlockHeight()})
 	genState1 := app1.exportGenesisState(ctx1)
 
 	// restore & reexport
-	app2 := initApp(acc, func(genState *GenesisState) {
+	app2 := initApp(func(genState *GenesisState) {
 		*genState = genState1
 	})
 	ctx2 := app2.NewContext(false, abci.Header{Height: app2.LastBlockHeight()})
@@ -45,7 +45,7 @@ func TestExportGenesisState(t *testing.T) {
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
 
 	// app
-	app := initApp(acc, nil)
+	app := initAppWithBaseAccounts(acc)
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	accx := authx.AccountX{
@@ -74,7 +74,7 @@ func TestExportDefaultAccountXState(t *testing.T) {
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
 
 	// app
-	app := initApp(acc, nil)
+	app := initAppWithBaseAccounts(acc)
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	state := app.exportGenesisState(ctx)

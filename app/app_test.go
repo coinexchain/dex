@@ -31,13 +31,20 @@ func newApp() *CetChainApp {
 	return NewCetChainApp(logger, db, nil, true, 10000)
 }
 
-func initApp(acc auth.BaseAccount, cb genesisStateCallback) *CetChainApp {
+func initAppWithBaseAccounts(accs ...auth.BaseAccount) *CetChainApp {
+	return initApp(func(genState *GenesisState) {
+		for _, acc := range accs {
+			genAcc := NewGenesisAccount(&acc)
+			genState.Accounts = append(genState.Accounts, genAcc)
+		}
+	})
+}
+
+func initApp(cb genesisStateCallback) *CetChainApp {
 	app := newApp()
 
 	// genesis state
 	genState := NewDefaultGenesisState()
-	genAcc := NewGenesisAccount(&acc)
-	genState.Accounts = append(genState.Accounts, genAcc)
 	if cb != nil {
 		cb(&genState)
 	}
@@ -70,7 +77,7 @@ func TestSend(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
-	app := initApp(acc0, nil)
+	app := initAppWithBaseAccounts(acc0)
 
 	// begin block
 	header := abci.Header{Height: 1}
@@ -103,7 +110,7 @@ func TestMemo(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
 
 	// app
-	app := initApp(acc0, nil)
+	app := initAppWithBaseAccounts(acc0)
 
 	// begin block
 	header := abci.Header{Height: 1}
@@ -132,7 +139,7 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
-	app := initApp(acc0, nil)
+	app := initAppWithBaseAccounts(acc0)
 
 	// begin block
 	header := abci.Header{Height: 1}
@@ -169,7 +176,7 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
-	app := initApp(acc0, nil)
+	app := initAppWithBaseAccounts(acc0)
 
 	// begin block
 	header := abci.Header{Height: 1}
@@ -193,7 +200,8 @@ func TestMinSelfDelegation(t *testing.T) {
 	val0 := sdk.ValAddress(addr0)
 
 	// init app
-	app := initApp(acc0, func(genState *GenesisState) {
+	app := initApp(func(genState *GenesisState) {
+		genState.Accounts = append(genState.Accounts, NewGenesisAccountI(&acc0))
 		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(500)
 	})
 
@@ -211,4 +219,12 @@ func TestMinSelfDelegation(t *testing.T) {
 	result := app.Deliver(tx)
 	//require.Nil(t, result.Codespace)
 	require.Equal(t, stakingx.CodeMinSelfDelegationBelowRequired, result.Code)
+}
+
+func TestDelegatorShares(t *testing.T) {
+	//valKey, valAcc := testutil.NewBaseAccount(10000, 0, 0)
+	//del1Key, del1Acc := testutil.NewBaseAccount(10000, 0, 0)
+	//del2Key, del2Acc := testutil.NewBaseAccount(10000, 0, 0)
+	//
+	//app := initAppWithBaseAccounts(valAcc, del1Acc, del2Acc)
 }

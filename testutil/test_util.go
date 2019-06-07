@@ -9,6 +9,9 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 type TestCase struct {
@@ -36,4 +39,16 @@ func KeyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
 
 func ToAccAddress(addr string) sdk.AccAddress {
 	return sdk.AccAddress([]byte(addr))
+}
+
+func NewBaseAccount(cet int64, accNum, seq uint64) (crypto.PrivKey, auth.BaseAccount) {
+	key, pubKey, addr := KeyPubAddr()
+	acc := auth.BaseAccount{
+		Address:       addr,
+		Coins:         dex.NewCetCoins(cet),
+		PubKey:        pubKey,
+		AccountNumber: accNum,
+		Sequence:      seq,
+	}
+	return key, acc
 }
