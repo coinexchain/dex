@@ -12,21 +12,18 @@ import (
 
 const (
 	CreateMarketFee             = 1E11 // 1000 * 10 ^8
-	FilterStaleOrderInterval    = 10
 	GTEOrderLifetime            = 100
 	MaxExecutedPriceChangeRatio = 25
 )
 
 var (
 	KeyCreateMarketFee             = []byte("CreateMarketFee")
-	KeyFilterStaleOrderInterval    = []byte("FilterStaleOrderInterval")
 	KeyGTEOrderLifetime            = []byte("GTEOrderLifetime")
 	KeyMaxExecutedPriceChangeRatio = []byte("MaxExecutedPriceChangeRatio")
 )
 
 type Params struct {
 	CreateMarketFee             sdk.Coins `json:"create_market_fee"`
-	FilterStaleOrderInterval    int       `json:"filter_stale_order_interval"`
 	GTEOrderLifetime            int       `json:"gte_order_lifetime"`
 	MaxExecutedPriceChangeRatio int       `json:"max_executed_price_change_ratio"`
 }
@@ -37,7 +34,6 @@ type Params struct {
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyCreateMarketFee, Value: &p.CreateMarketFee},
-		{Key: KeyFilterStaleOrderInterval, Value: &p.FilterStaleOrderInterval},
 		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
 		{Key: KeyMaxExecutedPriceChangeRatio, Value: &p.MaxExecutedPriceChangeRatio},
 	}
@@ -54,7 +50,6 @@ func (p Params) Equal(p2 Params) bool {
 func DefaultParams() Params {
 	return Params{
 		types.NewCetCoins(CreateMarketFee),
-		FilterStaleOrderInterval,
 		GTEOrderLifetime,
 		MaxExecutedPriceChangeRatio,
 	}
@@ -65,10 +60,10 @@ func (p *Params) ValidateGenesis() error {
 		return fmt.Errorf("%s must be a valid sdk.Coins, is %s", KeyCreateMarketFee, p.CreateMarketFee.String())
 	}
 
-	if p.MaxExecutedPriceChangeRatio < 0 || p.GTEOrderLifetime < 0 || p.FilterStaleOrderInterval < 0 {
+	if p.MaxExecutedPriceChangeRatio < 0 || p.GTEOrderLifetime < 0 {
 		return fmt.Errorf("params must be positive, MaxExecutedPriceChangeRatio "+
-			": %d, GTEOrderLifetime : %d, FilterStaleOrderInterval : %d ",
-			p.MaxExecutedPriceChangeRatio, p.GTEOrderLifetime, p.MaxExecutedPriceChangeRatio)
+			": %d, GTEOrderLifetime : %d",
+			p.MaxExecutedPriceChangeRatio, p.GTEOrderLifetime)
 	}
 	return nil
 }
