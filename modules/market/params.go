@@ -12,11 +12,11 @@ import (
 
 const (
 	DefaultCreateMarketFee             = 1E12 // 10000 * 10 ^8
-	DefaultFixedTradeFee               = 1
+	DefaultFixedTradeFee               = 0
 	DefaultGTEOrderLifetime            = 100
 	DefaultMaxExecutedPriceChangeRatio = 25
 	MarketFeeRatePrecision             = 4
-	DefaultMarketFeeRate               = 10 // 10/(10^4)=0.1%
+	DefaultMarketFeeRate               = 0
 )
 
 var (
@@ -29,10 +29,10 @@ var (
 
 type Params struct {
 	CreateMarketFee             sdk.Coins `json:"create_market_fee"`
-	FixedTradeFee               sdk.Coins `json:"fixed_trade_fee"`
+	FixedTradeFee               int64 `json:"fixed_trade_fee"`
 	GTEOrderLifetime            int       `json:"gte_order_lifetime"`
 	MaxExecutedPriceChangeRatio int       `json:"max_executed_price_change_ratio"`
-	MarketFeeRate               int       `json:"market_fee_rate"`
+	MarketFeeRate               int64     `json:"market_fee_rate"`
 }
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
@@ -59,7 +59,7 @@ func (p Params) Equal(p2 Params) bool {
 func DefaultParams() Params {
 	return Params{
 		types.NewCetCoins(DefaultCreateMarketFee),
-		types.NewCetCoins(DefaultFixedTradeFee),
+		DefaultFixedTradeFee,
 		DefaultGTEOrderLifetime,
 		DefaultMaxExecutedPriceChangeRatio,
 		DefaultMarketFeeRate,
@@ -70,8 +70,8 @@ func (p *Params) ValidateGenesis() error {
 	if p.CreateMarketFee.Empty() || p.CreateMarketFee.IsAnyNegative() {
 		return fmt.Errorf("%s must be a valid sdk.Coins, is %s", KeyCreateMarketFee, p.CreateMarketFee.String())
 	}
-	if p.FixedTradeFee.Empty() || p.FixedTradeFee.IsAnyNegative() {
-		return fmt.Errorf("%s must be a valid sdk.Coins, is %s", KeyFixedTradeFee, p.FixedTradeFee.String())
+	if p.FixedTradeFee<=0 {
+		return fmt.Errorf("%s must be a valid sdk.Coins, is %d", KeyFixedTradeFee, p.FixedTradeFee)
 	}
 
 	if p.MaxExecutedPriceChangeRatio < 0 || p.MarketFeeRate < 0 || p.GTEOrderLifetime < 0 {

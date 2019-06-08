@@ -107,6 +107,26 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
 	}
 
+	stockSepCet := denom+SymbolSeparator+"cet"
+	marketInfo, ok := keeper.GetMarketInfo(ctx, stockSepCet)
+	marketParams := keeper.GetParams(ctx)
+	var frozenFee int64
+	if ok!=nil {
+		frozenFee=marketParams.FixedTradeFee
+	} else {
+		totalPriceInCet:=marketInfo.LastExecutedPrice.Mul(sdk.NewDec(msg.Quantity))
+		rate:=sdk.NewDec(marketParams.MarketFeeRate)
+		div:=sdk.NewDec(int64(math.Pow10(MarketFeeRatePrecision)))
+		frozenFee=totalPriceInCet.Mul(rate).Quo(div).RoundInt64()
+	}
+	var frozenFeeAsCet sdk.Coins
+	if frozenFee!=0 {
+		frozenFeeAsCet = sdk.Coins{sdk.NewCoin("cet",sdk.NewInt(frozenFee))}
+		if !keeper.bnk.HasCoins(ctx, msg.Sender, frozenFeeAsCet) {
+			return ErrInsufficientCoins().Result()
+		}
+	}
+
 	actualPrice := sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision)))))
 	order := Order{
 		Sender:      msg.Sender,
@@ -118,6 +138,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		Side:        msg.Side,
 		TimeInForce: msg.TimeInForce,
 		Height:      ctx.BlockHeight(),
+		FrozenFee:   frozenFee,
 		LeftStock:   msg.Quantity,
 		Freeze:      amount,
 		DealMoney:   0,
@@ -133,6 +154,12 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 	if err := keeper.bnk.FreezeCoins(ctx, order.Sender, sdk.Coins{coin}); err != nil {
 		// Here must be panic. Because the order has been store in the database, but deduction of failure.
 		panic(err)
+	}
+	if frozenFee!=0 {
+		if err := keeper.bnk.FreezeCoins(ctx, order.Sender, frozenFeeAsCet); err != nil {
+			// Here must be panic. Because the order has been store in the database, but deduction of failure.
+			panic(err)
+		}
 	}
 
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
