@@ -29,7 +29,7 @@ var (
 
 type Params struct {
 	CreateMarketFee             sdk.Coins `json:"create_market_fee"`
-	FixedTradeFee               int64 `json:"fixed_trade_fee"`
+	FixedTradeFee               int64     `json:"fixed_trade_fee"`
 	GTEOrderLifetime            int       `json:"gte_order_lifetime"`
 	MaxExecutedPriceChangeRatio int       `json:"max_executed_price_change_ratio"`
 	MarketFeeRate               int64     `json:"market_fee_rate"`
@@ -70,7 +70,7 @@ func (p *Params) ValidateGenesis() error {
 	if p.CreateMarketFee.Empty() || p.CreateMarketFee.IsAnyNegative() {
 		return fmt.Errorf("%s must be a valid sdk.Coins, is %s", KeyCreateMarketFee, p.CreateMarketFee.String())
 	}
-	if p.FixedTradeFee<=0 {
+	if p.FixedTradeFee <= 0 {
 		return fmt.Errorf("%s must be a valid sdk.Coins, is %d", KeyFixedTradeFee, p.FixedTradeFee)
 	}
 

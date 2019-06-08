@@ -111,6 +111,12 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order 
 	}
 	coins := sdk.Coins([]sdk.Coin{sdk.NewCoin(frozenToken, sdk.NewInt(order.Freeze))})
 	bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
+	if order.FrozenFee!=0 {
+		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin("cet", sdk.NewInt(order.FrozenFee))})
+		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
+		//actualFee:=sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity))
+		//TODO deduct actualFee from order.Sender
+	}
 }
 
 // remove the orders whose age are older than height
