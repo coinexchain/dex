@@ -16,7 +16,8 @@ const (
 	LimitOrder             OrderType = 2
 	SymbolSeparator                  = "/"
 
-	MinEffectHeight = 10000
+	MinEffectHeight  = 10000
+	ExtraFrozenMoney = 0 //100
 )
 
 type OrderType = byte
@@ -244,7 +245,8 @@ func checkMsgCancelMarket(keeper Keeper, msg MsgCancelMarket, ctx sdk.Context) s
 
 func calculateAmount(price, quantity int64, pricePrecision byte) sdk.Dec {
 	actualPrice := sdk.NewDec(price).Quo(sdk.NewDec(int64(math.Pow10(int(pricePrecision)))))
-	return actualPrice.Mul(sdk.NewDec(quantity))
+	money := actualPrice.Mul(sdk.NewDec(quantity))
+	return money.Add(sdk.NewDec(ExtraFrozenMoney))
 }
 
 func marketStoreKey(prefix []byte, params ...string) []byte {
