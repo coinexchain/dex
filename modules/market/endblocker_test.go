@@ -67,7 +67,7 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 	order := newTO("00001", 1, 11051, 50, Buy, GTE, 998)
 	order.Freeze = 50
 	ctx, _ := newContextAndMarketKey()
-	unfreezeCoinsForOrder(ctx, bxKeeper, order)
+	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0)
 	refout := "unfreeze 50 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
 	if refout != bxKeeper.records[0] {
 		t.Errorf("Error in unfreezeCoinsForOrder")

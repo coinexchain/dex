@@ -120,6 +120,9 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 			frozenFee = totalPriceInCet.Mul(rate).Quo(div).RoundInt64()
 		}
 	}
+	if frozenFee < marketParams.MarketFeeMin {
+		return ErrOrderQuantityToSmall().Result()
+	}
 	var frozenFeeAsCet sdk.Coins
 	if frozenFee != 0 {
 		frozenFeeAsCet = sdk.Coins{sdk.NewCoin("cet", sdk.NewInt(frozenFee))}
@@ -218,8 +221,9 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 		return sdk.NewError(StoreKey, CodeNotMatchSender, "The cancel addr is not match order sender").Result()
 	}
 
+	marketParams := keeper.GetParams(ctx)
 	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
-	removeOrder(ctx, ork, keeper.bnk, order)
+	removeOrder(ctx, ork, keeper.bnk, order, marketParams.FeeForZeroDeal)
 
 	return sdk.Result{}
 }

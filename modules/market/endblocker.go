@@ -102,7 +102,7 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 }
 
 // unfreeze an ask order's stock or a bid order's money
-func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order *Order) {
+func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order *Order, feeForZeroDeal int64) {
 	stockAndMoney := strings.Split(order.Symbol, "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	frozenToken := stock
@@ -115,21 +115,24 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order 
 		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin("cet", sdk.NewInt(order.FrozenFee))})
 		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 		//actualFee:=sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity))
+		//if order.DealStock==0 {
+		//	actualFee=FeeForZeroDeal
+		//}
 		//TODO deduct actualFee from order.Sender
 	}
 }
 
 // remove the orders whose age are older than height
-func removeOrderOlderThan(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBankxKeeper, height int64) {
+func removeOrderOlderThan(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBankxKeeper, height int64, feeForZeroDeal int64) {
 	for _, order := range orderKeeper.GetOlderThan(ctx, height) {
-		removeOrder(ctx, orderKeeper, bxKeeper, order)
+		removeOrder(ctx, orderKeeper, bxKeeper, order, feeForZeroDeal)
 	}
 }
 
 // unfreeze the frozen token in the order and remove it from the market
-func removeOrder(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBankxKeeper, order *Order) {
-	if order.Freeze != 0 {
-		unfreezeCoinsForOrder(ctx, bxKeeper, order)
+func removeOrder(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBankxKeeper, order *Order, feeForZeroDeal int64) {
+	if order.Freeze != 0 || order.FrozenFee != 0 {
+		unfreezeCoinsForOrder(ctx, bxKeeper, order, feeForZeroDeal)
 	}
 	orderKeeper.Remove(ctx, order)
 }
@@ -212,7 +215,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		for _, mi := range marketInfoList {
 			symbol := mi.Stock + "/" + mi.Money
 			orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-			removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight-int64(lifeTime))
+			removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight-int64(lifeTime), marketParams.FeeForZeroDeal)
 		}
 		return nil
 	}
@@ -243,7 +246,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		for _, order := range ordersForUpdateList[idx] {
 			orderKeeper.Add(ctx, order)
 			if order.TimeInForce == IOC || order.LeftStock == 0 || notEnoughMoney(order) {
-				removeOrder(ctx, orderKeeper, keeper.bnk, order)
+				removeOrder(ctx, orderKeeper, keeper.bnk, order, marketParams.FeeForZeroDeal)
 			}
 		}
 		// if some orders dealt, update last executed price of this market
@@ -258,7 +261,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	delistSymbols := delistKeeper.GetDelistSymbolsAtHeight(ctx, ctx.BlockHeight())
 	for _, symbol := range delistSymbols {
 		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight+1)
+		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, currHeight+1, marketParams.FeeForZeroDeal)
 		keeper.RemoveMarket(ctx, symbol)
 	}
 	delistKeeper.RemoveDelistRequestsAtHeight(ctx, ctx.BlockHeight())

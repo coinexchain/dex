@@ -17,6 +17,8 @@ const (
 	DefaultMaxExecutedPriceChangeRatio = 25
 	MarketFeeRatePrecision             = 4
 	DefaultMarketFeeRate               = 0
+	DefaultMarketFeeMin                = 0
+	DefaultFeeForZeroDeal              = 0
 )
 
 var (
@@ -25,6 +27,8 @@ var (
 	KeyGTEOrderLifetime            = []byte("GTEOrderLifetime")
 	KeyMaxExecutedPriceChangeRatio = []byte("MaxExecutedPriceChangeRatio")
 	KeyMarketFeeRate               = []byte("MarketFeeRate")
+	KeyMarketFeeMin                = []byte("MarketFeeMin")
+	KeyFeeForZeroDeal              = []byte("FeeForZeroDeal")
 )
 
 type Params struct {
@@ -33,6 +37,8 @@ type Params struct {
 	GTEOrderLifetime            int       `json:"gte_order_lifetime"`
 	MaxExecutedPriceChangeRatio int       `json:"max_executed_price_change_ratio"`
 	MarketFeeRate               int64     `json:"market_fee_rate"`
+	MarketFeeMin                int64     `json:"market_fee_min"`
+	FeeForZeroDeal              int64     `json:"fee_for_zero_deal"`
 }
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
@@ -45,6 +51,8 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
 		{Key: KeyMaxExecutedPriceChangeRatio, Value: &p.MaxExecutedPriceChangeRatio},
 		{Key: KeyMarketFeeRate, Value: &p.MarketFeeRate},
+		{Key: KeyMarketFeeMin, Value: &p.MarketFeeMin},
+		{Key: KeyFeeForZeroDeal, Value: &p.FeeForZeroDeal},
 	}
 }
 
@@ -63,6 +71,8 @@ func DefaultParams() Params {
 		DefaultGTEOrderLifetime,
 		DefaultMaxExecutedPriceChangeRatio,
 		DefaultMarketFeeRate,
+		DefaultMarketFeeMin,
+		DefaultFeeForZeroDeal,
 	}
 }
 
@@ -70,14 +80,14 @@ func (p *Params) ValidateGenesis() error {
 	if p.CreateMarketFee.Empty() || p.CreateMarketFee.IsAnyNegative() {
 		return fmt.Errorf("%s must be a valid sdk.Coins, is %s", KeyCreateMarketFee, p.CreateMarketFee.String())
 	}
-	if p.FixedTradeFee <= 0 {
+	if p.FixedTradeFee < 0 {
 		return fmt.Errorf("%s must be a valid sdk.Coins, is %d", KeyFixedTradeFee, p.FixedTradeFee)
 	}
 
-	if p.MaxExecutedPriceChangeRatio < 0 || p.MarketFeeRate < 0 || p.GTEOrderLifetime < 0 {
+	if p.MaxExecutedPriceChangeRatio < 0 || p.MarketFeeRate < 0 || p.MarketFeeMin < 0 || p.FeeForZeroDeal < 0 || p.GTEOrderLifetime < 0 {
 		return fmt.Errorf("params must be positive, MaxExecutedPriceChangeRatio "+
-			": %d, MarketFeeRate: %d, GTEOrderLifetime : %d",
-			p.MaxExecutedPriceChangeRatio, p.MarketFeeRate, p.GTEOrderLifetime)
+			": %d, MarketFeeRate: %d, MarketFeeMin: %d, FeeForZeroDeal: %d, GTEOrderLifetime : %d",
+			p.MaxExecutedPriceChangeRatio, p.MarketFeeRate, p.MarketFeeMin, p.FeeForZeroDeal, p.GTEOrderLifetime)
 	}
 	return nil
 }

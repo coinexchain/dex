@@ -26,6 +26,7 @@ const (
 	CodeNotMatchSender        sdk.CodeType = 135
 	CodeInvalidHeight         sdk.CodeType = 136
 	CodeAddressForbidByIssuer sdk.CodeType = 137
+	CodeOrderQuantityToSmall  sdk.CodeType = 138
 )
 
 func ErrTokenNoExist() sdk.Error {
@@ -82,4 +83,8 @@ func ErrInvalidSymbol() sdk.Error {
 
 func ErrTokenForbidByIssuer() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeTokenForbidByIssuer, "Token is frozen by the issuer")
+}
+
+func ErrOrderQuantityToSmall() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityToSmall, "the order's quantity is too small")
 }
