@@ -111,7 +111,7 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order 
 	}
 	coins := sdk.Coins([]sdk.Coin{sdk.NewCoin(frozenToken, sdk.NewInt(order.Freeze))})
 	bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
-	if order.FrozenFee!=0 {
+	if order.FrozenFee != 0 {
 		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin("cet", sdk.NewInt(order.FrozenFee))})
 		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 		//actualFee:=sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity))
@@ -146,7 +146,7 @@ func filterCandidates(ctx sdk.Context, asKeeper ExpectedAssertStatusKeeper, orde
 	return ordersOut
 }
 
-func matchForMarket(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keeper Keeper, dataHash []byte, currHeight int64) (map[string]*Order, sdk.Dec) {
+func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keeper Keeper, dataHash []byte, currHeight int64) (map[string]*Order, sdk.Dec) {
 	orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
 	asKeeper := keeper.axk
 	bxKeeper := keeper.bnk
@@ -228,7 +228,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		symbol := mi.Stock + "/" + mi.Money
 		dataHash := ctx.BlockHeader().DataHash
 		ratio := marketParams.MaxExecutedPriceChangeRatio
-		oUpdate, newPrice := matchForMarket(ctx, mi.LastExecutedPrice, ratio, symbol, keeper, dataHash, currHeight)
+		oUpdate, newPrice := runMatch(ctx, mi.LastExecutedPrice, ratio, symbol, keeper, dataHash, currHeight)
 		newPrices[idx] = newPrice
 		ordersForUpdateList[idx] = oUpdate
 	}

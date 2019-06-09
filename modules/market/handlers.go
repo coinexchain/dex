@@ -95,29 +95,30 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		return ErrNoStoreEngine().Result()
 	}
 
-	if ret := checkMsgCreateOrder(ctx, store, msg, keeper); !ret.IsOK() {
-		return ret
-	}
-
 	values := strings.Split(msg.Symbol, SymbolSeparator)
-	denom := values[0]
+	stock, money := values[0], values[1]
+	denom := stock
 	amount := msg.Quantity
 	if msg.Side == match.BUY {
-		denom = values[1]
+		denom = money
 		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
 	}
 
-	stockSepCet := denom + SymbolSeparator + "cet"
-	marketInfo, ok := keeper.GetMarketInfo(ctx, stockSepCet)
-	marketParams := keeper.GetParams(ctx)
 	var frozenFee int64
-	if ok != nil {
-		frozenFee = marketParams.FixedTradeFee
+	marketParams := keeper.GetParams(ctx)
+	rate := sdk.NewDec(marketParams.MarketFeeRate)
+	div := sdk.NewDec(int64(math.Pow10(MarketFeeRatePrecision)))
+	if stock == "cet" {
+		frozenFee = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).RoundInt64()
 	} else {
-		totalPriceInCet := marketInfo.LastExecutedPrice.Mul(sdk.NewDec(msg.Quantity))
-		rate := sdk.NewDec(marketParams.MarketFeeRate)
-		div := sdk.NewDec(int64(math.Pow10(MarketFeeRatePrecision)))
-		frozenFee = totalPriceInCet.Mul(rate).Quo(div).RoundInt64()
+		stockSepCet := stock + SymbolSeparator + "cet"
+		marketInfo, ok := keeper.GetMarketInfo(ctx, stockSepCet)
+		if ok != nil || marketInfo.LastExecutedPrice.IsZero() {
+			frozenFee = marketParams.FixedTradeFee
+		} else {
+			totalPriceInCet := marketInfo.LastExecutedPrice.Mul(sdk.NewDec(msg.Quantity))
+			frozenFee = totalPriceInCet.Mul(rate).Quo(div).RoundInt64()
+		}
 	}
 	var frozenFeeAsCet sdk.Coins
 	if frozenFee != 0 {
@@ -125,6 +126,19 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		if !keeper.bnk.HasCoins(ctx, msg.Sender, frozenFeeAsCet) {
 			return ErrInsufficientCoins().Result()
 		}
+	}
+
+	totalAmount := amount
+	if stock == "cet" && msg.Side == match.SELL {
+		totalAmount += frozenFee
+	}
+	coin := sdk.NewCoin(denom, sdk.NewInt(totalAmount))
+	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{coin}) {
+		return ErrInsufficientCoins().Result()
+	}
+
+	if ret := checkMsgCreateOrder(ctx, store, msg, keeper, stock, money); !ret.IsOK() {
+		return ret
 	}
 
 	actualPrice := sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision)))))
@@ -150,7 +164,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		return err.Result()
 	}
 
-	coin := sdk.NewCoin(denom, sdk.NewInt(amount))
+	coin = sdk.NewCoin(denom, sdk.NewInt(amount))
 	if err := keeper.bnk.FreezeCoins(ctx, order.Sender, sdk.Coins{coin}); err != nil {
 		// Here must be panic. Because the order has been store in the database, but deduction of failure.
 		panic(err)
@@ -165,17 +179,9 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
 
-func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder, keeper Keeper) sdk.Result {
+func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder, keeper Keeper, stock, money string) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
-	}
-
-	values := strings.Split(msg.Symbol, SymbolSeparator)
-	denom := values[0]
-	amount := msg.Quantity
-	if msg.Side == match.BUY {
-		denom = values[1]
-		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
 	}
 
 	marketInfo, err := keeper.GetMarketInfo(ctx, msg.Symbol)
@@ -186,16 +192,11 @@ func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder,
 		return ErrInvalidPricePrecision().Result()
 	}
 
-	coin := sdk.NewCoin(denom, sdk.NewInt(amount))
-	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{coin}) {
-		return ErrInsufficientCoins().Result()
-	}
-
-	if keeper.axk.IsTokenForbidden(ctx, denom) {
+	if keeper.axk.IsTokenForbidden(ctx, stock) || keeper.axk.IsTokenForbidden(ctx, money) {
 		return ErrTokenForbidByIssuer().Result()
 	}
 
-	if keeper.axk.IsForbiddenByTokenIssuer(ctx, denom, msg.Sender) {
+	if keeper.axk.IsForbiddenByTokenIssuer(ctx, stock, msg.Sender) || keeper.axk.IsForbiddenByTokenIssuer(ctx, money, msg.Sender) {
 		return sdk.NewError(CodeSpaceMarket, CodeAddressForbidByIssuer, "The sender is forbidden by token issuer").Result()
 	}
 
@@ -218,19 +219,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 	}
 
 	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
-	if err := ork.Remove(ctx, order); err != nil {
-		return err.Result()
-	}
-
-	values := strings.Split(order.Symbol, SymbolSeparator)
-	denom := values[0]
-	if order.Side == match.BUY {
-		denom = values[1]
-	}
-	coin := sdk.NewCoin(denom, sdk.NewInt(order.Freeze))
-	if err := keeper.bnk.UnFreezeCoins(ctx, order.Sender, sdk.Coins{coin}); err != nil {
-		panic(err)
-	}
+	removeOrder(ctx, ork, keeper.bnk, order)
 
 	return sdk.Result{}
 }
