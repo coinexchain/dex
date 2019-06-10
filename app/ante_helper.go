@@ -52,8 +52,3 @@ func (ah anteHelper) checkMinSelfDelegation(ctx sdk.Context, actual sdk.Int) sdk
 	}
 	return nil
 }
-
-func (ah anteHelper) GasFee(msg sdk.Msg) sdk.Coins {
-	// TODO
-	return nil
-}

@@ -19,22 +19,18 @@ const (
 	// consider it takes 50000 to do transfer/send tx
 	// so, min_gas_price = 100000000sato.CET * 0.01 / 50000 = 20 sato.CET
 	DefaultMinGasPrice uint64 = 20
-
-	DefaultMsgSendGasCost uint64 = 1
 )
 
 // Parameter keys
 var (
-	KeyMinGasPrice    = []byte("MinGasPrice")
-	KeyMsgSendGasCost = []byte("MsgSendGasCost")
+	KeyMinGasPrice = []byte("MinGasPrice")
 )
 
 var _ params.ParamSet = &Params{}
 
 // Params defines the parameters for the authx module.
 type Params struct {
-	MinGasPrice    uint64 `json:"min_gas_price"`
-	MsgSendGasCost uint64 `json:"msg_send_gas_cost"`
+	MinGasPrice uint64 `json:"min_gas_price"`
 }
 
 // ParamKeyTable for authx module
@@ -47,7 +43,6 @@ func ParamKeyTable() params.KeyTable {
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyMinGasPrice, Value: &p.MinGasPrice},
-		{Key: KeyMsgSendGasCost, Value: &p.MsgSendGasCost},
 	}
 }
 
@@ -61,8 +56,7 @@ func (p Params) Equal(p2 Params) bool {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		MinGasPrice:    DefaultMinGasPrice,
-		MsgSendGasCost: DefaultMsgSendGasCost,
+		MinGasPrice: DefaultMinGasPrice,
 	}
 }
 

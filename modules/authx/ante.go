@@ -32,7 +32,6 @@ func init() {
 
 type AnteHelper interface {
 	CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Error
-	GasFee(msg sdk.Msg) sdk.Coins
 }
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
@@ -105,7 +104,7 @@ func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
 		if res := ValidateMemoSize(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
 		}
-		if res := checkMemo(newCtx, stdTx, anteHelper); !res.IsOK() {
+		if res := checkMsg(newCtx, stdTx, anteHelper); !res.IsOK() {
 			return newCtx, res, true
 		}
 
@@ -182,7 +181,7 @@ func ValidateMemoSize(stdTx auth.StdTx, params auth.Params) sdk.Result {
 }
 
 // additional check
-func checkMemo(ctx sdk.Context, stdTx auth.StdTx, anteHelper AnteHelper) sdk.Result {
+func checkMsg(ctx sdk.Context, stdTx auth.StdTx, anteHelper AnteHelper) sdk.Result {
 	memo := stdTx.Memo
 	for _, msg := range stdTx.Msgs {
 		if err := anteHelper.CheckMsg(ctx, msg, memo); err != nil {

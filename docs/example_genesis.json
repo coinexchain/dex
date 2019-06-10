@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-06-04T10:16:51.402543Z",
+  "genesis_time": "2019-06-10T22:15:15.648443Z",
   "chain_id": "coinexdex",
   "consensus_params": {
     "block": {
@@ -209,8 +209,7 @@
     },
     "authx": {
       "params": {
-        "min_gas_price": "100000000",
-        "msg_send_gas_cost": "1"
+        "min_gas_price": "20"
       }
     },
     "bank": {
@@ -346,26 +345,23 @@
           }
         }
       ],
-      "whitelists": [
-        "coin1:cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-        "coin1:cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt",
-        "coin1:cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
-      ],
-      "forbid_addr": [
-        "coin1:cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt"
-      ]
+      "whitelist": [],
+      "forbid_addr": []
     },
     "market": {
       "params": {
         "create_market_fee": [
           {
             "denom": "cet",
-            "amount": "100000000000"
+            "amount": "1000000000000"
           }
         ],
-        "filter_stale_order_interval": "10",
+        "fixed_trade_fee": "0",
         "gte_order_lifetime": "100",
-        "max_executed_price_change_ratio": "25"
+        "max_executed_price_change_ratio": "25",
+        "market_fee_rate": "0",
+        "market_fee_min": "0",
+        "fee_for_zero_deal": "0"
       },
       "orders": [
         {
@@ -378,6 +374,7 @@
           "side": 1,
           "time_in_force": "10092839",
           "height": "100",
+          "frozen_fee": "0",
           "left_stock": "0",
           "freeze": "0",
           "deal_stock": "0",
@@ -393,6 +390,7 @@
           "side": 1,
           "time_in_force": "1002682839",
           "height": "100",
+          "frozen_fee": "0",
           "left_stock": "0",
           "freeze": "0",
           "deal_stock": "0",
@@ -429,9 +427,9 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "10000000000000000",
-                "delegator_address": "cosmos1we4v8epy3jv8rlglwtgs2lgczadnaqphdrts8f",
-                "validator_address": "cosmosvaloper1we4v8epy3jv8rlglwtgs2lgczadnaqphghl9t6",
-                "pubkey": "cosmosvalconspub1addwnpepqgycyeda5p28sqt0p4f3unq64k363tzm4qm2htmwmmgc4dk7nmd8v2g92vp",
+                "delegator_address": "cosmos1tkpgv809xhqukgxt4euf2l5h4z9079fkc8xudn",
+                "validator_address": "cosmosvaloper1tkpgv809xhqukgxt4euf2l5h4z9079fkanjfpq",
+                "pubkey": "cosmosvalconspub1addwnpepqgzp556vt8fdcn5pcpr2lhyzs368sf83gzuttyzvtsqpngu2je6qca9zve2",
                 "value": {
                   "denom": "cet",
                   "amount": "10000000000000000"
@@ -452,9 +450,9 @@
             {
               "pub_key": {
                 "type": "tendermint/PubKeySecp256k1",
-                "value": "AgmCZb2gVHgBbw1THkwaraOorFuoNquvbt7Rirbentp2"
+                "value": "AgQaU0xZ0txOgcBGr9yChHR4JPFAuLWQTFwAGaOKlnQM"
               },
-              "signature": "TP4TMyFXHVgDNfuzTCaZLC47bA85OEPefOXf77op4JF++OrupEgKuzQG6Jw3Kb677ubpQdzwwnvYthEY+pf6Ig=="
+              "signature": "iAQTc8KbP7xLZi3uKVhuAb7MNW0CSE9SRsjpEKBJRgl0bwpco7UX+m+/glCluEDytYk/nnMsuJ1vM4jWULcUHQ=="
             }
           ],
           "memo": ""
