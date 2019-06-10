@@ -205,7 +205,7 @@ func (tk TokenKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error {
 func (tk TokenKeeper) addWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(tk.key)
 	for _, addr := range whitelist {
-		store.Set(PrefixAddrKey(WhitelistKeyPrefix, symbol, addr), []byte{})
+		store.Set(PrefixAddrStoreKey(WhitelistKeyPrefix, symbol, addr), []byte{})
 	}
 
 	return nil
@@ -214,7 +214,7 @@ func (tk TokenKeeper) addWhitelist(ctx sdk.Context, symbol string, whitelist []s
 func (tk TokenKeeper) removeWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(tk.key)
 	for _, addr := range whitelist {
-		store.Delete(PrefixAddrKey(WhitelistKeyPrefix, symbol, addr))
+		store.Delete(PrefixAddrStoreKey(WhitelistKeyPrefix, symbol, addr))
 	}
 
 	return nil
@@ -308,7 +308,7 @@ func (tk TokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddr
 func (tk TokenKeeper) addForbidAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(tk.key)
 	for _, addr := range addresses {
-		store.Set(PrefixAddrKey(ForbidAddrKeyPrefix, symbol, addr), []byte{})
+		store.Set(PrefixAddrStoreKey(ForbidAddrKeyPrefix, symbol, addr), []byte{})
 	}
 
 	return nil
@@ -317,7 +317,7 @@ func (tk TokenKeeper) addForbidAddress(ctx sdk.Context, symbol string, addresses
 func (tk TokenKeeper) removeForbidAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(tk.key)
 	for _, addr := range addresses {
-		store.Delete(PrefixAddrKey(ForbidAddrKeyPrefix, symbol, addr))
+		store.Delete(PrefixAddrStoreKey(ForbidAddrKeyPrefix, symbol, addr))
 	}
 
 	return nil
@@ -424,8 +424,15 @@ func TokenStoreKey(symbol string) []byte {
 	return append(TokenStoreKeyPrefix, []byte(symbol)...)
 }
 
-// PrefixAddrKey - return paramsKeyPrefix-Symbol-:-AccAddress KEY
-func PrefixAddrKey(prefix []byte, symbol string, addr sdk.AccAddress) []byte {
+func (tk TokenKeeper) decodeToken(bz []byte) (token Token) {
+	if err := tk.cdc.UnmarshalBinaryBare(bz, &token); err != nil {
+		panic(err)
+	}
+	return
+}
+
+// PrefixAddrStoreKey - return paramsKeyPrefix-Symbol-:-AccAddress KEY
+func PrefixAddrStoreKey(prefix []byte, symbol string, addr sdk.AccAddress) []byte {
 	return append(append(append(prefix, symbol...), SeparateKeyPrefix...), addr...)
 }
 
@@ -465,7 +472,7 @@ func (tk TokenKeeper) IterateAddrKeys(ctx sdk.Context, prefix []byte, process fu
 	}
 }
 
-func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefixKey []byte, addr string) error {
+func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefix []byte, addr string) error {
 	store := ctx.KVStore(tk.key)
 	index := strings.Index(addr, string(SeparateKeyPrefix))
 
@@ -473,15 +480,8 @@ func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefixKey []byte, addr string)
 	if err != nil {
 		return err
 	}
-	key := PrefixAddrKey(prefixKey, string([]byte(addr)[:index]), accBech32)
+	key := PrefixAddrStoreKey(prefix, string([]byte(addr)[:index]), accBech32)
 	store.Set(key, []byte{})
 
 	return nil
-}
-
-func (tk TokenKeeper) decodeToken(bz []byte) (token Token) {
-	if err := tk.cdc.UnmarshalBinaryBare(bz, &token); err != nil {
-		panic(err)
-	}
-	return
 }
