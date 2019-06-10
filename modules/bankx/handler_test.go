@@ -141,6 +141,35 @@ func TestHandlerMsgSend(t *testing.T) {
 
 }
 
+func TestHandlerMsgSendUnlockFirst(t *testing.T) {
+	input := setupTestInput()
+
+	fromAddr := []byte("fromaddr")
+	toAddr := []byte("toaddr")
+	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
+	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
+	oneCoins := dex.NewCetCoins(1000000000)
+	fromAccount.SetCoins(oneCoins)
+	input.ak.SetAccount(input.ctx, fromAccount)
+	input.axk.SetAccountX(input.ctx, fromAccountX)
+
+	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	input.handle(msgSend)
+	require.Equal(t, sdk.NewInt(int64(900000000)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	_, found := input.axk.GetAccountX(input.ctx, toAddr)
+	require.Equal(t, true, found)
+	require.Equal(t, sdk.NewInt(int64(100000000)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+
+	msgSend2 := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	input.handle(msgSend2)
+	require.Equal(t, sdk.NewInt(int64(800000000)), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(int64(0)), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	_, found2 := input.axk.GetAccountX(input.ctx, toAddr)
+	require.Equal(t, true, found2)
+	require.Equal(t, sdk.NewInt(int64(100000000)), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+}
+
 func TestHandleMsgSetMemoRequiredAccountNotExisted(t *testing.T) {
 	input := setupTestInput()
 

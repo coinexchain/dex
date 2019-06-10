@@ -89,6 +89,10 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 func sendLockedCoins(ctx sdk.Context, k Keeper,
 	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Result {
 
+	if k.ak.GetAccount(ctx, toAddr) == nil {
+		k.bk.AddCoins(ctx, toAddr, sdk.Coins{})
+	}
+
 	ax := k.axk.GetOrCreateAccountX(ctx, toAddr)
 	for _, coin := range amt {
 		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
