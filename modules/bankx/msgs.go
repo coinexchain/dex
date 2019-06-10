@@ -1,8 +1,6 @@
 package bankx
 
 import (
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	dex "github.com/coinexchain/dex/types"
@@ -83,11 +81,8 @@ func (msg MsgSend) ValidateBasic() sdk.Error {
 			return ErrCetCantBeLocked("Cet cannot be locked")
 		}
 	}
-
-	//TODO: should not compare with lock time.
-	t := time.Now().Unix()
-	if msg.UnlockTime <= t && msg.UnlockTime != 0 {
-		return ErrUnlockTime("Invalid Unlock Time")
+	if msg.UnlockTime < 0 {
+		return ErrUnlockTime("negative unlock time ")
 	}
 
 	return nil

@@ -2,6 +2,8 @@ package cli
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -41,8 +43,11 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			//TODO: check req.UnlockTime can not be negative
-			time := viper.GetInt64(FlagUnlockTime)
-
+			unlockTime := viper.GetInt64(FlagUnlockTime)
+			currentTime := time.Now().Unix()
+			if unlockTime < currentTime {
+				return fmt.Errorf("Unlock time should be later than the current time")
+			}
 			from := cliCtx.GetFromAddress()
 			account, err := cliCtx.GetAccount(from)
 			if err != nil {
@@ -55,7 +60,7 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			msg := bankx.NewMsgSend(from, to, coins, time)
+			msg := bankx.NewMsgSend(from, to, coins, unlockTime)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
 		},
 	}
