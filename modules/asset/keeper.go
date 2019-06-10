@@ -372,9 +372,9 @@ func (tk TokenKeeper) GetForbiddenAddr(ctx sdk.Context, symbol string) []sdk.Acc
 // -----------------------------------------------------------------------------
 // ExpectedAssertStatusKeeper
 
-//IsTokenForbidden - check whether the coin's owner has forbidden "denom", forbiding transmission and exchange.
-func (tk TokenKeeper) IsTokenForbidden(ctx sdk.Context, denom string) bool {
-	token := tk.GetToken(ctx, denom)
+//IsTokenForbidden - check whether the coin's owner has forbidden "symbol", forbidding transmission and exchange.
+func (tk TokenKeeper) IsTokenForbidden(ctx sdk.Context, symbol string) bool {
+	token := tk.GetToken(ctx, symbol)
 	if token != nil {
 		return token.GetIsForbidden()
 	}
@@ -382,24 +382,44 @@ func (tk TokenKeeper) IsTokenForbidden(ctx sdk.Context, denom string) bool {
 	return true
 }
 
-// IsTokenExists - check whether there is a coin named "denom"
-func (tk TokenKeeper) IsTokenExists(ctx sdk.Context, denom string) bool {
-	return tk.GetToken(ctx, denom) != nil
+// IsTokenExists - check whether there is a coin named "symbol"
+func (tk TokenKeeper) IsTokenExists(ctx sdk.Context, symbol string) bool {
+	return tk.GetToken(ctx, symbol) != nil
 }
 
 // IsTokenIssuer - check whether addr is a token issuer
-func (tk TokenKeeper) IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
+func (tk TokenKeeper) IsTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool {
 	if addr.Empty() {
 		return false
 	}
 
-	token := tk.GetToken(ctx, denom)
+	token := tk.GetToken(ctx, symbol)
 	return token != nil && token.GetOwner().Equals(addr)
 }
 
-func (tk TokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
-	//TODO:
-	return false
+func (tk TokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool {
+	token := tk.GetToken(ctx, symbol)
+	if token == nil {
+		return true
+	}
+
+	for _, forbidden := range tk.GetForbiddenAddr(ctx, symbol) {
+		if addr.Equals(forbidden) {
+			return true
+		}
+	}
+
+	if !token.GetIsForbidden() {
+		return false
+	}
+
+	for _, forbidden := range tk.GetWhitelist(ctx, symbol) {
+		if addr.Equals(forbidden) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // -----------------------------------------------------------------------------
@@ -436,7 +456,7 @@ func PrefixAddrStoreKey(prefix []byte, symbol string, addr sdk.AccAddress) []byt
 	return append(append(append(prefix, symbol...), SeparateKeyPrefix...), addr...)
 }
 
-// GetAllAddrKeys return [] symbol:addr
+// GetAllAddrKeys return [] symbol:addr key. for get all whitelists or forbidden addresses
 func (tk TokenKeeper) GetAllAddrKeys(ctx sdk.Context, prefix []byte) []string {
 	res := make([]string, 0)
 	bech32PrefixAccAddr := sdk.GetConfig().GetBech32AccountAddrPrefix()
