@@ -1,7 +1,6 @@
 package authx
 
 import (
-	"github.com/coinexchain/dex/modules/incentive"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 )
@@ -18,8 +17,10 @@ func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
 
 	ah := auth.NewAnteHandler(ak, fck)
 	return func(ctx sdk.Context, tx sdk.Tx, simulate bool) (newCtx sdk.Context, res sdk.Result, abort bool) {
+		// run auth.AnteHandler first
 		newCtx, res, abort = ah(ctx, tx, simulate)
 
+		// then, do additional check
 		stdTx, _ := tx.(auth.StdTx)
 		res2 := doAdditionalCheck(ctx, stdTx, anteHelper)
 		if !res2.IsOK() {
@@ -38,22 +39,5 @@ func doAdditionalCheck(ctx sdk.Context, tx auth.StdTx, anteHelper AnteHelper) sd
 			return err.Result()
 		}
 	}
-
-	if err := checkAddr(tx); err != nil {
-		return err.Result()
-	}
-
 	return sdk.Result{}
-}
-
-func checkAddr(tx auth.StdTx) sdk.Error {
-	for _, msg := range tx.Msgs {
-		signers := msg.GetSigners()
-		for _, signer := range signers {
-			if signer.Equals(incentive.IncentiveCoinsAccAddr) {
-				return sdk.ErrUnauthorized("tx not allowed to be sent from the sender addr")
-			}
-		}
-	}
-	return nil
 }

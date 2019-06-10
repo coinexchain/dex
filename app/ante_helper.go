@@ -7,6 +7,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
 
@@ -25,6 +26,10 @@ func newAnteHelper(accountXKeeper authx.AccountXKeeper, stakingXKeeper stakingx.
 }
 
 func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Error {
+	if err := checkAddr(msg); err != nil {
+		return err
+	}
+
 	switch msg := msg.(type) {
 	case bank.MsgSend: // should not be here!
 		return ah.checkMemo(ctx, msg.ToAddress, memo)
@@ -49,6 +54,16 @@ func (ah anteHelper) checkMinSelfDelegation(ctx sdk.Context, actual sdk.Int) sdk
 	expected := ah.stakingXKeeper.GetParams(ctx).MinSelfDelegation
 	if actual.LT(expected) {
 		return stakingx.ErrMinSelfDelegationBelowRequired(expected, actual)
+	}
+	return nil
+}
+
+func checkAddr(msg sdk.Msg) sdk.Error {
+	signers := msg.GetSigners()
+	for _, signer := range signers {
+		if signer.Equals(incentive.IncentiveCoinsAccAddr) {
+			return sdk.ErrUnauthorized("tx not allowed to be sent from the sender addr")
+		}
 	}
 	return nil
 }
