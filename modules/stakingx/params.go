@@ -5,7 +5,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 // DefaultParamspace defines the default stakingx module parameter subspace
@@ -20,7 +19,7 @@ const (
 	DefaultUnbondingTime time.Duration = time.Hour * 24 * 21
 
 	// Default maximum number of bonded validators
-	DefaultMaxValidators uint16 = staking.DefaultMaxValidators // TODO
+	DefaultMaxValidators uint16 = 42
 )
 
 // Parameter keys
