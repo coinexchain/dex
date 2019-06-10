@@ -84,11 +84,11 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	if err := t.SetName(name); err != nil {
 		return nil, ErrorInvalidTokenName(err.Error())
 	}
-	if err := t.SetSymbol(symbol); err != nil {
-		return nil, ErrorInvalidTokenSymbol(err.Error())
-	}
 	if err := t.SetOwner(owner); err != nil {
 		return nil, ErrorInvalidTokenOwner(err.Error())
+	}
+	if err := t.SetSymbol(symbol); err != nil {
+		return nil, ErrorInvalidTokenSymbol(err.Error())
 	}
 	if err := t.SetTotalSupply(totalSupply); err != nil {
 		return nil, ErrorInvalidTokenSupply(err.Error())
@@ -156,6 +156,11 @@ func ValidateTokenSymbol(symbol string) error {
 func (t *BaseToken) SetSymbol(symbol string) error {
 	if err := ValidateTokenSymbol(symbol); err != nil {
 		return err
+	}
+
+	// TODO: tAccAddr need coinex owner
+	if _, reserved := reservedSymbolMap[symbol]; reserved && !t.Owner.Equals(tAccAddr) {
+		return errors.New("only coinex dex can issue reserved symbol token, please contact coinex")
 	}
 
 	t.Symbol = symbol
