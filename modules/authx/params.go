@@ -11,7 +11,14 @@ const DefaultParamspace = "authx"
 
 // Default parameter values
 const (
-	DefaultMinGasPrice uint64 = 1e8 // 1 CET/Gas
+	// DefaultMinGasPrice of the network
+	// Make token transfer/send tx to costs around 0.01CET
+	// activated account send to self,                  costs 38883 gas
+	// activated account send to non-activated account, costs 48951 gas
+	// activated account send to other activated addr,  costs 33903 gas
+	// consider it takes 50000 to do transfer/send tx
+	// so, min_gas_price = 100000000sato.CET * 0.01 / 50000 = 20 sato.CET
+	DefaultMinGasPrice uint64 = 20
 
 	DefaultMsgSendGasCost uint64 = 1
 )
