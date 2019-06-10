@@ -2,9 +2,10 @@ package rest
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/bankx"
 	"net/http"
 	"time"
+
+	"github.com/coinexchain/dex/modules/bankx"
 
 	"github.com/gorilla/mux"
 
@@ -51,7 +52,12 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, kb keys.Keybase, cliCtx context.CL
 			return
 		}
 		currentTime := time.Now().Unix()
-		if req.UnlockTime < currentTime {
+		if req.UnlockTime < 0 {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, fmt.Errorf("invalid unlock time: %d", req.UnlockTime).Error())
+			return
+		}
+
+		if req.UnlockTime > 0 && req.UnlockTime < currentTime {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, fmt.Errorf("unlock time should be later than the current time").Error())
 			return
 		}

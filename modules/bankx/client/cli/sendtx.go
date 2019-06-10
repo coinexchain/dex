@@ -42,12 +42,16 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			//TODO: check req.UnlockTime can not be negative
 			unlockTime := viper.GetInt64(FlagUnlockTime)
+			if unlockTime < 0 {
+				return fmt.Errorf("invalid unlock time: %d", unlockTime)
+			}
+
 			currentTime := time.Now().Unix()
-			if unlockTime < currentTime {
+			if unlockTime > 0 && unlockTime < currentTime {
 				return fmt.Errorf("Unlock time should be later than the current time")
 			}
+
 			from := cliCtx.GetFromAddress()
 			account, err := cliCtx.GetAccount(from)
 			if err != nil {
