@@ -1188,6 +1188,7 @@ paths:
     post:
       summary: Submit a proposal
       description: Send transaction to submit a proposal
+      operationId: submitProposal
       consumes:
         - application/json
       produces:
@@ -1229,6 +1230,7 @@ paths:
     get:
       summary: Query proposals
       description: Query proposals information with parameters
+      operationId: getProposal
       produces:
         - application/json
       tags:
