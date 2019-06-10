@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/coinexchain/dex/modules/asset"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tmconfig "github.com/tendermint/tendermint/config"
@@ -280,6 +282,8 @@ func initGenFiles(
 	appGenState := app.NewDefaultGenesisState()
 	appGenState.Accounts = accs
 
+	addCetTokenForTesting(&appGenState)
+
 	appGenStateJSON, err := codec.MarshalJSONIndent(cdc, appGenState)
 	if err != nil {
 		return err
@@ -299,6 +303,22 @@ func initGenFiles(
 	}
 
 	return nil
+}
+
+func addCetTokenForTesting(appGenState *app.GenesisState) {
+	addr, _ := sdk.AccAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v")
+
+	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
+		"cet",
+		588788547005740000,
+		addr,
+		false,
+		true,
+		false,
+		false)
+
+	var token asset.Token = baseToken
+	appGenState.AssetData.Tokens = []asset.Token{token}
 }
 
 func collectGenFiles(

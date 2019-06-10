@@ -368,6 +368,7 @@ paths:
   /bank/accounts/{address}/transfers:
     post:
       summary: Send coins from one account to another
+      operationId: sendCoins
       tags:
         - ICS20
       consumes:
@@ -398,7 +399,7 @@ paths:
                 type: string
                 example: "675132000"
       responses:
-        202:
+        200:
           description: Tx was succesfully generated
           schema:
             $ref: "#/definitions/StdTx"
