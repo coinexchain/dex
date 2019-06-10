@@ -225,6 +225,7 @@ func (app *CetChainApp) initKeepers() {
 		app.keyMarket,
 		app.assetKeeper,
 		app.bankxKeeper,
+		app.feeCollectionKeeper,
 		app.cdc,
 		app.paramsKeeper.Subspace(market.StoreKey),
 	)

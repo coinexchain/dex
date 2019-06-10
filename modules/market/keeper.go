@@ -77,16 +77,16 @@ func (keeper *DelistKeeper) RemoveDelistRequestsAtHeight(ctx sdk.Context, height
 type Keeper struct {
 	paramSubspace params.Subspace
 	marketKey     sdk.StoreKey
-	axk           ExpectedAssertStatusKeeper
+	axk           ExpectedAssetStatusKeeper
 	bnk           ExpectedBankxKeeper
 	cdc           *codec.Codec
 	orderClean    *OrderCleanUpDayKeeper
 	gmk           GlobalMarketInfoKeeper
-	//fek       incentive.FeeCollectionKeeper
+	feeKeeper     ExpectFeeKeeper
 }
 
-func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper,
-	bnkVal ExpectedBankxKeeper, cdcVal *codec.Codec, paramstore params.Subspace) Keeper {
+func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssetStatusKeeper,
+	bnkVal ExpectedBankxKeeper, feeK ExpectFeeKeeper, cdcVal *codec.Codec, paramstore params.Subspace) Keeper {
 
 	return Keeper{
 		marketKey:     key,
@@ -96,6 +96,7 @@ func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper,
 		cdc:           cdcVal,
 		orderClean:    NewOrderCleanUpDayKeeper(key),
 		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
+		feeKeeper:     feeK,
 	}
 }
 
@@ -142,6 +143,15 @@ func (k Keeper) GetAllMarketInfos(ctx sdk.Context) []MarketInfo {
 
 func (k Keeper) GetMarketInfo(ctx sdk.Context, symbol string) (MarketInfo, error) {
 	return k.gmk.GetMarketInfo(ctx, symbol)
+}
+
+func (k Keeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	if err := k.bnk.SubtractCoins(ctx, addr, amt); err != nil {
+		return err
+	}
+
+	k.feeKeeper.AddCollectedFees(ctx, amt)
+	return nil
 }
 
 // -----------------------------------------------------------------------------

@@ -53,20 +53,23 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 		LastExecutedPrice: sdk.ZeroDec(),
 	}
 
-	key := marketStoreKey(MarketIdentifierPrefix, info.Stock+SymbolSeparator+info.Money)
-	value := keeper.cdc.MustMarshalBinaryBare(info)
-	ctx.KVStore(keeper.marketKey).Set(key, value)
+	if err := keeper.SetMarket(ctx, info); err != nil {
+		return err.Result()
+	}
 
-	//TODO. wait deduction fee decision to this function.
+	param := keeper.GetParams(ctx)
+	if err := keeper.SubtractFeeAndCollectFee(ctx, msg.Creator, param.CreateMarketFee); err != nil {
+		// Here must panic. because the market info have stored in db.
+		panic(err)
+	}
 
 	return sdk.Result{Tags: info.GetTags()}
 }
 
 func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
-	key := marketStoreKey(MarketIdentifierPrefix, msg.Stock+SymbolSeparator+msg.Money)
-	store := ctx.KVStore(keeper.marketKey)
-	if v := store.Get(key); v != nil {
-		return ErrInvalidSymbol().Result()
+
+	if _, err := keeper.GetMarketInfo(ctx, msg.Stock+SymbolSeparator+msg.Money); err == nil {
+		return sdk.NewError(CodeSpaceMarket, CodeRepeatTrade, "The repeatedly created trading pairs").Result()
 	}
 
 	if !keeper.axk.IsTokenExists(ctx, msg.Money) || !keeper.axk.IsTokenExists(ctx, msg.Stock) {
@@ -75,6 +78,12 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 
 	if !keeper.axk.IsTokenIssuer(ctx, msg.Stock, []byte(msg.Creator)) && !keeper.axk.IsTokenIssuer(ctx, msg.Money, []byte(msg.Creator)) {
 		return ErrInvalidTokenIssuer().Result()
+	}
+
+	if msg.Money != "cet" {
+		if _, err := keeper.GetMarketInfo(ctx, msg.Stock+SymbolSeparator+"cet"); err != nil {
+			return sdk.NewError(CodeSpaceMarket, CodeStockNoHaveCetTrade, "The stock(%s) not have cet trade", msg.Stock).Result()
+		}
 	}
 
 	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
@@ -256,7 +265,9 @@ func checkMsgCancelMarket(keeper Keeper, msg MsgCancelMarket, ctx sdk.Context) s
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, err.Error())
 	}
 
-	if !bytes.Equal(info.Creator, msg.Sender) {
+	stockToken := keeper.axk.GetToken(ctx, info.Stock)
+	moneyToken := keeper.axk.GetToken(ctx, info.Stock)
+	if !bytes.Equal(msg.Sender, stockToken.GetOwner()) && !bytes.Equal(msg.Sender, moneyToken.GetOwner()) {
 		return sdk.NewError(CodeSpaceMarket, CodeNotMatchSender, "Not match market info sender")
 	}
 

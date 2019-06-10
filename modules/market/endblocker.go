@@ -138,7 +138,7 @@ func removeOrder(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBank
 }
 
 // Iterate the candidate orders for matching, and remove the orders whose sender is forbidden by the money owner or the stock owner.
-func filterCandidates(ctx sdk.Context, asKeeper ExpectedAssertStatusKeeper, ordersIn []*Order, stock, money string) []*Order {
+func filterCandidates(ctx sdk.Context, asKeeper ExpectedAssetStatusKeeper, ordersIn []*Order, stock, money string) []*Order {
 	ordersOut := make([]*Order, 0, len(ordersIn))
 	for _, order := range ordersIn {
 		if !(asKeeper.IsForbiddenByTokenIssuer(ctx, stock, order.Sender) ||

@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset"
 	"sort"
 	"testing"
 
@@ -14,6 +15,9 @@ type mocBankxKeeper struct {
 	records []string
 }
 
+func (k *mocBankxKeeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return nil
+}
 func (k *mocBankxKeeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
 	return true
 }
@@ -61,6 +65,9 @@ func (k *mocAssertStatusKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom 
 	}
 	return false
 }
+func (k *mocAssertStatusKeeper) GetToken(ctx sdk.Context, symbol string) asset.Token {
+	return nil
+}
 
 func TestUnfreezeCoinsForOrder(t *testing.T) {
 	bxKeeper := &mocBankxKeeper{records: make([]string, 0, 10)}
@@ -82,7 +89,7 @@ func TestRemoveOrders(t *testing.T) {
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey()
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
-	keeper := NewKeeper(keys.marketKey, axk, bnk, msgCdc, subspace)
+	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, subspace)
 	currDay := ctx.BlockHeader().Time.Day()
 	keeper.orderClean.SetDay(ctx, currDay-1)
 	parameters := Params{}
@@ -152,7 +159,7 @@ func TestDelist(t *testing.T) {
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey()
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
-	keeper := NewKeeper(keys.marketKey, axk, bnk, msgCdc, subspace)
+	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, subspace)
 	delistKeeper := NewDelistKeeper(keys.marketKey)
 	delistKeeper.AddDelistRequest(ctx, ctx.BlockHeight(), "btc/usdt")
 	currDay := ctx.BlockHeader().Time.Day()

@@ -27,6 +27,8 @@ const (
 	CodeInvalidHeight         sdk.CodeType = 136
 	CodeAddressForbidByIssuer sdk.CodeType = 137
 	CodeOrderQuantityToSmall  sdk.CodeType = 138
+	CodeStockNoHaveCetTrade   sdk.CodeType = 139
+	CodeRepeatTrade           sdk.CodeType = 140
 )
 
 func ErrTokenNoExist() sdk.Error {
