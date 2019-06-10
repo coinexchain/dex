@@ -144,15 +144,8 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(originalOwner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(originalOwner); err != nil {
 				return err
-			}
-
-			transferFee := types.NewCetCoins(asset.TransferOwnershipFee)
-			if !account.GetCoins().IsAllGTE(transferFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to transfer ownership", originalOwner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -202,15 +195,8 @@ $ cetcli tx asset mint-token --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(owner); err != nil {
 				return err
-			}
-
-			mintFee := types.NewCetCoins(asset.MintFee)
-			if !account.GetCoins().IsAllGTE(mintFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to mint token", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -260,15 +246,8 @@ $ cetcli tx asset burn-token --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(owner); err != nil {
 				return err
-			}
-
-			burnFee := types.NewCetCoins(asset.BurnFee)
-			if !account.GetCoins().IsAllGTE(burnFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to burn token", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -316,15 +295,8 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(owner); err != nil {
 				return err
-			}
-
-			forbidFee := types.NewCetCoins(asset.ForbidTokenFee)
-			if !account.GetCoins().IsAllGTE(forbidFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to forbid token", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -367,15 +339,8 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(owner); err != nil {
 				return err
-			}
-
-			unForbidFee := types.NewCetCoins(asset.UnForbidTokenFee)
-			if !account.GetCoins().IsAllGTE(unForbidFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to unforbid token", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -425,15 +390,8 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(owner); err != nil {
 				return err
-			}
-
-			fee := types.NewCetCoins(asset.TokenWhitelistAddFee)
-			if !account.GetCoins().IsAllGTE(fee) {
-				return fmt.Errorf("address %s doesn't have enough cet to add token whitelist", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -479,15 +437,8 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(owner); err != nil {
 				return err
-			}
-
-			fee := types.NewCetCoins(asset.TokenWhitelistRemoveFee)
-			if !account.GetCoins().IsAllGTE(fee) {
-				return fmt.Errorf("address %s doesn't have enough cet to remove token whitelist", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -538,15 +489,8 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(owner); err != nil {
 				return err
-			}
-
-			fee := types.NewCetCoins(asset.ForbidAddrFee)
-			if !account.GetCoins().IsAllGTE(fee) {
-				return fmt.Errorf("address %s doesn't have enough cet to forbid addr", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
@@ -592,15 +536,8 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 				return err
 			}
 
-			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(owner)
-			if err != nil {
+			if _, err = cliCtx.GetAccount(owner); err != nil {
 				return err
-			}
-
-			fee := types.NewCetCoins(asset.UnForbidAddrFee)
-			if !account.GetCoins().IsAllGTE(fee) {
-				return fmt.Errorf("address %s doesn't have enough cet to unforbid addr", owner)
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint

@@ -5,9 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/coinexchain/dex/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestParams_Equal(t *testing.T) {
@@ -41,15 +40,6 @@ func TestParams_ValidateGenesis(t *testing.T) {
 			"case-invalidate",
 			Params{
 				sdk.Coins{},
-				types.NewCetCoins(TransferOwnershipFee),
-				types.NewCetCoins(ForbidAddrFee),
-				types.NewCetCoins(UnForbidAddrFee),
-				types.NewCetCoins(ForbidTokenFee),
-				types.NewCetCoins(UnForbidTokenFee),
-				types.NewCetCoins(TokenWhitelistAddFee),
-				types.NewCetCoins(TokenWhitelistRemoveFee),
-				types.NewCetCoins(BurnFee),
-				types.NewCetCoins(MintFee),
 			},
 			true,
 		},
@@ -58,15 +48,6 @@ func TestParams_ValidateGenesis(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Params{
 				tt.p.IssueTokenFee,
-				tt.p.TransferOwnershipFee,
-				tt.p.ForbidAddrFee,
-				tt.p.UnForbidAddrFee,
-				tt.p.ForbidTokenFee,
-				tt.p.UnForbidTokenFee,
-				tt.p.TokenWhitelistAddFee,
-				tt.p.TokenWhitelistRemoveFee,
-				tt.p.BurnFee,
-				tt.p.MintFee,
 			}
 			if err := p.ValidateGenesis(); (err != nil) != tt.wantErr {
 				t.Errorf("Params.ValidateGenesis() error = %v, wantErr %v", err, tt.wantErr)

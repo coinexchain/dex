@@ -310,60 +310,6 @@
             "denom": "cet",
             "amount": "1000000000000"
           }
-        ],
-        "transfer_ownership_fee": [
-          {
-            "denom": "cet",
-            "amount": "1000000000"
-          }
-        ],
-        "forbid_address_fee": [
-          {
-            "denom": "cet",
-            "amount": "1000000000"
-          }
-        ],
-        "unforbid_address_fee": [
-          {
-            "denom": "cet",
-            "amount": "1000000000"
-          }
-        ],
-        "forbid_token_fee": [
-          {
-            "denom": "cet",
-            "amount": "1000000000"
-          }
-        ],
-        "unforbid_token_fee": [
-          {
-            "denom": "cet",
-            "amount": "1000000000"
-          }
-        ],
-        "token_whitelist_add_fee": [
-          {
-            "denom": "cet",
-            "amount": "2000000000"
-          }
-        ],
-        "token_whitelist_remove_fee": [
-          {
-            "denom": "cet",
-            "amount": "2000000000"
-          }
-        ],
-        "burn_fee": [
-          {
-            "denom": "cet",
-            "amount": "1000000000"
-          }
-        ],
-        "mint_fee": [
-          {
-            "denom": "cet",
-            "amount": "1000000000"
-          }
         ]
       },
       "tokens": [

@@ -456,7 +456,7 @@ func PrefixAddrStoreKey(prefix []byte, symbol string, addr sdk.AccAddress) []byt
 	return append(append(append(prefix, symbol...), SeparateKeyPrefix...), addr...)
 }
 
-// GetAllAddrKeys return [] symbol:addr key. for get all whitelists or forbidden addresses
+// GetAllAddrKeys return [] symbol:addr key. for get all whitelists or forbidden addresses string
 func (tk TokenKeeper) GetAllAddrKeys(ctx sdk.Context, prefix []byte) []string {
 	res := make([]string, 0)
 	bech32PrefixAccAddr := sdk.GetConfig().GetBech32AccountAddrPrefix()
