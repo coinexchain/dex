@@ -10,8 +10,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // register REST routes
@@ -92,16 +93,16 @@ func QueryBalancesRequestHandlerFn(
 			return
 		}
 
+		lockedCoins := make(authx.LockedCoins, 0)
 		aux, err := clientx.GetAccountX(cliCtx, addr)
-		if err != nil {
-			rest.PostProcessResponse(w, cdc, acc, cliCtx.Indent)
-			return
+		if err == nil {
+			lockedCoins = aux.GetAllLockedCoins()
 		}
 
 		all := struct {
 			C sdk.Coins         `json:"coins"`
 			L authx.LockedCoins `json:"locked_coins"`
-		}{acc.GetCoins(), aux.GetAllLockedCoins()}
+		}{acc.GetCoins(), lockedCoins}
 
 		rest.PostProcessResponse(w, cdc, all, cliCtx.Indent)
 	}
