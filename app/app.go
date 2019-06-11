@@ -173,12 +173,6 @@ func (app *CetChainApp) initKeepers() {
 		app.bankKeeper, &stakingKeeper, app.feeCollectionKeeper,
 		distr.DefaultCodespace,
 	)
-	app.slashingKeeper = slashing.NewKeeper(
-		app.cdc,
-		app.keySlashing,
-		&stakingKeeper, app.paramsKeeper.Subspace(slashing.DefaultParamspace),
-		slashing.DefaultCodespace,
-	)
 	app.govKeeper = gov.NewKeeper(
 		app.cdc,
 		app.keyGov,
@@ -191,13 +185,6 @@ func (app *CetChainApp) initKeepers() {
 		app.feeCollectionKeeper,
 	)
 
-	// register the staking hooks
-	// NOTE: The stakingKeeper above is passed by reference, so that it can be
-	// modified like below:
-	app.stakingKeeper = *stakingKeeper.SetHooks(
-		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
-	)
-
 	// cet keepers
 	app.accountXKeeper = authx.NewKeeper(
 		app.cdc,
@@ -205,7 +192,14 @@ func (app *CetChainApp) initKeepers() {
 		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 	)
 	app.stakingXKeeper = stakingx.NewKeeper(
-		app.paramsKeeper.Subspace(stakingx.DefaultParamspace))
+		app.paramsKeeper.Subspace(stakingx.DefaultParamspace), &stakingKeeper, app.distrKeeper)
+
+	app.slashingKeeper = slashing.NewKeeper(
+		app.cdc,
+		app.keySlashing,
+		app.stakingXKeeper, app.paramsKeeper.Subspace(slashing.DefaultParamspace),
+		slashing.DefaultCodespace,
+	)
 	app.incentiveKeeper = incentive.NewKeeper(
 		app.feeCollectionKeeper, app.bankKeeper,
 	)
@@ -228,6 +222,13 @@ func (app *CetChainApp) initKeepers() {
 		app.feeCollectionKeeper,
 		app.cdc,
 		app.paramsKeeper.Subspace(market.StoreKey),
+	)
+
+	// register the staking hooks
+	// NOTE: The stakingKeeper above is passed by reference, so that it can be
+	// modified like below:
+	app.stakingKeeper = *stakingKeeper.SetHooks(
+		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
 	)
 
 }
