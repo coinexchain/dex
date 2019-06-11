@@ -69,8 +69,8 @@ var (
 	haveCetAddress            = getAddr("000001")
 	notHaveCetAddress         = getAddr("000002")
 	forbidAddr                = getAddr("000003")
-	stock                     = "usdt"
-	money                     = "eos"
+	stock                     = "tusdt"
+	money                     = "teos"
 	OriginHaveCetAmount int64 = 1E13
 	issueAmount         int64 = 210000000000
 )
@@ -214,12 +214,12 @@ func TestMarketInfoSetFailed(t *testing.T) {
 
 	// failed by token not exist
 	failedToken := msgMarket
-	failedToken.Money = "btc"
+	failedToken.Money = "tbtc"
 	ret := input.handler(input.ctx, failedToken)
 	require.Equal(t, CodeInvalidToken, ret.Code, "create market info should failed by token not exist")
 	require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
 
-	failedToken.Stock = "iota"
+	failedToken.Stock = "tiota"
 	failedToken.Money = money
 	ret = input.handler(input.ctx, failedToken)
 	require.Equal(t, CodeInvalidToken, ret.Code, "create market info should failed by token not exist")
