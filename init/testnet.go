@@ -194,12 +194,10 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 		}
 
 		minSelfDel := stakingx.DefaultParams().MinSelfDelegation
-		accTokens := minSelfDel.MulRaw(10)
 		accStakingTokens := minSelfDel.MulRaw(10)
 		accs = append(accs, app.GenesisAccount{
 			Address: addr,
 			Coins: sdk.Coins{
-				sdk.NewCoin(fmt.Sprintf("%stoken", nodeDirName), accTokens),
 				sdk.NewCoin(dex.DefaultBondDenom, accStakingTokens),
 			},
 		})
