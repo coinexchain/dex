@@ -27,7 +27,7 @@ type testInput struct {
 	bk      bank.Keeper
 	bxk     Keeper
 	axk     authx.AccountXKeeper
-	tvk     ExpectedTokenViewKeeper
+	ask     ExpectedAssetStatusKeeper
 	handler sdk.Handler
 }
 
@@ -61,14 +61,14 @@ func setupTestInput() testInput {
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
 	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
-	bxkKeeper := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, fakeTokenViewKeeper{})
+	bxkKeeper := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, fakeAssetStatusKeeper{})
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
 	bxkKeeper.SetParam(ctx, DefaultParams())
 
 	handler := NewHandler(bxkKeeper)
-	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, tvk: fakeTokenViewKeeper{}, handler: handler}
+	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, ask: fakeAssetStatusKeeper{}, handler: handler}
 }
 
 func TestHandlerMsgSend(t *testing.T) {

@@ -17,12 +17,12 @@ type Keeper struct {
 	bk            bank.BaseKeeper
 	ak            auth.AccountKeeper
 	fck           auth.FeeCollectionKeeper
-	tvk           ExpectedTokenViewKeeper
+	ask           ExpectedAssetStatusKeeper
 }
 
 func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	bk bank.BaseKeeper, ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
-	tvk ExpectedTokenViewKeeper) Keeper {
+	ask ExpectedAssetStatusKeeper) Keeper {
 
 	return Keeper{
 		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
@@ -30,7 +30,7 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 		bk:            bk,
 		ak:            ak,
 		fck:           fck,
-		tvk:           tvk,
+		ask:           ask,
 	}
 }
 

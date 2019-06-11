@@ -22,12 +22,12 @@ import (
 	"github.com/coinexchain/dex/types"
 )
 
-type fakeTokenViewKeeper struct{}
+type fakeAssetStatusKeeper struct{}
 
-func (k fakeTokenViewKeeper) IsTokenForbidden(ctx sdk.Context, symbol string) bool {
+func (k fakeAssetStatusKeeper) IsTokenForbidden(ctx sdk.Context, symbol string) bool {
 	return false
 }
-func (k fakeTokenViewKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool {
+func (k fakeAssetStatusKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool {
 	return false
 }
 
@@ -53,7 +53,7 @@ func defaultContext() (sdk.Context, params.Keeper) {
 func TestParamGetSet(t *testing.T) {
 	ctx, paramsKeeper := defaultContext()
 	subspace := paramsKeeper.Subspace(DefaultParamspace)
-	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{}, fakeTokenViewKeeper{})
+	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{}, fakeAssetStatusKeeper{})
 
 	//expect DefaultActivationFees=1
 	defaultParam := DefaultParams()
