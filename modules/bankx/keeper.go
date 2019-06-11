@@ -92,6 +92,15 @@ func (k Keeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 	return err
 }
 
+func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	if _, _, err := k.bk.SubtractCoins(ctx, addr, amt); err != nil {
+		return err
+	}
+
+	k.fck.AddCollectedFees(ctx, amt)
+	return nil
+}
+
 func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddress) bool {
 	for _, coin := range amt {
 		if k.ask.IsForbiddenByTokenIssuer(ctx, coin.Denom, addr) || k.ask.IsTokenForbidden(ctx, coin.Denom) {

@@ -146,12 +146,7 @@ func (k Keeper) GetMarketInfo(ctx sdk.Context, symbol string) (MarketInfo, error
 }
 
 func (k Keeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if err := k.bnk.SubtractCoins(ctx, addr, amt); err != nil {
-		return err
-	}
-
-	k.feeKeeper.AddCollectedFees(ctx, amt)
-	return nil
+	return k.bnk.DeductFee(ctx, addr, amt)
 }
 
 // -----------------------------------------------------------------------------
