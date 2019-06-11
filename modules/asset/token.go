@@ -135,7 +135,7 @@ func (t *BaseToken) Validate() error {
 
 func (t *BaseToken) SetName(name string) error {
 	if utf8.RuneCountInString(name) > 32 {
-		return errors.New("token name limited to 32 unicode characters")
+		return errors.New("token name is limited to 32 unicode characters")
 	}
 
 	t.Name = name
@@ -179,7 +179,7 @@ func (t *BaseToken) SetTotalSupply(amt int64) error {
 		return errors.New("token total supply before 1e8 boosting should be less than 90 billion")
 	}
 	if amt <= 0 {
-		return errors.New("token total supply must a positive")
+		return errors.New("token total supply must be positive")
 	}
 	t.TotalSupply = amt
 	return nil

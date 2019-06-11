@@ -51,7 +51,7 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 			"case-name1",
 			NewMsgIssueToken("123456789012345678901234567890123", "coin", 100000, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenName("token name limited to 32 unicode characters"),
+			ErrorInvalidTokenName("token name is limited to 32 unicode characters"),
 		},
 		{
 			"case-symbol1",
@@ -87,7 +87,7 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 			"case-totalSupply2",
 			NewMsgIssueToken("name", "coin", -1, tAccAddr,
 				false, false, false, false),
-			ErrorInvalidTokenSupply("token total supply must a positive"),
+			ErrorInvalidTokenSupply("token total supply must be positive"),
 		},
 	}
 
