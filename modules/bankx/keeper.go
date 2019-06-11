@@ -52,18 +52,10 @@ func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddres
 }
 
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	acc := k.ak.GetAccount(ctx, addr)
-	if acc == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
+	_, _, err := k.bk.SubtractCoins(ctx, addr, amt)
+	if err != nil {
+		return err
 	}
-
-	newCoins, neg := acc.GetCoins().SafeSub(amt)
-	if neg {
-		return sdk.ErrInsufficientCoins("account has insufficient coins to freeze")
-	}
-
-	acc.SetCoins(newCoins)
-	k.ak.SetAccount(ctx, acc)
 
 	accx := k.axk.GetOrCreateAccountX(ctx, addr)
 	frozenCoins := accx.FrozenCoins.Add(amt)
@@ -87,10 +79,10 @@ func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 	accx.FrozenCoins = frozenCoins
 	k.axk.SetAccountX(ctx, accx)
 
-	acc := k.ak.GetAccount(ctx, addr)
-	newcoins := acc.GetCoins().Add(amt)
-	acc.SetCoins(newcoins)
-	k.ak.SetAccount(ctx, acc)
+	_, _, err := k.bk.AddCoins(ctx, addr, amt)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

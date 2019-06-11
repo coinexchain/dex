@@ -125,7 +125,7 @@ func TestFreezeUnFreezeInvalidAccount(t *testing.T) {
 
 	freezeCoins := types.NewCetCoins(500000000)
 	err := input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
-	require.Equal(t, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", myaddr)), err)
+	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds;  < 500000000cet"), err)
 
 	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, freezeCoins)
 	require.Equal(t, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", myaddr)), err)
@@ -138,7 +138,7 @@ func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {
 
 	InvalidFreezeCoins := types.NewCetCoins(50)
 	err := input.bxk.FreezeCoins(input.ctx, myaddr, InvalidFreezeCoins)
-	require.Equal(t, sdk.ErrInsufficientCoins("account has insufficient coins to freeze"), err)
+	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds; 10cet < 50cet"), err)
 
 	freezeCoins := types.NewCetCoins(5)
 	err = input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
