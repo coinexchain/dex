@@ -17,16 +17,23 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
-	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/coinexchain/dex/types"
 )
 
+type fakeTokenViewKeeper struct{}
+
+func (k fakeTokenViewKeeper) IsTokenForbidden(ctx sdk.Context, symbol string) bool {
+	return false
+}
+func (k fakeTokenViewKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool {
+	return false
+}
+
 var myaddr = testutil.ToAccAddress("myaddr")
 
 func defaultContext() (sdk.Context, params.Keeper) {
-
 	cdc := codec.New()
 	skey := sdk.NewKVStoreKey("test")
 	tkey := sdk.NewTransientStoreKey("transient_test")
@@ -44,10 +51,9 @@ func defaultContext() (sdk.Context, params.Keeper) {
 }
 
 func TestParamGetSet(t *testing.T) {
-
 	ctx, paramsKeeper := defaultContext()
 	subspace := paramsKeeper.Subspace(DefaultParamspace)
-	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{}, asset.TokenKeeper{})
+	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{}, fakeTokenViewKeeper{})
 
 	//expect DefaultActivationFees=1
 	defaultParam := DefaultParams()
