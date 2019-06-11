@@ -505,6 +505,6 @@ func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefix []byte, addr string) er
 	return nil
 }
 
-func (tk TokenKeeper) GetReservedSymbol() []string {
+func (tk TokenKeeper) GetReservedSymbols() []string {
 	return reserved
 }

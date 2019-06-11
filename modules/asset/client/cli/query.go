@@ -151,24 +151,24 @@ $ cetcli query asset forbid-addr abc
 	return cmd
 }
 
-// GetReservedSymbolCmd returns reserved symbol list
-func GetReservedSymbolCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+// GetReservedSymbolsCmd returns reserved symbol list
+func GetReservedSymbolsCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "reserved-symbol",
-		Short: "Query reserved symbol",
+		Use:   "reserved-symbols",
+		Short: "Query reserved symbols",
 		Args:  cobra.ExactArgs(0),
 		Long: strings.TrimSpace(
-			fmt.Sprintf(`Query reserved symbol list".
+			fmt.Sprintf(`Query reserved symbols list".
 
 Example:
-$ cetcli query asset reserved-symbol
+$ cetcli query asset reserved-symbols
 `,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryReservedSymbol)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryReservedSymbols)
 			res, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err

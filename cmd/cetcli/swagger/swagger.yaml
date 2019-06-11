@@ -2398,14 +2398,14 @@ paths:
     get:
       tags:
         - ICS100
-      summary: List reserved symbol
-      description: List all reserved symbol
-      operationId: getReservedSymbol
+      summary: List reserved symbols
+      description: List all reserved symbols
+      operationId: getReservedSymbols
       produces:
         - application/json
       responses:
         200:
-          description: All reserved symbol
+          description: All reserved symbols
           schema:
             type: string
         500:

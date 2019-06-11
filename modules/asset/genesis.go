@@ -55,6 +55,13 @@ type GenesisState struct {
 	ForbidAddr []string `json:"forbid_addr"`
 }
 
+func init() {
+	reservedSymbolMap = make(map[string]int)
+	for i, symbol := range reserved {
+		reservedSymbolMap[symbol] = i
+	}
+}
+
 // NewGenesisState - Create a new genesis state
 func NewGenesisState(params Params, tokens []Token, whitelist []string, forbidAddr []string) GenesisState {
 	return GenesisState{
@@ -88,11 +95,6 @@ func InitGenesis(ctx sdk.Context, tk TokenKeeper, data GenesisState) {
 		if err := tk.setAddrKey(ctx, ForbidAddrKeyPrefix, addr); err != nil {
 			panic(err)
 		}
-	}
-
-	reservedSymbolMap = make(map[string]int)
-	for i, symbol := range reserved {
-		reservedSymbolMap[symbol] = i
 	}
 }
 

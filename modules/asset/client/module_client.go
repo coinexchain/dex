@@ -33,7 +33,7 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 		assCli.GetTokenListCmd(mc.storeKey, mc.cdc),
 		assCli.GetWhitelistCmd(mc.storeKey, mc.cdc),
 		assCli.GetForbiddenAddrCmd(mc.storeKey, mc.cdc),
-		assCli.GetReservedSymbolCmd(mc.storeKey, mc.cdc),
+		assCli.GetReservedSymbolsCmd(mc.storeKey, mc.cdc),
 	)...)
 
 	return assQueryCmd

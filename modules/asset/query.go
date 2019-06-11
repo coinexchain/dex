@@ -11,11 +11,11 @@ import (
 
 // query endpoints supported by the asset Querier
 const (
-	QueryToken          = "token-info"
-	QueryTokenList      = "token-list"
-	QueryWhitelist      = "token-whitelist"
-	QueryForbiddenAddr  = "addr-forbidden"
-	QueryReservedSymbol = "reserved-symbol"
+	QueryToken           = "token-info"
+	QueryTokenList       = "token-list"
+	QueryWhitelist       = "token-whitelist"
+	QueryForbiddenAddr   = "addr-forbidden"
+	QueryReservedSymbols = "reserved-symbols"
 )
 
 // creates a querier for asset REST endpoints
@@ -30,8 +30,8 @@ func NewQuerier(tk TokenKeeper, cdc *codec.Codec) sdk.Querier {
 			return queryWhitelist(ctx, req, tk)
 		case QueryForbiddenAddr:
 			return queryForbiddenAddr(ctx, req, tk)
-		case QueryReservedSymbol:
-			return queryReservedSymbol(ctx, req, tk)
+		case QueryReservedSymbols:
+			return queryReservedSymbols(ctx, req, tk)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown asset query endpoint")
 		}
@@ -129,8 +129,8 @@ func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) 
 	return bz, nil
 }
 
-func queryReservedSymbol(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
-	bz, err := codec.MarshalJSONIndent(tk.cdc, tk.GetReservedSymbol())
+func queryReservedSymbols(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
+	bz, err := codec.MarshalJSONIndent(tk.cdc, tk.GetReservedSymbols())
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
