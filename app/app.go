@@ -213,7 +213,7 @@ func (app *CetChainApp) initKeepers() {
 		app.cdc,
 		app.keyAsset,
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
-		app.accountKeeper, app.feeCollectionKeeper,
+		app.bankKeeper, app.feeCollectionKeeper,
 	)
 	app.bankxKeeper = bankx.NewKeeper(
 		app.paramsKeeper.Subspace(bankx.DefaultParamspace),

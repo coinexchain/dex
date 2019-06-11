@@ -1,6 +1,7 @@
 package asset
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -51,6 +52,10 @@ func setupTestInput() testInput {
 		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(auth.DefaultParamspace),
 		auth.ProtoBaseAccount,
 	)
+	bk := bank.NewBaseKeeper(
+		ak,
+		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(bank.DefaultParamspace),
+		sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(
 		cdc,
 		fckCapKey,
@@ -59,8 +64,7 @@ func setupTestInput() testInput {
 		cdc,
 		assetCapKey,
 		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(DefaultParamspace),
-		ak,
-		fck,
+		bk, fck,
 	)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())

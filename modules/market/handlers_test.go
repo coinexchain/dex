@@ -92,10 +92,11 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	//create auth, asset keeper
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, params.NewKeeper(cdc, keys.keyParams,
 		keys.tkeyParams).Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
-
+	bk := bank.NewBaseKeeper(ak,
+		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, keys.fckCapKey)
 	tk := asset.NewKeeper(cdc, keys.assetCapKey, params.NewKeeper(cdc, keys.keyParams,
-		keys.tkeyParams).Subspace(asset.DefaultParamspace), ak, fck)
+		keys.tkeyParams).Subspace(asset.DefaultParamspace), bk, fck)
 	tk.SetParams(ctx, asset.DefaultParams())
 
 	// create an account by auth keeper
@@ -154,7 +155,7 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) Expec
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, keys.fckCapKey)
 	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
-	ask := asset.NewKeeper(cdc, keys.assetCapKey, paramsKeeper.Subspace(asset.DefaultParamspace), ak, fck)
+	ask := asset.NewKeeper(cdc, keys.assetCapKey, paramsKeeper.Subspace(asset.DefaultParamspace), bk, fck)
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, ask)
 	bk.SetSendEnabled(ctx, true)
 	bxkKeeper.SetParam(ctx, bankx.DefaultParams())

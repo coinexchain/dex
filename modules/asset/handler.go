@@ -1,13 +1,10 @@
 package asset
 
 import (
-	"fmt"
 	"strconv"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
 	"github.com/coinexchain/dex/modules/asset/tags"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewHandler returns a handler for "asset" type messages.
@@ -42,75 +39,19 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 	}
 }
 
-func setCoins(ctx sdk.Context, ak auth.AccountKeeper, acc auth.Account, coins sdk.Coins) sdk.Error {
-	if !coins.IsValid() {
-		return sdk.ErrInvalidCoins(coins.String())
-	}
-
-	err := acc.SetCoins(coins)
-	if err != nil {
-		panic(err)
-	}
-	ak.SetAccount(ctx, acc)
-	return nil
-}
-
-func subTokenFee(ctx sdk.Context, tk TokenKeeper, addr sdk.AccAddress, fee sdk.Coins) sdk.Error {
-	acc := tk.ak.GetAccount(ctx, addr)
-	if acc == nil {
-		return sdk.ErrUnknownAddress("no valid address")
-	}
-
-	oldCoins := acc.GetCoins()
-	spendableCoins := acc.SpendableCoins(ctx.BlockHeader().Time)
-
-	_, hasNeg := spendableCoins.SafeSub(fee)
-	if hasNeg {
-		return sdk.ErrInsufficientCoins(
-			fmt.Sprintf("insufficient account funds; %s < %s", spendableCoins, fee))
-	}
-
-	newCoins := oldCoins.Sub(fee) // should not panic as spendable coins was already checked
-	if err := setCoins(ctx, tk.ak, acc, newCoins); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func addTokenCoins(ctx sdk.Context, tk TokenKeeper, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	acc := tk.ak.GetAccount(ctx, addr)
-	if acc == nil {
-		return sdk.ErrUnknownAddress("no valid address")
-	}
-
-	if !amt.IsValid() {
-		return sdk.ErrInvalidCoins(amt.String())
-	}
-
-	oldCoins := acc.GetCoins()
-	newCoins := oldCoins.Add(amt)
-
-	if !newCoins.IsValid() {
-		return sdk.ErrInvalidCoins(fmt.Sprintf("invalid account funds; %s", amt))
-	}
-
-	return setCoins(ctx, tk.ak, acc, newCoins)
-}
-
 // handleMsgIssueToken - Handle MsgIssueToken
 func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk.Result {
+
 	issueFee := tk.GetParams(ctx).IssueTokenFee
-	if err := subTokenFee(ctx, tk, msg.Owner, issueFee); err != nil {
+	if err := tk.SubtractFeeAndCollectFee(ctx, msg.Owner, issueFee); err != nil {
 		return err.Result()
 	}
-	tk.fck.AddCollectedFees(ctx, issueFee)
 
 	if err := tk.IssueToken(ctx, msg); err != nil {
 		return err.Result()
 	}
 
-	if err := addTokenCoins(ctx, tk, msg.Owner, NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
+	if err := tk.AddToken(ctx, msg.Owner, NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
 		return err.Result()
 	}
 

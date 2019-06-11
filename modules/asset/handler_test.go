@@ -23,6 +23,7 @@ func TestInvalidMsg(t *testing.T) {
 
 func TestIssueTokenMsg(t *testing.T) {
 	input := setupTestInput()
+	symbol := "abc"
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryToken),
 		Data: []byte{},
@@ -35,7 +36,7 @@ func TestIssueTokenMsg(t *testing.T) {
 
 	h := NewHandler(input.tk)
 	input.tk.SetParams(input.ctx, DefaultParams())
-	msg := NewMsgIssueToken("ABC Token", "abc", 210000000000, tAccAddr,
+	msg := NewMsgIssueToken("ABC Token", symbol, 210000000000, tAccAddr,
 		false, false, false, false)
 
 	//case 1: issue token need valid account
@@ -43,9 +44,8 @@ func TestIssueTokenMsg(t *testing.T) {
 	require.False(t, res.IsOK())
 
 	//case 2: base-case is ok
-	acc := input.tk.ak.NewAccountWithAddress(input.ctx, tAccAddr)
-	require.NoError(t, acc.SetCoins(types.NewCetCoins(1E18)))
-	input.tk.ak.SetAccount(input.ctx, acc)
+	err = input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
+	require.NoError(t, err)
 
 	res = h(input.ctx, msg)
 	require.True(t, res.IsOK())
@@ -53,9 +53,9 @@ func TestIssueTokenMsg(t *testing.T) {
 	var token Token
 	input.cdc.MustUnmarshalJSON(bz, &token)
 	require.NoError(t, err)
-	require.Equal(t, "abc", token.GetSymbol())
+	require.Equal(t, symbol, token.GetSymbol())
 
 	// get account abc token amount
-	amt := input.tk.ak.GetAccount(input.ctx, tAccAddr).GetCoins().AmountOf("abc").String()
+	amt := input.tk.bk.GetCoins(input.ctx, tAccAddr).AmountOf(symbol).String()
 	require.Equal(t, "210000000000", amt)
 }

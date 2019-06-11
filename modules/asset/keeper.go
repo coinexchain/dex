@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/tendermint/tendermint/libs/bech32"
 	"strings"
@@ -25,8 +26,8 @@ type TokenKeeper struct {
 	// The (unexposed) key used to access the store from the Context.
 	key sdk.StoreKey
 
-	ak  auth.AccountKeeper
-	fck auth.FeeCollectionKeeper
+	bk  bank.Keeper
+	fck ExpectFeeKeeper
 
 	// The codec codec for binary encoding/decoding of token.
 	cdc *codec.Codec
@@ -37,11 +38,11 @@ type TokenKeeper struct {
 // NewKeeper returns a new Keeper that uses go-amino to
 // (binary) encode and decode concrete Token.
 func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramstore params.Subspace,
-	ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) TokenKeeper {
+	bk bank.Keeper, fck auth.FeeCollectionKeeper) TokenKeeper {
 
 	return TokenKeeper{
 		key:           key,
-		ak:            ak,
+		bk:            bk,
 		fck:           fck,
 		cdc:           cdc,
 		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
@@ -507,4 +508,21 @@ func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefix []byte, addr string) er
 
 func (tk TokenKeeper) GetReservedSymbols() []string {
 	return reserved
+}
+
+func (tk TokenKeeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	if _, _, err := tk.bk.SubtractCoins(ctx, addr, amt); err != nil {
+		return err
+	}
+
+	tk.fck.AddCollectedFees(ctx, amt)
+	return nil
+}
+
+func (tk TokenKeeper) AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	if _, _, err := tk.bk.AddCoins(ctx, addr, amt); err != nil {
+		return err
+	}
+
+	return nil
 }
