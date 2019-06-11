@@ -6,6 +6,8 @@ import (
 )
 
 var reservedSymbolMap map[string]int
+
+//nolint
 var reserved = []string{
 	// coin market cap currency 200
 	"btc", "eth", "xrp", "ltc", "bch", "eos", "bnb", "bsv", "usdt", "xlm",

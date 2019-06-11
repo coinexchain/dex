@@ -22,6 +22,7 @@ func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Co
 	r.HandleFunc("/asset/tokens", QueryTokensRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/asset/tokens/{symbol}/whitelist", QueryWhitelistRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/asset/tokens/{symbol}/forbidden/addresses", QueryForbiddenAddrRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/asset/tokens/reserved/symbols", QueryReservedSymbolRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 }
 
 // QueryTokenRequestHandlerFn - query assetREST Handler
@@ -125,6 +126,27 @@ func QueryForbiddenAddrRequestHandlerFn(
 			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 			return
 		}
+		if len(res) == 0 {
+			res = []byte("[]")
+		}
+
+		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+	}
+}
+
+// QueryReservedSymbolRequestHandlerFn - query assetREST Handler
+func QueryReservedSymbolRequestHandlerFn(
+	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryReservedSymbol)
+		res, err := cliCtx.QueryWithData(route, nil)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
 		if len(res) == 0 {
 			res = []byte("[]")
 		}

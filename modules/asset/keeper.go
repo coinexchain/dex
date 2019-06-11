@@ -36,7 +36,6 @@ type TokenKeeper struct {
 
 // NewKeeper returns a new Keeper that uses go-amino to
 // (binary) encode and decode concrete Token.
-// nolint
 func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramstore params.Subspace,
 	ak auth.AccountKeeper, fck auth.FeeCollectionKeeper) TokenKeeper {
 
@@ -504,4 +503,8 @@ func (tk TokenKeeper) setAddrKey(ctx sdk.Context, prefix []byte, addr string) er
 	store.Set(key, []byte{})
 
 	return nil
+}
+
+func (tk TokenKeeper) GetReservedSymbol() []string {
+	return reserved
 }

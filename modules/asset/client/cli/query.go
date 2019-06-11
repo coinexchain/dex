@@ -13,7 +13,6 @@ import (
 
 // GetTokenCmd returns a query token that will display the info of the
 // token at a given token symbol
-// nolint: unparam
 func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "token [symbol]",
@@ -141,6 +140,36 @@ $ cetcli query asset forbid-addr abc
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryForbiddenAddr)
 			res, err := cliCtx.QueryWithData(route, bz)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(res))
+			return nil
+		},
+	}
+	return cmd
+}
+
+// GetReservedSymbolCmd returns reserved symbol list
+func GetReservedSymbolCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "reserved-symbol",
+		Short: "Query reserved symbol",
+		Args:  cobra.ExactArgs(0),
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query reserved symbol list".
+
+Example:
+$ cetcli query asset reserved-symbol
+`,
+			),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryReservedSymbol)
+			res, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err
 			}

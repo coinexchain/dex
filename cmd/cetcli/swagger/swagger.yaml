@@ -2394,6 +2394,22 @@ paths:
             $ref: "#/definitions/StdTx"
         500:
           description: Internal Server Error
+  /asset/tokens/reserved/symbols:
+    get:
+      tags:
+        - ICS100
+      summary: List reserved symbol
+      description: List all reserved symbol
+      operationId: getReservedSymbol
+      produces:
+        - application/json
+      responses:
+        200:
+          description: All reserved symbol
+          schema:
+            type: string
+        500:
+          description: Internal Server Error
 definitions:
   MarketInfo:
     type: object
