@@ -9,6 +9,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
+	"github.com/tendermint/tendermint/types"
 
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/store/errors"
@@ -280,4 +281,62 @@ func TestDelegatorShares(t *testing.T) {
 	require.Equal(t, sdk.NewDec(100), del0.Shares)
 	require.Equal(t, sdk.NewDec(100), del1.Shares)
 	require.Equal(t, sdk.NewDec(200), del2.Shares)
+}
+
+func TestSlashTokensToCommunityPool(t *testing.T) {
+	// prepare accounts
+	valKey, valAcc := testutil.NewBaseAccount(1e9, 0, 0)
+	valAddr := sdk.ValAddress(valAcc.Address)
+
+	// init app
+	app := initApp(func(genState *GenesisState) {
+		addGenesisAccounts(genState, valAcc)
+		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1e8)
+	})
+
+	//begin block at height 1
+	//note: context need to be updated after beginblock
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
+	ctx := app.NewContext(false, abci.Header{Height: 1})
+	app.stakingKeeper.SetPool(ctx, staking.Pool{
+		NotBondedTokens: sdk.NewInt(1e9),
+		BondedTokens:    sdk.ZeroInt(),
+	})
+
+	// create validator & self delegate 1 CET
+	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
+		MinSelfDelegation(1e8).SelfDelegation(1e8).
+		Build()
+	createValTx := testutil.NewStdTxBuilder("c1").
+		Msgs(createValMsg).Fee(10000, 0).AccNumSeqKey(0, 0, valKey).Build()
+	createValResult := app.Deliver(createValTx)
+	require.Equal(t, sdk.CodeOK, createValResult.Code)
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	//create double sign evidence for validator at height 1
+	evidences := []abci.Evidence{
+		{
+			Type:             types.ABCIEvidenceTypeDuplicateVote,
+			Validator:        abci.Validator{Address: valAddr, Power: 100},
+			Height:           1,
+			TotalVotingPower: 100,
+		},
+	}
+
+	//begin block at height 2 with evidences
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 2}, ByzantineValidators: evidences})
+	ctx = app.NewContext(false, abci.Header{Height: 2})
+	app.EndBlock(abci.RequestEndBlock{Height: 2})
+	app.Commit()
+
+	//validator should be slashed
+	validator, _ := app.stakingKeeper.GetValidator(ctx, valAddr)
+	require.Equal(t, sdk.NewInt(95e6), validator.GetTokens())
+
+	//slash tokens should be put into communityPool
+	//total tokens in communityPool should be the sum of slash tokens
+	// together with communityTax fraction of two blocks' accumulated incentives & fees
+	communityPool := app.distrKeeper.GetFeePool(ctx).CommunityPool
+	require.Equal(t, communityPool, sdk.NewDecCoins(dex.NewCetCoins(5000100)))
 }
