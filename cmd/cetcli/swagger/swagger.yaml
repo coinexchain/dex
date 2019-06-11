@@ -120,6 +120,7 @@ paths:
   /blocks/latest:
     get:
       summary: Get the latest block
+      operationId: getLatestBlock
       tags:
         - ICS0
       produces:
@@ -1806,6 +1807,7 @@ paths:
         x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Fee distribution outstanding rewards of a single validator
+      operationId: getOutstandingRewards
       tags:
         - ICS24
       produces:
@@ -1875,6 +1877,7 @@ paths:
   /distribution/community_pool:
     get:
       summary: Community pool parameters
+      operationId: getCommunityPool
       tags:
         - ICS24
       produces:
@@ -2690,9 +2693,12 @@ definitions:
         items:
           type: string
       evidence:
-        type: array
-        items:
-          type: string
+        type: object
+        properties:
+          evidence:
+            type: array
+            items:
+              type: string
       last_commit:
         type: object
         properties:
