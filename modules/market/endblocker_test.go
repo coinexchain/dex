@@ -6,6 +6,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/coinexchain/dex/types"
+
 	"github.com/coinexchain/dex/modules/asset"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -70,16 +72,36 @@ func (k *mocAssertStatusKeeper) GetToken(ctx sdk.Context, symbol string) asset.T
 	return nil
 }
 
+type mockFeeColletKeeper struct {
+	records []string
+}
+
+func (k *mockFeeColletKeeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	fee := fmt.Sprintf("addr : %s, fee : %s", addr, amt.String())
+	k.records = append(k.records, fee)
+	return nil
+}
+
 func TestUnfreezeCoinsForOrder(t *testing.T) {
 	bxKeeper := &mocBankxKeeper{records: make([]string, 0, 10)}
+	mockFeeK := &mockFeeColletKeeper{}
 	order := newTO("00001", 1, 11051, 50, Buy, GTE, 998)
 	order.Freeze = 50
+	order.FrozenFee = 10
+	order.DealStock = 20
 	ctx, _ := newContextAndMarketKey()
-	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, nil)
+	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, mockFeeK)
 	refout := "unfreeze 50 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
 	if refout != bxKeeper.records[0] {
 		t.Errorf("Error in unfreezeCoinsForOrder")
 	}
+
+	coinFee := sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity)).RoundInt64()
+	refout = fmt.Sprintf("addr : %s, fee : %s", order.Sender, types.NewCetCoin(coinFee).String())
+	if refout != mockFeeK.records[0] {
+		t.Errorf("Error in unfreezeCoinsForOrder")
+	}
+
 }
 
 //func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper,
