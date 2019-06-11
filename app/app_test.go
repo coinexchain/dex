@@ -335,8 +335,6 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	require.Equal(t, sdk.NewInt(95e6), validator.GetTokens())
 
 	//slash tokens should be put into communityPool
-	//total tokens in communityPool should be the sum of slash tokens
-	// together with communityTax fraction of two blocks' accumulated incentives & fees
 	communityPool := app.distrKeeper.GetFeePool(ctx).CommunityPool
-	require.Equal(t, communityPool, sdk.NewDecCoins(dex.NewCetCoins(5000100)))
+	require.Equal(t, sdk.NewDecCoins(dex.NewCetCoins(5e6)), communityPool)
 }
