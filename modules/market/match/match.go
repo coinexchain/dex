@@ -240,6 +240,11 @@ func calculateExecutionPrice(highPrice, midPrice, lowPrice sdk.Dec, ppList []Pri
 	if len(ppListSameEA) == 1 {
 		return ppListSameEA[0].price
 	}
+
+	sort.Slice(ppListSameEA, func(i, j int) bool {
+		return ppListSameEA[i].absImbalance < ppListSameEA[j].absImbalance
+	})
+
 	// create a PricePoint list whose every member has the same smallest absImbalance
 	ppListSameImbalance := []*PricePoint{ppListSameEA[0]}
 	for i := 1; i < len(ppListSameEA); i++ {
@@ -249,6 +254,7 @@ func calculateExecutionPrice(highPrice, midPrice, lowPrice sdk.Dec, ppList []Pri
 			break
 		}
 	}
+
 	// if only one price has the smallest absImbalance, then use it
 	if len(ppListSameImbalance) == 1 {
 		return ppListSameImbalance[0].price

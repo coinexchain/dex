@@ -5,6 +5,8 @@ import (
 	"math"
 	"strings"
 
+	"github.com/coinexchain/dex/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/market/match"
@@ -80,7 +82,7 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 		return ErrInvalidTokenIssuer().Result()
 	}
 
-	if msg.Money != "cet" {
+	if msg.Money != types.CET && msg.Stock != types.CET {
 		if _, err := keeper.GetMarketInfo(ctx, msg.Stock+SymbolSeparator+"cet"); err != nil {
 			return sdk.NewError(CodeSpaceMarket, CodeStockNoHaveCetTrade, "The stock(%s) not have cet trade", msg.Stock).Result()
 		}
@@ -99,10 +101,6 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 }
 
 func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sdk.Result {
-	store := ctx.KVStore(keeper.marketKey)
-	if store == nil {
-		return ErrNoStoreEngine().Result()
-	}
 
 	values := strings.Split(msg.Symbol, SymbolSeparator)
 	stock, money := values[0], values[1]
@@ -149,7 +147,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		return ErrInsufficientCoins().Result()
 	}
 
-	if ret := checkMsgCreateOrder(ctx, store, msg, keeper, stock, money); !ret.IsOK() {
+	if ret := checkMsgCreateOrder(ctx, msg, keeper, stock, money); !ret.IsOK() {
 		return ret
 	}
 
@@ -191,7 +189,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
 
-func checkMsgCreateOrder(ctx sdk.Context, store sdk.KVStore, msg MsgCreateOrder, keeper Keeper, stock, money string) sdk.Result {
+func checkMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper, stock, money string) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
@@ -232,7 +230,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 
 	marketParams := keeper.GetParams(ctx)
 	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
-	removeOrder(ctx, ork, keeper.bnk, order, marketParams.FeeForZeroDeal)
+	removeOrder(ctx, ork, keeper.bnk, keeper, order, marketParams.FeeForZeroDeal)
 
 	return sdk.Result{}
 }

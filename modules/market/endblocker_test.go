@@ -3,9 +3,10 @@ package market
 import (
 	"bytes"
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset"
 	"sort"
 	"testing"
+
+	"github.com/coinexchain/dex/modules/asset"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -74,7 +75,7 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 	order := newTO("00001", 1, 11051, 50, Buy, GTE, 998)
 	order.Freeze = 50
 	ctx, _ := newContextAndMarketKey()
-	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0)
+	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, nil)
 	refout := "unfreeze 50 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
 	if refout != bxKeeper.records[0] {
 		t.Errorf("Error in unfreezeCoinsForOrder")

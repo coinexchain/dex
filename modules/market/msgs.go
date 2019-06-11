@@ -123,7 +123,6 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidPrice()
 	}
 
-	//TODO: Add Other checks
 	return nil
 }
 
