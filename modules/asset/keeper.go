@@ -403,20 +403,16 @@ func (tk TokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, a
 		return true
 	}
 
-	for _, forbidden := range tk.GetForbiddenAddr(ctx, symbol) {
-		if addr.Equals(forbidden) {
-			return true
-		}
+	if forbidden := tk.GetAddrKeys(ctx, ForbidAddrKeyPrefix, symbol, addr); forbidden != nil {
+		return true
 	}
 
 	if !token.GetIsForbidden() {
 		return false
 	}
 
-	for _, forbidden := range tk.GetWhitelist(ctx, symbol) {
-		if addr.Equals(forbidden) {
-			return false
-		}
+	if whitelist := tk.GetAddrKeys(ctx, WhitelistKeyPrefix, symbol, addr); whitelist != nil {
+		return false
 	}
 
 	return true
@@ -454,6 +450,16 @@ func (tk TokenKeeper) decodeToken(bz []byte) (token Token) {
 // PrefixAddrStoreKey - return paramsKeyPrefix-Symbol-:-AccAddress KEY
 func PrefixAddrStoreKey(prefix []byte, symbol string, addr sdk.AccAddress) []byte {
 	return append(append(append(prefix, symbol...), SeparateKeyPrefix...), addr...)
+}
+
+// GetAddrKeys return prefix | symbol | addr key. for get whitelists or forbidden addresses string
+func (tk TokenKeeper) GetAddrKeys(ctx sdk.Context, prefix []byte, symbol string, addr sdk.AccAddress) []byte {
+	store := ctx.KVStore(tk.key)
+	key := PrefixAddrStoreKey(prefix, symbol, addr)
+	if store.Has(key) {
+		return key
+	}
+	return nil
 }
 
 // GetAllAddrKeys return [] symbol:addr key. for get all whitelists or forbidden addresses string
