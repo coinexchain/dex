@@ -13,5 +13,5 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, "cet", state.StakingData.Params.BondDenom)
 	require.Equal(t, "cet", state.GovData.DepositParams.MinDeposit[0].Denom)
 	require.Equal(t, "cet", state.CrisisData.ConstantFee.Denom)
-	require.Equal(t, authx.DefaultMinGasPrice, state.AuthXData.Params.MinGasPrice)
+	require.Equal(t, authx.DefaultMinGasPriceLimit, state.AuthXData.Params.MinGasPriceLimit)
 }

@@ -33,8 +33,7 @@ func ExportGenesis(ctx sdk.Context, keeper AccountXKeeper) GenesisState {
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) Validate() error {
-	minGasPrice := data.Params.MinGasPrice
-	if minGasPrice == 0 {
+	if data.Params.MinGasPriceLimit == 0 {
 		return ErrInvalidMinGasPrice("invalid min gas price: 0")
 	}
 	return nil

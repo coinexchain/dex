@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-06-10T22:15:15.648443Z",
+  "genesis_time": "2019-06-12T02:59:48.258769Z",
   "chain_id": "coinexdex",
   "consensus_params": {
     "block": {
@@ -209,7 +209,7 @@
     },
     "authx": {
       "params": {
-        "min_gas_price": "20"
+        "min_gas_price_limit": "20"
       }
     },
     "bank": {
@@ -427,9 +427,9 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "10000000000000000",
-                "delegator_address": "cosmos1tkpgv809xhqukgxt4euf2l5h4z9079fkc8xudn",
-                "validator_address": "cosmosvaloper1tkpgv809xhqukgxt4euf2l5h4z9079fkanjfpq",
-                "pubkey": "cosmosvalconspub1addwnpepqgzp556vt8fdcn5pcpr2lhyzs368sf83gzuttyzvtsqpngu2je6qca9zve2",
+                "delegator_address": "cosmos18grl359g0dnxzqs47chxcedlzeja7vh2deq9hm",
+                "validator_address": "cosmosvaloper18grl359g0dnxzqs47chxcedlzeja7vh2gd5smg",
+                "pubkey": "cosmosvalconspub1addwnpepqdpwaa2muprpdaav7qwrtnhw6k8x74l6w3kag5h7pp0s0du5cuza5q6lehz",
                 "value": {
                   "denom": "cet",
                   "amount": "10000000000000000"
@@ -450,9 +450,9 @@
             {
               "pub_key": {
                 "type": "tendermint/PubKeySecp256k1",
-                "value": "AgQaU0xZ0txOgcBGr9yChHR4JPFAuLWQTFwAGaOKlnQM"
+                "value": "A0Lu9VvgRhb3rPAcNc7u1Y5vV/p0bdRS/ghfB7eUxwXa"
               },
-              "signature": "iAQTc8KbP7xLZi3uKVhuAb7MNW0CSE9SRsjpEKBJRgl0bwpco7UX+m+/glCluEDytYk/nnMsuJ1vM4jWULcUHQ=="
+              "signature": "LOELSFPcRgoIbQa7+Qpw1L6sEWrvqj2pOVAFl5Y81yIJX0U7/I1iMMj9RIYutpU8fwUEbcuzrUD1NcZado8B0Q=="
             }
           ],
           "memo": ""
