@@ -132,7 +132,7 @@ func TestMemo(t *testing.T) {
 	coins := dex.NewCetCoins(100)
 	msgSend := bankx.NewMsgSend(addr, addr, coins, 0)
 	tx2 := testutil.NewStdTxBuilder("c1").
-		Msgs(msgSend).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+		Msgs(msgSend).Fee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
 	result2 := app.Deliver(tx2)
 	require.Equal(t, bankx.CodeMemoMissing, result2.Code)
@@ -176,8 +176,9 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 }
 
 func TestSendFromIncentiveAddr(t *testing.T) {
+	key, _, fromAddr := testutil.KeyPubAddr()
+	incentive.IncentiveCoinsAccAddr = fromAddr
 	toAddr := sdk.AccAddress([]byte("addr"))
-	fromAddr := incentive.IncentiveCoinsAccAddr
 	coins := dex.NewCetCoinsE8(100)
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
@@ -191,9 +192,8 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 	// deliver tx
 	coins = dex.NewCetCoins(1000)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
-	tx := auth.StdTx{
-		Msgs: []sdk.Msg{msg},
-	}
+	tx := testutil.NewStdTxBuilder("c1").
+		Msgs(msg).Fee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeUnauthorized, result.Code)

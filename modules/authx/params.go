@@ -18,7 +18,7 @@ const (
 	// activated account send to other activated addr,  costs 33903 gas
 	// consider it takes 50000 to do transfer/send tx
 	// so, min_gas_price = 100000000sato.CET * 0.01 / 50000 = 20 sato.CET
-	DefaultMinGasPriceLimit uint64 = 20
+	DefaultMinGasPriceLimit int64 = 20
 )
 
 // Parameter keys
@@ -30,7 +30,7 @@ var _ params.ParamSet = &Params{}
 
 // Params defines the parameters for the authx module.
 type Params struct {
-	MinGasPriceLimit uint64 `json:"min_gas_price_limit"`
+	MinGasPriceLimit int64 `json:"min_gas_price_limit"`
 }
 
 // ParamKeyTable for authx module

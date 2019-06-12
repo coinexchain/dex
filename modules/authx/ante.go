@@ -3,6 +3,8 @@ package authx
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 type AnteHelper interface {
@@ -13,18 +15,20 @@ type AnteHelper interface {
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
 func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
-	anteHelper AnteHelper) sdk.AnteHandler {
+	axk AccountXKeeper, anteHelper AnteHelper) sdk.AnteHandler {
 
 	ah := auth.NewAnteHandler(ak, fck)
 	return func(ctx sdk.Context, tx sdk.Tx, simulate bool) (newCtx sdk.Context, res sdk.Result, abort bool) {
 		// run auth.AnteHandler first
 		newCtx, res, abort = ah(ctx, tx, simulate)
+		if !res.IsOK() {
+			return
+		}
 
 		// then, do additional check
 		stdTx, _ := tx.(auth.StdTx)
-		res2 := doAdditionalCheck(ctx, stdTx, anteHelper)
-		if !res2.IsOK() {
-			res = res2
+		if err := doAdditionalCheck(ctx, stdTx, simulate, axk, anteHelper); err != nil {
+			res = err.Result()
 			abort = true
 		}
 
@@ -32,12 +36,29 @@ func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
 	}
 }
 
-func doAdditionalCheck(ctx sdk.Context, tx auth.StdTx, anteHelper AnteHelper) sdk.Result {
+func doAdditionalCheck(ctx sdk.Context, tx auth.StdTx, simulate bool,
+	axk AccountXKeeper, anteHelper AnteHelper) sdk.Error {
+
+	if !simulate {
+		if err := checkGasPrice(ctx, tx, axk); err != nil {
+			return err
+		}
+	}
+
 	memo := tx.Memo
 	for _, msg := range tx.Msgs {
 		if err := anteHelper.CheckMsg(ctx, msg, memo); err != nil {
-			return err.Result()
+			return err
 		}
 	}
-	return sdk.Result{}
+	return nil
+}
+
+func checkGasPrice(ctx sdk.Context, tx auth.StdTx, axk AccountXKeeper) sdk.Error {
+	gasPrice := tx.Fee.GasPrices().AmountOf(dex.CET)
+	minGasPrice := sdk.NewDec(axk.GetParams(ctx).MinGasPriceLimit)
+	if gasPrice.LT(minGasPrice) {
+		//return sdk.ErrInsufficientFee("invalid gas price: " + gasPrice.String())
+	}
+	return nil
 }

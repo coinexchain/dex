@@ -7,9 +7,10 @@ import (
 const (
 	CodeSpaceAuthX sdk.CodespaceType = "authx"
 
-	CodeInvalidMinGasPrice sdk.CodeType = 201
+	CodeInvalidMinGasPriceLimit sdk.CodeType = 201
 )
 
-func ErrInvalidMinGasPrice(msg string) sdk.Error {
-	return sdk.NewError(CodeSpaceAuthX, CodeInvalidMinGasPrice, msg)
+func ErrInvalidMinGasPriceLimit(limit int64) sdk.Error {
+	return sdk.NewError(CodeSpaceAuthX, CodeInvalidMinGasPriceLimit,
+		"invalid minimum gas price limit: %d", limit)
 }

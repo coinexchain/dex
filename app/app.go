@@ -93,6 +93,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
+	//bApp.NewContext(true, abci.Header{}).MinGasPrices()
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod)
 	app.initKeepers()
@@ -100,7 +101,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	app.registerMessageRoutes()
 	app.mountStores()
 
-	ah := authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper,
+	ah := authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper, app.accountXKeeper,
 		newAnteHelper(app.accountXKeeper, app.stakingXKeeper))
 
 	app.SetInitChainer(app.initChainer)

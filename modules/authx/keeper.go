@@ -110,7 +110,6 @@ func (axk AccountXKeeper) GetParams(ctx sdk.Context) (params Params) {
 // Codec
 
 func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax AccountX) {
-
 	err := axk.cdc.UnmarshalBinaryBare(bz, &ax)
 
 	if err != nil {
