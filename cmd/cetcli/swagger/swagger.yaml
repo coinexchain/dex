@@ -1267,6 +1267,7 @@ paths:
     get:
       summary: Query a proposal
       description: Query a proposal by id
+      operationId: getProposalByID
       produces:
         - application/json
       tags:
@@ -1337,6 +1338,7 @@ paths:
     post:
       summary: Deposit tokens to a proposal
       description: Send transaction to deposit tokens to a proposal
+      operationId: depositToProposal
       consumes:
         - application/json
       produces:
@@ -1437,6 +1439,7 @@ paths:
     post:
       summary: Vote a proposal
       description: Send transaction to vote a proposal
+      operationId: voteProposal
       consumes:
         - application/json
       produces:
@@ -1535,6 +1538,7 @@ paths:
     get:
       summary: Query governance deposit parameters
       description: Query governance deposit parameters. The max_deposit_period units are in nanoseconds.
+      operationId: getDepositParameters
       produces:
         - application/json
       tags:
@@ -2794,7 +2798,7 @@ definitions:
     type: object
     properties:
       proposal_id:
-        type: integer
+        type: string
       title:
         type: string
       description:
@@ -2817,7 +2821,7 @@ definitions:
     type: object
     properties:
       proposal_id:
-        type: integer
+        type: string
       proposer:
         type: string
   Deposit:
