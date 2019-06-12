@@ -60,6 +60,7 @@ func printExampleGenesis(cdc *codec.Codec) error {
 func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 	genState := app.NewDefaultGenesisState()
 	genState.Accounts = createGenesisAccounts()
+	genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
 	genState.AssetData = createGenesisAssetData()
 	genState.MarketData = createGenesisMarketData()
 	genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
