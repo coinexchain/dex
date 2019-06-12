@@ -110,7 +110,20 @@ func accAddressFromBech32(address string) sdk.AccAddress {
 }
 
 func createGenesisAssetData() asset.GenesisState {
-	abc := &asset.BaseToken{
+	t0 := &asset.BaseToken{
+		Name:             "CoinEx Chain Native Token",
+		Symbol:           "cet",
+		TotalSupply:      588788547005740000,
+		Owner:            accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Mintable:         false,
+		Burnable:         true,
+		AddrForbiddable:  false,
+		TokenForbiddable: false,
+		TotalBurn:        411211452994260000,
+		TotalMint:        0,
+		IsForbidden:      false,
+	}
+	t1 := &asset.BaseToken{
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
 		TotalSupply:      588788547005740000,
@@ -125,7 +138,7 @@ func createGenesisAssetData() asset.GenesisState {
 	}
 
 	state := asset.DefaultGenesisState()
-	state.Tokens = append(state.Tokens, abc)
+	state.Tokens = append(state.Tokens, t0, t1)
 	return state
 }
 
