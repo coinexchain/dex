@@ -2,10 +2,12 @@ package authx
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"time"
 )
 
 const (
@@ -140,13 +142,13 @@ func (axk AccountXKeeper) RemoveFromUnlockedCoinsQueueByKey(ctx sdk.Context, key
 
 var (
 	PrefixUnlockedCoinsQueue = []byte("UnlockedCoinsQueue")
-	KeyDelimiter             = []byte(":")
+	KeyDelimiter             = []byte(";")
 )
 
 func KeyUnlockedCoinsQueue(unlockedTime int64, address sdk.AccAddress) []byte {
 	return bytes.Join([][]byte{
 		PrefixUnlockedCoinsQueue,
-		int64ToBigEndianBytes(unlockedTime),
+		sdk.FormatTimeBytes(time.Unix(unlockedTime, 0)),
 		address,
 	}, KeyDelimiter)
 }
@@ -154,34 +156,28 @@ func KeyUnlockedCoinsQueue(unlockedTime int64, address sdk.AccAddress) []byte {
 func PrefixUnlockedTimeQueueTime(unlockedTime int64) []byte {
 	return bytes.Join([][]byte{
 		PrefixUnlockedCoinsQueue,
-		int64ToBigEndianBytes(unlockedTime),
+		sdk.FormatTimeBytes(time.Unix(unlockedTime, 0)),
 	}, KeyDelimiter)
-}
-
-func int64ToBigEndianBytes(n int64) []byte {
-	var result [8]byte
-	for i := 0; i < 8; i++ {
-		result[i] = byte(n >> (8 * uint(i)))
-	}
-	return result[:]
 }
 
 func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper auth.AccountKeeper) {
 
 	currentTime := ctx.BlockHeader().Time.Unix()
+	fmt.Println(currentTime)
 	iterator := aux.UnlockedCoinsQueueIterator(ctx, currentTime)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var addr sdk.AccAddress
-		var acc AccountX
-
-		addr = bytes.Split(iterator.Key(), KeyDelimiter)[2]
-		acc, ok := aux.GetAccountX(ctx, addr)
-		if !ok {
-			//always account exist
-			continue
+		fmt.Println(iterator.Key())
+		addr = iterator.Value()
+		if addr != nil {
+			acc, ok := aux.GetAccountX(ctx, addr)
+			if !ok {
+				//always account exist
+				continue
+			}
+			acc.TransferUnlockedCoins(currentTime, ctx, aux, keeper)
+			aux.RemoveFromUnlockedCoinsQueueByKey(ctx, iterator.Key())
 		}
-		acc.TransferUnlockedCoins(currentTime, ctx, aux, keeper)
-		aux.RemoveFromUnlockedCoinsQueueByKey(ctx, iterator.Key())
 	}
 }
