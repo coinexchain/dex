@@ -1,2 +1,2 @@
-run:
-  modules-download-mode: vendor
+#run:
+#  modules-download-mode: vendor
