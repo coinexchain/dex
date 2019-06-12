@@ -27,7 +27,7 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 	coins := dex.NewCetCoins(100000000000)
 	toAddr := sdk.AccAddress([]byte("addr"))
 	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
-	tx := testutil.NewStdTxBuilder("c1").
+	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
@@ -56,7 +56,7 @@ func TestMinGasPriceLimit(t *testing.T) {
 	coins := dex.NewCetCoins(1e8)
 	toAddr := sdk.AccAddress([]byte("addr"))
 	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
-	tx := testutil.NewStdTxBuilder("c1").
+	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(10000000000, 1).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)

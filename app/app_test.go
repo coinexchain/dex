@@ -25,7 +25,13 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
+const testChainID = "c1"
+
 type genesisStateCallback func(state *GenesisState)
+
+func newStdTxBuilder() *testutil.StdTxBuilder {
+	return newStdTxBuilder()
+}
 
 func newApp() *CetChainApp {
 	logger := log.NewNopLogger()
@@ -59,7 +65,7 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 
 	// init chain
 	genStateBytes, _ := app.cdc.MarshalJSON(genState)
-	app.InitChain(abci.RequestInitChain{ChainId: "c1", AppStateBytes: genStateBytes})
+	app.InitChain(abci.RequestInitChain{ChainId: testChainID, AppStateBytes: genStateBytes})
 
 	return app
 }
@@ -104,14 +110,14 @@ func TestSend(t *testing.T) {
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
-	tx := testutil.NewStdTxBuilder("c1").
+	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeType(0), result.Code)
 
 	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
-	tx = testutil.NewStdTxBuilder("c1").
+	tx = newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
 	result = app.Deliver(tx)
@@ -131,14 +137,14 @@ func TestMemo(t *testing.T) {
 
 	// deliver tx
 	msgSetMemoRequired := bankx.NewMsgSetTransferMemoRequired(addr, true)
-	tx1 := testutil.NewStdTxBuilder("c1").
+	tx1 := newStdTxBuilder().
 		Msgs(msgSetMemoRequired).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 	result1 := app.Deliver(tx1)
 	require.Equal(t, errors.CodeOK, result1.Code)
 
 	coins := dex.NewCetCoins(100)
 	msgSend := bankx.NewMsgSend(addr, addr, coins, 0)
-	tx2 := testutil.NewStdTxBuilder("c1").
+	tx2 := newStdTxBuilder().
 		Msgs(msgSend).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
 	result2 := app.Deliver(tx2)
@@ -162,7 +168,7 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 	// deliver tx
 	coins = dex.NewCetCoins(1000)
 	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
-	tx := testutil.NewStdTxBuilder("c1").
+	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
@@ -189,7 +195,7 @@ func TestMinSelfDelegation(t *testing.T) {
 	msg := testutil.NewMsgCreateValidatorBuilder(val0, pubKey0).
 		MinSelfDelegation(400).SelfDelegation(450).
 		Build()
-	tx := testutil.NewStdTxBuilder("c1").
+	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key0).Build()
 
 	result := app.Deliver(tx)
@@ -215,14 +221,14 @@ func TestDelegatorShares(t *testing.T) {
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
 		MinSelfDelegation(1).SelfDelegation(100).
 		Build()
-	createValTx := testutil.NewStdTxBuilder("c1").
+	createValTx := newStdTxBuilder().
 		Msgs(createValMsg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, valKey).Build()
 	createValResult := app.Deliver(createValTx)
 	require.Equal(t, sdk.CodeOK, createValResult.Code)
 
 	// delegator1 delegate 100 CET
 	del1Msg := staking.NewMsgDelegate(del1Acc.Address, valAddr, dex.NewCetCoin(100))
-	del1Tx := testutil.NewStdTxBuilder("c1").
+	del1Tx := newStdTxBuilder().
 		Msgs(del1Msg).GasAndFee(1000000, 100).AccNumSeqKey(1, 0, del1Key).Build()
 	del1Result := app.Deliver(del1Tx)
 	require.Equal(t, sdk.CodeOK, del1Result.Code)
@@ -236,7 +242,7 @@ func TestDelegatorShares(t *testing.T) {
 
 	// delegator2 delegate 150 CET
 	del2Msg := staking.NewMsgDelegate(del2Acc.Address, valAddr, dex.NewCetCoin(150))
-	del2Tx := testutil.NewStdTxBuilder("c1").
+	del2Tx := newStdTxBuilder().
 		Msgs(del2Msg).GasAndFee(1000000, 100).AccNumSeqKey(2, 0, del2Key).Build()
 	del2Result := app.Deliver(del2Tx)
 	require.Equal(t, sdk.CodeOK, del2Result.Code)
@@ -277,7 +283,7 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
 		MinSelfDelegation(1e8).SelfDelegation(1e8).
 		Build()
-	createValTx := testutil.NewStdTxBuilder("c1").
+	createValTx := newStdTxBuilder().
 		Msgs(createValMsg).GasAndFee(1000000, 1).AccNumSeqKey(0, 0, valKey).Build()
 	createValResult := app.Deliver(createValTx)
 	require.Equal(t, sdk.CodeOK, createValResult.Code)
