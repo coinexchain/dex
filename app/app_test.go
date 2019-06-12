@@ -51,7 +51,7 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 
 	// genesis state
 	genState := NewDefaultGenesisState()
-	//genState.AuthXData.Params.MinGasPriceLimit = sdk.MustNewDecFromStr("0.00000001")
+	genState.AuthXData.Params.MinGasPriceLimit = sdk.MustNewDecFromStr("0.00000001")
 	if cb != nil {
 		cb(&genState)
 	}
@@ -309,7 +309,7 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 		MinSelfDelegation(1e8).SelfDelegation(1e8).
 		Build()
 	createValTx := testutil.NewStdTxBuilder("c1").
-		Msgs(createValMsg).GasAndFee(10000, 0).AccNumSeqKey(0, 0, valKey).Build()
+		Msgs(createValMsg).GasAndFee(10000, 1).AccNumSeqKey(0, 0, valKey).Build()
 	createValResult := app.Deliver(createValTx)
 	require.Equal(t, sdk.CodeOK, createValResult.Code)
 	app.EndBlock(abci.RequestEndBlock{Height: 1})
@@ -337,5 +337,5 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 
 	//slash tokens should be put into communityPool
 	communityPool := app.distrKeeper.GetFeePool(ctx).CommunityPool
-	require.Equal(t, sdk.NewDecCoins(dex.NewCetCoins(5e6)), communityPool)
+	require.Equal(t, sdk.NewDecCoins(dex.NewCetCoins(5e6+1)), communityPool)
 }
