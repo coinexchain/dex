@@ -55,10 +55,15 @@ func doAdditionalCheck(ctx sdk.Context, tx auth.StdTx, simulate bool,
 }
 
 func checkGasPrice(ctx sdk.Context, tx auth.StdTx, axk AccountXKeeper) sdk.Error {
+	if ctx.BlockHeader().Height == 0 {
+		// do not check gas price during the genesis block
+		return nil
+	}
+
 	gasPrice := tx.Fee.GasPrices().AmountOf(dex.CET)
 	minGasPrice := axk.GetParams(ctx).MinGasPriceLimit
 	if gasPrice.LT(minGasPrice) {
-		//return ErrGasPriceTooLow(minGasPrice, gasPrice)
+		return ErrGasPriceTooLow(minGasPrice, gasPrice)
 	}
 	return nil
 }
