@@ -8,9 +8,15 @@ const (
 	CodeSpaceAuthX sdk.CodespaceType = "authx"
 
 	CodeInvalidMinGasPriceLimit sdk.CodeType = 201
+	CodeGasPriceTooLow          sdk.CodeType = 202
 )
 
 func ErrInvalidMinGasPriceLimit(limit sdk.Dec) sdk.Error {
 	return sdk.NewError(CodeSpaceAuthX, CodeInvalidMinGasPriceLimit,
 		"invalid minimum gas price limit: "+limit.String())
+}
+
+func ErrGasPriceTooLow(required, actual sdk.Dec) sdk.Error {
+	return sdk.NewError(CodeSpaceAuthX, CodeInvalidMinGasPriceLimit,
+		"gas price too low: %s < %s", actual.String(), required.String())
 }
