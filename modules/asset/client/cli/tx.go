@@ -16,28 +16,28 @@ import (
 )
 
 const (
-	FlagName             = "name"
-	FlagSymbol           = "symbol"
-	FlagTotalSupply      = "total-supply"
-	FlagMintable         = "mintable"
-	FlagBurnable         = "burnable"
-	FlagAddrForbiddable  = "addr-forbiddable"
-	FlagTokenForbiddable = "token-forbiddable"
+	flagName             = "name"
+	flagSymbol           = "symbol"
+	flagTotalSupply      = "total-supply"
+	flagMintable         = "mintable"
+	flagBurnable         = "burnable"
+	flagAddrForbiddable  = "addr-forbiddable"
+	flagTokenForbiddable = "token-forbiddable"
 
-	FlagNewOwner  = "new-owner"
-	FlagAmount    = "amount"
-	FlagWhitelist = "whitelist"
-	FlagAddresses = "addresses"
+	flagNewOwner  = "new-owner"
+	flagAmount    = "amount"
+	flagWhitelist = "whitelist"
+	flagAddresses = "addresses"
 )
 
 var issueTokenFlags = []string{
-	FlagName,
-	FlagSymbol,
-	FlagTotalSupply,
-	FlagMintable,
-	FlagBurnable,
-	FlagAddrForbiddable,
-	FlagTokenForbiddable,
+	flagName,
+	flagSymbol,
+	flagTotalSupply,
+	flagMintable,
+	flagBurnable,
+	flagAddrForbiddable,
+	flagTokenForbiddable,
 }
 
 // IssueTokenCmd will create a issue token tx and sign.
@@ -96,17 +96,16 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 		},
 	}
 
-	cmd.Flags().String(FlagName, "", "Issue token name limited to 32 unicode characters")
-	cmd.Flags().String(FlagSymbol, "", "Issue token symbol limited to [a-z][a-z0-9]{1,7}")
-	cmd.Flags().Int64(FlagTotalSupply, 0, "The total supply for token can have a maximum of "+
+	cmd.Flags().String(flagName, "", "issue token name is limited to 32 unicode characters")
+	cmd.Flags().String(flagSymbol, "", "issue token symbol is limited to [a-z][a-z0-9]{1,7}")
+	cmd.Flags().Int64(flagTotalSupply, 0, "the total supply for token can have a maximum of "+
 		"8 digits of decimal and is boosted by 1e8 in order to store as int64. "+
 		"The amount before boosting should not exceed 90 billion.")
-	cmd.Flags().Bool(FlagMintable, false, "Whether this token could be minted after the issuing")
-	cmd.Flags().Bool(FlagBurnable, true, "Whether this token could be burned")
-	cmd.Flags().Bool(FlagAddrForbiddable, false, " Whether the token holder address can be forbidden by token owner")
-	cmd.Flags().Bool(FlagTokenForbiddable, false, "Whether the token can be forbidden")
+	cmd.Flags().Bool(flagMintable, false, "whether the token could be minted")
+	cmd.Flags().Bool(flagBurnable, true, "whether the token could be burned")
+	cmd.Flags().Bool(flagAddrForbiddable, false, "whether the token holder address can be forbidden by token owner")
+	cmd.Flags().Bool(flagTokenForbiddable, false, "whether the token can be forbidden")
 
-	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range issueTokenFlags {
 		_ = cmd.MarkFlagRequired(flag)
 	}
@@ -115,8 +114,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 }
 
 var transferOwnershipFlags = []string{
-	FlagSymbol,
-	FlagNewOwner,
+	flagSymbol,
+	flagNewOwner,
 }
 
 // TransferOwnershipCmd will create a transfer token  owner tx and sign.
@@ -154,8 +153,8 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token`s ownership be transferred")
-	cmd.Flags().String(FlagNewOwner, "", "Who do you want to transfer to ?")
+	cmd.Flags().String(flagSymbol, "", "which token`s ownership be transferred")
+	cmd.Flags().String(flagNewOwner, "", "who do you want to transfer to ?")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range transferOwnershipFlags {
@@ -166,8 +165,8 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 }
 
 var mintTokenFlags = []string{
-	FlagSymbol,
-	FlagAmount,
+	flagSymbol,
+	flagAmount,
 }
 
 // MintTokenCmd will create a mint token tx and sign.
@@ -205,8 +204,8 @@ $ cetcli tx asset mint-token --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token will be minted")
-	cmd.Flags().String(FlagAmount, "", "The amount of mint")
+	cmd.Flags().String(flagSymbol, "", "which token will be minted")
+	cmd.Flags().String(flagAmount, "", "the amount of mint")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range mintTokenFlags {
@@ -217,8 +216,8 @@ $ cetcli tx asset mint-token --symbol="abc" \
 }
 
 var burnTokenFlags = []string{
-	FlagSymbol,
-	FlagAmount,
+	flagSymbol,
+	flagAmount,
 }
 
 // BurnTokenCmd will create a burn token tx and sign.
@@ -256,8 +255,8 @@ $ cetcli tx asset burn-token --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token will be burned")
-	cmd.Flags().String(FlagAmount, "", "The amount of burn")
+	cmd.Flags().String(flagSymbol, "", "which token will be burned")
+	cmd.Flags().String(flagAmount, "", "the amount of burn")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range burnTokenFlags {
@@ -268,7 +267,7 @@ $ cetcli tx asset burn-token --symbol="abc" \
 }
 
 var symbolFlags = []string{
-	FlagSymbol,
+	flagSymbol,
 }
 
 // ForbidTokenCmd will create a Forbid token tx and sign.
@@ -305,7 +304,7 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token will be forbidden")
+	cmd.Flags().String(flagSymbol, "", "which token will be forbidden")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range symbolFlags {
@@ -349,7 +348,7 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token will be un forbidden")
+	cmd.Flags().String(flagSymbol, "", "which token will be un forbidden")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range symbolFlags {
@@ -360,8 +359,8 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 }
 
 var whitelistFlags = []string{
-	FlagSymbol,
-	FlagWhitelist,
+	flagSymbol,
+	flagWhitelist,
 }
 
 // AddTokenWhitelistCmd will create a add token whitelist tx and sign.
@@ -400,8 +399,8 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token whitelist be added")
-	cmd.Flags().String(FlagWhitelist, "", "add token whitelist addresses")
+	cmd.Flags().String(flagSymbol, "", "which token whitelist be added")
+	cmd.Flags().String(flagWhitelist, "", "add token whitelist addresses")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range whitelistFlags {
@@ -447,8 +446,8 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token whitelist be remove")
-	cmd.Flags().String(FlagWhitelist, "", "remove token whitelist addresses")
+	cmd.Flags().String(flagSymbol, "", "which token whitelist be remove")
+	cmd.Flags().String(flagWhitelist, "", "remove token whitelist addresses")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range whitelistFlags {
@@ -459,8 +458,8 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 }
 
 var addressesFlags = []string{
-	FlagSymbol,
-	FlagAddresses,
+	flagSymbol,
+	flagAddresses,
 }
 
 // ForbidAddrCmd will create forbid address tx and sign.
@@ -499,8 +498,8 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token address be forbidden")
-	cmd.Flags().String(FlagAddresses, "", "forbid addresses")
+	cmd.Flags().String(flagSymbol, "", "which token address be forbidden")
+	cmd.Flags().String(flagAddresses, "", "forbid addresses")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range addressesFlags {
@@ -546,8 +545,8 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "Which token address be un-forbidden")
-	cmd.Flags().String(FlagAddresses, "", "unforbid addresses")
+	cmd.Flags().String(flagSymbol, "", "which token address be un-forbidden")
+	cmd.Flags().String(flagAddresses, "", "unforbid addresses")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range addressesFlags {

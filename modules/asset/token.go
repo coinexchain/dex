@@ -12,6 +12,7 @@ import (
 // Token is an interface used to store asset at a given token within state.
 // Many complex conditions can be used in the concrete struct which implements Token.
 type Token interface {
+	GetName() string
 	SetName(string) error
 
 	GetSymbol() string
@@ -33,7 +34,7 @@ type Token interface {
 	SetAddrForbiddable(bool)
 
 	GetTokenForbiddable() bool
-	setTokenForbiddable(bool)
+	SetTokenForbiddable(bool)
 
 	GetTotalBurn() int64
 	SetTotalBurn(int64) error
@@ -95,7 +96,7 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	t.SetMintable(mintable)
 	t.SetBurnable(burnable)
 	t.SetAddrForbiddable(addrForbiddable)
-	t.setTokenForbiddable(tokenForbiddable)
+	t.SetTokenForbiddable(tokenForbiddable)
 
 	if err := t.SetTotalMint(0); err != nil {
 		return nil, ErrorInvalidTokenMint(err.Error())
@@ -129,6 +130,10 @@ func (t *BaseToken) Validate() error {
 	}
 
 	return nil
+}
+
+func (t BaseToken) GetName() string {
+	return t.Name
 }
 
 func (t *BaseToken) SetName(name string) error {
@@ -224,7 +229,7 @@ func (t BaseToken) GetTokenForbiddable() bool {
 	return t.TokenForbiddable
 }
 
-func (t *BaseToken) setTokenForbiddable(enable bool) {
+func (t *BaseToken) SetTokenForbiddable(enable bool) {
 	t.TokenForbiddable = enable
 }
 

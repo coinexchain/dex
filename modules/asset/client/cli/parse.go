@@ -25,14 +25,14 @@ func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 	}
 
 	msg := asset.NewMsgIssueToken(
-		viper.GetString(FlagName),
-		viper.GetString(FlagSymbol),
-		viper.GetInt64(FlagTotalSupply),
+		viper.GetString(flagName),
+		viper.GetString(flagSymbol),
+		viper.GetInt64(flagTotalSupply),
 		owner,
-		viper.GetBool(FlagMintable),
-		viper.GetBool(FlagBurnable),
-		viper.GetBool(FlagAddrForbiddable),
-		viper.GetBool(FlagTokenForbiddable))
+		viper.GetBool(flagMintable),
+		viper.GetBool(flagBurnable),
+		viper.GetBool(flagAddrForbiddable),
+		viper.GetBool(flagTokenForbiddable))
 
 	return &msg, nil
 }
@@ -42,9 +42,9 @@ func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransfe
 		return nil, err
 	}
 
-	newOwner, _ := sdk.AccAddressFromBech32(viper.GetString(FlagNewOwner))
+	newOwner, _ := sdk.AccAddressFromBech32(viper.GetString(flagNewOwner))
 	msg := asset.NewMsgTransferOwnership(
-		viper.GetString(FlagSymbol),
+		viper.GetString(flagSymbol),
 		orginalOwner,
 		newOwner,
 	)
@@ -58,8 +58,8 @@ func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
 	}
 
 	msg := asset.NewMsgMintToken(
-		viper.GetString(FlagSymbol),
-		viper.GetInt64(FlagAmount),
+		viper.GetString(flagSymbol),
+		viper.GetInt64(flagAmount),
 		owner,
 	)
 
@@ -72,8 +72,8 @@ func parseBurnTokenFlags(owner sdk.AccAddress) (*asset.MsgBurnToken, error) {
 	}
 
 	msg := asset.NewMsgBurnToken(
-		viper.GetString(FlagSymbol),
-		viper.GetInt64(FlagAmount),
+		viper.GetString(flagSymbol),
+		viper.GetInt64(flagAmount),
 		owner,
 	)
 
@@ -86,7 +86,7 @@ func parseForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgForbidToken, error) 
 	}
 
 	msg := asset.NewMsgForbidToken(
-		viper.GetString(FlagSymbol),
+		viper.GetString(flagSymbol),
 		owner,
 	)
 
@@ -99,7 +99,7 @@ func parseUnForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgUnForbidToken, err
 	}
 
 	msg := asset.NewMsgUnForbidToken(
-		viper.GetString(FlagSymbol),
+		viper.GetString(flagSymbol),
 		owner,
 	)
 
@@ -115,7 +115,7 @@ func parseAddWhitelistFlags(owner sdk.AccAddress) (*asset.MsgAddTokenWhitelist, 
 		return nil, err
 	}
 
-	str := strings.Split(viper.GetString(FlagWhitelist), ",")
+	str := strings.Split(viper.GetString(flagWhitelist), ",")
 	for _, s := range str {
 		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
 			return nil, err
@@ -124,7 +124,7 @@ func parseAddWhitelistFlags(owner sdk.AccAddress) (*asset.MsgAddTokenWhitelist, 
 	}
 
 	msg := asset.NewMsgAddTokenWhitelist(
-		viper.GetString(FlagSymbol),
+		viper.GetString(flagSymbol),
 		owner,
 		whitelist,
 	)
@@ -141,7 +141,7 @@ func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*asset.MsgRemoveTokenWhite
 		return nil, err
 	}
 
-	str := strings.Split(viper.GetString(FlagWhitelist), ",")
+	str := strings.Split(viper.GetString(flagWhitelist), ",")
 	for _, s := range str {
 		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
 			return nil, err
@@ -150,7 +150,7 @@ func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*asset.MsgRemoveTokenWhite
 	}
 
 	msg := asset.NewMsgRemoveTokenWhitelist(
-		viper.GetString(FlagSymbol),
+		viper.GetString(flagSymbol),
 		owner,
 		whitelist,
 	)
@@ -167,7 +167,7 @@ func parseForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgForbidAddr, error) {
 		return nil, err
 	}
 
-	str := strings.Split(viper.GetString(FlagAddresses), ",")
+	str := strings.Split(viper.GetString(flagAddresses), ",")
 	for _, s := range str {
 		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
 			return nil, err
@@ -176,7 +176,7 @@ func parseForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgForbidAddr, error) {
 	}
 
 	msg := asset.NewMsgForbidAddr(
-		viper.GetString(FlagSymbol),
+		viper.GetString(flagSymbol),
 		owner,
 		addresses,
 	)
@@ -193,7 +193,7 @@ func parseUnForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgUnForbidAddr, error
 		return nil, err
 	}
 
-	str := strings.Split(viper.GetString(FlagAddresses), ",")
+	str := strings.Split(viper.GetString(flagAddresses), ",")
 	for _, s := range str {
 		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
 			return nil, err
@@ -202,7 +202,7 @@ func parseUnForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgUnForbidAddr, error
 	}
 
 	msg := asset.NewMsgUnForbidAddr(
-		viper.GetString(FlagSymbol),
+		viper.GetString(flagSymbol),
 		owner,
 		addresses,
 	)
