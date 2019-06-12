@@ -2,7 +2,10 @@ package asset
 
 import (
 	"errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 // only coinexdex owner can issue reserved symbol token
@@ -75,7 +78,24 @@ func NewGenesisState(params Params, tokens []Token, whitelist []string, forbidAd
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParams(), []Token{}, []string{}, []string{})
+	cet := createCetToken()
+	return NewGenesisState(DefaultParams(), []Token{cet}, []string{}, []string{})
+}
+
+func createCetToken() Token {
+	cetOwnerAddr, err := sdk.AccAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v")
+	if err != nil {
+		panic(err)
+	}
+
+	cet, err := NewToken("CoinEx Chain Native Token", dex.CET,
+		588788547005740000, cetOwnerAddr, false, true, false, false)
+	if err != nil {
+		panic(err)
+	}
+
+	cet.SetTotalBurn(411211452994260000)
+	return cet
 }
 
 // InitGenesis - Init store state from genesis data
