@@ -33,7 +33,7 @@ func (builder *StdTxBuilder) AccNumSeqKey(num, seq uint64, key crypto.PrivKey) *
 	return builder
 }
 func (builder *StdTxBuilder) GasAndFee(gas uint64, cet int64) *StdTxBuilder {
-	builder.fee = auth.NewStdFee(1000000, dex.NewCetCoins(cet))
+	builder.fee = auth.NewStdFee(gas, dex.NewCetCoins(cet))
 	return builder
 }
 

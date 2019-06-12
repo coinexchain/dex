@@ -81,13 +81,6 @@ func cetToken() asset.Token {
 	}
 }
 
-//func TestMinGasPrice(t *testing.T) {
-//	app := newApp()
-//	ctx := app.NewContext(true, abci.Header{})
-//	minGasPrice := ctx.MinGasPrices()
-//	require.False(t, minGasPrice.IsZero())
-//}
-
 func TestRouter(t *testing.T) {
 	bApp := bam.NewBaseApp(appName, nil, nil, nil)
 	app := &CetChainApp{BaseApp: bApp}
@@ -285,7 +278,7 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 		MinSelfDelegation(1e8).SelfDelegation(1e8).
 		Build()
 	createValTx := testutil.NewStdTxBuilder("c1").
-		Msgs(createValMsg).GasAndFee(10000, 1).AccNumSeqKey(0, 0, valKey).Build()
+		Msgs(createValMsg).GasAndFee(1000000, 1).AccNumSeqKey(0, 0, valKey).Build()
 	createValResult := app.Deliver(createValTx)
 	require.Equal(t, sdk.CodeOK, createValResult.Code)
 	app.EndBlock(abci.RequestEndBlock{Height: 1})
