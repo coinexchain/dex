@@ -200,7 +200,7 @@ func createExampleGenTx(cdc *codec.Codec) json.RawMessage {
 	stdTx := testutil.NewStdTxBuilder("coinexdex").
 		Msgs(msg).
 		AccNumSeqKey(0, 0, key).
-		Fee(200000, 10).
+		GasAndFee(200000, 10).
 		Build()
 
 	txBytes, err := codec.MarshalJSONIndent(cdc, stdTx)
