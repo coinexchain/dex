@@ -3,8 +3,6 @@ package app
 import (
 	"testing"
 
-	"github.com/coinexchain/dex/modules/authx"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,5 +11,5 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, "cet", state.StakingData.Params.BondDenom)
 	require.Equal(t, "cet", state.GovData.DepositParams.MinDeposit[0].Denom)
 	require.Equal(t, "cet", state.CrisisData.ConstantFee.Denom)
-	require.Equal(t, authx.DefaultMinGasPriceLimit, state.AuthXData.Params.MinGasPriceLimit)
+	require.True(t, state.AuthXData.Params.MinGasPriceLimit.IsPositive())
 }

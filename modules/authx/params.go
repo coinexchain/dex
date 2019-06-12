@@ -3,6 +3,7 @@ package authx
 import (
 	"bytes"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
@@ -18,7 +19,7 @@ const (
 	// activated account send to other activated addr,  costs 33903 gas
 	// consider it takes 50000 to do transfer/send tx
 	// so, min_gas_price = 100000000sato.CET * 0.01 / 50000 = 20 sato.CET
-	DefaultMinGasPriceLimit int64 = 20
+	DefaultMinGasPriceLimit = "20"
 )
 
 // Parameter keys
@@ -30,7 +31,7 @@ var _ params.ParamSet = &Params{}
 
 // Params defines the parameters for the authx module.
 type Params struct {
-	MinGasPriceLimit int64 `json:"min_gas_price_limit"`
+	MinGasPriceLimit sdk.Dec `json:"min_gas_price_limit"`
 }
 
 // ParamKeyTable for authx module
@@ -56,7 +57,7 @@ func (p Params) Equal(p2 Params) bool {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		MinGasPriceLimit: DefaultMinGasPriceLimit,
+		MinGasPriceLimit: sdk.MustNewDecFromStr(DefaultMinGasPriceLimit),
 	}
 }
 

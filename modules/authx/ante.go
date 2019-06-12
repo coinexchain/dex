@@ -56,7 +56,7 @@ func doAdditionalCheck(ctx sdk.Context, tx auth.StdTx, simulate bool,
 
 func checkGasPrice(ctx sdk.Context, tx auth.StdTx, axk AccountXKeeper) sdk.Error {
 	gasPrice := tx.Fee.GasPrices().AmountOf(dex.CET)
-	minGasPrice := sdk.NewDec(axk.GetParams(ctx).MinGasPriceLimit)
+	minGasPrice := axk.GetParams(ctx).MinGasPriceLimit
 	if gasPrice.LT(minGasPrice) {
 		//return sdk.ErrInsufficientFee("invalid gas price: " + gasPrice.String())
 	}

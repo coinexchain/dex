@@ -34,7 +34,7 @@ func ExportGenesis(ctx sdk.Context, keeper AccountXKeeper) GenesisState {
 // error for any failed validation criteria.
 func (data GenesisState) Validate() error {
 	limit := data.Params.MinGasPriceLimit
-	if limit < 0 {
+	if limit.IsNegative() {
 		return ErrInvalidMinGasPriceLimit(limit)
 	}
 	return nil

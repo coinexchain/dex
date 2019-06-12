@@ -10,7 +10,7 @@ const (
 	CodeInvalidMinGasPriceLimit sdk.CodeType = 201
 )
 
-func ErrInvalidMinGasPriceLimit(limit int64) sdk.Error {
+func ErrInvalidMinGasPriceLimit(limit sdk.Dec) sdk.Error {
 	return sdk.NewError(CodeSpaceAuthX, CodeInvalidMinGasPriceLimit,
-		"invalid minimum gas price limit: %d", limit)
+		"invalid minimum gas price limit: "+limit.String())
 }
