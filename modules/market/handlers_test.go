@@ -308,7 +308,7 @@ func TestMarketInfoSetSuccess(t *testing.T) {
 	ret := createCetMarket(input, stock)
 	newCetCoin := input.getCoinFromAddr(haveCetAddress, types.CET)
 	require.Equal(t, true, ret.IsOK(), "create market info should succeed")
-	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, params.CreateMarketFee[0]), "The amount is error")
+	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, types.NewCetCoin(params.CreateMarketFee)), "The amount is error")
 
 }
 

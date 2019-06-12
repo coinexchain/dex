@@ -4,10 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-
-	"github.com/coinexchain/dex/types"
 )
 
 const (
@@ -32,13 +29,13 @@ var (
 )
 
 type Params struct {
-	CreateMarketFee             sdk.Coins `json:"create_market_fee"`
-	FixedTradeFee               int64     `json:"fixed_trade_fee"`
-	GTEOrderLifetime            int       `json:"gte_order_lifetime"`
-	MaxExecutedPriceChangeRatio int       `json:"max_executed_price_change_ratio"`
-	MarketFeeRate               int64     `json:"market_fee_rate"`
-	MarketFeeMin                int64     `json:"market_fee_min"`
-	FeeForZeroDeal              int64     `json:"fee_for_zero_deal"`
+	CreateMarketFee             int64 `json:"create_market_fee"`
+	FixedTradeFee               int64 `json:"fixed_trade_fee"`
+	GTEOrderLifetime            int   `json:"gte_order_lifetime"`
+	MaxExecutedPriceChangeRatio int   `json:"max_executed_price_change_ratio"`
+	MarketFeeRate               int64 `json:"market_fee_rate"`
+	MarketFeeMin                int64 `json:"market_fee_min"`
+	FeeForZeroDeal              int64 `json:"fee_for_zero_deal"`
 }
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
@@ -66,7 +63,7 @@ func (p Params) Equal(p2 Params) bool {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		types.NewCetCoins(DefaultCreateMarketFee),
+		DefaultCreateMarketFee,
 		DefaultFixedTradeFee,
 		DefaultGTEOrderLifetime,
 		DefaultMaxExecutedPriceChangeRatio,
@@ -77,8 +74,8 @@ func DefaultParams() Params {
 }
 
 func (p *Params) ValidateGenesis() error {
-	if p.CreateMarketFee.Empty() || p.CreateMarketFee.IsAnyNegative() {
-		return fmt.Errorf("%s must be a valid sdk.Coins, is %s", KeyCreateMarketFee, p.CreateMarketFee.String())
+	if p.CreateMarketFee <= 0 {
+		return fmt.Errorf("%s must be a positive number, is %d", KeyCreateMarketFee, p.CreateMarketFee)
 	}
 	if p.FixedTradeFee < 0 {
 		return fmt.Errorf("%s must be a valid sdk.Coins, is %d", KeyFixedTradeFee, p.FixedTradeFee)

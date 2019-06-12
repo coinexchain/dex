@@ -60,7 +60,7 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 	}
 
 	param := keeper.GetParams(ctx)
-	if err := keeper.SubtractFeeAndCollectFee(ctx, msg.Creator, param.CreateMarketFee); err != nil {
+	if err := keeper.SubtractFeeAndCollectFee(ctx, msg.Creator, types.NewCetCoins(param.CreateMarketFee)); err != nil {
 		// Here must panic. because the market info have stored in db.
 		panic(err)
 	}
@@ -93,7 +93,7 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 	}
 
 	marketParams := keeper.GetParams(ctx)
-	if !keeper.bnk.HasCoins(ctx, msg.Creator, marketParams.CreateMarketFee) {
+	if !keeper.bnk.HasCoins(ctx, msg.Creator, types.NewCetCoins(marketParams.CreateMarketFee)) {
 		return ErrInsufficientCoins().Result()
 	}
 
