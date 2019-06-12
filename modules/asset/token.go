@@ -56,19 +56,17 @@ var _ Token = (*BaseToken)(nil)
 
 // BaseToken - a base Token structure.
 type BaseToken struct {
-	Name        string         `json:"name"`         //  Name of the newly issued asset, limited to 32 unicode characters.
-	Symbol      string         `json:"symbol"`       //  token symbol, [a-z][a-z0-9]{1,7}
-	TotalSupply int64          `json:"total_supply"` //  The total supply for this token [0]
-	Owner       sdk.AccAddress `json:"owner"`        // The initial issuer of this token
-
-	Mintable         bool `json:"mintable"`          // Whether this token could be minted after the issuing
-	Burnable         bool `json:"burnable"`          // Whether this token could be burned
-	AddrForbiddable  bool `json:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
-	TokenForbiddable bool `json:"token_forbiddable"` // whether token could be global forbid
-
-	TotalBurn   int64 `json:"total_burn"`   // Total amount of burn
-	TotalMint   int64 `json:"total_mint"`   // Total amount of mint
-	IsForbidden bool  `json:"is_forbidden"` // Whether token being forbidden currently
+	Name             string         `json:"name"`              //  Name of the newly issued asset, limited to 32 unicode characters.
+	Symbol           string         `json:"symbol"`            //  token symbol, [a-z][a-z0-9]{1,7}
+	TotalSupply      int64          `json:"total_supply"`      //  The total supply for this token [0]
+	Owner            sdk.AccAddress `json:"owner"`             // The initial issuer of this token
+	Mintable         bool           `json:"mintable"`          // Whether this token could be minted after the issuing
+	Burnable         bool           `json:"burnable"`          // Whether this token could be burned
+	AddrForbiddable  bool           `json:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
+	TokenForbiddable bool           `json:"token_forbiddable"` // whether token could be global forbid
+	TotalBurn        int64          `json:"total_burn"`        // Total amount of burn
+	TotalMint        int64          `json:"total_mint"`        // Total amount of mint
+	IsForbidden      bool           `json:"is_forbidden"`      // Whether token being forbidden currently
 }
 
 var (

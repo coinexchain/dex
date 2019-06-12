@@ -43,7 +43,7 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk.Result {
 
 	issueFee := tk.GetParams(ctx).IssueTokenFee
-	if err := tk.SubtractFeeAndCollectFee(ctx, msg.Owner, issueFee); err != nil {
+	if err := tk.DeductFee(ctx, msg.Owner, issueFee); err != nil {
 		return err.Result()
 	}
 

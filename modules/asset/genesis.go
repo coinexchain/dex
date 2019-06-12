@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// only coinexdex owner can issue reserved symbol token
 var reservedSymbolMap map[string]int
 
 //nolint

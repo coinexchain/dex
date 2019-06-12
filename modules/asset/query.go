@@ -18,7 +18,7 @@ const (
 	QueryReservedSymbols = "reserved-symbols"
 )
 
-// creates a querier for asset REST endpoints
+// NewQuerier - creates a querier for asset REST endpoints
 func NewQuerier(tk TokenKeeper, cdc *codec.Codec) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
@@ -38,7 +38,7 @@ func NewQuerier(tk TokenKeeper, cdc *codec.Codec) sdk.Querier {
 	}
 }
 
-// defines the params for query: "custom/asset/token-info"
+// QueryTokenParams defines the params for query: "custom/asset/token-info"
 type QueryTokenParams struct {
 	Symbol string
 }
@@ -77,7 +77,7 @@ func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) (
 	return bz, nil
 }
 
-// defines the params for query: "custom/asset/token-whitelist"
+// QueryWhitelistParams defines the params for query: "custom/asset/token-whitelist"
 type QueryWhitelistParams struct {
 	Symbol string
 }
@@ -103,7 +103,7 @@ func queryWhitelist(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]b
 	return bz, nil
 }
 
-// defines the params for query: "custom/asset/addr-forbidden"
+// QueryForbiddenAddrParams defines the params for query: "custom/asset/addr-forbidden"
 type QueryForbiddenAddrParams struct {
 	Symbol string
 }
