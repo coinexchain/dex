@@ -51,7 +51,7 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 
 	// genesis state
 	genState := NewDefaultGenesisState()
-	genState.AuthXData.Params.MinGasPriceLimit = sdk.MustNewDecFromStr("0.00000001")
+	//genState.AuthXData.Params.MinGasPriceLimit = sdk.MustNewDecFromStr("0.00000001")
 	if cb != nil {
 		cb(&genState)
 	}
