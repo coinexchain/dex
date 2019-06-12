@@ -30,7 +30,7 @@ const testChainID = "c1"
 type genesisStateCallback func(state *GenesisState)
 
 func newStdTxBuilder() *testutil.StdTxBuilder {
-	return newStdTxBuilder()
+	return testutil.NewStdTxBuilder(testChainID)
 }
 
 func newApp() *CetChainApp {
