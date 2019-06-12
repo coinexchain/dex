@@ -6,11 +6,11 @@
 
 ## 发行token 
 
-发行两种token: eth, cet
+发行两种token: seth, cet
 
-1. 发行 eth
+1. 发行 seth
 
-`./cetcli tx asset issue-token --name="eth" --symbol="eth" --total-supply=2100000000000000 --mintable=false --burnable=true --addr-forbiddable=false --token-forbiddable=false --from bob --chain-id=coinexdex`
+`./cetcli tx asset issue-token --name="eth" --symbol="seth" --total-supply=2100000000000000 --mintable=false --burnable=true --addr-forbiddable=false --token-forbiddable=false --from bob --chain-id=coinexdex`
 
 2. 发行 cet 
 
@@ -23,30 +23,30 @@
 `./cetcli query asset token cet --chain-id=coinexdex`
 
 2. 查询eth
-`./cetcli query asset token eth --chain-id=coinexdex`
+`./cetcli query asset token seth --chain-id=coinexdex`
 
 ## 创建交易对市场
 创建 eth/cet 对交易市场
 
-`./cetcli tx market createmarket --from bob --chain-id=coinexdex  --gas 20000 --stock=eth --money=cet --price-precision=8`
+`./cetcli tx market createmarket --from bob --chain-id=coinexdex  --gas 60000 --stock=seth --money=cet --price-precision=8`
 
 
 ## 查询指定市场信息
 
-`./cetcli query market marketinfo eth/cet --trust-node=true`
+`./cetcli query market marketinfo seth/cet --trust-node=true`
 
 ## 创建订单
 
 1. 创建**GTE**类型的订单
-`./cetcli tx market creategteoreder --symbol="eth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  `   
+`./cetcli tx market creategteoreder --symbol="seth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  `   
 
 2. 创建**IOC**类型的订单
 
-`./cetcli tx market createiocorder --symbol="eth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  `
+`./cetcli tx market createiocorder --symbol="seth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  `
 
 ## 查询指定订单信息
 
-`./cetcli query market orderinfo  --orderid=cosmos16gvnhynu7veexyyaadk60k28cn5s9k7p7p5v9p-13 --trust-node=true`
+`./cetcli query market orderinfo  --order-id=cosmos16gvnhynu7veexyyaadk60k28cn5s9k7p7p5v9p-13 --trust-node=true`
 
 ## 查询指定地址的所有订单列表
 
@@ -54,7 +54,7 @@
 
 ## 取消区块链上的指定订单
 
-`./cetcli tx market cancelorder --orderid=cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-6 --trust-node=true --from=bob --chain-id=coinexdex`
+`./cetcli tx market cancelorder --order-id=cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-6 --trust-node=true --from=bob --chain-id=coinexdex`
 
 
 ## Rest API 创建订单
