@@ -1,8 +1,10 @@
 package authx
 
 import (
+	"bytes"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
@@ -115,4 +117,72 @@ func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax AccountX) {
 		panic(err)
 	}
 	return
+}
+
+func (axk AccountXKeeper) UnlockedCoinsQueueIterator(ctx sdk.Context, unlockedTime int64) sdk.Iterator {
+	store := ctx.KVStore(axk.key)
+	return store.Iterator(PrefixUnlockedCoinsQueue, sdk.PrefixEndBytes(PrefixUnlockedTimeQueueTime(unlockedTime)))
+}
+
+func (axk AccountXKeeper) InsertUnlockedCoinsQueue(ctx sdk.Context, unlockedTime int64, address sdk.AccAddress) {
+	store := ctx.KVStore(axk.key)
+	store.Set(KeyUnlockedCoinsQueue(unlockedTime, address), address)
+}
+
+func (axk AccountXKeeper) RemoveFromUnlockedCoinsQueue(ctx sdk.Context, unlockedTime int64, address sdk.AccAddress) {
+	store := ctx.KVStore(axk.key)
+	store.Delete(KeyUnlockedCoinsQueue(unlockedTime, address))
+}
+
+func (axk AccountXKeeper) RemoveFromUnlockedCoinsQueueByKey(ctx sdk.Context, key []byte) {
+	store := ctx.KVStore(axk.key)
+	store.Delete(key)
+}
+
+var (
+	PrefixUnlockedCoinsQueue = []byte("UnlockedCoinsQueue")
+	KeyDelimiter             = []byte(":")
+)
+
+func KeyUnlockedCoinsQueue(unlockedTime int64, address sdk.AccAddress) []byte {
+	return bytes.Join([][]byte{
+		PrefixUnlockedCoinsQueue,
+		int64ToBigEndianBytes(unlockedTime),
+		address,
+	}, KeyDelimiter)
+}
+
+func PrefixUnlockedTimeQueueTime(unlockedTime int64) []byte {
+	return bytes.Join([][]byte{
+		PrefixUnlockedCoinsQueue,
+		int64ToBigEndianBytes(unlockedTime),
+	}, KeyDelimiter)
+}
+
+func int64ToBigEndianBytes(n int64) []byte {
+	var result [8]byte
+	for i := 0; i < 8; i++ {
+		result[i] = byte(n >> (8 * uint(i)))
+	}
+	return result[:]
+}
+
+func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper auth.AccountKeeper) {
+
+	currentTime := ctx.BlockHeader().Time.Unix()
+	iterator := aux.UnlockedCoinsQueueIterator(ctx, currentTime)
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var addr sdk.AccAddress
+		var acc AccountX
+
+		addr = bytes.Split(iterator.Key(), KeyDelimiter)[2]
+		acc, ok := aux.GetAccountX(ctx, addr)
+		if !ok {
+			//always account exist
+			continue
+		}
+		acc.TransferUnlockedCoins(currentTime, ctx, aux, keeper)
+		aux.RemoveFromUnlockedCoinsQueueByKey(ctx, iterator.Key())
+	}
 }

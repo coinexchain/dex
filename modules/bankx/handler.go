@@ -102,6 +102,8 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		return err.Result()
 	}
 
+	k.axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
+
 	return sdk.Result{
 		Tags: tag,
 	}
