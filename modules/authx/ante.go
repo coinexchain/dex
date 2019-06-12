@@ -58,7 +58,7 @@ func checkGasPrice(ctx sdk.Context, tx auth.StdTx, axk AccountXKeeper) sdk.Error
 	gasPrice := tx.Fee.GasPrices().AmountOf(dex.CET)
 	minGasPrice := axk.GetParams(ctx).MinGasPriceLimit
 	if gasPrice.LT(minGasPrice) {
-		return ErrGasPriceTooLow(minGasPrice, gasPrice)
+		//return ErrGasPriceTooLow(minGasPrice, gasPrice)
 	}
 	return nil
 }
