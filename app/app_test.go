@@ -106,7 +106,7 @@ func TestSend(t *testing.T) {
 
 	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
 	tx = testutil.NewStdTxBuilder("c1").
-		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
 	result = app.Deliver(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
