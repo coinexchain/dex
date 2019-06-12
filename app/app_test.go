@@ -51,6 +51,7 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 
 	// genesis state
 	genState := NewDefaultGenesisState()
+	genState.AssetData.Tokens = append(genState.AssetData.Tokens, cetToken())
 	//genState.AuthXData.Params.MinGasPriceLimit = sdk.MustNewDecFromStr("0.00000001")
 	if cb != nil {
 		cb(&genState)
@@ -61,6 +62,23 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 	app.InitChain(abci.RequestInitChain{ChainId: "c1", AppStateBytes: genStateBytes})
 
 	return app
+}
+
+func cetToken() asset.Token {
+	cetOwnerAddr, _ := sdk.AccAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v")
+	return &asset.BaseToken{
+		Name:             "CoinEx Chain Native Token",
+		Symbol:           "cet",
+		TotalSupply:      588788547005740000,
+		Owner:            cetOwnerAddr,
+		Mintable:         false,
+		Burnable:         true,
+		AddrForbiddable:  false,
+		TokenForbiddable: false,
+		TotalBurn:        411211452994260000,
+		TotalMint:        0,
+		IsForbidden:      false,
+	}
 }
 
 //func TestMinGasPrice(t *testing.T) {
@@ -89,11 +107,6 @@ func TestSend(t *testing.T) {
 	// begin block
 	header := abci.Header{Height: 1}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
-
-	// issue cet token
-	ctx := app.NewContext(false, header)
-	issueCetmsg := asset.NewMsgIssueToken("CET", "cet", 10000000000000000, sdk.AccAddress("fromaddr"), false, false, false, false)
-	app.assetKeeper.IssueToken(ctx, issueCetmsg)
 
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
