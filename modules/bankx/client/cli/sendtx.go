@@ -49,7 +49,7 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 
 			currentTime := time.Now().Unix()
 			if unlockTime > 0 && unlockTime < currentTime {
-				return fmt.Errorf("Unlock time should be later than the current time")
+				return fmt.Errorf("unlock time should be later than the current time")
 			}
 
 			from := cliCtx.GetFromAddress()

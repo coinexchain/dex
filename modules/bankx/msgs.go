@@ -2,8 +2,6 @@ package bankx
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	dex "github.com/coinexchain/dex/types"
 )
 
 // RouterKey is the name of the bankx module
@@ -75,11 +73,6 @@ func (msg MsgSend) ValidateBasic() sdk.Error {
 	}
 	if !msg.Amount.IsAllPositive() {
 		return sdk.ErrInsufficientCoins("send amount must be positive")
-	}
-	for _, c := range msg.Amount {
-		if dex.IsCET(c) && msg.UnlockTime != 0 {
-			return ErrCetCantBeLocked("Cet cannot be locked")
-		}
 	}
 	if msg.UnlockTime < 0 {
 		return ErrUnlockTime("negative unlock time ")

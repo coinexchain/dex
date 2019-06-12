@@ -80,7 +80,7 @@ func TestRouter(t *testing.T) {
 func TestSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
-	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10000000000), sdk.NewInt64Coin("eth", 100000000000))
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	// app
@@ -102,7 +102,7 @@ func TestSend(t *testing.T) {
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
-	require.Equal(t, bankx.CodeCetCantBeLocked, result.Code)
+	require.Equal(t, sdk.CodeType(0), result.Code)
 
 	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
 	tx = testutil.NewStdTxBuilder("c1").

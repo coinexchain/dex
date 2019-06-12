@@ -1,7 +1,23 @@
-1. 启动节点
+## Transaction send 
+
+#### 需求罗列
+
+- 转账可以设置该笔转账资金的解锁定时间
+- 任何资产都可以被锁定
+- 锁定需要收取100cet的功能费
+- 区块自动解锁定到达解锁时间的资金
+
+#### 测试过程
+
+1. 初始化并启动链
 
 ```
-$ ./cetd start
+./cetd init node0 --chain-id=coinexdex
+./cetcli keys add bob
+./cetd add-genesis-account $(./cetcli keys show bob -a) 10000000000000000cet
+./cetd gentx --name bob
+./cetd collect-gentxs
+./cetd start
 ```
 
 2. 创建新账号

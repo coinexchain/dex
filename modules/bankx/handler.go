@@ -2,12 +2,12 @@ package bankx
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/authx"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	"github.com/coinexchain/dex/modules/authx"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -88,7 +88,16 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Result {
 
 	if k.ak.GetAccount(ctx, toAddr) == nil {
-		k.bk.AddCoins(ctx, toAddr, sdk.Coins{})
+		_, _, _ = k.bk.AddCoins(ctx, toAddr, sdk.Coins{})
+	}
+
+	if err := k.DeductFee(ctx, fromAddr, dex.NewCetCoins(k.GetParam(ctx).LockCoinsFee)); err != nil {
+		return err.Result()
+	}
+
+	_, tag, err := k.bk.SubtractCoins(ctx, fromAddr, amt)
+	if err != nil {
+		return err.Result()
 	}
 
 	ax := k.axk.GetOrCreateAccountX(ctx, toAddr)
@@ -96,11 +105,6 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
 	}
 	k.axk.SetAccountX(ctx, ax)
-
-	_, tag, err := k.bk.SubtractCoins(ctx, fromAddr, amt)
-	if err != nil {
-		return err.Result()
-	}
 
 	k.axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 

@@ -39,5 +39,8 @@ func (data GenesisState) Validate() error {
 	if activationFee < 0 {
 		return sdk.NewError(CodeSpaceBankx, CodeInvalidActivationFee, "invalid activated fees")
 	}
+	if lockCoinsFee := data.Param.LockCoinsFee; lockCoinsFee < 0 {
+		return sdk.NewError(CodeSpaceBankx, CodeInvalidLockCoinsFee, "invalid lock coins fee")
+	}
 	return nil
 }

@@ -72,19 +72,19 @@ func TestMsgSendValidation(t *testing.T) {
 	var emptyAddr sdk.AccAddress
 	time := time.Now().Unix()
 	validTime := time + 1000
-	invalidTime := time - 1000
+	invalidTime := int64(-1000)
 
 	cases := []struct {
 		valid bool
 		tx    MsgSend
 	}{
-		{true, NewMsgSend(addr1, addr2, cet123, 0)},          // valid send
-		{true, NewMsgSend(addr1, addr2, cet123eth123, 0)},    // valid send with multiple coins
-		{false, NewMsgSend(addr1, addr2, cet0, 0)},           // non positive coin
-		{false, NewMsgSend(addr1, addr2, cet123eth0, 0)},     // non positive coin in multicoins
-		{false, NewMsgSend(emptyAddr, addr2, cet123, 0)},     // empty from addr
-		{false, NewMsgSend(addr1, emptyAddr, cet123, 0)},     // empty to addr
-		{false, NewMsgSend(addr1, addr2, cet123, validTime)}, // invalid unlocked time
+		{true, NewMsgSend(addr1, addr2, cet123, 0)},       // valid send
+		{true, NewMsgSend(addr1, addr2, cet123eth123, 0)}, // valid send with multiple coins
+		{false, NewMsgSend(addr1, addr2, cet0, 0)},        // non positive coin
+		{false, NewMsgSend(addr1, addr2, cet123eth0, 0)},  // non positive coin in multicoins
+		{false, NewMsgSend(emptyAddr, addr2, cet123, 0)},  // empty from addr
+		{false, NewMsgSend(addr1, emptyAddr, cet123, 0)},  // empty to addr
+		{true, NewMsgSend(addr1, addr2, cet123, validTime)},
 		{false, NewMsgSend(addr1, addr2, cet123eth123, invalidTime)},
 		{true, NewMsgSend(addr1, addr2, eth123, 0)},
 		{true, NewMsgSend(addr1, addr2, eth123, validTime)},
