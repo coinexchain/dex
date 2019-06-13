@@ -7,6 +7,7 @@ import (
 const (
 	CodeSpaceAuthX sdk.CodespaceType = "authx"
 
+	// 201 ～ 299
 	CodeInvalidMinGasPriceLimit sdk.CodeType = 201
 	CodeGasPriceTooLow          sdk.CodeType = 202
 )

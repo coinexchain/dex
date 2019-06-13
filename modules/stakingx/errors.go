@@ -7,8 +7,9 @@ import (
 const (
 	CodeSpaceStakingX sdk.CodespaceType = "stakingx"
 
-	CodeInvalidMinSelfDelegation       sdk.CodeType = 201
-	CodeMinSelfDelegationBelowRequired sdk.CodeType = 202
+	// 401 ~ 499
+	CodeInvalidMinSelfDelegation       sdk.CodeType = 401
+	CodeMinSelfDelegationBelowRequired sdk.CodeType = 402
 )
 
 func ErrInvalidMinSelfDelegation(val sdk.Int) sdk.Error {
