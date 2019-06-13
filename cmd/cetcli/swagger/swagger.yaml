@@ -695,9 +695,8 @@ paths:
                 $ref: "#/definitions/Address"
               validator_address:
                 $ref: "#/definitions/ValidatorAddress"
-              shares:
-                type: string
-                example: "100"
+              amount:
+                $ref: "#/definitions/Coin"
       tags:
         - ICS21
       consumes:
