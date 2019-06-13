@@ -663,6 +663,7 @@ paths:
         x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
       summary: Get all unbonding delegations from a delegator
+      operationId: getUndelegationsOfDelegator
       tags:
         - ICS21
       produces:
@@ -680,6 +681,7 @@ paths:
           description: Internal Server Error
     post:
       summary: Submit an unbonding delegation
+      operationId: undelegate
       parameters:
         - in: body
           name: delegation
@@ -729,6 +731,7 @@ paths:
         x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Query all unbonding delegations between a delegator and a validator
+      operationId: getUndelegationsBetween
       tags:
         - ICS21
       produces:
@@ -992,6 +995,7 @@ paths:
         x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Get all unbonding delegations from a validator
+      operationId: getUndelegationsOfValidator
       tags:
         - ICS21
       produces:
