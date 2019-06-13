@@ -28,7 +28,7 @@
 ## 创建交易对市场
 创建 eth/cet 对交易市场
 
-`./cetcli tx market createmarket --from bob --chain-id=coinexdex  --gas 60000 --stock=seth --money=cet --price-precision=8`
+`./cetcli tx market createmarket --from bob --chain-id=coinexdex  --gas 60000 --fees=1000cet --stock=seth --money=cet --price-precision=8`
 
 
 ## 查询指定市场信息
@@ -38,11 +38,13 @@
 ## 创建订单
 
 1. 创建**GTE**类型的订单
-`./cetcli tx market creategteoreder --symbol="seth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  `   
+  `./cetcli tx market creategteoreder --symbol="seth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex --gas=60000 --fees=1000cet` 
+
+  > 这条命令即创建一个seth的买单，money为cet。实际的价格是price sato.cet ，实际买入量是$quantity/10^{price-precision}$，因此，最终该交易会需要订单发起者支付52 sato.cet。
 
 2. 创建**IOC**类型的订单
 
-`./cetcli tx market createiocorder --symbol="seth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  `
+`./cetcli tx market createiocorder --symbol="seth/cet" --order-type=2 --price=520 --quantity=10000000 --side=1 --from bob --price-precision=8 --chain-id=coinexdex  --gas=60000 --fees=1000cet` `
 
 ## 查询指定订单信息
 
@@ -82,7 +84,7 @@
 
 
 ### 查询市场的交易对
- 
+
 `curl -X GET http://localhost:1317/market/market-info --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "symbol":"dash/cet" }'`    
 
 ### 查询订单
@@ -94,5 +96,5 @@
 `curl -X POST http://localhost:1317/market/cancel-order --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_id":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-16" }'`
 
 ### 查询用户订单列表
- 
+
  `curl -X GET http://localhost:1317/market/user-order-list --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "address":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z" }'`
