@@ -163,17 +163,17 @@ func PrefixUnlockedTimeQueueTime(unlockedTime int64) []byte {
 func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper auth.AccountKeeper) {
 
 	currentTime := ctx.BlockHeader().Time.Unix()
-	fmt.Println(currentTime)
 	iterator := aux.UnlockedCoinsQueueIterator(ctx, currentTime)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var addr sdk.AccAddress
-		fmt.Println(iterator.Key())
 		addr = iterator.Value()
 		if addr != nil {
 			acc, ok := aux.GetAccountX(ctx, addr)
+			fmt.Println(acc.Address)
 			if !ok {
 				//always account exist
+				fmt.Println("continue")
 				continue
 			}
 			acc.TransferUnlockedCoins(currentTime, ctx, aux, keeper)
