@@ -7,18 +7,17 @@ import (
 const (
 	CodeSpaceAsset sdk.CodespaceType = ModuleName
 
-	// 501 ~ 599
-	CodeInvalidTokenName      sdk.CodeType = 501
-	CodeInvalidTokenSymbol    sdk.CodeType = 502
-	CodeInvalidTokenSupply    sdk.CodeType = 503
-	CodeInvalidTokenOwner     sdk.CodeType = 504
-	CodeTokenNotFound         sdk.CodeType = 505
-	CodeInvalidTotalMint      sdk.CodeType = 506
-	CodeInvalidTotalBurn      sdk.CodeType = 507
-	CodeDuplicateTokenSymbol  sdk.CodeType = 508
-	CodeInvalidTokenForbidden sdk.CodeType = 509
-	CodeInvalidTokenWhitelist sdk.CodeType = 510
-	CodeInvalidAddress        sdk.CodeType = 511
+	CodeInvalidTokenName      sdk.CodeType = 201
+	CodeInvalidTokenSymbol    sdk.CodeType = 202
+	CodeInvalidTokenSupply    sdk.CodeType = 203
+	CodeInvalidTokenOwner     sdk.CodeType = 204
+	CodeTokenNotFound         sdk.CodeType = 205
+	CodeInvalidTotalMint      sdk.CodeType = 206
+	CodeInvalidTotalBurn      sdk.CodeType = 207
+	CodeDuplicateTokenSymbol  sdk.CodeType = 208
+	CodeInvalidTokenForbidden sdk.CodeType = 209
+	CodeInvalidTokenWhitelist sdk.CodeType = 210
+	CodeInvalidAddress        sdk.CodeType = 211
 )
 
 func ErrorInvalidTokenName(fmt string) sdk.Error {

@@ -7,29 +7,28 @@ import (
 const (
 	CodeSpaceMarket sdk.CodespaceType = "market"
 
-	// 601 ~ 699
-	CodeInvalidToken          sdk.CodeType = 601
-	CodeInvalidPricePrecision sdk.CodeType = 602
-	CodeInvalidTokenIssuer    sdk.CodeType = 603
-	CodeSendTokenFailed       sdk.CodeType = 604
-	CodeNoStoreEngine         sdk.CodeType = 605
-	CodeInvalidAddress        sdk.CodeType = 606
-	CodeNotExistKeyInStore    sdk.CodeType = 607
-	CodeInsufficientCoin      sdk.CodeType = 608
-	CodeInvalidTradeSide      sdk.CodeType = 609
-	CodeInvalidOrderType      sdk.CodeType = 610
-	CodeInvalidSymbol         sdk.CodeType = 611
-	CodeTokenForbidByIssuer   sdk.CodeType = 612
-	CodeInvalidOrderID        sdk.CodeType = 613
-	CodeMarshalFailed         sdk.CodeType = 614
-	CodeUnMarshalFailed       sdk.CodeType = 615
-	CodeNotFindOrder          sdk.CodeType = 616
-	CodeNotMatchSender        sdk.CodeType = 617
-	CodeInvalidHeight         sdk.CodeType = 618
-	CodeAddressForbidByIssuer sdk.CodeType = 619
-	CodeOrderQuantityToSmall  sdk.CodeType = 620
-	CodeStockNoHaveCetTrade   sdk.CodeType = 621
-	CodeRepeatTrade           sdk.CodeType = 622
+	CodeInvalidToken          sdk.CodeType = 120
+	CodeInvalidPricePrecision sdk.CodeType = 121
+	CodeInvalidTokenIssuer    sdk.CodeType = 122
+	CodeSendTokenFailed       sdk.CodeType = 123
+	CodeNoStoreEngine         sdk.CodeType = 124
+	CodeInvalidAddress        sdk.CodeType = 125
+	CodeNotExistKeyInStore    sdk.CodeType = 126
+	CodeInsufficientCoin      sdk.CodeType = 127
+	CodeInvalidTradeSide      sdk.CodeType = 128
+	CodeInvalidOrderType      sdk.CodeType = 129
+	CodeInvalidSymbol         sdk.CodeType = 130
+	CodeTokenForbidByIssuer   sdk.CodeType = 131
+	CodeInvalidOrderID        sdk.CodeType = 132
+	CodeMarshalFailed         sdk.CodeType = 133
+	CodeUnMarshalFailed       sdk.CodeType = 134
+	CodeNotFindOrder          sdk.CodeType = 135
+	CodeNotMatchSender        sdk.CodeType = 135
+	CodeInvalidHeight         sdk.CodeType = 136
+	CodeAddressForbidByIssuer sdk.CodeType = 137
+	CodeOrderQuantityToSmall  sdk.CodeType = 138
+	CodeStockNoHaveCetTrade   sdk.CodeType = 139
+	CodeRepeatTrade           sdk.CodeType = 140
 )
 
 func ErrTokenNoExist() sdk.Error {

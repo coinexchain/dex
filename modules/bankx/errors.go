@@ -5,13 +5,12 @@ import sdk "github.com/cosmos/cosmos-sdk/types"
 const (
 	CodeSpaceBankx sdk.CodespaceType = "bankx"
 
-	// 301 ～ 399
-	CodeMemoMissing                     sdk.CodeType = 301
-	CodeInsufficientCETForActivationFee sdk.CodeType = 302
-	CodeInvalidActivationFee            sdk.CodeType = 303
-	CodeInvalidUnlockTime               sdk.CodeType = 304
-	CodeTokenForbiddenByOwner           sdk.CodeType = 305
-	CodeInvalidLockCoinsFee             sdk.CodeType = 306
+	CodeMemoMissing                     sdk.CodeType = 111
+	CodeInsufficientCETForActivationFee sdk.CodeType = 112
+	CodeInvalidActivationFee            sdk.CodeType = 113
+	CodeInvalidUnlockTime               sdk.CodeType = 114
+	CodeTokenForbiddenByOwner           sdk.CodeType = 115
+	CodeInvalidLockCoinsFee             sdk.CodeType = 116
 )
 
 func ErrMemoMissing() sdk.Error {
