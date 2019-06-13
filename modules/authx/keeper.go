@@ -166,8 +166,7 @@ func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper auth.AccountKeeper) 
 	iterator := aux.UnlockedCoinsQueueIterator(ctx, currentTime)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		var addr sdk.AccAddress
-		addr = iterator.Value()
+		addr := iterator.Value()
 		if addr != nil {
 			acc, ok := aux.GetAccountX(ctx, addr)
 			fmt.Println(acc.Address)
