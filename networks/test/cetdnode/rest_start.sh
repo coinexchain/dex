@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 LADDR=$(ifconfig | awk '/inet/&&!/127.0.0.1/{print substr($2,length("addr:")+1)}')
 CHAIN_ID=$(awk '/chain_id/{print substr($2,2,length($2)-3)}' /cetd/node0/cetd/config/genesis.json)
