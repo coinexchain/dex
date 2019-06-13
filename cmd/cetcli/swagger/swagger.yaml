@@ -573,6 +573,7 @@ paths:
         x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
       summary: Get all delegations from a delegator
+      operationId: getDelegations
       tags:
         - ICS21
       produces:
@@ -965,6 +966,7 @@ paths:
         x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Get all delegations from a validator
+      operationId: getDelegationsOfValidator
       tags:
         - ICS21
       produces:
@@ -1623,6 +1625,7 @@ paths:
     get:
       summary: Get the total rewards balance from all delegations
       description: Get the sum of all the rewards earned by delegations by a single delegator
+      operationId: getAllRewards
       produces:
         - application/json
       tags:
@@ -1641,6 +1644,7 @@ paths:
     post:
       summary: Withdraw all the delegator's delegation rewards
       description: Withdraw all the delegator's delegation rewards
+      operationId: withdrawAllRewards
       tags:
         - ICS24
       consumes:
