@@ -161,7 +161,6 @@ func PrefixUnlockedTimeQueueTime(unlockedTime int64) []byte {
 }
 
 func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper auth.AccountKeeper) {
-
 	currentTime := ctx.BlockHeader().Time.Unix()
 	iterator := aux.UnlockedCoinsQueueIterator(ctx, currentTime)
 	defer iterator.Close()
