@@ -93,7 +93,6 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
-	//bApp.NewContext(true, abci.Header{}).MinGasPrices()
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod)
 	app.initKeepers()

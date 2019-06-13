@@ -23,6 +23,7 @@ import (
 	"github.com/coinexchain/dex/app"
 	cet_init "github.com/coinexchain/dex/init"
 	cet_server "github.com/coinexchain/dex/server"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // cetd custom flags
@@ -79,11 +80,21 @@ func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
-	return app.NewCetChainApp(
+	cetChainApp := app.NewCetChainApp(
 		logger, db, traceStore, true, invCheckPeriod,
 		baseapp.SetPruning(store.NewPruningOptionsFromString(viper.GetString("pruning"))),
 		baseapp.SetMinGasPrices(viper.GetString(server.FlagMinGasPrices)),
 	)
+	checkMinGasPrice(cetChainApp, logger)
+	return cetChainApp
+}
+
+func checkMinGasPrice(bApp *app.CetChainApp, logger log.Logger) {
+	ctx := bApp.NewContext(true, abci.Header{})
+	minGasPrice := ctx.MinGasPrices().AmountOf(dex.CET)
+	if !minGasPrice.IsPositive() {
+		logger.Info("--minimum-gas-prices option not set!")
+	}
 }
 
 func exportAppStateAndTMValidators(
