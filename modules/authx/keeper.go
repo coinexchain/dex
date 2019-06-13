@@ -2,10 +2,8 @@ package authx
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"time"
 )
@@ -158,24 +156,4 @@ func PrefixUnlockedTimeQueueTime(unlockedTime int64) []byte {
 		PrefixUnlockedCoinsQueue,
 		sdk.FormatTimeBytes(time.Unix(unlockedTime, 0)),
 	}, KeyDelimiter)
-}
-
-func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper auth.AccountKeeper) {
-	currentTime := ctx.BlockHeader().Time.Unix()
-	iterator := aux.UnlockedCoinsQueueIterator(ctx, currentTime)
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		addr := iterator.Value()
-		if addr != nil {
-			acc, ok := aux.GetAccountX(ctx, addr)
-			fmt.Println(acc.Address)
-			if !ok {
-				//always account exist
-				fmt.Println("continue")
-				continue
-			}
-			acc.TransferUnlockedCoins(currentTime, ctx, aux, keeper)
-			aux.RemoveFromUnlockedCoinsQueueByKey(ctx, iterator.Key())
-		}
-	}
 }
