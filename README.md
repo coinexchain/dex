@@ -1,7 +1,7 @@
 ## CoinEx Dex
 
 
-[![Build Status](https://api.travis-ci.com/coinexchain/dex.svg?token=SzpkQ9pqByb4D3AFKW7z&branch=master)](https://travis-ci.com/coinexchain/dex) [![Coverage Status](https://coveralls.io/repos/github/coinexchain/dex/badge.svg?t=PngCUj)](https://coveralls.io/github/coinexchain/dex)
+[![Build Status](https://api.travis-ci.com/coinexchain/dex.svg?token=SzpkQ9pqByb4D3AFKW7z&branch=master)](https://travis-ci.com/coinexchain/dex) [![Coverage Status](https://coveralls.io/repos/github/coinexchain/dex/badge.svg?t=PngCUj)](https://coveralls.io/github/coinexchain/dex) [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://github.com/coinexchain/dex/blob/master/LICENSE)
 
 A public chain built for the decentralized exchange
 
