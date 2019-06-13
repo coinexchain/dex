@@ -315,7 +315,7 @@ func assureTokenDistributionInGenesis(accs []app.GenesisAccount, testnetSupply i
 
 	if testnetSupply > distributedTokens {
 		accs = append(accs, app.GenesisAccount{
-			Address: sdk.AccAddress(crypto.AddressHash([]byte("lefted_tokens"))),
+			Address: sdk.AccAddress(crypto.AddressHash([]byte("left_tokens"))),
 			Coins: sdk.Coins{
 				sdk.NewCoin(dex.DefaultBondDenom, sdk.NewInt(testnetSupply-distributedTokens)),
 			},
