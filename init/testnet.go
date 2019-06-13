@@ -42,6 +42,8 @@ var (
 	flagNodeDaemonHome    = "node-daemon-home"
 	flagNodeCliHome       = "node-cli-home"
 	flagStartingIPAddress = "starting-ip-address"
+
+	testnetTokenSupply = int64(588788547005740000)
 )
 
 const nodeDirPerm = 0755
@@ -278,9 +280,11 @@ func initGenFiles(
 ) error {
 
 	appGenState := app.NewDefaultGenesisState()
-	appGenState.Accounts = accs
 
-	addCetTokenForTesting(&appGenState)
+	addCetTokenForTesting(&appGenState, testnetTokenSupply)
+
+	accs = assureTokenDistributionInGenesis(accs, testnetTokenSupply)
+	appGenState.Accounts = accs
 
 	appGenStateJSON, err := codec.MarshalJSONIndent(cdc, appGenState)
 	if err != nil {
@@ -303,12 +307,29 @@ func initGenFiles(
 	return nil
 }
 
-func addCetTokenForTesting(appGenState *app.GenesisState) {
+func assureTokenDistributionInGenesis(accs []app.GenesisAccount, testnetSupply int64) []app.GenesisAccount {
+	var distributedTokens int64
+	for _, acc := range accs {
+		distributedTokens += acc.Coins[0].Amount.Int64()
+	}
+
+	if testnetSupply > distributedTokens {
+		accs = append(accs, app.GenesisAccount{
+			Address: sdk.AccAddress(crypto.AddressHash([]byte("lefted_tokens"))),
+			Coins: sdk.Coins{
+				sdk.NewCoin(dex.DefaultBondDenom, sdk.NewInt(testnetSupply-distributedTokens)),
+			},
+		})
+	}
+	return accs
+}
+
+func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64) {
 	addr, _ := sdk.AccAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v")
 
 	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
 		"cet",
-		588788547005740000,
+		tokenTotalSupply,
 		addr,
 		false,
 		true,

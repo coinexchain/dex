@@ -1010,6 +1010,7 @@ paths:
   /staking/pool:
     get:
       summary: Get the current state of the staking pool
+      operationId: getStakingPool
       tags:
         - ICS21
       produces:
@@ -1037,6 +1038,7 @@ paths:
   /staking/parameters:
     get:
       summary: Get the current staking parameter values
+      operationId: getStakingParameters
       tags:
         - ICS21
       produces:
