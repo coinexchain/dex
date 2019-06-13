@@ -481,7 +481,7 @@ func TestCancelOrderFailed(t *testing.T) {
 	failedNotOrderSender := cancelOrder
 	failedNotOrderSender.OrderID = assemblyOrderID(notHaveCetAddress, 2)
 	ret = input.handler(input.ctx, failedNotOrderSender)
-	require.Equal(t, CodeNotMatchSender, ret.Code, "cancel order should failed by not match order sender")
+	require.Equal(t, CodeNotFindOrder, ret.Code, "cancel order should failed by not match order sender")
 
 }
 
