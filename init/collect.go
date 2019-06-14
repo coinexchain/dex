@@ -18,8 +18,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
-
 	"github.com/coinexchain/dex/app"
 )
 
@@ -94,7 +92,7 @@ func genAppStateFromConfig(
 	)
 
 	// process genesis transactions, else create default genesis.json
-	appGenTxs, persistentPeers, err = gaia_app.CollectStdTxs(
+	appGenTxs, persistentPeers, err = CollectStdTxs(
 		cdc, config.Moniker, initCfg.GenTxsDir, genDoc,
 	)
 	if err != nil {
