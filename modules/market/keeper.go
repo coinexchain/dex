@@ -4,6 +4,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/modules/msgqueue"
 )
 
 var (
@@ -82,11 +84,13 @@ type Keeper struct {
 	cdc           *codec.Codec
 	orderClean    *OrderCleanUpDayKeeper
 	gmk           GlobalMarketInfoKeeper
-	feeKeeper     ExpectFeeKeeper
+	msgProducer   msgqueue.Producer
 }
 
 func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssetStatusKeeper,
-	bnkVal ExpectedBankxKeeper, feeK ExpectFeeKeeper, cdcVal *codec.Codec, paramstore params.Subspace) Keeper {
+	bnkVal ExpectedBankxKeeper, feeK ExpectFeeKeeper,
+	cdcVal *codec.Codec, msgKeeperVal msgqueue.Producer,
+	paramstore params.Subspace) Keeper {
 
 	return Keeper{
 		marketKey:     key,
@@ -96,7 +100,7 @@ func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssetStatusKeeper,
 		cdc:           cdcVal,
 		orderClean:    NewOrderCleanUpDayKeeper(key),
 		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
-		feeKeeper:     feeK,
+		msgProducer:   msgKeeperVal,
 	}
 }
 

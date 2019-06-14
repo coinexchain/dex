@@ -29,6 +29,7 @@ import (
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
 
@@ -83,6 +84,7 @@ type CetChainApp struct {
 	assetKeeper         asset.TokenKeeper
 	paramsKeeper        params.Keeper
 	marketKeeper        market.Keeper
+	msgQueProducer      msgqueue.Producer
 }
 
 // NewCetChainApp returns a reference to an initialized CetChainApp.
@@ -215,12 +217,16 @@ func (app *CetChainApp) initKeepers() {
 		app.feeCollectionKeeper,
 		app.assetKeeper,
 	)
+
+	app.msgQueProducer = msgqueue.NewProducer()
+
 	app.marketKeeper = market.NewKeeper(
 		app.keyMarket,
 		app.assetKeeper,
 		app.bankxKeeper,
 		app.feeCollectionKeeper,
 		app.cdc,
+		app.msgQueProducer,
 		app.paramsKeeper.Subspace(market.StoreKey),
 	)
 
@@ -418,6 +424,7 @@ func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisSt
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
 	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
 	market.InitGenesis(ctx, app.marketKeeper, genesisState.MarketData)
+	msgqueue.InitGenesis(&app.msgQueProducer, genesisState.MsgQueData)
 }
 
 func (app *CetChainApp) deliverGenTxs(genTxs []json.RawMessage) {

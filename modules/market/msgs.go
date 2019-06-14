@@ -15,6 +15,7 @@ import (
 const (
 	RouterKey = "market"
 	StoreKey  = RouterKey
+	Topic     = RouterKey
 )
 
 var (
