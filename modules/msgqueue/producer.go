@@ -3,7 +3,6 @@ package msgqueue
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"strings"
 
@@ -42,13 +41,11 @@ func NewProducer() Producer {
 }
 
 func (k *Producer) SetParam(data config) {
-	k.brokers = strings.Split(data.Brokers, ",")
-	topics := strings.Split(data.Topics, ",")
-	fmt.Println(k.brokers, len(k.brokers))
-	fmt.Println(topics, len(topics))
-	if len(k.brokers) <= 1 || len(topics) <= 1 {
+	if len(data.Brokers) == 0 || len(data.Topics) == 0 {
 		return
 	}
+	k.brokers = strings.Split(data.Brokers, ",")
+	topics := strings.Split(data.Topics, ",")
 
 	for _, topic := range topics {
 		k.topicWrites[topic] = kafka.NewWriter(kafka.WriterConfig{
