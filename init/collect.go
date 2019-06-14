@@ -19,7 +19,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 
 	"github.com/coinexchain/dex/app"
 )
@@ -45,12 +44,12 @@ func CollectGenTxsCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
 			name := viper.GetString(client.FlagName)
-			nodeID, valPubKey, err := gaia_init.InitializeNodeValidatorFiles(config)
+			nodeID, valPubKey, err := InitializeNodeValidatorFiles(config)
 			if err != nil {
 				return err
 			}
 
-			genDoc, err := gaia_init.LoadGenesisDoc(cdc, config.GenesisFile())
+			genDoc, err := LoadGenesisDoc(cdc, config.GenesisFile())
 			if err != nil {
 				return err
 			}
@@ -120,7 +119,7 @@ func genAppStateFromConfig(
 		return
 	}
 
-	err = gaia_init.ExportGenesisFile(genFile, initCfg.ChainID, nil, appState)
+	err = ExportGenesisFile(genFile, initCfg.ChainID, nil, appState)
 	return
 }
 

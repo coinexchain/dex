@@ -11,7 +11,6 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/common"
 
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 
@@ -80,7 +79,7 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 				return fmt.Errorf("%s does not exist, run `cetd init` first", genFile)
 			}
 
-			genDoc, err := gaia_init.LoadGenesisDoc(cdc, genFile)
+			genDoc, err := LoadGenesisDoc(cdc, genFile)
 			if err != nil {
 				return err
 			}
@@ -100,7 +99,7 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 				return err
 			}
 
-			return gaia_init.ExportGenesisFile(genFile, genDoc.ChainID, nil, appStateJSON)
+			return ExportGenesisFile(genFile, genDoc.ChainID, nil, appStateJSON)
 		},
 	}
 

@@ -14,8 +14,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
-
 	"github.com/coinexchain/dex/app"
 )
 
@@ -47,7 +45,7 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 				return fmt.Errorf("%s does not exist, run `cetd init` first", genFile)
 			}
 
-			genDoc, err := gaia_init.LoadGenesisDoc(cdc, genFile)
+			genDoc, err := LoadGenesisDoc(cdc, genFile)
 			if err != nil {
 				return err
 			}
@@ -67,7 +65,7 @@ func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command 
 				return err
 			}
 
-			return gaia_init.ExportGenesisFile(genFile, genDoc.ChainID, nil, appStateJSON)
+			return ExportGenesisFile(genFile, genDoc.ChainID, nil, appStateJSON)
 		},
 	}
 

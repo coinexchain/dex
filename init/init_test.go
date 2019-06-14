@@ -16,7 +16,6 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/mock"
 
@@ -130,7 +129,7 @@ func TestInitNodeValidatorFiles(t *testing.T) {
 	viper.Set(client.FlagName, "moniker")
 	cfg, err := tcmd.ParseConfig()
 	require.Nil(t, err)
-	nodeID, valPubKey, err := gaia_init.InitializeNodeValidatorFiles(cfg)
+	nodeID, valPubKey, err := InitializeNodeValidatorFiles(cfg)
 	require.Nil(t, err)
 	require.NotEqual(t, "", nodeID)
 	require.NotEqual(t, 0, len(valPubKey.Bytes()))

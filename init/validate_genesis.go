@@ -10,8 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
-
 	"github.com/coinexchain/dex/app"
 )
 
@@ -35,7 +33,7 @@ func ValidateGenesisCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 			fmt.Fprintf(os.Stderr, "validating genesis file at %s\n", genesis)
 
 			var genDoc types.GenesisDoc
-			if genDoc, err = gaia_init.LoadGenesisDoc(cdc, genesis); err != nil {
+			if genDoc, err = LoadGenesisDoc(cdc, genesis); err != nil {
 				return fmt.Errorf("Error loading genesis doc from %s: %s", genesis, err.Error())
 			}
 

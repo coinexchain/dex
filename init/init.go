@@ -16,8 +16,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
-
 	"github.com/coinexchain/dex/app"
 )
 
@@ -46,7 +44,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: 
 		Long:  `Initialize validators's and node's configuration files.`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
-			return genGenesisJSON(ctx, cdc, args[0])
+			return initFn(ctx, cdc, args[0])
 		},
 	}
 
@@ -57,7 +55,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: 
 	return cmd
 }
 
-func genGenesisJSON(ctx *server.Context, cdc *codec.Codec, moniker string) error {
+func initFn(ctx *server.Context, cdc *codec.Codec, moniker string) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
 	config.Moniker = moniker
@@ -68,7 +66,7 @@ func genGenesisJSON(ctx *server.Context, cdc *codec.Codec, moniker string) error
 	}
 
 	// generate node_key.json & priv_validator_key.json
-	nodeID, _, err := gaia_init.InitializeNodeValidatorFiles(config)
+	nodeID, _, err := InitializeNodeValidatorFiles(config)
 	if err != nil {
 		return err
 	}
@@ -80,7 +78,7 @@ func genGenesisJSON(ctx *server.Context, cdc *codec.Codec, moniker string) error
 	if appState, err = initializeEmptyGenesis(cdc, genFile, viper.GetBool(flagOverwrite)); err != nil {
 		return err
 	}
-	if err = gaia_init.ExportGenesisFile(genFile, chainID, nil, appState); err != nil {
+	if err = ExportGenesisFile(genFile, chainID, nil, appState); err != nil {
 		return err
 	}
 

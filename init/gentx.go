@@ -30,8 +30,6 @@ import (
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
-
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
@@ -67,7 +65,7 @@ following delegation and commission default parameters:
 
 			config := ctx.Config
 			config.SetRoot(viper.GetString(tmcli.HomeFlag))
-			nodeID, valPubKey, err := gaia_init.InitializeNodeValidatorFiles(ctx.Config)
+			nodeID, valPubKey, err := InitializeNodeValidatorFiles(ctx.Config)
 			if err != nil {
 				return err
 			}
@@ -83,7 +81,7 @@ following delegation and commission default parameters:
 					"the tx's memo field will be unset")
 			}
 
-			genDoc, err := gaia_init.LoadGenesisDoc(cdc, config.GenesisFile())
+			genDoc, err := LoadGenesisDoc(cdc, config.GenesisFile())
 			if err != nil {
 				return err
 			}

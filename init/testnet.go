@@ -21,7 +21,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
@@ -150,7 +149,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 			return err
 		}
 
-		nodeIDs[i], valPubKeys[i], err = gaia_init.InitializeNodeValidatorFiles(config)
+		nodeIDs[i], valPubKeys[i], err = InitializeNodeValidatorFiles(config)
 		if err != nil {
 			_ = os.RemoveAll(outDir)
 			return err
@@ -361,7 +360,7 @@ func collectGenFiles(
 		nodeID, valPubKey := nodeIDs[i], valPubKeys[i]
 		initCfg := newInitConfig(chainID, gentxsDir, moniker, nodeID, valPubKey)
 
-		genDoc, err := gaia_init.LoadGenesisDoc(cdc, config.GenesisFile())
+		genDoc, err := LoadGenesisDoc(cdc, config.GenesisFile())
 		if err != nil {
 			return err
 		}
@@ -379,7 +378,7 @@ func collectGenFiles(
 		genFile := config.GenesisFile()
 
 		// overwrite each validator's genesis file to have a canonical genesis time
-		err = gaia_init.ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime)
+		err = ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime)
 		if err != nil {
 			return err
 		}
