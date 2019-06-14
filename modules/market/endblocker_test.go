@@ -6,6 +6,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/types"
 
 	"github.com/coinexchain/dex/modules/asset"
@@ -115,7 +116,7 @@ func TestRemoveOrders(t *testing.T) {
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey()
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
-	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, subspace)
+	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
 	currDay := ctx.BlockHeader().Time.Day()
 	keeper.orderClean.SetDay(ctx, currDay-1)
 	parameters := Params{}
@@ -185,7 +186,7 @@ func TestDelist(t *testing.T) {
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey()
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
-	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, subspace)
+	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
 	delistKeeper := NewDelistKeeper(keys.marketKey)
 	delistKeeper.AddDelistRequest(ctx, ctx.BlockHeight(), "btc/usdt")
 	currDay := ctx.BlockHeader().Time.Day()

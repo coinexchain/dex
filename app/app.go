@@ -424,7 +424,6 @@ func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisSt
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
 	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
 	market.InitGenesis(ctx, app.marketKeeper, genesisState.MarketData)
-	msgqueue.InitGenesis(&app.msgQueProducer, genesisState.MsgQueData)
 }
 
 func (app *CetChainApp) deliverGenTxs(genTxs []json.RawMessage) {

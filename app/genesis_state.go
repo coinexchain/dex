@@ -22,7 +22,6 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -43,7 +42,6 @@ type GenesisState struct {
 	AssetData    asset.GenesisState        `json:"asset"`
 	MarketData   market.GenesisState       `json:"market"`
 	GenTxs       []json.RawMessage         `json:"gentxs"`
-	MsgQueData   msgqueue.GenesisState     `json:"msgqueue"`
 }
 
 // NewDefaultGenesisState generates the default state for coindex.

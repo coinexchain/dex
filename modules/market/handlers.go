@@ -64,6 +64,7 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 		// Here must panic. because the market info have stored in db.
 		panic(err)
 	}
+
 	keeper.msgProducer.SendMsg(Topic, "marketInfo", msg)
 	return sdk.Result{Tags: info.GetTags()}
 }

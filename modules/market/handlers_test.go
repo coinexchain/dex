@@ -22,6 +22,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market/match"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/types"
 )
 
@@ -207,14 +208,14 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	ak := prepareAssetKeeper(t, keys, cdc, ctx, addrForbid, tokenForbid)
 	bk := prepareBankxKeeper(keys, cdc, ctx)
 
-	mk := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, cdc, params.NewKeeper(
+	mk := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, cdc, msgqueue.NewProducer(), params.NewKeeper(
 		cdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey))
 	RegisterCodec(mk.cdc)
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams)
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 
 	subspace := paramsKeeper.Subspace(StoreKey)
-	keeper := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, msgCdc, subspace)
+	keeper := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
 	parameters := DefaultParams()
 	keeper.SetParams(ctx, parameters)
 
