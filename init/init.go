@@ -98,9 +98,7 @@ func initializeGenesisFile(cdc *codec.Codec, genFile string) (chainID string, ap
 	return
 }
 
-func newPrintInfo(moniker, chainID, nodeID, genTxsDir string,
-	appMessage json.RawMessage) printInfo {
-
+func newPrintInfo(moniker, chainID, nodeID, genTxsDir string, appMessage json.RawMessage) printInfo {
 	return printInfo{
 		Moniker:    moniker,
 		ChainID:    chainID,
@@ -116,6 +114,6 @@ func displayInfo(cdc *codec.Codec, info printInfo) error {
 		return err
 	}
 
-	fmt.Fprintf(os.Stderr, "%s\n", string(out)) // nolint: errcheck
+	fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	return nil
 }
