@@ -20,7 +20,7 @@ func (app *CetChainApp) assertRuntimeInvariantsOnContext(ctx sdk.Context) {
 		if err := ir.Invar(ctx); err != nil {
 			panic(fmt.Errorf("invariant broken: %s\n"+
 				"\tCRITICAL please submit the following transaction:\n"+
-				"\t\t gaiacli tx crisis invariant-broken %v %v", err, ir.ModuleName, ir.Route))
+				"\t\t cetcli tx crisis invariant-broken %v %v", err, ir.ModuleName, ir.Route))
 		}
 	}
 	end := time.Now()

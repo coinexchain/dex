@@ -216,7 +216,7 @@ func CetAppGenStateJSON(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs [
 	return codec.MarshalJSONIndent(cdc, genesisState)
 }
 
-// Create the core parameters for genesis initialization for gaia
+// Create the core parameters for genesis initialization for CoinEx chain
 // note that the pubkey input is this machines pubkey
 func CetAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []json.RawMessage) (
 	genesisState GenesisState, err error) {

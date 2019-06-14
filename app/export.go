@@ -24,7 +24,7 @@ import (
 	"github.com/coinexchain/dex/modules/stakingx"
 )
 
-// export the state of gaia for a genesis file
+// export the state of CoinEx chain for a genesis file
 func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhiteList []string) (
 	appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 
