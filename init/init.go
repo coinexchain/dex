@@ -37,7 +37,7 @@ type printInfo struct {
 
 // InitCmd returns a command that initializes all files needed for Tendermint
 // and the respective application.
-func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: golint
+func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init [moniker]",
 		Short: "Initialize private validator, p2p, genesis, and application configuration files",
@@ -60,25 +60,15 @@ func initFn(ctx *server.Context, cdc *codec.Codec, moniker string) error {
 	config.SetRoot(viper.GetString(cli.HomeFlag))
 	config.Moniker = moniker
 
-	chainID := viper.GetString(client.FlagChainID)
-	if chainID == "" {
-		chainID = fmt.Sprintf("test-chain-%v", common.RandStr(6))
-	}
-
 	// generate node_key.json & priv_validator_key.json
 	nodeID, _, err := InitializeNodeValidatorFiles(config)
 	if err != nil {
 		return err
 	}
 
-	var appState json.RawMessage
-	genFile := config.GenesisFile()
-
 	// generate genesis.json
-	if appState, err = initializeEmptyGenesis(cdc, genFile, viper.GetBool(flagOverwrite)); err != nil {
-		return err
-	}
-	if err = ExportGenesisFile(genFile, chainID, nil, appState); err != nil {
+	chainID, appState, err := initializeGenesisFile(cdc, config.GenesisFile())
+	if err != nil {
 		return err
 	}
 
@@ -89,15 +79,23 @@ func initFn(ctx *server.Context, cdc *codec.Codec, moniker string) error {
 	return displayInfo(cdc, toPrint)
 }
 
-func initializeEmptyGenesis(
-	cdc *codec.Codec, genFile string, overwrite bool,
-) (appState json.RawMessage, err error) {
-
-	if !overwrite && common.FileExists(genFile) {
-		return nil, fmt.Errorf("genesis.json file already exists: %v", genFile)
+func initializeGenesisFile(cdc *codec.Codec, genFile string) (chainID string, appState json.RawMessage, err error) {
+	chainID = viper.GetString(client.FlagChainID)
+	if chainID == "" {
+		chainID = fmt.Sprintf("test-chain-%v", common.RandStr(6))
 	}
 
-	return codec.MarshalJSONIndent(cdc, app.NewDefaultGenesisState())
+	if !viper.GetBool(flagOverwrite) && common.FileExists(genFile) {
+		err = fmt.Errorf("genesis.json file already exists: %v", genFile)
+		return
+	}
+
+	if appState, err = codec.MarshalJSONIndent(cdc, app.NewDefaultGenesisState()); err != nil {
+		return
+	}
+
+	err = ExportGenesisFile(genFile, chainID, nil, appState)
+	return
 }
 
 func newPrintInfo(moniker, chainID, nodeID, genTxsDir string,
