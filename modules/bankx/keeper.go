@@ -103,7 +103,7 @@ func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) s
 
 func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddress) bool {
 	for _, coin := range amt {
-		if k.ask.IsForbiddenByTokenIssuer(ctx, coin.Denom, addr) || k.ask.IsTokenForbidden(ctx, coin.Denom) {
+		if k.ask.IsForbiddenByTokenIssuer(ctx, coin.Denom, addr) {
 			return true
 		}
 	}
