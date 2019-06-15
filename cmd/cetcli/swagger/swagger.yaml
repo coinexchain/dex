@@ -1238,7 +1238,7 @@ paths:
     get:
       summary: Query proposals
       description: Query proposals information with parameters
-      operationId: getProposal
+      operationId: getProposals
       produces:
         - application/json
       tags:
