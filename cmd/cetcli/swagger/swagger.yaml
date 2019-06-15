@@ -1521,6 +1521,7 @@ paths:
     get:
       summary: Get a proposal's tally result at the current time
       description: Gets a proposal's tally result at the current time. If the proposal is pending deposits (i.e status 'DepositPeriod') it returns an empty tally result.
+      operationId: tallyProposal
       produces:
         - application/json
       tags:
