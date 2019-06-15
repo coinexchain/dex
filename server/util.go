@@ -23,7 +23,7 @@ import (
 //___________________________________________________________________________________
 
 // PersistentPreRunEFn returns a PersistentPreRunE function for cobra
-// that initailizes the passed in context with a properly configured
+// that initializes the passed in context with a properly configured
 // logger and config object.
 func PersistentPreRunEFn(context *cosmos_server.Context) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
@@ -81,11 +81,11 @@ func interceptLoadConfig() (conf *cfg.Config, err error) {
 		conf, err = tcmd.ParseConfig() // NOTE: ParseConfig() creates dir/files as necessary.
 	}
 
-	// create a default gaia config file if it does not exist
-	gaiaConfigFilePath := filepath.Join(rootDir, "config/cetd.toml")
-	if _, err := os.Stat(gaiaConfigFilePath); os.IsNotExist(err) {
-		gaiaConf, _ := config.ParseConfig()
-		config.WriteConfigFile(gaiaConfigFilePath, gaiaConf)
+	// create a default cetd config file if it does not exist
+	cetdConfigFilePath := filepath.Join(rootDir, "config/cetd.toml")
+	if _, err := os.Stat(cetdConfigFilePath); os.IsNotExist(err) {
+		cetdConf, _ := config.ParseConfig()
+		config.WriteConfigFile(cetdConfigFilePath, cetdConf)
 	}
 
 	viper.SetConfigName("cetd")
