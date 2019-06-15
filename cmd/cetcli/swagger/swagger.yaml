@@ -2051,6 +2051,7 @@ paths:
         - ICS100
       summary: Transfer ownership
       description: Transfer token owner ship
+      operationId: transferOwnership
       consumes:
         - application/json
       produces:
@@ -2068,11 +2069,11 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-              - $ref: "#/definitions/TransferOwner"
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              new_owner:
+                $ref: "#/definitions/Address"
       responses:
         200:
           description: Token transfer ownership result
@@ -2086,6 +2087,7 @@ paths:
         - ICS100
       summary: Mint token
       description: Mint mintable token
+      operationId: mintToken
       consumes:
         - application/json
       produces:
@@ -2103,13 +2105,11 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-              - properties:
-                  amount:
-                    type: integer
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              amount:
+                type: string
       responses:
         200:
           description: Mint token result
@@ -2123,6 +2123,7 @@ paths:
         - ICS100
       summary: Burn token
       description: Burn burnable token
+      operationId: burnToken
       consumes:
         - application/json
       produces:
@@ -2140,13 +2141,11 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-              - properties:
-                  amount:
-                    type: integer
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              amount:
+                type: string
       responses:
         200:
           description: Burn token result
@@ -2160,6 +2159,7 @@ paths:
         - ICS100
       summary: Forbid token
       description: Forbid forbiddable token
+      operationId: forbidToken
       consumes:
         - application/json
       produces:
@@ -2177,10 +2177,9 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
       responses:
         200:
           description: Forbid token result
@@ -2194,6 +2193,7 @@ paths:
         - ICS100
       summary: UnForbid token
       description: UnForbid forbiddable token
+      operationId: unFrobidToken
       consumes:
         - application/json
       produces:
@@ -2211,10 +2211,9 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
       responses:
         200:
           description: UnForbid token result
@@ -2222,13 +2221,13 @@ paths:
             $ref: "#/definitions/StdTx"
         500:
           description: Internal Server Error
-  /asset/tokens/{symbol}/whitelist:
+  /asset/tokens/{symbol}/forbidden/whitelists:
     get:
       tags:
         - ICS100
       summary: queryWhitelist
       description: Get token whitelist with provided `symbol`
-      operationId: getwhitelist
+      operationId: getWhitelist
       produces:
         - application/json
       parameters:
@@ -2242,17 +2241,17 @@ paths:
         200:
           description: whitelist with provided symbol
           schema:
-            $ref: "#/definitions/Whitelist"
+            $ref: "#/definitions/Address"
         404:
           description: Token not found
         500:
           description: Internal Server Error
-  /asset/tokens/{symbol}/forbidden/whitelists:
     post:
       tags:
         - ICS100
       summary: Add forbid whitelist
       description: Add forbiddable token whitelist addr
+      operationId: addWhitelist
       consumes:
         - application/json
       produces:
@@ -2269,12 +2268,7 @@ paths:
           description: token whitelist addr
           required: true
           schema:
-            type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-              - $ref: "#/definitions/Whitelist"
+            $ref: "#/definitions/AddrList"
       responses:
         200:
           description: Add forbid whitelist result
@@ -2288,6 +2282,7 @@ paths:
         - ICS100
       summary: Remove forbid whitelist
       description: Remove forbiddable token whitelist addr
+      operationId: removeWhitelist
       consumes:
         - application/json
       produces:
@@ -2304,12 +2299,7 @@ paths:
           description: token whitelist addr
           required: true
           schema:
-            type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-              - $ref: "#/definitions/Whitelist"
+            $ref: "#/definitions/AddrList"
       responses:
         200:
           description: Remove forbid whitelist result
@@ -2337,7 +2327,7 @@ paths:
         200:
           description: forbidden addresses with provided symbol
           schema:
-            $ref: "#/definitions/ForbiddenAddr"
+            $ref: "#/definitions/Address"
         404:
           description: Token not found
         500:
@@ -2347,6 +2337,7 @@ paths:
         - ICS100
       summary: Forbid address
       description: Add forbidden address
+      operationId: addForbiddenAddr
       consumes:
         - application/json
       produces:
@@ -2359,16 +2350,11 @@ paths:
           type: string
           x-example: abc
         - in: body
-          name: addr
+          name: forbiddenAddr
           description: forbidden addr
           required: true
           schema:
-            type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-              - $ref: "#/definitions/ForbiddenAddr"
+            $ref: "#/definitions/AddrList"
       responses:
         200:
           description: Forbid address result
@@ -2382,6 +2368,7 @@ paths:
         - ICS100
       summary: UnForbid address
       description: Remove forbidden address
+      operationId: removeForbiddenAddr
       consumes:
         - application/json
       produces:
@@ -2394,16 +2381,11 @@ paths:
           type: string
           x-example: abc
         - in: body
-          name: addr
+          name: forbiddenAddr
           description: forbidden addr
           required: true
           schema:
-            type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-              - $ref: "#/definitions/ForbiddenAddr"
+            $ref: "#/definitions/AddrList"
       responses:
         200:
           description: UnForbid address result
@@ -3004,7 +2986,7 @@ definitions:
         type: string
         example: "abc"
       total_supply:
-        type: integer
+        type: string
         example: "2000000000000000"
       owner:
         $ref: "#/definitions/Address"
@@ -3026,26 +3008,20 @@ definitions:
       - $ref: "#/definitions/TokenBasicInfo"
       - properties:
           total_burn:
-            type: integer
+            type: string
             example: "100000000000000"
           total_mint:
-            type: integer
+            type: string
             example: "0"
           is_forbidden:
             type: boolean
             example: false
-  TransferOwner:
+  AddrList:
     type: object
     properties:
-      new_owner:
-        $ref: "#/definitions/Address"
-  Whitelist:
-    type: object
-    properties:
-      whitelist:
-        $ref: "#/definitions/Address"
-  ForbiddenAddr:
-    type: object
-    properties:
-      forbiddenAddr:
-        $ref: "#/definitions/Address"
+      base_req:
+        $ref: "#/definitions/BaseReq"
+      addr_list:
+        type: array
+        items:
+          $ref: "#/definitions/Address"

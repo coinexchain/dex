@@ -20,7 +20,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, storeName string) {
 	r.HandleFunc("/asset/tokens/{symbol}", QueryTokenRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/asset/tokens", QueryTokensRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
-	r.HandleFunc("/asset/tokens/{symbol}/whitelist", QueryWhitelistRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/asset/tokens/{symbol}/forbidden/whitelist", QueryWhitelistRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/asset/tokens/{symbol}/forbidden/addresses", QueryForbiddenAddrRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/asset/tokens/reserved/symbols", QueryReservedSymbolsRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 }

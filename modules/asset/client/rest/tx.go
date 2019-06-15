@@ -260,16 +260,16 @@ func unForbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 	}
 }
 
-// whitelistReq defines the properties of a whitelist request's body.
-type whitelistReq struct {
-	BaseReq   rest.BaseReq     `json:"base_req"`
-	Whitelist []sdk.AccAddress `json:"whitelist"`
+// addrListReq defines the properties of a whitelist or forbidden addr request's body.
+type addrListReq struct {
+	BaseReq  rest.BaseReq     `json:"base_req"`
+	AddrList []sdk.AccAddress `json:"addr_list"`
 }
 
 // addWhitelistHandlerFn - http request handler to add whitelist.
 func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req whitelistReq
+		var req addrListReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -288,7 +288,7 @@ func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		vars := mux.Vars(r)
 		symbol := vars[symbol]
 
-		msg := asset.NewMsgAddTokenWhitelist(symbol, owner, req.Whitelist)
+		msg := asset.NewMsgAddTokenWhitelist(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -301,7 +301,7 @@ func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 // removeWhitelistHandlerFn - http request handler to add whitelist.
 func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req whitelistReq
+		var req addrListReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -320,7 +320,7 @@ func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 		vars := mux.Vars(r)
 		symbol := vars[symbol]
 
-		msg := asset.NewMsgRemoveTokenWhitelist(symbol, owner, req.Whitelist)
+		msg := asset.NewMsgRemoveTokenWhitelist(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -330,16 +330,10 @@ func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 	}
 }
 
-// forbiddenAddrReq defines the properties of a forbidden addr request's body.
-type forbiddenAddrReq struct {
-	BaseReq       rest.BaseReq     `json:"base_req"`
-	ForbiddenAddr []sdk.AccAddress `json:"forbidden_addr"`
-}
-
 // forbidAddrHandlerFn - http request handler to forbid addresses.
 func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req forbiddenAddrReq
+		var req addrListReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -358,7 +352,7 @@ func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 		vars := mux.Vars(r)
 		symbol := vars[symbol]
 
-		msg := asset.NewMsgForbidAddr(symbol, owner, req.ForbiddenAddr)
+		msg := asset.NewMsgForbidAddr(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -371,7 +365,7 @@ func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 // unForbidAddrHandlerFn - http request handler to unforbid addresses.
 func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req forbiddenAddrReq
+		var req addrListReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -390,7 +384,7 @@ func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		vars := mux.Vars(r)
 		symbol := vars[symbol]
 
-		msg := asset.NewMsgUnForbidAddr(symbol, owner, req.ForbiddenAddr)
+		msg := asset.NewMsgUnForbidAddr(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
