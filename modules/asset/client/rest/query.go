@@ -35,14 +35,14 @@ func QueryTokenRequestHandlerFn(
 
 		bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(symbol))
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryToken)
 		res, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		if len(res) == 0 {
@@ -88,14 +88,14 @@ func QueryWhitelistRequestHandlerFn(
 
 		bz, err := cdc.MarshalJSON(asset.NewQueryWhitelistParams(symbol))
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryWhitelist)
 		res, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		if len(res) == 0 {
@@ -116,14 +116,14 @@ func QueryForbiddenAddrRequestHandlerFn(
 
 		bz, err := cdc.MarshalJSON(asset.NewQueryForbiddenAddrParams(symbol))
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryForbiddenAddr)
 		res, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		if len(res) == 0 {

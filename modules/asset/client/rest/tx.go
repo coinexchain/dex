@@ -25,8 +25,8 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/burns", symbol), burnTokenHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbids", symbol), forbidTokenHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbids", symbol), unForbidTokenHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/whitelists", symbol), addWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/whitelists", symbol), removeWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/whitelist", symbol), addWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/whitelist", symbol), removeWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/addresses", symbol), forbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/addresses", symbol), unForbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
 }

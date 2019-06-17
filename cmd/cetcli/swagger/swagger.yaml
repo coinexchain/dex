@@ -2008,6 +2008,8 @@ paths:
           description: Token issuance result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
     get:
@@ -2025,6 +2027,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Token"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
   /asset/tokens/{symbol}:
@@ -2048,8 +2052,10 @@ paths:
           description: token with provided symbol
           schema:
             $ref: "#/definitions/Token"
+        400:
+          description: Invalid Request
         404:
-          description: Token not found
+          description: Tokens not found
         500:
           description: Internal Server Error
   /asset/tokens/{symbol}/ownerships:
@@ -2086,6 +2092,8 @@ paths:
           description: Token transfer ownership result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
   /asset/tokens/{symbol}/mints:
@@ -2122,6 +2130,8 @@ paths:
           description: Mint token result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
   /asset/tokens/{symbol}/burns:
@@ -2158,6 +2168,8 @@ paths:
           description: Burn token result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
   /asset/tokens/{symbol}/forbids:
@@ -2192,6 +2204,8 @@ paths:
           description: Forbid token result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
   /asset/tokens/{symbol}/unforbids:
@@ -2226,9 +2240,11 @@ paths:
           description: UnForbid token result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
-  /asset/tokens/{symbol}/forbidden/whitelists:
+  /asset/tokens/{symbol}/forbidden/whitelist:
     get:
       tags:
         - ICS100
@@ -2248,7 +2264,9 @@ paths:
         200:
           description: whitelist with provided symbol
           schema:
-            $ref: "#/definitions/Address"
+            type: array
+            items:
+              $ref: "#/definitions/Address"
         404:
           description: Token not found
         500:
@@ -2281,9 +2299,11 @@ paths:
           description: Add forbid whitelist result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
-  /asset/tokens/{symbol}/unforbidden/whitelists:
+  /asset/tokens/{symbol}/unforbidden/whitelist:
     post:
       tags:
         - ICS100
@@ -2312,6 +2332,8 @@ paths:
           description: Remove forbid whitelist result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
   /asset/tokens/{symbol}/forbidden/addresses:
@@ -2334,9 +2356,11 @@ paths:
         200:
           description: forbidden addresses with provided symbol
           schema:
-            $ref: "#/definitions/Address"
-        404:
-          description: Token not found
+            type: array
+            items:
+              $ref: "#/definitions/Address"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
     post:
@@ -2367,6 +2391,8 @@ paths:
           description: Forbid address result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
   /asset/tokens/{symbol}/unforbidden/addresses:
@@ -2398,6 +2424,8 @@ paths:
           description: UnForbid address result
           schema:
             $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
   /asset/tokens/reserved/symbols:
@@ -2414,6 +2442,8 @@ paths:
           description: All reserved symbols
           schema:
             type: string
+        400:
+          description: Invalid Request
         500:
           description: Internal Server Error
 definitions:
