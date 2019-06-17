@@ -1298,6 +1298,7 @@ paths:
     get:
       summary: Query proposer
       description: Query for the proposer for a proposal
+      operationId: getProposer
       produces:
         - application/json
       tags:
@@ -1321,6 +1322,7 @@ paths:
     get:
       summary: Query deposits
       description: Query deposits by proposalId
+      operationId: getDeposits
       produces:
         - application/json
       tags:
@@ -1389,6 +1391,7 @@ paths:
     get:
       summary: Query deposit
       description: Query deposit by proposalId and depositor address
+      operationId: getDepositByAddr
       produces:
         - application/json
       tags:
@@ -1421,6 +1424,7 @@ paths:
     get:
       summary: Query voters
       description: Query voters information by proposalId
+      operationId: getVoters
       produces:
         - application/json
       tags:
@@ -1489,6 +1493,7 @@ paths:
     get:
       summary: Query vote
       description: Query vote information by proposal Id and voter address
+      operationId: getVoterByAddr
       produces:
         - application/json
       tags:
@@ -2824,7 +2829,7 @@ definitions:
         items:
           $ref: "#/definitions/Coin"
       proposal_id:
-        type: integer
+        type: string
       depositor:
         $ref: "#/definitions/Address"
   TallyResult:
@@ -2848,7 +2853,7 @@ definitions:
       voter:
         type: string
       proposal_id:
-        type: integer
+        type: string
       option:
         type: string
   Validator:
