@@ -61,7 +61,7 @@ func (ah anteHelper) checkMinSelfDelegation(ctx sdk.Context, actual sdk.Int) sdk
 func checkAddr(msg sdk.Msg) sdk.Error {
 	signers := msg.GetSigners()
 	for _, signer := range signers {
-		if signer.Equals(incentive.IncentiveCoinsAccAddr) {
+		if signer.Equals(incentive.IncentivePoolAddr) {
 			return sdk.ErrUnauthorized("tx not allowed to be sent from the sender addr")
 		}
 	}

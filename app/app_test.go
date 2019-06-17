@@ -153,7 +153,7 @@ func TestMemo(t *testing.T) {
 
 func TestSendFromIncentiveAddr(t *testing.T) {
 	key, _, fromAddr := testutil.KeyPubAddr()
-	incentive.IncentiveCoinsAccAddr = fromAddr
+	incentive.IncentivePoolAddr = fromAddr
 	toAddr := sdk.AccAddress([]byte("addr"))
 	coins := dex.NewCetCoinsE8(100)
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}

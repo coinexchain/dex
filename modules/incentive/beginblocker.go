@@ -7,23 +7,29 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const BlockRewards = 50
-
 var (
-	IncentiveCoinsAccAddr = sdk.AccAddress(crypto.AddressHash([]byte("incentive_pool")))
-	BlockRewardsCoins     = sdk.NewCoins(sdk.NewInt64Coin(types.DefaultBondDenom, BlockRewards))
+	IncentivePoolAddr = sdk.AccAddress(crypto.AddressHash([]byte("incentive_pool")))
 )
 
 func BeginBlocker(ctx sdk.Context, k Keeper) {
 
-	coins, _, err := k.bankKeeper.SubtractCoins(ctx, IncentiveCoinsAccAddr, BlockRewardsCoins)
+	blockRewards := calcRewardsForCurrentBlock()
+
+	collectRewardsFromPool(k, ctx, blockRewards)
+}
+
+func collectRewardsFromPool(k Keeper, ctx sdk.Context, blockRewards sdk.Coins) {
+	coins, _, err := k.bankKeeper.SubtractCoins(ctx, IncentivePoolAddr, blockRewards)
 	if err != nil || !coins.IsValid() {
 		return
 	}
 
-	incentiveCoins := sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(int64(BlockRewards))))
-	//TODO:sub the corresponding coins from genesis account
+	//add rewards into collected_fees for further distribution
+	k.feeCollectionKeeper.AddCollectedFees(ctx, blockRewards)
+}
 
-	//add these coins to collectedfees
-	k.feeCollectionKeeper.AddCollectedFees(ctx, incentiveCoins)
+func calcRewardsForCurrentBlock() sdk.Coins {
+	//TODO: calc according incentive plan
+	BlockRewardsCoins := sdk.NewCoins(sdk.NewInt64Coin(types.DefaultBondDenom, 50))
+	return BlockRewardsCoins
 }
