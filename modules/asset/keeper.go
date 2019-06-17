@@ -415,6 +415,10 @@ func (tk TokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, a
 		return false
 	}
 
+	if token.GetOwner().Equals(addr) {
+		return false
+	}
+
 	return true
 }
 
