@@ -16,5 +16,5 @@ func TestCreateRootCmd(t *testing.T) {
 	ctx := server.NewDefaultContext()
 
 	rootCmd := createRootCmd(ctx, cdc)
-	require.Equal(t, 8, len(rootCmd.Commands()))
+	require.Equal(t, 7, len(rootCmd.Commands()))
 }

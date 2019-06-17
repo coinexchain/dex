@@ -37,6 +37,7 @@ func main() {
 	ctx := server.NewDefaultContext()
 
 	rootCmd := createRootCmd(ctx, cdc)
+	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
 
 	// prepare and add flags
@@ -74,7 +75,6 @@ func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	rootCmd.AddCommand(cet_init.AddGenesisAccountCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.AddGenesisTokenCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.ValidateGenesisCmd(ctx, cdc))
-	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
 
 	return rootCmd
 }
