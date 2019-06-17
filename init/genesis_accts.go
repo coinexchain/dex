@@ -108,19 +108,24 @@ func collectAccInfo(args []string) (*accountInfo, error) {
 func getAddress(addrOrKeyName string) (addr sdk.AccAddress, err error) {
 	addr, err = sdk.AccAddressFromBech32(addrOrKeyName)
 	if err != nil {
-		kb, err := keys.NewKeyBaseFromDir(viper.GetString(flagClientHome))
-		if err != nil {
-			return nil, err
-		}
-
-		info, err := kb.Get(addrOrKeyName)
-		if err != nil {
-			return nil, err
-		}
-
-		addr = info.GetAddress()
+		return getAddressFromKeyBase(addrOrKeyName)
 	}
 	return
+}
+
+func getAddressFromKeyBase(keyName string) (sdk.AccAddress, error) {
+	kb, err := keys.NewKeyBaseFromDir(viper.GetString(flagClientHome))
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := kb.Get(keyName)
+	if err != nil {
+		return nil, err
+	}
+
+	addr := info.GetAddress()
+	return addr, nil
 }
 
 func addGenesisAccount(appState app.GenesisState, accInfo *accountInfo) (app.GenesisState, error) {
