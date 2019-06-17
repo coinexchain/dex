@@ -1579,6 +1579,7 @@ paths:
     get:
       summary: Query governance tally parameters
       description: Query governance tally parameters
+      operationId: getTallyingParameters
       produces:
         - application/json
       tags:
@@ -1607,6 +1608,7 @@ paths:
     get:
       summary: Query governance voting parameters
       description: Query governance voting parameters. The voting_period units are in nanoseconds.
+      operationId: getVotingParameters
       produces:
         - application/json
       tags:
