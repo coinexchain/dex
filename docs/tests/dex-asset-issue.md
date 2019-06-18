@@ -48,7 +48,7 @@ $ cetcli keys show bob -a
 本地返回：
 
 ```bash
-cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd
+coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd
 ```
 
 3. 创建token，通过--Flag指定所要创建的token信息
@@ -192,8 +192,8 @@ $ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
 
 ```bash
 Account:
-  Address:       cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd
-  Pubkey:        cosmospub1addwnpepq0mdsnxm75k543ruyg7v9gnd9n2s55lwf2t7sp60kl874rchq8vj5w4t7e4
+  Address:       coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd
+  Pubkey:        coinexpub1addwnpepq0mdsnxm75k543ruyg7v9gnd9n2s55lwf2t7sp60kl874rchq8vj5w4t7e4
   Coins:         9996999900000000cet,2100000000000000token1,2100000000000000token2,2100000000000000token3
   AccountNumber: 0
   Sequence:      4

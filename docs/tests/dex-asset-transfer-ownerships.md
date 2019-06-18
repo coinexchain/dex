@@ -31,8 +31,7 @@ cetcli keys show bob -a
 
 本地返回：
 
-```bash
-cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp
+```bashcoinexpsmd30v4q47qqgm788mffmx46g49k7afz2nvvp
 ```
 
 2. 查询本地alice地址
@@ -43,8 +42,7 @@ $ cetcli keys show alice -a
 
 本地返回：
 
-```bash
-cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t
+```bashcoinexyvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t
 ```
 
 3. 本地创建token，可参考[dex-asset-iusse](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-asset-issue.md) 
@@ -184,8 +182,8 @@ $ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
 
 ```bash
 Account:
-  Address:       cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp
-  Pubkey:        cosmospub1addwnpepqgrp6tj3j8507jveu2jmgcp6adz8t95gpfuxfeun6032a6emu2s2g23q55r
+  Address:      coinexpsmd30v4q47qqgm788mffmx46g49k7afz2nvvp
+  Pubkey:       coinexub1addwnpepqgrp6tj3j8507jveu2jmgcp6adz8t95gpfuxfeun6032a6emu2s2g23q55r
   Coins:         9996999900000000cet,2100000000000000coin1,2100000000000000coin2,2100000000000000coin3
   AccountNumber: 0
   Sequence:      5

@@ -245,7 +245,7 @@ paths:
         - in: query
           name: tag
           type: string
-          description: "transaction tags such as 'action=submit-proposal' and 'proposer=cosmos1g9ahr6xhht5rmqven628nklxluzyv8z9jqjcmc' which results in the following endpoint: 'GET /txs?action=submit-proposal&proposer=cosmos1g9ahr6xhht5rmqven628nklxluzyv8z9jqjcmc'"
+          description: "transaction tags such as 'action=submit-proposal' and 'proposer=coinex1g9ahr6xhht5rmqven628nklxluzyv8z9jqjcmc' which results in the following endpoint: 'GET /txs?action=submit-proposal&proposer=coinex1g9ahr6xhht5rmqven628nklxluzyv8z9jqjcmc'"
           required: true
           x-example: 'TODO'
         - in: query
@@ -346,7 +346,7 @@ paths:
           description: Account address in bech32 format
           required: true
           type: string
-          x-example: cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
+          x-example: coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
       responses:
         200:
           description: Account balances
@@ -382,7 +382,7 @@ paths:
           description: Account address in bech32 format
           required: true
           type: string
-          x-example: cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
+          x-example: coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
         - in: body
           name: account
           description: The sender and tx information
@@ -528,7 +528,7 @@ paths:
           description: Account address
           required: true
           type: string
-          x-example: cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
+          x-example: coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
       responses:
         200:
           description: Account information on the blockchain
@@ -570,7 +570,7 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
       summary: Get all delegations from a delegator
       operationId: getDelegations
@@ -631,13 +631,13 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
       - in: path
         name: validatorAddr
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Query the current delegation between a delegator and a validator
       tags:
@@ -660,7 +660,7 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
       summary: Get all unbonding delegations from a delegator
       operationId: getUndelegationsOfDelegator
@@ -721,13 +721,13 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
       - in: path
         name: validatorAddr
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Query all unbonding delegations between a delegator and a validator
       operationId: getUndelegationsBetween
@@ -785,7 +785,7 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     post:
       summary: Submit a redelegation
       parameters:
@@ -828,7 +828,7 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
       summary: Query all validators that a delegator is bonded to
       tags:
@@ -853,13 +853,13 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
       - in: path
         name: validatorAddr
         description: Bech32 ValAddress of Delegator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Query a validator that a delegator is bonded to
       tags:
@@ -882,7 +882,7 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
       summary: Get all staking txs (i.e msgs) from a delegator
       tags:
@@ -942,7 +942,7 @@ paths:
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Query the information from a single validator
       tags:
@@ -965,7 +965,7 @@ paths:
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Get all delegations from a validator
       operationId: getDelegationsOfValidator
@@ -991,7 +991,7 @@ paths:
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Get all unbonding delegations from a validator
       operationId: getUndelegationsOfValidator
@@ -1082,7 +1082,7 @@ paths:
           name: validatorPubKey
           required: true
           in: path
-          x-example: cosmosvalconspub1zcjduepq7mft6gfls57a0a42d7uhx656cckhfvtrlmw744jv4q0mvlv0dypskehfk8
+          x-example: coinexvalconspub1zcjduepq7mft6gfls57a0a42d7uhx656cckhfvtrlmw744jv4q0mvlv0dypskehfk8
       responses:
         200:
           description: OK
@@ -1144,7 +1144,7 @@ paths:
           name: validatorAddr
           required: true
           in: path
-          x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+          x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
         - description: ""
           name: UnjailBody
           in: body
@@ -1408,7 +1408,7 @@ paths:
           name: depositor
           required: true
           in: path
-          x-example: cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz
+          x-example: coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz
       responses:
         200:
           description: OK
@@ -1510,7 +1510,7 @@ paths:
           name: voter
           required: true
           in: path
-          x-example: cosmos1qwl879nx9t6kef4supyazayf7vjhennyjqwjgr
+          x-example: coinex1qwl879nx9t6kef4supyazayf7vjhennyjqwjgr
       responses:
         200:
           description: OK
@@ -1634,7 +1634,7 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
       summary: Get the total rewards balance from all delegations
       description: Get the sum of all the rewards earned by delegations by a single delegator
@@ -1689,13 +1689,13 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
       - in: path
         name: validatorAddr
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Query a delegation reward
       description: Query a single delegation reward by a delegator
@@ -1748,7 +1748,7 @@ paths:
         description: Bech32 AccAddress of Delegator
         required: true
         type: string
-        x-example: cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf
+        x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
       summary: Get the rewards withdrawal address
       description: Get the delegations' rewards withdrawal address. This is the address in which the user will receive the reward funds
@@ -1801,7 +1801,7 @@ paths:
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Validator distribution information
       description: Query the distribution information of a single validator
@@ -1825,7 +1825,7 @@ paths:
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Fee distribution outstanding rewards of a single validator
       operationId: getOutstandingRewards
@@ -1849,7 +1849,7 @@ paths:
         description: Bech32 OperatorAddress of validator
         required: true
         type: string
-        x-example: cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
+        x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Commission and self-delegation rewards of a single validator
       description: Query the commission and self-delegation rewards of validator.
@@ -2541,7 +2541,7 @@ definitions:
   Address:
     type: string
     description: bech32 encoded address
-    example: cosmos1depk54cuajgkzea6zpgkq36tnjwdzv4afc3d27
+    example: coinex1depk54cuajgkzea6zpgkq36tnjwdzv4afc3d27
   PublicKey:
     type: object
     description: public key information
@@ -2555,7 +2555,7 @@ definitions:
   ValidatorAddress:
     type: string
     description: bech32 encoded address
-    example: cosmosvaloper1depk54cuajgkzea6zpgkq36tnjwdzv4avv9cxd
+    example: coinexvaloper1depk54cuajgkzea6zpgkq36tnjwdzv4avv9cxd
   Coin:
     type: object
     properties:
@@ -2785,10 +2785,10 @@ definitions:
         description: Sender address or Keybase name to generate a transaction
       memo:
         type: string
-        example: "Sent via Cosmos Voyager 🚀"
+        example: "Sent with example memo"
       chain_id:
         type: string
-        example: "Cosmos-Hub"
+        example: "coinex-chain-1"
       account_number:
         type: string
         example: "0"
@@ -2816,7 +2816,7 @@ definitions:
         $ref: "#/definitions/ValidatorAddress"
       pub_key:
         type: string
-        example: cosmosvalconspub1zcjduepq7sjfglw7ra4mjxpw4ph7dtdhdheh7nz8dfgl6t8u2n5szuuql9mqsrwquu
+        example: coinexvalconspub1zcjduepq7sjfglw7ra4mjxpw4ph7dtdhdheh7nz8dfgl6t8u2n5szuuql9mqsrwquu
       voting_power:
         type: string
         example: "1000"
@@ -2895,7 +2895,7 @@ definitions:
         $ref: "#/definitions/ValidatorAddress"
       consensus_pubkey:
         type: string
-        example: cosmosvalconspub1zcjduepq7sjfglw7ra4mjxpw4ph7dtdhdheh7nz8dfgl6t8u2n5szuuql9mqsrwquu
+        example: coinexvalconspub1zcjduepq7sjfglw7ra4mjxpw4ph7dtdhdheh7nz8dfgl6t8u2n5szuuql9mqsrwquu
       jailed:
         type: boolean
       status:

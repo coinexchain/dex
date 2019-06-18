@@ -182,14 +182,14 @@
 2. 通过cetcli查询genesis账户，以第二个账户为例：
 
    ```bash
-   ./cetcli query account cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20 --trust-node
+   ./cetcli query account coinex1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20 --trust-node
    ```
 
    返回结果：
 
    ```bash
    Account:
-     Address:       cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20
+     Address:       coinex1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20
      Pubkey:        
      Coins:         120000000000000000cet
      AccountNumber: 2
@@ -448,14 +448,14 @@
          "last_total_power": "100",
          "last_validator_powers": [
            {
-             "Address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
+             "Address": "coinexvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "Power": "100"
            }
          ],
          "validators": [
            {
-             "operator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
-             "consensus_pubkey": "cosmosvalconspub1zcjduepqy248k43m6exsxyn28sthhjellp38r9gq4k2cnjpqv3jlfmjfy3nqy88u7j",
+             "operator_address": "coinexvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
+             "consensus_pubkey": "coinexvalconspub1zcjduepqy248k43m6exsxyn28sthhjellp38r9gq4k2cnjpqv3jlfmjfy3nqy88u7j",
              "jailed": false,
              "status": 2,
              "tokens": "100000000",
@@ -480,7 +480,7 @@
          "delegations": [
            {
              "delegator_address": "coinex1lmy0as3slwrkh6g56vx2rghcdslmclu5gnphz5",
-             "validator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
+             "validator_address": "coinexvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "shares": "100000000.000000000000000000"
            }
          ],
@@ -502,10 +502,10 @@
          "bonus_proposer_reward": "0.040000000000000000",
          "withdraw_addr_enabled": true,
          "delegator_withdraw_infos": [],
-         "previous_proposer": "cosmosvalcons1kkc4rlvkns38t398vtksmdk2yma2l0p463r96c",
+         "previous_proposer": "coinexvalcons1kkc4rlvkns38t398vtksmdk2yma2l0p463r96c",
          "outstanding_rewards": [
            {
-             "validator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
+             "validator_address": "coinexvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "outstanding_rewards": [
                {
                  "denom": "cet",
@@ -516,7 +516,7 @@
          ],
          "validator_accumulated_commissions": [
            {
-             "validator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
+             "validator_address": "coinexvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "accumulated": [
                {
                  "denom": "cet",
@@ -527,7 +527,7 @@
          ],
          "validator_historical_rewards": [
            {
-             "validator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
+             "validator_address": "coinexvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "period": "1",
              "rewards": {
                "cumulative_reward_ratio": null,
@@ -537,7 +537,7 @@
          ],
          "validator_current_rewards": [
            {
-             "validator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
+             "validator_address": "coinexvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "rewards": {
                "rewards": [
                  {
@@ -552,7 +552,7 @@
          "delegator_starting_infos": [
            {
              "delegator_address": "coinex1lmy0as3slwrkh6g56vx2rghcdslmclu5gnphz5",
-             "validator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
+             "validator_address": "coinexvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "starting_info": {
                "previous_period": "1",
                "stake": "100000000.000000000000000000",
@@ -601,7 +601,7 @@
            "slash_fraction_downtime": "0.010000000000000000"
          },
          "signing_infos": {
-           "cosmosvalcons1kkc4rlvkns38t398vtksmdk2yma2l0p463r96c": {
+           "coinexvalcons1kkc4rlvkns38t398vtksmdk2yma2l0p463r96c": {
              "start_height": "0",
              "index_offset": "1",
              "jailed_until": "1970-01-01T00:00:00Z",
@@ -610,7 +610,7 @@
            }
          },
          "missed_blocks": {
-           "cosmosvalcons1kkc4rlvkns38t398vtksmdk2yma2l0p463r96c": []
+           "coinexvalcons1kkc4rlvkns38t398vtksmdk2yma2l0p463r96c": []
          }
        },
        "asset": {

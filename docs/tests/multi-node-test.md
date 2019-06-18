@@ -183,10 +183,10 @@ $ docker exec cetdnode0 /cetd/cetcli status
 从任一node的genesis.json文件里，也可以找到各个node的地址。或者执行下面的命令：
 
 ```bash
-$ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node0/cetcli # cosmos1r309x5f09rwuns2sr8lqmczjgtulkht73hyyew
-$ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node1/cetcli # cosmos1guuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u
-$ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node2/cetcli # cosmos13fh95mxxdvuacf3km52t2a0xawv2c700hxf49f
-$ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node3/cetcli # cosmos1ast383g2ke4g2gjevemwzx5xwhz5jug388tlzp
+$ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node0/cetcli # coinex1r309x5f09rwuns2sr8lqmczjgtulkht73hyyew
+$ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node1/cetcli # coinex1guuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u
+$ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node2/cetcli # coinex13fh95mxxdvuacf3km52t2a0xawv2c700hxf49f
+$ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node3/cetcli # coinex1ast383g2ke4g2gjevemwzx5xwhz5jug388tlzp
 ```
 
 
@@ -196,7 +196,7 @@ $ docker exec cetdnode0 /cetd/cetcli keys list --home /cetd/node3/cetcli # cosmo
 好了，现在可以发起转账了。在node0里执行下面的命令，给node1转10cet（默认密码12345678）：
 
 ```bash
-$ docker exec -it cetdnode0 /cetd/cetcli tx send cosmos1guuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u 10cet \
+$ docker exec -it cetdnode0 /cetd/cetcli tx send coinex1guuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u 10cet \
 	--from node0 --chain-id=chain-0ze4Qg \
 	--gas 50000 --fees 10cet \
 	--home /cetd/node0/cetcli
@@ -223,8 +223,8 @@ Response:
   GasUsed: 35784
   Tags: 
     - action = send
-    - sender = cosmos1r309x5f09rwuns2sr8lqmczjgtulkht73hyyew
-    - recipient = cosmos1guuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u
+    - sender =coinexr309x5f09rwuns2sr8lqmczjgtulkht73hyyew
+    - recipient =coinexguuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u
 
   Timestamp: 2019-05-29T08:18:07
 ```
@@ -243,8 +243,8 @@ $ docker exec -it cetdnode1 /cetd/cetcli query tx 9B5888F7309C1C965145F5D1C75F88
   GasUsed: 35784
   Tags: 
     - action = send
-    - sender = cosmos1r309x5f09rwuns2sr8lqmczjgtulkht73hyyew
-    - recipient = cosmos1guuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u
+    - sender =coinexr309x5f09rwuns2sr8lqmczjgtulkht73hyyew
+    - recipient =coinexguuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u
 
   Timestamp: 2019-05-29T08:18:07Z
 ```

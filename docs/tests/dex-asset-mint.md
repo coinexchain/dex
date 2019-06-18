@@ -161,8 +161,8 @@ $ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
 
 ```bash
 Account:
-  Address:       cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3
-  Pubkey:        cosmospub1addwnpepq2uns08x3873dhp0q722pf8yunudlhl3j4s6uxhe0zglusr7p64swxxjts5
+  Address:       coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3
+  Pubkey:        coinexpub1addwnpepq2uns08x3873dhp0q722pf8yunudlhl3j4s6uxhe0zglusr7p64swxxjts5
   Coins:         9996997900000000cet,2100000000000000coin1,2100000000000000coin2,2100000000000000coin3
   AccountNumber: 0
   Sequence:      8

@@ -26,7 +26,7 @@
 $ ./cetcli keys add bear
 
 NAME:	TYPE:	ADDRESS:					PUBKEY:
-bear	local	cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9	cosmospub1addwnpepqtq2clys3yl8vvec46ujp7lsjta4akphe3ys3kcpewfukcwnc59rsy23rjj
+bear	local	coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9	coinexpub1addwnpepqtq2clys3yl8vvec46ujp7lsjta4akphe3ys3kcpewfukcwnc59rsy23rjj
 ```
 
 3. 发行cet
@@ -56,7 +56,7 @@ Response:
     - action = issue_token
     - category = asset
     - token = cet
-    - owner = cosmos1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj
+    - owner = coinex1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj
 
   Timestamp: 2019-06-12T09:25:30Z
 ```
@@ -76,9 +76,9 @@ Response:
 4. 查询激活结果
 
 ```
-./cetcli query account cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9 --chain-id=coinexdex
+./cetcli query account coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9 --chain-id=coinexdex
 Account:
-  Address:       cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9
+  Address:       coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9
   Pubkey:        
   Coins:         100000000cet
   AccountNumber: 1
@@ -112,9 +112,9 @@ Response:
 5. 查询账户
 
 ```
-./cetcli query account cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9 --chain-id=coinexdex
+./cetcli query account coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9 --chain-id=coinexdex
 Account:
-  Address:       cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9
+  Address:       coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9
   Pubkey:        
   Coins:         100000000cet
   AccountNumber: 1
@@ -128,9 +128,9 @@ Account:
 6. 3分钟后查询账户
 
 ```
-./cetcli query account cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9 --chain-id=coinexdex
+./cetcli query account coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9 --chain-id=coinexdex
 Account:
-  Address:       cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9
+  Address:       coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9
   Pubkey:        
   Coins:         300000000cet
   AccountNumber: 1

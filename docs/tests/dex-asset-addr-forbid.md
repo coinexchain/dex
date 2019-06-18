@@ -76,7 +76,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
 
 ```bash
 $ cetcli tx asset forbid-addr --symbol="coin1" \
-        --addresses=cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt,cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf,cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz \
+        --addresses=coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt,coinex167w96tdvmazakdwkw2u57227eduula2cy572lf,coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz \
     --from $(cetcli keys show bob -a) --chain-id=coinexdex
 ```
 
@@ -107,7 +107,7 @@ $ cetcli q asset forbid-addr coin1 --chain-id=coinexdex
 
 ```bash
 $ cetcli tx asset unforbid-addr --symbol="coin1" \
-        --addresses=cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt,cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz \
+        --addresses=coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt,coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz \
     --from $(cetcli keys show bob -a) --chain-id=coinexdex
 ```
 
@@ -147,8 +147,8 @@ $ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
 
 ```bash
 Account:
-  Address:       cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4
-  Pubkey:        cosmospub1addwnpepq03r5ud4j4yx3yzqnzz4yyj8r0r9ysf7pqm92s3at3r8s7rt93ay778g4la
+  Address:       coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4
+  Pubkey:        coinexpub1addwnpepq03r5ud4j4yx3yzqnzz4yyj8r0r9ysf7pqm92s3at3r8s7rt93ay778g4la
   Coins:         9997000000000000cet,2100000000000000coin1,2100000000000000coin2
   AccountNumber: 0
   Sequence:      15

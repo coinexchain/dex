@@ -34,8 +34,8 @@ Response:
   GasUsed: 41021
   Tags: 
     - action = send
-    - sender = cosmos1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78
-    - recipient = cosmos1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk
+    - sender = coinex1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78
+    - recipient = coinex1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk
 
   Timestamp: 2019-05-22T05:56:44Z
 
@@ -101,8 +101,8 @@ Response:
   GasUsed: 28240
   Tags: 
     - action = send
-    - sender = cosmos1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78
-    - recipient = cosmos1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk
+    - sender = coinex1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78
+    - recipient = coinex1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk
 
   Timestamp: 2019-05-22T06:07:45Z
 ```
@@ -215,8 +215,8 @@ Response:
   GasUsed: 37891
   Tags:
     - action = send
-    - sender = cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp
-    - recipient = cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t
+    - sender = coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp
+    - recipient = coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t
 
   Timestamp: 2019-05-28T10:32:07Z
 ```

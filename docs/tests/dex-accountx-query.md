@@ -14,10 +14,10 @@
 - 查询账户
 
 ```
-./cetcli query account cosmos17w3sdtvtddqqw2ctydk36ua2xu7qj3wz4a5xzm --chain-id=coinexdex
+./cetcli query account coinex17w3sdtvtddqqw2ctydk36ua2xu7qj3wz4a5xzm --chain-id=coinexdex
 
 Account:
-  Address:       cosmos17w3sdtvtddqqw2ctydk36ua2xu7qj3wz4a5xzm
+  Address:      coinex7w3sdtvtddqqw2ctydk36ua2xu7qj3wz4a5xzm
   Pubkey:        
   Coins:         100000000cet
   AccountNumber: 1

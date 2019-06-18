@@ -352,8 +352,8 @@ rm -rdf ~/.cetd ~/.cetcli
                 },
                 "min_self_delegation": "1",
                 "delegator_address": "coinex1mqesskxjc6xq2r8tg7sdh8mlkq5tl3nj0tuyfj",
-                "validator_address": "cosmosvaloper1mqesskxjc6xq2r8tg7sdh8mlkq5tl3nj2lg39p",
-                "pubkey": "cosmosvalconspub1zcjduepqzlumatluxcvaveyn88l4767hp84ltzuxpp8zgdxuyjeev4942f9sj4jj4x",
+                "validator_address": "coinexvaloper1mqesskxjc6xq2r8tg7sdh8mlkq5tl3nj2lg39p",
+                "pubkey": "coinexvalconspub1zcjduepqzlumatluxcvaveyn88l4767hp84ltzuxpp8zgdxuyjeev4942f9sj4jj4x",
                 "value": {
                   "denom": "cet",
                   "amount": "100000000"
@@ -404,7 +404,7 @@ Token Info: [
   Name:            CoinEx Chain Native Token
   Symbol:          cet
   TotalSupply:     588788547005740000
-  Owner:           cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v
+  Owner:           coinex1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v
   Mintable:        false
   Burnable:        true
   AddrForbiddable:  false

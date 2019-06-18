@@ -1,6 +1,6 @@
 # 单节点测试
 
-Reference: https://github.com/cosmos/gaia/blob/master/docs/deploy-testnet.md#single-node-local-manual-testnet
+Reference: https://github.com/coinex/gaia/blob/master/docs/deploy-testnet.md#single-node-local-manual-testnet
 
 
 
@@ -241,8 +241,8 @@ go run github.com/coinexchain/dex/cmd/cetcli
                },
                "min_self_delegation":"1",
                "delegator_address":"coinex1qfxpc6hful5hz8p03dk0cy5ygjgzc75jusl9fn",
-               "validator_address":"cosmosvaloper1qfxpc6hful5hz8p03dk0cy5ygjgzc75jeyts9q",
-               "pubkey":"cosmosvalconspub1zcjduepqp24c3zske6hh3g0u99l6yv6qeaw4pz0ct658q6hwy9plvjhqepkql7rduv",
+               "validator_address":"coinexvaloper1qfxpc6hful5hz8p03dk0cy5ygjgzc75jeyts9q",
+               "pubkey":"coinexvalconspub1zcjduepqp24c3zske6hh3g0u99l6yv6qeaw4pz0ct658q6hwy9plvjhqepkql7rduv",
                "value":{  
                   "denom":"cet",
                   "amount":"100000000"
@@ -302,7 +302,7 @@ go run github.com/coinexchain/dex/cmd/cetcli
         "value": {
           "msg": [
             {
-              "type": "cosmos-sdk/MsgCreateValidator",
+              "type": "coinex-sdk/MsgCreateValidator",
               "value": {
                 "description": {
                   "moniker": "node0",
@@ -317,8 +317,8 @@ go run github.com/coinexchain/dex/cmd/cetcli
                 },
                 "min_self_delegation": "1",
                 "delegator_address": "coinex1qfxpc6hful5hz8p03dk0cy5ygjgzc75jusl9fn",
-                "validator_address": "cosmosvaloper1qfxpc6hful5hz8p03dk0cy5ygjgzc75jeyts9q",
-                "pubkey": "cosmosvalconspub1zcjduepqp24c3zske6hh3g0u99l6yv6qeaw4pz0ct658q6hwy9plvjhqepkql7rduv",
+                "validator_address": "coinexvaloper1qfxpc6hful5hz8p03dk0cy5ygjgzc75jeyts9q",
+                "pubkey": "coinexvalconspub1zcjduepqp24c3zske6hh3g0u99l6yv6qeaw4pz0ct658q6hwy9plvjhqepkql7rduv",
                 "value": {
                   "denom": "cet",
                   "amount": "100000000"

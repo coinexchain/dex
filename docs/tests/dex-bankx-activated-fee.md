@@ -25,7 +25,7 @@
 对应地址如下：
 
 ```bash
-address: cosmos1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u	
+address: coinex1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u	
 ```
 
 
@@ -33,13 +33,13 @@ address: cosmos1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u
 2. 尝试查询该地址
 
 ```bash
-/cetcli query account cosmos1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u --trust-node
+/cetcli query account coinex1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u --trust-node
 ```
 
 返回结果
 
 ```bash
-ERROR: {"codespace":"sdk","code":9,"message":"account cosmos1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u does not exist"}
+ERROR: {"codespace":"sdk","code":9,"message":"account coinex1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u does not exist"}
 ```
 
 说明当前地址对应账户尚未创建。
@@ -54,8 +54,8 @@ ERROR: {"codespace":"sdk","code":9,"message":"account cosmos1knpnwr5z24fsc49waqa
 
 ```bash
 Account:
-  Address:       cosmos1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp
-  Pubkey:        cosmospub1addwnpepq2mhysu2wpt55wtlknhq8ckqy3qaeeye8vj7gl8pdl9x6xhkxjqgsauxxza
+  Address:       coinex1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp
+  Pubkey:        coinexpub1addwnpepq2mhysu2wpt55wtlknhq8ckqy3qaeeye8vj7gl8pdl9x6xhkxjqgsauxxza
   Coins:         900000000cet
   AccountNumber: 0
   Sequence:      1
@@ -66,7 +66,7 @@ Account:
 4. 转账：
 
 ```bash
-./cetcli tx send cosmos1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u 200000000cet --from validator --chain-id=coinexdex
+./cetcli tx send coinex1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u 200000000cet --from validator --chain-id=coinexdex
 ```
 
 返回response:
@@ -95,8 +95,8 @@ Response:
   GasUsed: 39033
   Tags: 
     - action = send
-    - sender = cosmos1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp
-    - recipient = cosmos1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u
+    - sender = coinex1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp
+    - recipient = coinex1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u
 
   Timestamp: 2019-05-20T07:36:14Z
 
@@ -105,14 +105,14 @@ Response:
 6. 查询bob账户
 
 ```bash
-./cetcli query account cosmos1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u --trust-node
+./cetcli query account coinex1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u --trust-node
 ```
 
 返回结果：
 
 ```json
 Account:
-  Address:       cosmos1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u
+  Address:       coinex1knpnwr5z24fsc49waqaxw5twxvd33ukwgl9z9u
   Pubkey:        
   Coins:         100000000cet
   AccountNumber: 1
@@ -132,8 +132,8 @@ Account:
 
 ```bash
 Account:
-  Address:       cosmos1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp
-  Pubkey:        cosmospub1addwnpepq2mhysu2wpt55wtlknhq8ckqy3qaeeye8vj7gl8pdl9x6xhkxjqgsauxxza
+  Address:       coinex1jzvzctg849zesmgq8edy50ufg2yz2hr79rlqkp
+  Pubkey:        coinexpub1addwnpepq2mhysu2wpt55wtlknhq8ckqy3qaeeye8vj7gl8pdl9x6xhkxjqgsauxxza
   Coins:         700000000cet
   AccountNumber: 0
   Sequence:      2
@@ -154,15 +154,15 @@ Account:
 2. 确认帐户ddd不存在系统中，同样也意味着处于未激活状态
 ```
 BJ00609:~/lab/dex$ ./cetcli query account $(./cetcli keys show ddd -a) --trust-node
-ERROR: {"codespace":"sdk","code":9,"message":"account cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79 does not exist"}
+ERROR: {"codespace":"sdk","code":9,"message":"account coinex1aj995p99reua0npfkevkw9v6fv579j449wdk79 does not exist"}
 ```
 
 3.　转帐发起人bob　的状态查询
 ```
 BJ00609:~/lab/dex$ ./cetcli query account $(./cetcli keys show bob -a) --trust-node
 Account:
-  Address:       cosmos1esmxfjyanvdevfkrznt00lemhftca7as2vavhk
-  Pubkey:        cosmospub1addwnpepqwwrut30t8pawppx2lpl2enayfmar5t59fggkf0k6hrx76empa4ujng6ck2
+  Address:       coinex1esmxfjyanvdevfkrznt00lemhftca7as2vavhk
+  Pubkey:        coinexpub1addwnpepqwwrut30t8pawppx2lpl2enayfmar5t59fggkf0k6hrx76empa4ujng6ck2
   Coins:         9999999700000000cet
   AccountNumber: 0
   Sequence:      2
@@ -175,7 +175,7 @@ Account:
 
 5. 访问　http://localhost:1317/swagger/
 然后　找　/bank/accounts/{address}/transfers　　这个API
-填上　address　　是收款人地址：　`cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79`
+填上　address　　是收款人地址：　`coinex1aj995p99reua0npfkevkw9v6fv579j449wdk79`
 account　是发款人的信息及发款数量，
 ```
 
@@ -210,7 +210,7 @@ account　是发款人的信息及发款数量，
 
 6. 上一步中对应的CURL请求是：
 ```
-curl -X POST "http://localhost:1317/bank/accounts/cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79/transfers" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"coinex1esmxfjyanvdevfkrznt00lemhftca7as2vavhk\", \"memo\": \"from bob to ddd\", \"chain_id\": \"coinexdex\", \"account_number\": \"0\", \"sequence\": \"2\", \"gas\": \"200000\", \"gas_adjustment\": \"1.2\", \"fees\": [ { \"denom\": \"cet\", \"amount\": \"200000000\" } ], \"simulate\": false }, \"amount\": [ { \"denom\": \"cet\", \"amount\": \"1300000000\" } ], \"unlock_time\": \"0\"}" > unsignedSendTx.json
+curl -X POST "http://localhost:1317/bank/accounts/coinex1aj995p99reua0npfkevkw9v6fv579j449wdk79/transfers" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"coinex1esmxfjyanvdevfkrznt00lemhftca7as2vavhk\", \"memo\": \"from bob to ddd\", \"chain_id\": \"coinexdex\", \"account_number\": \"0\", \"sequence\": \"2\", \"gas\": \"200000\", \"gas_adjustment\": \"1.2\", \"fees\": [ { \"denom\": \"cet\", \"amount\": \"200000000\" } ], \"simulate\": false }, \"amount\": [ { \"denom\": \"cet\", \"amount\": \"1300000000\" } ], \"unlock_time\": \"0\"}" > unsignedSendTx.json
 ```
 得到的是未签名的交易：
 ```
@@ -310,7 +310,7 @@ Response:
 ```
 BJ00609:~/lab/dex$ ./cetcli query account $(./cetcli keys show ddd -a) --trust-node
 Account:
-  Address:       cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79
+  Address:       coinex1aj995p99reua0npfkevkw9v6fv579j449wdk79
   Pubkey:
   Coins:         1200000000cet
   AccountNumber: 3
@@ -321,8 +321,8 @@ Account:
 ```
 BJ00609:~/lab/dex$ ./cetcli query account $(./cetcli keys show bob -a) --trust-node
 Account:
-  Address:       cosmos1esmxfjyanvdevfkrznt00lemhftca7as2vavhk
-  Pubkey:        cosmospub1addwnpepqwwrut30t8pawppx2lpl2enayfmar5t59fggkf0k6hrx76empa4ujng6ck2
+  Address:       coinex1esmxfjyanvdevfkrznt00lemhftca7as2vavhk
+  Pubkey:        coinexpub1addwnpepqwwrut30t8pawppx2lpl2enayfmar5t59fggkf0k6hrx76empa4ujng6ck2
   Coins:         9999998200000000cet
   AccountNumber: 0
   Sequence:      3
@@ -331,7 +331,7 @@ BJ00609:~/lab/dex$
 
 9. 再次bob转帐给ddd时，　因为ddd已经激活，就不会再次收ddd激活费用了。
 ```
-BJ00609:~/lab/dex$ curl -X POST "http://localhost:1317/bank/accounts/cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79/transfers" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"coinex1esmxfjyanvdevfkrznt00lemhftca7as2vavhk\", \"memo\": \"from bob to ddd\", \"chain_id\": \"coinexdex\", \"account_number\": \"0\", \"sequence\": \"3\", \"gas\": \"200000\", \"gas_adjustment\": \"1.2\", \"fees\": [ { \"denom\": \"cet\", \"amount\": \"200000000\" } ], \"simulate\": false }, \"amount\": [ { \"denom\": \"cet\", \"amount\": \"1300000000\" } ], \"unlock_time\": \"0\"}" > unsignedSendTx.json
+BJ00609:~/lab/dex$ curl -X POST "http://localhost:1317/bank/accounts/coinex1aj995p99reua0npfkevkw9v6fv579j449wdk79/transfers" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"coinex1esmxfjyanvdevfkrznt00lemhftca7as2vavhk\", \"memo\": \"from bob to ddd\", \"chain_id\": \"coinexdex\", \"account_number\": \"0\", \"sequence\": \"3\", \"gas\": \"200000\", \"gas_adjustment\": \"1.2\", \"fees\": [ { \"denom\": \"cet\", \"amount\": \"200000000\" } ], \"simulate\": false }, \"amount\": [ { \"denom\": \"cet\", \"amount\": \"1300000000\" } ], \"unlock_time\": \"0\"}" > unsignedSendTx.json
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100   741  100   379  100   362  38438  36713 --:--:-- --:--:-- --:--:-- 42111
@@ -346,7 +346,7 @@ BJ00609:~/lab/dex$
 BJ00609:~/lab/dex$
 BJ00609:~/lab/dex$ ./cetcli query account $(./cetcli keys show ddd -a) --trust-node
 Account:
-  Address:       cosmos1aj995p99reua0npfkevkw9v6fv579j449wdk79
+  Address:       coinex1aj995p99reua0npfkevkw9v6fv579j449wdk79
   Pubkey:
   Coins:         2500000000cet
   AccountNumber: 3

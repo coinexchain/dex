@@ -48,15 +48,15 @@
 
 ## 查询指定订单信息
 
-`./cetcli query market orderinfo  --order-id=cosmos16gvnhynu7veexyyaadk60k28cn5s9k7p7p5v9p-13 --trust-node=true`
+`./cetcli query market orderinfo  --order-id=coinex16gvnhynu7veexyyaadk60k28cn5s9k7p7p5v9p-13 --trust-node=true`
 
 ## 查询指定地址的所有订单列表
 
-`./cetcli query market userorderlist --address=cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z --trust-node=true`
+`./cetcli query market userorderlist --address=coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z --trust-node=true`
 
 ## 取消区块链上的指定订单
 
-`./cetcli tx market cancelorder --order-id=cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-6 --trust-node=true --from=bob --chain-id=coinexdex`
+`./cetcli tx market cancelorder --order-id=coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-6 --trust-node=true --from=bob --chain-id=coinexdex`
 
 
 ## Rest API 创建订单
