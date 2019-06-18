@@ -5,13 +5,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coinexchain/dex/cmd"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestMain(m *testing.M) {
-	cmd.InitSdkConfig()
+	dex.InitSdkConfig()
 	os.Exit(m.Run())
 }
 

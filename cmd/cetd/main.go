@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/coinexchain/dex/cmd"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -32,7 +30,7 @@ const flagInvCheckPeriod = "inv-check-period"
 var invCheckPeriod uint
 
 func main() {
-	cmd.InitSdkConfig()
+	dex.InitSdkConfig()
 	cdc := app.MakeCodec()
 	ctx := server.NewDefaultContext()
 

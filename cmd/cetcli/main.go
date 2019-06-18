@@ -6,8 +6,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/coinexchain/dex/cmd"
-
 	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -51,13 +49,14 @@ import (
 	bankxrest "github.com/coinexchain/dex/modules/bankx/client/rest"
 	mktclient "github.com/coinexchain/dex/modules/market/client"
 	mktrest "github.com/coinexchain/dex/modules/market/client/rest"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func main() {
 	// Configure cobra to sort commands
 	cobra.EnableCommandSorting = false
 
-	cmd.InitSdkConfig()
+	dex.InitSdkConfig()
 
 	// Instantiate the codec for the command line application
 	cdc := app.MakeCodec()

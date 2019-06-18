@@ -8,18 +8,17 @@ import (
 
 	"github.com/tendermint/tendermint/crypto"
 
-	"github.com/coinexchain/dex/cmd"
-
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/testutil"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // MsgSetMemoRequired tests
 func TestMain(m *testing.M) {
-	cmd.InitSdkConfig()
+	dex.InitSdkConfig()
 	os.Exit(m.Run())
 }
 

@@ -4,13 +4,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/coinexchain/dex/cmd"
-
 	"github.com/stretchr/testify/require"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestMain(m *testing.M) {
-	cmd.InitSdkConfig()
+	dex.InitSdkConfig()
 	os.Exit(m.Run())
 }
 

@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coinexchain/dex/cmd"
-
 	"github.com/stretchr/testify/require"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -31,7 +29,7 @@ import (
 const testChainID = "c1"
 
 func TestMain(m *testing.M) {
-	cmd.InitSdkConfig()
+	dex.InitSdkConfig()
 	os.Exit(m.Run())
 }
 

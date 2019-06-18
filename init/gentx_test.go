@@ -1,10 +1,9 @@
 package init
 
 import (
+	"github.com/coinexchain/dex/types"
 	"os"
 	"testing"
-
-	"github.com/coinexchain/dex/cmd"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
@@ -19,7 +18,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	cmd.InitSdkConfig()
+	types.InitSdkConfig()
 	os.Exit(m.Run())
 }
 

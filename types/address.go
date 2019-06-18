@@ -1,4 +1,4 @@
-package cmd
+package types
 
 import "github.com/cosmos/cosmos-sdk/types"
 

@@ -3,19 +3,18 @@ package main
 import (
 	"testing"
 
-	"github.com/coinexchain/dex/cmd"
-
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 
 	"github.com/coinexchain/dex/app"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestCreateRootCmd(t *testing.T) {
 	// Configure cobra to sort commands
 	cobra.EnableCommandSorting = false
 
-	cmd.InitSdkConfig()
+	dex.InitSdkConfig()
 
 	// Instantiate the codec for the command line application
 	cdc := app.MakeCodec()
