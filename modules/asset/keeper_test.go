@@ -82,7 +82,7 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 func TestTokenKeeper_TransferOwnership(t *testing.T) {
 	input := setupTestInput()
 	symbol := "abc"
-	var addr1, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
 	//case 1: base-case ok
 	// set token
@@ -119,7 +119,7 @@ func TestTokenKeeper_TransferOwnership(t *testing.T) {
 func TestTokenKeeper_MintToken(t *testing.T) {
 	input := setupTestInput()
 	symbol := "abc"
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
 	//case 1: base-case ok
 	// set token
@@ -208,7 +208,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 func TestTokenKeeper_BurnToken(t *testing.T) {
 	input := setupTestInput()
 	symbol := "abc"
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
 	//case 1: base-case ok
 	// set token
@@ -297,7 +297,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 func TestTokenKeeper_ForbidToken(t *testing.T) {
 	input := setupTestInput()
 	symbol := "abc"
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
 	//case 1: base-case ok
 	// set token

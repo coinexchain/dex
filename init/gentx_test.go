@@ -1,7 +1,10 @@
 package init
 
 import (
+	"os"
 	"testing"
+
+	"github.com/coinexchain/dex/cmd"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
@@ -15,6 +18,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 )
 
+func TestMain(m *testing.M) {
+	cmd.InitSdkConfig()
+	os.Exit(m.Run())
+}
+
 func Test_prepareFlagsForTxCreateValidator(t *testing.T) {
 	defer server.SetupViper(t)()
 	defer setupClientHome(t)()
@@ -23,7 +31,7 @@ func Test_prepareFlagsForTxCreateValidator(t *testing.T) {
 	logger := log.NewNopLogger()
 	ctx := server.NewContext(config, logger)
 
-	valPubKey, _ := sdk.GetConsPubKeyBech32("cosmosvalconspub1zcjduepq7jsrkl9fgqk0wj3ahmfr8pgxj6vakj2wzn656s8pehh0zhv2w5as5gd80a")
+	valPubKey, _ := sdk.GetConsPubKeyBech32("coinexvalconspub1addwnpepqdnj3shrcsjxjfp027lh6szyrrmvwxace6frplg30e9ngtflzpr5ucgmuy9")
 
 	type args struct {
 		config    *cfg.Config
@@ -63,7 +71,7 @@ func Test_prepareFlagsForTxCreateValidator(t *testing.T) {
 
 	tests := []testcase{
 		{"No parameters", args{ctx.Config, "X", "0.0.0.0", "chainId", valPubKey, "", "", ""}},
-		{"Optional parameters fed", args{ctx.Config, "X", "0.0.0.0", "chainId", valPubKey, "cosmos.network", "details", "identity"}},
+		{"Optional parameters fed", args{ctx.Config, "X", "0.0.0.0", "chainId", valPubKey, "coinex.org", "details", "identity"}},
 	}
 
 	defaultParams := extraParams{defaultAmount, defaultCommissionRate, defaultCommissionMaxRate, defaultCommissionMaxChangeRate, defaultMinSelfDelegation}

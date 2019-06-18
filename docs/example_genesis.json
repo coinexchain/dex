@@ -39,7 +39,7 @@
         "frozen_coins": null
       },
       {
-        "address": "cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy",
+        "address": "coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke",
         "coins": [
           {
             "denom": "cet",
@@ -58,7 +58,7 @@
         "frozen_coins": null
       },
       {
-        "address": "cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20",
+        "address": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
         "coins": [
           {
             "denom": "cet",
@@ -77,7 +77,7 @@
         "frozen_coins": null
       },
       {
-        "address": "cosmos1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q",
+        "address": "coinex1zvf0hx6rpz0n7dkuzu34s39dnsyr8eygqs8h3q",
         "coins": [
           {
             "denom": "cet",
@@ -101,7 +101,7 @@
         "frozen_coins": null
       },
       {
-        "address": "cosmos1966f22al7r23h3melq8yt8tnglhweunrxkcezl",
+        "address": "coinex1rfeae36tmm9t3gzacfq59hnv9j7fnaed3m4hhg",
         "coins": [
           {
             "denom": "cet",
@@ -125,7 +125,7 @@
         "frozen_coins": null
       },
       {
-        "address": "cosmos12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv",
+        "address": "coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47",
         "coins": [
           {
             "denom": "cet",
@@ -149,7 +149,7 @@
         "frozen_coins": null
       },
       {
-        "address": "cosmos1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj",
+        "address": "coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g",
         "coins": [
           {
             "denom": "cet",
@@ -173,7 +173,7 @@
         "frozen_coins": null
       },
       {
-        "address": "cosmos1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p",
+        "address": "coinex1qyy6tvx7ymw44t4444sfmexpvczchr0tcp2p6p",
         "coins": [
           {
             "denom": "cet",
@@ -318,7 +318,7 @@
             "name": "CoinEx Chain Native Token",
             "symbol": "cet",
             "total_supply": "588788547005740000",
-            "owner": "cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v",
+            "owner": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
             "mintable": false,
             "burnable": true,
             "addr_forbiddable": false,
@@ -334,7 +334,7 @@
             "name": "ABC Chain Native Token",
             "symbol": "abc",
             "total_supply": "588788547005740000",
-            "owner": "cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v",
+            "owner": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
             "mintable": false,
             "burnable": true,
             "addr_forbiddable": false,
@@ -365,7 +365,7 @@
       },
       "orders": [
         {
-          "sender": "cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v",
+          "sender": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
           "sequence": "100",
           "symbol": "abc/cet",
           "order_type": 2,
@@ -381,7 +381,7 @@
           "deal_money": "0"
         },
         {
-          "sender": "cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v",
+          "sender": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
           "sequence": "170",
           "symbol": "btc/cet",
           "order_type": 2,
@@ -401,7 +401,7 @@
         {
           "stock": "abc",
           "money": "cet",
-          "creator": "cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v",
+          "creator": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
           "price_precision": 8,
           "last_executed_price": "8568.000000000000000000"
         }
@@ -416,9 +416,9 @@
               "type": "cosmos-sdk/MsgCreateValidator",
               "value": {
                 "description": {
-                  "moniker": "node0",
-                  "identity": "node0",
-                  "website": "http://node0.coinexchain.org",
+                  "moniker": "moniker0",
+                  "identity": "",
+                  "website": "",
                   "details": ""
                 },
                 "commission": {
@@ -426,36 +426,31 @@
                   "max_rate": "0.200000000000000000",
                   "max_change_rate": "0.010000000000000000"
                 },
-                "min_self_delegation": "10000000000000000",
-                "delegator_address": "cosmos1t6dc9nlurlqkkyn907k2fuh6umvyg8ld44ehky",
-                "validator_address": "cosmosvaloper1t6dc9nlurlqkkyn907k2fuh6umvyg8ldspdz6h",
-                "pubkey": "cosmosvalconspub1addwnpepq2pswdyxuagrwdzg90pa72etzeeu5tp8lfvz9y7vqdh3u33a2nnyz4mj4mf",
+                "min_self_delegation": "1000000000000",
+                "delegator_address": "coinex1v5f78str9x5mhc0d2cvm8x9apru3dr2lptryxy",
+                "validator_address": "coinexvaloper1v5f78str9x5mhc0d2cvm8x9apru3dr2l6yqvgs",
+                "pubkey": "coinexvalconspub1zcjduepqupva053xvt8xd6x5644spga2uefdh6yxuad0823rf6t8s2pat34qep2rqf",
                 "value": {
                   "denom": "cet",
-                  "amount": "10000000000000000"
+                  "amount": "1000000000000"
                 }
               }
             }
           ],
           "fee": {
-            "amount": [
-              {
-                "denom": "cet",
-                "amount": "10"
-              }
-            ],
-            "gas": "1000000"
+            "amount": null,
+            "gas": "200000"
           },
           "signatures": [
             {
               "pub_key": {
                 "type": "tendermint/PubKeySecp256k1",
-                "value": "AoMHNIbnUDc0SCvD3ysrFnPKLCf6WCKTzANvHkY9VOZB"
+                "value": "A2gjEwOYZKGI+2sG+9o/j6IGNaP99bb+JxIpjEI5j9Vs"
               },
-              "signature": "i/YMy8076lxk3iSf8SoG0IEOHvyg7nLY9tbi9ebQb+VWu4JrNWOmtAybigagsbUlkRdMYaNrK7g+1cPgK5Qpzg=="
+              "signature": "VRKYnN1uq/9vdOlme4C1i2gbA2aAGFBfG3dIYBbSvao3Ar8w0kjnbzH9gPvRWg0iusjmPiTBZpQOujAf03jIew=="
             }
           ],
-          "memo": ""
+          "memo": "859580eee8a42568d3b1af3c8e803990ecbb931c@10.1.2.103:26656"
         }
       }
     ]

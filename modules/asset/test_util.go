@@ -81,9 +81,9 @@ func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
 }
 
 func mockWhitelist() (whitelist []sdk.AccAddress) {
-	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
-	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
-	var addr3, _ = sdk.AccAddressFromBech32("cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
+	var addr2, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+	var addr3, _ = sdk.AccAddressFromBech32("coinex1zvf0hx6rpz0n7dkuzu34s39dnsyr8eygqs8h3q")
 
 	whitelist = append(whitelist, addr1)
 	whitelist = append(whitelist, addr2)
@@ -92,9 +92,9 @@ func mockWhitelist() (whitelist []sdk.AccAddress) {
 }
 
 func mockAddresses() (addr []sdk.AccAddress) {
-	var addr1, _ = sdk.AccAddressFromBech32("cosmos16cyga47yh3cv6pzemy0fjtkeqjtrjjukgngey6")
-	var addr2, _ = sdk.AccAddressFromBech32("cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy")
-	var addr3, _ = sdk.AccAddressFromBech32("cosmos1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47")
+	var addr2, _ = sdk.AccAddressFromBech32("coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g")
+	var addr3, _ = sdk.AccAddressFromBech32("coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn")
 
 	addr = append(addr, addr1)
 	addr = append(addr, addr2)

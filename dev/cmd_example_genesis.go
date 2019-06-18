@@ -71,13 +71,13 @@ func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 func createGenesisAccounts() (accs []app.GenesisAccount) {
 	accs = append(accs,
 		newBaseGenesisAccount(incentive.IncentivePoolAddr.String(), 30000000000000000),
-		newBaseGenesisAccount("cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy", 288788547005740000),
-		newBaseGenesisAccount("cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20", 90000000000000000),
-		newVestingGenesisAccount("cosmos1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q", 36000000000000000, 1577836800),
-		newVestingGenesisAccount("cosmos1966f22al7r23h3melq8yt8tnglhweunrxkcezl", 36000000000000000, 1609459200),
-		newVestingGenesisAccount("cosmos12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv", 36000000000000000, 1640995200),
-		newVestingGenesisAccount("cosmos1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj", 36000000000000000, 1672531200),
-		newVestingGenesisAccount("cosmos1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p", 36000000000000000, 1704067200),
+		newBaseGenesisAccount("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke", 288788547005740000),
+		newBaseGenesisAccount("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h", 90000000000000000),
+		newVestingGenesisAccount("coinex1zvf0hx6rpz0n7dkuzu34s39dnsyr8eygqs8h3q", 36000000000000000, 1577836800),
+		newVestingGenesisAccount("coinex1rfeae36tmm9t3gzacfq59hnv9j7fnaed3m4hhg", 36000000000000000, 1609459200),
+		newVestingGenesisAccount("coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47", 36000000000000000, 1640995200),
+		newVestingGenesisAccount("coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g", 36000000000000000, 1672531200),
+		newVestingGenesisAccount("coinex1qyy6tvx7ymw44t4444sfmexpvczchr0tcp2p6p", 36000000000000000, 1704067200),
 	)
 	return
 }
@@ -115,7 +115,7 @@ func createGenesisAssetData() asset.GenesisState {
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",
 		TotalSupply:      588788547005740000,
-		Owner:            accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Owner:            accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Mintable:         false,
 		Burnable:         true,
 		AddrForbiddable:  false,
@@ -128,7 +128,7 @@ func createGenesisAssetData() asset.GenesisState {
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
 		TotalSupply:      588788547005740000,
-		Owner:            accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Owner:            accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Mintable:         false,
 		Burnable:         true,
 		AddrForbiddable:  false,
@@ -145,7 +145,7 @@ func createGenesisAssetData() asset.GenesisState {
 
 func createGenesisMarketData() market.GenesisState {
 	order0 := &market.Order{
-		Sender:      accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Sender:      accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Sequence:    100,
 		Symbol:      "abc/cet",
 		OrderType:   2,
@@ -156,7 +156,7 @@ func createGenesisMarketData() market.GenesisState {
 		Height:      100,
 	}
 	order1 := &market.Order{
-		Sender:      accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Sender:      accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Sequence:    170,
 		Symbol:      "btc/cet",
 		OrderType:   2,
@@ -170,7 +170,7 @@ func createGenesisMarketData() market.GenesisState {
 	market0 := market.MarketInfo{
 		Stock:             "abc",
 		Money:             "cet",
-		Creator:           accAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v"),
+		Creator:           accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(8568),
 	}

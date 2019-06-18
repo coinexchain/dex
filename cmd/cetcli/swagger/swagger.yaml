@@ -2647,10 +2647,10 @@ definitions:
         example: Main Account
       address:
         type: string
-        example: cosmos1depk54cuajgkzea6zpgkq36tnjwdzv4afc3d27
+        example: coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke
       pub_key:
         type: string
-        example: "cosmospub1addwnpepqtqc88gfdxyzcdm2eqr3tnlnxnelyqehy8k95qzgwdz5zccdft9rq5q7wj2"
+        example: "coinexpub1addwnpepqdnj3shrcsjxjfp027lh6szyrrmvwxace6frplg30e9ngtflzpr5ut4wmke"
       type:
         type: string
         example: local
@@ -2781,7 +2781,7 @@ definitions:
     properties:
       from:
         type: string
-        example: "cosmos1g9ahr6xhht5rmqven628nklxluzyv8z9jqjcmc"
+        example: "coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke"
         description: Sender address or Keybase name to generate a transaction
       memo:
         type: string

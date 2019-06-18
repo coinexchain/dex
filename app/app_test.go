@@ -1,8 +1,11 @@
 package app
 
 import (
+	"os"
 	"testing"
 	"time"
+
+	"github.com/coinexchain/dex/cmd"
 
 	"github.com/stretchr/testify/require"
 
@@ -26,6 +29,11 @@ import (
 )
 
 const testChainID = "c1"
+
+func TestMain(m *testing.M) {
+	cmd.InitSdkConfig()
+	os.Exit(m.Run())
+}
 
 type genesisStateCallback func(state *GenesisState)
 
@@ -71,7 +79,7 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 }
 
 func cetToken() asset.Token {
-	cetOwnerAddr, _ := sdk.AccAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v")
+	cetOwnerAddr, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	return &asset.BaseToken{
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",

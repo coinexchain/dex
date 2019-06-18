@@ -1,11 +1,19 @@
 package asset
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
+	"github.com/coinexchain/dex/cmd"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
+
+func TestMain(m *testing.M) {
+	cmd.InitSdkConfig()
+	os.Exit(m.Run())
+}
 
 func TestMsgIssueToken_Route(t *testing.T) {
 	tests := []struct {
@@ -111,7 +119,7 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgIssueToken_GetSignBytes(t *testing.T) {
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr, _ = sdk.AccAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd")
 	tests := []struct {
 		name string
 		msg  MsgIssueToken
@@ -121,7 +129,7 @@ func TestMsgIssueToken_GetSignBytes(t *testing.T) {
 			"base-case",
 			NewMsgIssueToken("ABC Token", "abc", 100000, addr,
 				false, false, false, false),
-			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"mintable":false,"name":"ABC Token","owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","token_forbiddable":false,"total_supply":"100000"}}`,
+			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"mintable":false,"name":"ABC Token","owner":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","token_forbiddable":false,"total_supply":"100000"}}`,
 		},
 	}
 
@@ -237,8 +245,8 @@ func TestMsgTransferOwnership_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgTransferOwnership_GetSignBytes(t *testing.T) {
-	var addr1, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
-	var addr2, _ = sdk.AccAddressFromBech32("cosmos1r8rjvkawsq379z7qndtqtkks0pvqxxepnk0frr")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd")
+	var addr2, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	tests := []struct {
 		name string
 		msg  MsgTransferOwnership
@@ -247,7 +255,7 @@ func TestMsgTransferOwnership_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgTransferOwnership("abc", addr1, addr2),
-			`{"type":"asset/MsgTransferOwnership","value":{"new_owner":"cosmos1r8rjvkawsq379z7qndtqtkks0pvqxxepnk0frr","original_owner":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+			`{"type":"asset/MsgTransferOwnership","value":{"new_owner":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","original_owner":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc"}}`,
 		},
 	}
 
@@ -357,7 +365,7 @@ func TestMsgMintToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgMintToken_GetSignBytes(t *testing.T) {
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	tests := []struct {
 		name string
 		msg  MsgMintToken
@@ -366,7 +374,7 @@ func TestMsgMintToken_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgMintToken("abc", 100000, addr),
-			`{"type":"asset/MsgMintToken","value":{"amount":"100000","owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+			`{"type":"asset/MsgMintToken","value":{"amount":"100000","owner_address":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","symbol":"abc"}}`,
 		},
 	}
 
@@ -476,7 +484,7 @@ func TestMsgBurnToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgBurnToken_GetSignBytes(t *testing.T) {
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	tests := []struct {
 		name string
 		msg  MsgBurnToken
@@ -485,7 +493,7 @@ func TestMsgBurnToken_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgBurnToken("abc", 100000, addr),
-			`{"type":"asset/MsgBurnToken","value":{"amount":"100000","owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+			`{"type":"asset/MsgBurnToken","value":{"amount":"100000","owner_address":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","symbol":"abc"}}`,
 		},
 	}
 
@@ -588,7 +596,7 @@ func TestMsgForbidToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgForbidToken_GetSignBytes(t *testing.T) {
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	tests := []struct {
 		name string
 		msg  MsgForbidToken
@@ -597,7 +605,7 @@ func TestMsgForbidToken_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgForbidToken("abc", addr),
-			`{"type":"asset/MsgForbidToken","value":{"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+			`{"type":"asset/MsgForbidToken","value":{"owner_address":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","symbol":"abc"}}`,
 		},
 	}
 
@@ -698,7 +706,7 @@ func TestMsgUnForbidToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgUnForbidToken_GetSignBytes(t *testing.T) {
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	tests := []struct {
 		name string
 		msg  MsgUnForbidToken
@@ -707,7 +715,7 @@ func TestMsgUnForbidToken_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgUnForbidToken("abc", addr),
-			`{"type":"asset/MsgUnForbidToken","value":{"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+			`{"type":"asset/MsgUnForbidToken","value":{"owner_address":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","symbol":"abc"}}`,
 		},
 	}
 
@@ -813,9 +821,9 @@ func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgAddTokenWhitelist_GetSignBytes(t *testing.T) {
-	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
-	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
+	var addr2, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	whitelist := []sdk.AccAddress{addr1, addr2}
 	tests := []struct {
 		name string
@@ -825,7 +833,7 @@ func TestMsgAddTokenWhitelist_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgAddTokenWhitelist("abc", addr, whitelist),
-			`{"type":"asset/MsgAddTokenWhitelist","value":{"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","whitelist":["cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}}`,
+			`{"type":"asset/MsgAddTokenWhitelist","value":{"owner_address":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","symbol":"abc","whitelist":["coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke","coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h"]}}`,
 		},
 	}
 
@@ -934,9 +942,9 @@ func TestMsgRemoveTokenWhitelist_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgRemoveTokenWhitelist_GetSignBytes(t *testing.T) {
-	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
-	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
+	var addr2, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	whitelist := []sdk.AccAddress{addr1, addr2}
 	tests := []struct {
 		name string
@@ -946,7 +954,7 @@ func TestMsgRemoveTokenWhitelist_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgRemoveTokenWhitelist("abc", addr, whitelist),
-			`{"type":"asset/MsgRemoveTokenWhitelist","value":{"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","whitelist":["cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}}`,
+			`{"type":"asset/MsgRemoveTokenWhitelist","value":{"owner_address":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","symbol":"abc","whitelist":["coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke","coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h"]}}`,
 		},
 	}
 
@@ -1055,9 +1063,9 @@ func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgForbidAddr_GetSignBytes(t *testing.T) {
-	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
-	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
+	var addr2, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	addresses := []sdk.AccAddress{addr1, addr2}
 	tests := []struct {
 		name string
@@ -1067,7 +1075,7 @@ func TestMsgForbidAddr_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgForbidAddr("abc", addr, addresses),
-			`{"type":"asset/MsgForbidAddr","value":{"forbid_addr":["cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"],"owner_address":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc"}}`,
+			`{"type":"asset/MsgForbidAddr","value":{"forbid_addr":["coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke","coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h"],"owner_address":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","symbol":"abc"}}`,
 		},
 	}
 
@@ -1176,9 +1184,9 @@ func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgUnForbidAddr_GetSignBytes(t *testing.T) {
-	var addr1, _ = sdk.AccAddressFromBech32("cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt")
-	var addr2, _ = sdk.AccAddressFromBech32("cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf")
-	var addr, _ = sdk.AccAddressFromBech32("cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
+	var addr2, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	addresses := []sdk.AccAddress{addr1, addr2}
 	tests := []struct {
 		name string
@@ -1188,7 +1196,7 @@ func TestMsgUnForbidAddr_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgUnForbidAddr("abc", addr, addresses),
-			`{"type":"asset/MsgUnForbidAddr","value":{"owner_addr":"cosmos1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","symbol":"abc","unforbid_addr":["cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}}`,
+			`{"type":"asset/MsgUnForbidAddr","value":{"owner_addr":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","symbol":"abc","unforbid_addr":["coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke","coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h"]}}`,
 		},
 	}
 

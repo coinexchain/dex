@@ -207,14 +207,6 @@ func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context, accountsX map[
 	return
 }
 
-func (app *CetChainApp) getAllAccountsXForGenesis(ctx sdk.Context) (accountsX []authx.AccountX) {
-	appendFn := func(accountX authx.AccountX) (stop bool) {
-		accountsX = append(accountsX, accountX)
-		return false
-	}
-	app.accountXKeeper.IterateAccounts(ctx, appendFn)
-	return
-}
 func (app *CetChainApp) getAccountsXMapForGenesis(ctx sdk.Context) (accountsX map[string]authx.AccountX) {
 	accountsX = make(map[string]authx.AccountX)
 	appendFn := func(accountX authx.AccountX) (stop bool) {
