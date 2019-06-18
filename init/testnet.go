@@ -324,7 +324,7 @@ func assureTokenDistributionInGenesis(accs []app.GenesisAccount, testnetSupply i
 }
 
 func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64) {
-	addr, _ := sdk.AccAddressFromBech32("cosmos1479jkxzl0gdz6jg7x4843z3eqsvlc5me23wn4v")
+	addr := sdk.AccAddress(crypto.AddressHash([]byte("test_cet_owner")))
 
 	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
 		"cet",

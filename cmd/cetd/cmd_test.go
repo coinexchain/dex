@@ -8,10 +8,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/cmd"
 )
 
 func TestCreateRootCmd(t *testing.T) {
-	initSdkConfig()
+	cmd.InitSdkConfig()
 	cdc := app.MakeCodec()
 	ctx := server.NewDefaultContext()
 

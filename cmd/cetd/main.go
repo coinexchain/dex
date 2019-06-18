@@ -16,16 +16,14 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/coinexchain/dex/app"
 	cet_init "github.com/coinexchain/dex/init"
 	cet_server "github.com/coinexchain/dex/server"
 	dex "github.com/coinexchain/dex/types"
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/cosmos/cosmos-sdk/store"
 )
 
 // cetd custom flags
@@ -34,7 +32,7 @@ const flagInvCheckPeriod = "inv-check-period"
 var invCheckPeriod uint
 
 func main() {
-	initSdkConfig()
+	cmd.InitSdkConfig()
 	cdc := app.MakeCodec()
 	ctx := server.NewDefaultContext()
 
@@ -51,14 +49,6 @@ func main() {
 		// handle with #870
 		panic(err)
 	}
-}
-
-func initSdkConfig() {
-	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount(cmd.Bech32PrefixAccAddr, cmd.Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(cmd.Bech32PrefixValAddr, cmd.Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(cmd.Bech32PrefixConsAddr, cmd.Bech32PrefixConsPub)
-	config.Seal()
 }
 
 func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
