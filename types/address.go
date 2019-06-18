@@ -1,6 +1,8 @@
 package types
 
-import "github.com/cosmos/cosmos-sdk/types"
+import (
+	"github.com/cosmos/cosmos-sdk/types"
+)
 
 const (
 	// AddrLen defines a valid address length
