@@ -17,7 +17,7 @@
 - CLI命令
   - `$ cetcli tx asset transfer-ownership [flags]` 
 - Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/ownerships --data-binary '{"base_req":{"from":"cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp","chain_id":"coinexdex","sequence":"5","account_number":"0"},"new_owner":"cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"}'`
+  - `curl -X POST http://localhost:1317/asset/tokens/coin2/ownerships --data-binary '{"base_req":{"from":"coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp","chain_id":"coinexdex","sequence":"5","account_number":"0"},"new_owner":"coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"}'`
 
 ## TransferOwnership CLI Example
 
@@ -83,7 +83,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": "bob first token",
       "symbol": "coin1",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
+      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": false,
@@ -99,7 +99,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": "bob sec token",
       "symbol": "coin2",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
+      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": false,
@@ -115,7 +115,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": "bob th token",
       "symbol": "coin3",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
+      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": false,
@@ -158,7 +158,7 @@ $ cetcli q asset token coin1 --chain-id=coinexdex
     "name": "bob first token",
     "symbol": "coin1",
     "total_supply": "2100000000000000",
-    "owner": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
+    "owner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
     "mintable": false,
     "burnable": true,
     "addr_forbiddable": false,
@@ -213,7 +213,7 @@ $ curl -X GET http://localhost:1317/asset/tokens | jq
       "name": "bob first token",
       "symbol": "coin1",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
+      "owner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": false,
@@ -229,7 +229,7 @@ $ curl -X GET http://localhost:1317/asset/tokens | jq
       "name": "bob sec token",
       "symbol": "coin2",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
+      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": false,
@@ -245,7 +245,7 @@ $ curl -X GET http://localhost:1317/asset/tokens | jq
       "name": "bob th token",
       "symbol": "coin3",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
+      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": false,
@@ -261,7 +261,7 @@ $ curl -X GET http://localhost:1317/asset/tokens | jq
 4. 通过Rest API转移coin2的ownership，填写本地from/new_owner/sequence/account_number等信息
 
 ```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/ownerships --data-binary '{"base_req":{"from":"cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp","chain_id":"coinexdex","sequence":"5","account_number":"0"},"new_owner":"cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"}' > unsigned.json
+$ curl -X POST http://localhost:1317/asset/tokens/coin2/ownerships --data-binary '{"base_req":{"from":"coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp","chain_id":"coinexdex","sequence":"5","account_number":"0"},"new_owner":"coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"}' > unsigned.json
 ```
 
 返回未签名交易存入unsigned.json
@@ -275,8 +275,8 @@ $ curl -X POST http://localhost:1317/asset/tokens/coin2/ownerships --data-binary
         "type": "asset/MsgTransferOwnership",
         "value": {
           "Symbol": "coin2",
-          "OriginalOwner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-          "NewOwner": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"
+          "OriginalOwner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
+          "NewOwner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"
         }
       }
     ],
@@ -309,8 +309,8 @@ $ cetcli tx sign \
         "type": "asset/MsgTransferOwnership",
         "value": {
           "Symbol": "coin2",
-          "OriginalOwner": "cosmos1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-          "NewOwner": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"
+          "OriginalOwner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
+          "NewOwner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"
         }
       }
     ],
@@ -360,7 +360,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin2
     "name": "bob sec token",
     "symbol": "coin2",
     "total_supply": "2100000000000000",
-    "owner": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
+    "owner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
     "mintable": false,
     "burnable": true,
     "addr_forbiddable": false,

@@ -65,12 +65,12 @@
 
 #### 创建未签名的GTE 订单交易
 
-`curl -X POST http://localhost:1317/market/create-gte-order  --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_type":"2", "symbol":"eth/cet", "price_precision":"8", "price":"32123", "quantity":"1267632", "side":"1"}'  > unsignedSendTx.json`
+`curl -X POST http://localhost:1317/market/create-gte-order  --data-binary '{"base_req":{"from":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_type":"2", "symbol":"eth/cet", "price_precision":"8", "price":"32123", "quantity":"1267632", "side":"1"}'  > unsignedSendTx.json`
 
 
 #### 创建未签名的IOC 订单交易
 
-`curl -X POST http://localhost:1317/market/create-ioc-order  --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_type":"2", "symbol":"eth/cet", "price_precision":"8", "price":"32782123", "quantity":"77563632", "side":"1"}'  > unsignedSendTx.json`
+`curl -X POST http://localhost:1317/market/create-ioc-order  --data-binary '{"base_req":{"from":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_type":"2", "symbol":"eth/cet", "price_precision":"8", "price":"32782123", "quantity":"77563632", "side":"1"}'  > unsignedSendTx.json`
 
 ### 对未签名的交易进行处理
 
@@ -85,16 +85,16 @@
 
 ### 查询市场的交易对
 
-`curl -X GET http://localhost:1317/market/market-info --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "symbol":"dash/cet" }'`    
+`curl -X GET http://localhost:1317/market/market-info --data-binary '{"base_req":{"from":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "symbol":"dash/cet" }'`    
 
 ### 查询订单
 
-`curl -X GET http://localhost:1317/market/order-info --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_id":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-16" }'`
+`curl -X GET http://localhost:1317/market/order-info --data-binary '{"base_req":{"from":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_id":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-16" }'`
 
 ### 取消订单
 
-`curl -X POST http://localhost:1317/market/cancel-order --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_id":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-16" }'`
+`curl -X POST http://localhost:1317/market/cancel-order --data-binary '{"base_req":{"from":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "order_id":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z-16" }'`
 
 ### 查询用户订单列表
 
- `curl -X GET http://localhost:1317/market/user-order-list --data-binary '{"base_req":{"from":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "address":"cosmos1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z" }'`
+ `curl -X GET http://localhost:1317/market/user-order-list --data-binary '{"base_req":{"from":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z", "chain_id":"coinexdex"}, "address":"coinex1wdzsu25mwlen0twt7vlar76af84mnsjtul4d9z" }'`

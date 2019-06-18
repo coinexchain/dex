@@ -19,8 +19,8 @@
   - `$ cetcli tx asset remove-whitelist [flags]` 
   - `$ cetcli q asset whitelist abc [flags]` 
 - Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}''`
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
+  - `curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}''`
+  - `curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
   - `curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/whitelist`
 
 ## Whitelist CLI Example
@@ -43,7 +43,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": " 1' Token",
       "symbol": "coin1",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+      "owner": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": true,
@@ -59,7 +59,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": " 2' Token",
       "symbol": "coin2",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+      "owner": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": true,
@@ -97,9 +97,9 @@ $ cetcli q asset whitelist coin1 --chain-id=coinexdex
 
 ```bash
 [
-  "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-  "cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt",
-  "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+  "coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt",
+  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
 ]
 ```
 
@@ -128,7 +128,7 @@ $ cetcli q asset whitelist coin1 --chain-id=coinexdex
 
 ```bash
 [
-  "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
+  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
 ]
 ```
 
@@ -166,7 +166,7 @@ $ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --nod
 3. 通过Rest AP添加coin2白名单，填写本地from/amount/sequence/account_number等信息
 
 ```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
+$ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
 ```
 
 返回未签名交易存入unsigned.json
@@ -180,10 +180,10 @@ $ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --da
         "type": "asset/MsgAddTokenWhitelist",
         "value": {
           "symbol": "coin2",
-          "owner_address": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
           "whitelist": [
-            "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-            "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+            "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
           ]
         }
       }
@@ -217,10 +217,10 @@ $ cetcli tx sign \
         "type": "asset/MsgAddTokenWhitelist",
         "value": {
           "symbol": "coin2",
-          "owner_address": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
           "whitelist": [
-            "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-            "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+            "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
           ]
         }
       }
@@ -266,15 +266,15 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/whitelist
 
 ```bash
 [
-  "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-  "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
 ]%
 ```
 
 8. 通过Rest API删除coin2的白名单，填写本地from/amount/sequence/account_number等信息
 
 ```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
+$ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
 ```
 
 返回未签名交易存入unsigned.json
@@ -288,9 +288,9 @@ $ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --
         "type": "asset/MsgRemoveTokenWhitelist",
         "value": {
           "symbol": "coin2",
-          "owner_address": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
           "whitelist": [
-            "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
           ]
         }
       }
@@ -324,9 +324,9 @@ $ cetcli tx sign \
         "type": "asset/MsgRemoveTokenWhitelist",
         "value": {
           "symbol": "coin2",
-          "owner_address": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
           "whitelist": [
-            "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
           ]
         }
       }
@@ -372,7 +372,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin2/whitelist
 
 ```bash
 [
-  "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
+  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
 ]%
 ```
 

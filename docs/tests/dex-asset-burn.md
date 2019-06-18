@@ -18,7 +18,7 @@
 - CLI命令
   - `$ cetcli tx asset burn-token [flags]` 
 - Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin3/burns --data-binary '{"base_req":{"from":"cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"8","account_number":"0"},"amount":"2000"}'`
+  - `curl -X POST http://localhost:1317/asset/tokens/coin3/burns --data-binary '{"base_req":{"from":"coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"8","account_number":"0"},"amount":"2000"}'`
 
 ## BurnToken CLI Example
 
@@ -40,7 +40,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": "first token",
       "symbol": "coin1",
       "total_supply": "2100000000000000",
-      "owner": "cosmos16cyga47yh3cv6pzemy0fjtkeqjtrjjukgngey6",
+      "owner": "coinex16cyga47yh3cv6pzemy0fjtkeqjtrjjukgngey6",
       "mintable": true,
       "burnable": true,
       "addr_forbiddable": false,
@@ -56,7 +56,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": "sec token",
       "symbol": "coin2",
       "total_supply": "2100000000000100",
-      "owner": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+      "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
       "mintable": true,
       "burnable": true,
       "addr_forbiddable": false,
@@ -72,7 +72,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": "th token",
       "symbol": "coin3",
       "total_supply": "2100000000002000",
-      "owner": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+      "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
       "mintable": true,
       "burnable": true,
       "addr_forbiddable": false,
@@ -115,7 +115,7 @@ $ cetcli q asset token coin2 --chain-id=coinexdex
     "name": "sec token",
     "symbol": "coin2",
     "total_supply": "2100000000000000",
-    "owner": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+    "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
     "mintable": true,
     "burnable": true,
     "addr_forbiddable": false,
@@ -158,7 +158,7 @@ $ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --nod
 3. 通过Rest API燃烧coin3，填写本地from/amount/sequence/account_number等信息
 
 ```bash
-curl -X POST http://localhost:1317/asset/tokens/coin3/burns --data-binary '{"base_req":{"from":"cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"11","account_number":"0"},"amount":"2000"}' > unsigned.json
+curl -X POST http://localhost:1317/asset/tokens/coin3/burns --data-binary '{"base_req":{"from":"coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"11","account_number":"0"},"amount":"2000"}' > unsigned.json
 ```
 
 返回未签名交易存入unsigned.json
@@ -173,7 +173,7 @@ curl -X POST http://localhost:1317/asset/tokens/coin3/burns --data-binary '{"bas
         "value": {
           "Symbol": "coin3",
           "Amount": "2000",
-          "OwnerAddress": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3"
+          "OwnerAddress": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3"
         }
       }
     ],
@@ -207,7 +207,7 @@ $ cetcli tx sign \
         "value": {
           "Symbol": "coin3",
           "Amount": "2000",
-          "OwnerAddress": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3"
+          "OwnerAddress": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3"
         }
       }
     ],
@@ -276,7 +276,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin3
     "name": "th token",
     "symbol": "coin3",
     "total_supply": "2100000000000000",
-    "owner": "cosmos1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+    "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
     "mintable": true,
     "burnable": true,
     "addr_forbiddable": false,

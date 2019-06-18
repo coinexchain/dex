@@ -33,7 +33,7 @@ bear	local	cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9	cosmospub1addwnpepqtq2c
 
 ```
 ./cetcli tx asset issue-token --name="Cet" --name="Cet" --symbol="cet" --total-supply=2100000000000000 --mintable=false --burnable=true --addr-forbiddable=0 --token-forbiddable=0 --from $(./cetcli keys show bob -a) --chain-id=coinexdex --fees 200cet --gas 200000
-{"chain_id":"coinexdex","account_number":"0","sequence":"1","fee":{"amount":[{"denom":"cet","amount":"200"}],"gas":"200000"},"msgs":[{"type":"asset/MsgIssueToken","value":{"name":"Cet","symbol":"cet","total_supply":"2100000000000000","owner":"cosmos1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":false}}],"memo":""}
+{"chain_id":"coinexdex","account_number":"0","sequence":"1","fee":{"amount":[{"denom":"cet","amount":"200"}],"gas":"200000"},"msgs":[{"type":"asset/MsgIssueToken","value":{"name":"Cet","symbol":"cet","total_supply":"2100000000000000","owner":"coinex1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":false}}],"memo":""}
 
 confirm transaction before signing and broadcasting [Y/n]: y
 Password to sign with 'bob':
@@ -65,7 +65,7 @@ Response:
 
 ```
 ./cetcli tx send $(./cetcli keys show bear -a) 200000000cet --unlock-time=0 --from bob --chain-id=coinexdex --gas 200000 --fees 100cet
-{"chain_id":"coinexdex","account_number":"0","sequence":"2","fee":{"amount":[{"denom":"cet","amount":"100"}],"gas":"200000"},"msgs":[{"type":"bankx/MsgSend","value":{"from_address":"cosmos1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj","to_address":"cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9","amount":[{"denom":"cet","amount":"200000000"}],"unlock_time":"0"}}],"memo":""}
+{"chain_id":"coinexdex","account_number":"0","sequence":"2","fee":{"amount":[{"denom":"cet","amount":"100"}],"gas":"200000"},"msgs":[{"type":"bankx/MsgSend","value":{"from_address":"coinex1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj","to_address":"coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9","amount":[{"denom":"cet","amount":"200000000"}],"unlock_time":"0"}}],"memo":""}
 
 confirm transaction before signing and broadcasting [Y/n]: y
 Password to sign with 'bob':
@@ -89,7 +89,7 @@ Account:
 
 ```
 ./cetcli tx send $(./cetcli keys show bear -a) 200000000cet --unlock-time=1560332036 --from bob --chain-id=coinexdex --gas 200000 --fees 200cet
-{"chain_id":"coinexdex","account_number":"0","sequence":"3","fee":{"amount":[{"denom":"cet","amount":"200"}],"gas":"200000"},"msgs":[{"type":"bankx/MsgSend","value":{"from_address":"cosmos1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj","to_address":"cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9","amount":[{"denom":"cet","amount":"200000000"}],"unlock_time":"1560332036"}}],"memo":""}
+{"chain_id":"coinexdex","account_number":"0","sequence":"3","fee":{"amount":[{"denom":"cet","amount":"200"}],"gas":"200000"},"msgs":[{"type":"bankx/MsgSend","value":{"from_address":"coinex1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj","to_address":"coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9","amount":[{"denom":"cet","amount":"200000000"}],"unlock_time":"1560332036"}}],"memo":""}
 
 confirm transaction before signing and broadcasting [Y/n]: y
 Password to sign with 'bob':
@@ -101,7 +101,7 @@ Response:
 
 ```
 ./cetcli tx send $(./cetcli keys show bear -a) 200000000cet --unlock-time=1570332036 --from bob --chain-id=coinexdex --gas 200000 --fees 200cet
-{"chain_id":"coinexdex","account_number":"0","sequence":"4","fee":{"amount":[{"denom":"cet","amount":"200"}],"gas":"200000"},"msgs":[{"type":"bankx/MsgSend","value":{"from_address":"cosmos1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj","to_address":"cosmos1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9","amount":[{"denom":"cet","amount":"200000000"}],"unlock_time":"1570332036"}}],"memo":""}
+{"chain_id":"coinexdex","account_number":"0","sequence":"4","fee":{"amount":[{"denom":"cet","amount":"200"}],"gas":"200000"},"msgs":[{"type":"bankx/MsgSend","value":{"from_address":"coinex1yah65tmduggvvhpldkmtmc2ldfsw9lrht5l3qj","to_address":"coinex1gxplu0twrg7xd503lmzqv76vq9m54ty9u74px9","amount":[{"denom":"cet","amount":"200000000"}],"unlock_time":"1570332036"}}],"memo":""}
 
 confirm transaction before signing and broadcasting [Y/n]: y
 Password to sign with 'bob':

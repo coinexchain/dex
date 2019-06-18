@@ -38,7 +38,7 @@ Account:
 curl -X GET http://localhost:1317/auth/accounts/cosmos17w3sdtvtddqqw2ctydk36ua2xu7qj3wz4a5xzm
 
 {
-    "address": "cosmos17w3sdtvtddqqw2ctydk36ua2xu7qj3wz4a5xzm",
+    "address": "coinex17w3sdtvtddqqw2ctydk36ua2xu7qj3wz4a5xzm",
     "coins": [
         {
             "denom": "cet",

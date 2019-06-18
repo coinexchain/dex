@@ -17,7 +17,7 @@ $ ./cetcli keys add charles <<<$'12345678\n'
 
 ```bash
 $ ./cetcli tx send $(./cetcli keys show charles -a) 1000000000cet --from bob --chain-id=coinexdex --gas 200000 <<<$'Y\n12345678\n'
-{"chain_id":"coinexdex","account_number":"0","sequence":"11","fee":{"amount":null,"gas":"200000"},"msgs":[{"type":"cosmos-sdk/MsgSend","value":{"from_address":"cosmos1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78","to_address":"cosmos1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk","amount":[{"denom":"cet","amount":"10"}]}}],"memo":""}
+{"chain_id":"coinexdex","account_number":"0","sequence":"11","fee":{"amount":null,"gas":"200000"},"msgs":[{"type":"cosmos-sdk/MsgSend","value":{"from_address":"coinex1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78","to_address":"coinex1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk","amount":[{"denom":"cet","amount":"10"}]}}],"memo":""}
 
 confirm transaction before signing and broadcasting [Y/n]: Y
 Password to sign with 'bob':
@@ -45,7 +45,7 @@ Response:
 
 ```bash
 $ ./cetcli tx require-memo true --from charles --chain-id=coinexdex --gas 100000 <<<$'Y\n12345678\n'
-{"chain_id":"coinexdex","account_number":"1","sequence":"0","fee":{"amount":null,"gas":"100000"},"msgs":[{"type":"cet-chain/MsgSetMemoRequired","value":{"address":"cosmos1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk","required":true}}],"memo":""}
+{"chain_id":"coinexdex","account_number":"1","sequence":"0","fee":{"amount":null,"gas":"100000"},"msgs":[{"type":"cet-chain/MsgSetMemoRequired","value":{"address":"coinex1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk","required":true}}],"memo":""}
 
 confirm transaction before signing and broadcasting [Y/n]: Y
 Password to sign with 'charles':
@@ -70,7 +70,7 @@ Response:
 
 ```bash
 $ ./cetcli tx send $(./cetcli keys show charles -a) 1000000000cet --from bob --chain-id=coinexdex --gas 200000 <<<$'Y\n12345678\n'
-{"chain_id":"coinexdex","account_number":"0","sequence":"12","fee":{"amount":null,"gas":"200000"},"msgs":[{"type":"cosmos-sdk/MsgSend","value":{"from_address":"cosmos1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78","to_address":"cosmos1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk","amount":[{"denom":"cet","amount":"10"}]}}],"memo":""}
+{"chain_id":"coinexdex","account_number":"0","sequence":"12","fee":{"amount":null,"gas":"200000"},"msgs":[{"type":"cosmos-sdk/MsgSend","value":{"from_address":"coinex1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78","to_address":"coinex1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk","amount":[{"denom":"cet","amount":"10"}]}}],"memo":""}
 
 confirm transaction before signing and broadcasting [Y/n]: Y
 Password to sign with 'bob':
@@ -84,7 +84,7 @@ Response:
 
 ```bash
 $ ./cetcli tx send $(./cetcli keys show charles -a) 1000000000cet --from bob --chain-id=coinexdex --gas 200000 --memo hello <<<$'Y\n12345678\n'
-{"chain_id":"coinexdex","account_number":"0","sequence":"12","fee":{"amount":null,"gas":"200000"},"msgs":[{"type":"cosmos-sdk/MsgSend","value":{"from_address":"cosmos1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78","to_address":"cosmos1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk","amount":[{"denom":"cet","amount":"10"}]}}],"memo":"hello"}
+{"chain_id":"coinexdex","account_number":"0","sequence":"12","fee":{"amount":null,"gas":"200000"},"msgs":[{"type":"cosmos-sdk/MsgSend","value":{"from_address":"coinex1fu24efn6syyvlem6t5zw7432t9tpa4nyedvw78","to_address":"coinex1jkcwep7zkvgdwg3nfe5q637qz6n75tv20uvktk","amount":[{"denom":"cet","amount":"10"}]}}],"memo":"hello"}
 
 confirm transaction before signing and broadcasting [Y/n]: Y
 Password to sign with 'bob':
@@ -128,7 +128,7 @@ $ /.cetd export
     "accounts": [ /*...*/ ],
     "accountsx": [
       {
-        "address": "cosmos1fjn9htuylwclsflh4cnuhzl0e4jp6fem6dkwym",
+        "address": "coinex1fjn9htuylwclsflh4cnuhzl0e4jp6fem6dkwym",
         "activated": true,
         "memo_required": true,
         "locked_coins": null
@@ -149,7 +149,7 @@ $ /.cetd export
 ## Memo Rest API
 1. 通过Rest API设置地址required_memo
 ```bash
-$ curl -X POST "http://localhost:1317/bank/accounts/memo" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t\", \"chain_id\": \"coinexdex\", \"account_number\": \"2\", \"sequence\": \"0\" }, \"memo_required\": true}" >> unsign.json
+$ curl -X POST "http://localhost:1317/bank/accounts/memo" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t\", \"chain_id\": \"coinexdex\", \"account_number\": \"2\", \"sequence\": \"0\" }, \"memo_required\": true}" >> unsign.json
 ```
 本地生成unsign.json
 ```bash
@@ -160,7 +160,7 @@ $ curl -X POST "http://localhost:1317/bank/accounts/memo" -H "accept: applicatio
       {
         "type": "cet-chain/MsgSetMemoRequired",
         "value": {
-          "address": "cosmos1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
+          "address": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
           "required": true
         }
       }

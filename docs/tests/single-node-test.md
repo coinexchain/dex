@@ -183,7 +183,7 @@ go run github.com/coinexchain/dex/cmd/cetcli
   "app_state": {
     "accounts": [
       {
-        "address": "cosmos1qfxpc6hful5hz8p03dk0cy5ygjgzc75jusl9fn",
+        "address": "coinex1qfxpc6hful5hz8p03dk0cy5ygjgzc75jusl9fn",
         "coins": [{"denom": "cet", "amount": "10000000000000000"}],
         "sequence_number": "0",
         "account_number": "0",
@@ -240,7 +240,7 @@ go run github.com/coinexchain/dex/cmd/cetcli
                   "max_change_rate":"0.010000000000000000"
                },
                "min_self_delegation":"1",
-               "delegator_address":"cosmos1qfxpc6hful5hz8p03dk0cy5ygjgzc75jusl9fn",
+               "delegator_address":"coinex1qfxpc6hful5hz8p03dk0cy5ygjgzc75jusl9fn",
                "validator_address":"cosmosvaloper1qfxpc6hful5hz8p03dk0cy5ygjgzc75jeyts9q",
                "pubkey":"cosmosvalconspub1zcjduepqp24c3zske6hh3g0u99l6yv6qeaw4pz0ct658q6hwy9plvjhqepkql7rduv",
                "value":{  
@@ -316,7 +316,7 @@ go run github.com/coinexchain/dex/cmd/cetcli
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "cosmos1qfxpc6hful5hz8p03dk0cy5ygjgzc75jusl9fn",
+                "delegator_address": "coinex1qfxpc6hful5hz8p03dk0cy5ygjgzc75jusl9fn",
                 "validator_address": "cosmosvaloper1qfxpc6hful5hz8p03dk0cy5ygjgzc75jeyts9q",
                 "pubkey": "cosmosvalconspub1zcjduepqp24c3zske6hh3g0u99l6yv6qeaw4pz0ct658q6hwy9plvjhqepkql7rduv",
                 "value": {

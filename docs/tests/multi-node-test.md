@@ -201,7 +201,7 @@ $ docker exec -it cetdnode0 /cetd/cetcli tx send cosmos1guuvctmm4fv3psyk43n7gdrr
 	--gas 50000 --fees 10cet \
 	--home /cetd/node0/cetcli
 	
-{"chain_id":"chain-0ze4Qg","account_number":"0","sequence":"2","fee":{"amount":[{"denom":"cet","amount":"10"}],"gas":"50000"},"msgs":[{"type":"cet-chain/MsgSend","value":{"from_address":"cosmos1r309x5f09rwuns2sr8lqmczjgtulkht73hyyew","to_address":"cosmos1guuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u","amount":[{"denom":"cet","amount":"10"}],"unlock_time":"0"}}],"memo":""}
+{"chain_id":"chain-0ze4Qg","account_number":"0","sequence":"2","fee":{"amount":[{"denom":"cet","amount":"10"}],"gas":"50000"},"msgs":[{"type":"cet-chain/MsgSend","value":{"from_address":"coinex1r309x5f09rwuns2sr8lqmczjgtulkht73hyyew","to_address":"coinex1guuvctmm4fv3psyk43n7gdrrm8zw0r4vnn4s4u","amount":[{"denom":"cet","amount":"10"}],"unlock_time":"0"}}],"memo":""}
 
 confirm transaction before signing and broadcasting [Y/n]: Y
 Password to sign with 'node0':

@@ -19,8 +19,8 @@
   - `$ cetcli tx asset unforbid-addr [flags]` 
   - `$ cetcli q asset forbid-addr abc [flags]` 
 - Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/addresses --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"15","account_number":"0"},"forbidden_addr":["cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/addresses --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"forbidden_addr":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
+  - `curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/addresses --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"15","account_number":"0"},"forbidden_addr":["coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
+  - `curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/addresses --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"forbidden_addr":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
   - `curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/addresses`
 
 ## Forbid Addr CLI Example
@@ -43,7 +43,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": " 1' Token",
       "symbol": "coin1",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+      "owner": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": true,
@@ -59,7 +59,7 @@ $ cetcli query asset tokens --chain-id=coinexdex
       "name": " 2' Token",
       "symbol": "coin2",
       "total_supply": "2100000000000000",
-      "owner": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+      "owner": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
       "mintable": false,
       "burnable": true,
       "addr_forbiddable": true,
@@ -97,9 +97,9 @@ $ cetcli q asset forbid-addr coin1 --chain-id=coinexdex
 
 ```bash
 [
-  "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-  "cosmos16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt",
-  "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+  "coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt",
+  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
 ]
 ```
 
@@ -129,7 +129,7 @@ $ cetcli q asset forbid-addr coin1 --chain-id=coinexdex
 
 ```bash
 [
-  "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
 ]
 ```
 
@@ -166,7 +166,7 @@ $ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --nod
 3. 通过Rest API禁止coin2 Addr，填写本地from/amount/sequence/account_number等信息
 
 ```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/addresses --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"15","account_number":"0"},"forbidden_addr":["cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
+$ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/addresses --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"15","account_number":"0"},"forbidden_addr":["coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
 ```
 
 返回未签名交易存入unsigned.json
@@ -180,10 +180,10 @@ $ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/addresses --da
         "type": "asset/MsgForbidAddr",
         "value": {
           "symbol": "coin2",
-          "owner_address": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
           "forbid_addr": [
-            "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-            "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+            "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
           ]
         }
       }
@@ -217,10 +217,10 @@ $ cetcli tx sign \
         "type": "asset/MsgForbidAddr",
         "value": {
           "symbol": "coin2",
-          "owner_address": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
           "forbid_addr": [
-            "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-            "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+            "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
           ]
         }
       }
@@ -266,15 +266,15 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/addresses
 
 ```bash
 [
-  "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-  "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
+  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
 ]%
 ```
 
 7. 通过Rest API解除Addr禁止，填写本地from/amount/sequence/account_number等信息
 
 ```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/addresses --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"forbidden_addr":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
+$ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/addresses --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"forbidden_addr":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
 ```
 
 返回未签名交易存入unsigned.json
@@ -288,9 +288,9 @@ $ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/addresses --
         "type": "asset/MsgUnForbidAddr",
         "value": {
           "symbol": "coin2",
-          "owner_addr": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+          "owner_addr": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
           "unforbid_addr": [
-            "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
           ]
         }
       }
@@ -324,9 +324,9 @@ $ cetcli tx sign \
         "type": "asset/MsgUnForbidAddr",
         "value": {
           "symbol": "coin2",
-          "owner_addr": "cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
+          "owner_addr": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
           "unforbid_addr": [
-            "cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"
+            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
           ]
         }
       }
@@ -373,7 +373,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/addresses
 
 ```bash
 [
-  "cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
+  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
 ]%
 
 ```

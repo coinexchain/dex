@@ -9,7 +9,7 @@
 ```json
 "accounts": [
       {
-        "address": "cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy",
+        "address": "coinex1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy",
         "coins": [
           {
             "denom": "cet",
@@ -28,7 +28,7 @@
         "locked_coins": null
       },
       {
-        "address": "cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20",
+        "address": "coinex1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20",
         "coins": [
           {
             "denom": "cet",
@@ -47,7 +47,7 @@
         "locked_coins": null
       },
       {
-        "address": "cosmos1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q",
+        "address": "coinex1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q",
         "coins": [
           {
             "denom": "cet",
@@ -71,7 +71,7 @@
         "locked_coins": null
       },
       {
-        "address": "cosmos1966f22al7r23h3melq8yt8tnglhweunrxkcezl",
+        "address": "coinex1966f22al7r23h3melq8yt8tnglhweunrxkcezl",
         "coins": [
           {
             "denom": "cet",
@@ -95,7 +95,7 @@
         "locked_coins": null
       },
       {
-        "address": "cosmos12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv",
+        "address": "coinex12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv",
         "coins": [
           {
             "denom": "cet",
@@ -119,7 +119,7 @@
         "locked_coins": null
       },
       {
-        "address": "cosmos1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj",
+        "address": "coinex1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj",
         "coins": [
           {
             "denom": "cet",
@@ -143,7 +143,7 @@
         "locked_coins": null
       },
       {
-        "address": "cosmos1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p",
+        "address": "coinex1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p",
         "coins": [
           {
             "denom": "cet",
@@ -239,7 +239,7 @@
      "app_state": {
        "accounts": [
          {
-           "address": "cosmos1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj",
+           "address": "coinex1r0z8lf82euwlxx0fuvny3jfl0jj2tmdxwuutxj",
            "coins": [
              {
                "denom": "cet",
@@ -263,7 +263,7 @@
            "locked_coins": null
          },
          {
-           "address": "cosmos1966f22al7r23h3melq8yt8tnglhweunrxkcezl",
+           "address": "coinex1966f22al7r23h3melq8yt8tnglhweunrxkcezl",
            "coins": [
              {
                "denom": "cet",
@@ -287,7 +287,7 @@
            "locked_coins": null
          },
          {
-           "address": "cosmos1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q",
+           "address": "coinex1xtpex9x7yq8n9d7f8dpgu5mfajrv2thvr6u34q",
            "coins": [
              {
                "denom": "cet",
@@ -311,7 +311,7 @@
            "locked_coins": null
          },
          {
-           "address": "cosmos12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv",
+           "address": "coinex12kt3yq0kdvu3zm0pq65dkd83hy3j9wgd2m9hfv",
            "coins": [
              {
                "denom": "cet",
@@ -335,7 +335,7 @@
            "locked_coins": null
          },
          {
-           "address": "cosmos1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p",
+           "address": "coinex1wezn7xuu5ha39t089mwfeypx0rxvxsutnr0h9p",
            "coins": [
              {
                "denom": "cet",
@@ -359,7 +359,7 @@
            "locked_coins": null
          },
          {
-           "address": "cosmos1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20",
+           "address": "coinex1n3n5w8mqjf339xse0rwvl0u7nqgp8e5d0nwt20",
            "coins": [
              {
                "denom": "cet",
@@ -378,7 +378,7 @@
            "locked_coins": null
          },
          {
-           "address": "cosmos1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy",
+           "address": "coinex1c79cqwzah604v0pqg0h88g99p5zg08hgf0cspy",
            "coins": [
              {
                "denom": "cet",
@@ -397,7 +397,7 @@
            "locked_coins": null
          },
          {
-           "address": "cosmos1lmy0as3slwrkh6g56vx2rghcdslmclu5gnphz5",
+           "address": "coinex1lmy0as3slwrkh6g56vx2rghcdslmclu5gnphz5",
            "coins": [
              {
                "denom": "cet",
@@ -479,7 +479,7 @@
          ],
          "delegations": [
            {
-             "delegator_address": "cosmos1lmy0as3slwrkh6g56vx2rghcdslmclu5gnphz5",
+             "delegator_address": "coinex1lmy0as3slwrkh6g56vx2rghcdslmclu5gnphz5",
              "validator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "shares": "100000000.000000000000000000"
            }
@@ -551,7 +551,7 @@
          ],
          "delegator_starting_infos": [
            {
-             "delegator_address": "cosmos1lmy0as3slwrkh6g56vx2rghcdslmclu5gnphz5",
+             "delegator_address": "coinex1lmy0as3slwrkh6g56vx2rghcdslmclu5gnphz5",
              "validator_address": "cosmosvaloper1lmy0as3slwrkh6g56vx2rghcdslmclu5d84zw8",
              "starting_info": {
                "previous_period": "1",
