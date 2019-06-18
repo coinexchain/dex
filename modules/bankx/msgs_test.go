@@ -2,8 +2,13 @@ package bankx
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
+
+	"github.com/tendermint/tendermint/crypto"
+
+	"github.com/coinexchain/dex/cmd"
 
 	"github.com/stretchr/testify/require"
 
@@ -13,6 +18,10 @@ import (
 )
 
 // MsgSetMemoRequired tests
+func TestMain(m *testing.M) {
+	cmd.InitSdkConfig()
+	os.Exit(m.Run())
+}
 
 func TestSetMemoRequiredRoute(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
@@ -34,11 +43,11 @@ func TestSetMemoRequiredValidation(t *testing.T) {
 }
 
 func TestSetMemoRequiredGetSignBytes(t *testing.T) {
-	addr := sdk.AccAddress([]byte("addr"))
+	addr := sdk.AccAddress(crypto.AddressHash([]byte("addr")))
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	sign := msg.GetSignBytes()
 
-	expected := `{"type":"bankx/MsgSetMemoRequired","value":{"address":"cosmos1v9jxguspv4h2u","required":true}}`
+	expected := `{"type":"bankx/MsgSetMemoRequired","value":{"address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","required":true}}`
 	require.Equal(t, expected, string(sign))
 }
 
@@ -101,13 +110,13 @@ func TestMsgSendValidation(t *testing.T) {
 }
 
 func TestMsgSendGetSignBytes(t *testing.T) {
-	addr1 := sdk.AccAddress([]byte("input"))
-	addr2 := sdk.AccAddress([]byte("output"))
+	addr1 := sdk.AccAddress(crypto.AddressHash([]byte("input")))
+	addr2 := sdk.AccAddress(crypto.AddressHash([]byte("output")))
 	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10))
 	var msg = NewMsgSend(addr1, addr2, coins, 0)
 	res := msg.GetSignBytes()
 
-	expected := `{"type":"bankx/MsgSend","value":{"amount":[{"amount":"10","denom":"cet"}],"from_address":"cosmos1d9h8qat57ljhcm","to_address":"cosmos1da6hgur4wsmpnjyg","unlock_time":"0"}}`
+	expected := `{"type":"bankx/MsgSend","value":{"amount":[{"amount":"10","denom":"cet"}],"from_address":"coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5","to_address":"coinex1urhghdgxshs9lg850mgyyqawj5lal5z460yvr8","unlock_time":"0"}}`
 	require.Equal(t, expected, string(res))
 }
 

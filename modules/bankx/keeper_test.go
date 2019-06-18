@@ -43,7 +43,7 @@ func defaultContext() (sdk.Context, params.Keeper) {
 	cms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
 	cms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
 
-	cms.LoadLatestVersion()
+	_ = cms.LoadLatestVersion()
 	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
 

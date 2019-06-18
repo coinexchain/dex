@@ -54,7 +54,7 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(authxKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(fckKey, sdk.StoreTypeIAVL, db)
 
-	ms.LoadLatestVersion()
+	_ = ms.LoadLatestVersion()
 
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
@@ -81,7 +81,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(100000000)
-	fromAccount.SetCoins(oneCoins)
+	_ = fromAccount.SetCoins(oneCoins)
 
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
@@ -98,7 +98,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, sdk.NewInt(100000000), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 
 	fee := input.bxk.GetParam(input.ctx).LockCoinsFee
-	fromAccount.SetCoins(dex.NewCetCoins(1000000000 + fee*2))
+	_ = fromAccount.SetCoins(dex.NewCetCoins(1000000000 + fee*2))
 	input.ak.SetAccount(input.ctx, fromAccount)
 
 	input.handle(msgSend)
@@ -142,7 +142,7 @@ func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
 	fee := input.bxk.GetParam(input.ctx).LockCoinsFee
 	Coins := dex.NewCetCoins(1000000000 + fee*2)
-	fromAccount.SetCoins(Coins)
+	_ = fromAccount.SetCoins(Coins)
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 

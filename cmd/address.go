@@ -1,5 +1,7 @@
 package cmd
 
+import "github.com/cosmos/cosmos-sdk/types"
+
 const (
 	// AddrLen defines a valid address length
 	AddrLen = 20
@@ -28,3 +30,12 @@ const (
 	// Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key
 	Bech32PrefixConsPub = Bech32MainPrefix + PrefixValidator + PrefixConsensus + PrefixPublic
 )
+
+// Read in the configuration file for the sdk
+func InitSdkConfig() {
+	config := types.GetConfig()
+	config.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+	config.Seal()
+}

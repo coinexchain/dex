@@ -2,6 +2,7 @@ package bankx
 
 import (
 	"fmt"
+
 	"github.com/coinexchain/dex/modules/authx"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -75,7 +76,7 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 	// sub the activationFees from fromAddress
 	oldCoins := fromAccount.GetCoins()
 	newCoins, _ := oldCoins.SafeSub(dex.NewCetCoins(activationFee))
-	fromAccount.SetCoins(newCoins)
+	_ = fromAccount.SetCoins(newCoins)
 	k.ak.SetAccount(ctx, fromAccount)
 
 	//collect account activation fees
