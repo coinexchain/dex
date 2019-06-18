@@ -19,9 +19,9 @@
   - `$ cetcli tx asset remove-whitelist [flags]` 
   - `$ cetcli q asset whitelist abc [flags]` 
 - Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelists --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}''`
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelists --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
-  - `curl -X GET http://localhost:1317/asset/tokens/coin2/whitelist`
+  - `curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}''`
+  - `curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
+  - `curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/whitelist`
 
 ## Whitelist CLI Example
 
@@ -166,7 +166,7 @@ $ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --nod
 3. 通过Rest AP添加coin2白名单，填写本地from/amount/sequence/account_number等信息
 
 ```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelists --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
+$ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
 ```
 
 返回未签名交易存入unsigned.json
@@ -259,7 +259,7 @@ Response:
 7. 查询coin2的白名单已经添加
 
 ```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin2/whitelist
+$ curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/whitelist
 ```
 
 返回信息：
@@ -274,7 +274,7 @@ $ curl -X GET http://localhost:1317/asset/tokens/coin2/whitelist
 8. 通过Rest API删除coin2的白名单，填写本地from/amount/sequence/account_number等信息
 
 ```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelists --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
+$ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --data-binary '{"base_req":{"from":"cosmos1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["cosmos167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
 ```
 
 返回未签名交易存入unsigned.json
