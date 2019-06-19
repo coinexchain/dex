@@ -207,6 +207,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		TimeInForce: order.TimeInForce,
 		Height:      order.Height,
 		FrozenFee:   order.FrozenFee,
+		Freeze:      order.Freeze,
 	}
 	keeper.SendMsg(CreateOrderInfoKey, msgInfo)
 
@@ -254,7 +255,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 		OrderID:      msg.OrderID,
 		DelReason:    CancelOrderByManual,
 		DelHeight:    ctx.BlockHeight(),
-		UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).String(),
+		UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
 		LeftStock:    order.LeftStock,
 		RemainAmount: order.Freeze,
 		DealStock:    order.DealStock,

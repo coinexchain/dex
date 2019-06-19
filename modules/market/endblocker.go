@@ -225,7 +225,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 					OrderID:      order.OrderID(),
 					DelReason:    CancelOrderByGteTimeOut,
 					DelHeight:    ctx.BlockHeight(),
-					UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).String(),
+					UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
 					LeftStock:    order.LeftStock,
 					RemainAmount: order.Freeze,
 					DealStock:    order.DealStock,
@@ -304,7 +304,7 @@ func sendOrderMsg(order *Order, height int64, feeForZeroDeal int64, keeper Keepe
 	msgInfo := CancelOrderInfo{
 		OrderID:      order.OrderID(),
 		DelHeight:    height,
-		UseFee:       order.CalOrderFee(feeForZeroDeal).String(),
+		UseFee:       order.CalOrderFee(feeForZeroDeal).RoundInt64(),
 		LeftStock:    order.LeftStock,
 		RemainAmount: order.Freeze,
 		DealStock:    order.DealStock,

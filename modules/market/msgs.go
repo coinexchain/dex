@@ -267,6 +267,7 @@ type CreateOrderInfo struct {
 	TimeInForce int    `json:"time_in_force"`
 	Height      int64  `json:"height"`
 	FrozenFee   int64  `json:"frozen_fee"`
+	Freeze      int64  `json:"freeze"`
 }
 
 type FillOrderInfo struct {
@@ -287,9 +288,9 @@ type CancelOrderInfo struct {
 	DelHeight int64  `json:"del_height"`
 
 	// Fields of amount
-	UseFee       string `json:"use_fee"`
-	LeftStock    int64  `json:"left_stock"`
-	RemainAmount int64  `json:"remain_amount"`
-	DealStock    int64  `json:"deal_stock"`
-	DealMoney    int64  `json:"deal_money"`
+	UseFee       int64 `json:"use_fee"`
+	LeftStock    int64 `json:"left_stock"`
+	RemainAmount int64 `json:"remain_amount"`
+	DealStock    int64 `json:"deal_stock"`
+	DealMoney    int64 `json:"deal_money"`
 }
