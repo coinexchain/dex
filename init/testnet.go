@@ -9,8 +9,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coinexchain/dex/modules/asset"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tmconfig "github.com/tendermint/tendermint/config"
@@ -30,6 +28,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -49,7 +48,6 @@ const nodeDirPerm = 0755
 
 // get cmd to initialize all files for tendermint testnet and application
 func TestnetFilesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
-
 	cmd := &cobra.Command{
 		Use:   "testnet",
 		Short: "Initialize files for a Cetd testnet",
