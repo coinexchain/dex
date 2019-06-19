@@ -84,12 +84,12 @@ type Keeper struct {
 	cdc           *codec.Codec
 	orderClean    *OrderCleanUpDayKeeper
 	gmk           GlobalMarketInfoKeeper
-	msgProducer   msgqueue.Producer
+	msgProducer   msgqueue.MsgSender
 }
 
 func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssetStatusKeeper,
 	bnkVal ExpectedBankxKeeper, feeK ExpectFeeKeeper,
-	cdcVal *codec.Codec, msgKeeperVal msgqueue.Producer,
+	cdcVal *codec.Codec, msgKeeperVal msgqueue.MsgSender,
 	paramstore params.Subspace) Keeper {
 
 	return Keeper{
@@ -102,6 +102,10 @@ func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssetStatusKeeper,
 		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
 		msgProducer:   msgKeeperVal,
 	}
+}
+
+func (k Keeper) SendMsg(key string, val interface{}) {
+	k.msgProducer.SendMsg(Topic, key, val)
 }
 
 // -----------------------------------------------------------------------------

@@ -51,3 +51,11 @@ func (or *Order) GetTagsInOrderFilled() sdk.Tags {
 		"deal-money", strconv.FormatInt(or.DealMoney, 10)),
 	)
 }
+
+func (or *Order) CalOrderFee(feeForZeroDeal int64) sdk.Dec {
+	actualFee := sdk.NewDec(or.DealStock).Mul(sdk.NewDec(or.FrozenFee)).Quo(sdk.NewDec(or.Quantity))
+	if or.DealStock == 0 {
+		actualFee = sdk.NewDec(feeForZeroDeal)
+	}
+	return actualFee
+}

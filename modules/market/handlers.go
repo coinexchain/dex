@@ -19,7 +19,7 @@ const (
 	SymbolSeparator                  = "/"
 
 	MinEffectHeight  = 10000
-	ExtraFrozenMoney = 0 //100
+	ExtraFrozenMoney = 0 // 100
 )
 
 type OrderType = byte
@@ -65,7 +65,15 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 		panic(err)
 	}
 
-	keeper.msgProducer.SendMsg(Topic, "marketInfo", msg)
+	// send msg to kafka
+	msgInfo := CreateMarketInfo{
+		Stock:          msg.Stock,
+		Money:          msg.Money,
+		PricePrecision: msg.PricePrecision,
+		Creator:        msg.Creator.String(),
+		CreateHeight:   ctx.BlockHeight(),
+	}
+	keeper.msgProducer.SendMsg(Topic, CreateMarketInfoKey, msgInfo)
 	return sdk.Result{Tags: info.GetTags()}
 }
 
@@ -187,7 +195,20 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		}
 	}
 
-	keeper.msgProducer.SendMsg(Topic, "order", msg)
+	// send msg to kafka
+	msgInfo := CreateOrderInfo{
+		OrderID:     order.OrderID(),
+		Sender:      order.Sender.String(),
+		Symbol:      order.Symbol,
+		OrderType:   order.OrderType,
+		Price:       order.Price.String(),
+		Quantity:    order.Quantity,
+		Side:        order.Side,
+		TimeInForce: order.TimeInForce,
+		Height:      order.Height,
+		FrozenFee:   order.FrozenFee,
+	}
+	keeper.SendMsg(CreateOrderInfoKey, msgInfo)
 
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
@@ -217,6 +238,34 @@ func checkMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper, sto
 }
 
 func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sdk.Result {
+
+	if err := checkMsgCancelOrder(ctx, msg, keeper); !err.IsOK() {
+		return err
+	}
+
+	order := NewGlobalOrderKeeper(keeper.marketKey, keeper.cdc).QueryOrder(ctx, msg.OrderID)
+	marketParams := keeper.GetParams(ctx)
+
+	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
+	removeOrder(ctx, ork, keeper.bnk, keeper, order, marketParams.FeeForZeroDeal)
+
+	// send msg to kafka
+	msgInfo := CancelOrderInfo{
+		OrderID:      msg.OrderID,
+		DelReason:    CancelOrderByManual,
+		DelHeight:    ctx.BlockHeight(),
+		UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).String(),
+		LeftStock:    order.LeftStock,
+		RemainAmount: order.Freeze,
+		DealStock:    order.DealStock,
+		DealMoney:    order.DealMoney,
+	}
+	keeper.SendMsg(CancelOrderInfoKey, msgInfo)
+
+	return sdk.Result{}
+}
+
+func checkMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
@@ -231,10 +280,6 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 		return sdk.NewError(StoreKey, CodeNotMatchSender, "The cancel addr is not match order sender").Result()
 	}
 
-	marketParams := keeper.GetParams(ctx)
-	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
-	removeOrder(ctx, ork, keeper.bnk, keeper, order, marketParams.FeeForZeroDeal)
-
 	return sdk.Result{}
 }
 
@@ -244,8 +289,19 @@ func handleMsgCancelMarket(ctx sdk.Context, msg MsgCancelMarket, keeper Keeper) 
 		return err.Result()
 	}
 
+	// Add del request to store
 	dlk := NewDelistKeeper(keeper.marketKey)
 	dlk.AddDelistRequest(ctx, msg.EffectiveHeight, msg.Symbol)
+
+	// send msg to kafka
+	values := strings.Split(msg.Symbol, SymbolSeparator)
+	msgInfo := CancelMarketInfo{
+		Stock:   values[0],
+		Money:   values[1],
+		Deleter: msg.Sender.String(),
+		DelTime: msg.EffectiveHeight,
+	}
+	keeper.SendMsg(CancelMarketInfoKey, msgInfo)
 
 	return sdk.Result{}
 }

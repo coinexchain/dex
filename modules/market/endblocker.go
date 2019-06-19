@@ -116,15 +116,9 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order 
 	bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 
 	if order.FrozenFee != 0 {
-
-		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin("cet", sdk.NewInt(order.FrozenFee))})
+		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin(types.CET, sdk.NewInt(order.FrozenFee))})
 		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
-
-		actualFee := sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity))
-		if order.DealStock == 0 {
-			actualFee = sdk.NewDec(feeForZeroDeal)
-		}
-
+		actualFee := order.CalOrderFee(feeForZeroDeal)
 		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, types.NewCetCoins(actualFee.RoundInt64())); err != nil {
 			panic(err)
 		}
@@ -140,6 +134,7 @@ func removeOrderOlderThan(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper Exp
 
 // unfreeze the frozen token in the order and remove it from the market
 func removeOrder(ctx sdk.Context, orderKeeper OrderKeeper, bxKeeper ExpectedBankxKeeper, feeK ExpectedChargeFeeKeeper, order *Order, feeForZeroDeal int64) {
+
 	if order.Freeze != 0 || order.FrozenFee != 0 {
 		unfreezeCoinsForOrder(ctx, bxKeeper, order, feeForZeroDeal, feeK)
 	}
@@ -224,6 +219,21 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		for _, mi := range marketInfoList {
 			symbol := mi.Stock + "/" + mi.Money
 			orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+			oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
+			for _, order := range oldOrders {
+				msgInfo := CancelOrderInfo{
+					OrderID:      order.OrderID(),
+					DelReason:    CancelOrderByGteTimeOut,
+					DelHeight:    ctx.BlockHeight(),
+					UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).String(),
+					LeftStock:    order.LeftStock,
+					RemainAmount: order.Freeze,
+					DealStock:    order.DealStock,
+					DealMoney:    order.DealMoney,
+				}
+				keeper.SendMsg(CancelOrderInfoKey, msgInfo)
+			}
+
 			removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, keeper, currHeight-int64(lifeTime), marketParams.FeeForZeroDeal)
 		}
 		return nil
@@ -243,6 +253,17 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		oUpdate, newPrice := runMatch(ctx, mi.LastExecutedPrice, ratio, symbol, keeper, dataHash, currHeight)
 		newPrices[idx] = newPrice
 		ordersForUpdateList[idx] = oUpdate
+
+		for orderID, order := range oUpdate {
+			msgInfo := FillOrderInfo{
+				OrderID:   orderID,
+				LeftStock: order.LeftStock,
+				Freeze:    order.Freeze,
+				DealStock: order.DealStock,
+				DealMoney: order.DealMoney,
+			}
+			keeper.SendMsg(FillOrderInfoKey, msgInfo)
+		}
 	}
 	for idx, mi := range marketInfoList {
 		// ignore a market if there are no orders need further processing
@@ -255,6 +276,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		for _, order := range ordersForUpdateList[idx] {
 			orderKeeper.Add(ctx, order)
 			if order.TimeInForce == IOC || order.LeftStock == 0 || notEnoughMoney(order) {
+				sendOrderMsg(order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, keeper)
 				removeOrder(ctx, orderKeeper, keeper.bnk, keeper, order, marketParams.FeeForZeroDeal)
 			}
 		}
@@ -276,4 +298,27 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	delistKeeper.RemoveDelistRequestsAtHeight(ctx, ctx.BlockHeight())
 
 	return nil
+}
+
+func sendOrderMsg(order *Order, height int64, feeForZeroDeal int64, keeper Keeper) {
+	msgInfo := CancelOrderInfo{
+		OrderID:      order.OrderID(),
+		DelHeight:    height,
+		UseFee:       order.CalOrderFee(feeForZeroDeal).String(),
+		LeftStock:    order.LeftStock,
+		RemainAmount: order.Freeze,
+		DealStock:    order.DealStock,
+		DealMoney:    order.DealMoney,
+	}
+	if order.TimeInForce == IOC {
+		msgInfo.DelReason = CancelOrderByIocType
+	} else if order.LeftStock == 0 {
+		msgInfo.DelReason = CancelOrderByAllFilled
+	} else if notEnoughMoney(order) {
+		msgInfo.DelReason = CancelOrderByNoEnoughMoney
+	} else {
+		msgInfo.DelReason = CancelOrderByNotKnow
+	}
+
+	keeper.SendMsg(CancelOrderInfoKey, msgInfo)
 }

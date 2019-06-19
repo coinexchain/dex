@@ -16,6 +16,24 @@ const (
 	RouterKey = "market"
 	StoreKey  = RouterKey
 	Topic     = RouterKey
+
+	// msg keys for Kafka
+	CreateMarketInfoKey = "create_market_info"
+	CancelMarketInfoKey = "cancel_market_info"
+
+	CreateOrderInfoKey = "create_order_info"
+	FillOrderInfoKey   = "fill_order_info"
+	CancelOrderInfoKey = "del_order_info"
+)
+
+// cancel order of reasons
+const (
+	CancelOrderByManual        = "Manually cancel the order"
+	CancelOrderByAllFilled     = "The order was fully filled"
+	CancelOrderByGteTimeOut    = "GTE order timeout"
+	CancelOrderByIocType       = "IOC order cancel "
+	CancelOrderByNoEnoughMoney = "Insufficient freeze money"
+	CancelOrderByNotKnow       = "Don't know"
 )
 
 var (
@@ -26,7 +44,7 @@ func init() {
 	RegisterCodec(msgCdc)
 }
 
-///////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////
 // MsgCreateMarketInfo
 
 var _ sdk.Msg = MsgCreateMarketInfo{}
@@ -75,7 +93,7 @@ func (msg MsgCreateMarketInfo) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{[]byte(msg.Creator)}
 }
 
-///////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////
 // MsgCreateOrder
 
 var _ sdk.Msg = MsgCreateOrder{}
@@ -139,7 +157,7 @@ func (msg MsgCreateOrder) IsGTEOrder() bool {
 	return msg.TimeInForce == GTE
 }
 
-///////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////
 // MsgCancelOrder
 
 type MsgCancelOrder struct {
@@ -175,7 +193,7 @@ func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }
 
-///////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////
 // MsgCancelMarket
 
 type MsgCancelMarket struct {
@@ -214,4 +232,64 @@ func (msg MsgCancelMarket) GetSignBytes() []byte {
 
 func (msg MsgCancelMarket) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
+}
+
+// --------------------------------------------------------------------
+// msg queue infos for kafka
+
+type CreateMarketInfo struct {
+	Stock          string `json:"stock"`
+	Money          string `json:"money"`
+	PricePrecision byte   `json:"price_precision"`
+
+	// create market info
+	Creator      string `json:"creator"`
+	CreateHeight int64  `json:"create_height"`
+}
+
+type CancelMarketInfo struct {
+	Stock string `json:"stock"`
+	Money string `json:"money"`
+
+	// del market info
+	Deleter string `json:"deleter"`
+	DelTime int64  `json:"del_time"`
+}
+
+type CreateOrderInfo struct {
+	OrderID     string `json:"order_id"`
+	Sender      string `json:"sender"`
+	Symbol      string `json:"symbol"`
+	OrderType   byte   `json:"order_type"`
+	Price       string `json:"price"`
+	Quantity    int64  `json:"quantity"`
+	Side        byte   `json:"side"`
+	TimeInForce int    `json:"time_in_force"`
+	Height      int64  `json:"height"`
+	FrozenFee   int64  `json:"frozen_fee"`
+}
+
+type FillOrderInfo struct {
+	OrderID string `json:"order_id"`
+
+	// These fields will change when order was filled/canceled.
+	LeftStock int64 `json:"left_stock"`
+	Freeze    int64 `json:"freeze"`
+	DealStock int64 `json:"deal_stock"`
+	DealMoney int64 `json:"deal_money"`
+}
+
+type CancelOrderInfo struct {
+	OrderID string `json:"order_id"`
+
+	// Del infos
+	DelReason string `json:"del_reason"`
+	DelHeight int64  `json:"del_height"`
+
+	// Fields of amount
+	UseFee       string `json:"use_fee"`
+	LeftStock    int64  `json:"left_stock"`
+	RemainAmount int64  `json:"remain_amount"`
+	DealStock    int64  `json:"deal_stock"`
+	DealMoney    int64  `json:"deal_money"`
 }

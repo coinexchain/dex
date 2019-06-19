@@ -35,12 +35,12 @@ func NewProducer() Producer {
 		Brokers: viper.GetString(brokers),
 		Topics:  viper.GetString(topics),
 	}
-	p.SetParam(data)
+	p.setParam(data)
 
 	return p
 }
 
-func (k *Producer) SetParam(data config) {
+func (k *Producer) setParam(data config) {
 	if len(data.Brokers) == 0 || len(data.Topics) == 0 {
 		return
 	}
@@ -78,4 +78,8 @@ func (k Producer) SendMsg(topic string, key string, v interface{}) error {
 	}
 
 	return nil
+}
+
+type MsgSender interface {
+	SendMsg(topic string, key string, v interface{}) error
 }
