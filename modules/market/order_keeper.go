@@ -39,6 +39,9 @@ func NewOrderCleanUpDayKeeper(key sdk.StoreKey) *OrderCleanUpDayKeeper {
 func (keeper *OrderCleanUpDayKeeper) GetDay(ctx sdk.Context) int {
 	store := ctx.KVStore(keeper.marketKey)
 	value := store.Get(LastOrderCleanUpDayKey)
+	if len(value) == 0 {
+		return ctx.BlockHeader().Time.Day()
+	}
 	return int(value[0])
 }
 

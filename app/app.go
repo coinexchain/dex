@@ -321,6 +321,7 @@ func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) ab
 	validatorUpdates, endBlockerTags := staking.EndBlocker(ctx, app.stakingKeeper)
 	tags = append(tags, endBlockerTags...)
 	authx.EndBlocker(ctx, app.accountXKeeper, app.accountKeeper)
+	market.EndBlocker(ctx, app.marketKeeper)
 
 	if app.invCheckPeriod != 0 && ctx.BlockHeight()%int64(app.invCheckPeriod) == 0 {
 		app.assertRuntimeInvariants()
