@@ -16,6 +16,6 @@ func TestCreateRootCmd(t *testing.T) {
 	cdc := app.MakeCodec()
 	ctx := server.NewDefaultContext()
 
-	rootCmd := createRootCmd(ctx, cdc)
-	require.Equal(t, 7, len(rootCmd.Commands()))
+	rootCmd := createCetdCmd(ctx, cdc)
+	require.Equal(t, 15, len(rootCmd.Commands()))
 }

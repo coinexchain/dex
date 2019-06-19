@@ -34,9 +34,7 @@ func main() {
 	cdc := app.MakeCodec()
 	ctx := server.NewDefaultContext()
 
-	rootCmd := createRootCmd(ctx, cdc)
-	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
-	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
+	rootCmd := createCetdCmd(ctx, cdc)
 
 	// prepare and add flags
 	executor := cli.PrepareBaseCmd(rootCmd, "GA", app.DefaultNodeHome)
@@ -49,7 +47,7 @@ func main() {
 	}
 }
 
-func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
+func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	cobra.EnableCommandSorting = false
 
 	rootCmd := &cobra.Command{
@@ -58,6 +56,14 @@ func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 		PersistentPreRunE: cet_server.PersistentPreRunEFn(ctx),
 	}
 
+	addInitCommands(ctx, cdc, rootCmd)
+	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
+	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
+
+	return rootCmd
+}
+
+func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Command) {
 	rootCmd.AddCommand(cet_init.InitCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.CollectGenTxsCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.TestnetFilesCmd(ctx, cdc))
@@ -65,8 +71,6 @@ func createRootCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	rootCmd.AddCommand(cet_init.AddGenesisAccountCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.AddGenesisTokenCmd(ctx, cdc))
 	rootCmd.AddCommand(cet_init.ValidateGenesisCmd(ctx, cdc))
-
-	return rootCmd
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
