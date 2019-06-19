@@ -2,6 +2,7 @@ package bankx
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -53,7 +54,7 @@ func defaultContext() (sdk.Context, params.Keeper) {
 func TestParamGetSet(t *testing.T) {
 	ctx, paramsKeeper := defaultContext()
 	subspace := paramsKeeper.Subspace(DefaultParamspace)
-	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{}, fakeAssetStatusKeeper{})
+	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{}, fakeAssetStatusKeeper{}, msgqueue.NewProducer())
 
 	//expect DefaultActivationFees=1
 	defaultParam := DefaultParams()

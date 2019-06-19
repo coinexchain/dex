@@ -170,12 +170,13 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) ExpectedBankxKeeper {
 
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams)
+	producer := msgqueue.NewProducer()
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, keys.fckCapKey)
 	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
 	ask := asset.NewKeeper(cdc, keys.assetCapKey, paramsKeeper.Subspace(asset.DefaultParamspace), bk, fck)
-	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, ask)
+	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, ask, producer)
 	bk.SetSendEnabled(ctx, true)
 	bxkKeeper.SetParam(ctx, bankx.DefaultParams())
 

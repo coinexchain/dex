@@ -2,6 +2,7 @@ package bankx
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/msgqueue"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -18,11 +19,12 @@ type Keeper struct {
 	ak            auth.AccountKeeper
 	fck           auth.FeeCollectionKeeper
 	ask           ExpectedAssetStatusKeeper
+	msgProducer   msgqueue.Producer
 }
 
 func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	bk bank.BaseKeeper, ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
-	ask ExpectedAssetStatusKeeper) Keeper {
+	ask ExpectedAssetStatusKeeper, msgProducer msgqueue.Producer) Keeper {
 
 	return Keeper{
 		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
@@ -31,6 +33,7 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 		ak:            ak,
 		fck:           fck,
 		ask:           ask,
+		msgProducer:   msgProducer,
 	}
 }
 

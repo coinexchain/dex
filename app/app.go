@@ -144,7 +144,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 
 func (app *CetChainApp) initKeepers() {
 	app.paramsKeeper = params.NewKeeper(app.cdc, app.keyParams, app.tkeyParams)
-
+	app.msgQueProducer = msgqueue.NewProducer()
 	// define the accountKeeper
 	app.accountKeeper = auth.NewAccountKeeper(
 		app.cdc,
@@ -216,9 +216,8 @@ func (app *CetChainApp) initKeepers() {
 		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
 		app.feeCollectionKeeper,
 		app.assetKeeper,
+		app.msgQueProducer,
 	)
-
-	app.msgQueProducer = msgqueue.NewProducer()
 
 	app.marketKeeper = market.NewKeeper(
 		app.keyMarket,

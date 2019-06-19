@@ -109,6 +109,10 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 
 	k.axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 
+	e := k.msgProducer.SendMsg(Topic, "send_lock_coins", NewMsgSend(fromAddr, toAddr, amt, unlockTime))
+	if e != nil {
+		//record fail sendMsg log
+	}
 	return sdk.Result{
 		Tags: tag,
 	}
@@ -121,6 +125,11 @@ func normalSend(ctx sdk.Context, k Keeper,
 
 	if err != nil {
 		return err.Result()
+	}
+
+	e := k.msgProducer.SendMsg(Topic, "send_coins", NewMsgSend(fromAddr, toAddr, amt, 0))
+	if e != nil {
+		//record fail sendMsg log
 	}
 
 	return sdk.Result{
@@ -140,7 +149,10 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg MsgSetMemoRequired)
 	accountX := k.axk.GetOrCreateAccountX(ctx, addr)
 	accountX.MemoRequired = required
 	k.axk.SetAccountX(ctx, accountX)
-
+	e := k.msgProducer.SendMsg(Topic, "send_memo_required", msg)
+	if e != nil {
+		//record fail sendMsg log
+	}
 	return sdk.Result{
 		Tags: sdk.NewTags(
 			TagKeyMemoRequired, fmt.Sprintf("%v", required),

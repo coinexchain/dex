@@ -1,6 +1,7 @@
 package bankx
 
 import (
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -56,12 +57,13 @@ func setupTestInput() testInput {
 
 	_ = ms.LoadLatestVersion()
 
+	producer := msgqueue.NewProducer()
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
 	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
-	bxkKeeper := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, fakeAssetStatusKeeper{})
+	bxkKeeper := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, fakeAssetStatusKeeper{}, producer)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)

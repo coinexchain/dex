@@ -5,7 +5,10 @@ import (
 )
 
 // RouterKey is the name of the bankx module
-const RouterKey = "bankx"
+const (
+	RouterKey = "bankx"
+	Topic     = RouterKey
+)
 
 var _ sdk.Msg = MsgSetMemoRequired{}
 
