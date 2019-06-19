@@ -173,6 +173,10 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	orderCandidates := orderKeeper.GetMatchingCandidates(ctx)
 	orderCandidates = filterCandidates(ctx, asKeeper, orderCandidates, stock, money)
+	orderOldDeals := make(map[string]int64, len(orderCandidates))
+	for _, order := range orderCandidates {
+		orderOldDeals[order.OrderID()] = order.DealStock
+	}
 
 	// fill bidList and askList with wrapped orders
 	bidList := make([]match.OrderForTrade, 0, len(orderCandidates))
@@ -202,7 +206,29 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 			}
 		}
 	}
+
+	sendFillMsg(orderOldDeals, ordersForUpdate, ctx.BlockHeight(), keeper)
 	return ordersForUpdate, infoForDeal.lastPrice
+}
+
+func sendFillMsg(orderOldDeal map[string]int64, ordersForUpdate map[string]*Order, height int64, keeper Keeper) {
+	if len(ordersForUpdate) == 0 {
+		return
+	}
+
+	for id, order := range ordersForUpdate {
+		oldDeal := orderOldDeal[id]
+		msgInfo := FillOrderInfo{
+			OrderID:   id,
+			Height:    height,
+			LeftStock: order.LeftStock,
+			Freeze:    order.Freeze,
+			DealStock: order.DealStock,
+			DealMoney: order.DealMoney,
+			CurrStock: order.DealStock - oldDeal,
+		}
+		keeper.SendMsg(FillOrderInfoKey, msgInfo)
+	}
 }
 
 func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
@@ -253,17 +279,6 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		oUpdate, newPrice := runMatch(ctx, mi.LastExecutedPrice, ratio, symbol, keeper, dataHash, currHeight)
 		newPrices[idx] = newPrice
 		ordersForUpdateList[idx] = oUpdate
-
-		for orderID, order := range oUpdate {
-			msgInfo := FillOrderInfo{
-				OrderID:   orderID,
-				LeftStock: order.LeftStock,
-				Freeze:    order.Freeze,
-				DealStock: order.DealStock,
-				DealMoney: order.DealMoney,
-			}
-			keeper.SendMsg(FillOrderInfoKey, msgInfo)
-		}
 	}
 	for idx, mi := range marketInfoList {
 		// ignore a market if there are no orders need further processing
