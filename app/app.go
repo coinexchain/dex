@@ -27,6 +27,7 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/govx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/msgqueue"
@@ -175,10 +176,16 @@ func (app *CetChainApp) initKeepers() {
 		app.bankKeeper, &stakingKeeper, app.feeCollectionKeeper,
 		distr.DefaultCodespace,
 	)
+
+	govBankKeeper := govx.NewKeeper(
+		app.bankKeeper,
+		app.accountKeeper,
+		app.distrKeeper,
+	)
 	app.govKeeper = gov.NewKeeper(
 		app.cdc,
 		app.keyGov,
-		app.paramsKeeper, app.paramsKeeper.Subspace(gov.DefaultParamspace), app.bankKeeper, &stakingKeeper,
+		app.paramsKeeper, app.paramsKeeper.Subspace(gov.DefaultParamspace), &govBankKeeper, &stakingKeeper,
 		gov.DefaultCodespace,
 	)
 	app.crisisKeeper = crisis.NewKeeper(
