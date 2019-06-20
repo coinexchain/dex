@@ -2,6 +2,7 @@ package govx
 
 import (
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/gov"
@@ -39,7 +40,7 @@ func (k GovBankKeeper) SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAdd
 	if fromAddr.Equals(gov.DepositedCoinsAccAddr) && toAddr.Equals(gov.BurnedDepositCoinsAccAddr) {
 		_, err := subtractCoins(ctx, k.ak, fromAddr, amt)
 		if err != nil {
-			fmt.Printf("subtractCoins error %v", err)
+			ctx.Logger().Error("subtractCoins error %v", err)
 			panic(err)
 		}
 
@@ -47,6 +48,7 @@ func (k GovBankKeeper) SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAdd
 		feePool := k.dk.GetFeePool(ctx)
 		feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoins(amt))
 		k.dk.SetFeePool(ctx, feePool)
+		ctx.Logger().Info("burnt token %v send to community pool", amt)
 		return nil, nil
 	}
 
