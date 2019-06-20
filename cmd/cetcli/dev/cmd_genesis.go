@@ -48,9 +48,12 @@ func printGenesisState(cdc *codec.Codec, genState app.GenesisState) error {
 		Validators: nil,
 		AppState:   gneStateBytes,
 	}
+
 	if err := genDoc.ValidateAndComplete(); err != nil {
 		return err
 	}
+
+	genDoc.ConsensusParams.Evidence.MaxAge = app.DefaultEvidenceMaxAge
 
 	genDocBytes, err := cdc.MarshalJSONIndent(genDoc, "", "  ")
 	if err != nil {

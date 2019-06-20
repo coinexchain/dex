@@ -72,7 +72,8 @@ func NewDefaultGenesisState() GenesisState {
 	gs.SlashingData.Params.MinSignedPerWindow = DefaultMinSignedPerWindow
 	gs.SlashingData.Params.SlashFractionDoubleSign = DefaultSlashFractionDoubleSign
 	gs.SlashingData.Params.SlashFractionDowntime = DefaultSlashFractionDowntime
-	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom // TODO
+	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
+	gs.GovData.DepositParams.MinDeposit[0].Amount = DefaultGovMinDeposit
 	gs.GovData.DepositParams.MaxDepositPeriod = DefaultPeriod
 	gs.GovData.VotingParams.VotingPeriod = DefaultPeriod
 	gs.GovData.TallyParams = gov.TallyParams{
@@ -81,6 +82,7 @@ func NewDefaultGenesisState() GenesisState {
 		Veto:      sdk.NewDecWithPrec(334, 3),
 	}
 	gs.CrisisData.ConstantFee.Denom = dex.DefaultBondDenom
+	gs.CrisisData.ConstantFee.Amount = DefaultCrisisConstantFee
 	return gs
 }
 
