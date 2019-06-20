@@ -30,7 +30,7 @@ func TestnetGenesisCmd(cdc *codec.Codec) *cobra.Command {
 		Short: "Print Cetd testnet genesis JSON",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			genState := createExampleGenesisState(cdc)
+			genState := createTestnetGenesisState(cdc)
 			return printGenesisState(cdc, genState)
 		},
 	}
