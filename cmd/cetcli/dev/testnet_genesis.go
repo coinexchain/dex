@@ -12,6 +12,6 @@ func createTestnetGenesisState(cdc *codec.Codec) app.GenesisState {
 	genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
 	genState.AssetData = createExampleGenesisAssetData()
 	genState.MarketData = createExampleGenesisMarketData()
-	genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
+	//genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
 	return genState
 }

@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-06-20T03:39:25.229862Z",
+  "genesis_time": "2019-06-20T10:02:30.964953Z",
   "chain_id": "coinexdex",
   "consensus_params": {
     "block": {
@@ -209,7 +209,7 @@
     },
     "authx": {
       "params": {
-        "min_gas_price_limit": "0.000000010000000000"
+        "min_gas_price_limit": "20.000000000000000000"
       }
     },
     "bank": {
@@ -274,13 +274,13 @@
             "amount": "10000000"
           }
         ],
-        "max_deposit_period": "172800000000000"
+        "max_deposit_period": "1209600000000000"
       },
       "voting_params": {
-        "voting_period": "172800000000000"
+        "voting_period": "1209600000000000"
       },
       "tally_params": {
-        "quorum": "0.334000000000000000",
+        "quorum": "0.400000000000000000",
         "threshold": "0.500000000000000000",
         "veto": "0.334000000000000000"
       }
@@ -293,12 +293,12 @@
     },
     "slashing": {
       "params": {
-        "max_evidence_age": "120000000000",
-        "signed_blocks_window": "100",
-        "min_signed_per_window": "0.500000000000000000",
+        "max_evidence_age": "1814400000000000",
+        "signed_blocks_window": "1000",
+        "min_signed_per_window": "0.050000000000000000",
         "downtime_jail_duration": "600000000000",
         "slash_fraction_double_sign": "0.050000000000000000",
-        "slash_fraction_downtime": "0.010000000000000000"
+        "slash_fraction_downtime": "0.000100000000000000"
       },
       "signing_infos": {},
       "missed_blocks": {}
@@ -403,57 +403,6 @@
         }
       ]
     },
-    "gentxs": [
-      {
-        "type": "auth/StdTx",
-        "value": {
-          "msg": [
-            {
-              "type": "cosmos-sdk/MsgCreateValidator",
-              "value": {
-                "description": {
-                  "moniker": "node0",
-                  "identity": "node0",
-                  "website": "http://node0.coinexchain.org",
-                  "details": ""
-                },
-                "commission": {
-                  "rate": "0.100000000000000000",
-                  "max_rate": "0.200000000000000000",
-                  "max_change_rate": "0.010000000000000000"
-                },
-                "min_self_delegation": "10000000000000000",
-                "delegator_address": "coinex1mak440p353zsux36c504r9vlwpk2k42qw4stln",
-                "validator_address": "coinexvaloper1mak440p353zsux36c504r9vlwpk2k42q46nr38",
-                "pubkey": "coinexvalconspub1addwnpepq2e9vpz9erpu0asdyzflj83p5wnypa2l9jy6duuhpf6k9l9ky6a3ysqzmka",
-                "value": {
-                  "denom": "cet",
-                  "amount": "10000000000000000"
-                }
-              }
-            }
-          ],
-          "fee": {
-            "amount": [
-              {
-                "denom": "cet",
-                "amount": "10"
-              }
-            ],
-            "gas": "200000"
-          },
-          "signatures": [
-            {
-              "pub_key": {
-                "type": "tendermint/PubKeySecp256k1",
-                "value": "ArJWBEXIw8f2DSCT+R4ho6ZA9V8siabzlwp1Yvy2JrsS"
-              },
-              "signature": "Oig5qWHnn0plnhgxGI/XBsqjrzK1AWdnNTrEhECEaWJT4L2QVW2U0RGEh9pVRlxtyhp4qrBneTOCSBD1bfqm5g=="
-            }
-          ],
-          "memo": ""
-        }
-      }
-    ]
+    "gentxs": null
   }
 }
