@@ -24,6 +24,19 @@ func ExampleGenesisCmd(cdc *codec.Codec) *cobra.Command {
 	return cmd
 }
 
+func TestnetGenesisCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "testnet-genesis",
+		Short: "Print Cetd testnet genesis JSON",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			genState := createExampleGenesisState(cdc)
+			return printGenesisState(cdc, genState)
+		},
+	}
+	return cmd
+}
+
 func printGenesisState(cdc *codec.Codec, genState app.GenesisState) error {
 	gneStateBytes, err := codec.MarshalJSONIndent(cdc, genState)
 	if err != nil {
