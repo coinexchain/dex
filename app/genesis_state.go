@@ -10,6 +10,7 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -68,7 +69,14 @@ func NewDefaultGenesisState() GenesisState {
 	gs.StakingData.Params.BondDenom = dex.DefaultBondDenom
 	gs.SlashingData.Params.MaxEvidenceAge = DefaultMaxEvidenceAge
 	gs.SlashingData.Params.SignedBlocksWindow = DefaultSignedBlocksWindow
-	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
+	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom // TODO
+	gs.GovData.DepositParams.MaxDepositPeriod = DefaultPeriod
+	gs.GovData.VotingParams.VotingPeriod = DefaultPeriod
+	gs.GovData.TallyParams = gov.TallyParams{
+		Quorum:    sdk.NewDecWithPrec(4, 1),
+		Threshold: sdk.NewDecWithPrec(5, 1),
+		Veto:      sdk.NewDecWithPrec(334, 3),
+	}
 	gs.CrisisData.ConstantFee.Denom = dex.DefaultBondDenom
 	return gs
 }

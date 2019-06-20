@@ -19,3 +19,9 @@ const (
 	DefaultMaxEvidenceAge           = 21 * Day
 	DefaultSignedBlocksWindow int64 = 1000
 )
+
+// gov
+const (
+	// Default period for deposits & voting
+	DefaultPeriod = 14 * Day
+)

@@ -33,10 +33,15 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, sdk.MustNewDecFromStr("0.04"), state.DistrData.BonusProposerReward)
 
 	// gov
-	require.Equal(t, "cet", state.GovData.DepositParams.MinDeposit[0].Denom)
+	require.Equal(t, "10000000cet", state.GovData.DepositParams.MinDeposit.String())
+	require.Equal(t, "336h0m0s", state.GovData.DepositParams.MaxDepositPeriod.String())
+	require.Equal(t, "336h0m0s", state.GovData.VotingParams.VotingPeriod.String())
+	require.Equal(t, sdk.MustNewDecFromStr("0.4"), state.GovData.TallyParams.Quorum)
+	require.Equal(t, sdk.MustNewDecFromStr("0.5"), state.GovData.TallyParams.Threshold)
+	require.Equal(t, sdk.MustNewDecFromStr("0.334"), state.GovData.TallyParams.Veto)
 
 	// crisis
-	require.Equal(t, "cet", state.CrisisData.ConstantFee.Denom)
+	require.Equal(t, "1000cet", state.CrisisData.ConstantFee.String())
 
 	// others
 	require.Equal(t, sdk.NewDec(20), state.AuthXData.Params.MinGasPriceLimit)
