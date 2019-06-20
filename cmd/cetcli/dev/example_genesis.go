@@ -40,20 +40,16 @@ func createExampleGenesisAccounts() (accs []app.GenesisAccount) {
 }
 
 func createExampleGenesisAssetData() asset.GenesisState {
-	t0 := &asset.BaseToken{
-		Name:             "CoinEx Chain Native Token",
-		Symbol:           "cet",
-		TotalSupply:      588788547005740000,
-		Owner:            accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
-		Mintable:         false,
-		Burnable:         true,
-		AddrForbiddable:  false,
-		TokenForbiddable: false,
-		TotalBurn:        411211452994260000,
-		TotalMint:        0,
-		IsForbidden:      false,
-	}
-	t1 := &asset.BaseToken{
+	cet := createCetToken()
+	abc := createAbcToken()
+
+	state := asset.DefaultGenesisState()
+	state.Tokens = append(state.Tokens, cet, abc)
+	return state
+}
+
+func createAbcToken() asset.Token {
+	token := &asset.BaseToken{
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
 		TotalSupply:      588788547005740000,
@@ -66,10 +62,10 @@ func createExampleGenesisAssetData() asset.GenesisState {
 		TotalMint:        0,
 		IsForbidden:      false,
 	}
-
-	state := asset.DefaultGenesisState()
-	state.Tokens = append(state.Tokens, t0, t1)
-	return state
+	if err := token.Validate(); err != nil {
+		panic(err)
+	}
+	return token
 }
 
 func createExampleGenesisMarketData() market.GenesisState {
