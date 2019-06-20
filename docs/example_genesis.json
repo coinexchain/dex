@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-06-20T03:39:10.564521Z",
+  "genesis_time": "2019-06-20T09:59:28.709096Z",
   "chain_id": "coinexdex",
   "consensus_params": {
     "block": {
@@ -209,7 +209,7 @@
     },
     "authx": {
       "params": {
-        "min_gas_price_limit": "0.000000010000000000"
+        "min_gas_price_limit": "20.000000000000000000"
       }
     },
     "bank": {
@@ -274,13 +274,13 @@
             "amount": "10000000"
           }
         ],
-        "max_deposit_period": "172800000000000"
+        "max_deposit_period": "1209600000000000"
       },
       "voting_params": {
-        "voting_period": "172800000000000"
+        "voting_period": "1209600000000000"
       },
       "tally_params": {
-        "quorum": "0.334000000000000000",
+        "quorum": "0.400000000000000000",
         "threshold": "0.500000000000000000",
         "veto": "0.334000000000000000"
       }
@@ -293,12 +293,12 @@
     },
     "slashing": {
       "params": {
-        "max_evidence_age": "120000000000",
-        "signed_blocks_window": "100",
-        "min_signed_per_window": "0.500000000000000000",
+        "max_evidence_age": "1814400000000000",
+        "signed_blocks_window": "1000",
+        "min_signed_per_window": "0.050000000000000000",
         "downtime_jail_duration": "600000000000",
         "slash_fraction_double_sign": "0.050000000000000000",
-        "slash_fraction_downtime": "0.010000000000000000"
+        "slash_fraction_downtime": "0.000100000000000000"
       },
       "signing_infos": {},
       "missed_blocks": {}
@@ -423,9 +423,9 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "10000000000000000",
-                "delegator_address": "coinex1ke4z2g6e9n6wnhladx0m5t95ccs3aslgjc3jfr",
-                "validator_address": "coinexvaloper1ke4z2g6e9n6wnhladx0m5t95ccs3aslgfhj68h",
-                "pubkey": "coinexvalconspub1addwnpepqvcrt5cd3wd7nt3x9r4zld84la7fnqyh3f33c85q2xgnxeswhgskxwnpye2",
+                "delegator_address": "coinex1dj2m0nmwp7khdnltzmtfqexasx69hg5q2ght3g",
+                "validator_address": "coinexvaloper1dj2m0nmwp7khdnltzmtfqexasx69hg5q385rlu",
+                "pubkey": "coinexvalconspub1addwnpepqtx9hr0sqk778yhdchdnzt6sfdqm3leg6x9yfjclnjc2g6eczrv75y8mcn5",
                 "value": {
                   "denom": "cet",
                   "amount": "10000000000000000"
@@ -446,9 +446,9 @@
             {
               "pub_key": {
                 "type": "tendermint/PubKeySecp256k1",
-                "value": "AzA10w2Lm+muJijqL7T1/3yZgJeKYxwegFGRM2YOuiFj"
+                "value": "AsxbjfAFveOS7cXbMS9QS0G4/yjRikTLH5ywpGs4ENnq"
               },
-              "signature": "ZFok8u/uBCgdQtEGWWDakmg5vSKLRJ03/6H4FtZYhKMw0LneQSUAJ1knmmHYFmU0kjFjKRHD5Vxk4FZ55dAwPA=="
+              "signature": "WgW8xdxyZP83mDtm70QgZf2rPxteeWOOFda2ciD4tiM6A/kCe6r+DVXkc1HTecryU4OM2CP9n7XQmUWAEhel5g=="
             }
           ],
           "memo": ""
