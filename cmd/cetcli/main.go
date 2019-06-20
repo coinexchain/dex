@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cobra"
@@ -62,6 +63,7 @@ func main() {
 	cdc := app.MakeCodec()
 
 	rootCmd := createRootCmd(cdc)
+	fixDescriptions(rootCmd)
 
 	// Add flags and prefix all env exposed with GA
 	executor := cli.PrepareMainCmd(rootCmd, "GA", app.DefaultCLIHome)
@@ -217,4 +219,21 @@ func registerSwaggerUI(rs *lcd.RestServer) {
 	}
 	staticServer := http.FileServer(statikFS)
 	rs.Mux.PathPrefix("/swagger").Handler(http.StripPrefix("/swagger", staticServer))
+}
+
+func fixDescriptions(cmd *cobra.Command) {
+	gaiacli := "gaiacli"
+	cetcli := "cetcli"
+
+	if strings.Contains(cmd.Short, gaiacli) {
+		cmd.Short = strings.Replace(cmd.Short, gaiacli, cetcli, -1)
+	}
+	if strings.Contains(cmd.Long, gaiacli) {
+		cmd.Long = strings.Replace(cmd.Long, gaiacli, cetcli, -1)
+	}
+	if len(cmd.Commands()) > 0 {
+		for _, subCmd := range cmd.Commands() {
+			fixDescriptions(subCmd)
+		}
+	}
 }
