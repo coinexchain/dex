@@ -1,8 +1,6 @@
 package stakingx
 
 import (
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
@@ -13,13 +11,6 @@ const DefaultParamspace = "stakingx"
 // Default parameter values
 const (
 	DefaultMinSelfDelegation = 10000e8
-
-	// DefaultUnbondingTime reflects three weeks in seconds as the default
-	// unbonding time.
-	DefaultUnbondingTime time.Duration = time.Hour * 24 * 21
-
-	// Default maximum number of bonded validators
-	DefaultMaxValidators uint16 = 42
 )
 
 // Parameter keys

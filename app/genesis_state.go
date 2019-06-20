@@ -63,9 +63,11 @@ func NewDefaultGenesisState() GenesisState {
 		GenTxs:       nil,
 	}
 	// TODO: create staking.GenesisState & gov.GenesisState & crisis.GenesisState from scratch
-	gs.StakingData.Params.UnbondingTime = stakingx.DefaultUnbondingTime
-	gs.StakingData.Params.MaxValidators = stakingx.DefaultMaxValidators
+	gs.StakingData.Params.UnbondingTime = DefaultUnbondingTime
+	gs.StakingData.Params.MaxValidators = DefaultMaxValidators
 	gs.StakingData.Params.BondDenom = dex.DefaultBondDenom
+	gs.SlashingData.Params.MaxEvidenceAge = DefaultMaxEvidenceAge
+	gs.SlashingData.Params.SignedBlocksWindow = DefaultSignedBlocksWindow
 	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
 	gs.CrisisData.ConstantFee.Denom = dex.DefaultBondDenom
 	return gs
