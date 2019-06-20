@@ -1,6 +1,10 @@
 package app
 
-import "time"
+import (
+	"time"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 const Day = 24 * time.Hour
 
@@ -18,6 +22,12 @@ const (
 const (
 	DefaultMaxEvidenceAge           = 21 * Day
 	DefaultSignedBlocksWindow int64 = 1000
+)
+
+var (
+	DefaultMinSignedPerWindow      = sdk.NewDecWithPrec(5, 2)             // 0.05
+	DefaultSlashFractionDoubleSign = sdk.NewDec(1).Quo(sdk.NewDec(20))    // 0.05
+	DefaultSlashFractionDowntime   = sdk.NewDec(1).Quo(sdk.NewDec(10000)) // 0.0001
 )
 
 // gov

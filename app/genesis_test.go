@@ -22,9 +22,9 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, "504h0m0s", state.SlashingData.Params.MaxEvidenceAge.String())
 	require.Equal(t, "10m0s", state.SlashingData.Params.DowntimeJailDuration.String())
 	require.Equal(t, 1000, int(state.SlashingData.Params.SignedBlocksWindow))
-	require.Equal(t, sdk.MustNewDecFromStr("0.5"), state.SlashingData.Params.MinSignedPerWindow)
+	require.Equal(t, sdk.MustNewDecFromStr("0.05"), state.SlashingData.Params.MinSignedPerWindow)
 	require.Equal(t, sdk.MustNewDecFromStr("0.05"), state.SlashingData.Params.SlashFractionDoubleSign)
-	require.Equal(t, sdk.MustNewDecFromStr("0.01"), state.SlashingData.Params.SlashFractionDowntime)
+	require.Equal(t, sdk.MustNewDecFromStr("0.0001"), state.SlashingData.Params.SlashFractionDowntime)
 
 	// distr
 	require.True(t, state.DistrData.WithdrawAddrEnabled)

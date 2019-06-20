@@ -69,6 +69,9 @@ func NewDefaultGenesisState() GenesisState {
 	gs.StakingData.Params.BondDenom = dex.DefaultBondDenom
 	gs.SlashingData.Params.MaxEvidenceAge = DefaultMaxEvidenceAge
 	gs.SlashingData.Params.SignedBlocksWindow = DefaultSignedBlocksWindow
+	gs.SlashingData.Params.MinSignedPerWindow = DefaultMinSignedPerWindow
+	gs.SlashingData.Params.SlashFractionDoubleSign = DefaultSlashFractionDoubleSign
+	gs.SlashingData.Params.SlashFractionDowntime = DefaultSlashFractionDowntime
 	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom // TODO
 	gs.GovData.DepositParams.MaxDepositPeriod = DefaultPeriod
 	gs.GovData.VotingParams.VotingPeriod = DefaultPeriod
