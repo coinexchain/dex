@@ -19,7 +19,7 @@ const (
 	// activated account send to other activated addr,  costs 33903 gas
 	// consider it takes 50000 to do transfer/send tx
 	// so, min_gas_price = 100000000sato.CET * 0.01 / 50000 = 20 sato.CET
-	DefaultMinGasPriceLimit = "0.00000001" // TODO: adjust this value after all functional tests have been fixed
+	DefaultMinGasPriceLimit = "20"
 )
 
 // Parameter keys

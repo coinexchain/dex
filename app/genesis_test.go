@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestDefaultGenesisState(t *testing.T) {
@@ -15,5 +17,5 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, "cet", state.StakingData.Params.BondDenom)
 	require.Equal(t, "504h0m0s", state.StakingData.Params.UnbondingTime.String()) // 21 days
 	require.Equal(t, 42, int(state.StakingData.Params.MaxValidators))
-	require.True(t, state.AuthXData.Params.MinGasPriceLimit.IsPositive())
+	require.Equal(t, sdk.NewDec(20), state.AuthXData.Params.MinGasPriceLimit)
 }
