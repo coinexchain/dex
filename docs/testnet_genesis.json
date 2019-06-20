@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-06-20T03:39:10.564521Z",
+  "genesis_time": "2019-06-20T03:39:25.229862Z",
   "chain_id": "coinexdex",
   "consensus_params": {
     "block": {
@@ -423,9 +423,9 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "10000000000000000",
-                "delegator_address": "coinex1ke4z2g6e9n6wnhladx0m5t95ccs3aslgjc3jfr",
-                "validator_address": "coinexvaloper1ke4z2g6e9n6wnhladx0m5t95ccs3aslgfhj68h",
-                "pubkey": "coinexvalconspub1addwnpepqvcrt5cd3wd7nt3x9r4zld84la7fnqyh3f33c85q2xgnxeswhgskxwnpye2",
+                "delegator_address": "coinex1mak440p353zsux36c504r9vlwpk2k42qw4stln",
+                "validator_address": "coinexvaloper1mak440p353zsux36c504r9vlwpk2k42q46nr38",
+                "pubkey": "coinexvalconspub1addwnpepq2e9vpz9erpu0asdyzflj83p5wnypa2l9jy6duuhpf6k9l9ky6a3ysqzmka",
                 "value": {
                   "denom": "cet",
                   "amount": "10000000000000000"
@@ -446,9 +446,9 @@
             {
               "pub_key": {
                 "type": "tendermint/PubKeySecp256k1",
-                "value": "AzA10w2Lm+muJijqL7T1/3yZgJeKYxwegFGRM2YOuiFj"
+                "value": "ArJWBEXIw8f2DSCT+R4ho6ZA9V8siabzlwp1Yvy2JrsS"
               },
-              "signature": "ZFok8u/uBCgdQtEGWWDakmg5vSKLRJ03/6H4FtZYhKMw0LneQSUAJ1knmmHYFmU0kjFjKRHD5Vxk4FZ55dAwPA=="
+              "signature": "Oig5qWHnn0plnhgxGI/XBsqjrzK1AWdnNTrEhECEaWJT4L2QVW2U0RGEh9pVRlxtyhp4qrBneTOCSBD1bfqm5g=="
             }
           ],
           "memo": ""
