@@ -3,11 +3,8 @@ package dev
 import (
 	"encoding/json"
 
-	tm "github.com/tendermint/tendermint/types"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
@@ -18,36 +15,17 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
-func createExampleGenesisDoc(cdc *codec.Codec) (tm.GenesisDoc, error) {
-	genState := createExampleGenesisState(cdc)
-	gneStateBytes, err := codec.MarshalJSONIndent(cdc, genState)
-	if err != nil {
-		return tm.GenesisDoc{}, err
-	}
-
-	genDoc := tm.GenesisDoc{
-		ChainID:    "coinexdex",
-		Validators: nil,
-		AppState:   gneStateBytes,
-	}
-	if err := genDoc.ValidateAndComplete(); err != nil {
-		return tm.GenesisDoc{}, err
-	}
-
-	return genDoc, nil
-}
-
 func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 	genState := app.NewDefaultGenesisState()
-	genState.Accounts = createGenesisAccounts()
+	genState.Accounts = createExampleGenesisAccounts()
 	genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
-	genState.AssetData = createGenesisAssetData()
-	genState.MarketData = createGenesisMarketData()
+	genState.AssetData = createExampleGenesisAssetData()
+	genState.MarketData = createExampleGenesisMarketData()
 	genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
 	return genState
 }
 
-func createGenesisAccounts() (accs []app.GenesisAccount) {
+func createExampleGenesisAccounts() (accs []app.GenesisAccount) {
 	accs = append(accs,
 		newBaseGenesisAccount(incentive.IncentivePoolAddr.String(), 30000000000000000),
 		newBaseGenesisAccount("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke", 288788547005740000),
@@ -61,35 +39,7 @@ func createGenesisAccounts() (accs []app.GenesisAccount) {
 	return
 }
 
-func newBaseGenesisAccount(address string, amt int64) app.GenesisAccount {
-	return app.NewGenesisAccount(&auth.BaseAccount{
-		Address: accAddressFromBech32(address),
-		Coins:   dex.NewCetCoins(amt),
-	})
-}
-
-func newVestingGenesisAccount(address string, amt int64, endTime int64) app.GenesisAccount {
-	return app.NewGenesisAccountI(&auth.DelayedVestingAccount{
-		BaseVestingAccount: &auth.BaseVestingAccount{
-			BaseAccount: &auth.BaseAccount{
-				Address: accAddressFromBech32(address),
-				Coins:   dex.NewCetCoins(amt),
-			},
-			OriginalVesting: dex.NewCetCoins(amt),
-			EndTime:         endTime,
-		},
-	})
-}
-
-func accAddressFromBech32(address string) sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(address)
-	if err != nil {
-		panic(err)
-	}
-	return addr
-}
-
-func createGenesisAssetData() asset.GenesisState {
+func createExampleGenesisAssetData() asset.GenesisState {
 	t0 := &asset.BaseToken{
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",
@@ -122,7 +72,7 @@ func createGenesisAssetData() asset.GenesisState {
 	return state
 }
 
-func createGenesisMarketData() market.GenesisState {
+func createExampleGenesisMarketData() market.GenesisState {
 	order0 := &market.Order{
 		Sender:      accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Sequence:    100,
