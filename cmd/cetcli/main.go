@@ -37,8 +37,8 @@ import (
 	staking "github.com/cosmos/cosmos-sdk/x/staking/client/rest"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/cmd/cetcli/dev"
 	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
-	"github.com/coinexchain/dex/dev"
 	as "github.com/coinexchain/dex/modules/asset"
 	assclient "github.com/coinexchain/dex/modules/asset/client"
 	assrest "github.com/coinexchain/dex/modules/asset/client/rest"
