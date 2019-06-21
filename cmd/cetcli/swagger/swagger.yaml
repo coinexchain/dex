@@ -452,7 +452,7 @@ paths:
       operationId: createGteOrder
       parameters:
         - in: body
-          name: body
+          name: orderInfo
           description: create order tx
           required: true
           schema:
@@ -483,7 +483,7 @@ paths:
       operationId: createIocOrder
       parameters:
         - in: body
-          name: body
+          name: orderInfo
           description: create order tx
           required: true
           schema:
@@ -514,7 +514,7 @@ paths:
       operationId: createMarket
       parameters:
         - in: body
-          name: body
+          name: marketInfo
           description: Create market tx
           required: true
           schema:
@@ -617,7 +617,7 @@ paths:
       operationId: cancelOrder
       parameters:
         - in: body
-          name: body
+          name: orderInfo
           description: cancel order tx
           required: true
           schema:
@@ -645,11 +645,11 @@ paths:
       consumes:
         - application/json
       produces:
-        - application/json 
+        - application/json
       operationId: cancelMarket
       parameters:
         - in: body
-          name: body
+          name: marketInfo
           description: create order tx
           required: true
           schema:
