@@ -449,6 +449,7 @@ paths:
         - application/json
       produces:
         - application/json
+      operationId: createGteOrder
       parameters:
         - in: body
           name: body
@@ -479,6 +480,7 @@ paths:
         - application/json
       produces:
         - application/json
+      operationId: createIocOrder
       parameters:
         - in: body
           name: body
@@ -509,6 +511,7 @@ paths:
         - application/json
       produces:
         - application/json
+      operationId: createMarket
       parameters:
         - in: body
           name: body
@@ -536,7 +539,8 @@ paths:
       tags:
         - ICS25
       produces:
-        - application/json  
+        - application/json
+      operationId: getMarket
       parameters:
         - in: path
           name: symbol
@@ -559,7 +563,8 @@ paths:
       tags:
         - ICS25
       produces:
-        - application/json  
+        - application/json
+      operationId: getOrder
       parameters:
         - in: path
           name: order-id
@@ -582,7 +587,8 @@ paths:
       tags:
         - ICS25
       produces:
-        - application/json  
+        - application/json
+      operationId: getOrders
       parameters:
         - in: path
           name: address
@@ -608,6 +614,7 @@ paths:
         - application/json  
       produces:
         - application/json
+      operationId: cancelOrder
       parameters:
         - in: body
           name: body
@@ -639,6 +646,7 @@ paths:
         - application/json
       produces:
         - application/json 
+      operationId: cancelMarket
       parameters:
         - in: body
           name: body
