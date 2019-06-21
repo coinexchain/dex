@@ -2,9 +2,13 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/types"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -81,17 +85,32 @@ func interceptLoadConfig() (conf *cfg.Config, err error) {
 		conf, err = tcmd.ParseConfig() // NOTE: ParseConfig() creates dir/files as necessary.
 	}
 
-	// create a default cetd config file if it does not exist
-	cetdConfigFilePath := filepath.Join(rootDir, "config/cetd.toml")
-	if _, err := os.Stat(cetdConfigFilePath); os.IsNotExist(err) {
-		cetdConf, _ := config.ParseConfig()
-		config.WriteConfigFile(cetdConfigFilePath, cetdConf)
+	if !cetdConfigExists(rootDir) {
+		createDefaultCetdConfig(rootDir)
 	}
 
 	viper.SetConfigName("cetd")
 	err = viper.MergeInConfig()
 
 	return
+}
+
+func createDefaultCetdConfig(rootDir string) {
+	cetdConf, _ := config.ParseConfig()
+
+	//use network_min_gas_price as default value for node_mini_gas_price
+	cetdConf.MinGasPrices = fmt.Sprintf("%s%s", authx.DefaultMinGasPriceLimit, types.DefaultBondDenom)
+
+	config.WriteConfigFile(cetdConfigFile(rootDir), cetdConf)
+}
+
+func cetdConfigExists(rootDir string) bool {
+	_, err := os.Stat(cetdConfigFile(rootDir))
+	return os.IsNotExist(err)
+}
+
+func cetdConfigFile(rootDir string) string {
+	return filepath.Join(rootDir, "config/cetd.toml")
 }
 
 // validate the config with the sdk's requirements.
