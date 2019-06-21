@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -61,4 +62,53 @@ func TestMinGasPriceLimit(t *testing.T) {
 
 	result := app.Deliver(tx)
 	require.Equal(t, authx.CodeGasPriceTooLow, result.Code)
+}
+
+func TestSmallAccountGasCost(t *testing.T) {
+	// acc & app
+	key, acc := testutil.NewBaseAccount(1e10, 0, 0)
+	app := initAppWithBaseAccounts(acc)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	// deliver tx
+	coins := dex.NewCetCoins(1e8)
+	toAddr := sdk.AccAddress([]byte("addr"))
+	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(41000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	// ok
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+	require.Equal(t, 41000, int(result.GasWanted))
+	require.Equal(t, 40503, int(result.GasUsed))
+}
+func TestBigAccountGasCost(t *testing.T) {
+	// acc & app
+	key, acc := testutil.NewBaseAccount(1e10, 0, 0)
+	for i := 0; i < 1000; i++ {
+		coin := sdk.NewCoin(fmt.Sprintf("coin%d", i), sdk.NewInt(1e10))
+		acc.Coins = acc.Coins.Add(sdk.NewCoins(coin))
+	}
+	app := initAppWithBaseAccounts(acc)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	// deliver tx
+	coins := dex.NewCetCoins(1e8)
+	toAddr := sdk.AccAddress([]byte("addr"))
+	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(3000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	// ok
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+	require.Equal(t, 3000000, int(result.GasWanted))
+	require.Equal(t, 2477283, int(result.GasUsed))
 }
