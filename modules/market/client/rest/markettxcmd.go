@@ -2,6 +2,9 @@ package rest
 
 import (
 	"fmt"
+
+	"github.com/gorilla/mux"
+
 	"github.com/coinexchain/dex/modules/market/client/cli"
 	"net/http"
 	"strings"
@@ -21,11 +24,6 @@ type createMarketReq struct {
 	Stock          string       `json:"stock"`
 	Money          string       `json:"money"`
 	PricePrecision int          `json:"price_precision"`
-}
-
-type queryMarketReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	Symbol  string       `json:"symbol"`
 }
 
 type cancelMarketReq struct {
@@ -71,22 +69,15 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req queryMarketReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
+		vars := mux.Vars(r)
+		symbol := vars["symbol"]
 
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		if len(strings.Split(req.Symbol, market.SymbolSeparator)) != 2 {
+		if len(strings.Split(symbol, market.SymbolSeparator)) != 2 {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "The invalid symbol")
 			return
 		}
 
-		bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(req.Symbol))
+		bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(symbol))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

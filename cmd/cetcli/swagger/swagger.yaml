@@ -17,6 +17,8 @@ tags:
     description: Slashing module APIs
   - name: ICS24
     description: Fee distribution module APIs
+  - name: ICS25
+    description: Market module APIs
   - name: ICS100
     description: Asset module APIs
   - name: version
@@ -438,11 +440,11 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/gteorder:
+  /market/create-gte-order:
     post:
       summary: Create GTE order in blockchain
       tags:
-        - ICS20
+        - ICS25
       consumes:
         - application/json
       produces:
@@ -454,23 +456,41 @@ paths:
           required: true
           schema:
             type: object
-            properties:
-              base_req:
-                $ref: "#/definitions/BaseReq"
-              order-type:
-                type: string
-              symbol:
-                type: string
-              price-precision:
-                type: integer
-              side:
-                type: integer
-              price:
-                type: integer
-              quantity:
-                type: integer
-              time-in-force:
-                type: integer
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/Order"
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /market/create-ioc-order:
+    post:
+      summary: Create IOC order in blockchain
+      tags:
+        - ICS25
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: create order tx
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/Order"
       responses:
         202:
           description: Tx was succesfully generated
@@ -479,12 +499,12 @@ paths:
         400:
           description: Invalid request
         500:
-          description: Server internal error
-  /market/marketinfo:
+          description: Server internal error        
+  /market/create-market:
     post:
       summary: Create market in blockchain
       tags:
-        - ICS20
+        - ICS25
       consumes:
         - application/json
       produces:
@@ -496,15 +516,11 @@ paths:
           required: true
           schema:
             type: object
-            properties:
-              base_req:
-                $ref: "#/definitions/BaseReq"
-              stock:
-                type: string
-              money:
-                type: string
-              price-precision:
-                type: integer
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/BaseMarket"      
       responses:
         202:
           description: Tx was succesfully generated
@@ -514,6 +530,140 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /market/market-info/{symbol}:
+    get:
+      summary: Query market info  
+      tags:
+        - ICS25
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: symbol
+          description: Market symbol
+          required: true
+          type: string
+          x-example: cet
+      responses:
+        200:
+          description: Market info of the specified symbol
+          schema:
+            $ref: "#/definitions/MarketInfo"
+        400:
+          description: Invalid symbol
+        500:
+          description: Server internal error
+  /market/order-info/{order-id}:
+    get:
+      summary: Query order info  
+      tags:
+        - ICS25
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: order-id
+          description: The order id 
+          required: true
+          type: string
+          x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+      responses:
+        200:
+          description: Order info of the specified id 
+          schema:
+            $ref: "#/definitions/OrderInfo"
+        400:
+          description: Invalid order-id
+        500:
+          description: Server internal error
+  /market/user-order-list/{address}:
+    get:
+      summary: Query user order-id list
+      tags:
+        - ICS25
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: address
+          description: The user address 
+          required: true
+          type: string
+          x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+      responses:
+        200:
+          description: OK    
+          schema:
+            $ref: "#/definitions/Order-Ids"
+        400:
+          description: Invalid address
+        500:
+          description: Server internal error  
+  /market/cancel-order:
+    post:
+      summary: Cancel the order
+      tags:
+        - ICS25
+      consumes:
+        - application/json  
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: cancel order tx
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              order_id:
+                type: string
+                example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj-1
+      responses:
+        202:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error    
+  /market/cancel-market:
+    post:
+      summary: Cancel the market
+      tags:
+        - ICS25
+      consumes:
+        - application/json
+      produces:
+        - application/json 
+      parameters:
+        - in: body
+          name: body
+          description: create order tx
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              symbol:
+                type: string
+                example: abc/cet
+              height:
+                type: integer
+                example: 7
+      responses:
+        202:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error    
   /auth/accounts/{address}:
     get:
       summary: Get the account information on blockchain
@@ -2447,19 +2597,87 @@ paths:
         500:
           description: Internal Server Error
 definitions:
-  MarketInfo:
+  BaseMarket:
     type: object
     properties:
       stock:
         type: string
+        example: abc
       money:
         type: string
+        example: cet
       price-precision:
         type: integer
-    example:
-      stock: bch
-      money: cet
-      price-precision: 8
+        example: 10
+  MarketInfo:  
+    type: object
+    allOf:
+      - $ref: "#/definitions/BaseMarket"
+      - properties:
+          last_executed_price:
+            type: string
+            example: "0.00002"
+          creator:
+            type: string
+            example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+  Order:
+    type: object
+    properties:
+      order_type:
+        type: integer
+        example: 1
+      symbol:
+        type: string
+        example: "abc/cet"
+      price_precision:
+        type: integer
+        example: 9
+      price:
+        type: integer
+        example: 1000
+      quantity:
+        type: integer
+        example: 12320
+      side:
+        type: integer
+        example: 1
+  OrderInfo:
+    type: object
+    allOf:
+      - $ref: "#/definitions/Order"
+      - properties:
+          sender:
+            type: string
+            example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+          sequence:
+            type: integer
+            example: 8
+          time_in_force:
+            type: integer
+            example: 1
+          height:
+            type: integer
+            example: 10
+          frozen_fee:
+            type: integer
+            example: 100
+          left_stock:
+            type: integer
+            example: 100
+          freeze:
+            type: integer
+            example: 100
+          DealStock:
+            type: integer
+            example: 100
+          DealMoney:
+            type: integer
+            example: 100
+  Order-Ids:
+    type: array
+    items:
+      type: string
+      example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj-1
   CheckTxResult:
     type: object
     properties:

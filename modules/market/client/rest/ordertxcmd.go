@@ -13,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/gorilla/mux"
 )
 
 // SendReq defines the properties of a send request's body.
@@ -24,16 +25,6 @@ type createOrderReq struct {
 	Price          int64        `json:"price"`
 	Quantity       int64        `json:"quantity"`
 	Side           int          `json:"side"`
-}
-
-type queryOrderReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	OrderID string       `json:"order_id"`
-}
-
-type queryUserOrderListReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	Address string       `json:"address"`
 }
 
 type cancelOrderReq struct {
@@ -78,28 +69,21 @@ func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 
 func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req queryOrderReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
+		vars := mux.Vars(r)
+		orderID := vars["order-id"]
 
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		if len(strings.Split(req.OrderID, "-")) != 2 {
+		if len(strings.Split(orderID, "-")) != 2 {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return
 		}
 
-		addr := strings.Split(req.OrderID, "-")[0]
+		addr := strings.Split(orderID, "-")[0]
 		if _, err := sdk.AccAddressFromBech32(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return
 		}
 
-		bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(req.OrderID))
+		bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(orderID))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return
@@ -118,22 +102,15 @@ func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 
 func queryUserOrderListHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req queryUserOrderListReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
+		vars := mux.Vars(r)
+		addr := vars["address"]
 
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		if _, err := sdk.AccAddressFromBech32(req.Address); err != nil {
+		if _, err := sdk.AccAddressFromBech32(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return
 		}
 
-		bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: req.Address})
+		bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: addr})
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
