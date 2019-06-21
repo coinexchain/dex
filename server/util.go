@@ -85,7 +85,7 @@ func interceptLoadConfig() (conf *cfg.Config, err error) {
 		conf, err = tcmd.ParseConfig() // NOTE: ParseConfig() creates dir/files as necessary.
 	}
 
-	if !cetdConfigExists(rootDir) {
+	if cetdConfigNotExists(rootDir) {
 		createDefaultCetdConfig(rootDir)
 	}
 
@@ -104,7 +104,7 @@ func createDefaultCetdConfig(rootDir string) {
 	config.WriteConfigFile(cetdConfigFile(rootDir), cetdConf)
 }
 
-func cetdConfigExists(rootDir string) bool {
+func cetdConfigNotExists(rootDir string) bool {
 	_, err := os.Stat(cetdConfigFile(rootDir))
 	return os.IsNotExist(err)
 }
