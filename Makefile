@@ -78,7 +78,7 @@ endif
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
 
-install: go.sum check-ledger
+install: go.sum check-ledger update-cet-lite-docs
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetd
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetcli
 
@@ -103,7 +103,8 @@ draw-deps:
 	@goviz -i ./cmd/cetd -d 2 | dot -Tpng -o dependency-graph.png
 
 update-cet-lite-docs:
-	@statik -src=cmd/cetcli/swagger-ui -dest=cmd/cetcli/ -f
+	@pushd cmd/cetcli/swagger && bower install && popd
+	@statik -src=./cmd/cetcli/swagger -dest=./cmd/cetcli/ -f
 
 clean:
 	rm -rf snapcraft-local.yaml build/
