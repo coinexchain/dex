@@ -1,22 +1,18 @@
-##  Install tools
-Install bower and statik for download swagger-ui dependency
-```
-npm install -g bower
-go get -d github.com/rakyll/statik
-go install github.com/rakyll/statik
-```
-
-## Compile cetd and cetcli
+## Compile
 
 ```bash
 git clone https://github.com/coinexchain/dex.git
 cd dex
 ```
 
-Compile
+Compile with
 ```bash
-./scripts/build.sh
+make tools install
 ```
+
+- `cetd` and `cetcli` will be install in your GOPATH.
+- `cetd` is the CoinEx Chain full node daemon. 
+- `cetcli` is the CLI tool to interact with `cetd`.
 
 ## Bootstrap single testing node
 ```bash
