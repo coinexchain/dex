@@ -34,7 +34,7 @@ var (
 	DefaultSlashFractionDoubleSign = sdk.NewDec(1).Quo(sdk.NewDec(20))    // 0.05
 	DefaultSlashFractionDowntime   = sdk.NewDec(1).Quo(sdk.NewDec(10000)) // 0.0001
 
-	DefaultGovMinDeposit = sdk.NewInt(50000e8)
+	DefaultGovMinDeposit = sdk.NewInt(10000e8)
 
 	DefaultCrisisConstantFee = sdk.NewInt(350000e8)
 )
