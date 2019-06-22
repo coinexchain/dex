@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coinexchain/dex/modules/asset"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
+
+	"github.com/coinexchain/dex/modules/asset"
 )
 
 // GetTokenCmd returns a query token that will display the info of the

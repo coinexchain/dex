@@ -3,14 +3,15 @@ package asset
 import (
 	"bytes"
 	"fmt"
+	"strings"
+
+	"github.com/tendermint/tendermint/libs/bech32"
+
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/tendermint/tendermint/libs/bech32"
-	"strings"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 var (

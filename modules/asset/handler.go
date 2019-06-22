@@ -3,8 +3,9 @@ package asset
 import (
 	"strconv"
 
-	"github.com/coinexchain/dex/modules/asset/tags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/asset/tags"
 )
 
 // NewHandler returns a handler for "asset" type messages.

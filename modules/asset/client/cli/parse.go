@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coinexchain/dex/modules/asset"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/viper"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/asset"
 )
 
 func checkFlags(flags []string, help string) error {
