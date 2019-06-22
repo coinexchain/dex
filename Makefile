@@ -103,7 +103,7 @@ draw-deps:
 	@goviz -i ./cmd/cetd -d 2 | dot -Tpng -o dependency-graph.png
 
 update-cet-lite-docs:
-	@pushd cmd/cetcli/swagger && bower install && popd
+	@cd cmd/cetcli/swagger && bower install && cd -
 	@statik -src=./cmd/cetcli/swagger -dest=./cmd/cetcli/ -f
 
 clean:
