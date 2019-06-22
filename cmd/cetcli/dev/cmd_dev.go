@@ -17,6 +17,7 @@ func DevCmd(cdc *codec.Codec) *cobra.Command {
 		ExampleGenesisCmd(cdc),
 		TestnetGenesisCmd(cdc),
 		DefaultParamsCmd(cdc),
+		ShowCommandTreeCmd(),
 	)
 
 	return devCmd

@@ -44,6 +44,8 @@ var (
 	flagStartingIPAddress = "starting-ip-address"
 
 	testnetTokenSupply = int64(588788547005740000)
+
+	testnetMinSelfDelegation = int64(10000e8)
 )
 
 const nodeDirPerm = 0755
@@ -279,7 +281,7 @@ func initGenFiles(
 ) error {
 
 	appGenState := app.NewDefaultGenesisState()
-
+	appGenState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(testnetMinSelfDelegation)
 	addCetTokenForTesting(&appGenState, testnetTokenSupply)
 
 	accs = assureTokenDistributionInGenesis(accs, testnetTokenSupply)

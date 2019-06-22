@@ -99,13 +99,10 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		crisisclient.NewModuleClient(sl.StoreKey, cdc),
 	}
 
-	cfgCmd := client.ConfigCmd(app.DefaultCLIHome)
-	cfgCmd.Short = "Create or query a CoinEx Chain CLI configuration file"
-
 	// Construct Root Command
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
-		cfgCmd,
+		configCmd(),
 		queryCmd(cdc, mc),
 		txCmd(cdc, mc),
 		client.LineBreak,
@@ -143,6 +140,12 @@ func initConfig(cmd *cobra.Command) error {
 		return err
 	}
 	return viper.BindPFlag(cli.OutputFlag, cmd.PersistentFlags().Lookup(cli.OutputFlag))
+}
+
+func configCmd() *cobra.Command {
+	cmd := client.ConfigCmd(app.DefaultCLIHome)
+	cmd.Short = "Create or query a CoinEx Chain CLI configuration file"
+	return cmd
 }
 
 func queryCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {

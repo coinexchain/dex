@@ -8,5 +8,5 @@ import (
 
 func TestDefaultParams(t *testing.T) {
 	params := DefaultParams()
-	require.Equal(t, "1000000000000", params.MinSelfDelegation.String())
+	require.Equal(t, "100000000000000", params.MinSelfDelegation.String())
 }

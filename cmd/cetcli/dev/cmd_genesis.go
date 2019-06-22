@@ -18,7 +18,7 @@ func ExampleGenesisCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			genState := createExampleGenesisState(cdc)
-			return printGenesisState(cdc, genState)
+			return printGenesisState(cdc, genState, "coinexdex-1")
 		},
 	}
 	return cmd
@@ -31,20 +31,20 @@ func TestnetGenesisCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			genState := createTestnetGenesisState(cdc)
-			return printGenesisState(cdc, genState)
+			return printGenesisState(cdc, genState, "coinexdex-test1")
 		},
 	}
 	return cmd
 }
 
-func printGenesisState(cdc *codec.Codec, genState app.GenesisState) error {
+func printGenesisState(cdc *codec.Codec, genState app.GenesisState, chainID string) error {
 	gneStateBytes, err := codec.MarshalJSONIndent(cdc, genState)
 	if err != nil {
 		return err
 	}
 
 	genDoc := tm.GenesisDoc{
-		ChainID:    "coinexdex",
+		ChainID:    chainID,
 		Validators: nil,
 		AppState:   gneStateBytes,
 	}
