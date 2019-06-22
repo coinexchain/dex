@@ -19,3 +19,9 @@ A public chain built for the decentralized exchange
 ### build
 
 Reference [quick start](docs/quickstart.md)
+
+
+
+### Resources
+
+1. [Forum](https://forum.coinex.org/)
