@@ -10,7 +10,7 @@ const DefaultParamspace = "stakingx"
 
 // Default parameter values
 const (
-	DefaultMinSelfDelegation = 10000e8
+	DefaultMinSelfDelegation = 1000000e8
 )
 
 // Parameter keys
