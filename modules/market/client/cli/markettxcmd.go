@@ -33,7 +33,7 @@ var createMarketFlags = []string{
 
 func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "createmarket ",
+		Use:   "create-market ",
 		Short: "generate tx to create market",
 		Long: "generate a tx and sign it to create market in dex blockchain." +
 			"Example : " +
@@ -122,7 +122,7 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo
 
 func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "marketinfo",
+		Use:   "market-info",
 		Short: "query market info",
 		Long: "cetcli query market marketinfo [symbol]" +
 			"Example : " +

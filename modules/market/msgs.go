@@ -77,10 +77,13 @@ func (msg MsgCreateMarketInfo) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("missing creator address")
 	}
 	if len(msg.Stock) == 0 || len(msg.Money) == 0 {
-		return sdk.ErrInvalidAddress("missing stock or money identifier")
+		return ErrInvalidSymbol()
 	}
 	if msg.PricePrecision > sdk.Precision {
-		return sdk.ErrInvalidAddress("price precision value out of range [0, 18]")
+		return ErrInvalidPricePrecision()
+	}
+	if msg.Money == msg.Stock {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "stock and money should be different")
 	}
 	return nil
 }

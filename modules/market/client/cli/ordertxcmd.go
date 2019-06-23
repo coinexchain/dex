@@ -42,7 +42,7 @@ var createOrderFlags = []string{
 
 func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "createiocorder",
+		Use:   "create-ioc-order",
 		Short: "",
 		Long: `Create an IOC order and sign tx, broadcast to nodes.
 		Example:
@@ -63,7 +63,7 @@ func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 
 func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "creategteoreder",
+		Use:   "create-gte-oreder",
 		Short: "Create an GTE order and sign tx",
 		Long: `Create an GTE order and sign tx, broadcast to nodes.
 
@@ -162,7 +162,7 @@ func markCreateOrderFlags(cmd *cobra.Command) {
 
 func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "orderinfo",
+		Use:   "order-info",
 		Short: "Query order info",
 		Long: "cetcli query market orderinfo " +
 			"--orderid=[orderid] --trust-node=true",
@@ -191,7 +191,7 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 
 func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "userorderlist [userAddress]",
+		Use:   "user-order-list [userAddress]",
 		Short: "Query user order list in blockchain",
 		Long: "Example:" +
 			"cetcli query market userorderlist --address=[userAddress] --trust-node=true",
@@ -227,7 +227,7 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 
 func CancelOrder(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "cancelorder",
+		Use:   "cancel-order",
 		Short: "cancel order in blockchain",
 		Long: "Examples:" +
 			"cetcli tx market cancelorder --orderid=[id] " +

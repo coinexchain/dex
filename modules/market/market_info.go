@@ -17,7 +17,7 @@ type MarketInfo struct {
 func (info MarketInfo) GetTags() sdk.Tags {
 	return sdk.NewTags("stock", info.Stock,
 		"money", info.Money,
-		"creator", string(info.Creator),
+		"creator", info.Creator.String(),
 		"price-precision", strconv.Itoa(int(info.PricePrecision)),
 		"last-execute-price", info.LastExecutedPrice.String(),
 	)

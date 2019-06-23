@@ -31,7 +31,7 @@ func (or *Order) OrderID() string {
 }
 
 func (or *Order) GetTagsInOrderCreate() sdk.Tags {
-	return sdk.NewTags("sender", string(or.Sender),
+	return sdk.NewTags("sender", or.Sender.String(),
 		"sequence", strconv.FormatInt(int64(or.Sequence), 10),
 		"symbol", or.Symbol,
 		"order-type", strconv.Itoa(int(or.OrderType)),

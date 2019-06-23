@@ -78,6 +78,9 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 }
 
 func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
 
 	if _, err := keeper.GetMarketInfo(ctx, msg.Stock+SymbolSeparator+msg.Money); err == nil {
 		return sdk.NewError(CodeSpaceMarket, CodeRepeatTrade, "The repeatedly created trading pairs").Result()

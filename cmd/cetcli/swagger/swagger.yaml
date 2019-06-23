@@ -494,7 +494,7 @@ paths:
                     $ref: "#/definitions/BaseReq"
               - $ref: "#/definitions/Order"
       responses:
-        202:
+        200:
           description: Tx was succesfully generated
           schema:
             $ref: "#/definitions/StdTx"
@@ -525,7 +525,7 @@ paths:
                     $ref: "#/definitions/BaseReq"
               - $ref: "#/definitions/BaseMarket"      
       responses:
-        202:
+        200:
           description: Tx was succesfully generated
           schema:
             $ref: "#/definitions/StdTx"
@@ -629,7 +629,7 @@ paths:
                 type: string
                 example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj-1
       responses:
-        202:
+        200:
           description: Tx was succesfully generated
           schema:
             $ref: "#/definitions/StdTx"
@@ -664,7 +664,7 @@ paths:
                 type: integer
                 example: 7
       responses:
-        202:
+        200:
           description: Tx was succesfully generated
           schema:
             $ref: "#/definitions/StdTx"
@@ -2615,7 +2615,7 @@ definitions:
         type: string
         example: cet
       price-precision:
-        type: integer
+        type: string
         example: 10
   MarketInfo:  
     type: object
@@ -2632,22 +2632,22 @@ definitions:
     type: object
     properties:
       order_type:
-        type: integer
+        type: string
         example: 1
       symbol:
         type: string
         example: "abc/cet"
       price_precision:
-        type: integer
+        type: string
         example: 9
       price:
-        type: integer
+        type: string
         example: 1000
       quantity:
-        type: integer
+        type: string
         example: 12320
       side:
-        type: integer
+        type: string
         example: 1
   OrderInfo:
     type: object
