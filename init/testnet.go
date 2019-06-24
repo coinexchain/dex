@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/coinexchain/dex/modules/authx"
 
@@ -144,6 +145,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 		monikers = append(monikers, nodeDirName)
 		config.Moniker = nodeDirName
+		adjustBlockCommitSpeed(config)
 
 		ip, err := getIP(i, viper.GetString(flagStartingIPAddress))
 		if err != nil {
@@ -196,7 +198,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 			return err
 		}
 
-		minSelfDel := stakingx.DefaultParams().MinSelfDelegation
+		minSelfDel := stakingx.DefaultParams().MinSelfDelegation.Quo(sdk.NewInt(100))
 		accStakingTokens := minSelfDel.MulRaw(10)
 		accs = append(accs, app.GenesisAccount{
 			Address: addr,
@@ -257,6 +259,19 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 	fmt.Printf("Successfully initialized %d node directories\n", numValidators)
 	return nil
+}
+
+func adjustBlockCommitSpeed(config *tmconfig.Config) {
+	c := config.Consensus
+	c.TimeoutPropose = 3000 * time.Millisecond
+	c.TimeoutProposeDelta = 500 * time.Millisecond
+	c.TimeoutPrevote = 1000 * time.Millisecond
+	c.TimeoutPrevoteDelta = 500 * time.Millisecond
+	c.TimeoutPrecommit = 1000 * time.Millisecond
+	c.TimeoutPrecommitDelta = 500 * time.Millisecond
+	c.TimeoutCommit = 700 * time.Millisecond
+	c.PeerGossipSleepDuration = 10 * time.Millisecond
+	c.PeerQueryMaj23SleepDuration = 10 * time.Millisecond
 }
 
 func mkNodeHomeDirs(outDir, nodeDir, clientDir string) error {
