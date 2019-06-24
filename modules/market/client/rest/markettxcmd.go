@@ -77,14 +77,7 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			return
 		}
 
-		bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(symbol))
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
-		res, err := cliCtx.QueryWithData(query, bz)
+		res, err := queryMarketInfo(cdc, cliCtx, symbol)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -92,6 +85,20 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 
 		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
 	}
+}
+
+func queryMarketInfo(cdc *codec.Codec, cliCtx context.CLIContext, symbol string) ([]byte, error) {
+	bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(symbol))
+	if err != nil {
+		return nil, err
+	}
+
+	query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
+	res, err := cliCtx.QueryWithData(query, bz)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {

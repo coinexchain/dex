@@ -35,12 +35,12 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create-market ",
 		Short: "generate tx to create market",
-		Long: "generate a tx and sign it to create market in dex blockchain." +
+		Long: "generate a tx and sign it to create market in dex blockchain. \n" +
 			"Example : " +
-			" cetcli tx market createmarket " +
+			" cetcli tx market create-market " +
 			"--from bob --chain-id=coinexdex " +
 			"--stock=eth --money=cet " +
-			"--price-precision=8 --gas 20000 ",
+			"--price-precision=8 --gas 20000 --fees=1000cet ",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -123,12 +123,12 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo
 func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "market-info",
-		Short: "query market info",
-		Long: "cetcli query market marketinfo [symbol]" +
+		Short: "query market info in blockchain",
+		Long: "query market info in blockchain. \n" +
 			"Example : " +
 			"cetcli query market " +
-			"marketinfo eth/cet " +
-			"--trust-node=true",
+			"market-info eth/cet " +
+			"--trust-node=true --chain-id=coinexdex",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -156,7 +156,11 @@ func CancelMarket(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cancel-market",
 		Short: "cancel market in blockchain",
-		Long:  "",
+		Long: "cancel market in blockchain. \n " +
+			"Example : " +
+			"cetcli tx market cancel-market " +
+			"--height=10000 --symbol=etc/cet --from=bob --chain-id=coinexdex " +
+			"--gas=1000000 --fees=1000cet",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -215,8 +219,12 @@ func QueryWaitCancelMarkets(cdc *codec.Codec) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "wait-cancel-markets",
-		Short: "",
-		Long:  "",
+		Short: "Query wait cancel market info in special time",
+		Long: "Query wait cancel market info in special time \n" +
+			"Example:" +
+			"cetcli query market " +
+			"wait-cancel-markets --height=10000 " +
+			"--trust-node=true --chain-id=coinexdex",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 

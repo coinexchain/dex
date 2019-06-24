@@ -145,6 +145,11 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		return
 	}
 
+	if _, err := queryMarketInfo(cdc, cliCtx, req.Symbol); err != nil {
+		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	force := market.GTE
 	if !isGTE {
 		force = market.IOC

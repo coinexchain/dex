@@ -43,15 +43,13 @@ var createOrderFlags = []string{
 func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create-ioc-order",
-		Short: "",
-		Long: `Create an IOC order and sign tx, broadcast to nodes.
-		Example:
-		$ cetcli tx market creategteoreder --symbol="btc/cet"
-		--order-type=2 \
-		--price=520 \
-		--quantity=10000000 \
-		--side=1 \
-		`,
+		Short: "Create an IOC order and sign tx",
+		Long: "Create an IOC order and sign tx, broadcast to nodes. \n" +
+			"Example:" +
+			"$ cetcli tx market create-ioc-order --symbol=btc/cet " +
+			"--order-type=2 --price=520 --quantity=10000000 " +
+			"--side=1 --price-precision=10 --from=bob " +
+			"--chain-id=coinexdex --gas=10000 --fees=1000cet",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, false)
 		},
@@ -63,18 +61,14 @@ func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 
 func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create-gte-oreder",
+		Use:   "create-gte-order",
 		Short: "Create an GTE order and sign tx",
-		Long: `Create an GTE order and sign tx, broadcast to nodes.
-
-Example:
-$ cetcli tx market creategteoreder --symbol="btc/cet"
-	--order-type=2 \
-	--price=520 \
-	--quantity=10000000 \
-	--side=1 \
-	--time-in-force=1000
-`,
+		Long: "Create an GTE order and sign tx, broadcast to nodes. \n" +
+			"Example:" +
+			"$ cetcli tx market create-gte-order --symbol=btc/cet " +
+			"--order-type=2 --price=520 --quantity=10000000 --side=1 " +
+			"--price-precision=10 --from=bob --chain-id=coinexdex " +
+			"--gas=10000 --fees=1000cet",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, true)
 		},
@@ -96,8 +90,12 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 
 	msg, err := parseCreateOrderFlags(sender, sequence)
 	if err != nil {
+		if isGTE {
+			return errors.Errorf("tx flag is error, please see help : " +
+				"$ cetcli tx market create-gte-order -h")
+		}
 		return errors.Errorf("tx flag is error, please see help : " +
-			"$ cetcli tx market creategteoreder -h")
+			"$ cetcli tx market create-ioc-order -h")
 	}
 	if err = msg.ValidateBasic(); err != nil {
 		return err
@@ -128,8 +126,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgCreateOrder, error) {
 	for _, flag := range createOrderFlags {
 		if viper.Get(flag) == nil {
-			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
-				"$ cetcli tx market creategteoreder -h", flag)
+			return nil, fmt.Errorf("--%s flag is a noop" + flag)
 		}
 	}
 
@@ -163,9 +160,11 @@ func markCreateOrderFlags(cmd *cobra.Command) {
 func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "order-info",
-		Short: "Query order info",
-		Long: "cetcli query market orderinfo " +
-			"--orderid=[orderid] --trust-node=true",
+		Short: "Query order info in blockchain",
+		Long: "Query order info in blockchain. \n" +
+			"Example : " +
+			"cetcli query market order-info " +
+			"--order-id=[orderID] --trust-node=true --chain-id=coinexdex",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
@@ -193,8 +192,9 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "user-order-list [userAddress]",
 		Short: "Query user order list in blockchain",
-		Long: "Example:" +
-			"cetcli query market userorderlist --address=[userAddress] --trust-node=true",
+		Long: "Query user order list in blockchain. \n" +
+			"Example:" +
+			"cetcli query market user-order-list --address=[userAddress] --trust-node=true --chain-id=coinexdex",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
@@ -209,7 +209,6 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 			}
 
 			route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryUserOrders)
-			fmt.Println(route)
 			res, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
@@ -229,8 +228,9 @@ func CancelOrder(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cancel-order",
 		Short: "cancel order in blockchain",
-		Long: "Examples:" +
-			"cetcli tx market cancelorder --orderid=[id] " +
+		Long: "cancel order in blockchain. \n" +
+			"Examples:" +
+			"cetcli tx market cancel-order --order-id=[id] " +
 			"--trust-node=true --from=bob --chain-id=coinexdex",
 		RunE: func(cmd *cobra.Command, args []string) error {
 

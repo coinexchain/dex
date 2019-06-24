@@ -124,8 +124,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if len(msg.Symbol) == 0 {
 		return sdk.ErrInvalidAddress("missing GTE order symbol identifier")
 	}
-	if msg.PricePrecision < MinTokenPricePrecision ||
-		msg.PricePrecision > MaxTokenPricePrecision {
+	if msg.PricePrecision > MaxTokenPricePrecision {
 		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [8, 18]. actual : %d", msg.PricePrecision))
 	}
 
@@ -278,11 +277,12 @@ type FillOrderInfo struct {
 	Height  int64  `json:"height"`
 
 	// These fields will change when order was filled/canceled.
-	LeftStock int64 `json:"left_stock"`
-	Freeze    int64 `json:"freeze"`
-	DealStock int64 `json:"deal_stock"`
-	DealMoney int64 `json:"deal_money"`
-	CurrStock int64 `json:"curr_stock"`
+	LeftStock int64  `json:"left_stock"`
+	Freeze    int64  `json:"freeze"`
+	DealStock int64  `json:"deal_stock"`
+	DealMoney int64  `json:"deal_money"`
+	CurrStock int64  `json:"curr_stock"`
+	Price     string `json:"price"`
 }
 
 type CancelOrderInfo struct {

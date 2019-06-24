@@ -207,11 +207,11 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 		}
 	}
 
-	sendFillMsg(orderOldDeals, ordersForUpdate, ctx.BlockHeight(), keeper)
+	sendFillMsg(orderOldDeals, ordersForUpdate, ctx.BlockHeight(), infoForDeal.lastPrice, keeper)
 	return ordersForUpdate, infoForDeal.lastPrice
 }
 
-func sendFillMsg(orderOldDeal map[string]int64, ordersForUpdate map[string]*Order, height int64, keeper Keeper) {
+func sendFillMsg(orderOldDeal map[string]int64, ordersForUpdate map[string]*Order, height int64, price sdk.Dec, keeper Keeper) {
 	if len(ordersForUpdate) == 0 {
 		return
 	}
@@ -226,6 +226,7 @@ func sendFillMsg(orderOldDeal map[string]int64, ordersForUpdate map[string]*Orde
 			DealStock: order.DealStock,
 			DealMoney: order.DealMoney,
 			CurrStock: order.DealStock - oldDeal,
+			Price:     price.String(),
 		}
 		keeper.SendMsg(FillOrderInfoKey, msgInfo)
 	}
