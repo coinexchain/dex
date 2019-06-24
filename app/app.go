@@ -82,7 +82,7 @@ type CetChainApp struct {
 	govKeeper           gov.Keeper
 	crisisKeeper        crisis.Keeper
 	incentiveKeeper     incentive.Keeper
-	assetKeeper         asset.TokenKeeper
+	assetKeeper         asset.BaseKeeper
 	paramsKeeper        params.Keeper
 	marketKeeper        market.Keeper
 	msgQueProducer      msgqueue.Producer
@@ -212,7 +212,7 @@ func (app *CetChainApp) initKeepers() {
 	app.incentiveKeeper = incentive.NewKeeper(
 		app.feeCollectionKeeper, app.bankKeeper,
 	)
-	app.assetKeeper = asset.NewKeeper(
+	app.assetKeeper = asset.NewBaseKeeper(
 		app.cdc,
 		app.keyAsset,
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),

@@ -44,6 +44,8 @@ var reserved = []string{
 	"lkr", "sek", "chf", "thb", "ttd", "tnd", "try", "ugx", "uah", "aed",
 	"uyu", "uzs", "vnd",
 
+	"libra",
+
 	// precious metals 4
 	"xau", "xag", "xpt", "xpd",
 }
@@ -79,33 +81,33 @@ func DefaultGenesisState() GenesisState {
 }
 
 // InitGenesis - Init store state from genesis data
-func InitGenesis(ctx sdk.Context, tk TokenKeeper, data GenesisState) {
-	tk.SetParams(ctx, data.Params)
+func InitGenesis(ctx sdk.Context, keeper BaseKeeper, data GenesisState) {
+	keeper.SetParams(ctx, data.Params)
 
 	for _, token := range data.Tokens {
-		if err := tk.setToken(ctx, token); err != nil {
+		if err := keeper.setToken(ctx, token); err != nil {
 			panic(err)
 		}
 	}
 	for _, addr := range data.Whitelist {
-		if err := tk.setAddrKey(ctx, WhitelistKeyPrefix, addr); err != nil {
+		if err := keeper.setAddrKey(ctx, WhitelistKeyPrefix, addr); err != nil {
 			panic(err)
 		}
 	}
 	for _, addr := range data.ForbidAddr {
-		if err := tk.setAddrKey(ctx, ForbidAddrKeyPrefix, addr); err != nil {
+		if err := keeper.setAddrKey(ctx, ForbidAddrKeyPrefix, addr); err != nil {
 			panic(err)
 		}
 	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
-func ExportGenesis(ctx sdk.Context, tk TokenKeeper) GenesisState {
+func ExportGenesis(ctx sdk.Context, keeper BaseKeeper) GenesisState {
 	return NewGenesisState(
-		tk.GetParams(ctx),
-		tk.GetAllTokens(ctx),
-		tk.GetAllAddrKeys(ctx, WhitelistKeyPrefix),
-		tk.GetAllAddrKeys(ctx, ForbidAddrKeyPrefix))
+		keeper.GetParams(ctx),
+		keeper.GetAllTokens(ctx),
+		keeper.GetAllAddrKeys(ctx, WhitelistKeyPrefix),
+		keeper.GetAllAddrKeys(ctx, ForbidAddrKeyPrefix))
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an

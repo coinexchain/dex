@@ -25,4 +25,5 @@ var msgCdc = codec.New()
 
 func init() {
 	RegisterCodec(msgCdc)
+	msgCdc.Seal()
 }

@@ -19,19 +19,19 @@ const (
 )
 
 // NewQuerier - creates a querier for asset REST endpoints
-func NewQuerier(tk TokenKeeper, cdc *codec.Codec) sdk.Querier {
+func NewQuerier(keeper ViewKeeper, cdc *codec.Codec) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
 		case QueryToken:
-			return queryToken(ctx, req, tk)
+			return queryToken(ctx, req, keeper)
 		case QueryTokenList:
-			return queryAllTokenList(ctx, req, tk)
+			return queryAllTokenList(ctx, req, keeper)
 		case QueryWhitelist:
-			return queryWhitelist(ctx, req, tk)
+			return queryWhitelist(ctx, req, keeper)
 		case QueryForbiddenAddr:
-			return queryForbiddenAddr(ctx, req, tk)
+			return queryForbiddenAddr(ctx, req, keeper)
 		case QueryReservedSymbols:
-			return queryReservedSymbols(ctx, req, tk)
+			return queryReservedSymbols(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown asset query endpoint")
 		}
@@ -49,18 +49,18 @@ func NewQueryAssetParams(s string) QueryTokenParams {
 	}
 }
 
-func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
+func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
 	var params QueryTokenParams
-	if err := tk.cdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := msgCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	token := tk.GetToken(ctx, params.Symbol)
+	token := keeper.GetToken(ctx, params.Symbol)
 	if token == nil {
 		return nil, ErrorTokenNotFound(fmt.Sprintf("token %s not found", params.Symbol))
 	}
 
-	bz, err := codec.MarshalJSONIndent(tk.cdc, token)
+	bz, err := codec.MarshalJSONIndent(msgCdc, token)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -68,8 +68,8 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte,
 	return bz, nil
 }
 
-func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
-	bz, err := codec.MarshalJSONIndent(tk.cdc, tk.GetAllTokens(ctx))
+func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
+	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetAllTokens(ctx))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -88,13 +88,13 @@ func NewQueryWhitelistParams(s string) QueryWhitelistParams {
 	}
 }
 
-func queryWhitelist(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
+func queryWhitelist(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
 	var params QueryWhitelistParams
-	if err := tk.cdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := msgCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	bz, err := codec.MarshalJSONIndent(tk.cdc, tk.GetWhitelist(ctx, params.Symbol))
+	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetWhitelist(ctx, params.Symbol))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -113,13 +113,13 @@ func NewQueryForbiddenAddrParams(s string) QueryForbiddenAddrParams {
 	}
 }
 
-func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
+func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
 	var params QueryForbiddenAddrParams
-	if err := tk.cdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := msgCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	bz, err := codec.MarshalJSONIndent(tk.cdc, tk.GetForbiddenAddr(ctx, params.Symbol))
+	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetForbiddenList(ctx, params.Symbol))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -127,8 +127,8 @@ func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) 
 	return bz, nil
 }
 
-func queryReservedSymbols(ctx sdk.Context, req abci.RequestQuery, tk TokenKeeper) ([]byte, sdk.Error) {
-	bz, err := codec.MarshalJSONIndent(tk.cdc, tk.GetReservedSymbols())
+func queryReservedSymbols(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
+	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetReservedSymbols())
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

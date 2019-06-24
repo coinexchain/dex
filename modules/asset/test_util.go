@@ -60,7 +60,7 @@ func setupTestInput() testInput {
 		cdc,
 		fckCapKey,
 	)
-	tk := NewKeeper(
+	tk := NewBaseKeeper(
 		cdc,
 		assetCapKey,
 		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(DefaultParamspace),

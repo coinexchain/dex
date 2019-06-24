@@ -9,29 +9,29 @@ import (
 )
 
 // NewHandler returns a handler for "asset" type messages.
-func NewHandler(tk TokenKeeper) sdk.Handler {
+func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case MsgIssueToken:
-			return handleMsgIssueToken(ctx, tk, msg)
+			return handleMsgIssueToken(ctx, keeper, msg)
 		case MsgTransferOwnership:
-			return handleMsgTransferOwnership(ctx, tk, msg)
+			return handleMsgTransferOwnership(ctx, keeper, msg)
 		case MsgMintToken:
-			return handleMsgMintToken(ctx, tk, msg)
+			return handleMsgMintToken(ctx, keeper, msg)
 		case MsgBurnToken:
-			return handleMsgBurnToken(ctx, tk, msg)
+			return handleMsgBurnToken(ctx, keeper, msg)
 		case MsgForbidToken:
-			return handleMsgForbidToken(ctx, tk, msg)
+			return handleMsgForbidToken(ctx, keeper, msg)
 		case MsgUnForbidToken:
-			return handleMsgUnForbidToken(ctx, tk, msg)
+			return handleMsgUnForbidToken(ctx, keeper, msg)
 		case MsgAddTokenWhitelist:
-			return handleMsgAddTokenWhitelist(ctx, tk, msg)
+			return handleMsgAddTokenWhitelist(ctx, keeper, msg)
 		case MsgRemoveTokenWhitelist:
-			return handleMsgRemoveTokenWhitelist(ctx, tk, msg)
+			return handleMsgRemoveTokenWhitelist(ctx, keeper, msg)
 		case MsgForbidAddr:
-			return handleMsgForbidAddr(ctx, tk, msg)
+			return handleMsgForbidAddr(ctx, keeper, msg)
 		case MsgUnForbidAddr:
-			return handleMsgUnForbidAddr(ctx, tk, msg)
+			return handleMsgUnForbidAddr(ctx, keeper, msg)
 
 		default:
 			errMsg := "Unrecognized asset Msg type: %s" + msg.Type()
@@ -41,18 +41,18 @@ func NewHandler(tk TokenKeeper) sdk.Handler {
 }
 
 // handleMsgIssueToken - Handle MsgIssueToken
-func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk.Result {
+func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg MsgIssueToken) sdk.Result {
 
-	issueFee := tk.GetParams(ctx).IssueTokenFee
-	if err := tk.DeductFee(ctx, msg.Owner, issueFee); err != nil {
+	issueFee := keeper.GetParams(ctx).IssueTokenFee
+	if err := keeper.DeductFee(ctx, msg.Owner, issueFee); err != nil {
 		return err.Result()
 	}
 
-	if err := tk.IssueToken(ctx, msg); err != nil {
+	if err := keeper.IssueToken(ctx, msg); err != nil {
 		return err.Result()
 	}
 
-	if err := tk.AddToken(ctx, msg.Owner, NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
+	if err := keeper.AddToken(ctx, msg.Owner, NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
 		return err.Result()
 	}
 
@@ -66,8 +66,8 @@ func handleMsgIssueToken(ctx sdk.Context, tk TokenKeeper, msg MsgIssueToken) sdk
 }
 
 // handleMsgTransferOwnership - Handle MsgTransferOwnership
-func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransferOwnership) sdk.Result {
-	if err := tk.TransferOwnership(ctx, msg); err != nil {
+func handleMsgTransferOwnership(ctx sdk.Context, keeper Keeper, msg MsgTransferOwnership) sdk.Result {
+	if err := keeper.TransferOwnership(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -82,8 +82,8 @@ func handleMsgTransferOwnership(ctx sdk.Context, tk TokenKeeper, msg MsgTransfer
 }
 
 // handleMsgMintToken - Handle MsgMintToken
-func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) sdk.Result {
-	if err := tk.MintToken(ctx, msg); err != nil {
+func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg MsgMintToken) sdk.Result {
+	if err := keeper.MintToken(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -97,8 +97,8 @@ func handleMsgMintToken(ctx sdk.Context, tk TokenKeeper, msg MsgMintToken) sdk.R
 }
 
 // handleMsgBurnToken - Handle MsgBurnToken
-func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) sdk.Result {
-	if err := tk.BurnToken(ctx, msg); err != nil {
+func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg MsgBurnToken) sdk.Result {
+	if err := keeper.BurnToken(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -112,8 +112,8 @@ func handleMsgBurnToken(ctx sdk.Context, tk TokenKeeper, msg MsgBurnToken) sdk.R
 }
 
 // handleMsgForbidToken - Handle ForbidToken msg
-func handleMsgForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgForbidToken) sdk.Result {
-	if err := tk.ForbidToken(ctx, msg); err != nil {
+func handleMsgForbidToken(ctx sdk.Context, keeper Keeper, msg MsgForbidToken) sdk.Result {
+	if err := keeper.ForbidToken(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -126,8 +126,8 @@ func handleMsgForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgForbidToken) s
 }
 
 // handleMsgUnForbidToken - Handle UnForbidToken msg
-func handleMsgUnForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidToken) sdk.Result {
-	if err := tk.UnForbidToken(ctx, msg); err != nil {
+func handleMsgUnForbidToken(ctx sdk.Context, keeper Keeper, msg MsgUnForbidToken) sdk.Result {
+	if err := keeper.UnForbidToken(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -140,8 +140,8 @@ func handleMsgUnForbidToken(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidToke
 }
 
 // handleMsgAddTokenWhitelist - Handle AddTokenWhitelist msg
-func handleMsgAddTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgAddTokenWhitelist) sdk.Result {
-	if err := tk.AddTokenWhitelist(ctx, msg); err != nil {
+func handleMsgAddTokenWhitelist(ctx sdk.Context, keeper Keeper, msg MsgAddTokenWhitelist) sdk.Result {
+	if err := keeper.AddTokenWhitelist(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -160,8 +160,8 @@ func handleMsgAddTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgAddToken
 }
 
 // handleMsgRemoveTokenWhitelist - Handle RemoveTokenWhitelist msg
-func handleMsgRemoveTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgRemoveTokenWhitelist) sdk.Result {
-	if err := tk.RemoveTokenWhitelist(ctx, msg); err != nil {
+func handleMsgRemoveTokenWhitelist(ctx sdk.Context, keeper Keeper, msg MsgRemoveTokenWhitelist) sdk.Result {
+	if err := keeper.RemoveTokenWhitelist(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -180,8 +180,8 @@ func handleMsgRemoveTokenWhitelist(ctx sdk.Context, tk TokenKeeper, msg MsgRemov
 }
 
 // handleMsgForbidAddr - Handle MsgForbidAddr
-func handleMsgForbidAddr(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddr) (res sdk.Result) {
-	if err := tk.ForbidAddress(ctx, msg); err != nil {
+func handleMsgForbidAddr(ctx sdk.Context, keeper Keeper, msg MsgForbidAddr) (res sdk.Result) {
+	if err := keeper.ForbidAddress(ctx, msg); err != nil {
 		return err.Result()
 	}
 
@@ -200,8 +200,8 @@ func handleMsgForbidAddr(ctx sdk.Context, tk TokenKeeper, msg MsgForbidAddr) (re
 }
 
 // handleMsgUnForbidAddr - Handle MsgUnForbidAddr
-func handleMsgUnForbidAddr(ctx sdk.Context, tk TokenKeeper, msg MsgUnForbidAddr) (res sdk.Result) {
-	if err := tk.UnForbidAddress(ctx, msg); err != nil {
+func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg MsgUnForbidAddr) (res sdk.Result) {
+	if err := keeper.UnForbidAddress(ctx, msg); err != nil {
 		return err.Result()
 	}
 
