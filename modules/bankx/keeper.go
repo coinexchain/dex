@@ -18,13 +18,13 @@ type Keeper struct {
 	bk            bank.BaseKeeper
 	ak            auth.AccountKeeper
 	fck           auth.FeeCollectionKeeper
-	ask           ExpectedAssetStatusKeeper
+	tk            ExpectedAssetStatusKeeper
 	msgProducer   msgqueue.Producer
 }
 
 func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	bk bank.BaseKeeper, ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
-	ask ExpectedAssetStatusKeeper, msgProducer msgqueue.Producer) Keeper {
+	tk ExpectedAssetStatusKeeper, msgProducer msgqueue.Producer) Keeper {
 
 	return Keeper{
 		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
@@ -32,7 +32,7 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 		bk:            bk,
 		ak:            ak,
 		fck:           fck,
-		ask:           ask,
+		tk:            tk,
 		msgProducer:   msgProducer,
 	}
 }
@@ -94,6 +94,12 @@ func (k Keeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 	_, _, err := k.bk.SubtractCoins(ctx, addr, amt)
 	return err
 }
+func (k Keeper) AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	if _, _, err := k.bk.AddCoins(ctx, addr, amt); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	if _, _, err := k.bk.SubtractCoins(ctx, addr, amt); err != nil {
@@ -106,7 +112,7 @@ func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) s
 
 func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddress) bool {
 	for _, coin := range amt {
-		if k.ask.IsForbiddenByTokenIssuer(ctx, coin.Denom, addr) {
+		if k.tk.IsForbiddenByTokenIssuer(ctx, coin.Denom, addr) {
 			return true
 		}
 	}

@@ -83,6 +83,7 @@ type CetChainApp struct {
 	crisisKeeper        crisis.Keeper
 	incentiveKeeper     incentive.Keeper
 	assetKeeper         asset.BaseKeeper
+	tokenKeeper         asset.TokenKeeper
 	paramsKeeper        params.Keeper
 	marketKeeper        market.Keeper
 	msgQueProducer      msgqueue.Producer
@@ -212,23 +213,25 @@ func (app *CetChainApp) initKeepers() {
 	app.incentiveKeeper = incentive.NewKeeper(
 		app.feeCollectionKeeper, app.bankKeeper,
 	)
-	app.assetKeeper = asset.NewBaseKeeper(
-		app.cdc,
-		app.keyAsset,
-		app.paramsKeeper.Subspace(asset.DefaultParamspace),
-		app.bankKeeper, app.feeCollectionKeeper,
+	app.tokenKeeper = asset.NewBaseTokenKeeper(
+		app.cdc, app.keyAsset,
 	)
 	app.bankxKeeper = bankx.NewKeeper(
 		app.paramsKeeper.Subspace(bankx.DefaultParamspace),
 		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
 		app.feeCollectionKeeper,
-		app.assetKeeper,
+		app.tokenKeeper,
 		app.msgQueProducer,
 	)
-
+	app.assetKeeper = asset.NewBaseKeeper(
+		app.cdc,
+		app.keyAsset,
+		app.paramsKeeper.Subspace(asset.DefaultParamspace),
+		app.bankxKeeper,
+	)
 	app.marketKeeper = market.NewKeeper(
 		app.keyMarket,
-		app.assetKeeper,
+		app.tokenKeeper,
 		app.bankxKeeper,
 		app.feeCollectionKeeper,
 		app.cdc,
@@ -269,7 +272,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(gov.QuerierRoute, gov.NewQuerier(app.govKeeper)).
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
-		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.assetKeeper, app.cdc)).
+		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.tokenKeeper, app.cdc)).
 		AddRoute(market.StoreKey, market.NewQuerier(app.marketKeeper, app.cdc))
 
 }

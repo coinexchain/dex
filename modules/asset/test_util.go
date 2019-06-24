@@ -1,6 +1,9 @@
 package asset
 
 import (
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
@@ -20,7 +23,7 @@ var _, _, tAccAddr = keyPubAddr()
 type testInput struct {
 	cdc     *codec.Codec
 	ctx     sdk.Context
-	tk      TokenKeeper
+	tk      BaseKeeper
 	handler sdk.Handler
 }
 
@@ -33,6 +36,7 @@ func setupTestInput() testInput {
 
 	assetCapKey := sdk.NewKVStoreKey(StoreKey)
 	authCapKey := sdk.NewKVStoreKey(auth.StoreKey)
+	authxCapKey := sdk.NewKVStoreKey(authx.StoreKey)
 	fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
 	keyParams := sdk.NewKVStoreKey(params.StoreKey)
 	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
@@ -52,6 +56,12 @@ func setupTestInput() testInput {
 		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(auth.DefaultParamspace),
 		auth.ProtoBaseAccount,
 	)
+	axk := authx.NewKeeper(
+		cdc,
+		authxCapKey,
+		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(authx.DefaultParamspace),
+	)
+
 	bk := bank.NewBaseKeeper(
 		ak,
 		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(bank.DefaultParamspace),
@@ -60,11 +70,21 @@ func setupTestInput() testInput {
 		cdc,
 		fckCapKey,
 	)
+	ask := NewBaseTokenKeeper(
+		cdc,
+		assetCapKey,
+	)
+	bkx := bankx.NewKeeper(
+		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(bankx.DefaultParamspace),
+		axk, bk, ak, fck, ask,
+		msgqueue.NewProducer(),
+	)
+
 	tk := NewBaseKeeper(
 		cdc,
 		assetCapKey,
 		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(DefaultParamspace),
-		bk, fck,
+		bkx,
 	)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())

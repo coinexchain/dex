@@ -4,6 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type ExpectFeeKeeper interface {
-	AddCollectedFees(ctx sdk.Context, coins sdk.Coins) sdk.Coins
+// Bankx Keeper will implement the interface
+type ExpectedBankxKeeper interface {
+	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
+	AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 }

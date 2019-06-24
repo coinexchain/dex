@@ -14,7 +14,7 @@ import (
 )
 
 func TestInvalidMsg(t *testing.T) {
-	h := NewHandler(TokenKeeper{})
+	h := NewHandler(BaseKeeper{})
 
 	res := h(sdk.Context{}, sdk.NewTestMsg())
 	require.False(t, res.IsOK())
@@ -29,7 +29,7 @@ func TestIssueTokenMsg(t *testing.T) {
 		Data: []byte{},
 	}
 	// no token in store
-	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams("abc"))
+	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams(symbol))
 	bz, err := queryToken(input.ctx, req, input.tk)
 	require.Nil(t, bz)
 	require.Error(t, err)
@@ -55,7 +55,4 @@ func TestIssueTokenMsg(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, symbol, token.GetSymbol())
 
-	// get account abc token amount
-	amt := input.tk.bk.GetCoins(input.ctx, tAccAddr).AmountOf(symbol).String()
-	require.Equal(t, "210000000000", amt)
 }

@@ -3,14 +3,13 @@ package asset
 import (
 	"bytes"
 	"fmt"
+	"github.com/coinexchain/dex/modules/bankx"
 	"strings"
 
 	"github.com/tendermint/tendermint/libs/bech32"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
@@ -20,6 +19,7 @@ var (
 	WhitelistKeyPrefix  = []byte{0x02}
 	ForbidAddrKeyPrefix = []byte{0x03}
 )
+
 // -----------------------------------------------------------------------------
 
 // Keeper defines a module interface that keep token info.
@@ -56,41 +56,32 @@ type BaseKeeper struct {
 
 	paramSubspace params.Subspace
 
-	bk  bank.Keeper
-	fck ExpectFeeKeeper
+	bkx ExpectedBankxKeeper
 }
 
 // NewBaseKeeper returns a new BaseKeeper that uses go-amino to (binary) encode and decode concrete Token.
 func NewBaseKeeper(cdc *codec.Codec, key sdk.StoreKey,
-	paramStore params.Subspace, bk bank.Keeper, fck auth.FeeCollectionKeeper) BaseKeeper {
+	paramStore params.Subspace, bkx bankx.Keeper) BaseKeeper {
 	return BaseKeeper{
 		BaseTokenKeeper: NewBaseTokenKeeper(cdc, key),
 
 		cdc:           cdc,
 		key:           key,
 		paramSubspace: paramStore.WithKeyTable(ParamKeyTable()),
-		bk:            bk,
-		fck:           fck,
+		bkx:           bkx,
 	}
 }
 
 // DeductFee - deduct asset func fee like issueFee
 func (keeper BaseKeeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if _, _, err := keeper.bk.SubtractCoins(ctx, addr, amt); err != nil {
-		return err
-	}
 
-	keeper.fck.AddCollectedFees(ctx, amt)
-	return nil
+	return keeper.bkx.DeductFee(ctx, addr, amt)
 }
 
 // AddToken - add token to addr when issue token etc.
 func (keeper BaseKeeper) AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if _, _, err := keeper.bk.AddCoins(ctx, addr, amt); err != nil {
-		return err
-	}
 
-	return nil
+	return keeper.bkx.AddCoins(ctx, addr, amt)
 }
 
 // SetParams sets the asset module's parameters.
@@ -356,6 +347,7 @@ type TokenKeeper interface {
 }
 
 var _ TokenKeeper = (*BaseTokenKeeper)(nil)
+
 // BaseTokenKeeper implements a read only keeper implementation of TokenKeeper.
 type BaseTokenKeeper struct {
 	BaseViewKeeper
@@ -459,6 +451,7 @@ type ViewKeeper interface {
 }
 
 var _ ViewKeeper = (*BaseViewKeeper)(nil)
+
 // BaseViewKeeper implements a read only keeper implementation of ViewKeeper.
 type BaseViewKeeper struct {
 	// The codec codec for	binary encoding/decoding of token.
