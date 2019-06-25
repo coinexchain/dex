@@ -7,7 +7,7 @@ info:
 tags:
   - name: Transactions
     description: Search, encode, or broadcast transactions.
-  - name: Tendermint RPC
+  - name: Tendermint
     description: Tendermint APIs, such as query blocks, transactions and validatorset
   - name: Auth
     description: Authenticate accounts
@@ -59,7 +59,7 @@ paths:
       summary: The properties of the connected node
       operationId: getNodeInfo
       tags:
-        - Tendermint RPC
+        - Tendermint
       produces:
         - application/json
       responses:
@@ -112,7 +112,7 @@ paths:
     get:
       summary: Syncing state of node
       tags:
-        - Tendermint RPC
+        - Tendermint
       description: Get if the node is currently syning with other nodes
       responses:
         200:
@@ -124,7 +124,7 @@ paths:
       summary: Get the latest block
       operationId: getLatestBlock
       tags:
-        - Tendermint RPC
+        - Tendermint
       produces:
         - application/json
       responses:
@@ -138,7 +138,7 @@ paths:
     get:
       summary: Get a block at a certain height
       tags:
-        - Tendermint RPC
+        - Tendermint
       produces:
         - application/json
       parameters:
@@ -164,7 +164,7 @@ paths:
       summary: Get the latest validator set
       operationId: getLatestValidatorSets
       tags:
-        - Tendermint RPC
+        - Tendermint
       produces:
         - application/json
       responses:
@@ -185,7 +185,7 @@ paths:
     get:
       summary: Get a validator set a certain height
       tags:
-        - Tendermint RPC
+        - Tendermint
       produces:
         - application/json
       parameters:
