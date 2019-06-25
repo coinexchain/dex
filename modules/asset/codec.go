@@ -7,7 +7,13 @@ import (
 // Register concrete types on codec codec
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterInterface((*Token)(nil), nil)
-	cdc.RegisterConcrete(&BaseToken{}, "asset/Token", nil)
+	cdc.RegisterConcrete(&BaseToken{}, "asset/BaseToken", nil)
+	cdc.RegisterInterface((*Keeper)(nil), nil)
+	cdc.RegisterConcrete(&BaseKeeper{}, "asset/BaseKeeper", nil)
+	cdc.RegisterInterface((*TokenKeeper)(nil), nil)
+	cdc.RegisterConcrete(&BaseTokenKeeper{}, "asset/BaseTokenKeeper", nil)
+	cdc.RegisterInterface((*ViewKeeper)(nil), nil)
+	cdc.RegisterConcrete(&BaseViewKeeper{}, "asset/BaseViewKeeper", nil)
 
 	cdc.RegisterConcrete(MsgIssueToken{}, "asset/MsgIssueToken", nil)
 	cdc.RegisterConcrete(MsgTransferOwnership{}, "asset/MsgTransferOwnership", nil)
@@ -19,6 +25,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgRemoveTokenWhitelist{}, "asset/MsgRemoveTokenWhitelist", nil)
 	cdc.RegisterConcrete(MsgForbidAddr{}, "asset/MsgForbidAddr", nil)
 	cdc.RegisterConcrete(MsgUnForbidAddr{}, "asset/MsgUnForbidAddr", nil)
+	cdc.RegisterConcrete(MsgModifyTokenURL{}, "asset/MsgModifyTokenURL", nil)
 }
 
 var msgCdc = codec.New()
