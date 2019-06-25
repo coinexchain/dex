@@ -23,6 +23,10 @@ tags:
     description: Fee distribution module APIs
   - name: Misc
     description: Query app version
+  - name: Asset
+    description: Asset module APIs
+  - name: Market
+    description: Market module APIs
 schemes:
   - http
   - https
