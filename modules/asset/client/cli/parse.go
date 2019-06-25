@@ -222,7 +222,21 @@ func parseModifyTokenURLFlags(owner sdk.AccAddress) (*asset.MsgModifyTokenURL, e
 
 	msg := asset.NewMsgModifyTokenURL(
 		viper.GetString(flagSymbol),
-		viper.GetString(flagURL),
+		viper.GetString(flagTokenURL),
+		owner,
+	)
+
+	return &msg, nil
+}
+
+func parseModifyTokenDescriptionFlags(owner sdk.AccAddress) (*asset.MsgModifyTokenDescription, error) {
+	if err := checkFlags(modifyTokenDescriptionFlags, "$ cetcli tx asset modify-token-description -h"); err != nil {
+		return nil, err
+	}
+
+	msg := asset.NewMsgModifyTokenDescription(
+		viper.GetString(flagSymbol),
+		viper.GetString(flagTokenDescription),
 		owner,
 	)
 

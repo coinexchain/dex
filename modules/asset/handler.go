@@ -34,6 +34,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgUnForbidAddr(ctx, keeper, msg)
 		case MsgModifyTokenURL:
 			return handleMsgModifyTokenURL(ctx, keeper, msg)
+		case MsgModifyTokenDescription:
+			return handleMsgModifyTokenDescription(ctx, keeper, msg)
 
 		default:
 			errMsg := "Unrecognized asset Msg type: %s" + msg.Type()
@@ -231,6 +233,21 @@ func handleMsgModifyTokenURL(ctx sdk.Context, keeper Keeper, msg MsgModifyTokenU
 			tags.Category, tags.TxCategory,
 			tags.Token, msg.Symbol,
 			tags.URL, msg.URL,
+		),
+	}
+}
+
+// handleMsgModifyTokenDescription - Handle MsgModifyTokenDescription
+func handleMsgModifyTokenDescription(ctx sdk.Context, keeper Keeper, msg MsgModifyTokenDescription) sdk.Result {
+	if err := keeper.ModifyTokenDescription(ctx, msg); err != nil {
+		return err.Result()
+	}
+
+	return sdk.Result{
+		Tags: sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Token, msg.Symbol,
+			tags.Description, msg.Description,
 		),
 	}
 }

@@ -3,6 +3,7 @@ package asset
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"unicode/utf8"
+	"unsafe"
 )
 
 // MsgIssueToken
@@ -580,5 +581,58 @@ func (msg MsgModifyTokenURL) GetSignBytes() []byte {
 
 // GetSigners Implements Msg.
 func (msg MsgModifyTokenURL) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.OwnerAddress}
+}
+
+// MsgModifyTokenDescription
+type MsgModifyTokenDescription struct {
+	Symbol       string         `json:"symbol"`
+	Description  string         `json:"description"`
+	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
+}
+
+var _ sdk.Msg = MsgModifyTokenDescription{}
+
+func NewMsgModifyTokenDescription(symbol string, description string, owner sdk.AccAddress) MsgModifyTokenDescription {
+	return MsgModifyTokenDescription{
+		symbol,
+		description,
+		owner,
+	}
+}
+
+// Route Implements Msg.
+func (msg MsgModifyTokenDescription) Route() string {
+	return RouterKey
+}
+
+// Type Implements Msg.
+func (msg MsgModifyTokenDescription) Type() string {
+	return "modify_token_description"
+}
+
+// ValidateBasic Implements Msg.
+func (msg MsgModifyTokenDescription) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("modify token description need a valid owner addr")
+	}
+
+	if unsafe.Sizeof(msg.Description) > 1024 {
+		return ErrorInvalidTokenDescription("token description is limited to 1k size")
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgModifyTokenDescription) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgModifyTokenDescription) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddress}
 }

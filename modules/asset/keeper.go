@@ -39,6 +39,7 @@ type Keeper interface {
 	ForbidAddress(ctx sdk.Context, msg MsgForbidAddr) sdk.Error
 	UnForbidAddress(ctx sdk.Context, msg MsgUnForbidAddr) sdk.Error
 	ModifyTokenURL(ctx sdk.Context, msg MsgModifyTokenURL) sdk.Error
+	ModifyTokenDescription(ctx sdk.Context, msg MsgModifyTokenDescription) sdk.Error
 
 	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
@@ -303,6 +304,20 @@ func (keeper BaseKeeper) ModifyTokenURL(ctx sdk.Context, msg MsgModifyTokenURL) 
 
 	if err := token.SetURL(msg.URL); err != nil {
 		return ErrorInvalidTokenURL(err.Error())
+	}
+
+	return keeper.setToken(ctx, token)
+}
+
+//ModifyTokenURL - modify token url property
+func (keeper BaseKeeper) ModifyTokenDescription(ctx sdk.Context, msg MsgModifyTokenDescription) sdk.Error {
+	token, err := keeper.checkPrecondition(ctx, msg, msg.Symbol, msg.OwnerAddress)
+	if err != nil {
+		return err
+	}
+
+	if err := token.SetDescription(msg.Description); err != nil {
+		return ErrorInvalidTokenDescription(err.Error())
 	}
 
 	return keeper.setToken(ctx, token)
