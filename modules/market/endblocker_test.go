@@ -173,7 +173,7 @@ func TestRemoveOrders(t *testing.T) {
 		if records[i] != rec {
 			t.Errorf("Error in Removing Old Orders!")
 		}
-		fmt.Printf("%s\n", rec)
+		//fmt.Printf("%s\n", rec)
 	}
 }
 
@@ -240,9 +240,9 @@ func TestDelist(t *testing.T) {
 	orders[2].Symbol = "btc/usdt"
 	btcKeeper.Add(ctx, orders[2])
 
-	orders[3] = newTO("00002", 2, 11080, 50, Buy, GTE, 98)
+	orders[3] = newTO("00202", 2, 11080, 50, Buy, GTE, 98)
 	cetKeeper.Add(ctx, orders[3])
-	orders[4] = newTO("00002", 3, 10900, 50, Buy, GTE, 92)
+	orders[4] = newTO("00102", 3, 10900, 50, Buy, GTE, 92)
 	cetKeeper.Add(ctx, orders[4])
 	orders[5] = newTO("00004", 4, 11032, 30, Sell, GTE, 90)
 	cetKeeper.Add(ctx, orders[5])
@@ -262,7 +262,7 @@ func TestDelist(t *testing.T) {
 	EndBlocker(ctx, keeper)
 	gKeeper := NewGlobalOrderKeeper(keeper.marketKey, msgCdc)
 	allOrders := gKeeper.GetAllOrders(ctx)
-	subList := []int{6, 8, 9, 4}
+	subList := []int{4, 6, 8, 9}
 	if len(allOrders) != 4 {
 		t.Errorf("Incorrect remain orders.")
 	}
@@ -281,23 +281,30 @@ func TestDelist(t *testing.T) {
 		"send 66 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca to cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf",
 		"unfreeze 5 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
 		"send 5 cet from cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24 to cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
-		"unfreeze 6 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
-		"send 6 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz to cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+		"unfreeze 5 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"send 5 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz to cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
 		"unfreeze 25 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
-		"send 25 cet from cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24 to cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
-		"unfreeze 28 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
-		"send 28 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz to cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+		"send 25 cet from cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24 to cosmos1qy352eufqy352eufqy352eufqy35qqszrgzaze",
+		"unfreeze 27 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqszrgzaze",
+		"send 27 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqszrgzaze to cosmos1qy352eufqy352eufqy352eufqy35qqqyej8x24",
+		"unfreeze 25 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqf464exq",
+		"send 25 cet from cosmos1qy352eufqy352eufqy352eufqy35qqqf464exq to cosmos1qy352eufqy352eufqy352eufqy35qqszrgzaze",
+		"unfreeze 27 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqszrgzaze",
+		"send 27 usdt from cosmos1qy352eufqy352eufqy352eufqy35qqszrgzaze to cosmos1qy352eufqy352eufqy352eufqy35qqqf464exq",
 	}
 	unfreezeRecords := []string{
 		"unfreeze 40 btc at cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf",
 		"unfreeze 120 btc at cosmos1qy352eufqy352eufqy352eufqy35qqq9yynnh8",
-		"unfreeze 27 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"unfreeze 1 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
+		"unfreeze 1 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqszrgzaze",
+	}
+	for i, rec := range bnk.records {
+		fmt.Printf("bnk.records[%d] %s\n", i, rec)
 	}
 	for i, rec := range records {
 		if rec != bnk.records[i] {
 			t.Errorf("Incorrect Records, actual : %s, expect : %s", bnk.records[i], rec)
 		}
-		fmt.Printf("%s\n", rec)
 	}
 	unf := bnk.records[len(records):]
 	sort.Strings(unf)
@@ -306,6 +313,5 @@ func TestDelist(t *testing.T) {
 		if rec != unf[i] {
 			t.Errorf("Incorrect Records, actual : %s, expect : %s", unf[i], rec)
 		}
-		fmt.Printf("%s\n", rec)
 	}
 }

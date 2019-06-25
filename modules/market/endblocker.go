@@ -75,7 +75,7 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	// buyer and seller will exchange stockCoins and moneyCoins
 	stockCoins := sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(amount))}
-	moneyAmount := price.MulInt(sdk.NewInt(amount)).RoundInt64()
+	moneyAmount := price.MulInt(sdk.NewInt(amount)).TruncateInt64()
 	moneyCoins := sdk.Coins{sdk.NewCoin(money, sdk.NewInt(moneyAmount))}
 	//fmt.Printf("here price:%s stock:%d money:%d seller.Freeze:%d buyer.Freeze:%d %d %s\n",
 	//price.String(), amount, moneyAmount, seller.Freeze, buyer.Freeze, buyer.Quantity, buyer.Price.String())
