@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	cfg "github.com/tendermint/tendermint/config"
+	tmconfig "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/common"
 
@@ -72,11 +74,20 @@ func initFn(ctx *server.Context, cdc *codec.Codec, moniker string) error {
 		return err
 	}
 
+	adjustBlockCommitSpeed(config)
+
 	// generate config.toml
 	cfg.WriteConfigFile(filepath.Join(config.RootDir, "config", "config.toml"), config)
 
 	toPrint := newPrintInfo(config.Moniker, chainID, nodeID, "", appState)
 	return displayInfo(cdc, toPrint)
+}
+
+func adjustBlockCommitSpeed(config *tmconfig.Config) {
+	c := config.Consensus
+	c.TimeoutCommit = 2100 * time.Millisecond
+	c.PeerGossipSleepDuration = 20 * time.Millisecond
+	c.PeerQueryMaj23SleepDuration = 100 * time.Millisecond
 }
 
 func initializeGenesisFile(cdc *codec.Codec, genFile string) (chainID string, appState json.RawMessage, err error) {
