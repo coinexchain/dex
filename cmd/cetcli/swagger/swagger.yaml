@@ -2814,7 +2814,7 @@ definitions:
       result:
         type: object
         properties:
-          log:
+          logs:
             type: string
           gas_wanted:
             type: string
