@@ -505,7 +505,7 @@ paths:
         400:
           description: Invalid request
         500:
-          description: Server internal error        
+          description: Server internal error
   /market/create-market:
     post:
       summary: Create market in blockchain
@@ -527,7 +527,7 @@ paths:
               - properties:
                   base_req:
                     $ref: "#/definitions/BaseReq"
-              - $ref: "#/definitions/BaseMarket"      
+              - $ref: "#/definitions/BaseMarket"
       responses:
         200:
           description: Tx was succesfully generated
@@ -539,7 +539,7 @@ paths:
           description: Server internal error
   /market/market-info/{symbol}:
     get:
-      summary: Query market info  
+      summary: Query market info
       tags:
         - Market
       produces:
@@ -563,7 +563,7 @@ paths:
           description: Server internal error
   /market/order-info/{order-id}:
     get:
-      summary: Query order info  
+      summary: Query order info
       tags:
         - Market
       produces:
@@ -572,13 +572,13 @@ paths:
       parameters:
         - in: path
           name: order-id
-          description: The order id 
+          description: The order id
           required: true
           type: string
           x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
       responses:
         200:
-          description: Order info of the specified id 
+          description: Order info of the specified id
           schema:
             $ref: "#/definitions/OrderInfo"
         400:
@@ -596,26 +596,26 @@ paths:
       parameters:
         - in: path
           name: address
-          description: The user address 
+          description: The user address
           required: true
           type: string
           x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
       responses:
         200:
-          description: OK    
+          description: OK
           schema:
             $ref: "#/definitions/Order-Ids"
         400:
           description: Invalid address
         500:
-          description: Server internal error  
+          description: Server internal error
   /market/cancel-order:
     post:
       summary: Cancel the order
       tags:
         - Market
       consumes:
-        - application/json  
+        - application/json
       produces:
         - application/json
       operationId: cancelOrder
@@ -640,7 +640,7 @@ paths:
         400:
           description: Invalid request
         500:
-          description: Server internal error    
+          description: Server internal error
   /market/cancel-market:
     post:
       summary: Cancel the market
@@ -675,7 +675,7 @@ paths:
         400:
           description: Invalid request
         500:
-          description: Server internal error    
+          description: Server internal error
   /auth/accounts/{address}:
     get:
       summary: Get the account information on blockchain
@@ -2560,6 +2560,44 @@ paths:
           description: Invalid Request
         500:
           description: Internal Server Error
+  /asset/tokens/{symbol}/urls:
+    post:
+      tags:
+        - ICS100
+      summary: Modify token url
+      description: Modify token url
+      operationId: modifyTokenURL
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: url
+          description: new token url
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              url:
+                type: string
+      responses:
+        200:
+          description: Modify token url result
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
+        500:
+          description: Internal Server Error
 definitions:
   BaseMarket:
     type: object
@@ -2573,7 +2611,7 @@ definitions:
       price-precision:
         type: string
         example: 10
-  MarketInfo:  
+  MarketInfo:
     type: object
     allOf:
       - $ref: "#/definitions/BaseMarket"

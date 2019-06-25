@@ -31,6 +31,7 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/whitelist", symbol), removeWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/addresses", symbol), forbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/addresses", symbol), unForbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/urls", symbol), modifyTokenURLHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
 // issueReq defines the properties of a issue token request's body.
@@ -389,6 +390,44 @@ func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		symbol := vars[symbol]
 
 		msg := asset.NewMsgUnForbidAddr(symbol, owner, req.AddrList)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// modifyTokenURLReq defines the properties of a modify token url request's body.
+type modifyTokenURLReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	URL     string       `json:"url"`
+}
+
+// modifyTokenURLHandlerFn - http request handler to modify token url.
+func modifyTokenURLHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req modifyTokenURLReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgModifyTokenURL(symbol, req.URL, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
