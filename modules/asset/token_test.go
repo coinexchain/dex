@@ -78,7 +78,7 @@ func TestNewToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := NewToken(tt.args.name, tt.args.symbol, tt.args.amt, tt.args.owner, tt.args.mintable, tt.args.burnable, tt.args.addrforbiddable, tt.args.tokenforbiddable, tt.args.url, tt.args.descripton)
+			got, got1 := NewToken(tt.args.name, tt.args.symbol, tt.args.amt, tt.args.owner, tt.args.mintable, tt.args.burnable, tt.args.addrforbiddable, tt.args.tokenforbiddable, tt.args.url, tt.args.description)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewToken() got = %v, want %v", got, tt.want)
 			}
