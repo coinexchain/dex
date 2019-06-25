@@ -214,3 +214,17 @@ func parseUnForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgUnForbidAddr, error
 
 	return &msg, nil
 }
+
+func parseModifyTokenURLFlags(owner sdk.AccAddress) (*asset.MsgModifyTokenURL, error) {
+	if err := checkFlags(modifyTokenURLFlags, "$ cetcli tx asset modify-token-url -h"); err != nil {
+		return nil, err
+	}
+
+	msg := asset.NewMsgModifyTokenURL(
+		viper.GetString(flagSymbol),
+		viper.GetString(flagURL),
+		owner,
+	)
+
+	return &msg, nil
+}

@@ -17,6 +17,7 @@ const (
 	AddWhitelist    = "add-whitelist"
 	RemoveWhitelist = "remove-whitelist"
 	Addresses       = "addresses"
+	URL             = "url"
 )
 
 // Tag keys and values

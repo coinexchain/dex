@@ -57,6 +57,7 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 		assCli.RemoveTokenWhitelistCmd(mc.cdc),
 		assCli.ForbidAddrCmd(mc.cdc),
 		assCli.UnForbidAddrCmd(mc.cdc),
+		assCli.ModifyTokenURLCmd(mc.cdc),
 	)...)
 
 	return assTxCmd

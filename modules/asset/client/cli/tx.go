@@ -32,6 +32,7 @@ const (
 	flagAmount    = "amount"
 	flagWhitelist = "whitelist"
 	flagAddresses = "addresses"
+	flagURL       = "url"
 )
 
 var issueTokenFlags = []string{
@@ -559,6 +560,57 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range addressesFlags {
+		_ = cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
+
+var modifyTokenURLFlags = []string{
+	flagSymbol,
+	flagURL,
+}
+
+// BurnTokenCmd will create a burn token tx and sign.
+func ModifyTokenURLCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "modify-token-url",
+		Short: "Modify token url",
+		Long: strings.TrimSpace(
+			`Create and sign a modify token url msg, broadcast to nodes.
+
+Example:
+$ cetcli tx asset modify-token-url --symbol="abc" \
+	--url="www.abc.com" \
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseModifyTokenURLFlags(owner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			if _, err = cliCtx.GetAccount(owner); err != nil {
+				return err
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(flagSymbol, "", "which token will be modify")
+	cmd.Flags().String(flagURL, "", "the url of token")
+
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range modifyTokenURLFlags {
 		_ = cmd.MarkFlagRequired(flag)
 	}
 

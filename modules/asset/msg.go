@@ -2,6 +2,7 @@ package asset
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"unicode/utf8"
 )
 
 // MsgIssueToken
@@ -527,4 +528,57 @@ func (msg MsgUnForbidAddr) GetSignBytes() []byte {
 // GetSigners Implements Msg.
 func (msg MsgUnForbidAddr) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddr}
+}
+
+// MsgModifyURL
+type MsgModifyTokenURL struct {
+	Symbol       string         `json:"symbol"`
+	URL          string         `json:"url"`
+	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
+}
+
+var _ sdk.Msg = MsgModifyTokenURL{}
+
+func NewMsgModifyTokenURL(symbol string, url string, owner sdk.AccAddress) MsgModifyTokenURL {
+	return MsgModifyTokenURL{
+		symbol,
+		url,
+		owner,
+	}
+}
+
+// Route Implements Msg.
+func (msg MsgModifyTokenURL) Route() string {
+	return RouterKey
+}
+
+// Type Implements Msg.
+func (msg MsgModifyTokenURL) Type() string {
+	return "modify_token_url"
+}
+
+// ValidateBasic Implements Msg.
+func (msg MsgModifyTokenURL) ValidateBasic() sdk.Error {
+	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+		return ErrorInvalidTokenSymbol(err.Error())
+	}
+
+	if msg.OwnerAddress.Empty() {
+		return ErrorInvalidTokenOwner("modify token url need a valid owner addr")
+	}
+
+	if utf8.RuneCountInString(msg.URL) > 100 {
+		return ErrorInvalidTokenURL("token url is limited to 100 unicode characters")
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgModifyTokenURL) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgModifyTokenURL) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.OwnerAddress}
 }
