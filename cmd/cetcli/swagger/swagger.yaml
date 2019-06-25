@@ -444,7 +444,7 @@ paths:
     post:
       summary: Create GTE order in blockchain
       tags:
-        - ICS25
+        - Market
       consumes:
         - application/json
       produces:
@@ -475,7 +475,7 @@ paths:
     post:
       summary: Create IOC order in blockchain
       tags:
-        - ICS25
+        - Market
       consumes:
         - application/json
       produces:
@@ -506,7 +506,7 @@ paths:
     post:
       summary: Create market in blockchain
       tags:
-        - ICS25
+        - Market
       consumes:
         - application/json
       produces:
@@ -537,7 +537,7 @@ paths:
     get:
       summary: Query market info  
       tags:
-        - ICS25
+        - Market
       produces:
         - application/json
       operationId: getMarket
@@ -561,7 +561,7 @@ paths:
     get:
       summary: Query order info  
       tags:
-        - ICS25
+        - Market
       produces:
         - application/json
       operationId: getOrder
@@ -585,7 +585,7 @@ paths:
     get:
       summary: Query user order-id list
       tags:
-        - ICS25
+        - Market
       produces:
         - application/json
       operationId: getOrders
@@ -609,7 +609,7 @@ paths:
     post:
       summary: Cancel the order
       tags:
-        - ICS25
+        - Market
       consumes:
         - application/json  
       produces:
@@ -641,7 +641,7 @@ paths:
     post:
       summary: Cancel the market
       tags:
-        - ICS25
+        - Market
       consumes:
         - application/json
       produces:
@@ -677,7 +677,7 @@ paths:
       summary: Get the account information on blockchain
       operationId: getAccount
       tags:
-        - ICS1
+        - Auth
       produces:
         - application/json
       parameters:
@@ -2093,7 +2093,7 @@ paths:
   /asset/tokens:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Issue token
       description: Issue a new Token
       operationId: issueToken
@@ -2124,7 +2124,7 @@ paths:
           description: Internal Server Error
     get:
       tags:
-        - ICS100
+        - Asset
       summary: List tokens
       description: List all existing tokens
       operationId: getTokenList
@@ -2144,7 +2144,7 @@ paths:
   /asset/tokens/{symbol}:
     get:
       tags:
-        - ICS100
+        - Asset
       summary: queryToken
       description: Get token with provided `symbol`
       operationId: getToken
@@ -2171,7 +2171,7 @@ paths:
   /asset/tokens/{symbol}/ownerships:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Transfer ownership
       description: Transfer token owner ship
       operationId: transferOwnership
@@ -2209,7 +2209,7 @@ paths:
   /asset/tokens/{symbol}/mints:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Mint token
       description: Mint mintable token
       operationId: mintToken
@@ -2247,7 +2247,7 @@ paths:
   /asset/tokens/{symbol}/burns:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Burn token
       description: Burn burnable token
       operationId: burnToken
@@ -2285,7 +2285,7 @@ paths:
   /asset/tokens/{symbol}/forbids:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Forbid token
       description: Forbid forbiddable token
       operationId: forbidToken
@@ -2321,7 +2321,7 @@ paths:
   /asset/tokens/{symbol}/unforbids:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: UnForbid token
       description: UnForbid forbiddable token
       operationId: unFrobidToken
@@ -2357,7 +2357,7 @@ paths:
   /asset/tokens/{symbol}/forbidden/whitelist:
     get:
       tags:
-        - ICS100
+        - Asset
       summary: queryWhitelist
       description: Get token whitelist with provided `symbol`
       operationId: getWhitelist
@@ -2383,7 +2383,7 @@ paths:
           description: Internal Server Error
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Add forbid whitelist
       description: Add forbiddable token whitelist addr
       operationId: addWhitelist
@@ -2416,7 +2416,7 @@ paths:
   /asset/tokens/{symbol}/unforbidden/whitelist:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Remove forbid whitelist
       description: Remove forbiddable token whitelist addr
       operationId: removeWhitelist
@@ -2449,7 +2449,7 @@ paths:
   /asset/tokens/{symbol}/forbidden/addresses:
     get:
       tags:
-        - ICS100
+        - Asset
       summary: query forbidden addr
       description: Get forbidden addresses with provided `symbol`
       operationId: getForbiddenAddr
@@ -2475,7 +2475,7 @@ paths:
           description: Internal Server Error
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Forbid address
       description: Add forbidden address
       operationId: addForbiddenAddr
@@ -2508,7 +2508,7 @@ paths:
   /asset/tokens/{symbol}/unforbidden/addresses:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: UnForbid address
       description: Remove forbidden address
       operationId: removeForbiddenAddr
@@ -2541,7 +2541,7 @@ paths:
   /asset/tokens/reserved/symbols:
     get:
       tags:
-        - ICS100
+        - Asset
       summary: List reserved symbols
       description: List all reserved symbols
       operationId: getReservedSymbols
