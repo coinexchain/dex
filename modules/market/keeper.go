@@ -155,6 +155,10 @@ func (k Keeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, a
 	return k.bnk.DeductFee(ctx, addr, amt)
 }
 
+func (k Keeper) MarketOwner(ctx sdk.Context, info MarketInfo) sdk.AccAddress {
+	return k.axk.GetToken(ctx, info.Stock).GetOwner()
+}
+
 // -----------------------------------------------------------------------------
 // Codec
 
@@ -165,6 +169,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgCreateOrder{}, "market/order-info", nil)
 	cdc.RegisterConcrete(MsgCancelOrder{}, "market/cancel-order", nil)
 	cdc.RegisterConcrete(MsgCancelMarket{}, "market/cancel-market", nil)
+	cdc.RegisterConcrete(QueryMarketInfo{}, "market/query-market", nil)
 }
 
 type GlobalMarketInfoKeeper interface {

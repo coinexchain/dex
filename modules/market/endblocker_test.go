@@ -124,19 +124,15 @@ func TestRemoveOrders(t *testing.T) {
 	parameters.MaxExecutedPriceChangeRatio = DefaultMaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
-	creater1, _ := simpleAddr("10000")
-	creater2, _ := simpleAddr("11000")
 	keeper.SetMarket(ctx, MarketInfo{
 		Stock:             "cet",
 		Money:             "usdt",
-		Creator:           creater1,
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
 	keeper.SetMarket(ctx, MarketInfo{
 		Stock:             "btc",
 		Money:             "usdt",
-		Creator:           creater2,
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
@@ -196,33 +192,27 @@ func TestDelist(t *testing.T) {
 	parameters.MaxExecutedPriceChangeRatio = DefaultMaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
-	creater1, _ := simpleAddr("10000")
-	creater2, _ := simpleAddr("11000")
 	keeper.SetMarket(ctx, MarketInfo{
 		Stock:             "cet",
 		Money:             "usdt",
-		Creator:           creater1,
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
 	keeper.SetMarket(ctx, MarketInfo{
 		Stock:             "btc",
 		Money:             "usdt",
-		Creator:           creater2,
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
 	keeper.SetMarket(ctx, MarketInfo{
 		Stock:             "bch",
 		Money:             "usdt",
-		Creator:           creater2,
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
 	keeper.SetMarket(ctx, MarketInfo{
 		Stock:             "bsv",
 		Money:             "cet",
-		Creator:           creater1,
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})

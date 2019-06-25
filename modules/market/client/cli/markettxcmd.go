@@ -203,7 +203,7 @@ func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg marke
 		return err
 	}
 
-	var msgMarket market.MarketInfo
+	var msgMarket market.QueryMarketInfo
 	if err := cdc.UnmarshalJSON(res, &msgMarket); err != nil {
 		return err
 	}

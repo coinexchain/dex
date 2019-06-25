@@ -44,6 +44,14 @@ func NewQueryMarketParam(symbol string) QueryMarketParam {
 	}
 }
 
+type QueryMarketInfo struct {
+	Creator           sdk.AccAddress `json:"creator"`
+	Stock             string         `json:"stock"`
+	Money             string         `json:"money"`
+	PricePrecision    byte           `json:"price_precision"`
+	LastExecutedPrice sdk.Dec        `json:"last_executed_price"`
+}
+
 func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
 	var param QueryMarketParam
 	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
@@ -54,7 +62,15 @@ func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sd
 	if err != nil {
 		return nil, sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "may be the market have deleted or not exist")
 	}
-	bz, err := codec.MarshalJSONIndent(mk.cdc, info)
+
+	queryInfo := QueryMarketInfo{
+		Creator:           mk.MarketOwner(ctx, info),
+		Stock:             info.Stock,
+		Money:             info.Money,
+		PricePrecision:    info.PricePrecision,
+		LastExecutedPrice: info.LastExecutedPrice,
+	}
+	bz, err := codec.MarshalJSONIndent(mk.cdc, queryInfo)
 	if err != nil {
 		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
 	}

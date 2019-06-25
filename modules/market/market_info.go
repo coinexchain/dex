@@ -7,17 +7,16 @@ import (
 )
 
 type MarketInfo struct {
-	Stock             string         `json:"stock"`
-	Money             string         `json:"money"`
-	Creator           sdk.AccAddress `json:"creator"`
-	PricePrecision    byte           `json:"price_precision"`
-	LastExecutedPrice sdk.Dec        `json:"last_executed_price"`
+	Stock             string  `json:"stock"`
+	Money             string  `json:"money"`
+	PricePrecision    byte    `json:"price_precision"`
+	LastExecutedPrice sdk.Dec `json:"last_executed_price"`
 }
 
 func (info MarketInfo) GetTags() sdk.Tags {
-	return sdk.NewTags("stock", info.Stock,
+	return sdk.NewTags(
+		"stock", info.Stock,
 		"money", info.Money,
-		"creator", info.Creator.String(),
 		"price-precision", strconv.Itoa(int(info.PricePrecision)),
 		"last-execute-price", info.LastExecutedPrice.String(),
 	)

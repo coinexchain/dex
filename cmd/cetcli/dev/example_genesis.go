@@ -95,7 +95,6 @@ func createExampleGenesisMarketData() market.GenesisState {
 	market0 := market.MarketInfo{
 		Stock:             "abc",
 		Money:             "cet",
-		Creator:           accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(8568),
 	}

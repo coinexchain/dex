@@ -48,7 +48,6 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 	info := MarketInfo{
 		Stock:             msg.Stock,
 		Money:             msg.Money,
-		Creator:           msg.Creator,
 		PricePrecision:    msg.PricePrecision,
 		LastExecutedPrice: sdk.ZeroDec(),
 	}
@@ -88,12 +87,12 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 		return ErrTokenNoExist().Result()
 	}
 
-	if !keeper.axk.IsTokenIssuer(ctx, msg.Stock, []byte(msg.Creator)) && !keeper.axk.IsTokenIssuer(ctx, msg.Money, []byte(msg.Creator)) {
+	if !keeper.axk.IsTokenIssuer(ctx, msg.Stock, []byte(msg.Creator)) {
 		return ErrInvalidTokenIssuer().Result()
 	}
 
 	if msg.Money != types.CET && msg.Stock != types.CET {
-		if _, err := keeper.GetMarketInfo(ctx, msg.Stock+SymbolSeparator+"cet"); err != nil {
+		if _, err := keeper.GetMarketInfo(ctx, msg.Stock+SymbolSeparator+types.CET); err != nil {
 			return sdk.NewError(CodeSpaceMarket, CodeStockNoHaveCetTrade, "The stock(%s) not have cet trade", msg.Stock).Result()
 		}
 	}
@@ -364,7 +363,7 @@ func checkMsgCancelMarket(keeper Keeper, msg MsgCancelMarket, ctx sdk.Context) s
 	marketParams := keeper.GetParams(ctx)
 	currTime := ctx.BlockHeader().Time.Unix()
 	if msg.EffectiveTime < currTime+marketParams.MarketMinExpiredTime {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidTime, "Invalid Height")
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidTime, "Invalid Cancel Time")
 	}
 
 	info, err := keeper.GetMarketInfo(ctx, msg.Symbol)
@@ -373,8 +372,7 @@ func checkMsgCancelMarket(keeper Keeper, msg MsgCancelMarket, ctx sdk.Context) s
 	}
 
 	stockToken := keeper.axk.GetToken(ctx, info.Stock)
-	moneyToken := keeper.axk.GetToken(ctx, info.Stock)
-	if !bytes.Equal(msg.Sender, stockToken.GetOwner()) && !bytes.Equal(msg.Sender, moneyToken.GetOwner()) {
+	if !bytes.Equal(msg.Sender, stockToken.GetOwner()) {
 		return sdk.NewError(CodeSpaceMarket, CodeNotMatchSender, "Not match market info sender")
 	}
 
