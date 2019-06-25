@@ -101,8 +101,18 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Erro
 		return ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
 	}
 
-	token, err := NewToken(msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
-		msg.Mintable, msg.Burnable, msg.AddrForbiddable, msg.TokenForbiddable)
+	token, err := NewToken(
+		msg.Name,
+		msg.Symbol,
+		msg.TotalSupply,
+		msg.Owner,
+		msg.Mintable,
+		msg.Burnable,
+		msg.AddrForbiddable,
+		msg.TokenForbiddable,
+		msg.URL,
+		msg.Description,
+	)
 
 	if err != nil {
 		return err

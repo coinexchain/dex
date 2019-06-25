@@ -34,7 +34,10 @@ func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 		viper.GetBool(flagMintable),
 		viper.GetBool(flagBurnable),
 		viper.GetBool(flagAddrForbiddable),
-		viper.GetBool(flagTokenForbiddable))
+		viper.GetBool(flagTokenForbiddable),
+		viper.GetString(flagTokenURL),
+		viper.GetString(flagTokenDescription),
+	)
 
 	return &msg, nil
 }

@@ -26,7 +26,7 @@ func TestTokenKeeper_IssueToken(t *testing.T) {
 			args{
 				input.ctx,
 				NewMsgIssueToken("ABC Token", "abc", 2100, tAccAddr,
-					false, false, false, false),
+					false, false, false, false, "", ""),
 			},
 			nil,
 		},
@@ -35,7 +35,7 @@ func TestTokenKeeper_IssueToken(t *testing.T) {
 			args{
 				input.ctx,
 				NewMsgIssueToken("ABC Token", "abc", 2100, tAccAddr,
-					false, false, false, false),
+					false, false, false, false, "", ""),
 			},
 			ErrorDuplicateTokenSymbol("token symbol already exists in store"),
 		},
@@ -54,13 +54,13 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 
 	// set token
 	token1, err := NewToken("ABC token", "abc", 2100, tAccAddr,
-		false, false, false, false)
+		false, false, false, false, "", "")
 	require.NoError(t, err)
 	err = input.tk.setToken(input.ctx, token1)
 	require.NoError(t, err)
 
 	token2, err := NewToken("XYZ token", "xyz", 2100, tAccAddr,
-		false, false, false, false)
+		false, false, false, false, "", "")
 	require.NoError(t, err)
 	err = input.tk.setToken(input.ctx, token2)
 	require.NoError(t, err)
@@ -88,7 +88,7 @@ func TestTokenKeeper_TransferOwnership(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		false, false, false, false)
+		false, false, false, false, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -125,7 +125,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, false, false, false)
+		true, false, false, false, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -149,7 +149,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	//case 2: un mintable token
 	// set token mintable: false
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		false, false, false, false)
+		false, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -162,7 +162,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 
 	//case 3: mint invalid token
 	issueMsg = NewMsgIssueToken("ABC token", "xyz", 2100, tAccAddr,
-		true, false, false, false)
+		true, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgMintToken(symbol, 1000, tAccAddr)
@@ -174,7 +174,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 
 	//case 4: only token owner can mint token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, addr,
-		true, false, false, false)
+		true, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgMintToken(symbol, 1000, tAccAddr)
@@ -186,7 +186,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 
 	//case 5: token total mint amt is invalid
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, false, false, false)
+		true, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgMintToken(symbol, 9E18+1, tAccAddr)
@@ -198,7 +198,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 
 	//case 6: token total supply before 1e8 boosting should be less than 90 billion
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, false, false, false)
+		true, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgMintToken(symbol, 9E18, tAccAddr)
@@ -214,7 +214,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, false)
+		true, true, false, false, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -238,7 +238,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	//case 2: un burnable token
 	// set token burnable: false
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		false, false, false, false)
+		false, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -251,7 +251,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 
 	//case 3: burn invalid token
 	issueMsg = NewMsgIssueToken("ABC token", "xyz", 2100, tAccAddr,
-		true, true, false, false)
+		true, true, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgBurnToken(symbol, 1000, tAccAddr)
@@ -263,7 +263,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 
 	//case 4: only token owner can burn token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, addr,
-		true, true, false, false)
+		true, true, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgBurnToken(symbol, 1000, tAccAddr)
@@ -275,7 +275,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 
 	//case 5: token total burn amt is invalid
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, false, false, false)
+		true, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgBurnToken(symbol, 9E18+1, tAccAddr)
@@ -287,7 +287,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 
 	//case 6: token total supply limited to > 0
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, false, false, false)
+		true, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgBurnToken(symbol, 2100, tAccAddr)
@@ -303,7 +303,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -320,7 +320,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 	//case 2: un forbiddable token
 	// set token forbiddable: false
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		false, false, false, false)
+		false, false, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -333,7 +333,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 
 	//case 3: duplicate forbid token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgForbidToken(symbol, tAccAddr)
@@ -348,7 +348,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 
 	//case 4: only token owner can forbid token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, addr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	msg = NewMsgForbidToken(symbol, tAccAddr)
@@ -367,7 +367,7 @@ func TestTokenKeeper_UnForbidToken(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -390,7 +390,7 @@ func TestTokenKeeper_UnForbidToken(t *testing.T) {
 
 	//case 2: unforbid token before forbid token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	unforbidMsg = NewMsgUnForbidToken(symbol, tAccAddr)
@@ -409,7 +409,7 @@ func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	token := input.tk.GetToken(input.ctx, symbol)
@@ -429,7 +429,7 @@ func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
 	//case 2: un forbiddable token
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, false)
+		true, true, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -443,7 +443,7 @@ func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
 	//case 3: nil whitelist
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -463,7 +463,7 @@ func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	token := input.tk.GetToken(input.ctx, symbol)
@@ -490,7 +490,7 @@ func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 	//case 2: un-forbiddable token
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, false)
+		true, true, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -504,7 +504,7 @@ func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 	//case 3: nil whitelist
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, true)
+		true, true, false, true, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -524,7 +524,7 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, true, true)
+		true, true, true, true, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	token := input.tk.GetToken(input.ctx, symbol)
@@ -544,7 +544,7 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 	//case 2: addr un-forbiddable token
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, false)
+		true, true, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -558,7 +558,7 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 	//case 3: nil forbid address
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, true, true)
+		true, true, true, true, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -578,7 +578,7 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	//case 1: base-case ok
 	// set token
 	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, true, true)
+		true, true, true, true, "", "")
 	err := input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 	token := input.tk.GetToken(input.ctx, symbol)
@@ -605,7 +605,7 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	//case 2: addr un-forbiddable token
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, false, false)
+		true, true, false, false, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 
@@ -619,7 +619,7 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	//case 3: nil un-forbid address
 	// set token
 	issueMsg = NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
-		true, true, true, true)
+		true, true, true, true, "", "")
 	err = input.tk.IssueToken(input.ctx, issueMsg)
 	require.NoError(t, err)
 

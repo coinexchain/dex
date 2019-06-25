@@ -25,6 +25,8 @@ const (
 	flagBurnable         = "burnable"
 	flagAddrForbiddable  = "addr-forbiddable"
 	flagTokenForbiddable = "token-forbiddable"
+	flagTokenURL         = "url"
+	flagTokenDescription = "description"
 
 	flagNewOwner  = "new-owner"
 	flagAmount    = "amount"
@@ -40,6 +42,8 @@ var issueTokenFlags = []string{
 	flagBurnable,
 	flagAddrForbiddable,
 	flagTokenForbiddable,
+	flagTokenURL,
+	flagTokenDescription,
 }
 
 // IssueTokenCmd will create a issue token tx and sign.
@@ -58,6 +62,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	--burnable=true \
 	--addr-forbiddable=false \
 	--token-forbiddable=false \
+	--url="www.abc.org" \
+	--description="token abc is a example token" \
     --from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -86,7 +92,6 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 			if err != nil {
 				return err
 			}
-
 			issueFee := types.NewCetCoins(asset.IssueTokenFee)
 			if !account.GetCoins().IsAllGTE(issueFee) {
 				return fmt.Errorf("address %s doesn't have enough cet to issue token", tokenOwner)
@@ -107,6 +112,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	cmd.Flags().Bool(flagBurnable, true, "whether the token could be burned")
 	cmd.Flags().Bool(flagAddrForbiddable, false, "whether the token holder address can be forbidden by token owner")
 	cmd.Flags().Bool(flagTokenForbiddable, false, "whether the token can be forbidden")
+	cmd.Flags().String(flagTokenURL, "", "url of token website")
+	cmd.Flags().String(flagTokenDescription, "", "description of token info")
 
 	for _, flag := range issueTokenFlags {
 		_ = cmd.MarkFlagRequired(flag)

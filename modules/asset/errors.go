@@ -8,17 +8,19 @@ const (
 	CodeSpaceAsset sdk.CodespaceType = ModuleName
 
 	// 501 ~ 599
-	CodeInvalidTokenName      sdk.CodeType = 501
-	CodeInvalidTokenSymbol    sdk.CodeType = 502
-	CodeInvalidTokenSupply    sdk.CodeType = 503
-	CodeInvalidTokenOwner     sdk.CodeType = 504
-	CodeTokenNotFound         sdk.CodeType = 505
-	CodeInvalidTotalMint      sdk.CodeType = 506
-	CodeInvalidTotalBurn      sdk.CodeType = 507
-	CodeDuplicateTokenSymbol  sdk.CodeType = 508
-	CodeInvalidTokenForbidden sdk.CodeType = 509
-	CodeInvalidTokenWhitelist sdk.CodeType = 510
-	CodeInvalidAddress        sdk.CodeType = 511
+	CodeInvalidTokenName        sdk.CodeType = 501
+	CodeInvalidTokenSymbol      sdk.CodeType = 502
+	CodeInvalidTokenSupply      sdk.CodeType = 503
+	CodeInvalidTokenOwner       sdk.CodeType = 504
+	CodeTokenNotFound           sdk.CodeType = 505
+	CodeInvalidTotalMint        sdk.CodeType = 506
+	CodeInvalidTotalBurn        sdk.CodeType = 507
+	CodeDuplicateTokenSymbol    sdk.CodeType = 508
+	CodeInvalidTokenForbidden   sdk.CodeType = 509
+	CodeInvalidTokenWhitelist   sdk.CodeType = 510
+	CodeInvalidAddress          sdk.CodeType = 511
+	CodeInvalidTokenURL         sdk.CodeType = 512
+	CodeInvalidTokenDescription sdk.CodeType = 513
 )
 
 func ErrorInvalidTokenName(fmt string) sdk.Error {
@@ -53,4 +55,10 @@ func ErrorInvalidTokenWhitelist(fmt string) sdk.Error {
 }
 func ErrorInvalidAddress(fmt string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidAddress, fmt)
+}
+func ErrorInvalidTokenURL(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenURL, fmt)
+}
+func ErrorInvalidTokenDescription(fmt string) sdk.Error {
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenDescription, fmt)
 }

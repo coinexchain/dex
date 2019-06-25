@@ -64,6 +64,8 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	--total-burn=411211452994260000 \
 	--total-mint=0 \
 	--is-forbidden=false \
+	--url="www.coinex.org" \
+	--description="A public chain built for the decentralized exchange"
 `),
 		RunE: func(_ *cobra.Command, args []string) error {
 			config := ctx.Config

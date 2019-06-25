@@ -17,6 +17,8 @@ func TestNewToken(t *testing.T) {
 		burnable         bool
 		addrforbiddable  bool
 		tokenforbiddable bool
+		url              string
+		descripton       string
 	}
 	tests := []struct {
 		name    string
@@ -35,6 +37,8 @@ func TestNewToken(t *testing.T) {
 				false,
 				false,
 				false,
+				"",
+				"",
 			},
 			&BaseToken{
 				"ABC Token",
@@ -48,6 +52,8 @@ func TestNewToken(t *testing.T) {
 				0,
 				0,
 				false,
+				"",
+				"",
 			},
 			nil,
 		},
@@ -62,6 +68,8 @@ func TestNewToken(t *testing.T) {
 				false,
 				false,
 				false,
+				"",
+				"",
 			},
 			nil,
 			ErrorInvalidTokenOwner("token owner is invalid"),
@@ -70,7 +78,7 @@ func TestNewToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := NewToken(tt.args.name, tt.args.symbol, tt.args.amt, tt.args.owner, tt.args.mintable, tt.args.burnable, tt.args.addrforbiddable, tt.args.tokenforbiddable)
+			got, got1 := NewToken(tt.args.name, tt.args.symbol, tt.args.amt, tt.args.owner, tt.args.mintable, tt.args.burnable, tt.args.addrforbiddable, tt.args.tokenforbiddable, tt.args.url, tt.args.descripton)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewToken() got = %v, want %v", got, tt.want)
 			}
@@ -101,6 +109,8 @@ func TestBaseToken_IsValid(t *testing.T) {
 				0,
 				0,
 				false,
+				"",
+				"",
 			},
 			nil,
 		},
@@ -118,6 +128,8 @@ func TestBaseToken_IsValid(t *testing.T) {
 				0,
 				-100000000,
 				false,
+				"",
+				"",
 			},
 			ErrorInvalidTokenMint("Invalid total mint: -100000000"),
 		},
@@ -137,6 +149,8 @@ func TestBaseToken_IsValid(t *testing.T) {
 				TotalBurn:        tt.token.TotalBurn,
 				TotalMint:        tt.token.TotalMint,
 				IsForbidden:      tt.token.IsForbidden,
+				URL:              tt.token.URL,
+				Description:      tt.token.Description,
 			}
 			if err := base.Validate(); !reflect.DeepEqual(err, tt.wantErr) {
 				t.Errorf("BaseToken.Validate() error = %v, wantErr %v", err, tt.wantErr)

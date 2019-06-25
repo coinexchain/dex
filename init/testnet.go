@@ -350,7 +350,10 @@ func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64
 		false,
 		true,
 		false,
-		false)
+		false,
+		"www.coinex.org",
+		"A public chain built for the decentralized exchange",
+	)
 
 	var token asset.Token = baseToken
 	appGenState.AssetData.Tokens = []asset.Token{token}

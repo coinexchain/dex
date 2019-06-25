@@ -24,7 +24,7 @@ func TestMsgIssueToken_Route(t *testing.T) {
 		{
 			"base-case",
 			NewMsgIssueToken("ABC token", "abc", 100000, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			RouterKey,
 		},
 	}
@@ -40,6 +40,8 @@ func TestMsgIssueToken_Route(t *testing.T) {
 				Burnable:         tt.msg.Burnable,
 				AddrForbiddable:  tt.msg.AddrForbiddable,
 				TokenForbiddable: tt.msg.TokenForbiddable,
+				URL:              tt.msg.URL,
+				Description:      tt.msg.Description,
 			}
 			if got := msg.Route(); got != tt.want {
 				t.Errorf("MsgIssueToken.Route() = %v, want %v", got, tt.want)
@@ -58,44 +60,50 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 		{
 			"case-name1",
 			NewMsgIssueToken("123456789012345678901234567890123", "coin", 100000, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			ErrorInvalidTokenName("token name is limited to 32 unicode characters"),
 		},
 		{
 			"case-symbol1",
 			NewMsgIssueToken("name", "1a", 100000, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			invalidTokenSymbol,
 		},
 		{
 			"case-symbol2",
 			NewMsgIssueToken("name", "A999", 100000, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			invalidTokenSymbol,
 		},
 		{
 			"case-symbol3",
 			NewMsgIssueToken("name", "aa1234567", 100000, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			invalidTokenSymbol,
 		},
 		{
 			"case-symbol4",
 			NewMsgIssueToken("name", "a*aa", 100000, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			invalidTokenSymbol,
 		},
 		{
 			"case-totalSupply1",
 			NewMsgIssueToken("name", "coin", 9E18+1, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			ErrorInvalidTokenSupply("token total supply before 1e8 boosting should be less than 90 billion"),
 		},
 		{
 			"case-totalSupply2",
 			NewMsgIssueToken("name", "coin", -1, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			ErrorInvalidTokenSupply("token total supply must be positive"),
+		},
+		{
+			"case-url1",
+			NewMsgIssueToken("name", "coin", 2100, tAccAddr,
+				false, false, false, false, "www.123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123.com", ""),
+			ErrorInvalidTokenURL("token url is limited to 100 unicode characters"),
 		},
 	}
 
@@ -110,6 +118,8 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 				Burnable:         tt.msg.Burnable,
 				AddrForbiddable:  tt.msg.AddrForbiddable,
 				TokenForbiddable: tt.msg.TokenForbiddable,
+				URL:              tt.msg.URL,
+				Description:      tt.msg.Description,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MsgIssueToken.ValidateBasic() = %v, want %v", got, tt.want)
@@ -128,8 +138,8 @@ func TestMsgIssueToken_GetSignBytes(t *testing.T) {
 		{
 			"base-case",
 			NewMsgIssueToken("ABC Token", "abc", 100000, addr,
-				false, false, false, false),
-			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"mintable":false,"name":"ABC Token","owner":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","token_forbiddable":false,"total_supply":"100000"}}`,
+				false, false, false, false, "", ""),
+			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"description":"","mintable":false,"name":"ABC Token","owner":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","token_forbiddable":false,"total_supply":"100000","url":""}}`,
 		},
 	}
 
@@ -144,6 +154,8 @@ func TestMsgIssueToken_GetSignBytes(t *testing.T) {
 				Burnable:         tt.msg.Burnable,
 				AddrForbiddable:  tt.msg.AddrForbiddable,
 				TokenForbiddable: tt.msg.TokenForbiddable,
+				URL:              tt.msg.URL,
+				Description:      tt.msg.Description,
 			}
 			if got := msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
 				t.Errorf("MsgIssueToken.GetSignBytes() = %s, want %s", got, tt.want)
@@ -161,7 +173,7 @@ func TestMsgIssueToken_GetSigners(t *testing.T) {
 		{
 			"base-case",
 			NewMsgIssueToken("ABC Token", "abc", 100000, tAccAddr,
-				false, false, false, false),
+				false, false, false, false, "", ""),
 			[]sdk.AccAddress{tAccAddr},
 		},
 	}
@@ -177,6 +189,8 @@ func TestMsgIssueToken_GetSigners(t *testing.T) {
 				Burnable:         tt.msg.Burnable,
 				AddrForbiddable:  tt.msg.AddrForbiddable,
 				TokenForbiddable: tt.msg.TokenForbiddable,
+				URL:              tt.msg.URL,
+				Description:      tt.msg.Description,
 			}
 			if got := msg.GetSigners(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MsgIssueToken.GetSigners() = %v, want %v", got, tt.want)

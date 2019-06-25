@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"unicode/utf8"
+	"unsafe"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -45,14 +46,18 @@ type Token interface {
 	GetIsForbidden() bool
 	SetIsForbidden(bool)
 
+	GetURL() string
+	SetURL(string) error
+
+	GetDescription() string
+	SetDescription(string) error
+
 	Validate() error
-	// Ensure that account implements stringer
+	// Ensure that token implements stringer
 	String() string
 }
 
 //-----------------------------------------------------------------------------
-// BaseAccount
-
 var _ Token = (*BaseToken)(nil)
 
 // BaseToken - a base Token structure.
@@ -68,6 +73,8 @@ type BaseToken struct {
 	TotalBurn        int64          `json:"total_burn"`        // Total amount of burn
 	TotalMint        int64          `json:"total_mint"`        // Total amount of mint
 	IsForbidden      bool           `json:"is_forbidden"`      // Whether token being forbidden currently
+	URL              string         `json:"url"`               //URL of token website
+	Description      string         `json:"description"`       //Description of token info
 }
 
 var (
@@ -77,20 +84,28 @@ var (
 
 // NewToken - new base token
 func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddress,
-	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool) (*BaseToken, sdk.Error) {
+	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
+	url string, description string) (*BaseToken, sdk.Error) {
 
 	t := &BaseToken{}
-	if err := t.SetName(name); err != nil {
+	var err error
+	if err = t.SetName(name); err != nil {
 		return nil, ErrorInvalidTokenName(err.Error())
 	}
-	if err := t.SetOwner(owner); err != nil {
+	if err = t.SetOwner(owner); err != nil {
 		return nil, ErrorInvalidTokenOwner(err.Error())
 	}
-	if err := t.SetSymbol(symbol); err != nil {
+	if err = t.SetSymbol(symbol); err != nil {
 		return nil, ErrorInvalidTokenSymbol(err.Error())
 	}
 	if err := t.SetTotalSupply(totalSupply); err != nil {
 		return nil, ErrorInvalidTokenSupply(err.Error())
+	}
+	if err = t.SetURL(url); err != nil {
+		return nil, ErrorInvalidTokenURL(err.Error())
+	}
+	if err = t.SetDescription(description); err != nil {
+		return nil, ErrorInvalidTokenDescription(err.Error())
 	}
 
 	t.SetMintable(mintable)
@@ -111,7 +126,7 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 
 func (t *BaseToken) Validate() error {
 	_, err := NewToken(t.Name, t.Symbol, t.TotalSupply, t.Owner,
-		t.Mintable, t.Burnable, t.AddrForbiddable, t.TokenForbiddable)
+		t.Mintable, t.Burnable, t.AddrForbiddable, t.TokenForbiddable, t.URL, t.Description)
 
 	if err != nil {
 		return err
@@ -231,6 +246,30 @@ func (t BaseToken) GetTokenForbiddable() bool {
 
 func (t *BaseToken) SetTokenForbiddable(enable bool) {
 	t.TokenForbiddable = enable
+}
+
+func (t BaseToken) GetURL() string {
+	return t.URL
+}
+
+func (t *BaseToken) SetURL(url string) error {
+	if utf8.RuneCountInString(url) > 100 {
+		return errors.New("token url is limited to 100 unicode characters")
+	}
+	t.URL = url
+	return nil
+}
+
+func (t BaseToken) GetDescription() string {
+	return t.Description
+}
+
+func (t *BaseToken) SetDescription(description string) error {
+	if unsafe.Sizeof(description) > 1024 {
+		return errors.New("token description is limited to 1k size")
+	}
+	t.Description = description
+	return nil
 }
 
 func (t BaseToken) GetTotalBurn() int64 {

@@ -43,6 +43,8 @@ type issueReq struct {
 	Burnable         bool         `json:"burnable"`
 	AddrForbiddable  bool         `json:"addr_forbiddable"`
 	TokenForbiddable bool         `json:"token_forbiddable"`
+	URL              string       `json:"url"`
+	Description      string       `json:"description"`
 }
 
 // issueRequestHandlerFn - http request handler to issue new token.
@@ -65,7 +67,7 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 
 		msg := asset.NewMsgIssueToken(req.Name, req.Symbol, req.TotalSupply, owner,
-			req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable)
+			req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable, req.URL, req.Description)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

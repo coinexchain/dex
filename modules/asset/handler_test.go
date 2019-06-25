@@ -37,7 +37,7 @@ func TestIssueTokenMsg(t *testing.T) {
 	h := NewHandler(input.tk)
 	input.tk.SetParams(input.ctx, DefaultParams())
 	msg := NewMsgIssueToken("ABC Token", symbol, 210000000000, tAccAddr,
-		false, false, false, false)
+		false, false, false, false, "", "")
 
 	//case 1: issue token need valid account
 	res := h(input.ctx, msg)

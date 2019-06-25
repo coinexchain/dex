@@ -227,12 +227,8 @@ func fixDescriptions(cmd *cobra.Command) {
 	gaiacli := "gaiacli"
 	cetcli := "cetcli"
 
-	if strings.Contains(cmd.Short, gaiacli) {
-		cmd.Short = strings.Replace(cmd.Short, gaiacli, cetcli, -1)
-	}
-	if strings.Contains(cmd.Long, gaiacli) {
-		cmd.Long = strings.Replace(cmd.Long, gaiacli, cetcli, -1)
-	}
+	cmd.Short = strings.Replace(cmd.Short, gaiacli, cetcli, -1)
+	cmd.Long = strings.Replace(cmd.Long, gaiacli, cetcli, -1)
 	if len(cmd.Commands()) > 0 {
 		for _, subCmd := range cmd.Commands() {
 			fixDescriptions(subCmd)
