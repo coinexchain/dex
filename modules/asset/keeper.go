@@ -107,8 +107,8 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Erro
 
 	// only cet owner can issue reserved token
 	if isReserved(msg.Symbol) && msg.Symbol != dex.CET {
-		cetOwner := keeper.GetToken(ctx, dex.CET).GetOwner()
-		if msg.Owner.Equals(cetOwner) {
+		cetToken := keeper.GetToken(ctx, dex.CET)
+		if cetToken == nil || !msg.Owner.Equals(cetToken.GetOwner()) {
 			return ErrorInvalidTokenOwner("only cet owner can issue reserved token")
 		}
 		//return errors.New("only coinex dex can issue reserved symbol token, you can run \n" +
