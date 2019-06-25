@@ -105,7 +105,7 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 
 	cmd.Flags().String(cli.HomeFlag, app.DefaultNodeHome, "node's home directory")
 	cmd.Flags().String(flagClientHome, app.DefaultCLIHome, "client's home directory")
-	cmd.Flags().String(flagName, "", "tToken name is limited to 32 unicode characters")
+	cmd.Flags().String(flagName, "", "token name is limited to 32 unicode characters")
 	cmd.Flags().String(flagSymbol, "", "token symbol is limited to [a-z][a-z0-9]{1,7}")
 	cmd.Flags().String(flagOwner, "", "token owner")
 	cmd.Flags().Int64(flagTotalSupply, 0, "the total supply for token can have a maximum of "+
