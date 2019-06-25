@@ -28,7 +28,7 @@ const (
 	FlagSide      = "side"
 	FlagOrderID   = "order-id"
 	FlagUserAddr  = "address"
-	FlagHeight    = "height"
+	FlagBlocks    = "blocks"
 	FlagTime      = "time"
 )
 
@@ -68,7 +68,7 @@ func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 			"Example:" +
 			"$ cetcli tx market create-gte-order --symbol=btc/cet " +
 			"--order-type=2 --price=520 --quantity=10000000 --side=1 " +
-			"--price-precision=10 --from=bob --chain-id=coinexdex " +
+			"--price-precision=10 --blocks=<100000> --from=bob --chain-id=coinexdex " +
 			"--gas=10000 --fees=1000cet",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, true)
@@ -76,6 +76,8 @@ func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	markCreateOrderFlags(cmd)
+	cmd.Flags().Int(FlagBlocks, -1, "the gte order will exist at least blocks in blockChain")
+
 	return cmd
 }
 
@@ -130,6 +132,10 @@ func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgC
 			return nil, fmt.Errorf("--%s flag is a noop" + flag)
 		}
 	}
+	blocks := market.DefaultGTEOrderLifetime
+	if viper.GetInt(FlagBlocks) > 0 {
+		blocks = viper.GetInt(FlagBlocks)
+	}
 
 	msg := &market.MsgCreateOrder{
 		Sender:         sender,
@@ -140,6 +146,7 @@ func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgC
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
 		Quantity:       viper.GetInt64(FlagQuantity),
 		Sequence:       sequence,
+		ExistBlocks:    blocks,
 	}
 
 	return msg, nil

@@ -18,6 +18,7 @@ type Order struct {
 	TimeInForce int            `json:"time_in_force"`
 	Height      int64          `json:"height"`
 	FrozenFee   int64          `json:"frozen_fee"`
+	ExistBlocks int            `json:"exist_blocks"`
 
 	// These fields will change when order was filled/canceled.
 	LeftStock int64 `json:"left_stock"`

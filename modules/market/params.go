@@ -10,7 +10,8 @@ import (
 const (
 	DefaultCreateMarketFee             = 1E12 // 10000 * 10 ^8
 	DefaultFixedTradeFee               = 0
-	DefaultGTEOrderLifetime            = 20000
+	DefaultGTEOrderLifetime            = 10000
+	DefaultGTEOrderFeatureFeeByBlocks  = 1
 	DefaultMaxExecutedPriceChangeRatio = 25
 	MarketFeeRatePrecision             = 4
 	DefaultMarketFeeRate               = 0
@@ -24,6 +25,7 @@ var (
 	KeyFixedTradeFee               = []byte("FixedTradeFee")
 	keyMarketMinExpiredTime        = []byte("MarketMinExpiredTime")
 	KeyGTEOrderLifetime            = []byte("GTEOrderLifetime")
+	KeyGTEOrderFeatureFeeByBlocks  = []byte("GTEOrderFeatureFeeByBlocks")
 	KeyMaxExecutedPriceChangeRatio = []byte("MaxExecutedPriceChangeRatio")
 	KeyMarketFeeRate               = []byte("MarketFeeRate")
 	KeyMarketFeeMin                = []byte("MarketFeeMin")
@@ -35,6 +37,7 @@ type Params struct {
 	FixedTradeFee               int64 `json:"fixed_trade_fee"`
 	MarketMinExpiredTime        int64 `json:"market_min_expired_time"`
 	GTEOrderLifetime            int   `json:"gte_order_lifetime"`
+	GTEOrderFeatureFeeByBlocks  int64 `json:"gte_order_feature_fee_by_blocks"`
 	MaxExecutedPriceChangeRatio int   `json:"max_executed_price_change_ratio"`
 	MarketFeeRate               int64 `json:"market_fee_rate"`
 	MarketFeeMin                int64 `json:"market_fee_min"`
@@ -50,6 +53,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeyFixedTradeFee, Value: &p.FixedTradeFee},
 		{Key: keyMarketMinExpiredTime, Value: &p.MarketMinExpiredTime},
 		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
+		{Key: KeyGTEOrderFeatureFeeByBlocks, Value: &p.GTEOrderFeatureFeeByBlocks},
 		{Key: KeyMaxExecutedPriceChangeRatio, Value: &p.MaxExecutedPriceChangeRatio},
 		{Key: KeyMarketFeeRate, Value: &p.MarketFeeRate},
 		{Key: KeyMarketFeeMin, Value: &p.MarketFeeMin},
@@ -71,6 +75,7 @@ func DefaultParams() Params {
 		DefaultFixedTradeFee,
 		DefaultMarketMinExpiredTime,
 		DefaultGTEOrderLifetime,
+		DefaultGTEOrderFeatureFeeByBlocks,
 		DefaultMaxExecutedPriceChangeRatio,
 		DefaultMarketFeeRate,
 		DefaultMarketFeeMin,

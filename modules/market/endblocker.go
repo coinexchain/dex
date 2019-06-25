@@ -232,14 +232,30 @@ func sendFillMsg(orderOldDeal map[string]int64, ordersForUpdate map[string]*Orde
 	}
 }
 
+func filterOldOrders(oldOrders []*Order, currHeight int64, lifeTime int) []*Order {
+	orders := make([]*Order, 0, len(oldOrders))
+	for _, order := range oldOrders {
+		if currHeight-int64(lifeTime) < int64(order.ExistBlocks) {
+			continue
+		}
+		orders = append(orders, order)
+	}
+
+	return orders
+}
+
 func removeExpiredOrder(ctx sdk.Context, keeper Keeper, marketInfoList []MarketInfo, marketParams Params) {
 	lifeTime := marketParams.GTEOrderLifetime
 	currHeight := ctx.BlockHeight()
 	for _, mi := range marketInfoList {
-		symbol := mi.Stock + "/" + mi.Money
+		symbol := mi.Stock + SymbolSeparator + mi.Money
 		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
-		for _, order := range oldOrders {
+		filterOrders := filterOldOrders(oldOrders, currHeight, lifeTime)
+
+		for _, order := range filterOrders {
+			removeOrder(ctx, orderKeeper, keeper.bnk, keeper, order, marketParams.FeeForZeroDeal)
+
 			msgInfo := CancelOrderInfo{
 				OrderID:      order.OrderID(),
 				DelReason:    CancelOrderByGteTimeOut,
@@ -252,8 +268,6 @@ func removeExpiredOrder(ctx sdk.Context, keeper Keeper, marketInfoList []MarketI
 			}
 			keeper.SendMsg(CancelOrderInfoKey, msgInfo)
 		}
-
-		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, keeper, currHeight-int64(lifeTime), marketParams.FeeForZeroDeal)
 	}
 }
 
@@ -295,7 +309,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 			keeper.axk.IsTokenForbidden(ctx, mi.Money) {
 			continue
 		}
-		symbol := mi.Stock + "/" + mi.Money
+		symbol := mi.Stock + SymbolSeparator + mi.Money
 		dataHash := ctx.BlockHeader().DataHash
 		ratio := marketParams.MaxExecutedPriceChangeRatio
 		oUpdate, newPrice := runMatch(ctx, mi.LastExecutedPrice, ratio, symbol, keeper, dataHash, currHeight)

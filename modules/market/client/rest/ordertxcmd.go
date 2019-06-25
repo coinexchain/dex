@@ -25,6 +25,7 @@ type createOrderReq struct {
 	Price          int64        `json:"price"`
 	Quantity       int64        `json:"quantity"`
 	Side           int          `json:"side"`
+	ExistBlocks    int          `json:"exist_blocks"`
 }
 
 type cancelOrderReq struct {
@@ -139,6 +140,10 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		return
 	}
 
+	if req.ExistBlocks <= 0 {
+		req.ExistBlocks = market.DefaultGTEOrderLifetime
+	}
+
 	creator, err := sdk.AccAddressFromBech32(req.BaseReq.From)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -171,6 +176,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		Quantity:       req.Quantity,
 		Side:           byte(req.Side),
 		TimeInForce:    force,
+		ExistBlocks:    req.ExistBlocks,
 	}
 
 	if err := msg.ValidateBasic(); err != nil {

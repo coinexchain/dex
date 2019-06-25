@@ -110,25 +110,17 @@ func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper K
 	return sdk.Result{}
 }
 
-func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sdk.Result {
-
-	values := strings.Split(msg.Symbol, SymbolSeparator)
-	stock, money := values[0], values[1]
-	denom := stock
-	amount := msg.Quantity
-	if msg.Side == match.BUY {
-		denom = money
-		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
-	}
-
+func calFrozenFeeInOrder(ctx sdk.Context, marketParams Params, keeper Keeper, msg MsgCreateOrder) (int64, sdk.Error) {
 	var frozenFee int64
-	marketParams := keeper.GetParams(ctx)
+	stock := strings.Split(msg.Symbol, SymbolSeparator)[0]
+
+	// Calculate the fee when stock is cet
 	rate := sdk.NewDec(marketParams.MarketFeeRate)
 	div := sdk.NewDec(int64(math.Pow10(MarketFeeRatePrecision)))
-	if stock == "cet" {
+	if stock == types.CET {
 		frozenFee = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).RoundInt64()
 	} else {
-		stockSepCet := stock + SymbolSeparator + "cet"
+		stockSepCet := stock + SymbolSeparator + types.CET
 		marketInfo, ok := keeper.GetMarketInfo(ctx, stockSepCet)
 		if ok != nil || marketInfo.LastExecutedPrice.IsZero() {
 			frozenFee = marketParams.FixedTradeFee
@@ -138,64 +130,49 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		}
 	}
 	if frozenFee < marketParams.MarketFeeMin {
-		return ErrOrderQuantityToSmall().Result()
-	}
-	var frozenFeeAsCet sdk.Coins
-	if frozenFee != 0 {
-		frozenFeeAsCet = sdk.Coins{sdk.NewCoin("cet", sdk.NewInt(frozenFee))}
-		if !keeper.bnk.HasCoins(ctx, msg.Sender, frozenFeeAsCet) {
-			return ErrInsufficientCoins().Result()
-		}
+		return 0, ErrOrderQuantityToSmall()
 	}
 
-	totalAmount := amount
-	if stock == "cet" && msg.Side == match.SELL {
-		totalAmount += frozenFee
-	}
-	coin := sdk.NewCoin(denom, sdk.NewInt(totalAmount))
-	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{coin}) {
-		return ErrInsufficientCoins().Result()
-	}
+	return frozenFee, nil
+}
 
-	if ret := checkMsgCreateOrder(ctx, msg, keeper, stock, money); !ret.IsOK() {
-		return ret
+func calFeatureFeeForExistBlocks(msg MsgCreateOrder, marketParam Params) int64 {
+	if msg.TimeInForce == IOC {
+		return 0
 	}
-
-	actualPrice := sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision)))))
-	order := Order{
-		Sender:      msg.Sender,
-		Sequence:    msg.Sequence,
-		Symbol:      msg.Symbol,
-		OrderType:   msg.OrderType,
-		Price:       actualPrice,
-		Quantity:    msg.Quantity,
-		Side:        msg.Side,
-		TimeInForce: msg.TimeInForce,
-		Height:      ctx.BlockHeight(),
-		FrozenFee:   frozenFee,
-		LeftStock:   msg.Quantity,
-		Freeze:      amount,
-		DealMoney:   0,
-		DealStock:   0,
+	quotient := msg.ExistBlocks / marketParam.GTEOrderLifetime
+	remainder := msg.ExistBlocks % marketParam.GTEOrderLifetime
+	if remainder != 0 {
+		quotient++
 	}
-
-	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
-	if err := ork.Add(ctx, &order); err != nil {
-		return err.Result()
+	if quotient <= 1 {
+		return 0
 	}
+	return int64(quotient) * marketParam.GTEOrderFeatureFeeByBlocks
+}
 
-	coin = sdk.NewCoin(denom, sdk.NewInt(amount))
-	if err := keeper.bnk.FreezeCoins(ctx, order.Sender, sdk.Coins{coin}); err != nil {
+func handleFeeForCreateOrder(ctx sdk.Context, keeper Keeper, amount int64, denom string,
+	sender sdk.AccAddress, frozenFee, featureFee int64) {
+	coin := sdk.NewCoin(denom, sdk.NewInt(amount))
+	if err := keeper.bnk.FreezeCoins(ctx, sender, sdk.Coins{coin}); err != nil {
 		// Here must be panic. Because the order has been store in the database, but deduction of failure.
 		panic(err)
 	}
 	if frozenFee != 0 {
-		if err := keeper.bnk.FreezeCoins(ctx, order.Sender, frozenFeeAsCet); err != nil {
+		frozenFeeAsCet := sdk.Coins{sdk.NewCoin(types.CET, sdk.NewInt(frozenFee))}
+		if err := keeper.bnk.FreezeCoins(ctx, sender, frozenFeeAsCet); err != nil {
 			// Here must be panic. Because the order has been store in the database, but deduction of failure.
 			panic(err)
 		}
 	}
+	if featureFee != 0 {
+		if err := keeper.SubtractFeeAndCollectFee(ctx, sender, types.NewCetCoins(featureFee)); err != nil {
+			panic(err)
+		}
+	}
+}
 
+func sendCreateOrderMsg(keeper Keeper, order Order) {
 	// send msg to kafka
 	msgInfo := CreateOrderInfo{
 		OrderID:     order.OrderID(),
@@ -211,13 +188,83 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		Freeze:      order.Freeze,
 	}
 	keeper.SendMsg(CreateOrderInfoKey, msgInfo)
+}
+
+func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sdk.Result {
+
+	values := strings.Split(msg.Symbol, SymbolSeparator)
+	stock, money := values[0], values[1]
+	denom := stock
+	amount := msg.Quantity
+	if msg.Side == match.BUY {
+		denom = money
+		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
+	}
+
+	marketParams := keeper.GetParams(ctx)
+	frozenFee, err := calFrozenFeeInOrder(ctx, marketParams, keeper, msg)
+	if err != nil {
+		return err.Result()
+	}
+
+	featureFee := calFeatureFeeForExistBlocks(msg, marketParams)
+	if ret := checkMsgCreateOrder(ctx, keeper, msg, frozenFee+featureFee, amount, denom); !ret.IsOK() {
+		return ret
+	}
+
+	order := Order{
+		Sender:      msg.Sender,
+		Sequence:    msg.Sequence,
+		Symbol:      msg.Symbol,
+		OrderType:   msg.OrderType,
+		Price:       sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision))))),
+		Quantity:    msg.Quantity,
+		Side:        msg.Side,
+		TimeInForce: msg.TimeInForce,
+		Height:      ctx.BlockHeight(),
+		ExistBlocks: msg.ExistBlocks,
+		FrozenFee:   frozenFee,
+		LeftStock:   msg.Quantity,
+		Freeze:      amount,
+		DealMoney:   0,
+		DealStock:   0,
+	}
+
+	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
+	if err := ork.Add(ctx, &order); err != nil {
+		return err.Result()
+	}
+
+	handleFeeForCreateOrder(ctx, keeper, amount, denom, order.Sender, frozenFee, featureFee)
+	sendCreateOrderMsg(keeper, order)
 
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
 
-func checkMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper, stock, money string) sdk.Result {
+func checkMsgCreateOrder(ctx sdk.Context, keeper Keeper, msg MsgCreateOrder, cetFee int64, amount int64, denom string) sdk.Result {
+	var (
+		stock, money string
+	)
+	values := strings.Split(msg.Symbol, SymbolSeparator)
+	stock, money = values[0], values[1]
+
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
+	}
+
+	if cetFee != 0 {
+		frozenFeeAsCet := sdk.Coins{sdk.NewCoin(types.CET, sdk.NewInt(cetFee))}
+		if !keeper.bnk.HasCoins(ctx, msg.Sender, frozenFeeAsCet) {
+			return ErrInsufficientCoins().Result()
+		}
+	}
+
+	totalAmount := amount
+	if stock == types.CET && msg.Side == match.SELL {
+		totalAmount += cetFee
+	}
+	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(denom, sdk.NewInt(totalAmount))}) {
+		return ErrInsufficientCoins().Result()
 	}
 
 	marketInfo, err := keeper.GetMarketInfo(ctx, msg.Symbol)

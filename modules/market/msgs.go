@@ -111,6 +111,7 @@ type MsgCreateOrder struct {
 	Quantity       int64          `json:"quantity"`
 	Side           byte           `json:"side"`
 	TimeInForce    int            `json:"time_in_force"`
+	ExistBlocks    int            `json:"exist_blocks"`
 }
 
 func (msg MsgCreateOrder) Route() string { return RouterKey }
@@ -124,8 +125,8 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if len(msg.Symbol) == 0 {
 		return sdk.ErrInvalidAddress("missing GTE order symbol identifier")
 	}
-	if msg.PricePrecision > MaxTokenPricePrecision {
-		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [8, 18]. actual : %d", msg.PricePrecision))
+	if msg.PricePrecision < 0 || msg.PricePrecision > MaxTokenPricePrecision {
+		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [0, 18]. actual : %d", msg.PricePrecision))
 	}
 
 	if msg.Side != match.BUY && msg.Side != match.SELL {
