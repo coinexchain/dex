@@ -52,7 +52,7 @@ func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sd
 
 	info, err := mk.GetMarketInfo(ctx, param.Symbol)
 	if err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "could not get market from blockchain")
+		return nil, sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "may be the market have deleted or not exist")
 	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, info)
 	if err != nil {
@@ -79,6 +79,9 @@ func queryOrder(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk
 
 	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
 	order := okp.QueryOrder(ctx, param.OrderID)
+	if order == nil {
+		return nil, sdk.NewError(CodeSpaceMarket, CodeInvalidOrderID, "may be the order have deleted or not exist")
+	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, *order)
 	if err != nil {
 		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
