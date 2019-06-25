@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/coinexchain/dex/modules/authx"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tmconfig "github.com/tendermint/tendermint/config"
@@ -32,9 +30,17 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
 )
+
+type testnetNodeInfo struct {
+	nodeID    string
+	valPubKey crypto.PubKey
+	acc       app.GenesisAccount
+	genFile   string
+}
 
 var (
 	flagNodeDirPrefix     = "node-dir-prefix"
@@ -104,145 +110,33 @@ func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 }
 
 func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
-	var chainID string
-
 	outDir := viper.GetString(flagOutputDir)
 	numValidators := viper.GetInt(flagNumValidators)
 
-	chainID = viper.GetString(client.FlagChainID)
+	chainID := viper.GetString(client.FlagChainID)
 	if chainID == "" {
 		chainID = "chain-" + cmn.RandStr(6)
 	}
 
-	monikers := make([]string, numValidators)
 	nodeIDs := make([]string, numValidators)
 	valPubKeys := make([]crypto.PubKey, numValidators)
+	accs := make([]app.GenesisAccount, numValidators)
+	genFiles := make([]string, numValidators)
 
 	dexConfig := srvconfig.DefaultConfig()
 	dexConfig.MinGasPrices = viper.GetString(server.FlagMinGasPrices)
 
-	var (
-		accs     []app.GenesisAccount
-		genFiles []string
-	)
-
 	// generate private keys, node IDs, and initial transactions
 	for i := 0; i < numValidators; i++ {
-		nodeDirName := fmt.Sprintf("%s%d", viper.GetString(flagNodeDirPrefix), i)
-		nodeDaemonHomeName := viper.GetString(flagNodeDaemonHome)
-		nodeCliHomeName := viper.GetString(flagNodeCliHome)
-		nodeDir := filepath.Join(outDir, nodeDirName, nodeDaemonHomeName)
-		clientDir := filepath.Join(outDir, nodeDirName, nodeCliHomeName)
-		gentxsDir := filepath.Join(outDir, "gentxs")
-
-		config.SetRoot(nodeDir)
-
-		err := mkNodeHomeDirs(outDir, nodeDir, clientDir)
-		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-
-		monikers = append(monikers, nodeDirName)
-		config.Moniker = nodeDirName
-		adjustBlockCommitSpeed(config)
-
-		ip, err := getIP(i, viper.GetString(flagStartingIPAddress))
-		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-
-		nodeIDs[i], valPubKeys[i], err = InitializeNodeValidatorFiles(config)
-		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-
-		memo := fmt.Sprintf("%s@%s:26656", nodeIDs[i], ip)
-		genFiles = append(genFiles, config.GenesisFile())
-
-		buf := client.BufferStdin()
-		prompt := fmt.Sprintf(
-			"Password for account '%s' (default %s):", nodeDirName, app.DefaultKeyPass,
-		)
-
-		keyPass, err := client.GetPassword(prompt, buf)
-		if err != nil && keyPass != "" {
-			// An error was returned that either failed to read the password from
-			// STDIN or the given password is not empty but failed to meet minimum
-			// length requirements.
-			return err
-		}
-
-		if keyPass == "" {
-			keyPass = app.DefaultKeyPass
-		}
-
-		addr, secret, err := server.GenerateSaveCoinKey(clientDir, nodeDirName, keyPass, true)
-		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-
-		info := map[string]string{"secret": secret}
-
-		cliPrint, err := json.Marshal(info)
+		nodeInfo, err := initTestnetNode(config, cdc, outDir, chainID, i)
 		if err != nil {
 			return err
 		}
 
-		// save private key seed words
-		err = writeFile(fmt.Sprintf("%v.json", "key_seed"), clientDir, cliPrint)
-		if err != nil {
-			return err
-		}
-
-		minSelfDel := stakingx.DefaultParams().MinSelfDelegation.Quo(sdk.NewInt(100))
-		accStakingTokens := minSelfDel.MulRaw(10)
-		accs = append(accs, app.GenesisAccount{
-			Address: addr,
-			Coins: sdk.Coins{
-				sdk.NewCoin(dex.DefaultBondDenom, accStakingTokens),
-			},
-		})
-
-		msg := staking.NewMsgCreateValidator(
-			sdk.ValAddress(addr),
-			valPubKeys[i],
-			sdk.NewCoin(dex.DefaultBondDenom, minSelfDel),
-			staking.NewDescription(nodeDirName, "", "", ""),
-			staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-			minSelfDel,
-		)
-		kb, err := keys.NewKeyBaseFromDir(clientDir)
-		if err != nil {
-			return err
-		}
-		tx := auth.NewStdTx([]sdk.Msg{msg}, auth.StdFee{}, []auth.StdSignature{}, memo)
-		txBldr := authtx.NewTxBuilderFromCLI().WithChainID(chainID).WithMemo(memo).WithKeybase(kb)
-
-		signedTx, err := txBldr.SignStdTx(nodeDirName, app.DefaultKeyPass, tx, false)
-		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-
-		txBytes, err := cdc.MarshalJSON(signedTx)
-		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-
-		// gather gentxs folder
-		err = writeFile(fmt.Sprintf("%v.json", nodeDirName), gentxsDir, txBytes)
-		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-
-		configFilePath := filepath.Join(nodeDir, "config/cetd.toml")
-		srvconfig.WriteConfigFile(configFilePath, dexConfig)
+		nodeIDs[i] = nodeInfo.nodeID
+		valPubKeys[i] = nodeInfo.valPubKey
+		accs[i] = nodeInfo.acc
+		genFiles[i] = nodeInfo.genFile
 	}
 
 	if err := initGenFiles(cdc, chainID, accs, genFiles, numValidators); err != nil {
@@ -250,7 +144,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 	}
 
 	err := collectGenFiles(
-		cdc, config, chainID, monikers, nodeIDs, valPubKeys, numValidators,
+		cdc, config, chainID, nodeIDs, valPubKeys, numValidators,
 		outDir, viper.GetString(flagNodeDirPrefix), viper.GetString(flagNodeDaemonHome),
 	)
 	if err != nil {
@@ -259,6 +153,132 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 	fmt.Printf("Successfully initialized %d node directories\n", numValidators)
 	return nil
+}
+
+func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
+	outDir, chainID string, i int,
+) (testnetNodeInfo, error) {
+
+	nodeDirName := fmt.Sprintf("%s%d", viper.GetString(flagNodeDirPrefix), i)
+	nodeDaemonHomeName := viper.GetString(flagNodeDaemonHome)
+	nodeCliHomeName := viper.GetString(flagNodeCliHome)
+	nodeDir := filepath.Join(outDir, nodeDirName, nodeDaemonHomeName)
+	clientDir := filepath.Join(outDir, nodeDirName, nodeCliHomeName)
+	gentxsDir := filepath.Join(outDir, "gentxs")
+
+	config.SetRoot(nodeDir)
+
+	err := mkNodeHomeDirs(outDir, nodeDir, clientDir)
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return testnetNodeInfo{}, err
+	}
+
+	config.Moniker = nodeDirName
+	adjustBlockCommitSpeed(config)
+
+	ip, err := getIP(i, viper.GetString(flagStartingIPAddress))
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return testnetNodeInfo{}, err
+	}
+
+	nodeID, valPubKey, err := InitializeNodeValidatorFiles(config)
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return testnetNodeInfo{}, err
+	}
+
+	memo := fmt.Sprintf("%s@%s:26656", nodeID, ip)
+	genFile := config.GenesisFile()
+
+	buf := client.BufferStdin()
+	prompt := fmt.Sprintf(
+		"Password for account '%s' (default %s):", nodeDirName, app.DefaultKeyPass,
+	)
+
+	keyPass, err := client.GetPassword(prompt, buf)
+	if err != nil && keyPass != "" {
+		// An error was returned that either failed to read the password from
+		// STDIN or the given password is not empty but failed to meet minimum
+		// length requirements.
+		return testnetNodeInfo{}, err
+	}
+
+	if keyPass == "" {
+		keyPass = app.DefaultKeyPass
+	}
+
+	addr, secret, err := server.GenerateSaveCoinKey(clientDir, nodeDirName, keyPass, true)
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return testnetNodeInfo{}, err
+	}
+
+	info := map[string]string{"secret": secret}
+
+	cliPrint, err := json.Marshal(info)
+	if err != nil {
+		return testnetNodeInfo{}, err
+	}
+
+	// save private key seed words
+	err = writeFile(fmt.Sprintf("%v.json", "key_seed"), clientDir, cliPrint)
+	if err != nil {
+		return testnetNodeInfo{}, err
+	}
+
+	minSelfDel := stakingx.DefaultParams().MinSelfDelegation.Quo(sdk.NewInt(100))
+	accStakingTokens := minSelfDel.MulRaw(10)
+	acc := app.GenesisAccount{
+		Address: addr,
+		Coins: sdk.Coins{
+			sdk.NewCoin(dex.DefaultBondDenom, accStakingTokens),
+		},
+	}
+
+	msg := staking.NewMsgCreateValidator(
+		sdk.ValAddress(addr),
+		valPubKey,
+		sdk.NewCoin(dex.DefaultBondDenom, minSelfDel),
+		staking.NewDescription(nodeDirName, "", "", ""),
+		staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
+		minSelfDel,
+	)
+	kb, err := keys.NewKeyBaseFromDir(clientDir)
+	if err != nil {
+		return testnetNodeInfo{}, err
+	}
+	tx := auth.NewStdTx([]sdk.Msg{msg}, auth.StdFee{}, []auth.StdSignature{}, memo)
+	txBldr := authtx.NewTxBuilderFromCLI().WithChainID(chainID).WithMemo(memo).WithKeybase(kb)
+
+	signedTx, err := txBldr.SignStdTx(nodeDirName, app.DefaultKeyPass, tx, false)
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return testnetNodeInfo{}, err
+	}
+
+	txBytes, err := cdc.MarshalJSON(signedTx)
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return testnetNodeInfo{}, err
+	}
+
+	// gather gentxs folder
+	err = writeFile(fmt.Sprintf("%v.json", nodeDirName), gentxsDir, txBytes)
+	if err != nil {
+		_ = os.RemoveAll(outDir)
+		return testnetNodeInfo{}, err
+	}
+
+	configFilePath := filepath.Join(nodeDir, "config/cetd.toml")
+	srvconfig.WriteConfigFile(configFilePath, srvconfig.DefaultConfig())
+	return testnetNodeInfo{
+		nodeID:    nodeID,
+		valPubKey: valPubKey,
+		acc:       acc,
+		genFile:   genFile,
+	}, nil
 }
 
 func adjustBlockCommitSpeed(config *tmconfig.Config) {
@@ -361,7 +381,7 @@ func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64
 
 func collectGenFiles(
 	cdc *codec.Codec, config *tmconfig.Config, chainID string,
-	monikers, nodeIDs []string, valPubKeys []crypto.PubKey,
+	nodeIDs []string, valPubKeys []crypto.PubKey,
 	numValidators int, outDir, nodeDirPrefix, nodeDaemonHomeName string,
 ) error {
 
@@ -372,13 +392,12 @@ func collectGenFiles(
 		nodeDirName := fmt.Sprintf("%s%d", nodeDirPrefix, i)
 		nodeDir := filepath.Join(outDir, nodeDirName, nodeDaemonHomeName)
 		gentxsDir := filepath.Join(outDir, "gentxs")
-		moniker := monikers[i]
 		config.Moniker = nodeDirName
 
 		config.SetRoot(nodeDir)
 
 		nodeID, valPubKey := nodeIDs[i], valPubKeys[i]
-		initCfg := newInitConfig(chainID, gentxsDir, moniker, nodeID, valPubKey)
+		initCfg := newInitConfig(chainID, gentxsDir, nodeID, valPubKey)
 
 		genDoc, err := LoadGenesisDoc(cdc, config.GenesisFile())
 		if err != nil {

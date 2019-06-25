@@ -13,7 +13,6 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/types"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -28,7 +27,6 @@ const (
 type initConfig struct {
 	ChainID   string
 	GenTxsDir string
-	Name      string
 	NodeID    string
 	ValPubKey crypto.PubKey
 }
@@ -41,7 +39,7 @@ func CollectGenTxsCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 		RunE: func(_ *cobra.Command, _ []string) error {
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
-			name := viper.GetString(client.FlagName)
+			//name := viper.GetString(client.FlagName)
 			nodeID, valPubKey, err := InitializeNodeValidatorFiles(config)
 			if err != nil {
 				return err
@@ -58,7 +56,7 @@ func CollectGenTxsCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 			}
 
 			toPrint := newPrintInfo(config.Moniker, genDoc.ChainID, nodeID, genTxsDir, json.RawMessage(""))
-			initCfg := newInitConfig(genDoc.ChainID, genTxsDir, name, nodeID, valPubKey)
+			initCfg := newInitConfig(genDoc.ChainID, genTxsDir, nodeID, valPubKey)
 
 			appMessage, err := genAppStateFromConfig(cdc, config, initCfg, genDoc)
 			if err != nil {
@@ -121,13 +119,12 @@ func genAppStateFromConfig(
 	return
 }
 
-func newInitConfig(chainID, genTxsDir, name, nodeID string,
+func newInitConfig(chainID, genTxsDir, nodeID string,
 	valPubKey crypto.PubKey) initConfig {
 
 	return initConfig{
 		ChainID:   chainID,
 		GenTxsDir: genTxsDir,
-		Name:      name,
 		NodeID:    nodeID,
 		ValPubKey: valPubKey,
 	}
