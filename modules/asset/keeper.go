@@ -12,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/coinexchain/dex/modules/bankx"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var (
@@ -101,6 +102,18 @@ func (keeper BaseKeeper) GetParams(ctx sdk.Context) (params Params) {
 func (keeper BaseKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Error {
 	if keeper.IsTokenExists(ctx, msg.Symbol) {
 		return ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
+	}
+
+	// only cet owner can issue reserved token
+	if isReserved(msg.Symbol) && msg.Symbol != dex.CET {
+		cetOwner := keeper.GetToken(ctx, dex.CET).GetOwner()
+		if msg.Owner.Equals(cetOwner) {
+			return ErrorInvalidTokenOwner("only cet owner can issue reserved token")
+		}
+		//return errors.New("only coinex dex can issue reserved symbol token, you can run \n" +
+		//	"$ cetcli query asset reserved-symbol \n" +
+		//	"to query coinex dex reserved token symbol\n" +
+		//	"if you want it,please contact coinex")
 	}
 
 	token, err := NewToken(

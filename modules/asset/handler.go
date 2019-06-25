@@ -44,7 +44,6 @@ func NewHandler(keeper Keeper) sdk.Handler {
 
 // handleMsgIssueToken - Handle MsgIssueToken
 func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg MsgIssueToken) sdk.Result {
-
 	issueFee := keeper.GetParams(ctx).IssueTokenFee
 	if err := keeper.DeductFee(ctx, msg.Owner, issueFee); err != nil {
 		return err.Result()
