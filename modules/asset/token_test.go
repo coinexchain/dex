@@ -18,7 +18,7 @@ func TestNewToken(t *testing.T) {
 		addrforbiddable  bool
 		tokenforbiddable bool
 		url              string
-		description       string
+		description      string
 	}
 	tests := []struct {
 		name    string
