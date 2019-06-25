@@ -111,7 +111,7 @@ func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]b
 }
 
 type QueryCancelMarkets struct {
-	Height int64
+	Time int64
 }
 
 func queryWaitCancelMarkets(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
@@ -121,7 +121,7 @@ func queryWaitCancelMarkets(ctx sdk.Context, req types.RequestQuery, mk Keeper) 
 	}
 
 	dlk := NewDelistKeeper(mk.marketKey)
-	markets := dlk.GetDelistSymbolsAtHeight(ctx, param.Height)
+	markets := dlk.GetDelistSymbolsBeforeTime(ctx, param.Time+1)
 	bz, err := codec.MarshalJSONIndent(mk.cdc, markets)
 	if err != nil {
 		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")

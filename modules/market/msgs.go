@@ -199,9 +199,9 @@ func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
 // MsgCancelMarket
 
 type MsgCancelMarket struct {
-	Sender          sdk.AccAddress `json:"sender"`
-	Symbol          string         `json:"symbol"`
-	EffectiveHeight int64          `json:"effective_height"`
+	Sender        sdk.AccAddress `json:"sender"`
+	Symbol        string         `json:"symbol"`
+	EffectiveTime int64          `json:"effective_height"`
 }
 
 func (msg MsgCancelMarket) Route() string {
@@ -221,8 +221,8 @@ func (msg MsgCancelMarket) ValidateBasic() sdk.Error {
 		return ErrInvalidSymbol()
 	}
 
-	if msg.EffectiveHeight < 0 {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidHeight, "Invalid height")
+	if msg.EffectiveTime < 0 {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidTime, "Invalid height")
 	}
 
 	return nil

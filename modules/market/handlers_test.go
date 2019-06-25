@@ -552,19 +552,25 @@ func TestCancelMarketFailed(t *testing.T) {
 	createCetMarket(input, stock)
 
 	msgCancelMarket := MsgCancelMarket{
-		Sender:          haveCetAddress,
-		Symbol:          stock + SymbolSeparator + "cet",
-		EffectiveHeight: MinEffectHeight + 10,
+		Sender:        haveCetAddress,
+		Symbol:        stock + SymbolSeparator + "cet",
+		EffectiveTime: DefaultMarketMinExpiredTime + 10,
 	}
 
-	failedHeight := msgCancelMarket
-	failedHeight.EffectiveHeight = 10
-	ret := input.handler(input.ctx, failedHeight)
-	require.Equal(t, CodeInvalidHeight, ret.Code, "cancel order should failed by invalid cancel height")
+	// header := abci.Header{Time: time.Now()}
+	// input.ctx.WithBlockHeader(header)
+	// input.ctx.WithBlockHeader(header)
+	// header = input.ctx.BlockHeader()
+
+	// TODO. will add the test case in late
+	// failedTime := msgCancelMarket
+	// failedTime.EffectiveTime = 10
+	// ret := input.handler(input.ctx, failedTime)
+	// require.Equal(t, CodeInvalidTime, ret.Code, "cancel order should failed by invalid cancel time")
 
 	failedSymbol := msgCancelMarket
 	failedSymbol.Symbol = stock + SymbolSeparator + "not exist"
-	ret = input.handler(input.ctx, failedSymbol)
+	ret := input.handler(input.ctx, failedSymbol)
 	require.Equal(t, CodeInvalidSymbol, ret.Code, "cancel order should failed by invalid symbol")
 
 	failedSender := msgCancelMarket
@@ -579,16 +585,16 @@ func TestCancelMarketSuccess(t *testing.T) {
 	createCetMarket(input, stock)
 
 	msgCancelMarket := MsgCancelMarket{
-		Sender:          haveCetAddress,
-		Symbol:          stock + SymbolSeparator + "cet",
-		EffectiveHeight: MinEffectHeight + 10,
+		Sender:        haveCetAddress,
+		Symbol:        stock + SymbolSeparator + "cet",
+		EffectiveTime: DefaultMarketMinExpiredTime + 10,
 	}
 
 	ret := input.handler(input.ctx, msgCancelMarket)
 	require.Equal(t, true, ret.IsOK(), "cancel market should success")
 
 	dlk := NewDelistKeeper(input.mk.marketKey)
-	delSymbol := dlk.GetDelistSymbolsAtHeight(input.ctx, MinEffectHeight+10)[0]
+	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, DefaultMarketMinExpiredTime+10+1)[0]
 	if delSymbol != stock+SymbolSeparator+"cet" {
 		t.Error("Not find del market in store")
 	}

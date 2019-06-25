@@ -232,6 +232,46 @@ func sendFillMsg(orderOldDeal map[string]int64, ordersForUpdate map[string]*Orde
 	}
 }
 
+func removeExpiredOrder(ctx sdk.Context, keeper Keeper, marketInfoList []MarketInfo, marketParams Params) {
+	lifeTime := marketParams.GTEOrderLifetime
+	currHeight := ctx.BlockHeight()
+	for _, mi := range marketInfoList {
+		symbol := mi.Stock + "/" + mi.Money
+		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
+		for _, order := range oldOrders {
+			msgInfo := CancelOrderInfo{
+				OrderID:      order.OrderID(),
+				DelReason:    CancelOrderByGteTimeOut,
+				DelHeight:    ctx.BlockHeight(),
+				UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+				LeftStock:    order.LeftStock,
+				RemainAmount: order.Freeze,
+				DealStock:    order.DealStock,
+				DealMoney:    order.DealMoney,
+			}
+			keeper.SendMsg(CancelOrderInfoKey, msgInfo)
+		}
+
+		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, keeper, currHeight-int64(lifeTime), marketParams.FeeForZeroDeal)
+	}
+}
+
+func removeExpiredMarket(ctx sdk.Context, keeper Keeper, marketParams Params) {
+	currHeight := ctx.BlockHeight()
+	currTime := ctx.BlockHeader().Time.Unix()
+
+	// process the delist requests
+	delistKeeper := NewDelistKeeper(keeper.marketKey)
+	delistSymbols := delistKeeper.GetDelistSymbolsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
+	for _, symbol := range delistSymbols {
+		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, keeper, currHeight+1, marketParams.FeeForZeroDeal)
+		keeper.RemoveMarket(ctx, symbol)
+	}
+	delistKeeper.RemoveDelistRequestsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
+}
+
 func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	recordDay := keeper.orderClean.GetDay(ctx)
 	currDay := ctx.BlockHeader().Time.Day()
@@ -240,29 +280,10 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	marketParams := keeper.GetParams(ctx)
 
 	// if this is the first block of a new day, we clean the GTE order and there is no trade
-	lifeTime := marketParams.GTEOrderLifetime
 	if currDay != recordDay {
 		keeper.orderClean.SetDay(ctx, currDay)
-		for _, mi := range marketInfoList {
-			symbol := mi.Stock + "/" + mi.Money
-			orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-			oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
-			for _, order := range oldOrders {
-				msgInfo := CancelOrderInfo{
-					OrderID:      order.OrderID(),
-					DelReason:    CancelOrderByGteTimeOut,
-					DelHeight:    ctx.BlockHeight(),
-					UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
-					LeftStock:    order.LeftStock,
-					RemainAmount: order.Freeze,
-					DealStock:    order.DealStock,
-					DealMoney:    order.DealMoney,
-				}
-				keeper.SendMsg(CancelOrderInfoKey, msgInfo)
-			}
-
-			removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, keeper, currHeight-int64(lifeTime), marketParams.FeeForZeroDeal)
-		}
+		removeExpiredOrder(ctx, keeper, marketInfoList, marketParams)
+		removeExpiredMarket(ctx, keeper, marketParams)
 		return nil
 	}
 
@@ -302,16 +323,6 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 			keeper.SetMarket(ctx, mi)
 		}
 	}
-
-	// process the delist requests
-	delistKeeper := NewDelistKeeper(keeper.marketKey)
-	delistSymbols := delistKeeper.GetDelistSymbolsAtHeight(ctx, ctx.BlockHeight())
-	for _, symbol := range delistSymbols {
-		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
-		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, keeper, currHeight+1, marketParams.FeeForZeroDeal)
-		keeper.RemoveMarket(ctx, symbol)
-	}
-	delistKeeper.RemoveDelistRequestsAtHeight(ctx, ctx.BlockHeight())
 
 	return nil
 }

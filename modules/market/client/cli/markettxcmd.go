@@ -156,10 +156,10 @@ func CancelMarket(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cancel-market",
 		Short: "cancel market in blockchain",
-		Long: "cancel market in blockchain. \n " +
+		Long: "cancel market in blockchain at least a week from now. \n " +
 			"Example : " +
 			"cetcli tx market cancel-market " +
-			"--height=10000 --symbol=etc/cet --from=bob --chain-id=coinexdex " +
+			"--time=1000000 --symbol=etc/cet --from=bob --chain-id=coinexdex " +
 			"--gas=1000000 --fees=1000cet",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -167,9 +167,9 @@ func CancelMarket(cdc *codec.Codec) *cobra.Command {
 
 			creator := cliCtx.GetFromAddress()
 			msg := market.MsgCancelMarket{
-				Sender:          creator,
-				EffectiveHeight: viper.GetInt64(FlagHeight),
-				Symbol:          viper.GetString(FlagSymbol),
+				Sender:        creator,
+				EffectiveTime: viper.GetInt64(FlagTime),
+				Symbol:        viper.GetString(FlagSymbol),
 			}
 
 			if err := CheckCancelMarketMsg(cdc, cliCtx, msg); err != nil {
@@ -181,9 +181,9 @@ func CancelMarket(cdc *codec.Codec) *cobra.Command {
 	}
 
 	cmd.Flags().String(FlagSymbol, "", "The market symbol")
-	cmd.Flags().Int64(FlagHeight, -1, "The block height")
+	cmd.Flags().Int64(FlagTime, -1, "The block height")
 	cmd.MarkFlagRequired(FlagSymbol)
-	cmd.MarkFlagRequired(FlagHeight)
+	cmd.MarkFlagRequired(FlagTime)
 
 	return cmd
 }
@@ -223,17 +223,17 @@ func QueryWaitCancelMarkets(cdc *codec.Codec) *cobra.Command {
 		Long: "Query wait cancel market info in special time \n" +
 			"Example:" +
 			"cetcli query market " +
-			"wait-cancel-markets --height=10000 " +
+			"wait-cancel-markets --time=10000 " +
 			"--trust-node=true --chain-id=coinexdex",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			height := viper.GetInt64(FlagHeight)
-			if height < 0 {
-				return errors.Errorf("Invalid height")
+			time := viper.GetInt64(FlagTime)
+			if time <= 0 {
+				return errors.Errorf("Invalid unix time")
 			}
 
-			bz, err := cdc.MarshalJSON(market.QueryCancelMarkets{Height: height})
+			bz, err := cdc.MarshalJSON(market.QueryCancelMarkets{Time: time})
 			if err != nil {
 				return err
 			}
@@ -254,7 +254,7 @@ func QueryWaitCancelMarkets(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64(FlagHeight, -1, "The query block height")
-	cmd.MarkFlagRequired(FlagHeight)
+	cmd.Flags().Int64(FlagTime, -1, "The query block height")
+	cmd.MarkFlagRequired(FlagTime)
 	return cmd
 }

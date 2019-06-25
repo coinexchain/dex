@@ -29,7 +29,7 @@ type createMarketReq struct {
 type cancelMarketReq struct {
 	BaseReq rest.BaseReq `json:"base_req"`
 	Symbol  string       `json:"symbol"`
-	Height  int64        `json:"height"`
+	Time    int64        `json:"time"`
 }
 
 func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -116,9 +116,9 @@ func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
 		msg := market.MsgCancelMarket{
-			Sender:          sender,
-			Symbol:          req.Symbol,
-			EffectiveHeight: req.Height,
+			Sender:        sender,
+			Symbol:        req.Symbol,
+			EffectiveTime: req.Time,
 		}
 
 		if err := cli.CheckCancelMarketMsg(cdc, cliCtx, msg); err != nil {

@@ -25,7 +25,7 @@ const (
 	CodeUnMarshalFailed       sdk.CodeType = 615
 	CodeNotFindOrder          sdk.CodeType = 616
 	CodeNotMatchSender        sdk.CodeType = 617
-	CodeInvalidHeight         sdk.CodeType = 618
+	CodeInvalidTime           sdk.CodeType = 618
 	CodeAddressForbidByIssuer sdk.CodeType = 619
 	CodeOrderQuantityToSmall  sdk.CodeType = 620
 	CodeStockNoHaveCetTrade   sdk.CodeType = 621

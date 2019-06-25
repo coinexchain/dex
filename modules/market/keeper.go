@@ -23,48 +23,46 @@ func NewDelistKeeper(key sdk.StoreKey) *DelistKeeper {
 	}
 }
 
-func getDelistKey(height int64, symbol string) []byte {
+func getDelistKey(time int64, symbol string) []byte {
 	return concatCopyPreAllocate([][]byte{
 		DelistKey,
-		int64ToBigEndianBytes(height),
+		int64ToBigEndianBytes(time),
 		{0x0},
 		[]byte(symbol),
 	})
 }
-func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, height int64, symbol string) {
+func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, time int64, symbol string) {
 	store := ctx.KVStore(keeper.marketKey)
-	store.Set(getDelistKey(height, symbol), []byte{})
+	store.Set(getDelistKey(time, symbol), []byte{})
 }
-func (keeper *DelistKeeper) GetDelistSymbolsAtHeight(ctx sdk.Context, height int64) []string {
+func (keeper *DelistKeeper) GetDelistSymbolsBeforeTime(ctx sdk.Context, time int64) []string {
 	store := ctx.KVStore(keeper.marketKey)
 	start := concatCopyPreAllocate([][]byte{
 		DelistKey,
-		int64ToBigEndianBytes(height),
-		{0x0},
+		int64ToBigEndianBytes(0),
 	})
 	end := concatCopyPreAllocate([][]byte{
 		DelistKey,
-		int64ToBigEndianBytes(height),
-		{0x1},
+		int64ToBigEndianBytes(time),
 	})
 	var result []string
 	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
 		key := iter.Key()
-		result = append(result, string(key[len(start):]))
+		result = append(result, string(key[len(start)+1:]))
 	}
 	return result
 }
 
-func (keeper *DelistKeeper) RemoveDelistRequestsAtHeight(ctx sdk.Context, height int64) {
+func (keeper *DelistKeeper) RemoveDelistRequestsBeforeTime(ctx sdk.Context, time int64) {
 	store := ctx.KVStore(keeper.marketKey)
 	start := concatCopyPreAllocate([][]byte{
 		DelistKey,
-		int64ToBigEndianBytes(height),
+		int64ToBigEndianBytes(0),
 		{0x0},
 	})
 	end := concatCopyPreAllocate([][]byte{
 		DelistKey,
-		int64ToBigEndianBytes(height),
+		int64ToBigEndianBytes(time),
 		{0x1},
 	})
 	var keys [][]byte

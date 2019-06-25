@@ -17,9 +17,7 @@ const (
 	MaxTokenPricePrecision           = 18
 	LimitOrder             OrderType = 2
 	SymbolSeparator                  = "/"
-
-	MinEffectHeight  = 10000
-	ExtraFrozenMoney = 0 // 100
+	ExtraFrozenMoney                 = 0 // 100
 )
 
 type OrderType = byte
@@ -295,7 +293,7 @@ func handleMsgCancelMarket(ctx sdk.Context, msg MsgCancelMarket, keeper Keeper) 
 
 	// Add del request to store
 	dlk := NewDelistKeeper(keeper.marketKey)
-	dlk.AddDelistRequest(ctx, msg.EffectiveHeight, msg.Symbol)
+	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.Symbol)
 
 	// send msg to kafka
 	values := strings.Split(msg.Symbol, SymbolSeparator)
@@ -303,7 +301,7 @@ func handleMsgCancelMarket(ctx sdk.Context, msg MsgCancelMarket, keeper Keeper) 
 		Stock:   values[0],
 		Money:   values[1],
 		Deleter: msg.Sender.String(),
-		DelTime: msg.EffectiveHeight,
+		DelTime: msg.EffectiveTime,
 	}
 	keeper.SendMsg(CancelMarketInfoKey, msgInfo)
 
@@ -316,9 +314,10 @@ func checkMsgCancelMarket(keeper Keeper, msg MsgCancelMarket, ctx sdk.Context) s
 		return err
 	}
 
-	currHeight := ctx.BlockHeight()
-	if msg.EffectiveHeight < currHeight+MinEffectHeight {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidHeight, "Invalid Height")
+	marketParams := keeper.GetParams(ctx)
+	currTime := ctx.BlockHeader().Time.Unix()
+	if msg.EffectiveTime < currTime+marketParams.MarketMinExpiredTime {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidTime, "Invalid Height")
 	}
 
 	info, err := keeper.GetMarketInfo(ctx, msg.Symbol)

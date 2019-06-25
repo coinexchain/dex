@@ -16,11 +16,13 @@ const (
 	DefaultMarketFeeRate               = 0
 	DefaultMarketFeeMin                = 0
 	DefaultFeeForZeroDeal              = 0
+	DefaultMarketMinExpiredTime        = 60 * 60 * 24 * 7
 )
 
 var (
 	KeyCreateMarketFee             = []byte("CreateMarketFee")
 	KeyFixedTradeFee               = []byte("FixedTradeFee")
+	keyMarketMinExpiredTime        = []byte("MarketMinExpiredTime")
 	KeyGTEOrderLifetime            = []byte("GTEOrderLifetime")
 	KeyMaxExecutedPriceChangeRatio = []byte("MaxExecutedPriceChangeRatio")
 	KeyMarketFeeRate               = []byte("MarketFeeRate")
@@ -31,6 +33,7 @@ var (
 type Params struct {
 	CreateMarketFee             int64 `json:"create_market_fee"`
 	FixedTradeFee               int64 `json:"fixed_trade_fee"`
+	MarketMinExpiredTime        int64 `json:"market_min_expired_time"`
 	GTEOrderLifetime            int   `json:"gte_order_lifetime"`
 	MaxExecutedPriceChangeRatio int   `json:"max_executed_price_change_ratio"`
 	MarketFeeRate               int64 `json:"market_fee_rate"`
@@ -45,6 +48,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyCreateMarketFee, Value: &p.CreateMarketFee},
 		{Key: KeyFixedTradeFee, Value: &p.FixedTradeFee},
+		{Key: keyMarketMinExpiredTime, Value: &p.MarketMinExpiredTime},
 		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
 		{Key: KeyMaxExecutedPriceChangeRatio, Value: &p.MaxExecutedPriceChangeRatio},
 		{Key: KeyMarketFeeRate, Value: &p.MarketFeeRate},
@@ -65,6 +69,7 @@ func DefaultParams() Params {
 	return Params{
 		DefaultCreateMarketFee,
 		DefaultFixedTradeFee,
+		DefaultMarketMinExpiredTime,
 		DefaultGTEOrderLifetime,
 		DefaultMaxExecutedPriceChangeRatio,
 		DefaultMarketFeeRate,
