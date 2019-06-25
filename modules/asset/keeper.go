@@ -3,7 +3,6 @@ package asset
 import (
 	"bytes"
 	"fmt"
-	"github.com/coinexchain/dex/modules/bankx"
 	"strings"
 
 	"github.com/tendermint/tendermint/libs/bech32"
@@ -11,6 +10,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/modules/bankx"
 )
 
 var (
