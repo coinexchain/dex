@@ -3,7 +3,6 @@ package asset
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"unicode/utf8"
-	"unsafe"
 )
 
 // MsgIssueToken
@@ -91,7 +90,7 @@ func (msg MsgTransferOwnership) Route() string {
 
 // Type Implements Msg.
 func (msg MsgTransferOwnership) Type() string {
-	return "transfer_ownerShip"
+	return "transfer_ownership"
 }
 
 // ValidateBasic Implements Msg.
@@ -621,7 +620,7 @@ func (msg MsgModifyTokenDescription) ValidateBasic() sdk.Error {
 		return ErrorInvalidTokenOwner("modify token description need a valid owner addr")
 	}
 
-	if unsafe.Sizeof(msg.Description) > 1024 {
+	if len(msg.Description) > 1024 {
 		return ErrorInvalidTokenDescription("token description is limited to 1k size")
 	}
 	return nil

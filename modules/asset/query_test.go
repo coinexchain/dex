@@ -2,6 +2,7 @@ package asset
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,9 +16,11 @@ func Test_queryToken(t *testing.T) {
 		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryToken),
 		Data: []byte{},
 	}
+	path0 := []string{QueryToken}
+	query := NewQuerier(input.tk, input.tk.cdc)
 
 	// no token
-	res, err := queryToken(input.ctx, req, input.tk)
+	res, err := query(input.ctx, []string{QueryToken}, req)
 	require.Error(t, err)
 	require.Nil(t, res)
 
@@ -29,22 +32,22 @@ func Test_queryToken(t *testing.T) {
 	require.NoError(t, err)
 
 	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams(""))
-	res, err = queryToken(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.Error(t, err)
 	require.Nil(t, res)
 
 	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams("www"))
-	res, err = queryToken(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.Error(t, err)
 	require.Nil(t, res)
 
 	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams("a*B12345……6789"))
-	res, err = queryToken(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.Error(t, err)
 	require.Nil(t, res)
 
 	req.Data = input.cdc.MustMarshalJSON(NewQueryAssetParams("abc"))
-	res, err = queryToken(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
@@ -60,8 +63,10 @@ func Test_queryAllTokenList(t *testing.T) {
 		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryTokenList),
 		Data: []byte{},
 	}
+	path0 := []string{QueryTokenList}
+	query := NewQuerier(input.tk, input.tk.cdc)
 
-	res, err := queryAllTokenList(input.ctx, req, input.tk)
+	res, err := query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.Equal(t, []byte("[]"), res)
 
@@ -71,12 +76,13 @@ func Test_queryAllTokenList(t *testing.T) {
 	err = input.tk.setToken(input.ctx, token1)
 	require.NoError(t, err)
 
-	token2, err := NewToken("XYZ Token", "xyz", 2100, tAccAddr, false, false, false, false, "", "")
+	token2, err := NewToken("XYZ Token", "xyz", 2100, tAccAddr,
+		false, false, false, false, "", "")
 	require.NoError(t, err)
 	err = input.tk.setToken(input.ctx, token2)
 	require.NoError(t, err)
 
-	res, err = queryAllTokenList(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
@@ -95,9 +101,11 @@ func Test_queryWhitelist(t *testing.T) {
 		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryWhitelist),
 		Data: []byte{},
 	}
+	path0 := []string{QueryWhitelist}
+	query := NewQuerier(input.tk, input.tk.cdc)
 
 	// no token
-	res, err := queryWhitelist(input.ctx, req, input.tk)
+	res, err := query(input.ctx, path0, req)
 	require.Error(t, err)
 	require.Nil(t, res)
 
@@ -110,19 +118,19 @@ func Test_queryWhitelist(t *testing.T) {
 
 	//case 1: nil whitelist
 	req.Data = input.cdc.MustMarshalJSON(NewQueryWhitelistParams(symbol))
-	res, err = queryWhitelist(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.Equal(t, []byte("[]"), res)
 
 	//case 2: base-case ok
 	err = input.tk.addWhitelist(input.ctx, symbol, whitelist)
 	require.NoError(t, err)
-	_, err = queryWhitelist(input.ctx, req, input.tk)
+	_, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 
 	err = input.tk.removeWhitelist(input.ctx, symbol, whitelist)
 	require.NoError(t, err)
-	res, err = queryWhitelist(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.Equal(t, []byte("[]"), res)
 
@@ -136,9 +144,11 @@ func Test_queryForbiddenAddr(t *testing.T) {
 		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryForbiddenAddr),
 		Data: []byte{},
 	}
+	path0 := []string{QueryForbiddenAddr}
+	query := NewQuerier(input.tk, input.tk.cdc)
 
 	// no token
-	res, err := queryForbiddenAddr(input.ctx, req, input.tk)
+	res, err := query(input.ctx, path0, req)
 	require.Error(t, err)
 	require.Nil(t, res)
 
@@ -151,20 +161,51 @@ func Test_queryForbiddenAddr(t *testing.T) {
 
 	//case 1: nil forbidden addr
 	req.Data = input.cdc.MustMarshalJSON(NewQueryForbiddenAddrParams(symbol))
-	res, err = queryForbiddenAddr(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.Equal(t, []byte("[]"), res)
 
 	//case 2: base-case ok
 	err = input.tk.addForbidAddress(input.ctx, symbol, mock)
 	require.NoError(t, err)
-	_, err = queryForbiddenAddr(input.ctx, req, input.tk)
+	_, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 
 	err = input.tk.removeForbidAddress(input.ctx, symbol, mock)
 	require.NoError(t, err)
-	res, err = queryForbiddenAddr(input.ctx, req, input.tk)
+	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.Equal(t, []byte("[]"), res)
 
+}
+
+func Test_queryReservedSymbols(t *testing.T) {
+	input := setupTestInput()
+	req := abci.RequestQuery{
+		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryReservedSymbols),
+		Data: []byte{},
+	}
+	path0 := []string{QueryReservedSymbols}
+	query := NewQuerier(input.tk, input.tk.cdc)
+
+	res, err := query(input.ctx, path0, req)
+	require.NoError(t, err)
+	require.NotNil(t, res)
+
+	bz, _ := codec.MarshalJSONIndent(msgCdc, reserved)
+	require.Equal(t, bz, res)
+}
+
+func Test_queryDefault(t *testing.T) {
+	input := setupTestInput()
+	req := abci.RequestQuery{
+		Path: fmt.Sprintf("custom/%s/%s", RouterKey, "unknown"),
+		Data: []byte{},
+	}
+	path0 := []string{"unknown"}
+	query := NewQuerier(input.tk, input.tk.cdc)
+
+	res, err := query(input.ctx, path0, req)
+	require.Error(t, err)
+	require.Nil(t, res)
 }

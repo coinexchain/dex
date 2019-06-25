@@ -3,17 +3,14 @@ package asset
 import (
 	"errors"
 	"fmt"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"regexp"
 	"unicode/utf8"
-	"unsafe"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Token is an interface used to store asset at a given token within state.
 // Many complex conditions can be used in the concrete struct which implements Token.
 type Token interface {
-	GetName() string
 	SetName(string) error
 
 	GetSymbol() string
@@ -113,10 +110,10 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	t.SetAddrForbiddable(addrForbiddable)
 	t.SetTokenForbiddable(tokenForbiddable)
 
-	if err := t.SetTotalMint(0); err != nil {
+	if err = t.SetTotalMint(0); err != nil {
 		return nil, ErrorInvalidTokenMint(err.Error())
 	}
-	if err := t.SetTotalBurn(0); err != nil {
+	if err = t.SetTotalBurn(0); err != nil {
 		return nil, ErrorInvalidTokenBurn(err.Error())
 	}
 	t.SetIsForbidden(false)
@@ -141,14 +138,10 @@ func (t *BaseToken) Validate() error {
 	}
 
 	if t.TotalBurn < 0 || (!t.Burnable && t.TotalBurn > 0) {
-		return ErrorInvalidTokenMint(fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
+		return ErrorInvalidTokenBurn(fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
 	}
 
 	return nil
-}
-
-func (t BaseToken) GetName() string {
-	return t.Name
 }
 
 func (t *BaseToken) SetName(name string) error {
@@ -257,7 +250,7 @@ func (t BaseToken) GetDescription() string {
 }
 
 func (t *BaseToken) SetDescription(description string) error {
-	if unsafe.Sizeof(description) > 1024 {
+	if len(description) > 1024 {
 		return errors.New("token description is limited to 1k size")
 	}
 	t.Description = description
@@ -297,20 +290,24 @@ func (t *BaseToken) SetIsForbidden(enable bool) {
 }
 
 func (t BaseToken) String() string {
-	return fmt.Sprintf(`Token Info: [
-  Name:           %s
-  Symbol:         %s
-  TotalSupply:    %d
-  Owner:          %s
-  Mintable:       %t
-  Burnable:       %t 
+	return fmt.Sprintf(`Token Info: 
+[
+  Name:             %s
+  Symbol:           %s
+  TotalSupply:      %d
+  Owner:            %s
+  Mintable:         %t
+  Burnable:         %t
   AddrForbiddable:  %t
   TokenForbiddable: %t
-  TotalBurn:      %d
-  TotalMint:      %d
-  IsForbidden:       %t ]`,
+  TotalBurn:        %d
+  TotalMint:        %d
+  IsForbidden:      %t
+  URL:              %s
+  Description:      %s
+]`,
 		t.Name, t.Symbol, t.TotalSupply, t.Owner.String(), t.Mintable, t.Burnable,
-		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsForbidden,
+		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsForbidden, t.URL, t.Description,
 	)
 }
 

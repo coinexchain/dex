@@ -39,6 +39,15 @@ func TestTokenKeeper_IssueToken(t *testing.T) {
 			},
 			ErrorDuplicateTokenSymbol("token symbol already exists in store"),
 		},
+		{
+			"case-invalid",
+			args{
+				input.ctx,
+				NewMsgIssueToken("ABC Token", "999", 2100, tAccAddr,
+					false, false, false, false, "", ""),
+			},
+			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -77,6 +86,45 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 	// get token
 	res := input.tk.GetToken(input.ctx, token1.GetSymbol())
 	require.Nil(t, res)
+
+}
+func TestTokenKeeper_TokenReserved(t *testing.T) {
+	input := setupTestInput()
+	addr, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+	expectErr := ErrorInvalidTokenOwner("only coinex dex can issue reserved symbol token, you can run \n" +
+		"$ cetcli query asset reserved-symbol \n" +
+		"to query coinex dex reserved token symbol\n" +
+		"if you want it,please contact coinex")
+
+	// issue btc token failed
+	issueMsg := NewMsgIssueToken("BTC token", "btc", 2100, tAccAddr,
+		true, true, false, true, "", "")
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.Equal(t, expectErr, err)
+
+	// issue abc token success
+	issueMsg = NewMsgIssueToken("ABC token", "abc", 2100, tAccAddr,
+		true, true, false, true, "", "")
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	// issue cet token success
+	issueMsg = NewMsgIssueToken("CET token", "cet", 2100, tAccAddr,
+		true, true, false, true, "", "")
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	// cet owner issue btc token success
+	issueMsg = NewMsgIssueToken("BTC token", "btc", 2100, tAccAddr,
+		true, true, false, true, "", "")
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	// only cet owner can issue reserved token
+	issueMsg = NewMsgIssueToken("ETH token", "eth", 2100, addr,
+		true, true, false, true, "", "")
+	err = input.tk.IssueToken(input.ctx, issueMsg)
+	require.Equal(t, expectErr, err)
 
 }
 
@@ -629,4 +677,74 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 
 	// remove token
 	input.tk.removeToken(input.ctx, token)
+}
+
+func TestTokenKeeper_ModifyTokenURL(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, false, false, false, "www.abc.org", "")
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg := NewMsgModifyTokenURL(symbol, "www.abc.com", tAccAddr)
+	err = input.tk.ModifyTokenURL(input.ctx, msg)
+	require.NoError(t, err)
+	token := input.tk.GetToken(input.ctx, symbol)
+	url := token.GetURL()
+	require.Equal(t, "www.abc.com", url)
+
+	//case 2: invalid url
+	msg = NewMsgModifyTokenURL(symbol, string(make([]byte, 100+1)), tAccAddr)
+	err = input.tk.ModifyTokenURL(input.ctx, msg)
+	require.Error(t, err)
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, "www.abc.com", url)
+
+	//case 3: only token owner can modify token url
+	msg = NewMsgModifyTokenURL(symbol, "www.abc.org", addr)
+	err = input.tk.ModifyTokenURL(input.ctx, msg)
+	require.Error(t, err)
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, "www.abc.com", url)
+
+}
+
+func TestTokenKeeper_ModifyTokenDescription(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+
+	//case 1: base-case ok
+	// set token
+	issueMsg := NewMsgIssueToken("ABC token", symbol, 2100, tAccAddr,
+		true, false, false, false, "", "token abc is a example token")
+	err := input.tk.IssueToken(input.ctx, issueMsg)
+	require.NoError(t, err)
+
+	msg := NewMsgModifyTokenDescription(symbol, "abc example description", tAccAddr)
+	err = input.tk.ModifyTokenDescription(input.ctx, msg)
+	require.NoError(t, err)
+	token := input.tk.GetToken(input.ctx, symbol)
+	description := token.GetDescription()
+	require.Equal(t, "abc example description", description)
+
+	//case 2: invalid url
+	msg = NewMsgModifyTokenDescription(symbol, string(make([]byte, 1024+1)), tAccAddr)
+	err = input.tk.ModifyTokenDescription(input.ctx, msg)
+	require.Error(t, err)
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, "abc example description", description)
+
+	//case 3: only token owner can modify token url
+	msg = NewMsgModifyTokenDescription(symbol, "abc example description", addr)
+	err = input.tk.ModifyTokenDescription(input.ctx, msg)
+	require.Error(t, err)
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, "abc example description", description)
+
 }

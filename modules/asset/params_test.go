@@ -14,6 +14,7 @@ func TestParams_Equal(t *testing.T) {
 	p1 := DefaultParams()
 	p2 := DefaultParams()
 	require.Equal(t, p1, p2)
+	require.True(t, p1.Equal(p2))
 
 	// mount should equal
 	cet := types.NewCetCoins(10)

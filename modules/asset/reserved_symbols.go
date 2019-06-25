@@ -39,7 +39,7 @@ var reserved = []string{
 	"lkr", "sek", "chf", "thb", "ttd", "tnd", "try", "ugx", "uah", "aed",
 	"uyu", "uzs", "vnd",
 
-	"libra",
+	"libra", "cet",
 
 	// precious metals 4
 	"xau", "xag", "xpt", "xpd",
