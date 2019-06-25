@@ -51,3 +51,8 @@ func init() {
 		reservedSymbolMap[symbol] = i
 	}
 }
+
+func isReserved(symbol string) bool {
+	var _, found = reservedSymbolMap[symbol]
+	return found
+}

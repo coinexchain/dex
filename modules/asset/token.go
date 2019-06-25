@@ -177,7 +177,7 @@ func (t *BaseToken) SetSymbol(symbol string) error {
 	}
 
 	// TODO: tAccAddr need coinex owner
-	if _, reserved := reservedSymbolMap[symbol]; reserved && !t.Owner.Equals(tAccAddr) {
+	if isReserved(symbol) && !t.Owner.Equals(tAccAddr) {
 		return errors.New("only coinex dex can issue reserved symbol token, you can run \n" +
 			"$ cetcli query asset reserved-symbol \n" +
 			"to query coinex dex reserved token symbol\n" +
