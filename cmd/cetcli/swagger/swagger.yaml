@@ -2,7 +2,7 @@
 swagger: "2.0"
 info:
   version: "3.0"
-  title: Cet-Lite for CoinEx Chain
+  title: CET-Lite for CoinEx Chain
   description: A REST interface for state queries, transaction generation and broadcasting.
 tags:
   - name: ICS0
@@ -34,7 +34,7 @@ securityDefinitions:
 paths:
   /version:
     get:
-      summary: Version of Gaia-lite
+      summary: Version of CET-lite
       tags:
         - version
       description: Get the version of cetcli
@@ -86,7 +86,7 @@ paths:
                     example: 0
               network:
                 type: string
-                example: gaia-2
+                example: coinexchain-2
               channels:
                 type: string
               listen_addr:
@@ -2900,7 +2900,7 @@ definitions:
     properties:
       chain_id:
         type: string
-        example: gaia-2
+        example: coinexchain-2
       height:
         type: number
         example: 1
