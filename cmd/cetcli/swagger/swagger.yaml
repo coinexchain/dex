@@ -2563,7 +2563,7 @@ paths:
   /asset/tokens/{symbol}/urls:
     post:
       tags:
-        - ICS100
+        - Asset
       summary: Modify token url
       description: Modify token url
       operationId: modifyTokenURL
@@ -2592,6 +2592,44 @@ paths:
       responses:
         200:
           description: Modify token url result
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
+        500:
+          description: Internal Server Error
+  /asset/tokens/{symbol}/descriptions:
+    post:
+      tags:
+        - Asset
+      summary: Modify token description
+      description: Modify token description
+      operationId: modifyTokenDescription
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: token symbol
+          required: true
+          type: string
+          x-example: abc
+        - in: body
+          name: description
+          description: new token description
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              description:
+                type: string
+      responses:
+        200:
+          description: Modify token description result
           schema:
             $ref: "#/definitions/StdTx"
         400:

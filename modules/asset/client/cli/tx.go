@@ -32,7 +32,6 @@ const (
 	flagAmount    = "amount"
 	flagWhitelist = "whitelist"
 	flagAddresses = "addresses"
-	flagURL       = "url"
 )
 
 var issueTokenFlags = []string{
@@ -568,10 +567,10 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 
 var modifyTokenURLFlags = []string{
 	flagSymbol,
-	flagURL,
+	flagTokenURL,
 }
 
-// BurnTokenCmd will create a burn token tx and sign.
+// ModifyTokenURLCmd will create a modify token url tx and sign.
 func ModifyTokenURLCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "modify-token-url",
@@ -607,10 +606,61 @@ $ cetcli tx asset modify-token-url --symbol="abc" \
 	}
 
 	cmd.Flags().String(flagSymbol, "", "which token will be modify")
-	cmd.Flags().String(flagURL, "", "the url of token")
+	cmd.Flags().String(flagTokenURL, "", "the url of token")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range modifyTokenURLFlags {
+		_ = cmd.MarkFlagRequired(flag)
+	}
+
+	return cmd
+}
+
+var modifyTokenDescriptionFlags = []string{
+	flagSymbol,
+	flagTokenDescription,
+}
+
+// ModifyTokenDescriptionCmd will create a modify token description tx and sign.
+func ModifyTokenDescriptionCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "modify-token-description",
+		Short: "Modify token description",
+		Long: strings.TrimSpace(
+			`Create and sign a modify token description msg, broadcast to nodes.
+
+Example:
+$ cetcli tx asset modify-token-description --symbol="abc" \
+	--description="abc example description" \
+    --from mykey
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			owner := cliCtx.GetFromAddress()
+			msg, err := parseModifyTokenDescriptionFlags(owner)
+			if err != nil {
+				return err
+			}
+
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			if _, err = cliCtx.GetAccount(owner); err != nil {
+				return err
+			}
+
+			// build and sign the transaction, then broadcast to Tendermint
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+		},
+	}
+
+	cmd.Flags().String(flagSymbol, "", "which token will be modify")
+	cmd.Flags().String(flagTokenDescription, "", "the description of token")
+
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
+	for _, flag := range modifyTokenDescriptionFlags {
 		_ = cmd.MarkFlagRequired(flag)
 	}
 

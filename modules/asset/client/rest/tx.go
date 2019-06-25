@@ -32,6 +32,7 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/addresses", symbol), forbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/addresses", symbol), unForbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/urls", symbol), modifyTokenURLHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/descriptions", symbol), modifyTokenDescriptionHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
 // issueReq defines the properties of a issue token request's body.
@@ -428,6 +429,44 @@ func modifyTokenURLHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 		symbol := vars[symbol]
 
 		msg := asset.NewMsgModifyTokenURL(symbol, req.URL, owner)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+// modifyTokenDescriptionReq defines the properties of a modify token description request's body.
+type modifyTokenDescriptionReq struct {
+	BaseReq     rest.BaseReq `json:"base_req"`
+	Description string       `json:"description"`
+}
+
+// modifyTokenDescriptionHandlerFn - http request handler to modify token description.
+func modifyTokenDescriptionHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req modifyTokenDescriptionReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		vars := mux.Vars(r)
+		symbol := vars[symbol]
+
+		msg := asset.NewMsgModifyTokenDescription(symbol, req.Description, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
