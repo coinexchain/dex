@@ -324,6 +324,8 @@
             "burnable": true,
             "addr_forbiddable": false,
             "token_forbiddable": false,
+            "url": "www.coinex.org",
+            "description": "A public chain built for the decentralized exchange",
             "total_burn": "411211452994260000",
             "total_mint": "0",
             "is_forbidden": false
@@ -340,6 +342,8 @@
             "burnable": true,
             "addr_forbiddable": false,
             "token_forbiddable": false,
+            "url": "www.abc.org",
+            "description": "token abc is a example token",
             "total_burn": "411211452994260000",
             "total_mint": "0",
             "is_forbidden": false
