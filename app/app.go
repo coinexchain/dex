@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/coinexchain/dex/modules/distributionx"
 	"io"
 	"os"
 	"sort"
@@ -79,6 +80,7 @@ type CetChainApp struct {
 	stakingXKeeper      stakingx.Keeper
 	slashingKeeper      slashing.Keeper
 	distrKeeper         distr.Keeper
+	distrxKeeper        distributionx.Keeper
 	govKeeper           gov.Keeper
 	crisisKeeper        crisis.Keeper
 	incentiveKeeper     incentive.Keeper
@@ -223,6 +225,10 @@ func (app *CetChainApp) initKeepers() {
 		app.tokenKeeper,
 		app.msgQueProducer,
 	)
+	app.distrxKeeper = distributionx.NewKeeper(
+		app.bankxKeeper,
+		app.distrKeeper,
+	)
 	app.assetKeeper = asset.NewBaseKeeper(
 		app.cdc,
 		app.keyAsset,
@@ -263,7 +269,8 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(crisis.RouterKey, crisis.NewHandler(app.crisisKeeper)).
 		AddRoute(bankx.RouterKey, bankx.NewHandler(app.bankxKeeper)).
 		AddRoute(asset.RouterKey, asset.NewHandler(app.assetKeeper)).
-		AddRoute(market.RouterKey, market.NewHandler(app.marketKeeper))
+		AddRoute(market.RouterKey, market.NewHandler(app.marketKeeper)).
+		AddRoute(distributionx.RouterKey, distributionx.NewHandler(app.distrxKeeper))
 
 	app.QueryRouter().
 		AddRoute(auth.QuerierRoute, auth.NewQuerier(app.accountKeeper)).
@@ -292,6 +299,7 @@ func MakeCodec() *codec.Codec {
 	bankx.RegisterCodec(cdc)
 	staking.RegisterCodec(cdc)
 	distr.RegisterCodec(cdc)
+	distributionx.RegisterCodec(cdc)
 	slashing.RegisterCodec(cdc)
 	gov.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/coinexchain/dex/modules/distributionx"
 	"os"
 	"testing"
 	"time"
@@ -319,4 +320,37 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	//slash tokens should be put into communityPool
 	communityPool := app.distrKeeper.GetFeePool(ctx).CommunityPool
 	require.Equal(t, sdk.NewDecCoins(dex.NewCetCoins(5e6+1)), communityPool)
+}
+
+func TestDonateToCommunityPool(t *testing.T) {
+
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10e8))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	// app
+	app := initAppWithBaseAccounts(acc0)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	ctx := app.NewContext(false, header)
+
+	//build tx
+	coins = dex.NewCetCoins(1e8)
+	msg := distributionx.NewMsgDonateToCommunityPool(fromAddr, coins)
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	// deliver tx
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeType(0), result.Code)
+
+	//check account
+	acc := app.accountKeeper.GetAccount(ctx, fromAddr)
+	require.Equal(t, sdk.NewInt(899999900), acc.GetCoins().AmountOf("cet"))
+
+	//check communityPool
+	communityPool := app.distrKeeper.GetFeePool(ctx).CommunityPool
+	require.True(t, communityPool.AmountOf("cet").Equal(sdk.NewDec(1e8)))
 }
