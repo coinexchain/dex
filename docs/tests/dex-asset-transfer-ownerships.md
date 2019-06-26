@@ -2,70 +2,42 @@
 
 ## TransferOwnership
 
-- 添加Asset模块的TransferOwnership功能，支持token ownership的转移。
-  - token的owner可以进行ownership的转移
-  - 非owner不能进行此操作
-  - 不能对未发行token进行此操作
-  - new_owner不能为空
+- 只有token的owner可以进行ownership的转移
+- 不能对未发行token进行此操作
+- new_owner不能为空
+- 不能向自己transfer ownership
 
-> transferOwnership扣除fee，暂时没有在asset 模块实现，待评估ante-Handler统一收取fee
->
-> transferOwnership fee未确认，需要和coinex对齐
+## TransferOwnership CLI
 
-## TransferOwnership CLI & API
-
-- CLI命令
-  - `$ cetcli tx asset transfer-ownership [flags]` 
-- Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/ownerships --data-binary '{"base_req":{"from":"coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp","chain_id":"coinexdex","sequence":"5","account_number":"0"},"new_owner":"coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"}'`
+- `$ cetcli tx asset transfer-ownership [flags]`
 
 ## TransferOwnership CLI Example
 
-参考[single_node_test](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/single-node-test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
+参考[Asset-IssueToken](https://github.com/coinexchain/dex/blob/master/docs/tests/dex-asset-issue.md)创建测试token
 
-1. 查询本地bob地址
+节点启动后
+
+1. 添加alice地址
 
 ```bash
-cetcli keys show bob -a
+$  cetcli keys add alice
+```
+
+2. 查询本地账户
+
+```bash
+$  cetcli	keys list
 ```
 
 本地返回：
 
-```bashcoinexpsmd30v4q47qqgm788mffmx46g49k7afz2nvvp
-```
-
-2. 查询本地alice地址
-
 ```bash
-$ cetcli keys show alice -a
+NAME:	TYPE:	ADDRESS:					PUBKEY:
+alice	local	coinex1h6jte3avry5q5fnn6cyzfh65r74tf7tmxdfxu6	coinexpub1addwnpepqguh9czz68trlt00fu5zvnlzghqzujudmagc563uxfuzdpl29hphy5mlqlq
+bob	local	coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765	coinexpub1addwnpepqvfkkum5w78h52xr8dzy347rp4sa79dh2h74tqpgndmvnn5tpcl4x99yzg4
 ```
 
-本地返回：
-
-```bashcoinexyvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t
-```
-
-3. 本地创建token，可参考[dex-asset-iusse](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-asset-issue.md) 
-
-```bash
-$ cetcli tx asset issue-token --name="bob first token" \
-        --symbol="coin1" \
-        --total-supply=2100000000000000 \
-        --mintable=false \
-        --burnable=true \
-        --addr-forbiddable=0 \
-        --token-forbiddable=1 \
-        --from $(cetcli keys show bob -a) --chain-id=coinexdex
-```
-
-本地返回TxHash：
-
-```bash
-Response:
-  TxHash: DA1EC4886B2469A58A0E3713DF8EA6760CAEC4A9F42B8EE11710F99AA44BF92A
-```
-
-4. 如上可以创建coin2，coin3等token，查询下所有token信息
+3. 查询本地所有token
 
 ```bash
 $ cetcli query asset tokens --chain-id=coinexdex
@@ -76,299 +48,117 @@ $ cetcli query asset tokens --chain-id=coinexdex
 ```bash
 [
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "bob first token",
-      "symbol": "coin1",
+      "name": "ABC Token",
+      "symbol": "abc",
       "total_supply": "2100000000000000",
-      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-      "mintable": false,
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.abc.org",
+      "description": "token abc is a example token"
     }
   },
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "bob sec token",
-      "symbol": "coin2",
+      "name": "First Token",
+      "symbol": "token1",
       "total_supply": "2100000000000000",
-      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-      "mintable": false,
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token1.org",
+      "description": "token1 is a example token"
     }
   },
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "bob th token",
-      "symbol": "coin3",
+      "name": "Second Token",
+      "symbol": "token2",
       "total_supply": "2100000000000000",
-      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-      "mintable": false,
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token2.org",
+      "description": "token2 is a example token"
     }
   }
 ]
 ```
 
-5. 如上3个token的owner都是bob，现在通过cli转移ownership
+4. 如上3个token的owner都是bob，现在通过cli转移ownership
 
 ```bash
-$ cetcli tx asset transfer-ownership --symbol="coin1" \
+$ cetcli tx asset transfer-ownership --symbol="token1" \
 	--new-owner $(cetcli keys show alice -a) \
-    --from $(cetcli keys show bob -a) --chain-id=coinexdex
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 50000 --gas-prices 20.0cet
 ```
 
-本地返回TxHash：
+解析返回TxHash，transfer ownership成功
 
 ```bash
 Response:
-  TxHash: C66A5DFB5CCAAB8F9A2BE039DAC9E3DFDDEACF044E9943760E9E71730B3B88A1
+  Height: 256
+  TxHash: D87A922A5AE08CFD12336F03F4C242993DA20305D1B0936A8664B2A9239ABAD5
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 50000
+  GasUsed: 21726
+  Tags:
+    - action = transfer_ownership
+    - category = asset
+    - token = token1
+    - original-owner = coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765
+    - new-owner = coinex1h6jte3avry5q5fnn6cyzfh65r74tf7tmxdfxu6
+
+  Timestamp: 2019-06-26T01:22:58Z
 ```
 
-6. 此时查看coin1信息，owner已经变成alice
+5. 此时查看token1信息，owner已经变成alice
 
 ```bash
-$ cetcli q asset token coin1 --chain-id=coinexdex
+$ cetcli q asset token token1 --chain-id=coinexdex
 ```
 
 本地返回：
 
 ```bash
 {
-  "type": "asset/Token",
+  "type": "asset/BaseToken",
   "value": {
-    "name": "bob first token",
-    "symbol": "coin1",
+    "name": "First Token",
+    "symbol": "token1",
     "total_supply": "2100000000000000",
-    "owner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
-    "mintable": false,
+    "owner": "coinex1h6jte3avry5q5fnn6cyzfh65r74tf7tmxdfxu6",
+    "mintable": true,
     "burnable": true,
-    "addr_forbiddable": false,
+    "addr_forbiddable": true,
     "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "0",
-    "is_forbidden": false
+    "is_forbidden": false,
+    "url": "www.token1.org",
+    "description": "token1 is a example token"
   }
 }
 ```
-
-
-
-## TransferOwnership Rest Example
-
-1. 查询本地AccountNumber和Sequence
-
-```bash
-$ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
-```
-
-本地返回：
-
-```bash
-Account:
-  Address:      coinexpsmd30v4q47qqgm788mffmx46g49k7afz2nvvp
-  Pubkey:       coinexub1addwnpepqgrp6tj3j8507jveu2jmgcp6adz8t95gpfuxfeun6032a6emu2s2g23q55r
-  Coins:         9996999900000000cet,2100000000000000coin1,2100000000000000coin2,2100000000000000coin3
-  AccountNumber: 0
-  Sequence:      5
-```
-
-2. 首先需要启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
-
-```bash
-$ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --node tcp://localhost:26657 --trust-node=false
-```
-
-3. 可以通过GET查询token信息
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens | jq
-```
-
-返回token1的信息：
-
-```bash
-[
-  {
-    "type": "asset/Token",
-    "value": {
-      "name": "bob first token",
-      "symbol": "coin1",
-      "total_supply": "2100000000000000",
-      "owner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
-      "mintable": false,
-      "burnable": true,
-      "addr_forbiddable": false,
-      "token_forbiddable": true,
-      "total_burn": "0",
-      "total_mint": "0",
-      "is_forbidden": false
-    }
-  },
-  {
-    "type": "asset/Token",
-    "value": {
-      "name": "bob sec token",
-      "symbol": "coin2",
-      "total_supply": "2100000000000000",
-      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-      "mintable": false,
-      "burnable": true,
-      "addr_forbiddable": false,
-      "token_forbiddable": true,
-      "total_burn": "0",
-      "total_mint": "0",
-      "is_forbidden": false
-    }
-  },
-  {
-    "type": "asset/Token",
-    "value": {
-      "name": "bob th token",
-      "symbol": "coin3",
-      "total_supply": "2100000000000000",
-      "owner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-      "mintable": false,
-      "burnable": true,
-      "addr_forbiddable": false,
-      "token_forbiddable": true,
-      "total_burn": "0",
-      "total_mint": "0",
-      "is_forbidden": false
-    }
-  }
-]
-```
-
-4. 通过Rest API转移coin2的ownership，填写本地from/new_owner/sequence/account_number等信息
-
-```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/ownerships --data-binary '{"base_req":{"from":"coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp","chain_id":"coinexdex","sequence":"5","account_number":"0"},"new_owner":"coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"}' > unsigned.json
-```
-
-返回未签名交易存入unsigned.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgTransferOwnership",
-        "value": {
-          "Symbol": "coin2",
-          "OriginalOwner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-          "NewOwner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": null,
-    "memo": ""
-  }
-}
-```
-
-5. 本地对交易进行签名
-
-```bash
-$ cetcli tx sign \
-  --chain-id=coinexdex \
-  --from $(cetcli keys show bob -a)  unsigned.json > signed.json
-```
-
-本地签名后将已签名交易存入signed.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgTransferOwnership",
-        "value": {
-          "Symbol": "coin2",
-          "OriginalOwner": "coinex1psmd30v4q47qqgm788mffmx46g49k7afz2nvvp",
-          "NewOwner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t"
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "AgYdLlGR6P9JmeKltGA660R1logKeGTnk9Pirus74qCk"
-        },
-        "signature": "Zss8X61FaPqW550Jxqqj7xctIUZq2h78PElavFsOKSZhgnC9SRno0V4DkFVDaGjtb+t8W94sPlW4ArJxvi2PnA=="
-      }
-    ],
-    "memo": ""
-  }
-}
-```
-
-6. 广播交易
-
-```bash
-$ cetcli tx broadcast signed.json
-```
-
-本地返回交易Hash
-
-```bash
-Response:
-  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
-```
-
-7. 此时查询coin2的owner已经更改
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin2
-```
-
-返回此token信息：
-
-```bash
-{
-  "type": "asset/Token",
-  "value": {
-    "name": "bob sec token",
-    "symbol": "coin2",
-    "total_supply": "2100000000000000",
-    "owner": "coinex1yvnrsxp6cagema97m4uf7vgvh4mcpl9csups2t",
-    "mintable": false,
-    "burnable": true,
-    "addr_forbiddable": false,
-    "token_forbiddable": true,
-    "total_burn": "0",
-    "total_mint": "0",
-    "is_forbidden": false
-  }
-}
-```
-
-
-

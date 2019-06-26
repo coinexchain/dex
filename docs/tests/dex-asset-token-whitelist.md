@@ -2,32 +2,24 @@
 
 ## Add/Remove Whitelist
 
-- 添加Asset模块Token全局禁止白名单。
-  - 只有token的owner可以进行add/Remove whitelist
-  - 不能对未发行token进行此操作
-  - 只有具备可全局禁止能力的token才能进行此操作
-  - 不能添加和删除空地址
+- 只有token的owner可以进行add/Remove whitelist
+- 不能对未发行token进行此操作
+- 只有具备可全局禁止能力的token才能进行此操作
+- 不能添加和删除空地址
 
-> add/remove扣除fee，暂时没有在asset 模块实现，待评估ante-Handler统一收取fee
->
-> add/removefee未确认，需要和coinex对齐
+## Whitelist CLI
 
-## Whitelist CLI & API
-
-- CLI命令
-  - `$ cetcli tx asset add-whitelist [flags]` 
-  - `$ cetcli tx asset remove-whitelist [flags]` 
-  - `$ cetcli q asset whitelist abc [flags]` 
-- Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}''`
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
-  - `curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/whitelist`
+- `$ cetcli tx asset add-whitelist [flags]`
+- `$ cetcli tx asset remove-whitelist [flags]`
+- `$ cetcli q asset whitelist abc [flags]`
 
 ## Whitelist CLI Example
 
-参考[single_node_test](https://github.com/coinexchain/dex/blob/master/docs/tests/single-node-test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
+参考[Asset-IssueToken](https://github.com/coinexchain/dex/blob/master/docs/tests/dex-asset-issue.md)创建测试token
 
-1. 本地创建token，可参考[dex-asset-iusse](https://github.com/coinexchain/dex/blob/master/docs/tests/dex-asset-issue.md) ,查询本地所有token信息：
+节点启动后
+
+1. 查询本地所有token
 
 ```bash
 $ cetcli query asset tokens --chain-id=coinexdex
@@ -38,90 +30,139 @@ $ cetcli query asset tokens --chain-id=coinexdex
 ```bash
 [
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": " 1' Token",
-      "symbol": "coin1",
+      "name": "ABC Token",
+      "symbol": "abc",
       "total_supply": "2100000000000000",
-      "owner": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-      "mintable": false,
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
       "burnable": true,
       "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.abc.org",
+      "description": "token abc is a example token"
     }
   },
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": " 2' Token",
-      "symbol": "coin2",
+      "name": "First Token",
+      "symbol": "token1",
       "total_supply": "2100000000000000",
-      "owner": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-      "mintable": false,
+      "owner": "coinex1h6jte3avry5q5fnn6cyzfh65r74tf7tmxdfxu6",
+      "mintable": true,
       "burnable": true,
       "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token1.org",
+      "description": "token1 is a example token"
+    }
+  },
+  {
+    "type": "asset/BaseToken",
+    "value": {
+      "name": "Second Token",
+      "symbol": "token2",
+      "total_supply": "2100000000000000",
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
+      "burnable": true,
+      "addr_forbiddable": true,
+      "token_forbiddable": true,
+      "total_burn": "100",
+      "total_mint": "100",
+      "is_forbidden": false,
+      "url": "www.token2.org",
+      "description": "token2 is a example token"
     }
   }
 ]
 ```
 
-3. 通过cli添加coin1的whitelist
+2. 通过cli添加token2的whitelist
 
 ```bash
-$ cetcli tx asset add-whitelist --symbol="coin1" \
-        --whitelist=coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt,coinex167w96tdvmazakdwkw2u57227eduula2cy572lf,coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz \
-    --from $(cetcli keys show bob -a) --chain-id=coinexdex
+$ cetcli tx asset add-whitelist --symbol="token2" \
+        --whitelist=coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47,coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g,coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn \
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 50000 --gas-prices 20.0cet
 ```
 
-本地返回TxHash：
+解析返回TxHash，添加白名单成功
 
 ```bash
-Response:
-  TxHash: C66A5DFB5CCAAB8F9A2BE039DAC9E3DFDDEACF044E9943760E9E71730B3B88A1
+  Height: 586
+  TxHash: 77EE969B535827CEDF11DC0D083BD18DDC4FA0DFBA5B1979AE2CC51DAE3B2A66
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 50000
+  GasUsed: 22971
+  Tags:
+    - action = add_token_whitelist
+    - category = asset
+    - token = token2
+    - add-whitelist = coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47,coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g,coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn,
+
+  Timestamp: 2019-06-26T01:50:42Z
 ```
 
-4. 此时可以查看到coin1白名单
+3. 此时可以查看token2白名单
 
 ```bash
-$ cetcli q asset whitelist coin1 --chain-id=coinexdex
+$ cetcli q asset whitelist token2 --chain-id=coinexdex
 ```
 
 本地返回：
 
 ```bash
 [
-  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-  "coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt",
-  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
+  "coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g",
+  "coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn",
+  "coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47"
 ]
 ```
 
-5. remove coin1白名单中的地址
+4. remove token2白名单中的地址
 
 ```bash
-$ cetcli tx asset remove-whitelist --symbol="coin1" \
-        --whitelist=coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt,coinex167w96tdvmazakdwkw2u57227eduula2cy572lf \
-    --from $(cetcli keys show bob -a) --chain-id=coinexdex
+$ cetcli tx asset remove-whitelist --symbol="token2" \
+        --whitelist=coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47,coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g \
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 50000 --gas-prices 20.0cet
 ```
 
 本地返回TxHash：
 
 ```bash
 Response:
-  TxHash: C66A5DFB5CCAAB8F9A2BE039DAC9E3DFDDEACF044E9943760E9E71730B3B88A1
+  Height: 675
+  TxHash: 62FEF4E5C92F70685340DE90672D9BFB923E16176C9F6241311FAE096F4B7CB2
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 50000
+  GasUsed: 18751
+  Tags:
+    - action = remove_token_whitelist
+    - category = asset
+    - token = token2
+    - remove-whitelist = coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g
+
+  Timestamp: 2019-06-26T01:58:10Z
 ```
 
-6. 此时查看到coin1的白名单
+5. 此时查看token2的白名单
 
 ```bash
-$ cetcli q asset whitelist coin1 --chain-id=coinexdex
+$ cetcli q asset whitelist  --chain-id=coinexdex
 ```
 
 本地返回：
@@ -131,248 +172,3 @@ $ cetcli q asset whitelist coin1 --chain-id=coinexdex
   "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
 ]
 ```
-
-
-
-## Whitelist Rest Example
-
-1. 查询本地AccountNumber和Sequence
-
-```bash
-$ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
-```
-
-本地返回：
-
-```bash
-Account:
-  Address:       coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4
-  Pubkey:        coinexpub1addwnpepq03r5ud4j4yx3yzqnzz4yyj8r0r9ysf7pqm92s3at3r8s7rt93ay778g4la
-  Coins:         9997000000000000cet,2100000000000000coin1,2100000000000000coin2
-  AccountNumber: 0
-  Sequence:      11
-  LockedCoins:
-  FrozenCoins:
-  MemoRequired:  false
-```
-
-2. 启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
-
-```bash
-$ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --node tcp://localhost:26657 --trust-node=false
-
-```
-
-3. 通过Rest AP添加coin2白名单，填写本地from/amount/sequence/account_number等信息
-
-```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/whitelist --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
-```
-
-返回未签名交易存入unsigned.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgAddTokenWhitelist",
-        "value": {
-          "symbol": "coin2",
-          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-          "whitelist": [
-            "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-          ]
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": null,
-    "memo": ""
-  }
-}
-```
-
-5. 本地对交易进行签名
-
-```bash
-$ cetcli tx sign \
-  --chain-id=coinexdex \
-  --from $(cetcli keys show bob -a)  unsigned.json > signed.json
-```
-
-本地签名后将已签名交易存入signed.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgAddTokenWhitelist",
-        "value": {
-          "symbol": "coin2",
-          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-          "whitelist": [
-            "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-          ]
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "A+I6cbWVSGiQQJiFUhJHG8ZSQT4INlVCPVxGeHhrLHpP"
-        },
-        "signature": "oAioMDCfKwRsuwZJMHMPRa1M+zDAku94ET4b3t/Yc+JroUnJ/hnic2poWCpeavzw7+lf7q4Kvf2JxNw3+43WZg=="
-      }
-    ],
-    "memo": ""
-  }
-}
-```
-
-6. 广播交易
-
-```bash
-$ cetcli tx broadcast signed.json
-```
-
-本地返回交易Hash
-
-```bash
-Response:
-  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
-```
-
-7. 查询coin2的白名单已经添加
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/whitelist
-```
-
-返回信息：
-
-```bash
-[
-  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-]%
-```
-
-8. 通过Rest API删除coin2的白名单，填写本地from/amount/sequence/account_number等信息
-
-```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/whitelist --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"whitelist":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
-```
-
-返回未签名交易存入unsigned.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgRemoveTokenWhitelist",
-        "value": {
-          "symbol": "coin2",
-          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-          "whitelist": [
-            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-          ]
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": null,
-    "memo": ""
-  }
-}
-```
-
-9. 本地对交易进行签名
-
-```bash
-$ cetcli tx sign \
-  --chain-id=coinexdex \
-  --from $(cetcli keys show bob -a)  unsigned.json > signed.json
-```
-
-本地签名后将已签名交易存入signed.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgRemoveTokenWhitelist",
-        "value": {
-          "symbol": "coin2",
-          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-          "whitelist": [
-            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-          ]
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "A+I6cbWVSGiQQJiFUhJHG8ZSQT4INlVCPVxGeHhrLHpP"
-        },
-        "signature": "2Vtfd+44BKmPcT1tz1HyqOtOo9G19je8Q76qF7eSx2pFJ4D55HSFO6knbx/026EmAH5D6WFXDBzL3yuCNI6r3A=="
-      }
-    ],
-    "memo": ""
-  }
-}
-```
-
-10. 广播交易
-
-```bash
-$ cetcli tx broadcast signed.json
-```
-
-本地返回交易Hash
-
-```bash
-Response:
-  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
-```
-
-11. 此时查询coin2的白名单已经更新
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin2/whitelist
-```
-
-返回信息：
-
-```bash
-[
-  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
-]%
-```
-

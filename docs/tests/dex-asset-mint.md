@@ -2,49 +2,22 @@
 
 ## MintToken
 
-- 添加Asset模块的MintToken功能，支持token的增发。
-  - token的owner可以进行token增发
-  - 非owner不能进行此操作
-  - 不能对未发行token进行此操作
-  - 只有具备可增发能力的token才能进行此操作
-  - 增发后的token总量不能超过90billion
+- 只有token的owner可以进行token增发
+- 不能对未发行token进行此操作
+- 只有具备可增发能力的token才能进行此操作
+- 增发后的token总量不能超过90billion
 
-> mint扣除fee，暂时没有在asset 模块实现，待评估ante-Handler统一收取fee
->
-> mint fee未确认，需要和coinex对齐
+## Mint Token CLI
 
-## MintToken CLI & API
+- `$ cetcli tx asset mint-token [flags]`
 
-- CLI命令
-  - `$ cetcli tx asset mint-token [flags]` 
-- Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin3/mints --data-binary '{"base_req":{"from":"coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"8","account_number":"0"},"amount":"2000"}'`
+## Mint Token CLI Example
 
-## MintToken CLI Example
+参考[Asset-IssueToken](https://github.com/coinexchain/dex/blob/master/docs/tests/dex-asset-issue.md)创建测试token
 
-参考[single_node_test](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/single-node-test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
+节点启动后
 
-1. 本地创建token，可参考[dex-asset-iusse](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-asset-issue.md) 
-
-```bash
-$ cetcli tx asset issue-token --name="first token" \
-        --symbol="coin1" \
-        --total-supply=2100000000000000 \
-        --mintable=true \
-        --burnable=true \
-        --addr-forbiddable=0 \
-        --token-forbiddable=1 \
-        --from $(cetcli keys show alice -a) --chain-id=coinexdex
-```
-
-本地返回TxHash：
-
-```bash
-Response:
-  TxHash: DA1EC4886B2469A58A0E3713DF8EA6760CAEC4A9F42B8EE11710F99AA44BF92A
-```
-
-2. 如上可以创建coin2，coin3等token，查询下所有token信息
+1. 查询本地所有token
 
 ```bash
 $ cetcli query asset tokens --chain-id=coinexdex
@@ -55,238 +28,116 @@ $ cetcli query asset tokens --chain-id=coinexdex
 ```bash
 [
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "first token",
-      "symbol": "coin1",
+      "name": "ABC Token",
+      "symbol": "abc",
       "total_supply": "2100000000000000",
-      "owner": "coinex16cyga47yh3cv6pzemy0fjtkeqjtrjjukgngey6",
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
       "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.abc.org",
+      "description": "token abc is a example token"
     }
   },
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "sec token",
-      "symbol": "coin2",
+      "name": "First Token",
+      "symbol": "token1",
       "total_supply": "2100000000000000",
-      "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+      "owner": "coinex1h6jte3avry5q5fnn6cyzfh65r74tf7tmxdfxu6",
       "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token1.org",
+      "description": "token1 is a example token"
     }
   },
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "th token",
-      "symbol": "coin3",
+      "name": "Second Token",
+      "symbol": "token2",
       "total_supply": "2100000000000000",
-      "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
       "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token2.org",
+      "description": "token2 is a example token"
     }
   }
 ]
 ```
 
-3. 我们通过cli进行coin2的增发
+3. 通过cli进行token2的增发
 
 ```bash
-$ cetcli tx asset mint-token --symbol="coin2" \
+$ cetcli tx asset mint-token --symbol="token2" \
         --amount=100 \
-    --from $(cetcli keys show bob -a) --chain-id=coinexdex
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 50000 --gas-prices 20.0cet
 ```
 
-本地返回TxHash：
+解析返回TxHash，增发成功
 
 ```bash
 Response:
-  TxHash: C66A5DFB5CCAAB8F9A2BE039DAC9E3DFDDEACF044E9943760E9E71730B3B88A1
+  Height: 331
+  TxHash: D7533A7DBE91539C55EB3C71EAB04208240984D93FF363C95367445B8312F021
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 50000
+  GasUsed: 21619
+  Tags:
+    - action = mint_token
+    - category = asset
+    - token = token2
+    - amount = 100
+
+  Timestamp: 2019-06-26T01:29:16Z
 ```
 
-4. 此时查看coin2信息，totalsupply已经增发
+4. 此时查看toekn2信息，totalsupply已经增发100
 
 ```bash
-$ cetcli q asset token coin2 --chain-id=coinexdex
+$ cetcli q asset token token2 --chain-id=coinexdex
 ```
 
 本地返回：
 
 ```bash
 {
-  "type": "asset/Token",
+  "type": "asset/BaseToken",
   "value": {
-    "name": "sec token",
-    "symbol": "coin2",
+    "name": "Second Token",
+    "symbol": "token2",
     "total_supply": "2100000000000100",
-    "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+    "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
     "mintable": true,
     "burnable": true,
-    "addr_forbiddable": false,
+    "addr_forbiddable": true,
     "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "100",
-    "is_forbidden": false
+    "is_forbidden": false,
+    "url": "www.token2.org",
+    "description": "token2 is a example token"
   }
 }
 ```
-
-
-
-## MintToken Rest Example
-
-1. 查询本地AccountNumber和Sequence
-
-```bash
-$ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
-```
-
-本地返回：
-
-```bash
-Account:
-  Address:       coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3
-  Pubkey:        coinexpub1addwnpepq2uns08x3873dhp0q722pf8yunudlhl3j4s6uxhe0zglusr7p64swxxjts5
-  Coins:         9996997900000000cet,2100000000000000coin1,2100000000000000coin2,2100000000000000coin3
-  AccountNumber: 0
-  Sequence:      8
-```
-
-2. 首先需要启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
-
-```bash
-$ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --node tcp://localhost:26657 --trust-node=false
-```
-
-3. 通过Rest API增发coin3，填写本地from/amount/sequence/account_number等信息
-
-```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin3/mints --data-binary '{"base_req":{"from":"coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"8","account_number":"0"},"amount":"2000"}' > unsigned.json
-```
-
-返回未签名交易存入unsigned.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgMintToken",
-        "value": {
-          "Symbol": "coin3",
-          "Amount": "2000",
-          "OwnerAddress": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3"
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": null,
-    "memo": ""
-  }
-}
-```
-
-4. 本地对交易进行签名
-
-```bash
-$ cetcli tx sign \
-  --chain-id=coinexdex \
-  --from $(cetcli keys show bob -a)  unsigned.json > signed.json
-```
-
-本地签名后将已签名交易存入signed.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgMintToken",
-        "value": {
-          "Symbol": "coin3",
-          "Amount": "2000",
-          "OwnerAddress": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3"
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "Ark4POaJ/RbcLweUoKTk5Pjf3/GVYa4a+XiR/kB+DqsH"
-        },
-        "signature": "rDybgNnkLdVrAt0BmuhujWDjnO2GI88fMgSxNCY2uKQPC+osG5bou0cjbkhK7zHHJEiyaKaczcjwPVL3kBK29A=="
-      }
-    ],
-    "memo": ""
-  }
-}
-```
-
-5. 广播交易
-
-```bash
-$ cetcli tx broadcast signed.json
-```
-
-本地返回交易Hash
-
-```bash
-Response:
-  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
-```
-
-6. 此时查询coin3已经增发
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin3
-```
-
-返回此token信息：
-
-```bash
-{
-  "type": "asset/Token",
-  "value": {
-    "name": "th token",
-    "symbol": "coin3",
-    "total_supply": "2100000000002000",
-    "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
-    "mintable": true,
-    "burnable": true,
-    "addr_forbiddable": false,
-    "token_forbiddable": true,
-    "total_burn": "0",
-    "total_mint": "2000",
-    "is_forbidden": false
-  }
-}
-```
-
-
-

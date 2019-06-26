@@ -2,32 +2,24 @@
 
 ## Forbid Addr
 
-- 添加Asset模块禁止Addr功能
-  - 只有token的owner可以进行forbid addr
-  - 不能对未发行token进行此操作
-  - 只有具备可addr禁止能力的token才能进行此操作
-  - 不能添加和删除空地址
+- 只有token的owner可以进行forbid addr
+- 不能对未发行token进行此操作
+- 只有具备可addr禁止能力的token才能进行此操作
+- 不能添加和删除空地址
 
-> forbid addr扣除fee，暂时没有在asset 模块实现，待评估ante-Handler统一收取fee
->
-> forbid addr fee未确认，需要和coinex对齐
+## Forbid Addr CLI
 
-## Forbid Addr CLI & API
-
-- CLI命令
-  - `$ cetcli tx asset forbid-addr [flags]` 
-  - `$ cetcli tx asset unforbid-addr [flags]` 
-  - `$ cetcli q asset forbid-addr abc [flags]` 
-- Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/addresses --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"15","account_number":"0"},"forbidden_addr":["coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
-  - `curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/addresses --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"forbidden_addr":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}'`
-  - `curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/addresses`
+- `$ cetcli tx asset forbid-addr [flags]`
+- `$ cetcli tx asset unforbid-addr [flags]`
+- `$ cetcli q asset forbid-addr abc [flags]`
 
 ## Forbid Addr CLI Example
 
-参考[single_node_test](https://github.com/coinexchain/dex/blob/master/docs/tests/single-node-test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
+参考[Asset-IssueToken](https://github.com/coinexchain/dex/blob/master/docs/tests/dex-asset-issue.md)创建测试token
 
-1. 本地创建token，可参考[dex-asset-iusse](https://github.com/coinexchain/dex/blob/master/docs/tests/dex-asset-issue.md) ,查询本地所有token信息：
+节点启动后
+
+1. 查询本地所有token
 
 ```bash
 $ cetcli query asset tokens --chain-id=coinexdex
@@ -38,90 +30,140 @@ $ cetcli query asset tokens --chain-id=coinexdex
 ```bash
 [
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": " 1' Token",
-      "symbol": "coin1",
+      "name": "ABC Token",
+      "symbol": "abc",
       "total_supply": "2100000000000000",
-      "owner": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-      "mintable": false,
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
       "burnable": true,
       "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.abc.org",
+      "description": "token abc is a example token"
     }
   },
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": " 2' Token",
-      "symbol": "coin2",
+      "name": "First Token",
+      "symbol": "token1",
       "total_supply": "2100000000000000",
-      "owner": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-      "mintable": false,
+      "owner": "coinex1h6jte3avry5q5fnn6cyzfh65r74tf7tmxdfxu6",
+      "mintable": true,
       "burnable": true,
       "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token1.org",
+      "description": "token1 is a example token"
+    }
+  },
+  {
+    "type": "asset/BaseToken",
+    "value": {
+      "name": "Second Token",
+      "symbol": "token2",
+      "total_supply": "2100000000000000",
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
+      "burnable": true,
+      "addr_forbiddable": true,
+      "token_forbiddable": true,
+      "total_burn": "100",
+      "total_mint": "100",
+      "is_forbidden": false,
+      "url": "www.token2.org",
+      "description": "token2 is a example token"
     }
   }
 ]
 ```
 
-2. 通过cli添加禁止coin1的Address
+2. 通过cli添加token2的禁止Address
 
 ```bash
-$ cetcli tx asset forbid-addr --symbol="coin1" \
-        --addresses=coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt,coinex167w96tdvmazakdwkw2u57227eduula2cy572lf,coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz \
-    --from $(cetcli keys show bob -a) --chain-id=coinexdex
+$ cetcli tx asset forbid-addr --symbol="token2" \
+        --addresses=coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47,coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g,coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn \
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 50000 --gas-prices 20.0cet
 ```
 
 本地返回TxHash：
 
 ```bash
 Response:
-  TxHash: C66A5DFB5CCAAB8F9A2BE039DAC9E3DFDDEACF044E9943760E9E71730B3B88A1
+  Height: 796
+  TxHash: 9E060C07E2A1F4C87FE635B4832B66272CB38C2E0AF4B5BE712FD492604E2676
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 50000
+  GasUsed: 22971
+  Tags:
+    - action = forbid_addr
+    - category = asset
+    - token = token2
+    - addresses = coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47,coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g,coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn,
+
+  Timestamp: 2019-06-26T02:08:20Z
 ```
 
-3. 此时可以查看到coin1被禁止的addr
+3. 此时可以查看到token2被禁止的addr
 
 ```bash
-$ cetcli q asset forbid-addr coin1 --chain-id=coinexdex
+$ cetcli q asset forbid-addr token2 --chain-id=coinexdex
 ```
 
 本地返回：
 
 ```bash
 [
-  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-  "coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt",
-  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
+  "coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g",
+  "coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn",
+  "coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47"
 ]
 ```
 
 4. 解除被禁止的addr
 
 ```bash
-$ cetcli tx asset unforbid-addr --symbol="coin1" \
-        --addresses=coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt,coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz \
-    --from $(cetcli keys show bob -a) --chain-id=coinexdex
+$ cetcli tx asset unforbid-addr --symbol="token2" \
+        --addresses=coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g,coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn \
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 50000 --gas-prices 20.0cet
 ```
 
 本地返回TxHash：
 
 ```bash
 Response:
-  TxHash: C66A5DFB5CCAAB8F9A2BE039DAC9E3DFDDEACF044E9943760E9E71730B3B88A1
+  Height: 826
+  TxHash: 1BCEFC7BF0B6591D60EA1280FA40792409E397140144A3E58DF461E308101859
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 50000
+  GasUsed: 18751
+  Tags:
+    - action = unforbid_addr
+    - category = asset
+    - token = token2
+    - addresses = coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g,coinex1sxdg68j29l057a7utz7hy9pztdv94a3gsw98hn,
+
+  Timestamp: 2019-06-26T02:10:52Z
 ```
 
-5. 此时查看coin1被禁止的addr
+5. 此时查看token2被禁止的addr
 
 ```bash
-$ cetcli q asset forbid-addr coin1 --chain-id=coinexdex
+$ cetcli q asset forbid-addr token2 --chain-id=coinexdex
 
 ```
 
@@ -129,252 +171,7 @@ $ cetcli q asset forbid-addr coin1 --chain-id=coinexdex
 
 ```bash
 [
-  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
+  "coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47"
 ]
-```
-
-
-
-## Forbid Addr Rest Example
-
-1. 查询本地AccountNumber和Sequence
-
-```bash
-$ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
-```
-
-本地返回：
-
-```bash
-Account:
-  Address:       coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4
-  Pubkey:        coinexpub1addwnpepq03r5ud4j4yx3yzqnzz4yyj8r0r9ysf7pqm92s3at3r8s7rt93ay778g4la
-  Coins:         9997000000000000cet,2100000000000000coin1,2100000000000000coin2
-  AccountNumber: 0
-  Sequence:      15
-  LockedCoins:
-  FrozenCoins:
-  MemoRequired:  false
-```
-
-2. 启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
-
-```bash
-$ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --node tcp://localhost:26657 --trust-node=false
-```
-
-3. 通过Rest API禁止coin2 Addr，填写本地from/amount/sequence/account_number等信息
-
-```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/forbidden/addresses --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"15","account_number":"0"},"forbidden_addr":["coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz","coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
-```
-
-返回未签名交易存入unsigned.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgForbidAddr",
-        "value": {
-          "symbol": "coin2",
-          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-          "forbid_addr": [
-            "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-          ]
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": null,
-    "memo": ""
-  }
-}
-```
-
-4. 本地对交易进行签名
-
-```bash
-$ cetcli tx sign \
-  --chain-id=coinexdex \
-  --from $(cetcli keys show bob -a)  unsigned.json > signed.json
-```
-
-本地签名后将已签名交易存入signed.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgForbidAddr",
-        "value": {
-          "symbol": "coin2",
-          "owner_address": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-          "forbid_addr": [
-            "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-          ]
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "A+I6cbWVSGiQQJiFUhJHG8ZSQT4INlVCPVxGeHhrLHpP"
-        },
-        "signature": "oeLKKPcjEUsko2OT3/BX8n0gEo4gnJegrFYmudmf9GgrCx6WpdJCYecodqHfKb3WDGuHmEX0OPY8rH+GN7PbmQ=="
-      }
-    ],
-    "memo": ""
-  }
-}
-```
-
-5. 广播交易
-
-```bash
-$ cetcli tx broadcast signed.json
-```
-
-本地返回交易Hash
-
-```bash
-Response:
-  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
-```
-
-6. 查询coin2被禁止的地址
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/addresses
-```
-
-返回信息：
-
-```bash
-[
-  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz",
-  "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-]%
-```
-
-7. 通过Rest API解除Addr禁止，填写本地from/amount/sequence/account_number等信息
-
-```bash
-$ curl -X POST http://localhost:1317/asset/tokens/coin2/unforbidden/addresses --data-binary '{"base_req":{"from":"coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4","chain_id":"coinexdex","sequence":"11","account_number":"0"},"forbidden_addr":["coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"]}' > unsigned.json
-```
-
-返回未签名交易存入unsigned.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgUnForbidAddr",
-        "value": {
-          "symbol": "coin2",
-          "owner_addr": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-          "unforbid_addr": [
-            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-          ]
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": null,
-    "memo": ""
-  }
-}
-```
-
-8. 本地对交易进行签名
-
-```bash
-$ cetcli tx sign \
-  --chain-id=coinexdex \
-  --from $(cetcli keys show bob -a)  unsigned.json > signed.json
-```
-
-本地签名后将已签名交易存入signed.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgUnForbidAddr",
-        "value": {
-          "symbol": "coin2",
-          "owner_addr": "coinex1x75pqkqaju8eauejjn0kq6pkx907qydusl0ua4",
-          "unforbid_addr": [
-            "coinex167w96tdvmazakdwkw2u57227eduula2cy572lf"
-          ]
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "A+I6cbWVSGiQQJiFUhJHG8ZSQT4INlVCPVxGeHhrLHpP"
-        },
-        "signature": "8Hw7fL5hLLmhw+GuOhvQmSiJnwle8Nv9oPY6F73ZeCBUcpZwMKeh/z/sakJlIxWLv6AAr6t4quUP3KKaAVOoHg=="
-      }
-    ],
-    "memo": ""
-  }
-}
-```
-
-9. 广播交易
-
-```bash
-$ cetcli tx broadcast signed.json
-```
-
-本地返回交易Hash
-
-```bash
-Response:
-  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
-
-```
-
-10. 此时查询coin2被禁止的地址
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin2/forbidden/addresses
-```
-
-返回信息：
-
-```bash
-[
-  "coinex1xl6453f6q6dv5770c9ue6hspdc0vxfuqtudkhz"
-]%
-
 ```
 

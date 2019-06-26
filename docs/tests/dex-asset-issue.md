@@ -2,30 +2,25 @@
 
 ## IssueToken
 
-- 参考[cosmos tutorial](https://cosmos.network/docs/intro/#sdk-application-architecture)添加Asset模块，支持token的发行。
-  - Token Name 限制在32 unicode characters
-  - Token Symbol format `^[a-z][a-z0-9]{1,7}$`
-  - Token Symbol 不能重名，创建已有的token
-  - Token TotalSupply 在boosting前不能超过90 billion
-  - Token issue fee扣除1000000000000cet
+- Token Name 限制在32 unicode characters
+- Token Symbol format `^[a-z][a-z0-9]{1,7}$`
+- Token Symbol 不能重名，创建已有的token
+- Token TotalSupply 在boosting前不能超过90 billion
+- Token issue fee扣除1000000000000cet
+- Token url限制在100 unicode characters
+- Token description size限制为1k
 
-> 发行token扣除的fee，暂时在asset 模块Handler中做了实现，待ante-Handler统一收取fee
+## IssueToken CLI
 
-## IssueToken CLI & API
-
-- CLI命令
-  - `$ cetcli tx asset issue-token [flags]` 
-  - `$ cetcli query asset token [symbol] [flags]`
-  - `$ cetcli query asset tokens  [flags]`
-
-- Rest-curl命令
-  - `$ curl -X GET http://localhost:1317/asset/tokens/symbol`
-  - `$ curl -X GET http://localhost:1317/asset/tokens`
-  - `$ curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"from":"coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","chain_id":"coinexdex","sequence":"4","account_number":"0"},"name":"my first rest coin","symbol":"coin1","total_supply":"10000000000","mintable":"false","burnable":"true","addr_forbiddable":"false","token_forbiddable":"true"}'`
+- `$ cetcli tx asset issue-token [flags]`
+- `$ cetcli query asset token [symbol] [flags]`
+- `$ cetcli query asset tokens [flags]`
 
 ## IssueToken CLI Example
 
-节点的搭建参考[single_node_test](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/single-node-test.md)，也可以从genesis.json中导入状态，节点启动后
+节点的搭建参考[single_node_test](https://github.com/coinexchain/dex/blob/master/docs/tests/single-node-test.md)，也可以运行`scripts/setup_single_testing_node.sh`，
+
+节点启动后
 
 1. 尝试查询当前token-list
 
@@ -33,93 +28,133 @@
 $ cetcli query asset tokens --chain-id=coinexdex
 ```
 
-当前并没有新创建的token：
+当前没有已发行的token
 
 ```bash
-ERROR: {"codespace":"asset","code":205,"message":"can not query any token"}
+[]
 ```
 
-2. 查询当前validator地址
+2. 查询当前用户
 
 ```bash
-$ cetcli keys show bob -a
+$ cetcli q account $(cetcli keys show bob -a) --chain-id=coinexdex
 ```
 
 本地返回：
 
 ```bash
-coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd
+Account:
+  Address:       coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765
+  Pubkey:        coinexpub1addwnpepqvfkkum5w78h52xr8dzy347rp4sa79dh2h74tqpgndmvnn5tpcl4x99yzg4
+  Coins:         9900000000000000cet
+  AccountNumber: 0
+  Sequence:      1
+  LockedCoins:
+  FrozenCoins:
+  MemoRequired:  false
 ```
 
 3. 创建token，通过--Flag指定所要创建的token信息
 
 ```bash
-$ cetcli tx asset issue-token --name="my first token" \
-        --symbol="token1" \
+$ cetcli tx asset issue-token --name="ABC Token" \
+        --symbol="abc" \
         --total-supply=2100000000000000 \
-        --mintable=false \
+        --mintable=true \
         --burnable=true \
-        --addr-forbiddable=0 \
-        --token-forbiddable=1 \
-        --from $(cetcli keys show bob -a) \
-        --chain-id=coinexdex
+        --addr-forbiddable=true \
+        --token-forbiddable=true \
+        --url="www.abc.org" \
+        --description="token abc is a example token" \
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 40000 --gas-prices 20.0cet
 ```
 
-本地返回TxHash：
+解析本地返回TxHash，token发行成功
 
 ```bash
 Response:
-  TxHash: CF7686265FB4DA2AA74B20CF92DEDF5792D22DA3385C9C91964D849B26C1C5FA
+  Height: 24
+  TxHash: 7549E7DF4FAAB34A6A33F09CB27759E07194323F2B3550FEF71BD883DB04D9C9
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 40000
+  GasUsed: 39312
+  Tags:
+    - action = issue_token
+    - category = asset
+    - token = abc
+    - owner = coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765
 ```
 
-4. 如果再次重复创建symbol:"token1"，会创建失败
+4. 查询bob账户，已扣除1000000000000sato.cet功能 fee+ 800000sato.cet的gas fee
 
 ```bash
-$ cetcli tx asset issue-token --name="my duplicat token" \
-        --symbol="token1" \
+Account:
+  Address:       coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765
+  Pubkey:        coinexpub1addwnpepqvfkkum5w78h52xr8dzy347rp4sa79dh2h74tqpgndmvnn5tpcl4x99yzg4
+  Coins:         2100000000000000abc,9898999999200000cet
+  AccountNumber: 0
+  Sequence:      2
+  LockedCoins:
+  FrozenCoins:
+  MemoRequired:  false
+```
+
+5. 如果再次重复创建symbol:"abc"，会创建失败
+
+```bash
+$ cetcli tx asset issue-token --name="ABC Token" \
+        --symbol="abc" \
         --total-supply=2100000000000000 \
-        --mintable=false \
+        --mintable=true \
         --burnable=true \
-        --addr-forbiddable=false \
+        --addr-forbiddable=true \
         --token-forbiddable=true \
-        --from $(cetcli keys show bob -a) \
-        --chain-id=coinexdex
+        --url="www.abc.org" \
+        --description="token abc is a example token" \
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 40000 --gas-prices 20.0cet
 ```
 
 本地返回提示：
 
 ```bash
-ERROR: token symbol already exists，pls query tokens and issue another symbol
+ERROR: token symbol already exists，please query tokens and issue another symbol
 ```
 
-5. 此时可以传入symbol参数`token1`查询到token-info
+5. 此时可以传入symbol参数`abc`查询到token-info
 
 ```bash
-$ cetcli query asset token token1 --chain-id=coinexdex
+$ cetcli query asset token abc --chain-id=coinexdex
 ```
 
 本地返回token的信息：
 
 ```bash
 {
-  "type": "asset/Token",
+  "type": "asset/BaseToken",
   "value": {
-    "name": "my first token",
-    "symbol": "token1",
+    "name": "ABC Token",
+    "symbol": "abc",
     "total_supply": "2100000000000000",
-    "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-    "mintable": false,
+    "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+    "mintable": true,
     "burnable": true,
-    "addr_forbiddable": false,
+    "addr_forbiddable": true,
     "token_forbiddable": true,
     "total_burn": "0",
     "total_mint": "0",
-    "is_forbidden": false
+    "is_forbidden": false,
+    "url": "www.abc.org",
+    "description": "token abc is a example token"
   }
 }
 ```
 
-6. 如上可以创建token2，token3等token，可以查询所有的token
+6. 如上可以创建token1，token2等token，可以查询所有的token
 
 ```bash
 $ cetcli query asset tokens --chain-id=coinexdex
@@ -130,277 +165,58 @@ $ cetcli query asset tokens --chain-id=coinexdex
 ```bash
 [
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "my first token",
+      "name": "ABC Token",
+      "symbol": "abc",
+      "total_supply": "2100000000000000",
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
+      "burnable": true,
+      "addr_forbiddable": true,
+      "token_forbiddable": true,
+      "total_burn": "0",
+      "total_mint": "0",
+      "is_forbidden": false,
+      "url": "www.abc.org",
+      "description": "token abc is a example token"
+    }
+  },
+  {
+    "type": "asset/BaseToken",
+    "value": {
+      "name": "First Token",
       "symbol": "token1",
       "total_supply": "2100000000000000",
-      "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-      "mintable": false,
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token1.org",
+      "description": "token1 is a example token"
     }
   },
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "my sec token",
+      "name": "Second Token",
       "symbol": "token2",
       "total_supply": "2100000000000000",
-      "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-      "mintable": false,
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
-    }
-  },
-  {
-    "type": "asset/Token",
-    "value": {
-      "name": "my th token",
-      "symbol": "token3",
-      "total_supply": "2100000000000000",
-      "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-      "mintable": false,
-      "burnable": true,
-      "addr_forbiddable": false,
-      "token_forbiddable": true,
-      "total_burn": "0",
-      "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token2.org",
+      "description": "token2 is a example token"
     }
   }
 ]
 ```
-
-## IssueToken Rest Example
-
-1. 查询本地AccountNumber和Sequence
-
-```bash
-$ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
-```
-
-本地返回：
-
-```bash
-Account:
-  Address:       coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd
-  Pubkey:        coinexpub1addwnpepq0mdsnxm75k543ruyg7v9gnd9n2s55lwf2t7sp60kl874rchq8vj5w4t7e4
-  Coins:         9996999900000000cet,2100000000000000token1,2100000000000000token2,2100000000000000token3
-  AccountNumber: 0
-  Sequence:      4
-```
-
-2. 首先需要启动rest-server.  可参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
-
-```bash
-$ cetcli rest-server --chain-id=coinexdex --laddr=tcp://localhost:1317 --node tcp://localhost:26657 --trust-node=false
-```
-
-3. 可以通过GET查询token信息
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/token1
-```
-
-返回token1的信息：
-
-```bash
-{"type":"asset/Token","value":{"name":"my first token","symbol":"token1","total_supply":"2100000000000000","owner":"coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":true,"total_burn":"0","total_mint":"0","is_forbidden":false}}%
-```
-
-4. 查询所有token信息
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens
-```
-
-返回所有token信息：
-
-```bash
-[
-  {
-    "type": "asset/Token",
-    "value": {
-      "name": "my first token",
-      "symbol": "token1",
-      "total_supply": "2100000000000000",
-      "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-      "mintable": false,
-      "burnable": true,
-      "addr_forbiddable": false,
-      "token_forbiddable": true,
-      "total_burn": "0",
-      "total_mint": "0",
-      "is_forbidden": false
-    }
-  },
-  {
-    "type": "asset/Token",
-    "value": {
-      "name": "my sec token",
-      "symbol": "token2",
-      "total_supply": "2100000000000000",
-      "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-      "mintable": false,
-      "burnable": true,
-      "addr_forbiddable": false,
-      "token_forbiddable": true,
-      "total_burn": "0",
-      "total_mint": "0",
-      "is_forbidden": false
-    }
-  },
-  {
-    "type": "asset/Token",
-    "value": {
-      "name": "my th token",
-      "symbol": "token3",
-      "total_supply": "2100000000000000",
-      "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-      "mintable": false,
-      "burnable": true,
-      "addr_forbiddable": false,
-      "token_forbiddable": true,
-      "total_burn": "0",
-      "total_mint": "0",
-      "is_forbidden": false
-    }
-  }
-]
-```
-
-5. 通过Rest API 发行token
-
-```bash
-curl -X POST http://localhost:1317/asset/tokens --data-binary '{"base_req":{"from":"coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd","chain_id":"coinexdex","sequence":"3","account_number":"0"},"name":"my first rest coin","symbol":"coin1","total_supply":"10000000000","mintable":false,"burnable":true,"addr_forbiddable":false,"token_forbiddable":true}' > unsigned.json
-```
-
-返回未签名交易存入unsigned.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgIssueToken",
-        "value": {
-          "name": "my first rest coin",
-          "symbol": "coin1",
-          "total_supply": "10000000000",
-          "owner": "coinex1n9emr2kwt70aajjreklu2w9d3jamm4nwkpnp2l",
-          "mintable": false,
-          "burnable": true,
-          "addr_forbiddable": false,
-          "token_forbiddable": true
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": null,
-    "memo": ""
-  }
-}
-```
-
-6. 本地对交易进行签名
-
-```bash
-$ cetcli tx sign \
-  --chain-id=coinexdex \
-  --from=$(cetcli keys show bob -a)  unsigned.json > signed.json
-```
-
-本地签名后将已签名交易存入signed.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgIssueToken",
-        "value": {
-          "name": "my first rest coin",
-          "symbol": "coin9",
-          "total_supply": "10000000000",
-          "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-          "mintable": false,
-          "burnable": true,
-          "addr_forbiddable": false,
-          "token_forbiddable": true
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "AwCqzZ5e3NhCF4QAtgrz+KT2kDvGt+rzOse87T7HfCS7"
-        },
-        "signature": "IAf/v0+Z5KV5kCTy5LWy2Y5ySPyaKhBoSbzVIctWSfoGb75XF0HVbE4DABEVnbntWKy7MA9iV7HYTXD+1NBePA=="
-      }
-    ],
-    "memo": ""
-  }
-}
-```
-
-7. 广播交易
-
-```bash
-$ cetcli tx broadcast signed.json
-```
-
-本地返回交易Hash
-
-```bash
-Response:
-  TxHash: 623321E41440540D6B980542C4C38BA22D0E6AE7284006188C212AFD801AA270
-```
-
-8. 此时查询此coin1已经被创建
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin1
-```
-
-返回此token信息：
-
-```bash
-{
-  "type": "asset/Token",
-  "value": {
-    "name": "my first rest coin",
-    "symbol": "coin1",
-    "total_supply": "10000000000",
-    "owner": "coinex1n9e8krs6dengw6k8ts0xpntyzd27rhj48ve5gd",
-    "mintable": false,
-    "burnable": false,
-    "addr_forbiddable": false,
-    "token_forbiddable": false,
-    "total_burn": "0",
-    "total_mint": "0",
-    "is_forbidden": false
-  }
-}
-```
-
-
-

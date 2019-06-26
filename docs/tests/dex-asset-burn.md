@@ -2,29 +2,22 @@
 
 ## BurnToken
 
-- 添加Asset模块的BurnToken功能，支持token的燃烧。
-  - token的owner可以进行token燃烧
-  - 非owner不能进行此操作
-  - 不能对未发行token进行此操作
-  - 只有具备可燃烧能力的token才能进行此操作
-  - 燃烧后的token总量不能为负
+- 只有token的owner可以进行token燃烧
+- 不能对未发行token进行此操作
+- 只有具备可燃烧能力的token才能进行此操作
+- 燃烧后的token总量不能为负
 
-> burn 扣除fee，暂时没有在asset 模块实现，待评估ante-Handler统一收取fee
->
-> burn fee未确认，需要和coinex对齐
+## Burn Token CLI 
 
-## BurnToken CLI & API
+- `$ cetcli tx asset burn-token [flags]`
 
-- CLI命令
-  - `$ cetcli tx asset burn-token [flags]` 
-- Rest-curl命令
-  - `curl -X POST http://localhost:1317/asset/tokens/coin3/burns --data-binary '{"base_req":{"from":"coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"8","account_number":"0"},"amount":"2000"}'`
+## Burn Token CLI Example
 
-## BurnToken CLI Example
+参考[Asset-IssueToken](https://github.com/coinexchain/dex/blob/master/docs/tests/dex-asset-issue.md)创建测试token
 
-参考[single_node_test](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/single-node-test.md)搭建节点，也可以从genesis.json中导入状态，节点启动后
+节点启动后
 
-1. 本地创建token，可参考[dex-asset-iusse](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-asset-issue.md) ,查询本地所有token信息：
+1. 查询本地所有token
 
 ```bash
 $ cetcli query asset tokens --chain-id=coinexdex
@@ -35,258 +28,116 @@ $ cetcli query asset tokens --chain-id=coinexdex
 ```bash
 [
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "first token",
-      "symbol": "coin1",
+      "name": "ABC Token",
+      "symbol": "abc",
       "total_supply": "2100000000000000",
-      "owner": "coinex16cyga47yh3cv6pzemy0fjtkeqjtrjjukgngey6",
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
       "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "0",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.abc.org",
+      "description": "token abc is a example token"
     }
   },
   {
-    "type": "asset/Token",
+    "type": "asset/BaseToken",
     "value": {
-      "name": "sec token",
-      "symbol": "coin2",
-      "total_supply": "2100000000000100",
-      "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+      "name": "First Token",
+      "symbol": "token1",
+      "total_supply": "2100000000000000",
+      "owner": "coinex1h6jte3avry5q5fnn6cyzfh65r74tf7tmxdfxu6",
       "mintable": true,
       "burnable": true,
-      "addr_forbiddable": false,
+      "addr_forbiddable": true,
+      "token_forbiddable": true,
+      "total_burn": "0",
+      "total_mint": "0",
+      "is_forbidden": false,
+      "url": "www.token1.org",
+      "description": "token1 is a example token"
+    }
+  },
+  {
+    "type": "asset/BaseToken",
+    "value": {
+      "name": "Second Token",
+      "symbol": "token2",
+      "total_supply": "2100000000000100",
+      "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
+      "mintable": true,
+      "burnable": true,
+      "addr_forbiddable": true,
       "token_forbiddable": true,
       "total_burn": "0",
       "total_mint": "100",
-      "is_forbidden": false
-    }
-  },
-  {
-    "type": "asset/Token",
-    "value": {
-      "name": "th token",
-      "symbol": "coin3",
-      "total_supply": "2100000000002000",
-      "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
-      "mintable": true,
-      "burnable": true,
-      "addr_forbiddable": false,
-      "token_forbiddable": true,
-      "total_burn": "0",
-      "total_mint": "2000",
-      "is_forbidden": false
+      "is_forbidden": false,
+      "url": "www.token2.org",
+      "description": "token2 is a example token"
     }
   }
 ]
 ```
 
-3. 我们通过cli进行coin2的燃烧
+3. 通过cli进行token2的燃烧
 
 ```bash
-$ cetcli tx asset burn-token --symbol="coin2" \
+$ cetcli tx asset burn-token --symbol="token2" \
         --amount=100 \
-    --from $(cetcli keys show bob -a) --chain-id=coinexdex
+    --from $(cetcli keys show bob -a) \
+    --chain-id=coinexdex \
+    --gas 50000 --gas-prices 20.0cet
 ```
 
-本地返回TxHash：
+解析返回TxHash，燃烧成功
 
 ```bash
 Response:
-  TxHash: C66A5DFB5CCAAB8F9A2BE039DAC9E3DFDDEACF044E9943760E9E71730B3B88A1
+  Height: 380
+  TxHash: C6A804A939FF8473FC3EF3B818D73771169D91FC82F5EB4BEF23BF7FFE7FD58B
+  Raw Log: [{"msg_index":"0","success":true,"log":""}]
+  Logs: [{"msg_index":0,"success":true,"log":""}]
+  GasWanted: 50000
+  GasUsed: 21685
+  Tags:
+    - action = burn_token
+    - category = asset
+    - token = token2
+    - amount = 100
+
+  Timestamp: 2019-06-26T01:33:23Z
 ```
 
-4. 此时查看coin2信息，totalsupply已经减少100
+4. 此时查看token2信息，totalsupply已经减少100
 
 ```bash
-$ cetcli q asset token coin2 --chain-id=coinexdex
+$ cetcli q asset token token2 --chain-id=coinexdex
 ```
 
 本地返回：
 
 ```bash
 {
-  "type": "asset/Token",
+  "type": "asset/BaseToken",
   "value": {
-    "name": "sec token",
-    "symbol": "coin2",
+    "name": "Second Token",
+    "symbol": "token2",
     "total_supply": "2100000000000000",
-    "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
+    "owner": "coinex1r550scev7m4qg7nv662v5vu0at7kvejagls765",
     "mintable": true,
     "burnable": true,
-    "addr_forbiddable": false,
+    "addr_forbiddable": true,
     "token_forbiddable": true,
     "total_burn": "100",
     "total_mint": "100",
-    "is_forbidden": false
+    "is_forbidden": false,
+    "url": "www.token2.org",
+    "description": "token2 is a example token"
   }
 }
 ```
-
-
-
-## BurnToken Rest Example
-
-1. 查询本地AccountNumber和Sequence
-
-```bash
-$ cetcli query account $(cetcli keys show bob -a) --chain-id=coinexdex
-```
-
-本地返回：
-
-```bash
-Account:
-  Address:       coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3
-  Pubkey:        coinexpub1addwnpepq2uns08x3873dhp0q722pf8yunudlhl3j4s6uxhe0zglusr7p64swxxjts5
-  Coins:         9996997900000000cet,2100000000000000coin1,2100000000000000coin2,2100000000000000coin3
-  AccountNumber: 0
-  Sequence:      11
-```
-
-2. 首先需要启动rest-server.  参考[本地rest-server中访问swagger-ui的方法](https://github.com/coinexchain/dex/blob/df3c59704ed32917af9e9e47cd203efbfbbc4227/docs/tests/dex-rest-api-swagger.md)
-
-```bash
-$ cetcli rest-server --chain-id=coinexdex \ --laddr=tcp://localhost:1317 \ --node tcp://localhost:26657 --trust-node=false
-
-```
-
-3. 通过Rest API燃烧coin3，填写本地from/amount/sequence/account_number等信息
-
-```bash
-curl -X POST http://localhost:1317/asset/tokens/coin3/burns --data-binary '{"base_req":{"from":"coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3","chain_id":"coinexdex","sequence":"11","account_number":"0"},"amount":"2000"}' > unsigned.json
-```
-
-返回未签名交易存入unsigned.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgBurnToken",
-        "value": {
-          "Symbol": "coin3",
-          "Amount": "2000",
-          "OwnerAddress": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3"
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": null,
-    "memo": ""
-  }
-}
-```
-
-4. 本地对交易进行签名
-
-```bash
-$ cetcli tx sign \
-  --chain-id=coinexdex \
-  --from $(cetcli keys show bob -a)  unsigned.json > signed.json
-```
-
-本地签名后将已签名交易存入signed.json
-
-```bash
-{
-  "type": "auth/StdTx",
-  "value": {
-    "msg": [
-      {
-        "type": "asset/MsgBurnToken",
-        "value": {
-          "Symbol": "coin3",
-          "Amount": "2000",
-          "OwnerAddress": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3"
-        }
-      }
-    ],
-    "fee": {
-      "amount": null,
-      "gas": "200000"
-    },
-    "signatures": [
-      {
-        "pub_key": {
-          "type": "tendermint/PubKeySecp256k1",
-          "value": "Ark4POaJ/RbcLweUoKTk5Pjf3/GVYa4a+XiR/kB+DqsH"
-        },
-        "signature": "lgy8m/+LDhPhLQmyZBrcxXdJRpClSQzl7Ntx0WvUJaAJun2AJIi/uvuAmnTU02CEkUpL+ip43vXVoEOEEM+0Qg=="
-      }
-    ],
-    "memo": ""
-  }
-}
-```
-
-5. 广播交易
-
-```bash
-$ cetcli tx broadcast signed.json
-```
-
-本地返回交易Hash
-
-```bash
-Response:
-  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
-```
-
-查询相关交易,可见本次burn token使用了16425 个GAS
-```
-~/lab/dex$ cetcli query tx 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5  --chain-id=coinexdex
-Response:
-  Height: 840
-  TxHash: 0900D4A88B4D4137168B20C756A77673CD00BB2486B13553A1A0A7100CB70FA5
-  Raw Log: [{"msg_index":"0","success":true,"log":""}]
-  Logs: [{"msg_index":0,"success":true,"log":""}]
-  GasWanted: 200000
-  GasUsed: 16425
-  Tags:
-    - action = burnToken
-    - category = asset
-    - token = coin3
-    - amount = 2000
-
-  Timestamp: 2019-06-01T03:52:17Z
-```
-
-6. 此时查询coin3已经减少
-
-```bash
-$ curl -X GET http://localhost:1317/asset/tokens/coin3
-```
-
-返回此token信息：
-
-```bash
-{
-  "type": "asset/Token",
-  "value": {
-    "name": "th token",
-    "symbol": "coin3",
-    "total_supply": "2100000000000000",
-    "owner": "coinex1u0nlxpfsngsyefpa4vjgnng8m8qn3el4cy3ut3",
-    "mintable": true,
-    "burnable": true,
-    "addr_forbiddable": false,
-    "token_forbiddable": true,
-    "total_burn": "2000",
-    "total_mint": "2000",
-    "is_forbidden": false
-  }
-}
-```
-
-
-
