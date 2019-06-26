@@ -229,6 +229,13 @@ func fixDescriptions(cmd *cobra.Command) {
 
 	cmd.Short = strings.Replace(cmd.Short, gaiacli, cetcli, -1)
 	cmd.Long = strings.Replace(cmd.Long, gaiacli, cetcli, -1)
+	if flagFee := cmd.Flag(client.FlagFees); flagFee != nil {
+		flagFee.Usage = "Fees to pay along with transaction; eg: 100cet"
+	}
+	if flagGas := cmd.Flag(client.FlagGasPrices); flagGas != nil {
+		flagGas.Usage = "Gas prices to determine the transaction fee (e.g. 100cet)"
+	}
+
 	if len(cmd.Commands()) > 0 {
 		for _, subCmd := range cmd.Commands() {
 			fixDescriptions(subCmd)
