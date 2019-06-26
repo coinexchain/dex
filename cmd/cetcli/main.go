@@ -160,7 +160,7 @@ func queryCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 		tx.SearchTxCmd(cdc),
 		tx.QueryTxCmd(cdc),
 		client.LineBreak,
-		authxcmd.GetAccountXCmd(authx.StoreKey, cdc),
+		authxcmd.GetAccountXCmd(cdc),
 	)
 
 	for _, m := range mc {

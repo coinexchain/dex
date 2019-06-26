@@ -1,17 +1,18 @@
 package cli
 
 import (
-	clientx "github.com/coinexchain/dex/client"
-	"github.com/coinexchain/dex/modules/authx"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/spf13/cobra"
+	clientx "github.com/coinexchain/dex/client"
+	"github.com/coinexchain/dex/modules/authx"
 )
 
-func GetAccountXCmd(storeName string, cdc *codec.Codec) *cobra.Command {
+func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "account [address]",
 		Short: "Query account balance",
@@ -35,8 +36,8 @@ func GetAccountXCmd(storeName string, cdc *codec.Codec) *cobra.Command {
 			}
 
 			aux, err := clientx.GetAccountX(cliCtx, key)
-			if err != nil {
-				return cliCtx.PrintOutput(acc)
+			if err != nil { // it's ok
+				aux = authx.AccountX{}
 			}
 
 			all := authx.AccountAll{Account: acc, AccountX: aux}
