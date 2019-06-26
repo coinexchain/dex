@@ -3297,6 +3297,12 @@ definitions:
       token_forbiddable:
         type: boolean
         example: false
+      url:
+        type: string
+        example: "www.abc.org"
+      description:
+        type: string
+        example: "token abc is a example token"
   Token:
     type: object
     allOf:
