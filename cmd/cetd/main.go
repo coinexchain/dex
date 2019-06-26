@@ -14,14 +14,17 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/coinexchain/dex/app"
-	cet_init "github.com/coinexchain/dex/init"
-	cet_server "github.com/coinexchain/dex/server"
-	dex "github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/store"
+	"github.com/cosmos/cosmos-sdk/version"
+
+	"github.com/coinexchain/dex/app"
+	cet_init "github.com/coinexchain/dex/init"
+	cet_server "github.com/coinexchain/dex/server"
+	dex "github.com/coinexchain/dex/types"
+	cet_version "github.com/coinexchain/dex/version"
 )
 
 // cetd custom flags
@@ -59,6 +62,9 @@ func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	addInitCommands(ctx, cdc, rootCmd)
 	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
+
+	rootCmd.RemoveCommand(version.VersionCmd)
+	rootCmd.AddCommand(cet_version.Cmd)
 
 	return rootCmd
 }

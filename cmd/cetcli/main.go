@@ -19,7 +19,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/version"
 
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	crisisclient "github.com/cosmos/cosmos-sdk/x/crisis/client"
@@ -50,6 +49,7 @@ import (
 	mktclient "github.com/coinexchain/dex/modules/market/client"
 	mktrest "github.com/coinexchain/dex/modules/market/client/rest"
 	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/dex/version"
 )
 
 func main() {
@@ -109,7 +109,7 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		client.LineBreak,
 		keys.Commands(),
 		client.LineBreak,
-		version.VersionCmd,
+		version.Cmd,
 		client.NewCompletionCmd(rootCmd, true),
 		client.LineBreak,
 		dev.DevCmd(cdc),

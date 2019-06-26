@@ -46,12 +46,12 @@ build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
 # process linker flags
 
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=cet \
-		  -X github.com/cosmos/cosmos-sdk/version.ServerName=cetd \
-		  -X github.com/cosmos/cosmos-sdk/version.ClientName=cetcli \
-		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
-		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
-		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)"
+ldflags = -X "github.com/coinexchain/dex/version.Name=CoinEx Chain" \
+		  -X github.com/coinexchain/dex/version.ServerName=cetd \
+		  -X github.com/coinexchain/dex/version.ClientName=cetcli \
+		  -X github.com/coinexchain/dex/version.Version=$(VERSION) \
+		  -X github.com/coinexchain/dex/version.Commit=$(COMMIT) \
+		  -X "github.com/coinexchain/dex/version.BuildTags=$(build_tags_comma_sep)"
 
 ifeq ($(WITH_CLEVELDB),yes)
   ldflags += -X github.com/cosmos/cosmos-sdk/types.DBBackend=cleveldb
