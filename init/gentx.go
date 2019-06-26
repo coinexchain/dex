@@ -114,12 +114,13 @@ following delegation and commission default parameters:
 				}
 			}
 
+			moniker := viper.GetString(cli.FlagMoniker)
 			website := viper.GetString(cli.FlagWebsite)
 			details := viper.GetString(cli.FlagDetails)
 			identity := viper.GetString(cli.FlagIdentity)
 
 			// Set flags for creating gentx
-			prepareFlagsForTxCreateValidator(config, nodeID, ip, genDoc.ChainID, valPubKey, website, details, identity)
+			prepareFlagsForTxCreateValidator(config, nodeID, ip, genDoc.ChainID, valPubKey, moniker, website, details, identity)
 
 			// Fetch the amount of coins staked
 			amount := viper.GetString(cli.FlagAmount)
@@ -207,6 +208,7 @@ following delegation and commission default parameters:
 		"write the genesis transaction JSON document to the given file instead of the default location")
 	cmd.Flags().String(cli.FlagIP, ip, "The node's public IP")
 	cmd.Flags().String(cli.FlagNodeID, "", "The node's NodeID")
+	cmd.Flags().String(cli.FlagMoniker, "", "The validator's (optional) moniker")
 	cmd.Flags().String(cli.FlagWebsite, "", "The validator's (optional) website")
 	cmd.Flags().String(cli.FlagDetails, "", "The validator's (optional) details")
 	cmd.Flags().String(cli.FlagIdentity, "", "The (optional) identity signature (ex. UPort or Keybase)")
@@ -247,22 +249,28 @@ func accountInGenesis(genesisState app.GenesisState, key sdk.AccAddress, coins s
 }
 
 func prepareFlagsForTxCreateValidator(
-	config *cfg.Config, nodeID, ip, chainID string, valPubKey crypto.PubKey, website, details, identity string,
+	config *cfg.Config, nodeID, ip, chainID string, valPubKey crypto.PubKey,
+	moniker, website, details, identity string,
 ) {
+	if moniker == "" {
+		if config.Moniker != "" {
+			moniker = config.Moniker
+		} else {
+			moniker = viper.GetString(client.FlagName)
+		}
+	}
+
 	viper.Set(tmcli.HomeFlag, viper.GetString(flagClientHome))
 	viper.Set(client.FlagChainID, chainID)
 	viper.Set(client.FlagFrom, viper.GetString(client.FlagName))
 	viper.Set(cli.FlagNodeID, nodeID)
 	viper.Set(cli.FlagIP, ip)
 	viper.Set(cli.FlagPubKey, sdk.MustBech32ifyConsPub(valPubKey))
-	viper.Set(cli.FlagMoniker, config.Moniker)
+	viper.Set(cli.FlagMoniker, moniker)
 	viper.Set(cli.FlagWebsite, website)
 	viper.Set(cli.FlagDetails, details)
 	viper.Set(cli.FlagIdentity, identity)
 
-	if config.Moniker == "" {
-		viper.Set(cli.FlagMoniker, viper.GetString(client.FlagName))
-	}
 	if viper.GetString(cli.FlagAmount) == "" {
 		viper.Set(cli.FlagAmount, defaultAmount)
 	}

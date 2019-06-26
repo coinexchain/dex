@@ -38,6 +38,7 @@ func Test_prepareFlagsForTxCreateValidator(t *testing.T) {
 		ip        string
 		chainID   string
 		valPubKey crypto.PubKey
+		moniker   string
 		website   string
 		details   string
 		identity  string
@@ -57,7 +58,7 @@ func Test_prepareFlagsForTxCreateValidator(t *testing.T) {
 	}
 
 	runTest := func(t *testing.T, tt testcase, params extraParams) {
-		prepareFlagsForTxCreateValidator(tt.args.config, tt.args.nodeID, tt.args.ip, tt.args.chainID, tt.args.valPubKey, tt.args.website, tt.args.details, tt.args.identity)
+		prepareFlagsForTxCreateValidator(tt.args.config, tt.args.nodeID, tt.args.ip, tt.args.chainID, tt.args.valPubKey, tt.args.moniker, tt.args.website, tt.args.details, tt.args.identity)
 		require.Equal(t, tt.args.website, viper.GetString(cli.FlagWebsite))
 		require.Equal(t, tt.args.details, viper.GetString(cli.FlagDetails))
 		require.Equal(t, tt.args.identity, viper.GetString(cli.FlagIdentity))
@@ -69,8 +70,8 @@ func Test_prepareFlagsForTxCreateValidator(t *testing.T) {
 	}
 
 	tests := []testcase{
-		{"No parameters", args{ctx.Config, "X", "0.0.0.0", "chainId", valPubKey, "", "", ""}},
-		{"Optional parameters fed", args{ctx.Config, "X", "0.0.0.0", "chainId", valPubKey, "coinex.org", "details", "identity"}},
+		{"No parameters", args{ctx.Config, "X", "0.0.0.0", "chainId", valPubKey, "", "", "", ""}},
+		{"Optional parameters fed", args{ctx.Config, "X", "0.0.0.0", "chainId", valPubKey, "node0", "coinex.org", "details", "identity"}},
 	}
 
 	defaultParams := extraParams{defaultAmount, defaultCommissionRate, defaultCommissionMaxRate, defaultCommissionMaxChangeRate, defaultMinSelfDelegation}
