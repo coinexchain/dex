@@ -1,7 +1,6 @@
 package app
 
 import (
-	"github.com/coinexchain/dex/modules/distributionx"
 	"os"
 	"testing"
 	"time"
@@ -21,6 +20,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/testutil"

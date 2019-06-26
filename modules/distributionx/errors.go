@@ -3,7 +3,7 @@ package distributionx
 import sdk "github.com/cosmos/cosmos-sdk/types"
 
 const (
-	CodespaceDistrx = "distrx"
+	CodespaceDistrx sdk.CodespaceType = "distrx"
 
 	CodeInvalidFromAddr sdk.CodeType = 801
 	CodeInvalidDonation sdk.CodeType = 802

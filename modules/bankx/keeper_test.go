@@ -2,7 +2,6 @@ package bankx
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/msgqueue"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -19,6 +18,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/coinexchain/dex/types"
 )

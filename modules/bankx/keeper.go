@@ -2,7 +2,6 @@ package bankx
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/msgqueue"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -10,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/msgqueue"
 )
 
 type Keeper struct {

@@ -3,12 +3,11 @@ package bankx
 import (
 	"fmt"
 
-	"github.com/coinexchain/dex/modules/authx"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
+	"github.com/coinexchain/dex/modules/authx"
 	dex "github.com/coinexchain/dex/types"
 )
 
