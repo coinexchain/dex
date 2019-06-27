@@ -15,5 +15,5 @@ func TestMain(m *testing.M) {
 }
 
 func TestIncentiveCoinsAddress(t *testing.T) {
-	require.Equal(t, "coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97", IncentivePoolAddr.String())
+	require.Equal(t, "coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97", PoolAddr.String())
 }

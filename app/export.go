@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/coinexchain/dex/modules/incentive"
 	"log"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -191,6 +192,7 @@ func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
 		slashing.ExportGenesis(ctx, app.slashingKeeper),
 		asset.ExportGenesis(ctx, app.assetKeeper),
 		market.ExportGenesis(ctx, app.marketKeeper),
+		incentive.ExportGenesis(ctx, app.incentiveKeeper),
 	)
 }
 

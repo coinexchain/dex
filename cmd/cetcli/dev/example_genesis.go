@@ -27,7 +27,7 @@ func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 
 func createExampleGenesisAccounts() (accs []app.GenesisAccount) {
 	accs = append(accs,
-		newBaseGenesisAccount(incentive.IncentivePoolAddr.String(), 30000000000000000),
+		newBaseGenesisAccount(incentive.PoolAddr.String(), 30000000000000000),
 		newBaseGenesisAccount("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke", 288788547005740000),
 		newBaseGenesisAccount("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h", 90000000000000000),
 		newVestingGenesisAccount("coinex1zvf0hx6rpz0n7dkuzu34s39dnsyr8eygqs8h3q", 36000000000000000, 1577836800),

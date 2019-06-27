@@ -69,6 +69,7 @@ type CetChainApp struct {
 	tkeyParams       *sdk.TransientStoreKey
 	keyAsset         *sdk.KVStoreKey
 	keyMarket        *sdk.KVStoreKey
+	keyIncentive     *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -143,6 +144,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
 		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
 		keyMarket:        sdk.NewKVStoreKey(market.StoreKey),
+		keyIncentive:     sdk.NewKVStoreKey(incentive.StoreKey),
 	}
 }
 
@@ -213,7 +215,7 @@ func (app *CetChainApp) initKeepers() {
 		slashing.DefaultCodespace,
 	)
 	app.incentiveKeeper = incentive.NewKeeper(
-		app.feeCollectionKeeper, app.bankKeeper,
+		app.cdc, app.keyIncentive, app.paramsKeeper.Subspace(incentive.DefaultParamspace), app.feeCollectionKeeper, app.bankKeeper,
 	)
 	app.tokenKeeper = asset.NewBaseTokenKeeper(
 		app.cdc, app.keyAsset,
@@ -289,7 +291,7 @@ func (app *CetChainApp) mountStores() {
 	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyDistr,
 		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
-		app.keyAccountX, app.keyAsset, app.keyMarket,
+		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,
 	)
 }
 
@@ -309,6 +311,7 @@ func MakeCodec() *codec.Codec {
 	codec.RegisterCrypto(cdc)
 	asset.RegisterCodec(cdc)
 	market.RegisterCodec(cdc)
+	incentive.RegisterCodec(cdc)
 	return cdc
 }
 
@@ -442,6 +445,7 @@ func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisSt
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
 	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
 	market.InitGenesis(ctx, app.marketKeeper, genesisState.MarketData)
+	incentive.InitGenesis(ctx, app.incentiveKeeper, genesisState.Incentive)
 }
 
 func (app *CetChainApp) deliverGenTxs(genTxs []json.RawMessage) {

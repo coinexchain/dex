@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/coinexchain/dex/modules/incentive"
 	"sort"
 	"time"
 
@@ -42,6 +43,7 @@ type GenesisState struct {
 	SlashingData slashing.GenesisState     `json:"slashing"`
 	AssetData    asset.GenesisState        `json:"asset"`
 	MarketData   market.GenesisState       `json:"market"`
+	Incentive    incentive.GenesisState    `json:"incentive"`
 	GenTxs       []json.RawMessage         `json:"gentxs"`
 }
 
@@ -61,6 +63,7 @@ func NewDefaultGenesisState() GenesisState {
 		SlashingData: slashing.DefaultGenesisState(),
 		AssetData:    asset.DefaultGenesisState(),
 		MarketData:   market.DefaultGenesisState(),
+		Incentive:    incentive.DefaultGenesisState(),
 		GenTxs:       nil,
 	}
 	// TODO: create staking.GenesisState & gov.GenesisState & crisis.GenesisState from scratch
@@ -99,7 +102,9 @@ func NewGenesisState(
 	crisisData crisis.GenesisState,
 	slashingData slashing.GenesisState,
 	assetData asset.GenesisState,
-	marketData market.GenesisState) GenesisState {
+	marketData market.GenesisState,
+	incentive incentive.GenesisState,
+) GenesisState {
 
 	return GenesisState{
 		Accounts:     accounts,
@@ -115,6 +120,7 @@ func NewGenesisState(
 		SlashingData: slashingData,
 		AssetData:    assetData,
 		MarketData:   marketData,
+		Incentive:    incentive,
 	}
 }
 
@@ -152,6 +158,10 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 	if err := gs.MarketData.Validate(); err != nil {
+		return err
+	}
+
+	if err := gs.Incentive.Validate(); err != nil {
 		return err
 	}
 
