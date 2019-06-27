@@ -141,8 +141,7 @@ func mintTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgMintToken(symbol, req.Amount, owner)
 		if err := msg.ValidateBasic(); err != nil {
@@ -179,8 +178,7 @@ func burnTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgBurnToken(symbol, req.Amount, owner)
 		if err := msg.ValidateBasic(); err != nil {
@@ -216,8 +214,7 @@ func forbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgForbidToken(symbol, owner)
 		if err := msg.ValidateBasic(); err != nil {
@@ -253,8 +250,7 @@ func unForbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgUnForbidToken(symbol, owner)
 		if err := msg.ValidateBasic(); err != nil {
@@ -291,8 +287,7 @@ func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgAddTokenWhitelist(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
@@ -323,8 +318,7 @@ func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgRemoveTokenWhitelist(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
@@ -355,8 +349,7 @@ func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgForbidAddr(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
@@ -387,8 +380,7 @@ func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgUnForbidAddr(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
@@ -425,8 +417,7 @@ func modifyTokenURLHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgModifyTokenURL(symbol, req.URL, owner)
 		if err := msg.ValidateBasic(); err != nil {
@@ -463,8 +454,7 @@ func modifyTokenDescriptionHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars[symbol]
+		symbol := getSymbol(r)
 
 		msg := asset.NewMsgModifyTokenDescription(symbol, req.Description, owner)
 		if err := msg.ValidateBasic(); err != nil {
@@ -474,4 +464,9 @@ func modifyTokenDescriptionHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext
 
 		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
+}
+
+func getSymbol(r *http.Request) string {
+	vars := mux.Vars(r)
+	return vars[symbol]
 }
