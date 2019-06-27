@@ -168,6 +168,7 @@ func TestGetTotalCoins(t *testing.T) {
 		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(10)},
 	)
 
+	// nolint
 	accx := authx.AccountX{
 		myaddr,
 		false,
