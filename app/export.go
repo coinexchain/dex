@@ -37,6 +37,10 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 	}
 
 	genState := app.exportGenesisState(ctx)
+	if forZeroHeight {
+		genState.Incentive.State.HeightAdjustment = genState.Incentive.State.HeightAdjustment + ctx.BlockHeader().Height
+	}
+
 	appState, err = codec.MarshalJSONIndent(app.cdc, genState)
 	if err != nil {
 		return nil, nil, err

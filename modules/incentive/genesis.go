@@ -40,7 +40,6 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	params := keeper.GetParam(ctx)
 	state := keeper.GetState(ctx)
-	state.HeightAdjustment = ctx.BlockHeader().Height + state.HeightAdjustment
 	return NewGenesisState(state, params)
 }
 
