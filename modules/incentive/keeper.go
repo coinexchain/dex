@@ -56,7 +56,7 @@ func (k Keeper) SetState(ctx sdk.Context, state State) sdk.Error {
 
 func (k Keeper) AddNewPlan(ctx sdk.Context, plan Plan) {
 	param := k.GetParam(ctx)
-	param.Incentive.Plans = append(param.Incentive.Plans, plan)
+	param.Plans = append(param.Plans, plan)
 	k.SetParam(ctx, param)
 }
 

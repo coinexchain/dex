@@ -14,7 +14,6 @@ var (
 func BeginBlocker(ctx sdk.Context, k Keeper) {
 
 	blockRewards := calcRewardsForCurrentBlock(ctx, k)
-
 	collectRewardsFromPool(k, ctx, blockRewards)
 }
 
@@ -30,16 +29,16 @@ func collectRewardsFromPool(k Keeper, ctx sdk.Context, blockRewards sdk.Coins) {
 
 func calcRewardsForCurrentBlock(ctx sdk.Context, k Keeper) sdk.Coins {
 
-	var RewardAmount int64 = 0
+	var rewardAmount int64
 	height := ctx.BlockHeader().Height
 	adjustmentHeight := k.GetState(ctx).HeightAdjustment
 	height = height + adjustmentHeight
-	plans := k.GetParam(ctx).Incentive.Plans
+	plans := k.GetParam(ctx).Plans
 	for _, plan := range plans {
 		if height > plan.StartHeight && height <= plan.EndHeight {
-			RewardAmount = RewardAmount + plan.RewardPerBlock
+			rewardAmount = rewardAmount + plan.RewardPerBlock
 		}
 	}
-	BlockRewardsCoins := sdk.NewCoins(sdk.NewInt64Coin(types.DefaultBondDenom, RewardAmount))
-	return BlockRewardsCoins
+	blockRewardsCoins := sdk.NewCoins(sdk.NewInt64Coin(types.DefaultBondDenom, rewardAmount))
+	return blockRewardsCoins
 }

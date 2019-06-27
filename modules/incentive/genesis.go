@@ -40,22 +40,22 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	params := keeper.GetParam(ctx)
 	state := keeper.GetState(ctx)
-	state.HeightAdjustment = ctx.BlockHeader().Height
+	state.HeightAdjustment = ctx.BlockHeader().Height + state.HeightAdjustment
 	return NewGenesisState(state, params)
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) Validate() error {
-	incentive := data.Param.Incentive
-	if incentive.IncentiveBlockInterval <= 0 && incentive.IncentiveBlockInterval > 10 {
+	param := data.Param
+	if param.IncentiveBlockInterval <= 0 && param.IncentiveBlockInterval > 10 {
 		return sdk.NewError(CodeSpaceIncentive, CodeInvalidIncentiveBlockInterval, "invalid incentive block interval")
 	}
-	if incentive.DefaultRewardPerBlock < 0 {
+	if param.DefaultRewardPerBlock < 0 {
 		return sdk.NewError(CodeSpaceIncentive, CodeInvalidDefaultRewardPerBlock, "invalid default reward per block")
 	}
 
-	for _, plan := range incentive.Plans {
+	for _, plan := range param.Plans {
 		if plan.StartHeight < 0 || plan.EndHeight < 0 {
 			return sdk.NewError(CodeSpaceIncentive, CodeInvalidPlanHeight, "invalid incentive plan height")
 		}

@@ -1,0 +1,186 @@
+{
+  "moniker": "/Users/helldealer/.cetd/config/genesis.json",
+  "chain_id": "test-chain-OwwpYK",
+  "node_id": "b509fc38f2a46a5415407d003a85a733fef963cc",
+  "gentxs_dir": "",
+  "app_message": {
+    "accounts": null,
+    "auth": {
+      "collected_fees": [],
+      "params": {
+        "max_memo_characters": "256",
+        "tx_sig_limit": "7",
+        "tx_size_cost_per_byte": "10",
+        "sig_verify_cost_ed25519": "590",
+        "sig_verify_cost_secp256k1": "1000"
+      }
+    },
+    "authx": {
+      "params": {
+        "min_gas_price_limit": "20.000000000000000000"
+      }
+    },
+    "bank": {
+      "send_enabled": true
+    },
+    "bankx": {
+      "params": {
+        "activation_fee": "100000000",
+        "lock_coins_fee": "10000000000"
+      }
+    },
+    "staking": {
+      "pool": {
+        "not_bonded_tokens": "0",
+        "bonded_tokens": "0"
+      },
+      "params": {
+        "unbonding_time": "1814400000000000",
+        "max_validators": 42,
+        "max_entries": 7,
+        "bond_denom": "cet"
+      },
+      "last_total_power": "0",
+      "last_validator_powers": null,
+      "validators": null,
+      "delegations": null,
+      "unbonding_delegations": null,
+      "redelegations": null,
+      "exported": false
+    },
+    "stakingx": {
+      "params": {
+        "min_self_delegation": "100000000000000"
+      }
+    },
+    "distr": {
+      "fee_pool": {
+        "community_pool": []
+      },
+      "community_tax": "0.020000000000000000",
+      "base_proposer_reward": "0.010000000000000000",
+      "bonus_proposer_reward": "0.040000000000000000",
+      "withdraw_addr_enabled": true,
+      "delegator_withdraw_infos": [],
+      "previous_proposer": "",
+      "outstanding_rewards": [],
+      "validator_accumulated_commissions": [],
+      "validator_historical_rewards": [],
+      "validator_current_rewards": [],
+      "delegator_starting_infos": [],
+      "validator_slash_events": []
+    },
+    "gov": {
+      "starting_proposal_id": "1",
+      "deposits": null,
+      "votes": null,
+      "proposals": null,
+      "deposit_params": {
+        "min_deposit": [
+          {
+            "denom": "cet",
+            "amount": "1000000000000"
+          }
+        ],
+        "max_deposit_period": "1209600000000000"
+      },
+      "voting_params": {
+        "voting_period": "1209600000000000"
+      },
+      "tally_params": {
+        "quorum": "0.400000000000000000",
+        "threshold": "0.500000000000000000",
+        "veto": "0.334000000000000000"
+      }
+    },
+    "crisis": {
+      "constant_fee": {
+        "denom": "cet",
+        "amount": "35000000000000"
+      }
+    },
+    "slashing": {
+      "params": {
+        "max_evidence_age": "1814400000000000",
+        "signed_blocks_window": "1000",
+        "min_signed_per_window": "0.050000000000000000",
+        "downtime_jail_duration": "600000000000",
+        "slash_fraction_double_sign": "0.050000000000000000",
+        "slash_fraction_downtime": "0.000100000000000000"
+      },
+      "signing_infos": {},
+      "missed_blocks": {}
+    },
+    "asset": {
+      "params": {
+        "issue_token_fee": [
+          {
+            "denom": "cet",
+            "amount": "1000000000000"
+          }
+        ]
+      },
+      "tokens": [],
+      "whitelist": [],
+      "forbid_addr": []
+    },
+    "market": {
+      "params": {
+        "create_market_fee": "1000000000000",
+        "fixed_trade_fee": "0",
+        "market_min_expired_time": "604800",
+        "gte_order_lifetime": "10000",
+        "gte_order_feature_fee_by_blocks": "1",
+        "max_executed_price_change_ratio": "25",
+        "market_fee_rate": "0",
+        "market_fee_min": "0",
+        "fee_for_zero_deal": "0"
+      },
+      "orders": [],
+      "market_infos": []
+    },
+    "incentive": {
+      "state": {
+        "height_adjustment": "0"
+      },
+      "params": {
+        "incentive_block_interval": 3,
+        "default_reward_per_block": 0,
+        "plans": [
+          {
+            "start_height": "0",
+            "end_height": "10512000",
+            "reward_per_block": "10",
+            "total_incentive": "105120000"
+          },
+          {
+            "start_height": "10512000",
+            "end_height": "21024000",
+            "reward_per_block": "8",
+            "total_incentive": "84096000"
+          },
+          {
+            "start_height": "21024000",
+            "end_height": "31536000",
+            "reward_per_block": "6",
+            "total_incentive": "63072000"
+          },
+          {
+            "start_height": "31536000",
+            "end_height": "42048000",
+            "reward_per_block": "4",
+            "total_incentive": "42048000"
+          },
+          {
+            "start_height": "42048000",
+            "end_height": "52560000",
+            "reward_per_block": "2",
+            "total_incentive": "21024000"
+          }
+        ]
+      }
+    },
+    "gentxs": null
+  }
+}
+

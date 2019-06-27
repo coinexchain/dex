@@ -11,14 +11,12 @@ const (
 var _ params.ParamSet = &Params{}
 
 var (
-	KeyIncentive = []byte("incentive")
+	KeyIncentiveBlockInterval         = []byte("incentiveBlockInterval")
+	KeyIncentiveDefaultRewardPerBlock = []byte("incentiveDefaultRewardPerBlock")
+	KeyIncentivePlans                 = []byte("incentivePlans")
 )
 
 type Params struct {
-	Incentive Incentive `json:"incentive"`
-}
-
-type Incentive struct {
 	IncentiveBlockInterval uint16 `json:"incentive_block_interval"`
 	DefaultRewardPerBlock  uint16 `json:"default_reward_per_block"`
 	Plans                  []Plan `json:"plans"`
@@ -33,22 +31,22 @@ type Plan struct {
 
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
-		{Key: KeyIncentive, Value: &p.Incentive},
+		{Key: KeyIncentiveBlockInterval, Value: &p.IncentiveBlockInterval},
+		{Key: KeyIncentiveDefaultRewardPerBlock, Value: &p.DefaultRewardPerBlock},
+		{Key: KeyIncentivePlans, Value: &p.Plans},
 	}
 }
 
 func DefaultParams() Params {
 	return Params{
-		Incentive: Incentive{
-			IncentiveBlockInterval: 3,
-			DefaultRewardPerBlock:  0,
-			Plans: []Plan{
-				{0, 10512000, 10, 105120000},
-				{10512000, 21024000, 8, 84096000},
-				{21024000, 31536000, 6, 63072000},
-				{31536000, 42048000, 4, 42048000},
-				{42048000, 52560000, 2, 21024000},
-			},
+		IncentiveBlockInterval: 3,
+		DefaultRewardPerBlock:  0,
+		Plans: []Plan{
+			{0, 10512000, 10, 105120000},
+			{10512000, 21024000, 8, 84096000},
+			{21024000, 31536000, 6, 63072000},
+			{31536000, 42048000, 4, 42048000},
+			{42048000, 52560000, 2, 21024000},
 		},
 	}
 }
