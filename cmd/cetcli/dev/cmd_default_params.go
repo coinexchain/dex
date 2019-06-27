@@ -2,12 +2,12 @@ package dev
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
 	"reflect"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth"

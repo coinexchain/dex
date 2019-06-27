@@ -112,7 +112,7 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		version.Cmd,
 		client.NewCompletionCmd(rootCmd, true),
 		client.LineBreak,
-		dev.DevCmd(cdc),
+		dev.DevCmd(cdc, registerRoutes),
 	)
 
 	return rootCmd

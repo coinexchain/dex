@@ -3,11 +3,12 @@ package dev
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/codec"
 )
 
 // add server commands
-func DevCmd(cdc *codec.Codec) *cobra.Command {
+func DevCmd(cdc *codec.Codec, registerRoutesFn func(*lcd.RestServer)) *cobra.Command {
 	devCmd := &cobra.Command{
 		Use:   "dev",
 		Short: "Dev subcommands",
@@ -18,6 +19,7 @@ func DevCmd(cdc *codec.Codec) *cobra.Command {
 		TestnetGenesisCmd(cdc),
 		DefaultParamsCmd(cdc),
 		ShowCommandTreeCmd(),
+		RestEndpointsCmd(cdc, registerRoutesFn),
 	)
 
 	return devCmd
