@@ -40,6 +40,6 @@ func calcRewardsForCurrentBlock(ctx sdk.Context, k Keeper) sdk.Coins {
 			RewardAmount = RewardAmount + plan.RewardPerBlock
 		}
 	}
-	BlockRewardsCoins := sdk.NewCoins(sdk.NewInt64Coin(types.DefaultBondDenom, 0))
+	BlockRewardsCoins := sdk.NewCoins(sdk.NewInt64Coin(types.DefaultBondDenom, RewardAmount))
 	return BlockRewardsCoins
 }
