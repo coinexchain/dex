@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -22,17 +21,17 @@ const (
 // registerTXRoutes -
 func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
 	r.HandleFunc("/asset/tokens", issueRequestHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/ownerships", symbol), transferOwnerRequestHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/mints", symbol), mintTokenHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/burns", symbol), burnTokenHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbids", symbol), forbidTokenHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbids", symbol), unForbidTokenHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/whitelist", symbol), addWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/whitelist", symbol), removeWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/forbidden/addresses", symbol), forbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/unforbidden/addresses", symbol), unForbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/urls", symbol), modifyTokenURLHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/asset/tokens/{%s}/descriptions", symbol), modifyTokenDescriptionHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/ownerships", transferOwnerRequestHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/mints", mintTokenHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/burns", burnTokenHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/forbids", forbidTokenHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/unforbids", unForbidTokenHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/forbidden/whitelist", addWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/unforbidden/whitelist", removeWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/forbidden/addresses", forbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/unforbidden/addresses", unForbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/urls", modifyTokenURLHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/descriptions", modifyTokenDescriptionHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
 // issueReq defines the properties of a issue token request's body.
