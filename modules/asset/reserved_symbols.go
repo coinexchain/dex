@@ -5,7 +5,7 @@ var reservedSymbolMap map[string]int
 
 //nolint
 var reserved = []string{
-	// coin market cap currency 200
+	// coin market cap currency Top 200
 	"btc", "eth", "xrp", "ltc", "bch", "eos", "bnb", "bsv", "usdt", "xlm",
 	"ada", "trx", "xmr", "dash", "miota", "atom", "etc", "neo", "xtz", "xem",
 	"mkr", "ont", "zec", "btg", "cro", "vet", "bat", "link", "doge", "usdc",
@@ -27,7 +27,16 @@ var reserved = []string{
 	"agi", "cosm", "ino", "apl", "gno", "sky", "nkn", "gbyte", "medx", "sxdt",
 	"edo", "ttc", "cennz", "dtr", "gbc", "noah", "nxs", "icn", "lba", "dac",
 
-	// ISO 8601 fiat currency 93
+	// coinex exchange currency: 68
+	"ont", "trx", "ada", "nnb", "xlm", "hot", "seele", "cet", "bat", "btu",
+	"gnt", "doge", "atom", "eth", "neo", "ltc", "btc", "hc", "bsv", "qtum",
+	"eos", "wings", "vet", "lamb", "pax", "bch", "dcr", "ult", "cody", "xmr",
+	"olt", "zil", "gusd", "xrp", "etc", "ctxc", "nano", "algo", "dash", "omg",
+	"btm", "xzc", "link", "trtl", "cmt", "iota", "rvn", "ong", "btt", "usdc",
+	"whc", "hydro", "usdh", "zrx", "sc", "btct", "tusd", "cnn", "tct", "loom",
+	"lfc", "zec", "wwb", "egt", "bcht", "dero", "etht", "kan",
+
+	// ISO 8601 fiat currency: 93
 	"usd", "all", "dzd", "ars", "amd", "aud", "azn", "bhd", "bdt", "byn",
 	"bmd", "bob", "bam", "brl", "bgn", "khr", "cad", "clp", "cny", "cop",
 	"crc", "hrk", "cup", "czk", "dkk", "dop", "egp", "eur", "gel", "ghs",
@@ -39,10 +48,11 @@ var reserved = []string{
 	"lkr", "sek", "chf", "thb", "ttd", "tnd", "try", "ugx", "uah", "aed",
 	"uyu", "uzs", "vnd",
 
-	"libra", "cet",
-
-	// precious metals 4
+	// precious metals: 4
 	"xau", "xag", "xpt", "xpd",
+
+	// extra currency
+	"libra", "cet", "rmb",
 }
 
 func init() {
