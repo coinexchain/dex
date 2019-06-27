@@ -118,3 +118,16 @@ func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddr
 	}
 	return false
 }
+func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+	acc := k.ak.GetAccount(ctx, addr)
+	accx, found := k.axk.GetAccountX(ctx, addr)
+	var coins = sdk.Coins{}
+	if acc != nil {
+		coins = acc.GetCoins()
+	}
+	if found {
+		coins = coins.Add(accx.GetAllCoins())
+	}
+	return coins
+
+}

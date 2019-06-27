@@ -154,3 +154,36 @@ func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {
 	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, InvalidFreezeCoins)
 	require.Equal(t, sdk.ErrInsufficientCoins("account has insufficient coins to unfreeze"), err)
 }
+
+func TestGetTotalCoins(t *testing.T) {
+	input := setupTestInput()
+	givenAccountWith(input, myaddr, "100cet, 20bch, 30btc")
+
+	lockedCoins := authx.LockedCoins{
+		authx.LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}, UnlockTime: 1000},
+		authx.LockedCoin{Coin: sdk.Coin{Denom: "eth", Amount: sdk.NewInt(30)}, UnlockTime: 2000},
+	}
+
+	frozenCoins := sdk.NewCoins(sdk.Coin{Denom: "btc", Amount: sdk.NewInt(50)},
+		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(10)},
+	)
+
+	accx := authx.AccountX{
+		myaddr,
+		false,
+		lockedCoins,
+		frozenCoins,
+	}
+	input.axk.SetAccountX(input.ctx, accx)
+
+	expected := sdk.NewCoins(
+		sdk.Coin{Denom: "bch", Amount: sdk.NewInt(40)},
+		sdk.Coin{Denom: "btc", Amount: sdk.NewInt(80)},
+		sdk.Coin{Denom: "cet", Amount: sdk.NewInt(100)},
+		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(40)},
+	)
+	expected = expected.Sort()
+	coins := input.bxk.GetTotalCoins(input.ctx, myaddr)
+
+	require.Equal(t, expected, coins)
+}

@@ -38,6 +38,16 @@ func (acc *AccountX) GetAllLockedCoins() LockedCoins {
 	return acc.LockedCoins
 }
 
+func (acc *AccountX) GetAllCoins() sdk.Coins {
+	lockedCoins := acc.LockedCoins
+	coins := sdk.Coins{}
+	for _, lockedCoin := range lockedCoins {
+		coins = coins.Add(sdk.Coins{lockedCoin.Coin})
+	}
+	coins = coins.Add(acc.FrozenCoins)
+	return coins
+}
+
 func (acc *AccountX) GetLockedCoinsByDemon(demon string) LockedCoins {
 	var coins LockedCoins
 	for _, c := range acc.LockedCoins {

@@ -137,3 +137,23 @@ func TestAccountX_AddLockedCoins(t *testing.T) {
 	require.Equal(t, "bch", acc.GetLockedCoinsByDemon("bch")[0].Coin.Denom)
 	require.Equal(t, sdk.NewInt(10), acc.GetLockedCoinsByDemon("bch")[0].Coin.Amount)
 }
+
+func TestAccountX_GetAllCoins(t *testing.T) {
+	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
+	coins := LockedCoins{
+		LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}, UnlockTime: 1000},
+		LockedCoin{Coin: sdk.Coin{Denom: "eth", Amount: sdk.NewInt(30)}, UnlockTime: 2000},
+		LockedCoin{Coin: sdk.Coin{Denom: "eos", Amount: sdk.NewInt(40)}, UnlockTime: 3000},
+	}
+	acc.LockedCoins = coins
+	acc.FrozenCoins = sdk.NewCoins(sdk.Coin{Denom: "bch", Amount: sdk.NewInt(50)},
+		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(10)})
+
+	res := acc.GetAllCoins()
+	expected := sdk.NewCoins(sdk.Coin{Denom: "bch", Amount: sdk.NewInt(70)},
+		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(40)},
+		sdk.Coin{Denom: "eos", Amount: sdk.NewInt(40)},
+	)
+
+	require.Equal(t, expected, res)
+}
