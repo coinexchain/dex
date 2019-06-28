@@ -1,6 +1,8 @@
 package stakingx
 
 import (
+	"errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -37,5 +39,15 @@ func (data GenesisState) Validate() error {
 	if !msd.IsPositive() {
 		return ErrInvalidMinSelfDelegation(msd)
 	}
+
+	addrSet := make(map[string]interface{})
+	for _, addr := range data.Params.NonBondableAddresses {
+		if _, exists := addrSet[addr.String()]; exists {
+			return errors.New("duplicate addresses in non_bondable_addresses")
+		}
+
+		addrSet[addr.String()] = nil
+	}
+
 	return nil
 }

@@ -1186,17 +1186,15 @@ paths:
           schema:
             type: object
             properties:
-              loose_tokens:
+              not_bonded_tokens:
                 type: string
               bonded_tokens:
                 type: string
-              inflation_last_time:
+              non_bondable_tokens:
                 type: string
-              inflation:
+              total_supply:
                 type: string
-              date_last_commission_reset:
-                type: string
-              prev_bonded_shares:
+              bonded_ratio:
                 type: string
         500:
           description: Internal Server Error

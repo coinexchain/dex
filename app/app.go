@@ -206,7 +206,7 @@ func (app *CetChainApp) initKeepers() {
 		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 	)
 	app.stakingXKeeper = stakingx.NewKeeper(
-		app.paramsKeeper.Subspace(stakingx.DefaultParamspace), &stakingKeeper, app.distrKeeper)
+		app.paramsKeeper.Subspace(stakingx.DefaultParamspace), &stakingKeeper, app.distrKeeper, app.accountKeeper)
 
 	app.slashingKeeper = slashing.NewKeeper(
 		app.cdc,
@@ -281,9 +281,9 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(gov.QuerierRoute, gov.NewQuerier(app.govKeeper)).
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
+		AddRoute(stakingx.QuerierRoute, stakingx.NewQuerier(app.stakingXKeeper, app.cdc)).
 		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.tokenKeeper, app.cdc)).
 		AddRoute(market.StoreKey, market.NewQuerier(app.marketKeeper, app.cdc))
-
 }
 
 // initialize BaseApp

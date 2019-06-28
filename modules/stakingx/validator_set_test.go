@@ -60,7 +60,7 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 		staking.DefaultCodespace,
 	)
 	dk := distribution.NewKeeper(cdc, distKey, paramsKeeper.Subspace(distribution.StoreKey), bk, sk, fck, types.DefaultCodespace)
-	sxk := NewKeeper(paramsKeeper.Subspace(DefaultParamspace), &sk, dk)
+	sxk := NewKeeper(paramsKeeper.Subspace(DefaultParamspace), &sk, dk, ak)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
@@ -90,6 +90,7 @@ func initStates(ctx sdk.Context, sxk Keeper) {
 	sxk.sk.SetPool(ctx, pool)
 
 }
+
 func TestSlashTokensToCommunityPool(t *testing.T) {
 	sxk, ctx, ak := setUpInput()
 

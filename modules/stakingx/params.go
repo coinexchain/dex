@@ -5,9 +5,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// DefaultParamspace defines the default stakingx module parameter subspace
-const DefaultParamspace = "stakingx"
-
 // Default parameter values
 const (
 	DefaultMinSelfDelegation = 1000000e8
@@ -15,14 +12,16 @@ const (
 
 // Parameter keys
 var (
-	KeyMinSelfDelegation = []byte("MinSelfDelegation")
+	KeyMinSelfDelegation    = []byte("MinSelfDelegation")
+	KeyNonBondableAddresses = []byte("NonBondableAddresses")
 )
 
 var _ params.ParamSet = &Params{}
 
 // Params defines the parameters for the stakingx module.
 type Params struct {
-	MinSelfDelegation sdk.Int `json:"min_self_delegation"`
+	MinSelfDelegation    sdk.Int          `json:"min_self_delegation"`
+	NonBondableAddresses []sdk.AccAddress `json:"non_bondable_addresses"`
 }
 
 // ParamKeyTable for stakingx module
@@ -35,12 +34,14 @@ func ParamKeyTable() params.KeyTable {
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyMinSelfDelegation, Value: &p.MinSelfDelegation},
+		{Key: KeyNonBondableAddresses, Value: &p.NonBondableAddresses},
 	}
 }
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		MinSelfDelegation: sdk.NewInt(DefaultMinSelfDelegation),
+		MinSelfDelegation:    sdk.NewInt(DefaultMinSelfDelegation),
+		NonBondableAddresses: make([]sdk.AccAddress, 0),
 	}
 }

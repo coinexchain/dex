@@ -10,6 +10,7 @@ import (
 	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
 	"github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/libs/cli"
 
@@ -33,7 +34,7 @@ import (
 	slashing "github.com/cosmos/cosmos-sdk/x/slashing/client/rest"
 	st "github.com/cosmos/cosmos-sdk/x/staking"
 	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
-	staking "github.com/cosmos/cosmos-sdk/x/staking/client/rest"
+	stakingrest "github.com/cosmos/cosmos-sdk/x/staking/client/rest"
 
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/cmd/cetcli/dev"
@@ -48,6 +49,8 @@ import (
 	bankxrest "github.com/coinexchain/dex/modules/bankx/client/rest"
 	mktclient "github.com/coinexchain/dex/modules/market/client"
 	mktrest "github.com/coinexchain/dex/modules/market/client/rest"
+	stakingxclient "github.com/coinexchain/dex/modules/stakingx/client"
+	stakingxrest "github.com/coinexchain/dex/modules/stakingx/client/rest"
 	dex "github.com/coinexchain/dex/types"
 	"github.com/coinexchain/dex/version"
 )
@@ -86,6 +89,8 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		return initConfig(rootCmd)
 	}
 
+	stakingModuleClient := stakingclient.NewModuleClient(st.StoreKey, cdc)
+
 	// Module clients hold cli commands (tx,query) and lcd routes
 	// TODO: Make the lcd command take a list of ModuleClient
 	mc := []sdk.ModuleClients{
@@ -93,7 +98,7 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		mktclient.NewModuleClient(as.StoreKey, cdc),
 		govClient.NewModuleClient(gv.StoreKey, cdc),
 		distClient.NewModuleClient(distcmd.StoreKey, cdc),
-		stakingclient.NewModuleClient(st.StoreKey, cdc),
+		stakingxclient.NewModuleClient(&stakingModuleClient, st.StoreKey, cdc),
 		slashingclient.NewModuleClient(sl.StoreKey, cdc),
 		crisisclient.NewModuleClient(sl.StoreKey, cdc),
 	}
@@ -207,7 +212,8 @@ func registerRoutes(rs *lcd.RestServer) {
 	authxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, authx.StoreKey)
 	bankxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	dist.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, distcmd.StoreKey)
-	staking.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
+	stakingxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	stakingrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	slashing.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	gov.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	assrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, as.StoreKey)
