@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/coinexchain/dex/modules/crisisx"
 	"github.com/coinexchain/dex/modules/distributionx"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -259,6 +260,7 @@ func (app *CetChainApp) initKeepers() {
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {
+	crisisx.RegisterInvariants(&app.crisisKeeper, app.bankxKeeper, app.feeCollectionKeeper, app.distrKeeper)
 	bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
 	distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
 
