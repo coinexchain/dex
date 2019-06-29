@@ -38,7 +38,7 @@ func TestNewCetCoinE8(t *testing.T) {
 		args args
 		want sdk.Coin
 	}{
-		{name: "cet", args: args{1}, want: sdk.NewInt64Coin("cet", 100000000)},
+		{name: "cet", args: args{1}, want: sdk.NewInt64Coin("cet", E8)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -58,7 +58,7 @@ func TestNewCetCoinsE8(t *testing.T) {
 		args args
 		want sdk.Coins
 	}{
-		{name: "cet", args: args{1}, want: []sdk.Coin{sdk.NewInt64Coin("cet", 100000000)}},
+		{name: "cet", args: args{1}, want: []sdk.Coin{sdk.NewInt64Coin("cet", E8)}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
