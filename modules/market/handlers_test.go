@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -239,16 +240,16 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	ak := prepareAssetKeeper(t, keys, cdc, ctx, addrForbid, tokenForbid)
 	bk := prepareBankxKeeper(keys, cdc, ctx)
 
-	mk := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, cdc, msgqueue.NewProducer(), params.NewKeeper(
-		cdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey))
-	RegisterCodec(mk.cdc)
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams)
-	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
+	mk := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, cdc,
+		msgqueue.NewProducer(), paramsKeeper.Subspace(StoreKey))
+	RegisterCodec(mk.cdc)
 
-	subspace := paramsKeeper.Subspace(StoreKey)
-	keeper := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
+	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
+	// subspace := paramsKeeper.Subspace(StoreKey)
+	// keeper := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
 	parameters := DefaultParams()
-	keeper.SetParams(ctx, parameters)
+	mk.SetParams(ctx, parameters)
 
 	return testInput{ctx: ctx, mk: mk, handler: NewHandler(mk), akp: akp}
 }
@@ -554,23 +555,19 @@ func TestCancelMarketFailed(t *testing.T) {
 	msgCancelMarket := MsgCancelMarket{
 		Sender:        haveCetAddress,
 		Symbol:        stock + SymbolSeparator + "cet",
-		EffectiveTime: DefaultMarketMinExpiredTime + 10,
+		EffectiveTime: time.Now().Unix() + DefaultMarketMinExpiredTime,
 	}
 
-	// header := abci.Header{Time: time.Now()}
-	// input.ctx.WithBlockHeader(header)
-	// input.ctx.WithBlockHeader(header)
-	// header = input.ctx.BlockHeader()
-
-	// TODO. will add the test case in late
-	// failedTime := msgCancelMarket
-	// failedTime.EffectiveTime = 10
-	// ret := input.handler(input.ctx, failedTime)
-	// require.Equal(t, CodeInvalidTime, ret.Code, "cancel order should failed by invalid cancel time")
+	header := abci.Header{Time: time.Now(), Height: 10}
+	input.ctx = input.ctx.WithBlockHeader(header)
+	failedTime := msgCancelMarket
+	failedTime.EffectiveTime = 10
+	ret := input.handler(input.ctx, failedTime)
+	require.Equal(t, CodeInvalidTime, ret.Code, "cancel order should failed by invalid cancel time")
 
 	failedSymbol := msgCancelMarket
 	failedSymbol.Symbol = stock + SymbolSeparator + "not exist"
-	ret := input.handler(input.ctx, failedSymbol)
+	ret = input.handler(input.ctx, failedSymbol)
 	require.Equal(t, CodeInvalidSymbol, ret.Code, "cancel order should failed by invalid symbol")
 
 	failedSender := msgCancelMarket

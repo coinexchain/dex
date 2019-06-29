@@ -131,3 +131,26 @@ func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 	return coins
 
 }
+
+func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) int64 {
+	var (
+		axkTotalAmount sdk.Int
+		akTotalAmount  sdk.Int
+	)
+	axkProcess := func(acc authx.AccountX) bool {
+		val := acc.GetAllCoins().AmountOf(denom)
+		axkTotalAmount.Add(val)
+		return false
+	}
+
+	akProcess := func(acc auth.Account) bool {
+		val := acc.GetCoins().AmountOf(denom)
+		akTotalAmount.Add(val)
+		return false
+	}
+
+	k.axk.IterateAccounts(ctx, axkProcess)
+	k.ak.IterateAccounts(ctx, akProcess)
+
+	return axkTotalAmount.Add(akTotalAmount).Int64()
+}
