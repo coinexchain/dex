@@ -506,9 +506,9 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/create-market:
+  /market/trading-pair:
     post:
-      summary: Create market in blockchain
+      summary: Create trading-pair in blockchain
       tags:
         - Market
       consumes:
@@ -518,8 +518,8 @@ paths:
       operationId: createMarket
       parameters:
         - in: body
-          name: marketInfo
-          description: Create market tx
+          name: info
+          description: Create trading-pair 
           required: true
           schema:
             type: object
@@ -537,9 +537,9 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/market-info/{symbol}:
+  /market/trading-pair/{symbol}:
     get:
-      summary: Query market info
+      summary: Query trading-pair info
       tags:
         - Market
       produces:
@@ -548,13 +548,13 @@ paths:
       parameters:
         - in: path
           name: symbol
-          description: Market symbol
+          description: trading-pair symbol
           required: true
           type: string
           x-example: cet
       responses:
         200:
-          description: Market info of the specified symbol
+          description: trading-pair info of the specified symbol
           schema:
             $ref: "#/definitions/MarketInfo"
         400:
@@ -641,9 +641,9 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/cancel-market:
+  /market/cancel-trading-pair:
     post:
-      summary: Cancel the market
+      summary: Cancel the trading-pair
       tags:
         - Market
       consumes:
@@ -653,8 +653,8 @@ paths:
       operationId: cancelMarket
       parameters:
         - in: body
-          name: marketInfo
-          description: create order tx
+          name: info
+          description: cancel trading-pair in dex
           required: true
           schema:
             type: object
