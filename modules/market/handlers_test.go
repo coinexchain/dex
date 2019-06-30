@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/staking"
+
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -18,6 +20,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
@@ -102,6 +105,8 @@ type storeKeys struct {
 	tkeyParams  *sdk.TransientStoreKey
 	marketKey   *sdk.KVStoreKey
 	authxKey    *sdk.KVStoreKey
+	keyStaking  *sdk.KVStoreKey
+	tkeyStaking *sdk.TransientStoreKey
 }
 
 func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) ExpectedAssetStatusKeeper {
@@ -138,11 +143,16 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		msgqueue.NewProducer(),
 	)
 
+	sk := staking.NewKeeper(cdc, keys.keyStaking, keys.tkeyStaking, bk,
+		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(staking.DefaultParamspace),
+		stakingtypes.DefaultCodespace)
+
 	tk := asset.NewBaseKeeper(
 		cdc,
 		keys.assetCapKey,
 		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(asset.DefaultParamspace),
 		bkx,
+		&sk,
 	)
 	tk.SetParams(ctx, asset.DefaultParams())
 
@@ -227,6 +237,9 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	keys.keyParams = sdk.NewKVStoreKey(params.StoreKey)
 	keys.tkeyParams = sdk.NewTransientStoreKey(params.TStoreKey)
 	keys.authxKey = sdk.NewKVStoreKey(authx.StoreKey)
+	keys.keyStaking = sdk.NewKVStoreKey(stakingtypes.StoreKey)
+	keys.tkeyStaking = sdk.NewTransientStoreKey(stakingtypes.TStoreKey)
+
 	ms.MountStoreWithDB(keys.assetCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.authCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.fckCapKey, sdk.StoreTypeIAVL, db)

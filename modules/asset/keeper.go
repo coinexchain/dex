@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/x/staking"
+
 	"github.com/tendermint/tendermint/libs/bech32"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
-	"github.com/coinexchain/dex/modules/bankx"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -61,11 +62,12 @@ type BaseKeeper struct {
 	paramSubspace params.Subspace
 
 	bkx ExpectedBankxKeeper
+	sk  *staking.Keeper
 }
 
 // NewBaseKeeper returns a new BaseKeeper that uses go-amino to (binary) encode and decode concrete Token.
 func NewBaseKeeper(cdc *codec.Codec, key sdk.StoreKey,
-	paramStore params.Subspace, bkx bankx.Keeper) BaseKeeper {
+	paramStore params.Subspace, bkx ExpectedBankxKeeper, sk *staking.Keeper) BaseKeeper {
 	return BaseKeeper{
 		BaseTokenKeeper: NewBaseTokenKeeper(cdc, key),
 
@@ -73,6 +75,7 @@ func NewBaseKeeper(cdc *codec.Codec, key sdk.StoreKey,
 		key:           key,
 		paramSubspace: paramStore.WithKeyTable(ParamKeyTable()),
 		bkx:           bkx,
+		sk:            sk,
 	}
 }
 
@@ -183,6 +186,11 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error 
 		return ErrorInvalidTokenBurn(fmt.Sprintf("token %s do not support burn", msg.Symbol))
 	}
 
+	coinsToBurn := NewTokenCoins(msg.Symbol, msg.Amount)
+	if err = keeper.bkx.SubtractCoins(ctx, token.GetOwner(), coinsToBurn); err != nil {
+		return err
+	}
+
 	if err := token.SetTotalBurn(msg.Amount + token.GetTotalBurn()); err != nil {
 		return ErrorInvalidTokenBurn(err.Error())
 	}
@@ -191,7 +199,16 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error 
 		return ErrorInvalidTokenSupply(err.Error())
 	}
 
+	if token.GetSymbol() == dex.CET {
+		updateBondPoolStatus(msg, keeper, ctx)
+	}
+
 	return keeper.setToken(ctx, token)
+}
+
+func updateBondPoolStatus(msg MsgBurnToken, keeper BaseKeeper, ctx sdk.Context) {
+	decreaseNotBondedAmt := sdk.NewInt(msg.Amount).Neg()
+	keeper.sk.InflateSupply(ctx, decreaseNotBondedAmt)
 }
 
 //ForbidToken - forbid token
@@ -338,6 +355,7 @@ func (keeper BaseKeeper) checkPrecondition(ctx sdk.Context, msg sdk.Msg, symbol 
 
 	return token, nil
 }
+
 func (keeper BaseKeeper) setToken(ctx sdk.Context, token Token) sdk.Error {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(keeper.key)
@@ -349,11 +367,13 @@ func (keeper BaseKeeper) setToken(ctx sdk.Context, token Token) sdk.Error {
 	store.Set(TokenStoreKey(symbol), bz)
 	return nil
 }
+
 func (keeper BaseKeeper) removeToken(ctx sdk.Context, token Token) {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(keeper.key)
 	store.Delete(TokenStoreKey(symbol))
 }
+
 func (keeper BaseKeeper) addWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.key)
 	for _, addr := range whitelist {
@@ -362,6 +382,7 @@ func (keeper BaseKeeper) addWhitelist(ctx sdk.Context, symbol string, whitelist 
 
 	return nil
 }
+
 func (keeper BaseKeeper) removeWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.key)
 	for _, addr := range whitelist {
@@ -370,6 +391,7 @@ func (keeper BaseKeeper) removeWhitelist(ctx sdk.Context, symbol string, whiteli
 
 	return nil
 }
+
 func (keeper BaseKeeper) addForbidAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.key)
 	for _, addr := range addresses {
@@ -378,6 +400,7 @@ func (keeper BaseKeeper) addForbidAddress(ctx sdk.Context, symbol string, addres
 
 	return nil
 }
+
 func (keeper BaseKeeper) removeForbidAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.key)
 	for _, addr := range addresses {

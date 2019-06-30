@@ -64,11 +64,14 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 
 	// genesis state
 	genState := NewDefaultGenesisState()
-	genState.AssetData.Tokens = append(genState.AssetData.Tokens, cetToken())
+	cetToken := cetToken()
+	genState.AssetData.Tokens = append(genState.AssetData.Tokens, cetToken)
 	genState.AuthXData.Params.MinGasPriceLimit = sdk.MustNewDecFromStr("0.00000001")
 	if cb != nil {
 		cb(&genState)
 	}
+
+	genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(cetToken.GetTotalSupply())
 
 	// init chain
 	genStateBytes, _ := app.cdc.MarshalJSON(genState)

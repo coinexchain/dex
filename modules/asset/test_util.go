@@ -5,6 +5,8 @@ import (
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -39,7 +41,9 @@ func setupTestInput() testInput {
 	authxCapKey := sdk.NewKVStoreKey(authx.StoreKey)
 	fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
 	keyParams := sdk.NewKVStoreKey(params.StoreKey)
+	keyStaking := sdk.NewKVStoreKey(types.StoreKey)
 	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
+	tkeyStaking := sdk.NewTransientStoreKey(types.TStoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(assetCapKey, sdk.StoreTypeIAVL, db)
@@ -80,12 +84,16 @@ func setupTestInput() testInput {
 		msgqueue.NewProducer(),
 	)
 
+	sk := staking.NewKeeper(cdc, keyStaking, tkeyStaking, bk,
+		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(staking.DefaultParamspace),
+		types.DefaultCodespace)
+
 	tk := NewBaseKeeper(
 		cdc,
 		assetCapKey,
 		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(DefaultParamspace),
 		bkx,
-	)
+		&sk)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	handler := NewHandler(tk)

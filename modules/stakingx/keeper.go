@@ -79,7 +79,7 @@ func calcBondedRatio(p *BondPool) sdk.Dec {
 	}
 
 	bondableTokens := p.TotalSupply.Sub(p.NonBondableTokens)
-	if bondableTokens.IsNegative() {
+	if !bondableTokens.IsPositive() {
 		return sdk.ZeroDec()
 	}
 
