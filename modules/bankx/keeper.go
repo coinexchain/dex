@@ -134,8 +134,8 @@ func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 
 func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) int64 {
 	var (
-		axkTotalAmount sdk.Int
-		akTotalAmount  sdk.Int
+		axkTotalAmount = sdk.ZeroInt()
+		akTotalAmount  = sdk.ZeroInt()
 	)
 	axkProcess := func(acc authx.AccountX) bool {
 		val := acc.GetAllCoins().AmountOf(denom)
