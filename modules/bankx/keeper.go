@@ -139,11 +139,12 @@ func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) int64 {
 	)
 	axkProcess := func(acc authx.AccountX) bool {
 		val := acc.GetAllCoins().AmountOf(denom)
-		axkTotalAmount.Add(val)
+		axkTotalAmount = axkTotalAmount.Add(val)
 		fmt.Printf("axkTotalAmount : %d, val : %d\n", axkTotalAmount.Int64(), val.Int64())
 		return false
 	}
 
+	fmt.Println(axkTotalAmount.Int64())
 	// akProcess := func(acc auth.Account) bool {
 	// 	val := acc.GetCoins().AmountOf(denom)
 	// 	akTotalAmount.Add(val)
