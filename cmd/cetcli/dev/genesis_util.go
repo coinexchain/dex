@@ -37,12 +37,12 @@ func accAddressFromBech32(address string) sdk.AccAddress {
 	return addr
 }
 
-func createCetToken() asset.Token {
+func createCetToken(ownerAddr string) asset.Token {
 	token := &asset.BaseToken{
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",
 		TotalSupply:      588788547005740000,
-		Owner:            accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
+		Owner:            accAddressFromBech32(ownerAddr),
 		Mintable:         false,
 		Burnable:         true,
 		AddrForbiddable:  false,
@@ -50,9 +50,12 @@ func createCetToken() asset.Token {
 		TotalBurn:        411211452994260000,
 		TotalMint:        0,
 		IsForbidden:      false,
+		URL:              "https://www.coinex.org",
+		Description:      "Decentralized public chain ecosystem, Born for financial liberalization",
 	}
 	if err := token.Validate(); err != nil {
 		panic(err)
 	}
+
 	return token
 }

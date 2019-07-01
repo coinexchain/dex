@@ -40,7 +40,7 @@ func createExampleGenesisAccounts() (accs []app.GenesisAccount) {
 }
 
 func createExampleGenesisAssetData() asset.GenesisState {
-	cet := createCetToken()
+	cet := createCetToken("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	abc := createAbcToken()
 
 	state := asset.DefaultGenesisState()

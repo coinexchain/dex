@@ -99,5 +99,8 @@ func calcNonBondableTokens(ctx sdk.Context, k *Keeper) sdk.Int {
 		}
 	}
 
+	communityPoolAmt := k.dk.GetFeePoolCommunityCoins(ctx).AmountOf(types.CET)
+	ret = ret.Add(communityPoolAmt.TruncateInt())
+
 	return ret
 }

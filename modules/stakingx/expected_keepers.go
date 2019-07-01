@@ -8,4 +8,5 @@ import (
 type DistributionKeeper interface {
 	GetFeePool(ctx sdk.Context) (feePool types.FeePool)
 	SetFeePool(ctx sdk.Context, feePool types.FeePool)
+	GetFeePoolCommunityCoins(ctx sdk.Context) sdk.DecCoins
 }
