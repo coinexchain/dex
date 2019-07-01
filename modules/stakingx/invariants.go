@@ -36,6 +36,9 @@ func RegisterInvariants(c types.CrisisKeeper, k Keeper, assetKeeper AssetViewKee
 func TotalSupplyInvariants(k Keeper, assetKeeper AssetViewKeeper) sdk.Invariant {
 	return func(ctx sdk.Context) error {
 		token := assetKeeper.GetToken(ctx, dex.DefaultBondDenom)
+		if token == nil {
+			return nil
+		}
 
 		ts := token.GetTotalSupply()
 		bondPool := k.CalcBondPoolStatus(ctx)
