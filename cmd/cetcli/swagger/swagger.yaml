@@ -2083,7 +2083,9 @@ paths:
               base_req:
                 $ref: "#/definitions/BaseReq"
               amount:
-                type: string
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
       responses:
         200:
           description: Donate tx result
