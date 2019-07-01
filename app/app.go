@@ -260,7 +260,7 @@ func (app *CetChainApp) initKeepers() {
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {
-	crisisx.RegisterInvariants(&app.crisisKeeper, app.bankxKeeper, app.feeCollectionKeeper, app.distrKeeper, app.stakingKeeper)
+	crisisx.RegisterInvariants(&app.crisisKeeper, app.assetKeeper, app.bankxKeeper, app.feeCollectionKeeper, app.distrKeeper, app.stakingKeeper)
 	bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
 	distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
 

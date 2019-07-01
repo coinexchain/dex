@@ -10,19 +10,19 @@ import (
 	dType "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/types"
 )
 
 const (
-	TotalCetAmount int64 = 588800000000000000
-	ModuleName           = "crisisx"
+	ModuleName = "crisisx"
 )
 
-func RegisterInvariants(c *crisis.Keeper, bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) {
-	c.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(bk, feek, disk, stk))
+func RegisterInvariants(c *crisis.Keeper, tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) {
+	c.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(tokenKeeper, bk, feek, disk, stk))
 }
 
-func SupplyCETInvariant(bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) sdk.Invariant {
+func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) sdk.Invariant {
 
 	return func(ctx sdk.Context) error {
 		var (
@@ -67,11 +67,12 @@ func SupplyCETInvariant(bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, dis
 		stk.IterateUnbondingDelegations(ctx, unbondingProcess)
 		stk.IterateValidators(ctx, validatorProcess)
 
+		issueAmount := tokenKeeper.GetParams(ctx).IssueTokenFee.AmountOf(types.CET)
 		// Judge equality
-		if totalAmount.Int64() == TotalCetAmount {
+		if totalAmount.Int64() == issueAmount.Int64() {
 			return nil
 		}
-		return fmt.Errorf("The Cet total amount [ %d ]is inconsistent with the actual amount [ %d ]\n",
-			TotalCetAmount, totalAmount.Int64())
+		return fmt.Errorf("the cet total amount [ %d ]is inconsistent with the actual amount [ %d ]",
+			issueAmount.Int64(), totalAmount.Int64())
 	}
 }
