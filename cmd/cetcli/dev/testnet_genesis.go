@@ -14,7 +14,6 @@ import (
 func createTestnetGenesisState(cdc *codec.Codec) app.GenesisState {
 	genState := app.NewDefaultGenesisState()
 	genState.Accounts = createGenesisAccounts()
-	genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(calcTotalTokens(genState.Accounts))
 	genState.AssetData = createTestnetGenesisAssetData()
 
 	addNonBondableAddresses(&genState.StakingXData.Params)
@@ -65,23 +64,10 @@ func createGenesisAccounts() (accs []app.GenesisAccount) {
 	return
 }
 
-func calcTotalTokens(accs []app.GenesisAccount) int64 {
-	var total int64
-	for _, acc := range accs {
-		total = total + acc.Coins.AmountOf(types.CET).Int64()
-	}
-
-	return total
-}
-
 func checkGenState(genState *app.GenesisState) {
 	tokens := genState.AssetData.Tokens
 	if len(tokens) != 1 || tokens[0].GetSymbol() != types.CET {
 		panic("only CET token should exists during network initial genesis")
-	}
-
-	if tokens[0].GetTotalSupply() != genState.StakingData.Pool.NotBondedTokens.Int64() {
-		panic("initial CET token total-supply should equals Staking.Pool.NotBondedTokens")
 	}
 
 	if tokens[0].GetOwner().String() != viper.GetString(flagAddrCoinExFoundation) {
