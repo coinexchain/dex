@@ -1,6 +1,6 @@
 {
-  "genesis_time": "2019-06-22T09:28:18.255819731Z",
-  "chain_id": "coinexdex-test1",
+  "genesis_time": "2019-07-01T13:22:30.027742822Z",
+  "chain_id": "coinexdex-test2",
   "consensus_params": {
     "block": {
       "max_bytes": "22020096",
@@ -8,7 +8,7 @@
       "time_iota_ms": "1000"
     },
     "evidence": {
-      "max_age": "1000000"
+      "max_age": "100000"
     },
     "validator": {
       "pub_key_types": [
@@ -24,7 +24,7 @@
         "coins": [
           {
             "denom": "cet",
-            "amount": "30000000000000000"
+            "amount": "31536000000000000"
           }
         ],
         "sequence_number": "0",
@@ -62,7 +62,7 @@
         "coins": [
           {
             "denom": "cet",
-            "amount": "90000000000000000"
+            "amount": "88464000000000000"
           }
         ],
         "sequence_number": "0",
@@ -198,7 +198,7 @@
       }
     ],
     "auth": {
-      "collected_fees": [],
+      "collected_fees": null,
       "params": {
         "max_memo_characters": "256",
         "tx_sig_limit": "7",
@@ -242,25 +242,34 @@
     },
     "stakingx": {
       "params": {
-        "min_self_delegation": "100000000000000"
+        "min_self_delegation": "100000000000000",
+        "non_bondable_addresses": [
+          "coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97",
+          "coinex1cfg6fld5snhrmjdjh29msgqn4luf5ugqt96h0s",
+          "coinex1n996vusm2e592y35t7p95aj7gfpxkzt8v3nqcd",
+          "coinex1wdh5fsl5duv0yhky2cx3jfqgc0nvt73kzq60c9",
+          "coinex1hvwyuk60ehlcfpk85l3ere205hec5fm0c7vcxh",
+          "coinex16lvmlnvuze2sym63cc8vm5wqz577z6y6ehwt7a",
+          "coinex1gfzu2zyzwmt9e7lqmdr27pe939fvpvddpuqxpt"
+        ]
       }
     },
     "distr": {
       "fee_pool": {
-        "community_pool": []
+        "community_pool": null
       },
       "community_tax": "0.020000000000000000",
       "base_proposer_reward": "0.010000000000000000",
       "bonus_proposer_reward": "0.040000000000000000",
       "withdraw_addr_enabled": true,
-      "delegator_withdraw_infos": [],
+      "delegator_withdraw_infos": null,
       "previous_proposer": "",
-      "outstanding_rewards": [],
-      "validator_accumulated_commissions": [],
-      "validator_historical_rewards": [],
-      "validator_current_rewards": [],
-      "delegator_starting_infos": [],
-      "validator_slash_events": []
+      "outstanding_rewards": null,
+      "validator_accumulated_commissions": null,
+      "validator_historical_rewards": null,
+      "validator_current_rewards": null,
+      "delegator_starting_infos": null,
+      "validator_slash_events": null
     },
     "gov": {
       "starting_proposal_id": "1",
@@ -314,7 +323,7 @@
       },
       "tokens": [
         {
-          "type": "asset/Token",
+          "type": "asset/BaseToken",
           "value": {
             "name": "CoinEx Chain Native Token",
             "symbol": "cet",
@@ -326,73 +335,117 @@
             "token_forbiddable": false,
             "total_burn": "411211452994260000",
             "total_mint": "0",
-            "is_forbidden": false
+            "is_forbidden": false,
+            "url": "https://www.coinex.org",
+            "description": "Decentralized public chain ecosystem, Born for financial liberalization"
           }
         }
       ],
-      "whitelist": [],
-      "forbid_addr": []
+      "whitelist": null,
+      "forbid_addr": null
     },
     "market": {
       "params": {
         "create_market_fee": "1000000000000",
         "fixed_trade_fee": "0",
-        "gte_order_lifetime": "20000",
+        "market_min_expired_time": "604800",
+        "gte_order_lifetime": "10000",
+        "gte_order_feature_fee_by_blocks": "6000000",
         "max_executed_price_change_ratio": "25",
         "market_fee_rate": "0",
         "market_fee_min": "0",
         "fee_for_zero_deal": "0"
       },
-      "orders": [],
-      "market_infos": []
+      "orders": null,
+      "market_infos": null
+    },
+    "incentive": {
+      "state": {
+        "height_adjustment": "0"
+      },
+      "params": {
+        "incentive_block_interval": 3,
+        "default_reward_per_block": 0,
+        "plans": [
+          {
+            "start_height": "0",
+            "end_height": "10512000",
+            "reward_per_block": "10",
+            "total_incentive": "105120000"
+          },
+          {
+            "start_height": "10512000",
+            "end_height": "21024000",
+            "reward_per_block": "8",
+            "total_incentive": "84096000"
+          },
+          {
+            "start_height": "21024000",
+            "end_height": "31536000",
+            "reward_per_block": "6",
+            "total_incentive": "63072000"
+          },
+          {
+            "start_height": "31536000",
+            "end_height": "42048000",
+            "reward_per_block": "4",
+            "total_incentive": "42048000"
+          },
+          {
+            "start_height": "42048000",
+            "end_height": "52560000",
+            "reward_per_block": "2",
+            "total_incentive": "21024000"
+          }
+        ]
+      }
     },
     "gentxs": [
-{
-    "type": "auth/StdTx",
-    "value": {
-        "fee": {
+      {
+        "type": "auth/StdTx",
+        "value": {
+          "msg": [
+            {
+              "type": "cosmos-sdk/MsgCreateValidator",
+              "value": {
+                "description": {
+                  "moniker": "moniker_genesis",
+                  "identity": "CF1FAAA36A78BE02",
+                  "website": "www.coinex.org",
+                  "details": "This is initial genesis node."
+                },
+                "commission": {
+                  "rate": "0.050000000000000000",
+                  "max_rate": "0.200000000000000000",
+                  "max_change_rate": "0.010000000000000000"
+                },
+                "min_self_delegation": "100000000000000",
+                "delegator_address": "coinex1cfg6fld5snhrmjdjh29msgqn4luf5ugqt96h0s",
+                "validator_address": "coinexvaloper1cfg6fld5snhrmjdjh29msgqn4luf5ugqs2elpy",
+                "pubkey": "coinexvalconspub1zcjduepqe6yz2munsrsfj5nxzt2j770cvl7llmsj7ztfprp9daf55sm7mfesj92zne",
+                "value": {
+                  "denom": "cet",
+                  "amount": "100000000000000"
+                }
+              }
+            }
+          ],
+          "fee": {
             "amount": null,
             "gas": "200000"
-        },
-        "memo": "a2f1731b43470337ac17816f8c081d0e2902f44e@10.211.55.3:26656",
-        "msg": [
+          },
+          "signatures": [
             {
-                "type": "cosmos-sdk/MsgCreateValidator",
-                "value": {
-                    "commission": {
-                        "max_change_rate": "0.010000000000000000",
-                        "max_rate": "0.200000000000000000",
-                        "rate": "0.100000000000000000"
-                    },
-                    "delegator_address": "coinex1cfg6fld5snhrmjdjh29msgqn4luf5ugqt96h0s",
-                    "description": {
-                        "details": "genesis_validator",
-                        "identity": "",
-                        "moniker": "genesis_node",
-                        "website": ""
-                    },
-                    "min_self_delegation": "100000000000000",
-                    "pubkey": "coinexvalconspub1zcjduepq03cqkldgl39z79ryq0zwed5dhhryq73xhwhnq3vcck4a0wl9f6vqqy743s",
-                    "validator_address": "coinexvaloper1cfg6fld5snhrmjdjh29msgqn4luf5ugqs2elpy",
-                    "value": {
-                        "amount": "100000000000000",
-                        "denom": "cet"
-                    }
-                }
+              "pub_key": {
+                "type": "tendermint/PubKeySecp256k1",
+                "value": "A2iAW8Nm9gJAw0pee5+piD1EKkVG+FrMKQz1FfOFROOF"
+              },
+              "signature": "eND3h3jSxtNxQlIYT895jukdldFzc4ovH5P1nWbV3WYVx7OHYsFIinR2pXDPfl1uRveIQ+Qru1xflQ0igIPsSw=="
             }
-        ],
-        "signatures": [
-            {
-                "pub_key": {
-                    "type": "tendermint/PubKeySecp256k1",
-                    "value": "A2iAW8Nm9gJAw0pee5+piD1EKkVG+FrMKQz1FfOFROOF"
-                },
-                "signature": "kMRwIqhXZiw9oXNpZnL6nLa87M7COwABNkQ1FX0snoJsbn2WFExl4VkG1l69lp38T6wX9+t9HfYozW2sUEdV0A=="
-            }
-        ]
-    }
-}
-          
+          ],
+          "memo": "f335babc387ba0a681faa02452d42689c1d27fa5@3.16.100.40:26656"
+        }
+      }
     ]
   }
 }
