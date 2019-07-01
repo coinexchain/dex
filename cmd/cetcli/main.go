@@ -47,6 +47,8 @@ import (
 	authxrest "github.com/coinexchain/dex/modules/authx/client/rest"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
 	bankxrest "github.com/coinexchain/dex/modules/bankx/client/rest"
+	distrxcmd "github.com/coinexchain/dex/modules/distributionx/client/cli"
+	distrxrest "github.com/coinexchain/dex/modules/distributionx/client/rest"
 	mktclient "github.com/coinexchain/dex/modules/market/client"
 	mktrest "github.com/coinexchain/dex/modules/market/client/rest"
 	stakingxclient "github.com/coinexchain/dex/modules/stakingx/client"
@@ -187,6 +189,7 @@ func txCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 	txCmd.AddCommand(
 		bankxcmd.SendTxCmd(cdc),
 		bankxcmd.RequireMemoCmd(cdc),
+		distrxcmd.DonateTxCmd(cdc),
 		client.LineBreak,
 		authcmd.GetSignCommand(cdc),
 		authcmd.GetMultiSignCommand(cdc),
@@ -212,6 +215,7 @@ func registerRoutes(rs *lcd.RestServer) {
 	authxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, authx.StoreKey)
 	bankxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	dist.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, distcmd.StoreKey)
+	distrxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	stakingxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	stakingrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	slashing.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)

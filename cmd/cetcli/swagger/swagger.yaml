@@ -2055,6 +2055,43 @@ paths:
           description: Key password is wrong
         500:
           description: Internal Server Error
+  /distribution/{accAddress}/donates:
+    post:
+      summary: Donate to the community pool
+      description: Donate some amount of cet to the community pool
+      tags:
+        - Distribution
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: accAddress
+          description: Account address of the user
+          required: true
+          type: string
+          x-example: coinex1628t2zxa9antj3qtkg7xj2m4t68uljqvyjqrup
+        - in: body
+          name: amount
+          description: Amount of cet to donate
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              amount:
+                type: string
+      responses:
+        200:
+          description: Donate tx result
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid Request
+        500:
+          description: Internal Server Error
   /distribution/community_pool:
     get:
       summary: Community pool parameters
