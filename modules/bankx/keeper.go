@@ -132,29 +132,30 @@ func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 
 }
 
-func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) int64 {
+func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int {
 	var (
 		axkTotalAmount = sdk.ZeroInt()
-		// akTotalAmount  = sdk.ZeroInt()
+		akTotalAmount  = sdk.ZeroInt()
 	)
 	axkProcess := func(acc authx.AccountX) bool {
 		val := acc.GetAllCoins().AmountOf(denom)
 		axkTotalAmount = axkTotalAmount.Add(val)
-		fmt.Printf("axkTotalAmount : %d, val : %d\n", axkTotalAmount.Int64(), val.Int64())
+		fmt.Printf("axkTotalAmount : %d, val : %d, addr : %s\n", axkTotalAmount.Int64(), val.Int64(), acc.Address.String())
 		return false
 	}
+	fmt.Printf("axkTotalAmount : %d\n", axkTotalAmount.Int64())
 
-	fmt.Println(axkTotalAmount.Int64())
-	// akProcess := func(acc auth.Account) bool {
-	// 	val := acc.GetCoins().AmountOf(denom)
-	// 	akTotalAmount.Add(val)
-	// 	fmt.Printf("axkTotalAmount : %d, val : %d\n", akTotalAmount.Int64(), val.Int64())
-	// 	return false
-	// }
+	akProcess := func(acc auth.Account) bool {
+		val := acc.GetCoins().AmountOf(denom)
+		akTotalAmount = akTotalAmount.Add(val)
+		fmt.Printf("axkTotalAmount : %d, val : %d, addr : %s\n", akTotalAmount.Int64(), val.Int64(), acc.GetAddress().String())
+		return false
+	}
+	fmt.Printf("akTotalAmount : %d\n", akTotalAmount.Int64())
 
 	k.axk.IterateAccounts(ctx, axkProcess)
-	// k.ak.IterateAccounts(ctx, akProcess)
+	k.ak.IterateAccounts(ctx, akProcess)
 
-	// return axkTotalAmount.Add(akTotalAmount).Int64()
-	return axkTotalAmount.Int64()
+	return axkTotalAmount.Add(akTotalAmount)
+	// return axkTotalAmount.Int64()
 }

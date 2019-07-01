@@ -7,6 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
+	dType "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/types"
 )
@@ -16,24 +18,60 @@ const (
 	ModuleName           = "crisisx"
 )
 
-func RegisterInvariants(c *crisis.Keeper, bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper) {
-	c.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(bk, feek, disk))
+func RegisterInvariants(c *crisis.Keeper, bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) {
+	c.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(bk, feek, disk, stk))
 }
 
-func SupplyCETInvariant(bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper) sdk.Invariant {
+func SupplyCETInvariant(bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) sdk.Invariant {
 
 	return func(ctx sdk.Context) error {
+		var (
+			totalAmount = sdk.ZeroInt()
+		)
 
 		// Get all amounts based on the account system
 		basedAccountTotalAmount := bk.TotalAmountOfCoin(ctx, types.CET)
-		feeAmount := feek.GetCollectedFees(ctx).AmountOf(types.CET).Int64()
-		communityAmount := disk.GetFeePool(ctx).CommunityPool.AmountOf(types.CET).Int64()
-		fmt.Printf("basedAccountTotalAmount : %d, feeAmount : %d, communityAmount : %d\n",
-			basedAccountTotalAmount, feeAmount, communityAmount)
-		if basedAccountTotalAmount+feeAmount+communityAmount == TotalCetAmount {
-			return nil
+		totalAmount = totalAmount.Add(basedAccountTotalAmount)
+		fmt.Printf("basedAccountTotalAmount : %s, totalAmount : %s \n", basedAccountTotalAmount, totalAmount.String())
+
+		// Get all amounts based on the Non-account system
+		feeAmount := feek.GetCollectedFees(ctx).AmountOf(types.CET)
+		communityAmount := disk.GetFeePool(ctx).CommunityPool.AmountOf(types.CET)
+		totalAmount = totalAmount.Add(feeAmount).Add(communityAmount.RoundInt())
+		fmt.Printf("feeAmount : %s, communityAmount : %s, totalAmount : %s\n",
+			feeAmount.String(), communityAmount.String(), totalAmount.String())
+
+		// Get all amounts based on the Non-account system in the validators
+		outStandingProcess := func(val sdk.ValAddress, rewards dType.ValidatorOutstandingRewards) (stop bool) {
+			totalAmount = totalAmount.Add(rewards.AmountOf(types.CET).RoundInt())
+			fmt.Printf("validator addr : %s, rewards : %s, totalAmount : %s\n",
+				val.String(), rewards.AmountOf(types.CET).RoundInt().String(), totalAmount.String())
+			return false
+		}
+		validatorProcess := func(index int64, validator sdk.Validator) bool {
+			totalAmount = totalAmount.Add(validator.GetTokens())
+			fmt.Printf("validator addr : %s, tokens : %d, totalTokens : %s\n",
+				validator.GetOperator().String(), validator.GetTokens().Int64(), totalAmount.String())
+			return false
+		}
+		unbondingProcess := func(index int64, ubd staking.UnbondingDelegation) bool {
+			for _, ubdentry := range ubd.Entries {
+				totalAmount = totalAmount.Add(ubdentry.Balance)
+				fmt.Printf("unbonding tokens : %s,  totalTokens : %s\n, delgator addr : %s, validator addr : %s ",
+					ubdentry.Balance.String(), totalAmount.String(), ubd.DelegatorAddress.String(), ubd.ValidatorAddress.String())
+			}
+			return false
 		}
 
-		return fmt.Errorf("The Cet total amount is inconsistent with the actual amount")
+		disk.IterateValidatorOutstandingRewards(ctx, outStandingProcess)
+		stk.IterateUnbondingDelegations(ctx, unbondingProcess)
+		stk.IterateValidators(ctx, validatorProcess)
+
+		// Judge equality
+		if totalAmount.Int64() == TotalCetAmount {
+			return nil
+		}
+		return fmt.Errorf("The Cet total amount [ %d ]is inconsistent with the actual amount [ %d ]\n",
+			TotalCetAmount, totalAmount.Int64())
 	}
 }

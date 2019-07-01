@@ -260,7 +260,7 @@ func (app *CetChainApp) initKeepers() {
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {
-	crisisx.RegisterInvariants(&app.crisisKeeper, app.bankxKeeper, app.feeCollectionKeeper, app.distrKeeper)
+	crisisx.RegisterInvariants(&app.crisisKeeper, app.bankxKeeper, app.feeCollectionKeeper, app.distrKeeper, app.stakingKeeper)
 	bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
 	distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
 
@@ -371,6 +371,10 @@ func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 		panic(err) // TODO https://github.com/cosmos/cosmos-sdk/issues/468
 		// return sdk.ErrGenesisParse("").TraceCause(err, "")
 	}
+
+	// for i := range genesisState.Accounts {
+	// 	fmt.Printf("genesis accout address : %s, coins : %s\n", genesisState.Accounts[i].Address.String(), genesisState.Accounts[i].Coins.String())
+	// }
 
 	validators := app.initFromGenesisState(ctx, genesisState)
 

@@ -5,5 +5,5 @@ import (
 )
 
 type ExpectBankxKeeper interface {
-	TotalAmountOfCoin(ctx sdk.Context, denom string) int64
+	TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int
 }
