@@ -42,7 +42,8 @@ func TestExportRestore(t *testing.T) {
 
 func TestExportGenesisState(t *testing.T) {
 	_, _, addr := testutil.KeyPubAddr()
-	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
+	amount := cetToken().GetTotalSupply()
+	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
 
 	// app
 	app := initAppWithBaseAccounts(acc)
@@ -60,7 +61,7 @@ func TestExportGenesisState(t *testing.T) {
 
 	state := app.exportGenesisState(ctx)
 	require.Equal(t, 1, len(state.Accounts))
-	require.Equal(t, sdk.NewInt(int64(1000)), state.Accounts[0].Coins.AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(amount), state.Accounts[0].Coins.AmountOf("cet"))
 	require.Equal(t, true, state.Accounts[0].MemoRequired)
 	require.Equal(t, int64(10), state.Accounts[0].LockedCoins[0].UnlockTime)
 	require.Equal(t, sdk.NewInt(int64(10)), state.Accounts[0].LockedCoins[0].Coin.Amount)
@@ -71,7 +72,9 @@ func TestExportGenesisState(t *testing.T) {
 
 func TestExportDefaultAccountXState(t *testing.T) {
 	_, _, addr := testutil.KeyPubAddr()
-	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
+	amount := cetToken().GetTotalSupply()
+
+	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
 
 	// app
 	app := initAppWithBaseAccounts(acc)
@@ -79,7 +82,7 @@ func TestExportDefaultAccountXState(t *testing.T) {
 
 	state := app.exportGenesisState(ctx)
 	require.Equal(t, 1, len(state.Accounts))
-	require.Equal(t, sdk.NewInt(int64(1000)), state.Accounts[0].Coins.AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(amount), state.Accounts[0].Coins.AmountOf("cet"))
 	require.Equal(t, false, state.Accounts[0].MemoRequired)
 	require.Nil(t, state.Accounts[0].LockedCoins)
 	require.Nil(t, state.Accounts[0].FrozenCoins)

@@ -53,7 +53,20 @@ func initAppWithBaseAccounts(accs ...auth.BaseAccount) *CetChainApp {
 }
 
 func addGenesisAccounts(genState *GenesisState, accs ...auth.BaseAccount) {
+	var amount int64
 	for _, acc := range accs {
+		genAcc := NewGenesisAccount(&acc)
+		genState.Accounts = append(genState.Accounts, genAcc)
+		amount = amount + acc.Coins.AmountOf(dex.CET).Int64()
+	}
+
+	addAccountForDanglingCET(amount, genState)
+}
+
+func addAccountForDanglingCET(amount int64, genState *GenesisState) {
+	accAmount := cetToken().GetTotalSupply() - amount
+	if accAmount > 0 {
+		_, acc := testutil.NewBaseAccount(accAmount, 0, 0)
 		genAcc := NewGenesisAccount(&acc)
 		genState.Accounts = append(genState.Accounts, genAcc)
 	}
@@ -195,6 +208,8 @@ func TestMinSelfDelegation(t *testing.T) {
 	app := initApp(func(genState *GenesisState) {
 		genState.Accounts = append(genState.Accounts, NewGenesisAccountI(&acc0))
 		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(500)
+
+		addAccountForDanglingCET(1000, genState)
 	})
 
 	// begin block
@@ -215,7 +230,8 @@ func TestMinSelfDelegation(t *testing.T) {
 
 func TestDelegatorShares(t *testing.T) {
 	// prepare accounts
-	valKey, valAcc := testutil.NewBaseAccount(10000, 0, 0)
+	amountVal := cetToken().GetTotalSupply() - 20000
+	valKey, valAcc := testutil.NewBaseAccount(amountVal, 0, 0)
 	valAddr := sdk.ValAddress(valAcc.Address)
 	del1Key, del1Acc := testutil.NewBaseAccount(10000, 1, 0)
 	del2Key, del2Acc := testutil.NewBaseAccount(10000, 2, 0)

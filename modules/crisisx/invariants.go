@@ -25,9 +25,12 @@ func RegisterInvariants(c *crisis.Keeper, tokenKeeper asset.Keeper, bk ExpectBan
 func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) sdk.Invariant {
 
 	return func(ctx sdk.Context) error {
-		var (
-			totalAmount = sdk.ZeroInt()
-		)
+		token := tokenKeeper.GetToken(ctx, types.DefaultBondDenom)
+		if token == nil {
+			return nil
+		}
+
+		var totalAmount = sdk.ZeroInt()
 
 		// Get all amounts based on the account system
 		basedAccountTotalAmount := bk.TotalAmountOfCoin(ctx, types.CET)
@@ -48,12 +51,14 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek aut
 				val.String(), rewards.AmountOf(types.CET).RoundInt().String(), totalAmount.String())
 			return false
 		}
+
 		validatorProcess := func(index int64, validator sdk.Validator) bool {
 			totalAmount = totalAmount.Add(validator.GetTokens())
 			fmt.Printf("validator addr : %s, tokens : %d, totalTokens : %s\n",
 				validator.GetOperator().String(), validator.GetTokens().Int64(), totalAmount.String())
 			return false
 		}
+
 		unbondingProcess := func(index int64, ubd staking.UnbondingDelegation) bool {
 			for _, ubdentry := range ubd.Entries {
 				totalAmount = totalAmount.Add(ubdentry.Balance)
@@ -67,13 +72,12 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek aut
 		stk.IterateUnbondingDelegations(ctx, unbondingProcess)
 		stk.IterateValidators(ctx, validatorProcess)
 
-		// cetToken := tokenKeeper.GetToken(ctx, types.CET)
-		issueAmount := tokenKeeper.GetParams(ctx).IssueTokenFee.AmountOf(types.CET)
 		// Judge equality
-		if totalAmount.Int64() == issueAmount.Int64() {
-			return nil
+		if totalAmount.Int64() != token.GetTotalSupply() {
+			return fmt.Errorf("the cet total amount [ %d ]is inconsistent with the actual amount [ %d ]",
+				token.GetTotalSupply(), totalAmount.Int64())
 		}
-		return fmt.Errorf("the cet total amount [ %d ]is inconsistent with the actual amount [ %d ]",
-			issueAmount.Int64(), totalAmount.Int64())
+
+		return nil
 	}
 }
