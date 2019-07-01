@@ -229,5 +229,4 @@ func Test_MintToken_AddCoins(t *testing.T) {
 	coins := input.tk.bkx.GetTotalCoins(input.ctx, tAccAddr)
 	require.Equal(t, sdk.NewInt(2200), coins.AmountOf(symbol))
 
-
 }

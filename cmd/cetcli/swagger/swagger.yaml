@@ -2059,6 +2059,7 @@ paths:
     post:
       summary: Donate to the community pool
       description: Donate some amount of cet to the community pool
+      operationId: donateToCommunityPool
       tags:
         - Distribution
       consumes:
