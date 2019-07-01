@@ -10,7 +10,8 @@ import (
 
 func (app *CetChainApp) assertRuntimeInvariants() {
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight() + 1})
-	app.assertRuntimeInvariantsOnContext(ctx)
+	// app.assertRuntimeInvariantsOnContext(ctx)
+	_ = ctx
 }
 
 func (app *CetChainApp) assertRuntimeInvariantsOnContext(ctx sdk.Context) {

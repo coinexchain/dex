@@ -67,6 +67,7 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek aut
 		stk.IterateUnbondingDelegations(ctx, unbondingProcess)
 		stk.IterateValidators(ctx, validatorProcess)
 
+		// cetToken := tokenKeeper.GetToken(ctx, types.CET)
 		issueAmount := tokenKeeper.GetParams(ctx).IssueTokenFee.AmountOf(types.CET)
 		// Judge equality
 		if totalAmount.Int64() == issueAmount.Int64() {
