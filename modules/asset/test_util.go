@@ -48,6 +48,7 @@ func setupTestInput() testInput {
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(assetCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(authCapKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(authxCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(fckCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
@@ -96,6 +97,7 @@ func setupTestInput() testInput {
 		&sk)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
+	tk.SetParams(ctx, DefaultParams())
 	handler := NewHandler(tk)
 
 	return testInput{cdc, ctx, tk, handler}

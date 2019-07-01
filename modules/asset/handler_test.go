@@ -18,28 +18,9 @@ func TestInvalidMsg(t *testing.T) {
 	require.True(t, strings.Contains(res.Log, "Unrecognized asset Msg type: "))
 }
 
-func Test_IssueToken_DeductFee(t *testing.T) {
-	input := setupTestInput()
-	symbol := "abc"
-	h := NewHandler(input.tk)
-	input.tk.SetParams(input.ctx, DefaultParams())
-
-	msg := NewMsgIssueToken("ABC Token", symbol, 210000000000, tAccAddr,
-		false, false, false, false, "", "")
-	res := h(input.ctx, msg)
-	require.False(t, res.IsOK())
-
-	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
-	require.NoError(t, err)
-	res = h(input.ctx, msg)
-	require.True(t, res.IsOK())
-
-}
-
 func Test_handleMsg(t *testing.T) {
 	input := setupTestInput()
 	h := NewHandler(input.tk)
-	input.tk.SetParams(input.ctx, DefaultParams())
 	owner, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
 	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
@@ -176,9 +157,77 @@ func Test_handleMsg(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := h(input.ctx, tt.msg); !reflect.DeepEqual(got.IsOK(), tt.want) {
-				//TODO:fzc
-				//t.Errorf("handleMsg() = %v, want %v", got, tt.want)
+				t.Errorf("handleMsg() = %v, want %v", got, tt.want)
 			}
 		})
 	}
+}
+
+func Test_IssueToken_DeductFee(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	h := NewHandler(input.tk)
+
+	// invalid account issue token
+	msg := NewMsgIssueToken("ABC Token", symbol, 210000000000, tAccAddr,
+		false, false, false, false, "", "")
+	res := h(input.ctx, msg)
+	require.False(t, res.IsOK())
+
+	// issue token deduct fee
+	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
+	require.NoError(t, err)
+	res = h(input.ctx, msg)
+	require.True(t, res.IsOK())
+
+	coins := input.tk.bkx.GetTotalCoins(input.ctx, tAccAddr)
+	require.Equal(t, sdk.NewInt(210000000000), coins.AmountOf(symbol))
+	require.Equal(t, sdk.NewInt(1E18-1E12), coins.AmountOf("cet"))
+
+}
+
+func Test_BurnToken_SubtractCoins(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	h := NewHandler(input.tk)
+
+	// issue token
+	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, tAccAddr,
+		true, true, false, false, "", "")
+	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
+	require.NoError(t, err)
+	res := h(input.ctx, msgIssue)
+	require.True(t, res.IsOK())
+
+	// burn token
+	msgBurn := NewMsgBurnToken(symbol, 100, tAccAddr)
+	res = h(input.ctx, msgBurn)
+	require.True(t, res.IsOK())
+
+	coins := input.tk.bkx.GetTotalCoins(input.ctx, tAccAddr)
+	require.Equal(t, sdk.NewInt(2000), coins.AmountOf(symbol))
+}
+
+func Test_MintToken_AddCoins(t *testing.T) {
+	input := setupTestInput()
+	symbol := "abc"
+	h := NewHandler(input.tk)
+
+	// issue token
+	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, tAccAddr,
+		true, true, false, false, "", "")
+	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
+	require.NoError(t, err)
+	res := h(input.ctx, msgIssue)
+	require.True(t, res.IsOK())
+
+	// mint token
+	msgMint := NewMsgMintToken(symbol, 100, tAccAddr)
+	res = h(input.ctx, msgMint)
+	require.True(t, res.IsOK())
+
+	coins := input.tk.bkx.GetTotalCoins(input.ctx, tAccAddr)
+	require.Equal(t, sdk.NewInt(2200), coins.AmountOf(symbol))
+
+
 }

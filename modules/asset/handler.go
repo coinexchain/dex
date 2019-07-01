@@ -90,6 +90,10 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg MsgMintToken) sdk.Re
 		return err.Result()
 	}
 
+	if err := keeper.AddToken(ctx, msg.OwnerAddress, NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
+		return err.Result()
+	}
+
 	return sdk.Result{
 		Tags: sdk.NewTags(
 			tags.Category, tags.TxCategory,
@@ -102,6 +106,10 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg MsgMintToken) sdk.Re
 // handleMsgBurnToken - Handle MsgBurnToken
 func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg MsgBurnToken) sdk.Result {
 	if err := keeper.BurnToken(ctx, msg); err != nil {
+		return err.Result()
+	}
+
+	if err := keeper.SubtractToken(ctx, msg.OwnerAddress, NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
 		return err.Result()
 	}
 

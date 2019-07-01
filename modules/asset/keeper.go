@@ -44,6 +44,7 @@ type Keeper interface {
 
 	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
+	SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	SetParams(ctx sdk.Context, params Params)
 	GetParams(ctx sdk.Context) (params Params)
 }
@@ -85,10 +86,16 @@ func (keeper BaseKeeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk
 	return keeper.bkx.DeductFee(ctx, addr, amt)
 }
 
-// AddToken - add token to addr when issue token etc.
+// AddToken - add token to addr when issue token and mint token etc.
 func (keeper BaseKeeper) AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 
 	return keeper.bkx.AddCoins(ctx, addr, amt)
+}
+
+// SubtractToken - sub token to addr when burn token etc.
+func (keeper BaseKeeper) SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+
+	return keeper.bkx.SubtractCoins(ctx, addr, amt)
 }
 
 // SetParams sets the asset module's parameters.
@@ -184,11 +191,6 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, msg MsgBurnToken) sdk.Error 
 
 	if !token.GetBurnable() {
 		return ErrorInvalidTokenBurn(fmt.Sprintf("token %s do not support burn", msg.Symbol))
-	}
-
-	coinsToBurn := NewTokenCoins(msg.Symbol, msg.Amount)
-	if err = keeper.bkx.SubtractCoins(ctx, token.GetOwner(), coinsToBurn); err != nil {
-		return err
 	}
 
 	if err := token.SetTotalBurn(msg.Amount + token.GetTotalBurn()); err != nil {
