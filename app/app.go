@@ -3,10 +3,11 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/coinexchain/dex/modules/distributionx"
 	"io"
 	"os"
 	"sort"
+
+	"github.com/coinexchain/dex/modules/distributionx"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -236,6 +237,7 @@ func (app *CetChainApp) initKeepers() {
 		app.keyAsset,
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
 		app.bankxKeeper,
+		&app.stakingKeeper,
 	)
 	app.marketKeeper = market.NewKeeper(
 		app.keyMarket,
@@ -259,7 +261,9 @@ func (app *CetChainApp) initKeepers() {
 func (app *CetChainApp) registerCrisisRoutes() {
 	bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
 	distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
-	staking.RegisterInvariants(&app.crisisKeeper, app.stakingKeeper, app.feeCollectionKeeper, app.distrKeeper, app.accountKeeper)
+
+	//Invariants checks of staking module will adjust and included by stakingx.RegisterInvariants
+	stakingx.RegisterInvariants(&app.crisisKeeper, app.stakingXKeeper, app.assetKeeper, app.stakingKeeper)
 }
 
 func (app *CetChainApp) registerMessageRoutes() {
@@ -384,7 +388,7 @@ func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 	}
 
 	// assert runtime invariants
-	//app.assertRuntimeInvariants()
+	app.assertRuntimeInvariants()
 
 	return abci.ResponseInitChain{
 		Validators: validators,

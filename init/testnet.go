@@ -303,7 +303,7 @@ func initGenFiles(
 
 	appGenState := app.NewDefaultGenesisState()
 	appGenState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(testnetMinSelfDelegation)
-	addCetTokenForTesting(&appGenState, testnetTokenSupply)
+	addCetTokenForTesting(&appGenState, testnetTokenSupply, accs[0].Address)
 
 	accs = assureTokenDistributionInGenesis(accs, testnetTokenSupply)
 	appGenState.Accounts = accs
@@ -346,13 +346,12 @@ func assureTokenDistributionInGenesis(accs []app.GenesisAccount, testnetSupply i
 	return accs
 }
 
-func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64) {
-	addr := sdk.AccAddress(crypto.AddressHash([]byte("test_cet_owner")))
+func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64, cetOwner sdk.AccAddress) {
 
 	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
 		"cet",
 		tokenTotalSupply,
-		addr,
+		cetOwner,
 		false,
 		true,
 		false,
