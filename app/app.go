@@ -324,7 +324,7 @@ func MakeCodec() *codec.Codec {
 // application updates every end block
 func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	//block incentive for the previous block
-	incentive.BeginBlocker(ctx, app.incentiveKeeper)
+	_ = incentive.BeginBlocker(ctx, app.incentiveKeeper)
 
 	// distribute rewards for the previous block
 	distr.BeginBlocker(ctx, req, app.distrKeeper)

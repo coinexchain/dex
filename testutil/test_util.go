@@ -1,9 +1,8 @@
 package testutil
 
 import (
-	"testing"
-
 	"github.com/stretchr/testify/require"
+	"testing"
 
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"

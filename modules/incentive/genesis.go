@@ -46,6 +46,11 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) Validate() error {
+
+	state := data.State
+	if state.HeightAdjustment < 0 {
+		return sdk.NewError(CodeSpaceIncentive, CodeInvalidAdjustmentHeight, "invalid adjustment Height")
+	}
 	param := data.Param
 	if param.DefaultRewardPerBlock < 0 {
 		return sdk.NewError(CodeSpaceIncentive, CodeInvalidDefaultRewardPerBlock, "invalid default reward per block")
@@ -63,6 +68,9 @@ func (data GenesisState) Validate() error {
 		}
 		if plan.TotalIncentive <= 0 {
 			return sdk.NewError(CodeSpaceIncentive, CodeInvalidTotalIncentive, "invalid incentive plan total incentive reward")
+		}
+		if (plan.EndHeight-plan.StartHeight)*plan.RewardPerBlock != plan.TotalIncentive {
+			return sdk.NewError(CodeSpaceIncentive, CodeInvalidTotalIncentive, "invalid incentive plan")
 		}
 	}
 	return nil
