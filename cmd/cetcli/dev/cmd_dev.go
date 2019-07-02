@@ -18,6 +18,7 @@ func DevCmd(cdc *codec.Codec, registerRoutesFn func(*lcd.RestServer)) *cobra.Com
 		ExampleGenesisCmd(cdc),
 		TestnetGenesisCmd(cdc),
 		DefaultParamsCmd(cdc),
+		CosmosHubParamsCmd(),
 		ShowCommandTreeCmd(),
 		RestEndpointsCmd(cdc, registerRoutesFn),
 	)
