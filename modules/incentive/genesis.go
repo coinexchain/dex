@@ -47,9 +47,6 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 // error for any failed validation criteria.
 func (data GenesisState) Validate() error {
 	param := data.Param
-	if param.IncentiveBlockInterval <= 0 && param.IncentiveBlockInterval > 10 {
-		return sdk.NewError(CodeSpaceIncentive, CodeInvalidIncentiveBlockInterval, "invalid incentive block interval")
-	}
 	if param.DefaultRewardPerBlock < 0 {
 		return sdk.NewError(CodeSpaceIncentive, CodeInvalidDefaultRewardPerBlock, "invalid default reward per block")
 	}

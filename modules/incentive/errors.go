@@ -6,9 +6,8 @@ const (
 	CodeSpaceIncentive sdk.CodespaceType = "incentive"
 
 	// 701 ～ 799
-	CodeInvalidIncentiveBlockInterval sdk.CodeType = 701
-	CodeInvalidDefaultRewardPerBlock  sdk.CodeType = 702
-	CodeInvalidPlanHeight             sdk.CodeType = 703
-	CodeInvalidRewardPerBlock         sdk.CodeType = 704
-	CodeInvalidTotalIncentive         sdk.CodeType = 705
+	CodeInvalidDefaultRewardPerBlock sdk.CodeType = 701
+	CodeInvalidPlanHeight            sdk.CodeType = 702
+	CodeInvalidRewardPerBlock        sdk.CodeType = 703
+	CodeInvalidTotalIncentive        sdk.CodeType = 704
 )
