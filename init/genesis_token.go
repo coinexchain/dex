@@ -29,6 +29,8 @@ const (
 	flagTotalBurn        = "total-burn"
 	flagTotalMint        = "total-mint"
 	flagIsForbidden      = "is-forbidden"
+	flagTokenURL         = "url"
+	flagTokenDescription = "description"
 )
 
 var tokenFlags = []string{
@@ -43,6 +45,8 @@ var tokenFlags = []string{
 	flagTotalBurn,
 	flagTotalMint,
 	flagIsForbidden,
+	flagTokenURL,
+	flagTokenDescription,
 }
 
 // AddGenesisTokenCmd returns add-genesis-token cobra Command.
@@ -120,6 +124,8 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	cmd.Flags().Int64(flagTotalBurn, 0, "the total burn amount")
 	cmd.Flags().Int64(flagTotalMint, 0, "the total mint amount")
 	cmd.Flags().Bool(flagIsForbidden, false, "whether the token is forbidden")
+	cmd.Flags().String(flagTokenURL, "", "url of token website")
+	cmd.Flags().String(flagTokenDescription, "", "description of token info")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range tokenFlags {
