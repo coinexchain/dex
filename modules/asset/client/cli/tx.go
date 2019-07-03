@@ -64,7 +64,7 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	--token-forbiddable=false \
 	--url="www.abc.org" \
 	--description="token abc is a example token" \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
