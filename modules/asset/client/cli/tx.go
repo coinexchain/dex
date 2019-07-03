@@ -138,7 +138,7 @@ func TransferOwnershipCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset transfer-ownership --symbol="abc" \
 	--new-owner=newkey \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -189,7 +189,7 @@ func MintTokenCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset mint-token --symbol="abc" \
 	--amount=10000000000000000 \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -240,7 +240,7 @@ func BurnTokenCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset burn-token --symbol="abc" \
 	--amount=10000000000000000 \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -289,7 +289,7 @@ func ForbidTokenCmd(cdc *codec.Codec) *cobra.Command {
 
 Example:
 $ cetcli tx asset forbid-token --symbol="abc" \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -333,7 +333,7 @@ func UnForbidTokenCmd(cdc *codec.Codec) *cobra.Command {
 
 Example:
 $ cetcli tx asset unforbid-token --symbol="abc" \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -384,7 +384,7 @@ func AddTokenWhitelistCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset add-whitelist --symbol="abc" \
 	--whitelist=key,key,key \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -431,7 +431,7 @@ func RemoveTokenWhitelistCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset remove-whitelist --symbol="abc" \
 	--whitelist=key,key,key \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -483,7 +483,7 @@ func ForbidAddrCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset forbid-addr --symbol="abc" \
 	--addresses=key,key,key \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -530,7 +530,7 @@ func UnForbidAddrCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset unforbid-addr --symbol="abc" \
 	--addresses=key,key,key \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -581,7 +581,7 @@ func ModifyTokenURLCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset modify-token-url --symbol="abc" \
 	--url="www.abc.com" \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -632,7 +632,7 @@ func ModifyTokenDescriptionCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 $ cetcli tx asset modify-token-description --symbol="abc" \
 	--description="abc example description" \
-    --from mykey
+	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
