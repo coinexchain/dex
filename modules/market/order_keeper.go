@@ -219,7 +219,9 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64)
 		{0x0},
 		int64ToBigEndianBytes(height),
 	})
-	for iter := store.ReverseIterator(start, end); iter.Valid(); iter.Next() {
+	iter := store.ReverseIterator(start, end)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
 		result = append(result, keeper.getOrder(ctx, orderID))
@@ -243,7 +245,9 @@ func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height i
 		{0x0},
 		int64ToBigEndianBytes(height + 1),
 	})
-	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
+	iter := store.Iterator(start, end)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
 		result = append(result, keeper.getOrder(ctx, orderID))
@@ -291,6 +295,10 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*O
 	})
 	bidIter := store.ReverseIterator(bidListStart, bidListEnd)
 	askIter := store.Iterator(askListStart, askListEnd)
+	defer func() {
+		bidIter.Close()
+		askIter.Close()
+	}()
 	if !bidIter.Valid() || !askIter.Valid() {
 		return nil
 	}
@@ -354,7 +362,9 @@ func (keeper *PersistentGlobalOrderKeeper) GetOrdersFromUser(ctx sdk.Context, us
 	nextKey := orderBookKey(user + string([]byte{0xFF}))
 	startPos := len(key) - len(user) - 1
 	var result []string
-	for iter := store.Iterator(key, nextKey); iter.Valid(); iter.Next() {
+	iter := store.Iterator(key, nextKey)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
 		k := iter.Key()
 		result = append(result, string(k[startPos:]))
 	}
@@ -373,7 +383,10 @@ func (keeper *PersistentGlobalOrderKeeper) GetAllOrders(ctx sdk.Context) []*Orde
 		OrderBookKeyPrefix,
 		{0x1},
 	})
-	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
+
+	iter := store.Iterator(start, end)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
 		order := &Order{}
 		keeper.codec.MustUnmarshalBinaryBare(iter.Value(), order)
 		result = append(result, order)

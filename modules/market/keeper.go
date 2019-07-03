@@ -46,7 +46,9 @@ func (keeper *DelistKeeper) GetDelistSymbolsBeforeTime(ctx sdk.Context, time int
 		int64ToBigEndianBytes(time),
 	})
 	var result []string
-	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
+	iter := store.Iterator(start, end)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
 		result = append(result, string(key[len(start)+1:]))
 	}
@@ -66,7 +68,9 @@ func (keeper *DelistKeeper) RemoveDelistRequestsBeforeTime(ctx sdk.Context, time
 		{0x1},
 	})
 	var keys [][]byte
-	for iter := store.Iterator(start, end); iter.Valid(); iter.Next() {
+	iter := store.Iterator(start, end)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
 		keys = append(keys, iter.Key())
 	}
 	for _, key := range keys {
