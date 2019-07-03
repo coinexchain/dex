@@ -34,11 +34,13 @@ func TestDonateToCommunityPoolValidation(t *testing.T) {
 
 	var invalidDenomCoins = sdk.NewCoins(sdk.NewCoin("abc", sdk.NewInt(1e8)))
 	var invalidLenCoins = append(validCoins, types.NewCetCoin(1e8))
+	var invalidAmount = types.NewCetCoins(0)
 
 	testutil.ValidateBasic(t, []testutil.TestCase{
 		{Valid: true, Msg: NewMsgDonateToCommunityPool(validAddr, validCoins)},
 		{Valid: false, Msg: NewMsgDonateToCommunityPool(validAddr, invalidDenomCoins)},
 		{Valid: false, Msg: NewMsgDonateToCommunityPool(validAddr, invalidLenCoins)},
+		{Valid: false, Msg: NewMsgDonateToCommunityPool(validAddr, invalidAmount)},
 		{Valid: false, Msg: NewMsgDonateToCommunityPool(emptyAddr, validCoins)},
 	})
 }

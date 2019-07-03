@@ -124,3 +124,12 @@ func TestDonateToCommunityPoolFailed(t *testing.T) {
 	require.True(t, fromAcc.GetCoins().AmountOf("cet").Equal(sdk.NewInt(10e8)))
 
 }
+func TestNewHandler(t *testing.T) {
+	input := setupTestInput()
+	handler := NewHandler(input.k)
+
+	msg := bankx.MsgSetMemoRequired{}
+	res := handler(input.ctx, msg)
+
+	require.Equal(t, sdk.CodeUnknownRequest, res.Code)
+}
