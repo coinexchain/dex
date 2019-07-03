@@ -18,6 +18,12 @@ func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
 	axk AccountXKeeper, anteHelper AnteHelper) sdk.AnteHandler {
 
 	ah := auth.NewAnteHandler(ak, fck)
+	return wrapAnteHandler(ah, axk, anteHelper)
+}
+
+func wrapAnteHandler(ah sdk.AnteHandler,
+	axk AccountXKeeper, anteHelper AnteHelper) sdk.AnteHandler {
+
 	return func(ctx sdk.Context, tx sdk.Tx, simulate bool) (newCtx sdk.Context, res sdk.Result, abort bool) {
 		// run auth.AnteHandler first
 		newCtx, res, abort = ah(ctx, tx, simulate)
