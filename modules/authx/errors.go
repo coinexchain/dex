@@ -14,10 +14,10 @@ const (
 
 func ErrInvalidMinGasPriceLimit(limit sdk.Dec) sdk.Error {
 	return sdk.NewError(CodeSpaceAuthX, CodeInvalidMinGasPriceLimit,
-		"invalid minimum gas price limit: %s", limit.String())
+		"invalid minimum gas price limit: %s", limit)
 }
 
 func ErrGasPriceTooLow(required, actual sdk.Dec) sdk.Error {
 	return sdk.NewError(CodeSpaceAuthX, CodeGasPriceTooLow,
-		"gas price too low: %s < %s", actual.String(), required.String())
+		"gas price too low: %s < %s", actual, required)
 }
