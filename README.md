@@ -25,3 +25,4 @@ Reference [quick start](docs/quickstart.md)
 ### Resources
 
 1. [Forum](https://forum.coinex.org/)
+2. [Slack](https://join.slack.com/t/coinexchain/shared_invite/enQtNjc2NjI1NTU3MDI0LTQzNWZkMTdlMzlhNTUxOWYwNzJjNWNjNDI5OGMxMmQxNDcxZWVlOGU1MjBiOGIyNWQ0YzRjYTE2ODU1MWMxNWU)
