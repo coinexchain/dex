@@ -259,3 +259,7 @@ func handleMsgModifyTokenDescription(ctx sdk.Context, keeper Keeper, msg MsgModi
 		),
 	}
 }
+
+func newTokenCoins(denom string, amount int64) sdk.Coins {
+	return sdk.NewCoins(sdk.NewInt64Coin(denom, amount))
+}

@@ -310,7 +310,3 @@ func (t BaseToken) String() string {
 		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsForbidden, t.URL, t.Description,
 	)
 }
-
-func newTokenCoins(denom string, amount int64) sdk.Coins {
-	return sdk.NewCoins(sdk.NewInt64Coin(denom, amount))
-}
