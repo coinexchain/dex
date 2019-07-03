@@ -27,7 +27,7 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek aut
 	return func(ctx sdk.Context) error {
 		token := tokenKeeper.GetToken(ctx, types.DefaultBondDenom)
 		if token == nil {
-			return nil
+			return fmt.Errorf("cet not found")
 		}
 
 		var totalAmount = sdk.ZeroInt()
