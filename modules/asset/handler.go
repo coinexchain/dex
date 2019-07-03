@@ -55,7 +55,7 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg MsgIssueToken) sdk.
 		return err.Result()
 	}
 
-	if err := keeper.AddToken(ctx, msg.Owner, NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
+	if err := keeper.AddToken(ctx, msg.Owner, newTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
 		return err.Result()
 	}
 
@@ -90,7 +90,7 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg MsgMintToken) sdk.Re
 		return err.Result()
 	}
 
-	if err := keeper.AddToken(ctx, msg.OwnerAddress, NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
+	if err := keeper.AddToken(ctx, msg.OwnerAddress, newTokenCoins(msg.Symbol, msg.Amount)); err != nil {
 		return err.Result()
 	}
 
@@ -109,7 +109,7 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg MsgBurnToken) sdk.Re
 		return err.Result()
 	}
 
-	if err := keeper.SubtractToken(ctx, msg.OwnerAddress, NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
+	if err := keeper.SubtractToken(ctx, msg.OwnerAddress, newTokenCoins(msg.Symbol, msg.Amount)); err != nil {
 		return err.Result()
 	}
 

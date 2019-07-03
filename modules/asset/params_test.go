@@ -22,7 +22,7 @@ func TestParams_Equal(t *testing.T) {
 	require.NotEqual(t, p1, p2)
 
 	// denom should equal
-	abc := NewTokenCoins("abc", 1E12)
+	abc := newTokenCoins("abc", 1E12)
 	p1.IssueTokenFee = abc
 	require.NotEqual(t, p1, p2)
 }

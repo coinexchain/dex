@@ -311,6 +311,6 @@ func (t BaseToken) String() string {
 	)
 }
 
-func NewTokenCoins(denom string, amount int64) sdk.Coins {
+func newTokenCoins(denom string, amount int64) sdk.Coins {
 	return sdk.NewCoins(sdk.NewInt64Coin(denom, amount))
 }
