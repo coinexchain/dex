@@ -30,11 +30,30 @@ func TestGasPriceTooLowError(t *testing.T) {
 
 	ctx := testInput.ctx.WithBlockHeight(1)
 	tx := auth.StdTx{Fee: auth.StdFee{Amount: sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(1))), Gas: 10000000}}
-	_, res, _ := ah2(ctx, tx, false)
+	_, res, abort := ah2(ctx, tx, false)
+	require.True(t, abort)
 	require.Equal(t, CodeSpaceAuthX, res.Codespace)
 	require.Equal(t, CodeGasPriceTooLow, res.Code)
 }
 
+type testAnteHelper struct {
+	error sdk.Error
+}
+
+func (h testAnteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Error {
+	return h.error
+}
+
 func TestAdditionalError(t *testing.T) {
-	// TODO
+	ah := func(ctx sdk.Context, tx sdk.Tx, simulate bool) (newCtx sdk.Context, res sdk.Result, abort bool) {
+		return ctx, sdk.Result{}, false
+	}
+
+	expectedErr := sdk.NewError(sdk.CodespaceRoot, sdk.CodeInternal, "stop here")
+	tx := auth.StdTx{Msgs: []sdk.Msg{nil}}
+	ah2 := wrapAnteHandler(ah, AccountXKeeper{}, testAnteHelper{error: expectedErr})
+
+	_, res, abort := ah2(sdk.Context{}, tx, true)
+	require.True(t, abort)
+	require.Equal(t, expectedErr.Result(), res)
 }
