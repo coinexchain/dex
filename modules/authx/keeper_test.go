@@ -62,3 +62,20 @@ func TestGetOrCreateAccountX(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, addr, accx.Address)
 }
+
+func TestIteratorAccounts(t *testing.T) {
+	input := setupTestInput()
+
+	input.axk.GetOrCreateAccountX(input.ctx, sdk.AccAddress([]byte("addr0")))
+	input.axk.GetOrCreateAccountX(input.ctx, sdk.AccAddress([]byte("addr1")))
+	input.axk.GetOrCreateAccountX(input.ctx, sdk.AccAddress([]byte("addr2")))
+	input.axk.GetOrCreateAccountX(input.ctx, sdk.AccAddress([]byte("addr3")))
+
+	var accxs []AccountX
+	input.axk.IterateAccounts(input.ctx, func(accx AccountX) bool {
+		accxs = append(accxs, accx)
+		return false
+	})
+
+	require.Equal(t, 4, len(accxs))
+}

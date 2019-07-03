@@ -19,6 +19,9 @@ const (
 var (
 	// AddressStoreKeyPrefix prefix for accountx-by-address store
 	AddressStoreKeyPrefix = []byte{0x01}
+
+	PrefixUnlockedCoinsQueue = []byte("UnlockedCoinsQueue")
+	KeyDelimiter             = []byte(";")
 )
 
 type AccountXKeeper struct {
@@ -93,6 +96,26 @@ func (axk AccountXKeeper) IterateAccounts(ctx sdk.Context, process func(AccountX
 	}
 }
 
+func (axk AccountXKeeper) UnlockedCoinsQueueIterator(ctx sdk.Context, unlockedTime int64) sdk.Iterator {
+	store := ctx.KVStore(axk.key)
+	return store.Iterator(PrefixUnlockedCoinsQueue, sdk.PrefixEndBytes(PrefixUnlockedTimeQueueTime(unlockedTime)))
+}
+
+func (axk AccountXKeeper) InsertUnlockedCoinsQueue(ctx sdk.Context, unlockedTime int64, address sdk.AccAddress) {
+	store := ctx.KVStore(axk.key)
+	store.Set(KeyUnlockedCoinsQueue(unlockedTime, address), address)
+}
+
+func (axk AccountXKeeper) RemoveFromUnlockedCoinsQueue(ctx sdk.Context, unlockedTime int64, address sdk.AccAddress) {
+	store := ctx.KVStore(axk.key)
+	store.Delete(KeyUnlockedCoinsQueue(unlockedTime, address))
+}
+
+func (axk AccountXKeeper) RemoveFromUnlockedCoinsQueueByKey(ctx sdk.Context, key []byte) {
+	store := ctx.KVStore(axk.key)
+	store.Delete(key)
+}
+
 // -----------------------------------------------------------------------------
 // Params
 
@@ -119,30 +142,8 @@ func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax AccountX) {
 	return
 }
 
-func (axk AccountXKeeper) UnlockedCoinsQueueIterator(ctx sdk.Context, unlockedTime int64) sdk.Iterator {
-	store := ctx.KVStore(axk.key)
-	return store.Iterator(PrefixUnlockedCoinsQueue, sdk.PrefixEndBytes(PrefixUnlockedTimeQueueTime(unlockedTime)))
-}
-
-func (axk AccountXKeeper) InsertUnlockedCoinsQueue(ctx sdk.Context, unlockedTime int64, address sdk.AccAddress) {
-	store := ctx.KVStore(axk.key)
-	store.Set(KeyUnlockedCoinsQueue(unlockedTime, address), address)
-}
-
-func (axk AccountXKeeper) RemoveFromUnlockedCoinsQueue(ctx sdk.Context, unlockedTime int64, address sdk.AccAddress) {
-	store := ctx.KVStore(axk.key)
-	store.Delete(KeyUnlockedCoinsQueue(unlockedTime, address))
-}
-
-func (axk AccountXKeeper) RemoveFromUnlockedCoinsQueueByKey(ctx sdk.Context, key []byte) {
-	store := ctx.KVStore(axk.key)
-	store.Delete(key)
-}
-
-var (
-	PrefixUnlockedCoinsQueue = []byte("UnlockedCoinsQueue")
-	KeyDelimiter             = []byte(";")
-)
+// -----------------------------------------------------------------------------
+// Keys
 
 func KeyUnlockedCoinsQueue(unlockedTime int64, address sdk.AccAddress) []byte {
 	return bytes.Join([][]byte{
