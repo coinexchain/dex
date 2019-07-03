@@ -47,3 +47,18 @@ func TestAddressStoreKey(t *testing.T) {
 	expectedOutput := []byte{0x1, 0x73, 0x6f, 0x6d, 0x65, 0x2d, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x31}
 	require.Equal(t, expectedOutput, addrStoreKey)
 }
+
+func TestGetOrCreateAccountX(t *testing.T) {
+	input := setupTestInput()
+	addr := sdk.AccAddress([]byte("addr"))
+
+	_, ok := input.axk.GetAccountX(input.ctx, addr)
+	require.False(t, ok)
+
+	accx := input.axk.GetOrCreateAccountX(input.ctx, addr)
+	require.Equal(t, addr, accx.Address)
+
+	accx, ok = input.axk.GetAccountX(input.ctx, addr)
+	require.True(t, ok)
+	require.Equal(t, addr, accx.Address)
+}
