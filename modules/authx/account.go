@@ -99,7 +99,6 @@ func (acc *AccountX) TransferUnlockedCoins(time int64, ctx sdk.Context, kx Accou
 }
 
 func (acc AccountX) String() string {
-
 	return fmt.Sprintf(`
   LockedCoins:   %s
   FrozenCoins:   %s
