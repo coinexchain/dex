@@ -1,11 +1,13 @@
 package authx
 
 import (
-	"github.com/coinexchain/dex/types"
-	"github.com/stretchr/testify/require"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/types"
 )
 
 func TestEndBlocker(t *testing.T) {
@@ -14,7 +16,7 @@ func TestEndBlocker(t *testing.T) {
 	addr1 := sdk.AccAddress("addr1")
 	var accX1 = AccountX{Address: addr1, MemoRequired: false}
 	coins := LockedCoins{
-		LockedCoin{Coin: types.NewCetCoin(1), UnlockTime: input.ctx.BlockHeader().Time.Unix() - 1},
+		NewLockedCoin("cet", sdk.NewInt(1), input.ctx.BlockHeader().Time.Unix()-1),
 	}
 	accX1.LockedCoins = coins
 	input.axk.SetAccountX(input.ctx, accX1)
@@ -26,7 +28,7 @@ func TestEndBlocker(t *testing.T) {
 	addr2 := sdk.AccAddress("addr2")
 	var accX2 = AccountX{Address: addr2, MemoRequired: false}
 	coins = LockedCoins{
-		LockedCoin{Coin: sdk.Coin{Denom: "cet", Amount: sdk.NewInt(1)}, UnlockTime: input.ctx.BlockHeader().Time.Unix() + 1},
+		NewLockedCoin("cet", sdk.NewInt(1), input.ctx.BlockHeader().Time.Unix()+1),
 	}
 	accX2.LockedCoins = coins
 	input.axk.SetAccountX(input.ctx, accX2)

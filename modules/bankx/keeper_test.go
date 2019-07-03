@@ -160,8 +160,8 @@ func TestGetTotalCoins(t *testing.T) {
 	givenAccountWith(input, myaddr, "100cet, 20bch, 30btc")
 
 	lockedCoins := authx.LockedCoins{
-		authx.LockedCoin{Coin: sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}, UnlockTime: 1000},
-		authx.LockedCoin{Coin: sdk.Coin{Denom: "eth", Amount: sdk.NewInt(30)}, UnlockTime: 2000},
+		authx.NewLockedCoin("bch", sdk.NewInt(20), 1000),
+		authx.NewLockedCoin("eth", sdk.NewInt(30), 2000),
 	}
 
 	frozenCoins := sdk.NewCoins(sdk.Coin{Denom: "btc", Amount: sdk.NewInt(50)},

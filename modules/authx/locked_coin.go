@@ -13,6 +13,13 @@ type LockedCoin struct {
 	UnlockTime int64    `json:"unlock_time"`
 }
 
+func NewLockedCoin(denom string, amount sdk.Int, unlockTime int64) LockedCoin {
+	return LockedCoin{
+		Coin:       sdk.NewCoin(denom, amount),
+		UnlockTime: unlockTime,
+	}
+}
+
 func (coins LockedCoins) String() string {
 
 	if len(coins) == 0 {
