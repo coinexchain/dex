@@ -39,6 +39,19 @@ func ParamKeyTable() params.KeyTable {
 	return params.NewKeyTable().RegisterParamSet(&Params{})
 }
 
+// DefaultParams returns a default set of parameters.
+func DefaultParams() Params {
+	return Params{
+		MinGasPriceLimit: sdk.MustNewDecFromStr(DefaultMinGasPriceLimit),
+	}
+}
+
+func NewParams(minGasPriceLimit sdk.Dec) Params {
+	return Params{
+		MinGasPriceLimit: minGasPriceLimit,
+	}
+}
+
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 // pairs of authx module's parameters.
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
@@ -52,13 +65,6 @@ func (p Params) Equal(p2 Params) bool {
 	bz1 := msgCdc.MustMarshalBinaryLengthPrefixed(&p)
 	bz2 := msgCdc.MustMarshalBinaryLengthPrefixed(&p2)
 	return bytes.Equal(bz1, bz2)
-}
-
-// DefaultParams returns a default set of parameters.
-func DefaultParams() Params {
-	return Params{
-		MinGasPriceLimit: sdk.MustNewDecFromStr(DefaultMinGasPriceLimit),
-	}
 }
 
 // String implements the stringer interface.

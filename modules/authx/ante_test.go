@@ -21,7 +21,7 @@ func TestOriginalAnteHandlerError(t *testing.T) {
 
 func TestGasPriceTooLowError(t *testing.T) {
 	testInput := setupTestInput()
-	testInput.axk.SetParams(testInput.ctx, DefaultParams())
+	InitGenesis(testInput.ctx, testInput.axk, DefaultGenesisState())
 
 	ah := func(ctx sdk.Context, tx sdk.Tx, simulate bool) (newCtx sdk.Context, res sdk.Result, abort bool) {
 		return ctx, sdk.Result{}, false
