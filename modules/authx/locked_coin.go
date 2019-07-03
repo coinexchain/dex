@@ -21,7 +21,6 @@ func NewLockedCoin(denom string, amount sdk.Int, unlockTime int64) LockedCoin {
 	}
 }
 
-
 func (coin LockedCoin) String() string {
 	return fmt.Sprintf("coin: %s, unlocked_time: %d\n", coin.Coin, coin.UnlockTime)
 }
