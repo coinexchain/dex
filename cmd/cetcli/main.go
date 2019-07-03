@@ -42,7 +42,6 @@ import (
 	as "github.com/coinexchain/dex/modules/asset"
 	assclient "github.com/coinexchain/dex/modules/asset/client"
 	assrest "github.com/coinexchain/dex/modules/asset/client/rest"
-	"github.com/coinexchain/dex/modules/authx"
 	authxcmd "github.com/coinexchain/dex/modules/authx/client/cli"
 	authxrest "github.com/coinexchain/dex/modules/authx/client/rest"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
@@ -212,7 +211,7 @@ func registerRoutes(rs *lcd.RestServer) {
 	registerSwaggerUI(rs)
 	rpc.RegisterRoutes(rs.CliCtx, rs.Mux)
 	tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
-	authxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, authx.StoreKey)
+	authxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	bankxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	dist.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, distcmd.StoreKey)
 	distrxrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)

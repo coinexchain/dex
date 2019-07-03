@@ -1,38 +1,34 @@
 package rest
 
 import (
-	clientx "github.com/coinexchain/dex/client"
-	"github.com/coinexchain/dex/modules/authx"
+	"net/http"
+
+	"github.com/gorilla/mux"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	"net/http"
-
-	"github.com/gorilla/mux"
+	clientx "github.com/coinexchain/dex/client"
+	"github.com/coinexchain/dex/modules/authx"
 )
 
 // register REST routes
-func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, storeName string) {
+func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
 	r.HandleFunc(
 		"/auth/accounts/{address}",
-		QueryAccountRequestHandlerFn(storeName, cdc, context.GetAccountDecoder(cdc), cliCtx),
+		QueryAccountRequestHandlerFn(cdc, cliCtx),
 	).Methods("GET")
 
 	r.HandleFunc(
 		"/bank/balances/{address}",
-		QueryBalancesRequestHandlerFn(storeName, cdc, context.GetAccountDecoder(cdc), cliCtx),
+		QueryBalancesRequestHandlerFn(cdc, cliCtx),
 	).Methods("GET")
 }
 
 // query accountREST Handler
-func QueryAccountRequestHandlerFn(
-	storeName string, cdc *codec.Codec,
-	decoder auth.AccountDecoder, cliCtx context.CLIContext,
-) http.HandlerFunc {
+func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		bech32addr := vars["address"]
@@ -67,10 +63,7 @@ func QueryAccountRequestHandlerFn(
 }
 
 // query accountREST Handler
-func QueryBalancesRequestHandlerFn(
-	storeName string, cdc *codec.Codec,
-	decoder auth.AccountDecoder, cliCtx context.CLIContext,
-) http.HandlerFunc {
+func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		vars := mux.Vars(r)
