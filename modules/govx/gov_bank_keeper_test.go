@@ -1,8 +1,9 @@
 package govx
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -19,6 +20,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -102,4 +104,87 @@ func TestBurntDepositsToCommunityPool(t *testing.T) {
 
 	communityPool := keeper.dk.GetFeePool(ctx).CommunityPool
 	require.Equal(t, sdk.NewDecCoins(dex.NewCetCoins(300)), communityPool)
+}
+func TestSendCoinsNormal(t *testing.T) {
+	ctx, keeper := setUpKeeper()
+
+	depositAddr := gov.DepositedCoinsAccAddr
+	acc := keeper.ak.GetAccount(ctx, depositAddr)
+	if acc == nil {
+		acc = keeper.ak.NewAccountWithAddress(ctx, depositAddr)
+	}
+
+	totalAmt := sdk.Coins{
+		sdk.Coin{
+			Denom:  "cet",
+			Amount: sdk.NewInt(900),
+		},
+	}
+	err := acc.SetCoins(totalAmt)
+	if err != nil {
+		panic(err)
+	}
+	keeper.ak.SetAccount(ctx, acc)
+
+	burntAmt := sdk.Coins{
+		sdk.Coin{
+			Denom:  "cet",
+			Amount: sdk.NewInt(600),
+		},
+	}
+
+	_, _, toAddr := testutil.KeyPubAddr()
+	_, err = keeper.SendCoins(ctx, depositAddr, toAddr, burntAmt)
+
+	require.Nil(t, err)
+
+	depositAcc := keeper.ak.GetAccount(ctx, depositAddr)
+	require.Equal(t, sdk.NewInt(300), depositAcc.GetCoins().AmountOf("cet"))
+
+	toAcc := keeper.ak.GetAccount(ctx, toAddr)
+	require.Equal(t, sdk.NewInt(600), toAcc.GetCoins().AmountOf("cet"))
+
+	communityPool := keeper.dk.GetFeePool(ctx).CommunityPool
+	require.Nil(t, communityPool)
+
+}
+
+func TestSetCoins(t *testing.T) {
+	ctx, keeper := setUpKeeper()
+	coins := dex.NewCetCoins(10e8)
+	_, _, addr := testutil.KeyPubAddr()
+
+	//nil account
+	err := setCoins(ctx, keeper.ak, addr, coins)
+	acc := keeper.ak.GetAccount(ctx, addr)
+	require.Nil(t, err)
+	require.Equal(t, coins, acc.GetCoins())
+
+	//invalid amount
+	coins[0].Amount = sdk.ZeroInt()
+	err = setCoins(ctx, keeper.ak, addr, coins)
+	acc = keeper.ak.GetAccount(ctx, addr)
+	require.NotNil(t, err)
+
+}
+func TestSubtractCoins(t *testing.T) {
+	ctx, keeper := setUpKeeper()
+	coins := dex.NewCetCoins(10e8)
+	_, _, addr := testutil.KeyPubAddr()
+
+	//nil account
+	_, err := subtractCoins(ctx, keeper.ak, addr, coins)
+	require.NotNil(t, err)
+
+	acc := auth.BaseAccount{
+		Address: addr,
+		Coins:   dex.NewCetCoins(20e8),
+	}
+	keeper.ak.SetAccount(ctx, &acc)
+
+	//valid sub
+	left, err := subtractCoins(ctx, keeper.ak, addr, coins)
+	require.Nil(t, err)
+	require.Equal(t, left, coins)
+
 }
