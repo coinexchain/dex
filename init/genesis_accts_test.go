@@ -1,6 +1,7 @@
 package init
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -115,4 +116,16 @@ func TestAddGenesisAccountX(t *testing.T) {
 	require.Equal(t, 1, len(newstate.Accounts))
 	require.Equal(t, false, newstate.Accounts[0].MemoRequired)
 	require.Nil(t, newstate.Accounts[0].LockedCoins)
+}
+
+func TestCollectAccInfo(t *testing.T) {
+	addr := "coinex1paehyhx9sxdfwc3rjf85vwn6kjnmzjemtedpnl"
+	coin := "100000000cet"
+	args := []string{addr, coin}
+	_, err := collectAccInfo(args)
+	require.Equal(t, nil, err)
+
+	args = []string{addr, "i"}
+	_, err = collectAccInfo(args)
+	assert.NotNil(t, err, "invalid coin expression: i")
 }
