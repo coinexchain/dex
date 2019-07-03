@@ -6,7 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type LockedCoins []LockedCoin
+//-----------------------------------------------------------------------------
+// Locked Coin
 
 type LockedCoin struct {
 	Coin       sdk.Coin `json:"coin"`
@@ -20,23 +21,23 @@ func NewLockedCoin(denom string, amount sdk.Int, unlockTime int64) LockedCoin {
 	}
 }
 
-func (coins LockedCoins) String() string {
 
+func (coin LockedCoin) String() string {
+	return fmt.Sprintf("coin: %s, unlocked_time: %d\n", coin.Coin, coin.UnlockTime)
+}
+
+//-----------------------------------------------------------------------------
+// Locked Coins
+
+type LockedCoins []LockedCoin
+
+func (coins LockedCoins) String() string {
 	if len(coins) == 0 {
 		return ""
 	}
 	out := ""
-	for i, coin := range coins {
-		if i == 0 {
-			out += fmt.Sprintf("%v", coin.String())
-		} else {
-			out += fmt.Sprintf("                 %v", coin.String())
-			//out += fmt.Sprintf("%17v", coin.String())
-		}
+	for _, coin := range coins {
+		out += coin.String()
 	}
 	return out[:len(out)-1]
-}
-
-func (coin LockedCoin) String() string {
-	return fmt.Sprintf("coin: %s, unlocked_time: %d\n", coin.Coin.String(), coin.UnlockTime)
 }
