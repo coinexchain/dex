@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/types"
@@ -93,7 +94,7 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 	order.Freeze = 50
 	order.FrozenFee = 10
 	order.DealStock = 20
-	ctx, _ := newContextAndMarketKey()
+	ctx, _ := newContextAndMarketKey(testNetSubString)
 	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, mockFeeK)
 	refout := "unfreeze 50 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
 	if refout != bxKeeper.records[0] {
@@ -108,17 +109,14 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 
 }
 
-//func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssertStatusKeeper,
-//	bnkVal ExpectedBankxKeeper, cdcVal *codec.Codec, paramstore params.Subspace) Keeper {
-
 func TestRemoveOrders(t *testing.T) {
 	axk := &mocAssertStatusKeeper{}
 	bnk := &mocBankxKeeper{}
-	ctx, keys := newContextAndMarketKey()
+	ctx, keys := newContextAndMarketKey(testNetSubString)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
 	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
-	currDay := ctx.BlockHeader().Time.Day()
-	keeper.orderClean.SetDay(ctx, currDay-1)
+	keeper.orderClean.SetUnixTime(ctx, time.Now().Unix())
+	ctx = ctx.WithBlockTime(time.Unix(time.Now().Unix()+int64(25*60*60), 0))
 	parameters := Params{}
 	parameters.GTEOrderLifetime = 1
 	parameters.MaxExecutedPriceChangeRatio = DefaultMaxExecutedPriceChangeRatio
@@ -169,7 +167,6 @@ func TestRemoveOrders(t *testing.T) {
 		if records[i] != rec {
 			t.Errorf("Error in Removing Old Orders!")
 		}
-		//fmt.Printf("%s\n", rec)
 	}
 }
 
@@ -180,13 +177,15 @@ func TestDelist(t *testing.T) {
 	addr01, _ := simpleAddr("00001")
 	axk.forbiddenAddrList = []sdk.AccAddress{addr01}
 	bnk := &mocBankxKeeper{}
-	ctx, keys := newContextAndMarketKey()
+	ctx, keys := newContextAndMarketKey(testNetSubString)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
 	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
 	delistKeeper := NewDelistKeeper(keys.marketKey)
 	delistKeeper.AddDelistRequest(ctx, ctx.BlockHeight(), "btc/usdt")
-	currDay := ctx.BlockHeader().Time.Day()
-	keeper.orderClean.SetDay(ctx, currDay)
+	// currDay := ctx.BlockHeader().Time.Unix()
+	// keeper.orderClean.SetUnixTime(ctx, currDay)
+	keeper.orderClean.SetUnixTime(ctx, time.Now().Unix())
+	ctx = ctx.WithBlockTime(time.Now())
 	parameters := Params{}
 	parameters.GTEOrderLifetime = 1
 	parameters.MaxExecutedPriceChangeRatio = DefaultMaxExecutedPriceChangeRatio

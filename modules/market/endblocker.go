@@ -3,12 +3,18 @@ package market
 import (
 	"crypto/sha256"
 	"strings"
+	"time"
 
 	"github.com/coinexchain/dex/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/market/match"
+)
+
+const (
+	testNetSubString = "coinexdex-test"
+	mainNetSubString = "coinexdex-main"
 )
 
 // Some handlers which are useful when orders are matched and traded.
@@ -287,15 +293,29 @@ func removeExpiredMarket(ctx sdk.Context, keeper Keeper, marketParams Params) {
 }
 
 func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
-	recordDay := keeper.orderClean.GetDay(ctx)
-	currDay := ctx.BlockHeader().Time.Day()
+
 	marketInfoList := keeper.GetAllMarketInfos(ctx)
 	currHeight := ctx.BlockHeight()
 	marketParams := keeper.GetParams(ctx)
 
+	chainID := ctx.ChainID()
+	recordTime := keeper.orderClean.GetUnixTime(ctx)
+	currTime := ctx.BlockHeader().Time.Unix()
+
+	var needRemove bool
+	if strings.Contains(chainID, mainNetSubString) || strings.Contains(chainID, testNetSubString) {
+		if time.Unix(recordTime, 0).Day() != time.Unix(currTime, 0).Day() {
+			needRemove = true
+		}
+	} else {
+		if time.Unix(recordTime, 0).Minute() != time.Unix(currTime, 0).Minute() {
+			needRemove = true
+		}
+	}
+
 	// if this is the first block of a new day, we clean the GTE order and there is no trade
-	if currDay != recordDay {
-		keeper.orderClean.SetDay(ctx, currDay)
+	if needRemove {
+		keeper.orderClean.SetUnixTime(ctx, currTime)
 		removeExpiredOrder(ctx, keeper, marketInfoList, marketParams)
 		removeExpiredMarket(ctx, keeper, marketParams)
 		return nil

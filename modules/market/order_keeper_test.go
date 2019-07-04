@@ -34,7 +34,7 @@ func Test_concatCopyPreAllocate(t *testing.T) {
 	}
 }
 
-func newContextAndMarketKey() (sdk.Context, storeKeys) {
+func newContextAndMarketKey(chainid string) (sdk.Context, storeKeys) {
 	db := dbm.NewMemDB()
 	ms := sdkstore.NewCommitMultiStore(db)
 
@@ -47,17 +47,23 @@ func newContextAndMarketKey() (sdk.Context, storeKeys) {
 	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
-	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1000}, false, log.NewNopLogger())
+	ctx := sdk.NewContext(ms, abci.Header{ChainID: chainid, Height: 1000}, false, log.NewNopLogger())
 	return ctx, keys
 }
 
 func TestOrderCleanUpDayKeeper(t *testing.T) {
-	ctx, keys := newContextAndMarketKey()
+	ctx, keys := newContextAndMarketKey(testNetSubString)
 	k := NewOrderCleanUpDayKeeper(keys.marketKey)
-	k.SetDay(ctx, 12)
-	if k.GetDay(ctx) != 12 {
+	k.SetUnixTime(ctx, 19673122)
+	if k.GetUnixTime(ctx) != 19673122 {
 		t.Errorf("Error for OrderCleanUpDayKeeper")
 	}
+
+	k.SetUnixTime(ctx, -173122)
+	if k.GetUnixTime(ctx) != -173122 {
+		t.Errorf("Error for OrderCleanUpDayKeeper")
+	}
+
 }
 
 func newKeeperForTest(key sdk.StoreKey) OrderKeeper {
@@ -138,7 +144,7 @@ func createTO3() []*Order {
 
 func TestOrderBook1(t *testing.T) {
 	orders := createTO1()
-	ctx, keys := newContextAndMarketKey()
+	ctx, keys := newContextAndMarketKey(testNetSubString)
 	keeper := newKeeperForTest(keys.marketKey)
 	if keeper.GetSymbol() != "cet/usdt" {
 		t.Errorf("Error in GetSymbol")
@@ -202,7 +208,7 @@ func TestOrderBook1(t *testing.T) {
 
 func TestOrderBook2a(t *testing.T) {
 	orders := createTO1()
-	ctx, keys := newContextAndMarketKey()
+	ctx, keys := newContextAndMarketKey(testNetSubString)
 	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		if order.Side == Buy {
@@ -216,7 +222,7 @@ func TestOrderBook2a(t *testing.T) {
 
 func TestOrderBook2b(t *testing.T) {
 	orders := createTO1()
-	ctx, keys := newContextAndMarketKey()
+	ctx, keys := newContextAndMarketKey(testNetSubString)
 	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		if order.Side == Sell {
@@ -230,7 +236,7 @@ func TestOrderBook2b(t *testing.T) {
 
 func TestOrderBook3(t *testing.T) {
 	orders := createTO3()
-	ctx, keys := newContextAndMarketKey()
+	ctx, keys := newContextAndMarketKey(testNetSubString)
 	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		keeper.Add(ctx, order)

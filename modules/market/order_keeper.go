@@ -2,6 +2,8 @@ package market
 
 import (
 	"bytes"
+	"encoding/binary"
+
 	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -36,18 +38,18 @@ func NewOrderCleanUpDayKeeper(key sdk.StoreKey) *OrderCleanUpDayKeeper {
 	}
 }
 
-func (keeper *OrderCleanUpDayKeeper) GetDay(ctx sdk.Context) int {
+func (keeper *OrderCleanUpDayKeeper) GetUnixTime(ctx sdk.Context) int64 {
 	store := ctx.KVStore(keeper.marketKey)
 	value := store.Get(LastOrderCleanUpDayKey)
 	if len(value) == 0 {
-		return ctx.BlockHeader().Time.Day()
+		return ctx.BlockHeader().Time.Unix()
 	}
-	return int(value[0])
+	return int64(binary.BigEndian.Uint64(value))
 }
 
-func (keeper *OrderCleanUpDayKeeper) SetDay(ctx sdk.Context, day int) {
-	var value [1]byte
-	value[0] = byte(day)
+func (keeper *OrderCleanUpDayKeeper) SetUnixTime(ctx sdk.Context, unixTime int64) {
+	value := make([]byte, 8)
+	binary.BigEndian.PutUint64(value, uint64(unixTime))
 	store := ctx.KVStore(keeper.marketKey)
 	store.Set(LastOrderCleanUpDayKey, value[:])
 }
