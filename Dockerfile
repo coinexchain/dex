@@ -1,11 +1,35 @@
-FROM coinexchain/basic:latest
+FROM golang:1.12-alpine AS build-env
+RUN apk --no-cache add build-base git bzr mercurial gcc && \
+    go get github.com/rakyll/statik
 
-COPY . /dex
-WORKDIR /dex
+ADD . $GOPATH/src/github.com/coinexchain/dex
 
-RUN echo '{ "allow_root": true }' > /root/.bowerrc
-RUN go mod tidy
-RUN go mod vendor
-RUN go install github.com/rakyll/statik
+RUN cd $GOPATH/src/github.com/coinexchain/dex && \
+    statik -src=./cmd/cetcli/swagger -dest=./cmd/cetcli -f -m && \
+    export GO111MODULE=on && \
+    go mod tidy && \
+    go mod vendor && \
+    go install -gcflags "all=-N -l" ./... && \
+    cp $GOPATH/bin/cetd /tmp/ && \
+    cp $GOPATH/bin/cetcli /tmp/
 
-RUN ./scripts/build.sh
+FROM alpine:3.7
+LABEL maintainer="dev@coinex.org"
+
+RUN apk update && \
+    apk upgrade && \
+    apk --no-cache add curl jq file
+
+VOLUME [ /cetd ]
+WORKDIR /cetd
+EXPOSE 26656 26657 27000
+ENTRYPOINT ["/usr/bin/wrapper.sh"]
+CMD ["start"]
+STOPSIGNAL SIGTERM
+
+COPY networks/test/cetdnode/wrapper.sh    /usr/bin/
+COPY networks/test/cetdnode/rest_start.sh /usr/bin/
+COPY --from=build-env /tmp/cetd           /usr/bin/
+COPY --from=build-env /tmp/cetcli         /usr/bin/
+
+RUN ["chmod", "+x", "/usr/bin/wrapper.sh"]

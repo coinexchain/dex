@@ -1,51 +1,62 @@
-language: go
+matrix:
+  include:
+    - language: go
+      go: 1.12.x
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:masterminds/glide'
+          packages:
+            - g++-6
+            - gcc-6
+            - glide
+      cache:
+        directories:
+          - ${TRAVIS_BUILD_DIR}/vendor
+          - $GOPATH/src
+          - $GOPATH/pkg
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-      - sourceline: 'ppa:masterminds/glide'
-    packages:
-      - g++-6
-      - gcc-6
-      - glide
+      before_cache:
+        - find $HOME/.glide/cache -name ORIG_HEAD -exec rm {} \;
+        - rm -rf $GOPATH/src/github.com/coinexchain/dex/*
+        - rm -rf $GOPATH/pkg/**/github.com/coinexchain/dex
 
+      after_success:
+        - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
 
-go:
-  - 1.12.x
-cache:
-  apt: true
-  directories:
-    - ${TRAVIS_BUILD_DIR}/vendor
-    - $GOPATH/src
-    - $GOPATH/pkg
+      before_install:
+        - export GO111MODULE=on
+        - export GOROOT=$(go env GOROOT)
+        - export CXX="g++-6" CC="gcc-6"
+        - export PATH=$PATH:$HOME/gopath/bin
 
-before_cache:
-  - find $HOME/.glide/cache -name ORIG_HEAD -exec rm {} \;
-  - rm -rf $GOPATH/src/github.com/coinexchain/dex/*
-  - rm -rf $GOPATH/pkg/**/github.com/coinexchain/dex
+      install:
+        - cd -
+        - go mod tidy
+        - go mod vendor
+        - go get github.com/golangci/golangci-lint/cmd/golangci-lint
+        - go get golang.org/x/tools/cmd/cover
+        - go get github.com/mattn/goveralls
 
-after_success:
-  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
+      script:
+        - ./scripts/check.sh
 
-before_install:
-  - export GO111MODULE=on
-  - export GOROOT=$(go env GOROOT)
-  - export CXX="g++-6" CC="gcc-6"
-  - export PATH=$PATH:$HOME/gopath/bin
+    - language: python
+      python: 3.7
+      dist: xenial
 
-install:
-  - cd -
-  - go mod tidy
-  - go mod vendor
-  - go get github.com/golangci/golangci-lint/cmd/golangci-lint
-  - go get golang.org/x/tools/cmd/cover
-  - go get github.com/mattn/goveralls
+      services:
+        - docker
 
-script:
-  - ./scripts/check.sh
+      before_script:
+        - chmod +x ./scripts/functional_test.sh
+
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh
 
 notifications:
   email:
     on_success: change
-    on_failure: alwayss
+    on_failure: always
