@@ -1,6 +1,5 @@
-FROM golang:1.12-alpine AS build-env
-RUN apk --no-cache add build-base git bzr mercurial gcc && \
-    go get github.com/rakyll/statik
+FROM matrixport/go-build-env:latest AS build-env
+LABEL maintainer="dev@coinex.org"
 
 ADD . $GOPATH/src/github.com/coinexchain/dex
 
@@ -14,7 +13,6 @@ RUN cd $GOPATH/src/github.com/coinexchain/dex && \
     cp $GOPATH/bin/cetcli /tmp/
 
 FROM alpine:3.7
-LABEL maintainer="dev@coinex.org"
 
 RUN apk update && \
     apk upgrade && \

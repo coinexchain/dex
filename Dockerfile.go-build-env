@@ -1,0 +1,5 @@
+FROM golang:1.12-alpine
+LABEL maintainer="dev@coinex.org"
+
+RUN apk --no-cache add build-base git bzr mercurial gcc && \
+    go get github.com/rakyll/statik
