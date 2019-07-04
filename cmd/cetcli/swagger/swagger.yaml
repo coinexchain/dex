@@ -444,7 +444,7 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/create-gte-order:
+  /market/gte-orders:
     post:
       summary: Create GTE order in blockchain
       tags:
@@ -475,7 +475,7 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/create-ioc-order:
+  /market/ioc-orders:
     post:
       summary: Create IOC order in blockchain
       tags:
@@ -506,7 +506,7 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/trading-pair:
+  /market/trading-pairs:
     post:
       summary: Create trading-pair in blockchain
       tags:
@@ -537,7 +537,7 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/trading-pair/{stock}/{money}:
+  /market/trading-pairs/{stock}/{money}:
     get:
       summary: Query trading-pair info
       tags:
@@ -567,7 +567,7 @@ paths:
           description: Invalid symbol
         500:
           description: Server internal error
-  /market/order-info/{order-id}:
+  /market/orders/{order-id}:
     get:
       summary: Query order info
       tags:
@@ -591,7 +591,7 @@ paths:
           description: Invalid order-id
         500:
           description: Server internal error
-  /market/user-order-list/{address}:
+  /market/orders/account/{address}:
     get:
       summary: Query user order-id list
       tags:

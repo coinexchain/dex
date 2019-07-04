@@ -120,8 +120,8 @@ func calFrozenFeeInOrder(ctx sdk.Context, marketParams Params, keeper Keeper, ms
 		frozenFee = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).RoundInt64()
 	} else {
 		stockSepCet := stock + SymbolSeparator + types.CET
-		marketInfo, ok := keeper.GetMarketInfo(ctx, stockSepCet)
-		if ok != nil || marketInfo.LastExecutedPrice.IsZero() {
+		marketInfo, err := keeper.GetMarketInfo(ctx, stockSepCet)
+		if err != nil || marketInfo.LastExecutedPrice.IsZero() {
 			frozenFee = marketParams.FixedTradeFee
 		} else {
 			totalPriceInCet := marketInfo.LastExecutedPrice.Mul(sdk.NewDec(msg.Quantity))
