@@ -671,7 +671,7 @@ paths:
                 type: string
                 example: abc/cet
               time:
-                type: integer
+                type: string
                 example: 7
       responses:
         200:
