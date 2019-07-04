@@ -1,7 +1,10 @@
 package init
 
 import (
+	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -128,4 +131,18 @@ func TestCollectAccInfo(t *testing.T) {
 	args = []string{addr, "i"}
 	_, err = collectAccInfo(args)
 	assert.NotNil(t, err, "invalid coin expression: i")
+}
+
+func TestAddGenesisAccountCmd(t *testing.T) {
+	ctx := server.NewDefaultContext()
+	cdc := app.MakeCodec()
+	ctx.Config.Genesis = "genesis.json"
+	viper.Set("home", "./")
+
+	defer os.Remove("./genesis.json")
+	_, _, _ = initializeGenesisFile(cdc, "./genesis.json")
+
+	cmd := AddGenesisAccountCmd(ctx, cdc)
+	require.Equal(t, nil, cmd.RunE(nil,
+		[]string{"coinex1paehyhx9sxdfwc3rjf85vwn6kjnmzjemtedpnl", "100000cet"}))
 }

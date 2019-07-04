@@ -3,9 +3,11 @@ package init
 import (
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
 
@@ -30,6 +32,8 @@ func TestAddGenesisToken(t *testing.T) {
 }
 
 func TestParseTokenInfo(t *testing.T) {
+
+	defer os.RemoveAll("./keys")
 	_, err := parseTokenInfo()
 	assert.Error(t, err)
 
@@ -53,5 +57,22 @@ func TestParseTokenInfo(t *testing.T) {
 	viper.Set(flagTotalMint, int64(100))
 	token, _ := parseTokenInfo()
 	require.Equal(t, "aaa", token.GetSymbol())
+}
 
+func TestAddGenesisTokenCmd(t *testing.T) {
+	ctx := server.NewDefaultContext()
+	cdc := app.MakeCodec()
+	ctx.Config.Genesis = "genesis.json"
+
+	viper.Set(flagOwner, "coinex1paehyhx9sxdfwc3rjf85vwn6kjnmzjemtedpnl")
+	viper.Set(flagSymbol, "abbbc")
+	viper.Set(flagTotalSupply, int64(100))
+	viper.Set(flagTotalBurn, int64(100))
+	viper.Set(flagTotalMint, int64(100))
+	viper.Set("home", "./")
+
+	defer os.Remove("./genesis.json")
+	_, _, _ = initializeGenesisFile(cdc, "./genesis.json")
+	cmd := AddGenesisTokenCmd(ctx, cdc)
+	require.Equal(t, nil, cmd.RunE(nil, []string{}))
 }

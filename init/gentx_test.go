@@ -1,7 +1,9 @@
 package init
 
 import (
+	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/types"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 	"os"
 	"testing"
 
@@ -91,4 +93,27 @@ func Test_prepareFlagsForTxCreateValidator(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) { runTest(t, tt, params) })
 	}
+}
+
+func TestAccountInGenesis(t *testing.T) {
+	genesis := app.GenesisState{
+		StakingData: staking.GenesisState{Params: staking.Params{BondDenom: "cet"}},
+		Accounts: []app.GenesisAccount{
+			{Address: sdk.AccAddress{12}, Coins: sdk.Coins{
+				sdk.Coin{Denom: "cet", Amount: sdk.NewInt(2000)}},
+			}}}
+	coins := sdk.Coins{
+		sdk.Coin{Denom: "cet", Amount: sdk.NewInt(3000)}}
+	err := accountInGenesis(genesis, sdk.AccAddress{12}, coins)
+	require.Error(t, err)
+
+	coins = sdk.Coins{
+		sdk.Coin{Denom: "cet", Amount: sdk.NewInt(100)}}
+	err = accountInGenesis(genesis, sdk.AccAddress{12}, coins)
+	require.Equal(t, nil, err)
+}
+
+func TestMakeOutputFilepath(t *testing.T) {
+	file, _ := makeOutputFilepath("~", "1")
+	require.Equal(t, "~/config/gentx/gentx-1.json", file)
 }
