@@ -3,8 +3,6 @@ package cli
 import (
 	"bytes"
 	"fmt"
-	"strings"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -120,38 +118,6 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo
 	return msg, nil
 }
 
-func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
-	return &cobra.Command{
-		Use:   "trading-pair",
-		Short: "query trading-pair info in blockchain",
-		Long: "query trading-pair info in blockchain. \n" +
-			"Example : " +
-			"cetcli query market " +
-			"trading-pair eth/cet " +
-			"--trust-node=true --chain-id=coinexdex",
-		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-			if len(strings.Split(args[0], market.SymbolSeparator)) != 2 {
-				return errors.Errorf("symbol illegal : %s, For example : eth/cet.", args[0])
-			}
-
-			bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(args[0]))
-			if err != nil {
-				return err
-			}
-			query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
-			res, err := cliCtx.QueryWithData(query, bz)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(string(res))
-			return nil
-		},
-	}
-}
-
 func CancelMarket(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cancel-trading-pair",
@@ -213,48 +179,4 @@ func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg marke
 	}
 
 	return nil
-}
-
-func QueryWaitCancelMarkets(cdc *codec.Codec) *cobra.Command {
-
-	cmd := &cobra.Command{
-		Use:   "wait-cancel-trading-pair",
-		Short: "Query wait cancel trading-pair info in special time",
-		Long: "Query wait cancel trading-pair info in special time \n" +
-			"Example:" +
-			"cetcli query market " +
-			"wait-cancel-trading-pair --time=10000 " +
-			"--trust-node=true --chain-id=coinexdex",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-
-			time := viper.GetInt64(FlagTime)
-			if time <= 0 {
-				return errors.Errorf("Invalid unix time")
-			}
-
-			bz, err := cdc.MarshalJSON(market.QueryCancelMarkets{Time: time})
-			if err != nil {
-				return err
-			}
-
-			query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryWaitCancelMarkets)
-			res, err := cliCtx.QueryWithData(query, bz)
-			if err != nil {
-				return err
-			}
-
-			var markets []string
-			if err := cdc.UnmarshalJSON(res, &markets); err != nil {
-				return err
-			}
-			fmt.Println(markets)
-
-			return nil
-		},
-	}
-
-	cmd.Flags().Int64(FlagTime, -1, "The query block height")
-	cmd.MarkFlagRequired(FlagTime)
-	return cmd
 }
