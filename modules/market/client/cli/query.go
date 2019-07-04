@@ -17,13 +17,11 @@ import (
 
 func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "trading-pair",
+		Use:   "trading-pair <pair>",
 		Short: "query trading-pair info in blockchain",
 		Long: "query trading-pair info in blockchain. \n" +
 			"Example : " +
-			"cetcli query market " +
-			"trading-pair eth/cet " +
-			"--trust-node=true --chain-id=coinexdex",
+			"cetcli query market trading-pair eth/cet --trust-node=true --chain-id=coinexdex",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
