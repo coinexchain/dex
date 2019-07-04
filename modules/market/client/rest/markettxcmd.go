@@ -1,10 +1,7 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
-
-	"github.com/gorilla/mux"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	clientrest "github.com/cosmos/cosmos-sdk/client/rest"
@@ -66,42 +63,7 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 	}
 }
 
-func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		stock := vars["stock"]
-		money := vars["money"]
-
-		res, err := queryMarketInfo(cdc, cliCtx, stock+market.SymbolSeparator+money)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		var queryInfo market.QueryMarketInfo
-		if err := cdc.UnmarshalJSON(res, &queryInfo); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		rest.PostProcessResponse(w, cdc, queryInfo, cliCtx.Indent)
-	}
-}
-
-func queryMarketInfo(cdc *codec.Codec, cliCtx context.CLIContext, symbol string) ([]byte, error) {
-	bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(symbol))
-	if err != nil {
-		return nil, err
-	}
-
-	query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
-	res, err := cliCtx.QueryWithData(query, bz)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req cancelMarketReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {

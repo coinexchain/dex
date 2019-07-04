@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -13,7 +12,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/gorilla/mux"
 )
 
 // SendReq defines the properties of a send request's body.
@@ -65,67 +63,6 @@ func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 		}
 
 		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
-}
-
-func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		orderID := vars["order-id"]
-
-		if len(strings.Split(orderID, "-")) != 2 {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
-			return
-		}
-
-		addr := strings.Split(orderID, "-")[0]
-		if _, err := sdk.AccAddressFromBech32(addr); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
-			return
-		}
-
-		bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(orderID))
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
-			return
-		}
-
-		route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryOrder)
-		res, err := cliCtx.QueryWithData(route, bz)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
-	}
-}
-
-func queryUserOrderListHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		addr := vars["address"]
-
-		if _, err := sdk.AccAddressFromBech32(addr); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
-			return
-		}
-
-		bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: addr})
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryUserOrders)
-		fmt.Println(route)
-		res, err := cliCtx.QueryWithData(route, bz)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
 	}
 }
 
