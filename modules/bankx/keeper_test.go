@@ -188,3 +188,9 @@ func TestGetTotalCoins(t *testing.T) {
 
 	require.Equal(t, expected, coins)
 }
+
+func TestKeeper_TotalAmountOfCoin(t *testing.T) {
+	input := setupTestInput()
+	amount := input.bxk.TotalAmountOfCoin(input.ctx, "cet")
+	require.Equal(t, int64(0), amount.Int64())
+}
