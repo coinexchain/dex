@@ -189,9 +189,9 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 			Symbol:       stock,
 			OwnerAddress: haveCetAddress,
 		}
-		tk.ForbidToken(ctx, msgForbidToken)
+		tk.ForbidToken(ctx, msgForbidToken.Symbol, msgForbidToken.OwnerAddress)
 		msgForbidToken.Symbol = money
-		tk.ForbidToken(ctx, msgForbidToken)
+		tk.ForbidToken(ctx, msgForbidToken.Symbol, msgForbidToken.OwnerAddress)
 	}
 	if addrForbid {
 		msgForbidAddr := asset.MsgForbidAddr{
@@ -199,9 +199,9 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 			OwnerAddr:  haveCetAddress,
 			ForbidAddr: []sdk.AccAddress{forbidAddr},
 		}
-		tk.ForbidAddress(ctx, msgForbidAddr)
+		tk.ForbidAddress(ctx, msgForbidAddr.Symbol, msgForbidAddr.OwnerAddr, msgForbidAddr.ForbidAddr)
 		msgForbidAddr.Symbol = stock
-		tk.ForbidAddress(ctx, msgForbidAddr)
+		tk.ForbidAddress(ctx, msgForbidAddr.Symbol, msgForbidAddr.OwnerAddr, msgForbidAddr.ForbidAddr)
 	}
 
 	return tk
