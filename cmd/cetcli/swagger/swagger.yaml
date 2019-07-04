@@ -14,7 +14,7 @@ tags:
   - name: Bank
     description: Create and broadcast transactions
   - name: Staking
-    description: Stake module APIs
+    description: Stake moMarketInfodule APIs
   - name: Governance
     description: Governance module APIs
   - name: Slashing
@@ -537,7 +537,7 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
-  /market/trading-pair/{symbol}:
+  /market/trading-pair/{stock}/{money}:
     get:
       summary: Query trading-pair info
       tags:
@@ -547,8 +547,14 @@ paths:
       operationId: getMarket
       parameters:
         - in: path
-          name: symbol
-          description: trading-pair symbol
+          name: stock
+          description: stock symbol
+          required: true
+          type: string
+          x-example: btc
+        - in: path  
+          name: money
+          description: money symbol
           required: true
           type: string
           x-example: cet
@@ -664,7 +670,7 @@ paths:
               symbol:
                 type: string
                 example: abc/cet
-              height:
+              time:
                 type: integer
                 example: 7
       responses:
@@ -2684,7 +2690,7 @@ definitions:
       money:
         type: string
         example: cet
-      price-precision:
+      price_precision:
         type: string
         example: 10
   MarketInfo:

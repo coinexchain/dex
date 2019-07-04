@@ -2,18 +2,17 @@ package rest
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
-
-	"github.com/coinexchain/dex/modules/market/client/cli"
-	"net/http"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	clientrest "github.com/cosmos/cosmos-sdk/client/rest"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+
+	"github.com/coinexchain/dex/modules/market/client/cli"
 
 	"github.com/coinexchain/dex/modules/market"
 )
@@ -70,20 +69,20 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		symbol := vars["symbol"]
+		stock := vars["stock"]
+		money := vars["money"]
 
-		if len(strings.Split(symbol, market.SymbolSeparator)) != 2 {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "The invalid symbol")
-			return
-		}
-
-		res, err := queryMarketInfo(cdc, cliCtx, symbol)
+		res, err := queryMarketInfo(cdc, cliCtx, stock+market.SymbolSeparator+money)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+		var queryInfo market.QueryMarketInfo
+		if err := cdc.UnmarshalJSON(res, &queryInfo); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		rest.PostProcessResponse(w, cdc, queryInfo, cliCtx.Indent)
 	}
 }
 

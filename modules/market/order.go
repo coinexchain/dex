@@ -41,6 +41,7 @@ func (or *Order) GetTagsInOrderCreate() sdk.Tags {
 		"side", strconv.Itoa(int(or.Side)),
 		"time-in-force", strconv.Itoa(or.TimeInForce),
 		"height", strconv.FormatInt(or.Height, 10),
+		"order-id", or.OrderID(),
 	)
 }
 
