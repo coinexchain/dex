@@ -14,6 +14,6 @@ bash script/init.sh
 
 echo "Test begin"
 
-pipenv run behave ./features/
+pipenv run behave ./features/ --tags=~@wip
 
 echo "Test end"
