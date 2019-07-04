@@ -9,9 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
-	"github.com/coinexchain/dex/modules/market/client/cli"
-
 	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/client/cli"
 )
 
 // SendReq defines the properties of a send request's body.

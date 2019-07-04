@@ -4,14 +4,15 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/market/client/cli"
-	"github.com/coinexchain/dex/modules/market/match"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	clientrest "github.com/cosmos/cosmos-sdk/client/rest"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+
+	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/client/cli"
+	"github.com/coinexchain/dex/modules/market/match"
 )
 
 // SendReq defines the properties of a send request's body.
