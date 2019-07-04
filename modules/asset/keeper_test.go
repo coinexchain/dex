@@ -91,10 +91,9 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 func TestTokenKeeper_TokenReserved(t *testing.T) {
 	input := setupTestInput()
 	addr, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
-	expectErr := ErrorInvalidTokenOwner("only coinex dex can issue reserved symbol token, you can run \n" +
+	expectErr := ErrorInvalidTokenOwner("only coinex dex foundation can issue reserved symbol token, you can run \n" +
 		"$ cetcli query asset reserved-symbol \n" +
-		"to query coinex dex reserved token symbol\n" +
-		"if you want it,please contact coinex")
+		"to query reserved token symbol")
 
 	// issue btc token failed
 	issueMsg := NewMsgIssueToken("BTC token", "btc", 2100, tAccAddr,
