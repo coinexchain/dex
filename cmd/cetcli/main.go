@@ -220,7 +220,7 @@ func registerRoutes(rs *lcd.RestServer) {
 	slashing.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	gov.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	assrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, as.StoreKey)
-	mktrest.RegisterTXRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	mktrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 }
 
 func registerSwaggerUI(rs *lcd.RestServer) {
