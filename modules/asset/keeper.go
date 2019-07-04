@@ -119,10 +119,9 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, msg MsgIssueToken) sdk.Erro
 	if isReserved(msg.Symbol) && msg.Symbol != dex.CET {
 		cetToken := keeper.GetToken(ctx, dex.CET)
 		if cetToken == nil || !msg.Owner.Equals(cetToken.GetOwner()) {
-			return ErrorInvalidTokenOwner("only coinex dex can issue reserved symbol token, you can run \n" +
+			return ErrorInvalidTokenOwner("only coinex dex foundation can issue reserved symbol token, you can run \n" +
 				"$ cetcli query asset reserved-symbol \n" +
-				"to query coinex dex reserved token symbol\n" +
-				"if you want it,please contact coinex")
+				"to query reserved token symbol")
 		}
 	}
 
