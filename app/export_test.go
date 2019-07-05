@@ -87,3 +87,55 @@ func TestExportDefaultAccountXState(t *testing.T) {
 	require.Nil(t, state.Accounts[0].LockedCoins)
 	require.Nil(t, state.Accounts[0].FrozenCoins)
 }
+
+func TestExportAppStateAndValidators(t *testing.T) {
+	sk, pk, addr := testutil.KeyPubAddr()
+	amount := cetToken().GetTotalSupply()
+
+	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
+
+	// init app
+	app := initApp(func(genState *GenesisState) {
+		addGenesisAccounts(genState, acc)
+		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1e8)
+	})
+
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
+	ctx := app.NewContext(false, abci.Header{Height: 1})
+
+	// create validator & self delegate minSelfDelegate CET
+	valAddr := sdk.ValAddress(addr)
+	minSelfDelegate := app.stakingXKeeper.GetParams(ctx).MinSelfDelegation
+	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, pk).
+		MinSelfDelegation(minSelfDelegate.Int64()).SelfDelegation(minSelfDelegate.Int64()).
+		Build()
+	createValTx := newStdTxBuilder().
+		Msgs(createValMsg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, sk).Build()
+	createValResult := app.Deliver(createValTx)
+	require.Equal(t, sdk.CodeOK, createValResult.Code)
+
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	//next block
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: app.LastBlockHeight() + 1}})
+	ctx = app.NewContext(false, abci.Header{Height: app.LastBlockHeight() + 1})
+
+	exportState, valset, err := app.ExportAppStateAndValidators(true, []string{})
+	require.Nil(t, err)
+
+	var appState GenesisState
+	err = app.cdc.UnmarshalJSON(exportState, &appState)
+	require.Nil(t, err)
+
+	val := appState.StakingData.Validators
+	require.Equal(t, pk, valset[0].PubKey)
+	require.Equal(t, val[0].GetTendermintPower(), valset[0].Power)
+
+	valAcc := app.accountKeeper.GetAccount(ctx, addr)
+	require.Equal(t, int64(0), appState.DistrData.FeePool.CommunityPool.AmountOf("cet").Int64())
+	require.Equal(t, cetToken().GetTotalSupply()-minSelfDelegate.Int64()-100, valAcc.GetCoins().AmountOf("cet").Int64())
+
+	feesCollected := appState.AuthData.CollectedFees
+	require.Equal(t, "100cet", feesCollected.String())
+}
