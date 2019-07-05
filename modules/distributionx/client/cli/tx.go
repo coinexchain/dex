@@ -2,7 +2,8 @@ package cli
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/distributionx"
+
+	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -10,7 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-	"github.com/spf13/cobra"
+
+	"github.com/coinexchain/dex/modules/distributionx"
 )
 
 // DonateTxCmd will create a DonateToCommunityPool tx and sign it with the given key.
