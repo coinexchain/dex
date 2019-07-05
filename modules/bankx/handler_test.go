@@ -47,6 +47,7 @@ func setupTestInput() testInput {
 	tkey := sdk.NewTransientStoreKey("transient_test")
 	authxKey := sdk.NewKVStoreKey(authx.StoreKey)
 	fckKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
+	paramKey := sdk.NewKVStoreKey(params.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
@@ -54,6 +55,7 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(authxKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(fckKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(paramKey, sdk.StoreTypeIAVL, db)
 
 	_ = ms.LoadLatestVersion()
 
@@ -132,6 +134,32 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, int64(1), aux.LockedCoins[0].UnlockTime)
 	require.Equal(t, sdk.NewInt(100000000), aux.LockedCoins[1].Coin.Amount)
 	require.Equal(t, int64(2), aux.LockedCoins[1].UnlockTime)
+}
+
+func TestHandlerMsgSendFail(t *testing.T) {
+	input := setupTestInput()
+
+	fromAddr := []byte("fromaddr")
+	toAddr := []byte("toaddr")
+
+	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
+	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
+
+	oneCoins := dex.NewCetCoins(100000000)
+	_ = fromAccount.SetCoins(oneCoins)
+
+	input.ak.SetAccount(input.ctx, fromAccount)
+	input.axk.SetAccountX(input.ctx, fromAccountX)
+
+	input.bk.SetSendEnabled(input.ctx, false)
+	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
+	res := input.handle(msgSend)
+	require.Equal(t, bank.CodeSendDisabled, res.Code)
+
+	input.bk.SetSendEnabled(input.ctx, true)
+	msgSend = MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(200000000), UnlockTime: 0}
+	res = input.handle(msgSend)
+	require.Equal(t, sdk.CodeInsufficientCoins, res.Code)
 
 }
 

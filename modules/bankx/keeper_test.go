@@ -2,6 +2,7 @@ package bankx
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -74,10 +75,10 @@ func givenAccountWith(input testInput, addr sdk.AccAddress, coinsString string) 
 	_ = acc.SetCoins(coins)
 	input.ak.SetAccount(input.ctx, &acc)
 
-	accx := authx.AccountX{
+	accX := authx.AccountX{
 		Address: addr,
 	}
-	input.axk.SetAccountX(input.ctx, accx)
+	input.axk.SetAccountX(input.ctx, accX)
 }
 
 func coinsOf(input testInput, addr sdk.AccAddress) string {
@@ -85,8 +86,8 @@ func coinsOf(input testInput, addr sdk.AccAddress) string {
 }
 
 func frozenCoinsOf(input testInput, addr sdk.AccAddress) string {
-	accx, _ := input.axk.GetAccountX(input.ctx, addr)
-	return accx.FrozenCoins.String()
+	accX, _ := input.axk.GetAccountX(input.ctx, addr)
+	return accX.FrozenCoins.String()
 }
 
 func TestFreezeMultiCoins(t *testing.T) {
@@ -168,14 +169,13 @@ func TestGetTotalCoins(t *testing.T) {
 		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(10)},
 	)
 
-	// nolint
-	accx := authx.AccountX{
-		myaddr,
-		false,
-		lockedCoins,
-		frozenCoins,
+	accX := authx.AccountX{
+		Address:     myaddr,
+		LockedCoins: lockedCoins,
+		FrozenCoins: frozenCoins,
 	}
-	input.axk.SetAccountX(input.ctx, accx)
+
+	input.axk.SetAccountX(input.ctx, accX)
 
 	expected := sdk.NewCoins(
 		sdk.Coin{Denom: "bch", Amount: sdk.NewInt(40)},
@@ -193,4 +193,62 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 	input := setupTestInput()
 	amount := input.bxk.TotalAmountOfCoin(input.ctx, "cet")
 	require.Equal(t, int64(0), amount.Int64())
+
+	givenAccountWith(input, myaddr, "100cet")
+
+	lockedCoins := authx.LockedCoins{
+		authx.NewLockedCoin("cet", sdk.NewInt(100), 1000),
+	}
+	frozenCoins := sdk.NewCoins(sdk.Coin{Denom: "cet", Amount: sdk.NewInt(100)})
+
+	accX := authx.AccountX{
+		Address:     myaddr,
+		LockedCoins: lockedCoins,
+		FrozenCoins: frozenCoins,
+	}
+	input.axk.SetAccountX(input.ctx, accX)
+	amount = input.bxk.TotalAmountOfCoin(input.ctx, "cet")
+	require.Equal(t, int64(300), amount.Int64())
+}
+
+func TestKeeper_AddCoins(t *testing.T) {
+	input := setupTestInput()
+	coins := sdk.NewCoins(
+		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(10)},
+		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(20)},
+	)
+
+	coins2 := sdk.NewCoins(
+		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(5)},
+		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(10)},
+	)
+
+	err := input.bxk.AddCoins(input.ctx, myaddr, coins)
+	require.Equal(t, nil, err)
+	err = input.bxk.SubtractCoins(input.ctx, myaddr, coins2)
+	require.Equal(t, nil, err)
+	cs := input.bxk.GetTotalCoins(input.ctx, myaddr)
+	require.Equal(t, coins2, cs)
+
+	coins3 := sdk.NewCoins(
+		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(15)},
+		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(10)},
+	)
+	err = input.bxk.SubtractCoins(input.ctx, myaddr, coins3)
+	require.Error(t, err)
+}
+
+func TestKeeper_SendCoins(t *testing.T) {
+	input := setupTestInput()
+	coins := sdk.NewCoins(
+		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(10)},
+	)
+	addr2 := testutil.ToAccAddress("addr2")
+	_ = input.bxk.AddCoins(input.ctx, myaddr, coins)
+	exist := input.bxk.HasCoins(input.ctx, myaddr, coins)
+	assert.True(t, exist)
+	err := input.bxk.SendCoins(input.ctx, myaddr, addr2, coins)
+	require.Equal(t, nil, err)
+	cs := input.bxk.GetTotalCoins(input.ctx, addr2)
+	require.Equal(t, coins, cs)
 }
