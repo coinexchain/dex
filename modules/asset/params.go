@@ -3,7 +3,6 @@ package asset
 import (
 	"bytes"
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
@@ -26,13 +25,16 @@ const (
 
 	DefaultParamspace = ModuleName
 	MaxTokenAmount    = 9E18 // 90 billion * 10 ^ 8
+	RareSymbolLength  = 2
 
-	IssueTokenFee = 1E12 // 10000 * 10 ^8
+	IssueTokenFee     = 1E12 // 10000 * 10 ^8
+	IssueRareTokenFee = 1E13 // 100000 * 10 ^8
 )
 
 // Parameter keys
 var (
-	KeyIssueTokenFee = []byte("IssueTokenFee")
+	KeyIssueTokenFee     = []byte("IssueTokenFee")
+	KeyIssueRareTokenFee = []byte("IssueRareTokenFee")
 )
 
 var _ params.ParamSet = &Params{}
@@ -40,7 +42,8 @@ var _ params.ParamSet = &Params{}
 // Params defines the parameters for the asset module.
 type Params struct {
 	// FeeParams define the rules according to which fee are charged.
-	IssueTokenFee sdk.Coins `json:"issue_token_fee"`
+	IssueTokenFee     sdk.Coins `json:"issue_token_fee"`
+	IssueRareTokenFee sdk.Coins `json:"issue_rare_token_fee"`
 }
 
 // ParamKeyTable for asset module
@@ -53,6 +56,7 @@ func ParamKeyTable() params.KeyTable {
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyIssueTokenFee, Value: &p.IssueTokenFee},
+		{Key: KeyIssueRareTokenFee, Value: &p.IssueRareTokenFee},
 	}
 }
 
@@ -77,5 +81,6 @@ func (p *Params) ValidateGenesis() error {
 func DefaultParams() Params {
 	return Params{
 		types.NewCetCoins(IssueTokenFee),
+		types.NewCetCoins(IssueRareTokenFee),
 	}
 }

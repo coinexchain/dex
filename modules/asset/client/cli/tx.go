@@ -93,6 +93,9 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 				return err
 			}
 			issueFee := types.NewCetCoins(asset.IssueTokenFee)
+			if len(msg.Symbol) == asset.RareSymbolLength {
+				issueFee = types.NewCetCoins(asset.IssueRareTokenFee)
+			}
 			if !account.GetCoins().IsAllGTE(issueFee) {
 				return fmt.Errorf("address %s doesn't have enough cet to issue token", tokenOwner)
 			}

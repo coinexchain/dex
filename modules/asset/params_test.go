@@ -42,16 +42,14 @@ func TestParams_ValidateGenesis(t *testing.T) {
 			"case-invalidate",
 			Params{
 				sdk.Coins{},
+				sdk.Coins{},
 			},
 			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Params{
-				tt.p.IssueTokenFee,
-			}
-			if err := p.ValidateGenesis(); (err != nil) != tt.wantErr {
+			if err := tt.p.ValidateGenesis(); (err != nil) != tt.wantErr {
 				t.Errorf("Params.ValidateGenesis() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

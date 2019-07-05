@@ -90,6 +90,7 @@ func TestGenesis(t *testing.T) {
 
 	export := ExportGenesis(input.ctx, input.tk)
 	require.Equal(t, types.NewCetCoins(IssueTokenFee), export.Params.IssueTokenFee)
+	require.Equal(t, types.NewCetCoins(IssueRareTokenFee), export.Params.IssueRareTokenFee)
 	require.Equal(t, 2, len(export.Tokens))
 	require.Equal(t, whitelist, export.Whitelist)
 	require.Equal(t, forbiddenList, export.ForbiddenAddresses)
