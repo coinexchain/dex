@@ -51,6 +51,7 @@ ldflags = -X "github.com/coinexchain/dex/version.Name=CoinEx Chain" \
 		  -X github.com/coinexchain/dex/version.ClientName=cetcli \
 		  -X github.com/coinexchain/dex/version.Version=$(VERSION) \
 		  -X github.com/coinexchain/dex/version.Commit=$(COMMIT) \
+		  -X github.com/cosmos/cosmos-sdk/types.reDnmString=[a-z][a-z0-9]{1,7} \
 		  -X "github.com/coinexchain/dex/version.BuildTags=$(build_tags_comma_sep)"
 
 ifeq ($(WITH_CLEVELDB),yes)
