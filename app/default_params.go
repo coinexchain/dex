@@ -21,12 +21,17 @@ const (
 // slashing
 const (
 	DefaultMaxEvidenceAge           = 21 * Day
-	DefaultSignedBlocksWindow int64 = 1000
+	DefaultSignedBlocksWindow int64 = 10000
 )
 
 //consensus
 const (
 	DefaultEvidenceMaxAge int64 = 1000000
+)
+
+//auth
+const (
+	DefaultMaxMemoCharacters uint64 = 512
 )
 
 var (

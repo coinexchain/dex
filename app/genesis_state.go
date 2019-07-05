@@ -67,6 +67,7 @@ func NewDefaultGenesisState() GenesisState {
 		GenTxs:       nil,
 	}
 	// TODO: create staking.GenesisState & gov.GenesisState & crisis.GenesisState from scratch
+	gs.AuthData.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
 	gs.StakingData.Params.UnbondingTime = DefaultUnbondingTime
 	gs.StakingData.Params.MaxValidators = DefaultMaxValidators
 	gs.StakingData.Params.BondDenom = dex.DefaultBondDenom

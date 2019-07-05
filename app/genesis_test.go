@@ -12,6 +12,9 @@ func TestDefaultGenesisState(t *testing.T) {
 	state := NewDefaultGenesisState()
 	require.NoError(t, state.Validate())
 
+	//auth
+	require.Equal(t, 512, int(state.AuthData.Params.MaxMemoCharacters))
+
 	// staking
 	require.Equal(t, "cet", state.StakingData.Params.BondDenom)
 	require.Equal(t, "504h0m0s", state.StakingData.Params.UnbondingTime.String()) // 21 days
@@ -21,7 +24,7 @@ func TestDefaultGenesisState(t *testing.T) {
 	// slashing
 	require.Equal(t, "504h0m0s", state.SlashingData.Params.MaxEvidenceAge.String())
 	require.Equal(t, "10m0s", state.SlashingData.Params.DowntimeJailDuration.String())
-	require.Equal(t, 1000, int(state.SlashingData.Params.SignedBlocksWindow))
+	require.Equal(t, 10000, int(state.SlashingData.Params.SignedBlocksWindow))
 	require.Equal(t, sdk.MustNewDecFromStr("0.05"), state.SlashingData.Params.MinSignedPerWindow)
 	require.Equal(t, sdk.MustNewDecFromStr("0.05"), state.SlashingData.Params.SlashFractionDoubleSign)
 	require.Equal(t, sdk.MustNewDecFromStr("0.0001"), state.SlashingData.Params.SlashFractionDowntime)
