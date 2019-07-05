@@ -16,6 +16,24 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
+func initAppWithValidators(gs GenesisState) *CetChainApp {
+	app := newApp()
+
+	// genesis state
+	validators := gs.StakingData.Validators
+	var validatorUpdates []abci.ValidatorUpdate
+
+	for _, val := range validators {
+		validatorUpdates = append(validatorUpdates, val.ABCIValidatorUpdate())
+	}
+
+	// init chain
+	genStateBytes, _ := app.cdc.MarshalJSON(gs)
+	app.InitChain(abci.RequestInitChain{ChainId: testChainID, AppStateBytes: genStateBytes, Validators: validatorUpdates})
+
+	return app
+}
+
 func TestExportRestore(t *testing.T) {
 	_, _, addr := testutil.KeyPubAddr()
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
@@ -133,9 +151,59 @@ func TestExportAppStateAndValidators(t *testing.T) {
 	require.Equal(t, val[0].GetTendermintPower(), valset[0].Power)
 
 	valAcc := app.accountKeeper.GetAccount(ctx, addr)
-	require.Equal(t, int64(0), appState.DistrData.FeePool.CommunityPool.AmountOf("cet").Int64())
+	require.Equal(t, sdk.NewDec(0), appState.DistrData.FeePool.CommunityPool.AmountOf("cet"))
 	require.Equal(t, cetToken().GetTotalSupply()-minSelfDelegate.Int64()-100, valAcc.GetCoins().AmountOf("cet").Int64())
 
 	feesCollected := appState.AuthData.CollectedFees
-	require.Equal(t, "100cet", feesCollected.String())
+	require.Equal(t, sdk.NewInt(100), feesCollected.AmountOf("cet"))
+
+}
+
+func TestExportValidatorsUpdateRestore(t *testing.T) {
+	sk, pk, addr := testutil.KeyPubAddr()
+	amount := cetToken().GetTotalSupply()
+
+	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
+
+	// init app1
+	app1 := initApp(func(genState *GenesisState) {
+		addGenesisAccounts(genState, acc)
+		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1e8)
+	})
+
+	app1.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
+	ctx := app1.NewContext(false, abci.Header{Height: 1})
+
+	// create validator & self delegate minSelfDelegate CET
+	valAddr := sdk.ValAddress(addr)
+	minSelfDelegate := app1.stakingXKeeper.GetParams(ctx).MinSelfDelegation
+	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, pk).
+		MinSelfDelegation(minSelfDelegate.Int64()).SelfDelegation(minSelfDelegate.Int64()).
+		Build()
+	createValTx := newStdTxBuilder().
+		Msgs(createValMsg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, sk).Build()
+	createValResult := app1.Deliver(createValTx)
+	require.Equal(t, sdk.CodeOK, createValResult.Code)
+
+	app1.EndBlock(abci.RequestEndBlock{Height: 1})
+	app1.Commit()
+
+	//next block
+	app1.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: app1.LastBlockHeight() + 1}})
+	ctx = app1.NewContext(false, abci.Header{Height: app1.LastBlockHeight() + 1})
+
+	exportState1 := app1.exportGenesisState(ctx)
+
+	// restore & reexport
+	app2 := initAppWithValidators(exportState1)
+	ctx2 := app2.NewContext(false, abci.Header{Height: app2.LastBlockHeight()})
+	exportState2 := app2.exportGenesisState(ctx2)
+
+	// check
+	json1, err1 := codec.MarshalJSONIndent(app1.cdc, exportState1)
+	json2, err2 := codec.MarshalJSONIndent(app2.cdc, exportState2)
+	require.Nil(t, err1)
+	require.Nil(t, err2)
+	require.Equal(t, json1, json2)
+
 }

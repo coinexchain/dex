@@ -117,6 +117,30 @@ func TestRouter(t *testing.T) {
 	require.Nil(t, app.Router().Route("bank"))
 }
 
+func TestGenTx(t *testing.T) {
+
+	_, _, toAddr := testutil.KeyPubAddr()
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	msg := bankx.NewMsgSend(fromAddr, toAddr, dex.NewCetCoins(1000000000), time.Now().Unix()+10000)
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	cdc := MakeCodec()
+	app := initApp(func(state *GenesisState) {
+		addGenesisAccounts(state, acc0)
+		txbz, _ := cdc.MarshalJSON(tx)
+		state.GenTxs = append(state.GenTxs, txbz)
+
+	})
+
+	ctx := app.NewContext(false, abci.Header{Height: 1})
+	acc1 := app.accountKeeper.GetAccount(ctx, toAddr)
+	require.NotNil(t, acc1)
+}
+
 func TestSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
