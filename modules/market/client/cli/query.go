@@ -2,11 +2,11 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -17,11 +17,13 @@ import (
 
 func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "trading-pair <pair>",
+		Use:   "trading-pair",
 		Short: "query trading-pair info in blockchain",
-		Long: "query trading-pair info in blockchain. \n" +
-			"Example : " +
-			"cetcli query market trading-pair eth/cet --trust-node=true --chain-id=coinexdex",
+		Long: `query trading-pair info in blockchain. 
+
+Example : 
+	cetcli query market trading-pair 
+	eth/cet --trust-node=true --chain-id=coinexdex`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -49,20 +51,21 @@ func QueryWaitCancelMarkets(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "wait-cancel-trading-pair",
 		Short: "Query wait cancel trading-pair info in special time",
-		Long: "Query wait cancel trading-pair info in special time \n" +
-			"Example:" +
-			"cetcli query market " +
-			"wait-cancel-trading-pair --time=10000 " +
-			"--trust-node=true --chain-id=coinexdex",
+		Long: `Query wait cancel trading-pair info in special time.
+
+Example:
+	cetcli query market 
+	wait-cancel-trading-pair --time=10000 
+	--trust-node=true --chain-id=coinexdex`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			time := viper.GetInt64(FlagTime)
-			if time <= 0 {
+			time, err := strconv.Atoi(args[0])
+			if time <= 0 || err != nil {
 				return errors.Errorf("Invalid unix time")
 			}
 
-			bz, err := cdc.MarshalJSON(market.QueryCancelMarkets{Time: time})
+			bz, err := cdc.MarshalJSON(market.QueryCancelMarkets{Time: int64(time)})
 			if err != nil {
 				return err
 			}
@@ -83,8 +86,6 @@ func QueryWaitCancelMarkets(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64(FlagTime, -1, "The query block height")
-	cmd.MarkFlagRequired(FlagTime)
 	return cmd
 }
 
@@ -92,14 +93,21 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "order-info",
 		Short: "Query order info in blockchain",
-		Long: "Query order info in blockchain. \n" +
-			"Example : " +
-			"cetcli query market order-info " +
-			"--order-id=[orderID] --trust-node=true --chain-id=coinexdex",
+		Long: `Query order info in blockchain. 
+
+Example :
+	cetcli query market order-info [orderID] 
+	--trust-node=true --chain-id=coinexdex`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(viper.GetString(FlagOrderID)))
+			orderID := args[0]
+			if len(strings.Split(orderID, market.SymbolSeparator)) != 2 {
+				return fmt.Errorf("order-id is incorrect")
+			}
+
+			bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(orderID))
 			if err != nil {
 				return err
 			}
@@ -121,15 +129,18 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 
 func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "user-order-list [userAddress]",
+		Use:   "order-list [userAddress]",
 		Short: "Query user order list in blockchain",
-		Long: "Query user order list in blockchain. \n" +
-			"Example:" +
-			"cetcli query market user-order-list --address=[userAddress] --trust-node=true --chain-id=coinexdex",
+		Long: `Query user order list in blockchain. 
+
+Example:
+	cetcli query market order-list [userAddress] 
+	--trust-node=true --chain-id=coinexdex`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			queryAddr := viper.GetString(FlagUserAddr)
+			queryAddr := args[0]
 			if _, err := sdk.AccAddressFromBech32(queryAddr); err != nil {
 				return err
 			}
@@ -150,7 +161,5 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String(FlagUserAddr, "", "The address of the user to be queried")
-	cmd.MarkFlagRequired(FlagUserAddr)
 	return cmd
 }

@@ -30,8 +30,8 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 	mktQueryCmd.AddCommand(client.GetCommands(
 		cli.QueryMarketCmd(mc.cdc),
 		cli.QueryOrderCmd(mc.cdc),
-		cli.QueryUserOrderList(mc.cdc),
-		cli.QueryWaitCancelMarkets(mc.cdc))...)
+		cli.QueryUserOrderList(mc.cdc))...)
+	// cli.QueryWaitCancelMarkets(mc.cdc))...)
 	return mktQueryCmd
 }
 

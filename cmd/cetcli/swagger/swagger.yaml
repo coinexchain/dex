@@ -515,7 +515,7 @@ paths:
         - application/json
       produces:
         - application/json
-      operationId: createMarket
+      operationId: createTradingPair
       parameters:
         - in: body
           name: info
@@ -544,7 +544,7 @@ paths:
         - Market
       produces:
         - application/json
-      operationId: getMarket
+      operationId: getTradingPair
       parameters:
         - in: path
           name: stock
@@ -656,7 +656,7 @@ paths:
         - application/json
       produces:
         - application/json
-      operationId: cancelMarket
+      operationId: cancelTradingPair
       parameters:
         - in: body
           name: info

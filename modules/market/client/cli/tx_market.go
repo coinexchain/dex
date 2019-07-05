@@ -31,14 +31,15 @@ var createMarketFlags = []string{
 
 func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "trading-pair ",
+		Use:   "create-trading-pair ",
 		Short: "generate tx to create trading pair",
-		Long: "generate a tx and sign it to create trading pair in dex blockchain. \n" +
-			"Example : " +
-			" cetcli tx market trading-pair " +
-			"--from bob --chain-id=coinexdex " +
-			"--stock=eth --money=cet " +
-			"--price-precision=8 --gas 20000 --fees=1000cet ",
+		Long: `generate a tx and sign it to create trading pair in dex blockchain. 
+
+Example : 
+	cetcli tx market create-trading-pair 
+	--from bob --chain-id=coinexdex 
+	--stock=eth --money=cet 
+	--price-precision=8 --gas 20000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -76,7 +77,7 @@ func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 	cmd.Flags().String(FlagStock, "", "The exist token symbol as stock")
 	cmd.Flags().String(FlagMoney, "", "The exist token symbol as money")
-	cmd.Flags().Int(FlagPricePrecision, -1, "The trading market price precision")
+	cmd.Flags().Int(FlagPricePrecision, -1, "The trading-pair price precision")
 
 	for _, flag := range createMarketFlags {
 		cmd.MarkFlagRequired(flag)
@@ -122,11 +123,12 @@ func CancelMarket(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cancel-trading-pair",
 		Short: "cancel trading-pair in blockchain",
-		Long: "cancel trading-pair in blockchain at least a week from now. \n " +
-			"Example : " +
-			"cetcli tx market cancel-trading-pair " +
-			"--time=1000000 --symbol=etc/cet --from=bob --chain-id=coinexdex " +
-			"--gas=1000000 --fees=1000cet",
+		Long: `cancel trading-pair in blockchain at least a week from now. 
+
+Example 
+	cetcli tx market cancel-trading-pair 
+	--time=1000000 --trading-pair=etc/cet --from=bob --chain-id=coinexdex 
+	--gas=1000000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
@@ -146,7 +148,7 @@ func CancelMarket(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String(FlagSymbol, "", "The market symbol")
+	cmd.Flags().String(FlagSymbol, "", "The market trading-pair")
 	cmd.Flags().Int64(FlagTime, -1, "The block height")
 	cmd.MarkFlagRequired(FlagSymbol)
 	cmd.MarkFlagRequired(FlagTime)

@@ -21,13 +21,12 @@ import (
 )
 
 const (
-	FlagSymbol    = "symbol"
+	FlagSymbol    = "trading-pair"
 	FlagOrderType = "order-type"
 	FlagPrice     = "price"
 	FlagQuantity  = "quantity"
 	FlagSide      = "side"
 	FlagOrderID   = "order-id"
-	FlagUserAddr  = "address"
 	FlagBlocks    = "blocks"
 	FlagTime      = "time"
 )
@@ -45,12 +44,13 @@ func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create-ioc-order",
 		Short: "Create an IOC order and sign tx",
-		Long: "Create an IOC order and sign tx, broadcast to nodes. \n" +
-			"Example:" +
-			"$ cetcli tx market create-ioc-order --symbol=btc/cet " +
-			"--order-type=2 --price=520 --quantity=10000000 " +
-			"--side=1 --price-precision=10 --from=bob " +
-			"--chain-id=coinexdex --gas=10000 --fees=1000cet",
+		Long: `Create an IOC order and sign tx, broadcast to nodes.
+
+Example: 
+	 cetcli tx market create-ioc-order --trading-pair=btc/cet 
+	--order-type=2 --price=520 --quantity=10000000 
+	--side=1 --price-precision=10 --from=bob 
+	--chain-id=coinexdex --gas=10000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, false)
 		},
@@ -64,19 +64,20 @@ func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create-gte-order",
 		Short: "Create an GTE order and sign tx",
-		Long: "Create an GTE order and sign tx, broadcast to nodes. \n" +
-			"Example:" +
-			"$ cetcli tx market create-gte-order --symbol=btc/cet " +
-			"--order-type=2 --price=520 --quantity=10000000 --side=1 " +
-			"--price-precision=10 --blocks=<100000> --from=bob --chain-id=coinexdex " +
-			"--gas=10000 --fees=1000cet",
+		Long: `Create an GTE order and sign tx, broadcast to nodes. 
+
+Example:
+	cetcli tx market create-gte-order --trading-pair=btc/cet 
+	--order-type=2 --price=520 --quantity=10000000 --side=1 
+	--price-precision=10 --blocks=<100000> --from=bob --chain-id=coinexdex 
+	--gas=10000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, true)
 		},
 	}
 
 	markCreateOrderFlags(cmd)
-	cmd.Flags().Int(FlagBlocks, -1, "the gte order will exist at least blocks in blockChain")
+	cmd.Flags().Int(FlagBlocks, 10000, "the gte order will exist at least blocks in blockChain")
 
 	return cmd
 }
@@ -169,10 +170,11 @@ func CancelOrder(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cancel-order",
 		Short: "cancel order in blockchain",
-		Long: "cancel order in blockchain. \n" +
-			"Examples:" +
-			"cetcli tx market cancel-order --order-id=[id] " +
-			"--trust-node=true --from=bob --chain-id=coinexdex",
+		Long: `cancel order in blockchain. 
+
+Examples:
+	cetcli tx market cancel-order --order-id=[id] 
+	--trust-node=true --from=bob --chain-id=coinexdex`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
