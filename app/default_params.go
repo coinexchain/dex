@@ -8,6 +8,11 @@ import (
 
 const Day = 24 * time.Hour
 
+// auth
+const (
+	DefaultMaxMemoCharacters uint64 = 512
+)
+
 // staking
 const (
 	// DefaultUnbondingTime reflects three weeks in seconds as the default
@@ -24,14 +29,9 @@ const (
 	DefaultSignedBlocksWindow int64 = 10000
 )
 
-//consensus
+// consensus
 const (
 	DefaultEvidenceMaxAge int64 = 1000000
-)
-
-//auth
-const (
-	DefaultMaxMemoCharacters uint64 = 512
 )
 
 var (

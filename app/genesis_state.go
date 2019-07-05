@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/coinexchain/dex/modules/incentive"
 	"sort"
 	"time"
 
@@ -23,6 +22,7 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
@@ -67,6 +67,11 @@ func NewDefaultGenesisState() GenesisState {
 		GenTxs:       nil,
 	}
 	// TODO: create staking.GenesisState & gov.GenesisState & crisis.GenesisState from scratch
+	adjustDefaultParams(&gs)
+	return gs
+}
+
+func adjustDefaultParams(gs *GenesisState) {
 	gs.AuthData.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
 	gs.StakingData.Params.UnbondingTime = DefaultUnbondingTime
 	gs.StakingData.Params.MaxValidators = DefaultMaxValidators
@@ -87,7 +92,6 @@ func NewDefaultGenesisState() GenesisState {
 	}
 	gs.CrisisData.ConstantFee.Denom = dex.DefaultBondDenom
 	gs.CrisisData.ConstantFee.Amount = DefaultCrisisConstantFee
-	return gs
 }
 
 func NewGenesisState(
