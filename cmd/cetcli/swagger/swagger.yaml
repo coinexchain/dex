@@ -2498,9 +2498,9 @@ paths:
     get:
       tags:
         - Asset
-      summary: query forbidden addr
+      summary: query forbidden addresses
       description: Get forbidden addresses with provided `symbol`
-      operationId: getForbiddenAddr
+      operationId: getForbiddenAddresses
       produces:
         - application/json
       parameters:
@@ -2525,8 +2525,8 @@ paths:
       tags:
         - Asset
       summary: Forbid address
-      description: Add forbidden address
-      operationId: addForbiddenAddr
+      description: Add forbidden addresses
+      operationId: forbidAddr
       consumes:
         - application/json
       produces:
@@ -2539,8 +2539,8 @@ paths:
           type: string
           x-example: abc
         - in: body
-          name: forbiddenAddr
-          description: forbidden addr
+          name: addresses
+          description: forbidden addresses
           required: true
           schema:
             $ref: "#/definitions/AddrList"
@@ -2558,8 +2558,8 @@ paths:
       tags:
         - Asset
       summary: UnForbid address
-      description: Remove forbidden address
-      operationId: removeForbiddenAddr
+      description: Remove forbidden addresses
+      operationId: unForbidAddr
       consumes:
         - application/json
       produces:
@@ -2572,8 +2572,8 @@ paths:
           type: string
           x-example: abc
         - in: body
-          name: forbiddenAddr
-          description: forbidden addr
+          name: addresses
+          description: un forbidden addresses
           required: true
           schema:
             $ref: "#/definitions/AddrList"

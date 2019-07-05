@@ -7,19 +7,19 @@ import (
 
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
-	Params     Params   `json:"params"`
-	Tokens     []Token  `json:"tokens"`
-	Whitelist  []string `json:"whitelist"`
-	ForbidAddr []string `json:"forbid_addr"`
+	Params             Params   `json:"params"`
+	Tokens             []Token  `json:"tokens"`
+	Whitelist          []string `json:"whitelist"`
+	ForbiddenAddresses []string `json:"forbidden_addresses"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params Params, tokens []Token, whitelist []string, forbidAddr []string) GenesisState {
+func NewGenesisState(params Params, tokens []Token, whitelist []string, forbiddenAddresses []string) GenesisState {
 	return GenesisState{
-		Params:     params,
-		Tokens:     tokens,
-		Whitelist:  whitelist,
-		ForbidAddr: forbidAddr,
+		Params:             params,
+		Tokens:             tokens,
+		Whitelist:          whitelist,
+		ForbiddenAddresses: forbiddenAddresses,
 	}
 }
 
@@ -38,12 +38,12 @@ func InitGenesis(ctx sdk.Context, keeper BaseKeeper, data GenesisState) {
 		}
 	}
 	for _, addr := range data.Whitelist {
-		if err := keeper.setAddrKey(ctx, WhitelistKeyPrefix, addr); err != nil {
+		if err := keeper.importAddrKey(ctx, WhitelistKeyPrefix, addr); err != nil {
 			panic(err)
 		}
 	}
-	for _, addr := range data.ForbidAddr {
-		if err := keeper.setAddrKey(ctx, ForbidAddrKeyPrefix, addr); err != nil {
+	for _, addr := range data.ForbiddenAddresses {
+		if err := keeper.importAddrKey(ctx, ForbiddenAddrKeyPrefix, addr); err != nil {
 			panic(err)
 		}
 	}
@@ -54,8 +54,8 @@ func ExportGenesis(ctx sdk.Context, keeper BaseKeeper) GenesisState {
 	return NewGenesisState(
 		keeper.GetParams(ctx),
 		keeper.GetAllTokens(ctx),
-		keeper.GetAllAddrKeys(ctx, WhitelistKeyPrefix),
-		keeper.GetAllAddrKeys(ctx, ForbidAddrKeyPrefix))
+		keeper.ExportAddrKeys(ctx, WhitelistKeyPrefix),
+		keeper.ExportAddrKeys(ctx, ForbiddenAddrKeyPrefix))
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an

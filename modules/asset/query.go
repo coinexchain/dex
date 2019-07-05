@@ -119,7 +119,7 @@ func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeepe
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetForbiddenList(ctx, params.Symbol))
+	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetForbiddenAddresses(ctx, params.Symbol))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

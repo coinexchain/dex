@@ -430,9 +430,9 @@ func (msg MsgRemoveTokenWhitelist) GetSigners() []sdk.AccAddress {
 
 // MsgForbidAddr
 type MsgForbidAddr struct {
-	Symbol     string           `json:"symbol"`
-	OwnerAddr  sdk.AccAddress   `json:"owner_address"`
-	ForbidAddr []sdk.AccAddress `json:"forbid_addr"`
+	Symbol    string           `json:"symbol"`
+	OwnerAddr sdk.AccAddress   `json:"owner_address"`
+	Addresses []sdk.AccAddress `json:"addresses"`
 }
 
 var _ sdk.Msg = MsgForbidAddr{}
@@ -463,7 +463,7 @@ func (msg MsgForbidAddr) ValidateBasic() sdk.Error {
 	if msg.OwnerAddr.Empty() {
 		return ErrorInvalidTokenOwner("forbid address need a valid owner addr")
 	}
-	if len(msg.ForbidAddr) == 0 {
+	if len(msg.Addresses) == 0 {
 		return ErrorInvalidAddress("forbid nil address")
 	}
 	return nil
@@ -481,9 +481,9 @@ func (msg MsgForbidAddr) GetSigners() []sdk.AccAddress {
 
 // MsgUnForbidAddr
 type MsgUnForbidAddr struct {
-	Symbol       string           `json:"symbol"`
-	OwnerAddr    sdk.AccAddress   `json:"owner_addr"`
-	UnForbidAddr []sdk.AccAddress `json:"unforbid_addr"`
+	Symbol    string           `json:"symbol"`
+	OwnerAddr sdk.AccAddress   `json:"owner_addr"`
+	Addresses []sdk.AccAddress `json:"addresses"`
 }
 
 var _ sdk.Msg = MsgUnForbidAddr{}
@@ -514,7 +514,7 @@ func (msg MsgUnForbidAddr) ValidateBasic() sdk.Error {
 	if msg.OwnerAddr.Empty() {
 		return ErrorInvalidTokenOwner("unforbid address need a valid owner addr")
 	}
-	if len(msg.UnForbidAddr) == 0 {
+	if len(msg.Addresses) == 0 {
 		return ErrorInvalidAddress("unforbid nil address")
 	}
 	return nil

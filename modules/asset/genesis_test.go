@@ -75,7 +75,7 @@ func TestGenesis(t *testing.T) {
 	state.Whitelist = append(state.Whitelist, whitelist...)
 
 	forbiddenList := []string{"abc:coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g"}
-	state.ForbidAddr = append(state.ForbidAddr, forbiddenList...)
+	state.ForbiddenAddresses = append(state.ForbiddenAddresses, forbiddenList...)
 
 	require.NoError(t, state.Validate())
 	InitGenesis(input.ctx, input.tk, state)
@@ -84,7 +84,7 @@ func TestGenesis(t *testing.T) {
 	require.Equal(t, 1, len(res))
 	require.Equal(t, "coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke", res[0].String())
 
-	res = input.tk.GetForbiddenList(input.ctx, "abc")
+	res = input.tk.GetForbiddenAddresses(input.ctx, "abc")
 	require.Equal(t, 1, len(res))
 	require.Equal(t, "coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g", res[0].String())
 
@@ -92,5 +92,5 @@ func TestGenesis(t *testing.T) {
 	require.Equal(t, types.NewCetCoins(IssueTokenFee), export.Params.IssueTokenFee)
 	require.Equal(t, 2, len(export.Tokens))
 	require.Equal(t, whitelist, export.Whitelist)
-	require.Equal(t, forbiddenList, export.ForbidAddr)
+	require.Equal(t, forbiddenList, export.ForbiddenAddresses)
 }

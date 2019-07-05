@@ -227,12 +227,12 @@ func handleMsgForbidAddr(ctx sdk.Context, keeper Keeper, msg MsgForbidAddr) (res
 		return err.Result()
 	}
 
-	if err := keeper.ForbidAddress(ctx, msg.Symbol, msg.OwnerAddr, msg.ForbidAddr); err != nil {
+	if err := keeper.ForbidAddress(ctx, msg.Symbol, msg.OwnerAddr, msg.Addresses); err != nil {
 		return err.Result()
 	}
 
 	var str string
-	for _, addr := range msg.ForbidAddr {
+	for _, addr := range msg.Addresses {
 		str = str + addr.String() + ","
 	}
 
@@ -251,12 +251,12 @@ func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg MsgUnForbidAddr) 
 		return err.Result()
 	}
 
-	if err := keeper.UnForbidAddress(ctx, msg.Symbol, msg.OwnerAddr, msg.UnForbidAddr); err != nil {
+	if err := keeper.UnForbidAddress(ctx, msg.Symbol, msg.OwnerAddr, msg.Addresses); err != nil {
 		return err.Result()
 	}
 
 	var str string
-	for _, addr := range msg.UnForbidAddr {
+	for _, addr := range msg.Addresses {
 		str = str + addr.String() + ","
 	}
 

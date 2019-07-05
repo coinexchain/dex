@@ -166,12 +166,12 @@ func Test_queryForbiddenAddr(t *testing.T) {
 	require.Equal(t, []byte("[]"), res)
 
 	//case 2: base-case ok
-	err = input.tk.addForbidAddress(input.ctx, symbol, mock)
+	err = input.tk.addForbiddenAddress(input.ctx, symbol, mock)
 	require.NoError(t, err)
 	_, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 
-	err = input.tk.removeForbidAddress(input.ctx, symbol, mock)
+	err = input.tk.removeForbiddenAddress(input.ctx, symbol, mock)
 	require.NoError(t, err)
 	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)

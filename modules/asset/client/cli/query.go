@@ -118,14 +118,14 @@ $ cetcli query asset whitelist abc
 // GetForbiddenAddrCmd returns forbidden addr
 func GetForbiddenAddrCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "forbid-addr [symbol]",
+		Use:   "forbidden-addresses [symbol]",
 		Short: "Query forbidden addresses",
 		Args:  cobra.ExactArgs(1),
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Query forbidden addresses for a token. You can find it by token symbol".
 
 Example:
-$ cetcli query asset forbid-addr abc
+$ cetcli query asset forbidden-addresses abc
 `,
 			),
 		),

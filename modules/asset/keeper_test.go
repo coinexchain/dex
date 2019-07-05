@@ -590,9 +590,9 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 	token := input.tk.GetToken(input.ctx, symbol)
 
 	forbidMsg := NewMsgForbidAddr(symbol, tAccAddr, mock)
-	err = input.tk.ForbidAddress(input.ctx, forbidMsg.Symbol, forbidMsg.OwnerAddr, forbidMsg.ForbidAddr)
+	err = input.tk.ForbidAddress(input.ctx, forbidMsg.Symbol, forbidMsg.OwnerAddr, forbidMsg.Addresses)
 	require.NoError(t, err)
-	forbidden := input.tk.GetForbiddenList(input.ctx, symbol)
+	forbidden := input.tk.GetForbiddenAddresses(input.ctx, symbol)
 	for _, addr := range forbidden {
 		require.Contains(t, mock, addr)
 	}
@@ -610,7 +610,7 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 	require.NoError(t, err)
 
 	forbidMsg = NewMsgForbidAddr(symbol, tAccAddr, mock)
-	err = input.tk.ForbidAddress(input.ctx, forbidMsg.Symbol, forbidMsg.OwnerAddr, forbidMsg.ForbidAddr)
+	err = input.tk.ForbidAddress(input.ctx, forbidMsg.Symbol, forbidMsg.OwnerAddr, forbidMsg.Addresses)
 	require.Error(t, err)
 
 	// remove token
@@ -632,18 +632,18 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	token := input.tk.GetToken(input.ctx, symbol)
 
 	forbidMsg := NewMsgForbidAddr(symbol, tAccAddr, mock)
-	err = input.tk.ForbidAddress(input.ctx, forbidMsg.Symbol, forbidMsg.OwnerAddr, forbidMsg.ForbidAddr)
+	err = input.tk.ForbidAddress(input.ctx, forbidMsg.Symbol, forbidMsg.OwnerAddr, forbidMsg.Addresses)
 	require.NoError(t, err)
-	forbidden := input.tk.GetForbiddenList(input.ctx, symbol)
+	forbidden := input.tk.GetForbiddenAddresses(input.ctx, symbol)
 	for _, addr := range forbidden {
 		require.Contains(t, mock, addr)
 	}
 	require.Equal(t, len(mock), len(forbidden))
 
 	unForbidMsg := NewMsgUnForbidAddr(symbol, tAccAddr, []sdk.AccAddress{mock[0]})
-	err = input.tk.UnForbidAddress(input.ctx, unForbidMsg.Symbol, unForbidMsg.OwnerAddr, unForbidMsg.UnForbidAddr)
+	err = input.tk.UnForbidAddress(input.ctx, unForbidMsg.Symbol, unForbidMsg.OwnerAddr, unForbidMsg.Addresses)
 	require.NoError(t, err)
-	forbidden = input.tk.GetForbiddenList(input.ctx, symbol)
+	forbidden = input.tk.GetForbiddenAddresses(input.ctx, symbol)
 	require.Equal(t, len(mock)-1, len(forbidden))
 	require.NotContains(t, forbidden, mock[0])
 
@@ -659,7 +659,7 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	require.NoError(t, err)
 
 	unForbidMsg = NewMsgUnForbidAddr(symbol, tAccAddr, mock)
-	err = input.tk.UnForbidAddress(input.ctx, unForbidMsg.Symbol, unForbidMsg.OwnerAddr, unForbidMsg.UnForbidAddr)
+	err = input.tk.UnForbidAddress(input.ctx, unForbidMsg.Symbol, unForbidMsg.OwnerAddr, unForbidMsg.Addresses)
 	require.Error(t, err)
 
 	// remove token

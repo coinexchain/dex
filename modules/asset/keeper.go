@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	SeparateKeyPrefix   = []byte{0x3A}
-	TokenStoreKeyPrefix = []byte{0x01}
-	WhitelistKeyPrefix  = []byte{0x02}
-	ForbidAddrKeyPrefix = []byte{0x03}
+	SeparateKeyPrefix      = []byte{0x3A}
+	TokenStoreKeyPrefix    = []byte{0x01}
+	WhitelistKeyPrefix     = []byte{0x02}
+	ForbiddenAddrKeyPrefix = []byte{0x03}
 )
 
 // -----------------------------------------------------------------------------
@@ -38,8 +38,8 @@ type Keeper interface {
 	UnForbidToken(ctx sdk.Context, symbol string, owner sdk.AccAddress) sdk.Error
 	AddTokenWhitelist(ctx sdk.Context, symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) sdk.Error
 	RemoveTokenWhitelist(ctx sdk.Context, symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) sdk.Error
-	ForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, forbidAddr []sdk.AccAddress) sdk.Error
-	UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, unForbidAddr []sdk.AccAddress) sdk.Error
+	ForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
+	UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
 	ModifyTokenURL(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string) sdk.Error
 	ModifyTokenDescription(ctx sdk.Context, symbol string, owner sdk.AccAddress, description string) sdk.Error
 
@@ -284,7 +284,7 @@ func (keeper BaseKeeper) RemoveTokenWhitelist(ctx sdk.Context, symbol string, ow
 }
 
 //ForbidAddress - add forbidden addresses
-func (keeper BaseKeeper) ForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, forbidAddr []sdk.AccAddress) sdk.Error {
+func (keeper BaseKeeper) ForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
 		return err
@@ -293,14 +293,14 @@ func (keeper BaseKeeper) ForbidAddress(ctx sdk.Context, symbol string, owner sdk
 	if !token.GetAddrForbiddable() {
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid address", symbol))
 	}
-	if err = keeper.addForbidAddress(ctx, symbol, forbidAddr); err != nil {
+	if err = keeper.addForbiddenAddress(ctx, symbol, addresses); err != nil {
 		return ErrorInvalidAddress(fmt.Sprintf("forbid addr is invalid"))
 	}
 	return nil
 }
 
 //UnForbidAddress - remove forbidden addresses
-func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, unForbidAddr []sdk.AccAddress) sdk.Error {
+func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
 		return err
@@ -309,7 +309,7 @@ func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner s
 	if !token.GetAddrForbiddable() {
 		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid address", symbol))
 	}
-	if err = keeper.removeForbidAddress(ctx, symbol, unForbidAddr); err != nil {
+	if err = keeper.removeForbiddenAddress(ctx, symbol, addresses); err != nil {
 		return ErrorInvalidAddress(fmt.Sprintf("unforbid addr is invalid"))
 	}
 	return nil
@@ -392,19 +392,19 @@ func (keeper BaseKeeper) removeWhitelist(ctx sdk.Context, symbol string, whiteli
 	return nil
 }
 
-func (keeper BaseKeeper) addForbidAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
+func (keeper BaseKeeper) addForbiddenAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.key)
 	for _, addr := range addresses {
-		store.Set(PrefixAddrStoreKey(ForbidAddrKeyPrefix, symbol, addr), []byte{})
+		store.Set(PrefixAddrStoreKey(ForbiddenAddrKeyPrefix, symbol, addr), []byte{})
 	}
 
 	return nil
 }
 
-func (keeper BaseKeeper) removeForbidAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
+func (keeper BaseKeeper) removeForbiddenAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.key)
 	for _, addr := range addresses {
-		store.Delete(PrefixAddrStoreKey(ForbidAddrKeyPrefix, symbol, addr))
+		store.Delete(PrefixAddrStoreKey(ForbiddenAddrKeyPrefix, symbol, addr))
 	}
 
 	return nil
@@ -475,7 +475,7 @@ func (keeper BaseTokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol s
 		return true
 	}
 
-	if keeper.hasAddrKey(ctx, ForbidAddrKeyPrefix, symbol, addr) {
+	if keeper.hasAddrKey(ctx, ForbiddenAddrKeyPrefix, symbol, addr) {
 		return true
 	}
 
@@ -500,7 +500,7 @@ func (keeper BaseTokenKeeper) hasAddrKey(ctx sdk.Context, prefix []byte, symbol 
 	key := PrefixAddrStoreKey(prefix, symbol, addr)
 	return store.Has(key)
 }
-func (keeper BaseTokenKeeper) setAddrKey(ctx sdk.Context, prefix []byte, addr string) error {
+func (keeper BaseTokenKeeper) importAddrKey(ctx sdk.Context, prefix []byte, addr string) error {
 	store := ctx.KVStore(keeper.key)
 	index := strings.Index(addr, string(SeparateKeyPrefix))
 
@@ -521,8 +521,8 @@ type ViewKeeper interface {
 	GetToken(ctx sdk.Context, symbol string) Token
 	GetAllTokens(ctx sdk.Context) []Token
 	GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddress
-	GetForbiddenList(ctx sdk.Context, symbol string) []sdk.AccAddress
-	GetAllAddrKeys(ctx sdk.Context, prefix []byte) []string
+	GetForbiddenAddresses(ctx sdk.Context, symbol string) []sdk.AccAddress
+	ExportAddrKeys(ctx sdk.Context, prefix []byte) []string
 	GetReservedSymbols() []string
 }
 
@@ -580,13 +580,13 @@ func (keeper BaseViewKeeper) GetWhitelist(ctx sdk.Context, symbol string) []sdk.
 	return whitelist
 }
 
-// GetForbidAddr - returns all forbidden addr list.
-func (keeper BaseViewKeeper) GetForbiddenList(ctx sdk.Context, symbol string) []sdk.AccAddress {
+// GetForbiddenAddresses - returns all forbidden addr list.
+func (keeper BaseViewKeeper) GetForbiddenAddresses(ctx sdk.Context, symbol string) []sdk.AccAddress {
 	addresses := make([]sdk.AccAddress, 0)
-	keyPrefix := append(append(ForbidAddrKeyPrefix, symbol...), SeparateKeyPrefix...)
+	keyPrefix := append(append(ForbiddenAddrKeyPrefix, symbol...), SeparateKeyPrefix...)
 
 	keeper.iterateAddrKey(ctx, keyPrefix, func(key []byte) (stop bool) {
-		addr := key[len(ForbidAddrKeyPrefix)+len(symbol)+len(SeparateKeyPrefix):]
+		addr := key[len(ForbiddenAddrKeyPrefix)+len(symbol)+len(SeparateKeyPrefix):]
 		addresses = append(addresses, addr)
 		return false
 	})
@@ -594,8 +594,8 @@ func (keeper BaseViewKeeper) GetForbiddenList(ctx sdk.Context, symbol string) []
 	return addresses
 }
 
-// GetAllAddrKeys return []KEY symbol: | addr . get all whitelists or forbidden addresses string to genesis.json
-func (keeper BaseViewKeeper) GetAllAddrKeys(ctx sdk.Context, prefix []byte) []string {
+// ExportAddrKeys return []KEY symbol: | addr . get all whitelists or forbidden addresses string to genesis.json
+func (keeper BaseViewKeeper) ExportAddrKeys(ctx sdk.Context, prefix []byte) []string {
 	res := make([]string, 0)
 	bech32PrefixAccAddr := sdk.GetConfig().GetBech32AccountAddrPrefix()
 
