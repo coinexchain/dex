@@ -10,15 +10,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Producer struct {
-	topicWrites map[string]*kafka.Writer
-	brokers     []string
-}
-
 const (
 	brokers = "brokers"
 	topics  = "topics"
 )
+
+type MsgSender interface {
+	SendMsg(topic string, key string, v interface{}) error
+}
+
+type Producer struct {
+	topicWrites map[string]*kafka.Writer
+	brokers     []string
+}
 
 type config struct {
 	Brokers string
@@ -26,7 +30,6 @@ type config struct {
 }
 
 func NewProducer() Producer {
-
 	p := Producer{
 		topicWrites: make(map[string]*kafka.Writer),
 	}
@@ -78,8 +81,4 @@ func (k Producer) SendMsg(topic string, key string, v interface{}) error {
 	}
 
 	return nil
-}
-
-type MsgSender interface {
-	SendMsg(topic string, key string, v interface{}) error
 }
