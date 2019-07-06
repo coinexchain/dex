@@ -44,20 +44,12 @@ func ErrInvalidPricePrecision() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price precision out of range")
 }
 
-func ErrInvalidPrice() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price out of range [0, 9E18]")
+func ErrInvalidPrice(price int64) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price out of range [0, 9E18], actual price :  ", price)
 }
 
 func ErrInvalidTokenIssuer() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidTokenIssuer, "Invalid token issuer")
-}
-
-func ErrSendTokenFailed(errStr string) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeSendTokenFailed, "Send token failed %s", errStr)
-}
-
-func ErrNoStoreEngine() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeNoStoreEngine, "market No store engine")
 }
 
 func ErrInvalidAddress() sdk.Error {

@@ -45,13 +45,16 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
-		sequence, err := cliCtx.GetAccountSequence(creator)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
-			return
+		sequence := req.BaseReq.Sequence
+		if sequence == 0 {
+			sequence, err = cliCtx.GetAccountSequence(creator)
+			if err != nil {
+				rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
+				return
+			}
 		}
-		req.BaseReq.Sequence = sequence
 
+		req.BaseReq.Sequence = sequence
 		msg := market.NewMsgCreateMarketInfo(req.Stock, req.Money, creator, byte(req.PricePrecision))
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

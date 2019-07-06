@@ -98,10 +98,13 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		force = market.IOC
 	}
 
-	sequence, err := cliCtx.GetAccountSequence(creator)
-	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
-		return
+	sequence := req.BaseReq.Sequence
+	if sequence == 0 {
+		sequence, err = cliCtx.GetAccountSequence(creator)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
+			return
+		}
 	}
 
 	msg := market.MsgCreateOrder{
