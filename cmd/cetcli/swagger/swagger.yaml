@@ -417,6 +417,7 @@ paths:
   /bank/accounts/memo:
     post:
       summary: Mark if memo is required to receive coins
+      operationId: setMemoRequired
       tags:
         - Bank
       consumes:
