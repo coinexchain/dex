@@ -29,13 +29,12 @@ func createTestnetGenesisState(cdc *codec.Codec) app.GenesisState {
 
 func adjustParamForTestnet(genState *app.GenesisState) {
 	genState.StakingData.Params.UnbondingTime = time.Second * 60 * 60
-	genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(100e8)
-	genState.GovData.DepositParams.MinDeposit[0].Amount = sdk.NewInt(100e8)
+	genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(10000e8)
+	genState.GovData.DepositParams.MinDeposit[0].Amount = sdk.NewInt(1000e8)
 	genState.GovData.DepositParams.MaxDepositPeriod = 86400 * time.Second
-	genState.BankXData.Param.LockCoinsFee = 1e8
-	genState.AssetData.Params.IssueTokenFee = types.NewCetCoins(10e8)
-	genState.AssetData.Params.IssueRareTokenFee = types.NewCetCoins(100e8)
-	genState.MarketData.Params.CreateMarketFee = 100e8
+	genState.AssetData.Params.IssueTokenFee = types.NewCetCoins(1000e8)
+	genState.AssetData.Params.IssueRareTokenFee = types.NewCetCoins(10000e8)
+	genState.MarketData.Params.CreateMarketFee = 10000e8
 }
 
 func addNonBondableAddresses(stakingxParam *stakingx.Params) {
