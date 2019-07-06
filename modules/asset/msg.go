@@ -482,7 +482,7 @@ func (msg MsgForbidAddr) GetSigners() []sdk.AccAddress {
 // MsgUnForbidAddr
 type MsgUnForbidAddr struct {
 	Symbol    string           `json:"symbol"`
-	OwnerAddr sdk.AccAddress   `json:"owner_addr"`
+	OwnerAddr sdk.AccAddress   `json:"owner_address"`
 	Addresses []sdk.AccAddress `json:"addresses"`
 }
 
