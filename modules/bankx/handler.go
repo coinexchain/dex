@@ -106,7 +106,9 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 	}
 	k.axk.SetAccountX(ctx, ax)
 
-	k.axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
+	if amt != nil {
+		k.axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
+	}
 
 	e := k.msgProducer.SendMsg(Topic, "send_lock_coins", NewMsgSend(fromAddr, toAddr, amt, unlockTime))
 	if e != nil {

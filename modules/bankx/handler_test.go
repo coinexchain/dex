@@ -232,3 +232,31 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 	accX, _ := input.axk.GetAccountX(input.ctx, addr)
 	require.Equal(t, true, accX.MemoRequired)
 }
+func TestUnlockQueueNotAppend(t *testing.T) {
+	input := setupTestInput()
+
+	fromAddr := []byte("fromaddr")
+	toAddr := []byte("toaddr")
+
+	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
+	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
+
+	oneCoins := dex.NewCetCoins(10100000000)
+	_ = fromAccount.SetCoins(oneCoins)
+
+	input.ak.SetAccount(input.ctx, fromAccount)
+	input.axk.SetAccountX(input.ctx, fromAccountX)
+
+	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 10000}
+	input.handle(msgSend)
+
+	//send 0 to toaddr results toAccount to be created
+	//to be consistent with cosmos-sdk
+	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+
+	//when lockedcoin is nil, it should not be inserted to the UnlockedCoinsQueue
+	iter := input.axk.UnlockedCoinsQueueIterator(input.ctx, 10000)
+	require.False(t, iter.Valid())
+
+}
