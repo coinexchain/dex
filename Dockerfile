@@ -4,13 +4,13 @@ LABEL maintainer="dev@coinex.org"
 ADD . $GOPATH/src/github.com/coinexchain/dex
 
 RUN cd $GOPATH/src/github.com/coinexchain/dex && \
-    statik -src=./cmd/cetcli/swagger -dest=./cmd/cetcli -f -m && \
     export GO111MODULE=on && \
     go mod tidy && \
     go mod vendor && \
-    go install -gcflags "all=-N -l" ./... && \
-    cp $GOPATH/bin/cetd /tmp/ && \
-    cp $GOPATH/bin/cetcli /tmp/
+    make statik-swagger && \
+    make build-linux && \
+    cp build/cetd /tmp/ && \
+    cp build/cetcli /tmp/
 
 FROM alpine:3.7
 
