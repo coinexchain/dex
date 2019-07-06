@@ -1,4 +1,4 @@
-FROM matrixport/go-build-env:latest AS build-env
+FROM coinexchain/go-build-env:latest AS build-env
 LABEL maintainer="dev@coinex.org"
 
 ADD . $GOPATH/src/github.com/coinexchain/dex

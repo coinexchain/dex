@@ -5,8 +5,8 @@ set -e
 mkdir func_test
 
 echo "$DPW" | docker login -u "$DUN" --password-stdin
-docker pull matrixport/walle
-docker run --rm -v $(pwd)/func_test:/test:Z matrixport/walle /data/script/cp_data.sh
+docker pull coinexchain/walle
+docker run --rm -v $(pwd)/func_test:/test:Z coinexchain/walle /data/script/cp_data.sh
 
 mkdir func_test/run
 cd func_test
