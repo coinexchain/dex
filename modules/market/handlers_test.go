@@ -163,7 +163,8 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	cetacc.SetCoins(coins)
 	ak.SetAccount(ctx, cetacc)
 	usdtacc := ak.NewAccountWithAddress(ctx, forbidAddr)
-	usdtacc.SetCoins(sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(issueAmount))})
+	usdtacc.SetCoins(sdk.NewCoins(sdk.NewCoin(stock, sdk.NewInt(issueAmount)),
+		sdk.NewCoin(types.CET, sdk.NewInt(issueAmount))))
 	ak.SetAccount(ctx, usdtacc)
 	onlyIssueToken := ak.NewAccountWithAddress(ctx, notHaveCetAddress)
 	onlyIssueToken.SetCoins(types.NewCetCoins(asset.IssueTokenFee))
@@ -624,7 +625,7 @@ func TestChargeOrderFee(t *testing.T) {
 		OrderType:      LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
-		Quantity:       1000000,
+		Quantity:       100000000000,
 		Side:           Buy,
 		TimeInForce:    IOC,
 	}
@@ -644,9 +645,9 @@ func TestChargeOrderFee(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create market should success")
 	stockIsCetOrder := msgOrder
 	stockIsCetOrder.Symbol = types.CET + SymbolSeparator + stock
-	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, types.CET)
-	ret = input.handler(input.ctx, stockIsCetOrder)
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, types.CET)
+	ret = input.handler(input.ctx, stockIsCetOrder)
+	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, types.CET)
 	rate := sdk.NewDec(param.MarketFeeRate).Quo(sdk.NewDec(int64(math.Pow10(MarketFeeRatePrecision))))
 	frozeFee = types.NewCetCoin(sdk.NewDec(stockIsCetOrder.Quantity).Mul(rate).RoundInt64())
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
