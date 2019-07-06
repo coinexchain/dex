@@ -52,8 +52,7 @@ func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) h
 
 		aux, err := clientx.GetAccountX(cliCtx, addr)
 		if err != nil {
-			rest.PostProcessResponse(w, cdc, acc, cliCtx.Indent)
-			return
+			aux = authx.AccountX{}
 		}
 
 		mix := authx.NewAccountMix(acc, aux)
