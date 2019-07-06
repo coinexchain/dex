@@ -81,11 +81,11 @@ func (acc *AccountX) GetAllUnlockedCoinsAtTheTime(time int64) LockedCoins {
 func (acc *AccountX) TransferUnlockedCoins(time int64, ctx sdk.Context, kx AccountXKeeper, keeper auth.AccountKeeper) {
 	account := keeper.GetAccount(ctx, acc.Address)
 	oldCoins := account.GetCoins()
-	var coins = make(sdk.Coins, 1)
+	var coins = sdk.Coins{}
 	var temp LockedCoins
 	for _, c := range acc.LockedCoins {
 		if c.UnlockTime <= time {
-			coins.Add(sdk.Coins{c.Coin})
+			coins = coins.Add(sdk.Coins{c.Coin})
 		} else {
 			temp = append(temp, c)
 		}

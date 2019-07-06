@@ -108,9 +108,9 @@ func TestAccountX_TransferUnlockedCoins(t *testing.T) {
 	_, pub, addr := testutil.KeyPubAddr()
 
 	fromAccount := auth.NewBaseAccountWithAddress(addr)
-	fromAccount.SetPubKey(pub)
+	_ = fromAccount.SetPubKey(pub)
 	oneCoins := sdk.Coins{sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}}
-	fromAccount.SetCoins(oneCoins)
+	_ = fromAccount.SetCoins(oneCoins)
 
 	ctx.ak.SetAccount(ctx.ctx, &fromAccount)
 
@@ -127,7 +127,7 @@ func TestAccountX_TransferUnlockedCoins(t *testing.T) {
 	require.Equal(t, "eth", acc.LockedCoins[0].Coin.Denom)
 	require.Equal(t, "eos", acc.LockedCoins[1].Coin.Denom)
 
-	require.Equal(t, sdk.NewInt(40), ctx.ak.GetAccount(ctx.ctx, addr).GetCoins().AmountOf("bch"))
+	require.Equal(t, int64(40), ctx.ak.GetAccount(ctx.ctx, addr).GetCoins().AmountOf("bch").Int64())
 }
 
 func TestAccountX_AddLockedCoins(t *testing.T) {
