@@ -1,6 +1,8 @@
 package dev
 
 import (
+	"time"
+
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/incentive"
@@ -20,7 +22,20 @@ func createTestnetGenesisState(cdc *codec.Codec) app.GenesisState {
 
 	checkGenState(&genState)
 
+	adjustParamForTestnet(&genState)
+
 	return genState
+}
+
+func adjustParamForTestnet(genState *app.GenesisState) {
+	genState.StakingData.Params.UnbondingTime = time.Second * 60 * 60
+	genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(100e8)
+	genState.GovData.DepositParams.MinDeposit[0].Amount = sdk.NewInt(100e8)
+	genState.GovData.DepositParams.MaxDepositPeriod = 86400 * time.Second
+	genState.BankXData.Param.LockCoinsFee = 1e8
+	genState.AssetData.Params.IssueTokenFee = types.NewCetCoins(10e8)
+	genState.AssetData.Params.IssueRareTokenFee = types.NewCetCoins(100e8)
+	genState.MarketData.Params.CreateMarketFee = 100e8
 }
 
 func addNonBondableAddresses(stakingxParam *stakingx.Params) {

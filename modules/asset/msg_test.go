@@ -796,7 +796,7 @@ func TestMsg_GetSignBytes(t *testing.T) {
 		{
 			"unforbid-addr",
 			NewMsgUnForbidAddr("abc", owner, addrList),
-			`{"type":"asset/MsgUnForbidAddr","value":{"addresses":["coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke","coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h"],"owner_addr":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc"}}`,
+			`{"type":"asset/MsgUnForbidAddr","value":{"addresses":["coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke","coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h"],"owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc"}}`,
 		},
 		{
 			"modify-token-url",
