@@ -101,6 +101,15 @@ func ExecuteOrderList(price sdk.Dec, bidList []OrderForTrade, askList []OrderFor
 func ExecuteOrder(price sdk.Dec, currOrder OrderForTrade, orderList []OrderForTrade) []OrderForTrade {
 	firstNonZeroIndex := 0
 	for _, otherSide := range orderList {
+		if otherSide.GetSide() == BUY {
+			if otherSide.GetPrice().LT(price) {
+				break
+			}
+		} else {
+			if otherSide.GetPrice().GT(price) {
+				break
+			}
+		}
 		minAmount := otherSide.GetAmount()
 		if currOrder.GetAmount() < otherSide.GetAmount() {
 			minAmount = currOrder.GetAmount()

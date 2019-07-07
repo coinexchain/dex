@@ -17,7 +17,7 @@ const (
 	MaxTokenPricePrecision           = 18
 	LimitOrder             OrderType = 2
 	SymbolSeparator                  = "/"
-	ExtraFrozenMoney                 = 100 // 100
+	ExtraFrozenMoney                 = 0 // 100
 )
 
 type OrderType = byte
