@@ -73,7 +73,7 @@ func TestGenesisState_Validate(t *testing.T) {
 func TestDefaultGenesisState(t *testing.T) {
 	state := DefaultGenesisState()
 	require.Equal(t, int64(0), state.State.HeightAdjustment)
-	require.Equal(t, int64(10), state.Param.Plans[0].RewardPerBlock)
+	require.Equal(t, int64(10e8), state.Param.Plans[0].RewardPerBlock)
 }
 
 func TestExportGenesis(t *testing.T) {
