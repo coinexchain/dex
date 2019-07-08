@@ -151,27 +151,26 @@ func calFeatureFeeForExistBlocks(msg MsgCreateOrder, marketParam Params) int64 {
 }
 
 func handleFeeForCreateOrder(ctx sdk.Context, keeper Keeper, amount int64, denom string,
-	sender sdk.AccAddress, frozenFee, featureFee int64) {
+	sender sdk.AccAddress, frozenFee, featureFee int64) sdk.Error {
 	coin := sdk.NewCoin(denom, sdk.NewInt(amount))
 	if err := keeper.bnk.FreezeCoins(ctx, sender, sdk.Coins{coin}); err != nil {
-		// Here must be panic. Because the order has been store in the database, but deduction of failure.
-		panic(err)
+		return err
 	}
 	if frozenFee != 0 {
 		frozenFeeAsCet := sdk.Coins{sdk.NewCoin(types.CET, sdk.NewInt(frozenFee))}
 		if err := keeper.bnk.FreezeCoins(ctx, sender, frozenFeeAsCet); err != nil {
-			// Here must be panic. Because the order has been store in the database, but deduction of failure.
-			panic(err)
+			return err
 		}
 	}
 	if featureFee != 0 {
 		if err := keeper.SubtractFeeAndCollectFee(ctx, sender, types.NewCetCoins(featureFee)); err != nil {
-			panic(err)
+			return err
 		}
 	}
+	return nil
 }
 
-func sendCreateOrderMsg(keeper Keeper, order Order) {
+func sendCreateOrderMsg(keeper Keeper, order Order, featureFee int64) {
 	// send msg to kafka
 	msgInfo := CreateOrderInfo{
 		OrderID:     order.OrderID(),
@@ -185,6 +184,7 @@ func sendCreateOrderMsg(keeper Keeper, order Order) {
 		Height:      order.Height,
 		FrozenFee:   order.FrozenFee,
 		Freeze:      order.Freeze,
+		FeatureFee:  featureFee,
 	}
 	keeper.SendMsg(CreateOrderInfoKey, msgInfo)
 }
@@ -234,8 +234,10 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		return err.Result()
 	}
 
-	handleFeeForCreateOrder(ctx, keeper, amount, denom, order.Sender, frozenFee, featureFee)
-	sendCreateOrderMsg(keeper, order)
+	if err := handleFeeForCreateOrder(ctx, keeper, amount, denom, order.Sender, frozenFee, featureFee); err != nil {
+		return err.Result()
+	}
+	sendCreateOrderMsg(keeper, order, featureFee)
 
 	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
 }
@@ -299,14 +301,14 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 
 	// send msg to kafka
 	msgInfo := CancelOrderInfo{
-		OrderID:      msg.OrderID,
-		DelReason:    CancelOrderByManual,
-		DelHeight:    ctx.BlockHeight(),
-		UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
-		LeftStock:    order.LeftStock,
-		RemainAmount: order.Freeze,
-		DealStock:    order.DealStock,
-		DealMoney:    order.DealMoney,
+		OrderID:        msg.OrderID,
+		DelReason:      CancelOrderByManual,
+		DelHeight:      ctx.BlockHeight(),
+		UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+		LeftStock:      order.LeftStock,
+		RemainAmount:   order.Freeze,
+		DealStock:      order.DealStock,
+		DealMoney:      order.DealMoney,
 	}
 	keeper.SendMsg(CancelOrderInfoKey, msgInfo)
 

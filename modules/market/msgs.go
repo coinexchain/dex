@@ -24,6 +24,7 @@ const (
 	CreateOrderInfoKey = "create_order_info"
 	FillOrderInfoKey   = "fill_order_info"
 	CancelOrderInfoKey = "del_order_info"
+	HeightInfoKey      = "height-info"
 )
 
 // cancel order of reasons
@@ -268,6 +269,7 @@ type CreateOrderInfo struct {
 	Quantity    int64  `json:"quantity"`
 	Side        byte   `json:"side"`
 	TimeInForce int    `json:"time_in_force"`
+	FeatureFee  int64  `json:"feature_fee"`
 	Height      int64  `json:"height"`
 	FrozenFee   int64  `json:"frozen_fee"`
 	Freeze      int64  `json:"freeze"`
@@ -294,9 +296,14 @@ type CancelOrderInfo struct {
 	DelHeight int64  `json:"del_height"`
 
 	// Fields of amount
-	UseFee       int64 `json:"use_fee"`
-	LeftStock    int64 `json:"left_stock"`
-	RemainAmount int64 `json:"remain_amount"`
-	DealStock    int64 `json:"deal_stock"`
-	DealMoney    int64 `json:"deal_money"`
+	UsedCommission int64 `json:"used_commission"`
+	LeftStock      int64 `json:"left_stock"`
+	RemainAmount   int64 `json:"remain_amount"`
+	DealStock      int64 `json:"deal_stock"`
+	DealMoney      int64 `json:"deal_money"`
+}
+
+type NewHeightInfo struct {
+	Height    int64 `json:"height"`
+	TimeStamp int64 `json:"timestamp"`
 }

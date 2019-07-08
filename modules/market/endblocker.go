@@ -263,14 +263,14 @@ func removeExpiredOrder(ctx sdk.Context, keeper Keeper, marketInfoList []MarketI
 			removeOrder(ctx, orderKeeper, keeper.bnk, keeper, order, marketParams.FeeForZeroDeal)
 
 			msgInfo := CancelOrderInfo{
-				OrderID:      order.OrderID(),
-				DelReason:    CancelOrderByGteTimeOut,
-				DelHeight:    ctx.BlockHeight(),
-				UseFee:       order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
-				LeftStock:    order.LeftStock,
-				RemainAmount: order.Freeze,
-				DealStock:    order.DealStock,
-				DealMoney:    order.DealMoney,
+				OrderID:        order.OrderID(),
+				DelReason:      CancelOrderByGteTimeOut,
+				DelHeight:      ctx.BlockHeight(),
+				UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+				LeftStock:      order.LeftStock,
+				RemainAmount:   order.Freeze,
+				DealStock:      order.DealStock,
+				DealMoney:      order.DealMoney,
 			}
 			keeper.SendMsg(CancelOrderInfoKey, msgInfo)
 		}
@@ -363,13 +363,13 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 
 func sendOrderMsg(order *Order, height int64, feeForZeroDeal int64, keeper Keeper) {
 	msgInfo := CancelOrderInfo{
-		OrderID:      order.OrderID(),
-		DelHeight:    height,
-		UseFee:       order.CalOrderFee(feeForZeroDeal).RoundInt64(),
-		LeftStock:    order.LeftStock,
-		RemainAmount: order.Freeze,
-		DealStock:    order.DealStock,
-		DealMoney:    order.DealMoney,
+		OrderID:        order.OrderID(),
+		DelHeight:      height,
+		UsedCommission: order.CalOrderFee(feeForZeroDeal).RoundInt64(),
+		LeftStock:      order.LeftStock,
+		RemainAmount:   order.Freeze,
+		DealStock:      order.DealStock,
+		DealMoney:      order.DealMoney,
 	}
 	if order.TimeInForce == IOC {
 		msgInfo.DelReason = CancelOrderByIocType
