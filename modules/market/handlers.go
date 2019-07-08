@@ -261,7 +261,8 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper Keeper, msg MsgCreateOrder, cet
 	}
 
 	totalAmount := amount
-	if stock == types.CET && msg.Side == match.SELL {
+	if (stock == types.CET && msg.Side == match.SELL) ||
+		(money == types.CET && msg.Side == match.BUY) {
 		totalAmount += cetFee
 	}
 	if !keeper.bnk.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(denom, sdk.NewInt(totalAmount))}) {
