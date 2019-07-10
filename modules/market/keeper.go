@@ -164,17 +164,6 @@ func (k Keeper) MarketOwner(ctx sdk.Context, info MarketInfo) sdk.AccAddress {
 }
 
 // -----------------------------------------------------------------------------
-// Codec
-
-func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(Order{}, "market/order", nil)
-	cdc.RegisterConcrete(MarketInfo{}, "market/market", nil)
-	cdc.RegisterConcrete(MsgCreateMarketInfo{}, "market/market-info", nil)
-	cdc.RegisterConcrete(MsgCreateOrder{}, "market/order-info", nil)
-	cdc.RegisterConcrete(MsgCancelOrder{}, "market/cancel-order", nil)
-	cdc.RegisterConcrete(MsgCancelMarket{}, "market/cancel-market", nil)
-	cdc.RegisterConcrete(QueryMarketInfo{}, "market/query-market", nil)
-}
 
 type GlobalMarketInfoKeeper interface {
 	SetMarket(ctx sdk.Context, info MarketInfo) sdk.Error

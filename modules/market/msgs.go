@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/asset"
@@ -36,14 +35,6 @@ const (
 	CancelOrderByNoEnoughMoney = "Insufficient freeze money"
 	CancelOrderByNotKnow       = "Don't know"
 )
-
-var (
-	msgCdc = codec.New()
-)
-
-func init() {
-	RegisterCodec(msgCdc)
-}
 
 // /////////////////////////////////////////////////////////
 // MsgCreateMarketInfo
