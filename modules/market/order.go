@@ -10,7 +10,7 @@ import (
 type Order struct {
 	Sender      sdk.AccAddress `json:"sender"`
 	Sequence    uint64         `json:"sequence"`
-	Symbol      string         `json:"symbol"`
+	TradingPair string         `json:"trading_pair"`
 	OrderType   byte           `json:"order_type"`
 	Price       sdk.Dec        `json:"price"`
 	Quantity    int64          `json:"quantity"`
@@ -34,7 +34,7 @@ func (or *Order) OrderID() string {
 func (or *Order) GetTagsInOrderCreate() sdk.Tags {
 	return sdk.NewTags("sender", or.Sender.String(),
 		"sequence", strconv.FormatInt(int64(or.Sequence), 10),
-		"symbol", or.Symbol,
+		"symbol", or.TradingPair,
 		"order-type", strconv.Itoa(int(or.OrderType)),
 		"price", or.Price.String(),
 		"quantity", strconv.FormatInt(or.Quantity, 10),

@@ -77,7 +77,7 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	if buyer.Side == match.SELL {
 		buyer, seller = other.order, wo.order
 	}
-	stockAndMoney := strings.Split(buyer.Symbol, "/")
+	stockAndMoney := strings.Split(buyer.TradingPair, "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	// buyer and seller will exchange stockCoins and moneyCoins
 	stockCoins := sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(amount))}
@@ -111,7 +111,7 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 
 // unfreeze an ask order's stock or a bid order's money
 func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper ExpectedBankxKeeper, order *Order, feeForZeroDeal int64, feeK ExpectedChargeFeeKeeper) {
-	stockAndMoney := strings.Split(order.Symbol, "/")
+	stockAndMoney := strings.Split(order.TradingPair, "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	frozenToken := stock
 	if order.Side == match.BUY {

@@ -72,7 +72,7 @@ func createExampleGenesisMarketData() market.GenesisState {
 	order0 := &market.Order{
 		Sender:      accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Sequence:    100,
-		Symbol:      "abc/cet",
+		TradingPair: "abc/cet",
 		OrderType:   2,
 		Price:       sdk.NewDec(100),
 		Quantity:    100000,
@@ -83,7 +83,7 @@ func createExampleGenesisMarketData() market.GenesisState {
 	order1 := &market.Order{
 		Sender:      accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Sequence:    170,
-		Symbol:      "btc/cet",
+		TradingPair: "btc/cet",
 		OrderType:   2,
 		Price:       sdk.NewDec(121920),
 		Quantity:    100000,

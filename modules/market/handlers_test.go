@@ -364,7 +364,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	msgOrder := MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Sequence:       1,
-		Symbol:         stock + SymbolSeparator + money,
+		TradingPair:    stock + SymbolSeparator + money,
 		OrderType:      LimitOrder,
 		PricePrecision: 8,
 		Price:          100,
@@ -379,7 +379,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	zeroCet := sdk.NewCoin("cet", sdk.NewInt(0))
 
 	failedSymbolOrder := msgOrder
-	failedSymbolOrder.Symbol = stock + SymbolSeparator + "no exsit"
+	failedSymbolOrder.TradingPair = stock + SymbolSeparator + "no exsit"
 	oldCetCoin := input.getCoinFromAddr(haveCetAddress, types.CET)
 	ret = input.handler(input.ctx, failedSymbolOrder)
 	newCetCoin := input.getCoinFromAddr(haveCetAddress, types.CET)
@@ -427,7 +427,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	msgGteOrder := MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Sequence:       1,
-		Symbol:         stock + SymbolSeparator + "cet",
+		TradingPair:    stock + SymbolSeparator + "cet",
 		OrderType:      LimitOrder,
 		PricePrecision: 8,
 		Price:          100,
@@ -455,7 +455,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	msgIOCOrder := MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Sequence:       2,
-		Symbol:         stock + SymbolSeparator + "cet",
+		TradingPair:    stock + SymbolSeparator + "cet",
 		OrderType:      LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
@@ -485,7 +485,7 @@ func isSameOrderAndMsg(order *Order, msg MsgCreateOrder) bool {
 	p := sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision)))))
 	samePrice := order.Price.Equal(p)
 	return bytes.Equal(order.Sender, msg.Sender) && order.Sequence == msg.Sequence &&
-		order.Symbol == msg.Symbol && order.OrderType == msg.OrderType && samePrice &&
+		order.TradingPair == msg.TradingPair && order.OrderType == msg.OrderType && samePrice &&
 		order.Quantity == msg.Quantity && order.Side == msg.Side && order.TimeInForce == msg.TimeInForce
 }
 
@@ -514,7 +514,7 @@ func TestCancelOrderFailed(t *testing.T) {
 	msgIOCOrder := MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Sequence:       2,
-		Symbol:         stock + SymbolSeparator + "cet",
+		TradingPair:    stock + SymbolSeparator + "cet",
 		OrderType:      LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
@@ -540,7 +540,7 @@ func TestCancelOrderSuccess(t *testing.T) {
 	msgIOCOrder := MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Sequence:       2,
-		Symbol:         stock + SymbolSeparator + "cet",
+		TradingPair:    stock + SymbolSeparator + "cet",
 		OrderType:      LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
@@ -568,7 +568,7 @@ func TestCancelMarketFailed(t *testing.T) {
 
 	msgCancelMarket := MsgCancelTradingPair{
 		Sender:        haveCetAddress,
-		Symbol:        stock + SymbolSeparator + "cet",
+		TradingPair:   stock + SymbolSeparator + "cet",
 		EffectiveTime: time.Now().Unix() + DefaultMarketMinExpiredTime,
 	}
 
@@ -580,7 +580,7 @@ func TestCancelMarketFailed(t *testing.T) {
 	require.Equal(t, CodeInvalidTime, ret.Code, "cancel order should failed by invalid cancel time")
 
 	failedSymbol := msgCancelMarket
-	failedSymbol.Symbol = stock + SymbolSeparator + "not exist"
+	failedSymbol.TradingPair = stock + SymbolSeparator + "not exist"
 	ret = input.handler(input.ctx, failedSymbol)
 	require.Equal(t, CodeInvalidSymbol, ret.Code, "cancel order should failed by invalid symbol")
 
@@ -597,7 +597,7 @@ func TestCancelMarketSuccess(t *testing.T) {
 
 	msgCancelMarket := MsgCancelTradingPair{
 		Sender:        haveCetAddress,
-		Symbol:        stock + SymbolSeparator + "cet",
+		TradingPair:   stock + SymbolSeparator + "cet",
 		EffectiveTime: DefaultMarketMinExpiredTime + 10,
 	}
 
@@ -621,7 +621,7 @@ func TestChargeOrderFee(t *testing.T) {
 	msgOrder := MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Sequence:       2,
-		Symbol:         stock + SymbolSeparator + types.CET,
+		TradingPair:    stock + SymbolSeparator + types.CET,
 		OrderType:      LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
@@ -644,7 +644,7 @@ func TestChargeOrderFee(t *testing.T) {
 	ret = createImpMarket(input, types.CET, stock)
 	require.Equal(t, true, ret.IsOK(), "create market should success")
 	stockIsCetOrder := msgOrder
-	stockIsCetOrder.Symbol = types.CET + SymbolSeparator + stock
+	stockIsCetOrder.TradingPair = types.CET + SymbolSeparator + stock
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, types.CET)
 	ret = input.handler(input.ctx, stockIsCetOrder)
 	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, types.CET)
@@ -653,11 +653,11 @@ func TestChargeOrderFee(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, frozeFee), "The amount is error ")
 
-	marketInfo, err := input.mk.GetMarketInfo(input.ctx, msgOrder.Symbol)
-	require.Equal(t, nil, err, "get %s market failed", msgOrder.Symbol)
+	marketInfo, err := input.mk.GetMarketInfo(input.ctx, msgOrder.TradingPair)
+	require.Equal(t, nil, err, "get %s market failed", msgOrder.TradingPair)
 	marketInfo.LastExecutedPrice = sdk.NewDec(12)
 	err = input.mk.SetMarket(input.ctx, marketInfo)
-	require.Equal(t, nil, err, "set %s market failed", msgOrder.Symbol)
+	require.Equal(t, nil, err, "set %s market failed", msgOrder.TradingPair)
 
 	// Freeze fee at market execution prices
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, types.CET)

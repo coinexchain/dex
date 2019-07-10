@@ -466,7 +466,11 @@ paths:
               - properties:
                   base_req:
                     $ref: "#/definitions/BaseReq"
+                  exist_blocks:
+                    type: string
+                    example: 10000      
               - $ref: "#/definitions/Order"
+              
       responses:
         200:
           description: Tx was succesfully generated
@@ -668,7 +672,7 @@ paths:
             properties:
               base_req:
                 $ref: "#/definitions/BaseReq"
-              symbol:
+              trading_pair:
                 type: string
                 example: abc/cet
               time:
@@ -2711,7 +2715,7 @@ definitions:
       order_type:
         type: string
         example: 1
-      symbol:
+      trading_pair:
         type: string
         example: "abc/cet"
       price_precision:

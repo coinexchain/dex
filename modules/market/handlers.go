@@ -112,7 +112,7 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg MsgCreateTradingPair, keeper
 
 func calFrozenFeeInOrder(ctx sdk.Context, marketParams Params, keeper Keeper, msg MsgCreateOrder) (int64, sdk.Error) {
 	var frozenFee int64
-	stock := strings.Split(msg.Symbol, SymbolSeparator)[0]
+	stock := strings.Split(msg.TradingPair, SymbolSeparator)[0]
 
 	// Calculate the fee when stock is cet
 	rate := sdk.NewDec(marketParams.MarketFeeRate)
@@ -176,7 +176,7 @@ func sendCreateOrderMsg(keeper Keeper, order Order, featureFee int64) {
 	msgInfo := CreateOrderInfo{
 		OrderID:     order.OrderID(),
 		Sender:      order.Sender.String(),
-		Symbol:      order.Symbol,
+		TradingPair: order.TradingPair,
 		OrderType:   order.OrderType,
 		Price:       order.Price.String(),
 		Quantity:    order.Quantity,
@@ -192,7 +192,7 @@ func sendCreateOrderMsg(keeper Keeper, order Order, featureFee int64) {
 
 func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sdk.Result {
 
-	values := strings.Split(msg.Symbol, SymbolSeparator)
+	values := strings.Split(msg.TradingPair, SymbolSeparator)
 	stock, money := values[0], values[1]
 	denom := stock
 	amount := msg.Quantity
@@ -215,7 +215,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 	order := Order{
 		Sender:      msg.Sender,
 		Sequence:    msg.Sequence,
-		Symbol:      msg.Symbol,
+		TradingPair: msg.TradingPair,
 		OrderType:   msg.OrderType,
 		Price:       sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision))))),
 		Quantity:    msg.Quantity,
@@ -230,7 +230,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 		DealStock:   0,
 	}
 
-	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
+	ork := NewOrderKeeper(keeper.marketKey, order.TradingPair, keeper.cdc)
 	if err := ork.Add(ctx, &order); err != nil {
 		return err.Result()
 	}
@@ -247,7 +247,7 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper Keeper, msg MsgCreateOrder, cet
 	var (
 		stock, money string
 	)
-	values := strings.Split(msg.Symbol, SymbolSeparator)
+	values := strings.Split(msg.TradingPair, SymbolSeparator)
 	stock, money = values[0], values[1]
 
 	if err := msg.ValidateBasic(); err != nil {
@@ -270,7 +270,7 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper Keeper, msg MsgCreateOrder, cet
 		return ErrInsufficientCoins().Result()
 	}
 
-	marketInfo, err := keeper.GetMarketInfo(ctx, msg.Symbol)
+	marketInfo, err := keeper.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
 		return ErrInvalidSymbol().Result()
 	}
@@ -298,7 +298,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 	order := NewGlobalOrderKeeper(keeper.marketKey, keeper.cdc).QueryOrder(ctx, msg.OrderID)
 	marketParams := keeper.GetParams(ctx)
 
-	ork := NewOrderKeeper(keeper.marketKey, order.Symbol, keeper.cdc)
+	ork := NewOrderKeeper(keeper.marketKey, order.TradingPair, keeper.cdc)
 	removeOrder(ctx, ork, keeper.bnk, keeper, order, marketParams.FeeForZeroDeal)
 
 	// send msg to kafka
@@ -347,10 +347,10 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg MsgCancelTradingPair, keepe
 
 	// Add del request to store
 	dlk := NewDelistKeeper(keeper.marketKey)
-	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.Symbol)
+	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.TradingPair)
 
 	// send msg to kafka
-	values := strings.Split(msg.Symbol, SymbolSeparator)
+	values := strings.Split(msg.TradingPair, SymbolSeparator)
 	msgInfo := CancelMarketInfo{
 		Stock:   values[0],
 		Money:   values[1],
@@ -361,7 +361,7 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg MsgCancelTradingPair, keepe
 
 	return sdk.Result{Tags: sdk.NewTags(
 		Sender, msg.Sender.String(),
-		TradingPair, msg.Symbol,
+		TradingPair, msg.TradingPair,
 		EffectiveTime, strconv.Itoa(int(msg.EffectiveTime)),
 	)}
 }
@@ -378,7 +378,7 @@ func checkMsgCancelTradingPair(keeper Keeper, msg MsgCancelTradingPair, ctx sdk.
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidTime, "Invalid Cancel Time")
 	}
 
-	info, err := keeper.GetMarketInfo(ctx, msg.Symbol)
+	info, err := keeper.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, err.Error())
 	}

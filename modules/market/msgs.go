@@ -96,7 +96,7 @@ var _ sdk.Msg = MsgCreateOrder{}
 type MsgCreateOrder struct {
 	Sender         sdk.AccAddress `json:"sender"`
 	Sequence       uint64         `json:"sequence"`
-	Symbol         string         `json:"symbol"`
+	TradingPair    string         `json:"trading_pair"`
 	OrderType      byte           `json:"order_type"`
 	PricePrecision byte           `json:"price_precision"`
 	Price          int64          `json:"price"`
@@ -114,8 +114,8 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return sdk.ErrInvalidAddress("missing creator address")
 	}
-	if len(msg.Symbol) == 0 {
-		return sdk.ErrInvalidAddress("missing GTE order symbol identifier")
+	if len(msg.TradingPair) == 0 {
+		return sdk.ErrInvalidAddress("missing GTE order TradingPair identifier")
 	}
 	if msg.PricePrecision < 0 || msg.PricePrecision > MaxTokenPricePrecision {
 		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [0, 18]. actual : %d", msg.PricePrecision))
@@ -129,7 +129,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidOrderType()
 	}
 
-	if len(strings.Split(msg.Symbol, SymbolSeparator)) != 2 {
+	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
 		return ErrInvalidSymbol()
 	}
 
@@ -193,7 +193,7 @@ func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
 
 type MsgCancelTradingPair struct {
 	Sender        sdk.AccAddress `json:"sender"`
-	Symbol        string         `json:"symbol"`
+	TradingPair   string         `json:"trading_pair"`
 	EffectiveTime int64          `json:"effective_height"`
 }
 
@@ -210,7 +210,7 @@ func (msg MsgCancelTradingPair) ValidateBasic() sdk.Error {
 		return ErrInvalidAddress()
 	}
 
-	if len(strings.Split(msg.Symbol, SymbolSeparator)) != 2 {
+	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
 		return ErrInvalidSymbol()
 	}
 
@@ -254,7 +254,7 @@ type CancelMarketInfo struct {
 type CreateOrderInfo struct {
 	OrderID     string `json:"order_id"`
 	Sender      string `json:"sender"`
-	Symbol      string `json:"symbol"`
+	TradingPair string `json:"TradingPair"`
 	OrderType   byte   `json:"order_type"`
 	Price       string `json:"price"`
 	Quantity    int64  `json:"quantity"`

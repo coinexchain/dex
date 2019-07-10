@@ -137,7 +137,7 @@ Example
 			msg := market.MsgCancelTradingPair{
 				Sender:        creator,
 				EffectiveTime: viper.GetInt64(FlagTime),
-				Symbol:        viper.GetString(FlagSymbol),
+				TradingPair:   viper.GetString(FlagSymbol),
 			}
 
 			if err := CheckCancelMarketMsg(cdc, cliCtx, msg); err != nil {
@@ -161,7 +161,7 @@ func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg marke
 		return err
 	}
 
-	bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(msg.Symbol))
+	bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(msg.TradingPair))
 	if err != nil {
 		return err
 	}

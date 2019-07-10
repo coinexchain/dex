@@ -88,7 +88,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 	return &Order{
 		Sender:      addr,
 		Sequence:    seq,
-		Symbol:      "cet/usdt",
+		TradingPair: "cet/usdt",
 		OrderType:   LIMIT,
 		Price:       decPrice,
 		Quantity:    qua,
@@ -102,7 +102,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 
 func sameTO(a, b *Order) bool {
 	res := bytes.Equal(a.Sender, b.Sender) && a.Sequence == b.Sequence &&
-		a.Symbol == b.Symbol && a.OrderType == b.OrderType && a.Price.Equal(b.Price) &&
+		a.TradingPair == b.TradingPair && a.OrderType == b.OrderType && a.Price.Equal(b.Price) &&
 		a.Quantity == b.Quantity && a.Side == b.Side && a.TimeInForce == b.TimeInForce &&
 		a.Height == b.Height
 	//if !res {

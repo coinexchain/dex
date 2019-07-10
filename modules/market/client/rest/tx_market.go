@@ -22,9 +22,9 @@ type createMarketReq struct {
 }
 
 type cancelMarketReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	Symbol  string       `json:"symbol"`
-	Time    int64        `json:"time"`
+	BaseReq     rest.BaseReq `json:"base_req"`
+	TradingPair string       `json:"trading_pair"`
+	Time        int64        `json:"time"`
 }
 
 func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -80,7 +80,7 @@ func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
 		msg := market.MsgCancelTradingPair{
 			Sender:        sender,
-			Symbol:        req.Symbol,
+			TradingPair:   req.TradingPair,
 			EffectiveTime: req.Time,
 		}
 

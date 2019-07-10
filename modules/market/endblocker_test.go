@@ -138,10 +138,10 @@ func TestRemoveOrders(t *testing.T) {
 	cetKeeper := NewOrderKeeper(keeper.marketKey, "cet/usdt", msgCdc)
 	btcKeeper := NewOrderKeeper(keeper.marketKey, "btc/usdt", msgCdc)
 	order := newTO("00001", 1, 11051, 50, Buy, GTE, 98)
-	order.Symbol = "btc/usdt"
+	order.TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, order)
 	order = newTO("00005", 5, 12039, 120, Sell, GTE, 96)
-	order.Symbol = "btc/usdt"
+	order.TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, order)
 	order = newTO("00002", 2, 11080, 50, Buy, GTE, 98)
 	cetKeeper.Add(ctx, order)
@@ -220,13 +220,13 @@ func TestDelist(t *testing.T) {
 	btcKeeper := NewOrderKeeper(keeper.marketKey, "btc/usdt", msgCdc)
 	orders := make([]*Order, 10)
 	orders[0] = newTO("00001", 1, 11051, 60, Buy, GTE, 98)
-	orders[0].Symbol = "btc/usdt"
+	orders[0].TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, orders[0])
 	orders[1] = newTO("00005", 5, 12039, 120, Sell, IOC, 1000)
-	orders[1].Symbol = "btc/usdt"
+	orders[1].TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, orders[1])
 	orders[2] = newTO("00020", 6, 11039, 100, Sell, IOC, 1000)
-	orders[2].Symbol = "btc/usdt"
+	orders[2].TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, orders[2])
 
 	orders[3] = newTO("00202", 2, 11080, 50, Buy, GTE, 98)
@@ -241,11 +241,11 @@ func TestDelist(t *testing.T) {
 	cetKeeper.Add(ctx, orders[7])
 
 	orders[8] = newTO("00001", 10, 11000, 15, Buy, GTE, 998)
-	orders[8].Symbol = "bch/usdt"
+	orders[8].TradingPair = "bch/usdt"
 	cetKeeper.Add(ctx, orders[8])
 
 	orders[9] = newTO("00001", 7, 11000, 15, Buy, GTE, 998)
-	orders[9].Symbol = "bsv/usdt"
+	orders[9].TradingPair = "bsv/usdt"
 	cetKeeper.Add(ctx, orders[9])
 
 	EndBlocker(ctx, keeper)

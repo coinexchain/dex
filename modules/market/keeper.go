@@ -129,7 +129,7 @@ func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
 
 // SetOrder implements token Keeper.
 func (k Keeper) SetOrder(ctx sdk.Context, order *Order) sdk.Error {
-	return NewOrderKeeper(k.marketKey, order.Symbol, k.cdc).Add(ctx, order)
+	return NewOrderKeeper(k.marketKey, order.TradingPair, k.cdc).Add(ctx, order)
 }
 
 func (k Keeper) GetAllOrders(ctx sdk.Context) []*Order {

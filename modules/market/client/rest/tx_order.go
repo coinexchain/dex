@@ -19,7 +19,7 @@ import (
 type createOrderReq struct {
 	BaseReq        rest.BaseReq `json:"base_req"`
 	OrderType      int          `json:"order_type"`
-	Symbol         string       `json:"symbol"`
+	TradingPair    string       `json:"trading_pair"`
 	PricePrecision int          `json:"price_precision"`
 	Price          int64        `json:"price"`
 	Quantity       int64        `json:"quantity"`
@@ -88,7 +88,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		return
 	}
 
-	if _, err := queryMarketInfo(cdc, cliCtx, req.Symbol); err != nil {
+	if _, err := queryMarketInfo(cdc, cliCtx, req.TradingPair); err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -110,7 +110,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 	msg := market.MsgCreateOrder{
 		Sender:         creator,
 		Sequence:       sequence,
-		Symbol:         req.Symbol,
+		TradingPair:    req.TradingPair,
 		OrderType:      byte(req.OrderType),
 		PricePrecision: byte(req.PricePrecision),
 		Price:          req.Price,
@@ -125,7 +125,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		return
 	}
 
-	symbols := strings.Split(msg.Symbol, market.SymbolSeparator)
+	symbols := strings.Split(msg.TradingPair, market.SymbolSeparator)
 	userToken := symbols[0]
 	if msg.Side == match.BUY {
 		userToken = symbols[1]

@@ -105,7 +105,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		return err
 	}
 
-	symbols := strings.Split(msg.Symbol, market.SymbolSeparator)
+	symbols := strings.Split(msg.TradingPair, market.SymbolSeparator)
 	userToken := symbols[0]
 	if msg.Side == match.BUY {
 		userToken = symbols[1]
@@ -140,7 +140,7 @@ func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgC
 
 	msg := &market.MsgCreateOrder{
 		Sender:         sender,
-		Symbol:         viper.GetString(FlagSymbol),
+		TradingPair:    viper.GetString(FlagSymbol),
 		OrderType:      byte(viper.GetInt(FlagOrderType)),
 		Side:           byte(viper.GetInt(FlagSide)),
 		Price:          viper.GetInt64(FlagPrice),

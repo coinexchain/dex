@@ -35,12 +35,12 @@ func NewQuerier(mk Keeper, cdc *codec.Codec) sdk.Querier {
 }
 
 type QueryMarketParam struct {
-	Symbol string
+	TradingPair string
 }
 
 func NewQueryMarketParam(symbol string) QueryMarketParam {
 	return QueryMarketParam{
-		Symbol: symbol,
+		TradingPair: symbol,
 	}
 }
 
@@ -58,7 +58,7 @@ func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sd
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse param: %s", err))
 	}
 
-	info, err := mk.GetMarketInfo(ctx, param.Symbol)
+	info, err := mk.GetMarketInfo(ctx, param.TradingPair)
 	if err != nil {
 		return nil, sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "may be the market have deleted or not exist")
 	}
