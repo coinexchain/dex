@@ -55,7 +55,7 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 
 		req.BaseReq.Sequence = sequence
-		msg := market.NewMsgCreateMarketInfo(req.Stock, req.Money, creator, byte(req.PricePrecision))
+		msg := market.NewMsgCreateTradingPair(req.Stock, req.Money, creator, byte(req.PricePrecision))
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -78,7 +78,7 @@ func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 
 		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
-		msg := market.MsgCancelMarket{
+		msg := market.MsgCancelTradingPair{
 			Sender:        sender,
 			Symbol:        req.Symbol,
 			EffectiveTime: req.Time,

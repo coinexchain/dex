@@ -25,14 +25,14 @@ type OrderType = byte
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
-		case MsgCreateMarketInfo:
-			return handleMsgCreateMarketInfo(ctx, msg, k)
+		case MsgCreateTradingPair:
+			return handleMsgCreateTradingPair(ctx, msg, k)
 		case MsgCreateOrder:
 			return handleMsgCreateOrder(ctx, msg, k)
 		case MsgCancelOrder:
 			return handleMsgCancelOrder(ctx, msg, k)
-		case MsgCancelMarket:
-			return handleMsgCancelMarket(ctx, msg, k)
+		case MsgCancelTradingPair:
+			return handleMsgCancelTradingPair(ctx, msg, k)
 		default:
 			errMsg := "Unrecognized market Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -40,8 +40,8 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
-func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
-	if ret := checkMsgCreateMarketInfo(ctx, msg, keeper); !ret.IsOK() {
+func handleMsgCreateTradingPair(ctx sdk.Context, msg MsgCreateTradingPair, keeper Keeper) sdk.Result {
+	if ret := checkMsgCreateTradingPair(ctx, msg, keeper); !ret.IsOK() {
 		return ret
 	}
 
@@ -74,7 +74,7 @@ func handleMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper 
 	return sdk.Result{Tags: info.GetTags()}
 }
 
-func checkMsgCreateMarketInfo(ctx sdk.Context, msg MsgCreateMarketInfo, keeper Keeper) sdk.Result {
+func checkMsgCreateTradingPair(ctx sdk.Context, msg MsgCreateTradingPair, keeper Keeper) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
@@ -334,9 +334,9 @@ func checkMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sdk
 	return sdk.Result{}
 }
 
-func handleMsgCancelMarket(ctx sdk.Context, msg MsgCancelMarket, keeper Keeper) sdk.Result {
+func handleMsgCancelTradingPair(ctx sdk.Context, msg MsgCancelTradingPair, keeper Keeper) sdk.Result {
 
-	if err := checkMsgCancelMarket(keeper, msg, ctx); err != nil {
+	if err := checkMsgCancelTradingPair(keeper, msg, ctx); err != nil {
 		return err.Result()
 	}
 
@@ -357,7 +357,7 @@ func handleMsgCancelMarket(ctx sdk.Context, msg MsgCancelMarket, keeper Keeper) 
 	return sdk.Result{}
 }
 
-func checkMsgCancelMarket(keeper Keeper, msg MsgCancelMarket, ctx sdk.Context) sdk.Error {
+func checkMsgCancelTradingPair(keeper Keeper, msg MsgCancelTradingPair, ctx sdk.Context) sdk.Error {
 
 	if err := msg.ValidateBasic(); err != nil {
 		return err

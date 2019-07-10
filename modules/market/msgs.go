@@ -37,19 +37,19 @@ const (
 )
 
 // /////////////////////////////////////////////////////////
-// MsgCreateMarketInfo
+// MsgCreateTradingPair
 
-var _ sdk.Msg = MsgCreateMarketInfo{}
+var _ sdk.Msg = MsgCreateTradingPair{}
 
-type MsgCreateMarketInfo struct {
+type MsgCreateTradingPair struct {
 	Stock          string         `json:"stock"`
 	Money          string         `json:"money"`
 	Creator        sdk.AccAddress `json:"creator"`
 	PricePrecision byte           `json:"price_precision"`
 }
 
-func NewMsgCreateMarketInfo(stock, money string, crater sdk.AccAddress, pricePrecision byte) MsgCreateMarketInfo {
-	return MsgCreateMarketInfo{
+func NewMsgCreateTradingPair(stock, money string, crater sdk.AccAddress, pricePrecision byte) MsgCreateTradingPair {
+	return MsgCreateTradingPair{
 		Stock:          stock,
 		Money:          money,
 		Creator:        crater,
@@ -60,11 +60,11 @@ func NewMsgCreateMarketInfo(stock, money string, crater sdk.AccAddress, pricePre
 // --------------------------------------------------------
 // sdk.Msg Implementation
 
-func (msg MsgCreateMarketInfo) Route() string { return RouterKey }
+func (msg MsgCreateTradingPair) Route() string { return RouterKey }
 
-func (msg MsgCreateMarketInfo) Type() string { return "create_market_info" }
+func (msg MsgCreateTradingPair) Type() string { return "create_market_info" }
 
-func (msg MsgCreateMarketInfo) ValidateBasic() sdk.Error {
+func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("missing creator address")
 	}
@@ -80,11 +80,11 @@ func (msg MsgCreateMarketInfo) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgCreateMarketInfo) GetSignBytes() []byte {
+func (msg MsgCreateTradingPair) GetSignBytes() []byte {
 	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
-func (msg MsgCreateMarketInfo) GetSigners() []sdk.AccAddress {
+func (msg MsgCreateTradingPair) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{[]byte(msg.Creator)}
 }
 
@@ -189,23 +189,23 @@ func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
 }
 
 // /////////////////////////////////////////////////////////
-// MsgCancelMarket
+// MsgCancelTradingPair
 
-type MsgCancelMarket struct {
+type MsgCancelTradingPair struct {
 	Sender        sdk.AccAddress `json:"sender"`
 	Symbol        string         `json:"symbol"`
 	EffectiveTime int64          `json:"effective_height"`
 }
 
-func (msg MsgCancelMarket) Route() string {
+func (msg MsgCancelTradingPair) Route() string {
 	return StoreKey
 }
 
-func (msg MsgCancelMarket) Type() string {
+func (msg MsgCancelTradingPair) Type() string {
 	return "cancel_market"
 }
 
-func (msg MsgCancelMarket) ValidateBasic() sdk.Error {
+func (msg MsgCancelTradingPair) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return ErrInvalidAddress()
 	}
@@ -221,11 +221,11 @@ func (msg MsgCancelMarket) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgCancelMarket) GetSignBytes() []byte {
+func (msg MsgCancelTradingPair) GetSignBytes() []byte {
 	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
 }
 
-func (msg MsgCancelMarket) GetSigners() []sdk.AccAddress {
+func (msg MsgCancelTradingPair) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }
 

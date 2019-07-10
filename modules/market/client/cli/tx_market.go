@@ -102,7 +102,7 @@ func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, queryRoute string, t
 	return nil
 }
 
-func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo, error) {
+func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateTradingPair, error) {
 	for _, flag := range createMarketFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
@@ -110,7 +110,7 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateMarketInfo
 		}
 	}
 
-	msg := &market.MsgCreateMarketInfo{
+	msg := &market.MsgCreateTradingPair{
 		Stock:          viper.GetString(FlagStock),
 		Money:          viper.GetString(FlagMoney),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
@@ -134,7 +134,7 @@ Example
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
-			msg := market.MsgCancelMarket{
+			msg := market.MsgCancelTradingPair{
 				Sender:        creator,
 				EffectiveTime: viper.GetInt64(FlagTime),
 				Symbol:        viper.GetString(FlagSymbol),
@@ -156,7 +156,7 @@ Example
 	return cmd
 }
 
-func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg market.MsgCancelMarket) error {
+func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg market.MsgCancelTradingPair) error {
 	if err := msg.ValidateBasic(); err != nil {
 		return err
 	}

@@ -271,7 +271,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 func TestMarketInfoSetFailed(t *testing.T) {
 	input := prepareMockInput(t, false, true)
 	remainCoin := types.NewCetCoin(OriginHaveCetAmount + issueAmount - asset.IssueTokenFee*2)
-	msgMarket := MsgCreateMarketInfo{
+	msgMarket := MsgCreateTradingPair{
 		Stock:          stock,
 		Money:          money,
 		Creator:        haveCetAddress,
@@ -334,7 +334,7 @@ func createMarket(input testInput) sdk.Result {
 }
 
 func createImpMarket(input testInput, stock, money string) sdk.Result {
-	msgMarketInfo := MsgCreateMarketInfo{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 8}
+	msgMarketInfo := MsgCreateTradingPair{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 8}
 	return input.handler(input.ctx, msgMarketInfo)
 }
 
@@ -566,7 +566,7 @@ func TestCancelMarketFailed(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	createCetMarket(input, stock)
 
-	msgCancelMarket := MsgCancelMarket{
+	msgCancelMarket := MsgCancelTradingPair{
 		Sender:        haveCetAddress,
 		Symbol:        stock + SymbolSeparator + "cet",
 		EffectiveTime: time.Now().Unix() + DefaultMarketMinExpiredTime,
@@ -595,7 +595,7 @@ func TestCancelMarketSuccess(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	createCetMarket(input, stock)
 
-	msgCancelMarket := MsgCancelMarket{
+	msgCancelMarket := MsgCancelTradingPair{
 		Sender:        haveCetAddress,
 		Symbol:        stock + SymbolSeparator + "cet",
 		EffectiveTime: DefaultMarketMinExpiredTime + 10,
