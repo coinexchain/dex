@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"math"
+	"strconv"
 	"strings"
 
 	"github.com/coinexchain/dex/types"
@@ -313,7 +314,11 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 	}
 	keeper.SendMsg(CancelOrderInfoKey, msgInfo)
 
-	return sdk.Result{}
+	return sdk.Result{Tags: sdk.NewTags(
+		Sender, msg.Sender.String(),
+		OrderID, msg.OrderID,
+	),
+	}
 }
 
 func checkMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sdk.Result {
@@ -354,7 +359,11 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg MsgCancelTradingPair, keepe
 	}
 	keeper.SendMsg(CancelMarketInfoKey, msgInfo)
 
-	return sdk.Result{}
+	return sdk.Result{Tags: sdk.NewTags(
+		Sender, msg.Sender.String(),
+		TradingPair, msg.Symbol,
+		EffectiveTime, strconv.Itoa(int(msg.EffectiveTime)),
+	)}
 }
 
 func checkMsgCancelTradingPair(keeper Keeper, msg MsgCancelTradingPair, ctx sdk.Context) sdk.Error {
