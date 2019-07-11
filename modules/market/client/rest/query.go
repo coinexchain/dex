@@ -58,7 +58,7 @@ func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 		vars := mux.Vars(r)
 		orderID := vars["order-id"]
 
-		if len(strings.Split(orderID, "-")) != 2 {
+		if len(strings.Split(orderID, "-")) != 3 {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return
 		}

@@ -19,6 +19,7 @@ const (
 	MaxTokenPricePrecision           = 18
 	LimitOrder             OrderType = 2
 	SymbolSeparator                  = "/"
+	OrderIDSeparator                 = "-"
 	ExtraFrozenMoney                 = 0 // 100
 )
 
