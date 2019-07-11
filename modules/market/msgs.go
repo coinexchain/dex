@@ -174,7 +174,7 @@ func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidAddress()
 	}
 
-	if len(strings.Split(msg.OrderID, "-")) != 2 {
+	if len(strings.Split(msg.OrderID, "-")) != 3 {
 		return ErrInvalidOrderID()
 	}
 

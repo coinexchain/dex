@@ -182,7 +182,7 @@ func TestOrderBook1(t *testing.T) {
 	}
 	addr, _ := simpleAddr("00002")
 	orderList := gkeeper.GetOrdersFromUser(ctx, addr.String())
-	refOrderList := []string{addr.String() + "-3", addr.String() + "-2"}
+	refOrderList := []string{addr.String() + "-3" + "-0", addr.String() + "-2" + "-0"}
 	if orderList[0] != refOrderList[1] || orderList[1] != refOrderList[0] {
 		t.Errorf("Error in GetOrdersFromUser")
 	}
