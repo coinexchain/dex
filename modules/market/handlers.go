@@ -2,6 +2,7 @@ package market
 
 import (
 	"bytes"
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -34,6 +35,8 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handleMsgCancelOrder(ctx, msg, k)
 		case MsgCancelTradingPair:
 			return handleMsgCancelTradingPair(ctx, msg, k)
+		case MsgModifyPricePrecision:
+			return handleMsgModifyPricePrecision(ctx, msg, k)
 		default:
 			errMsg := "Unrecognized market Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -59,8 +62,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg MsgCreateTradingPair, keepe
 
 	param := keeper.GetParams(ctx)
 	if err := keeper.SubtractFeeAndCollectFee(ctx, msg.Creator, types.NewCetCoins(param.CreateMarketFee)); err != nil {
-		// Here must panic. because the market info have stored in db.
-		panic(err)
+		return err.Result()
 	}
 
 	// send msg to kafka
@@ -405,4 +407,64 @@ func marketStoreKey(prefix []byte, params ...string) []byte {
 		}
 	}
 	return buf.Bytes()
+}
+
+func handleMsgModifyPricePrecision(ctx sdk.Context, msg MsgModifyPricePrecision, k Keeper) sdk.Result {
+	if ret := checkMsgModifyPricePrecision(ctx, msg, k); !ret.IsOK() {
+		return ret
+	}
+
+	oldInfo, _ := k.GetMarketInfo(ctx, msg.TradingPair)
+	info := MarketInfo{
+		Stock:             oldInfo.Stock,
+		Money:             oldInfo.Money,
+		PricePrecision:    msg.PricePrecision,
+		LastExecutedPrice: oldInfo.LastExecutedPrice,
+	}
+	if err := k.SetMarket(ctx, info); err != nil {
+		return err.Result()
+	}
+
+	k.SendMsg(PricePrecisionInfoKey, ModifyPricePrecisionInfo{
+		Sender:            msg.Sender.String(),
+		TradingPair:       msg.TradingPair,
+		OldPricePrecision: oldInfo.PricePrecision,
+		NewPricePrecision: info.PricePrecision,
+	})
+
+	return sdk.Result{Tags: sdk.NewTags(
+		TradingPair, msg.TradingPair,
+		Sender, msg.Sender.String(),
+		PricePrecision, strconv.Itoa(int(msg.PricePrecision)),
+	)}
+}
+
+func checkMsgModifyPricePrecision(ctx sdk.Context, msg MsgModifyPricePrecision, k Keeper) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	info, err := k.GetMarketInfo(ctx, msg.TradingPair)
+	if err != nil {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol,
+			fmt.Sprintf("Error retrieving trade pair information : %s", err.Error())).Result()
+	}
+
+	if info.PricePrecision > msg.PricePrecision {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision,
+			fmt.Sprintf("Price Precision can only be increased; "+
+				"tradingPair price_precision : %d, msg price_precision : %d",
+				&info.PricePrecision, msg.PricePrecision)).Result()
+	}
+
+	stock := strings.Split(msg.TradingPair, SymbolSeparator)[0]
+	tokenInfo := k.axk.GetToken(ctx, stock)
+	if !tokenInfo.GetOwner().Equals(msg.Sender) {
+		return sdk.NewError(CodeSpaceMarket, CodeNotMatchSender, fmt.Sprintf(
+			"The sender of the transaction (%s) does not match "+
+				"the owner of the transaction pair (%s)",
+			tokenInfo.GetOwner().String(), msg.Sender.String())).Result()
+	}
+
+	return sdk.Result{}
 }

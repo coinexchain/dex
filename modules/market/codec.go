@@ -16,6 +16,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgCancelOrder{}, "market/MsgCancelOrder", nil)
 	cdc.RegisterConcrete(MsgCancelTradingPair{}, "market/MsgCancelTradingPair", nil)
 	cdc.RegisterConcrete(QueryMarketInfo{}, "market/QueryMarketInfo", nil)
+	cdc.RegisterConcrete(MsgModifyPricePrecision{}, "MsgModifyPricePrecision", nil)
 }
 
 func init() {

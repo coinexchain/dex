@@ -669,3 +669,52 @@ func TestChargeOrderFee(t *testing.T) {
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, totalFreeze), "The amount is error ")
 
 }
+
+func TestModifyPricePrecisionFaild(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	createCetMarket(input, stock)
+
+	msg := MsgModifyPricePrecision{
+		Sender:         haveCetAddress,
+		TradingPair:    stock + SymbolSeparator + types.CET,
+		PricePrecision: 12,
+	}
+
+	msgFailedBySender := msg
+	msgFailedBySender.Sender = notHaveCetAddress
+	ret := input.handler(input.ctx, msgFailedBySender)
+	require.Equal(t, CodeNotMatchSender, ret.Code, "the tx should failed by dis match sender")
+
+	msgFailedByPricePrecision := msg
+	msgFailedByPricePrecision.PricePrecision = 19
+	ret = input.handler(input.ctx, msgFailedByPricePrecision)
+	require.Equal(t, CodeInvalidPricePrecision, ret.Code, "the tx should failed by dis match sender")
+
+	msgFailedByPricePrecision.PricePrecision = 2
+	ret = input.handler(input.ctx, msgFailedByPricePrecision)
+	require.Equal(t, CodeInvalidPricePrecision, ret.Code, "the tx should failed, the price precision can only be increased")
+
+	msgFailedByInvalidSymbol := msg
+	msgFailedByInvalidSymbol.TradingPair = stock + SymbolSeparator + "not find"
+	ret = input.handler(input.ctx, msgFailedByInvalidSymbol)
+	require.Equal(t, CodeInvalidSymbol, ret.Code, "the tx should failed by dis match sender")
+
+}
+
+func TestModifyPricePrecisionSuccess(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	createCetMarket(input, stock)
+
+	msg := MsgModifyPricePrecision{
+		Sender:         haveCetAddress,
+		TradingPair:    stock + SymbolSeparator + types.CET,
+		PricePrecision: 12,
+	}
+
+	oldCetCoin := input.getCoinFromAddr(haveCetAddress, types.CET)
+	ret := input.handler(input.ctx, msg)
+	newCetCoin := input.getCoinFromAddr(haveCetAddress, types.CET)
+	require.Equal(t, true, ret.IsOK(), "the tx should success")
+	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, sdk.NewCoin(types.CET, sdk.NewInt(0))), "the amount is error")
+
+}

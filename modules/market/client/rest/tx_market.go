@@ -27,6 +27,12 @@ type cancelMarketReq struct {
 	Time        int64        `json:"time"`
 }
 
+type modifyPricePrecision struct {
+	BaseReq        rest.BaseReq `json:"base_req"`
+	TradingPair    string       `json:"trading_pair"`
+	PricePrecision int          `json:"price_precision"`
+}
+
 func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req createMarketReq
@@ -86,6 +92,35 @@ func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		if err := cli.CheckCancelMarketMsg(cdc, cliCtx, msg); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+func modifyTradingPairPricePrecision(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req modifyPricePrecision
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
+		msg := market.MsgModifyPricePrecision{
+			Sender:         sender,
+			TradingPair:    req.TradingPair,
+			PricePrecision: byte(req.PricePrecision),
+		}
+
+		if err := cli.CheckModifyPricePrecision(msg); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
 		}
 
 		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
