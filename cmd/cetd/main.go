@@ -24,8 +24,8 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	dexinit "github.com/coinexchain/dex/init"
-	dex "github.com/coinexchain/dex/types"
 	dexserver "github.com/coinexchain/dex/server"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // cetd custom flags
