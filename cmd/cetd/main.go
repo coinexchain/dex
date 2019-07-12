@@ -24,7 +24,6 @@ import (
 	cet_init "github.com/coinexchain/dex/init"
 	cet_server "github.com/coinexchain/dex/server"
 	dex "github.com/coinexchain/dex/types"
-	cet_version "github.com/coinexchain/dex/version"
 )
 
 // cetd custom flags
@@ -62,9 +61,7 @@ func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	addInitCommands(ctx, cdc, rootCmd)
 	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
-
-	rootCmd.RemoveCommand(version.VersionCmd)
-	rootCmd.AddCommand(cet_version.Cmd)
+	rootCmd.AddCommand(version.Cmd)
 
 	return rootCmd
 }
