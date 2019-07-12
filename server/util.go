@@ -1,122 +1,44 @@
 package server
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
-
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/types"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	tcmd "github.com/tendermint/tendermint/cmd/tendermint/commands"
 	cfg "github.com/tendermint/tendermint/config"
-	"github.com/tendermint/tendermint/libs/cli"
-	tmflags "github.com/tendermint/tendermint/libs/cli/flags"
-	"github.com/tendermint/tendermint/libs/log"
 
-	cosmos_server "github.com/cosmos/cosmos-sdk/server"
+	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/config"
-	"github.com/cosmos/cosmos-sdk/version"
+
+	"github.com/coinexchain/dex/modules/authx"
+	dex "github.com/coinexchain/dex/types"
 )
 
-//___________________________________________________________________________________
-
-// PersistentPreRunEFn returns a PersistentPreRunE function for cobra
-// that initializes the passed in context with a properly configured
-// logger and config object.
-func PersistentPreRunEFn(context *cosmos_server.Context) func(*cobra.Command, []string) error {
+func PersistentPreRunEFn(context *sdkserver.Context) func(*cobra.Command, []string) error {
+	fn := sdkserver.PersistentPreRunEFn(context)
 	return func(cmd *cobra.Command, args []string) error {
-		if cmd.Name() == version.VersionCmd.Name() {
-			return nil
-		}
-		config, err := interceptLoadConfig()
-		if err != nil {
-			return err
-		}
-		err = validateConfig(config)
-		if err != nil {
-			return err
-		}
-		logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
-		logger, err = tmflags.ParseLogLevel(config.LogLevel, logger, cfg.DefaultLogLevel())
-		if err != nil {
-			return err
-		}
-		if viper.GetBool(cli.TraceFlag) {
-			logger = log.NewTracingLogger(logger)
-		}
-		logger = logger.With("module", "main")
-		context.Config = config
-		context.Logger = logger
-		return nil
+		createAppConfigFile()
+		return fn(cmd, args)
 	}
 }
 
-// If a new config is created, change some of the default tendermint settings
-func interceptLoadConfig() (conf *cfg.Config, err error) {
+func createAppConfigFile() {
 	tmpConf := cfg.DefaultConfig()
-	err = viper.Unmarshal(tmpConf)
+	err := viper.Unmarshal(tmpConf)
 	if err != nil {
 		// TODO: Handle with #870
 		panic(err)
 	}
 	rootDir := tmpConf.RootDir
-	configFilePath := filepath.Join(rootDir, "config/config.toml")
-	// Intercept only if the file doesn't already exist
 
-	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
-		// the following parse config is needed to create directories
-		conf, _ = tcmd.ParseConfig() // NOTE: ParseConfig() creates dir/files as necessary.
-		conf.ProfListenAddress = "localhost:6060"
-		conf.P2P.RecvRate = 5120000
-		conf.P2P.SendRate = 5120000
-		conf.TxIndex.IndexAllTags = true
-		conf.Consensus.TimeoutCommit = 5 * time.Second
-		cfg.WriteConfigFile(configFilePath, conf)
-		// Fall through, just so that its parsed into memory.
+	appConfigFilePath := filepath.Join(rootDir, "config/app.toml")
+	if _, err := os.Stat(appConfigFilePath); os.IsNotExist(err) {
+		appConf, _ := config.ParseConfig()
+		// use network_min_gas_price as default value for node_mini_gas_price
+		appConf.MinGasPrices = fmt.Sprintf("%s%s", authx.DefaultMinGasPriceLimit, dex.DefaultBondDenom)
+		config.WriteConfigFile(appConfigFilePath, appConf)
 	}
-
-	if conf == nil {
-		conf, err = tcmd.ParseConfig() // NOTE: ParseConfig() creates dir/files as necessary.
-	}
-
-	if cetdConfigNotExists(rootDir) {
-		createDefaultCetdConfig(rootDir)
-	}
-
-	viper.SetConfigName("cetd")
-	err = viper.MergeInConfig()
-
-	return
-}
-
-func createDefaultCetdConfig(rootDir string) {
-	cetdConf, _ := config.ParseConfig()
-
-	//use network_min_gas_price as default value for node_mini_gas_price
-	cetdConf.MinGasPrices = fmt.Sprintf("%s%s", authx.DefaultMinGasPriceLimit, types.DefaultBondDenom)
-
-	config.WriteConfigFile(cetdConfigFile(rootDir), cetdConf)
-}
-
-func cetdConfigNotExists(rootDir string) bool {
-	_, err := os.Stat(cetdConfigFile(rootDir))
-	return os.IsNotExist(err)
-}
-
-func cetdConfigFile(rootDir string) string {
-	return filepath.Join(rootDir, "config/cetd.toml")
-}
-
-// validate the config with the sdk's requirements.
-func validateConfig(conf *cfg.Config) error {
-	if !conf.Consensus.CreateEmptyBlocks {
-		return errors.New("config option CreateEmptyBlocks = false is currently unsupported")
-	}
-	return nil
 }

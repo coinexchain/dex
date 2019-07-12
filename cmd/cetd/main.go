@@ -18,12 +18,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/store"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
+	gucli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 
 	"github.com/coinexchain/dex/app"
-	cet_init "github.com/coinexchain/dex/init"
-	cet_server "github.com/coinexchain/dex/server"
+	dexinit "github.com/coinexchain/dex/init"
 	dex "github.com/coinexchain/dex/types"
+	dexserver "github.com/coinexchain/dex/server"
 )
 
 // cetd custom flags
@@ -54,8 +56,8 @@ func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 
 	rootCmd := &cobra.Command{
 		Use:               "cetd",
-		Short:             "CET Chain Daemon (server)",
-		PersistentPreRunE: cet_server.PersistentPreRunEFn(ctx),
+		Short:             "CoinEx Chain Daemon (server)",
+		PersistentPreRunE: dexserver.PersistentPreRunEFn(ctx),
 	}
 
 	addInitCommands(ctx, cdc, rootCmd)
@@ -67,13 +69,14 @@ func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 }
 
 func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Command) {
-	rootCmd.AddCommand(cet_init.InitCmd(ctx, cdc))
-	rootCmd.AddCommand(cet_init.CollectGenTxsCmd(ctx, cdc))
-	rootCmd.AddCommand(cet_init.TestnetFilesCmd(ctx, cdc))
-	rootCmd.AddCommand(cet_init.GenTxCmd(ctx, cdc))
-	rootCmd.AddCommand(cet_init.AddGenesisAccountCmd(ctx, cdc))
-	rootCmd.AddCommand(cet_init.AddGenesisTokenCmd(ctx, cdc))
-	rootCmd.AddCommand(cet_init.ValidateGenesisCmd(ctx, cdc))
+	var bm module.BasicManager
+	rootCmd.AddCommand(gucli.InitCmd(ctx, cdc, bm, ""))
+	rootCmd.AddCommand(dexinit.CollectGenTxsCmd(ctx, cdc))
+	rootCmd.AddCommand(dexinit.TestnetFilesCmd(ctx, cdc))
+	rootCmd.AddCommand(dexinit.GenTxCmd(ctx, cdc))
+	rootCmd.AddCommand(dexinit.AddGenesisAccountCmd(ctx, cdc))
+	rootCmd.AddCommand(dexinit.AddGenesisTokenCmd(ctx, cdc))
+	rootCmd.AddCommand(dexinit.ValidateGenesisCmd(ctx, cdc))
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
