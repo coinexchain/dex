@@ -114,7 +114,7 @@ func TestRemoveOrders(t *testing.T) {
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey(testNetSubString)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
-	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
+	keeper := NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace)
 	keeper.orderClean.SetUnixTime(ctx, time.Now().Unix())
 	ctx = ctx.WithBlockTime(time.Unix(time.Now().Unix()+int64(25*60*60), 0))
 	parameters := Params{}
@@ -179,7 +179,7 @@ func TestDelist(t *testing.T) {
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey(testNetSubString)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(StoreKey)
-	keeper := NewKeeper(keys.marketKey, axk, bnk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
+	keeper := NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace)
 	delistKeeper := NewDelistKeeper(keys.marketKey)
 	delistKeeper.AddDelistRequest(ctx, ctx.BlockHeight(), "btc/usdt")
 	// currDay := ctx.BlockHeader().Time.Unix()

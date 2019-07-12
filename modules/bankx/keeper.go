@@ -17,13 +17,12 @@ type Keeper struct {
 	axk           authx.AccountXKeeper
 	bk            bank.BaseKeeper
 	ak            auth.AccountKeeper
-	fck           auth.FeeCollectionKeeper
 	tk            ExpectedAssetStatusKeeper
 	msgProducer   msgqueue.Producer
 }
 
 func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
-	bk bank.BaseKeeper, ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
+	bk bank.BaseKeeper, ak auth.AccountKeeper,
 	tk ExpectedAssetStatusKeeper, msgProducer msgqueue.Producer) Keeper {
 
 	return Keeper{
@@ -31,7 +30,6 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 		axk:           axk,
 		bk:            bk,
 		ak:            ak,
-		fck:           fck,
 		tk:            tk,
 		msgProducer:   msgProducer,
 	}
@@ -50,12 +48,12 @@ func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bo
 }
 
 func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	_, ret := k.bk.SendCoins(ctx, from, to, amt)
+	ret := k.bk.SendCoins(ctx, from, to, amt)
 	return ret
 }
 
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	_, _, err := k.bk.SubtractCoins(ctx, addr, amt)
+	_, err := k.bk.SubtractCoins(ctx, addr, amt)
 	if err != nil {
 		return err
 	}
@@ -82,7 +80,7 @@ func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 	accx.FrozenCoins = frozenCoins
 	k.axk.SetAccountX(ctx, accx)
 
-	_, _, err := k.bk.AddCoins(ctx, addr, amt)
+	_, err := k.bk.AddCoins(ctx, addr, amt)
 	if err != nil {
 		return err
 	}
@@ -91,18 +89,18 @@ func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 }
 
 func (k Keeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	_, _, err := k.bk.SubtractCoins(ctx, addr, amt)
+	_, err := k.bk.SubtractCoins(ctx, addr, amt)
 	return err
 }
 func (k Keeper) AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if _, _, err := k.bk.AddCoins(ctx, addr, amt); err != nil {
+	if _, err := k.bk.AddCoins(ctx, addr, amt); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if _, _, err := k.bk.SubtractCoins(ctx, addr, amt); err != nil {
+	if _, err := k.bk.SubtractCoins(ctx, addr, amt); err != nil {
 		return err
 	}
 

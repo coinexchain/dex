@@ -255,7 +255,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	bk := prepareBankxKeeper(keys, cdc, ctx)
 
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams)
-	mk := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, cdc,
+	mk := NewKeeper(keys.marketKey, ak, bk, cdc,
 		msgqueue.NewProducer(), paramsKeeper.Subspace(StoreKey))
 	RegisterCodec(mk.cdc)
 

@@ -2,35 +2,25 @@ package stakingx
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	slash "github.com/cosmos/cosmos-sdk/x/slashing/types"
+	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 
 	dex "github.com/coinexchain/dex/types"
 )
 
-var _ sdk.ValidatorSet = Keeper{}
+var _ slash.StakingKeeper = Keeper{}
 
 // forward to staking.Keeper
-func (k Keeper) IterateValidators(ctx sdk.Context, fn func(index int64, validator sdk.Validator) (stop bool)) {
+func (k Keeper) IterateValidators(ctx sdk.Context, fn func(index int64, validator exported.ValidatorI) (stop bool)) {
 	k.sk.IterateValidators(ctx, fn)
 }
-func (k Keeper) IterateBondedValidatorsByPower(ctx sdk.Context, fn func(index int64, validator sdk.Validator) (stop bool)) {
-	k.sk.IterateBondedValidatorsByPower(ctx, fn)
-}
-func (k Keeper) IterateLastValidators(ctx sdk.Context, fn func(index int64, validator sdk.Validator) (stop bool)) {
-	k.sk.IterateLastValidators(ctx, fn)
-}
-func (k Keeper) Validator(ctx sdk.Context, address sdk.ValAddress) sdk.Validator {
+func (k Keeper) Validator(ctx sdk.Context, address sdk.ValAddress) exported.ValidatorI { // get a particular validator by operator addressL
 	return k.sk.Validator(ctx, address)
 }
-func (k Keeper) ValidatorByConsAddr(ctx sdk.Context, addr sdk.ConsAddress) sdk.Validator {
+func (k Keeper) ValidatorByConsAddr(ctx sdk.Context, addr sdk.ConsAddress) exported.ValidatorI {
 	return k.sk.ValidatorByConsAddr(ctx, addr)
 }
-func (k Keeper) TotalBondedTokens(ctx sdk.Context) sdk.Int {
-	return k.sk.TotalBondedTokens(ctx)
-}
-func (k Keeper) TotalTokens(ctx sdk.Context) sdk.Int {
-	return k.sk.TotalTokens(ctx)
-}
-func (k Keeper) Delegation(ctx sdk.Context, addrDel sdk.AccAddress, addrVal sdk.ValAddress) sdk.Delegation {
+func (k Keeper) Delegation(ctx sdk.Context, addrDel sdk.AccAddress, addrVal sdk.ValAddress) exported.DelegationI {
 	return k.sk.Delegation(ctx, addrDel, addrVal)
 }
 func (k Keeper) Jail(ctx sdk.Context, consAddr sdk.ConsAddress) {
@@ -38,6 +28,10 @@ func (k Keeper) Jail(ctx sdk.Context, consAddr sdk.ConsAddress) {
 }
 func (k Keeper) Unjail(ctx sdk.Context, consAddr sdk.ConsAddress) {
 	k.sk.Unjail(ctx, consAddr)
+}
+
+func (k Keeper) MaxValidators(sdk.Context) uint16 {
+	//TODO:  panic("implement me")
 }
 
 // intercept Slash(), inject CoinEx logic

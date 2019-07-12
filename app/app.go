@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 
+	"github.com/cosmos/cosmos-sdk/x/supply"
+
 	"github.com/coinexchain/dex/modules/crisisx"
 	"github.com/coinexchain/dex/modules/distributionx"
 
@@ -30,7 +32,6 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/govx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/msgqueue"
@@ -60,6 +61,7 @@ type CetChainApp struct {
 	keyMain          *sdk.KVStoreKey
 	keyAccount       *sdk.KVStoreKey
 	keyAccountX      *sdk.KVStoreKey
+	keySupply        *sdk.KVStoreKey
 	keyStaking       *sdk.KVStoreKey
 	tkeyStaking      *sdk.TransientStoreKey
 	keySlashing      *sdk.KVStoreKey
@@ -74,24 +76,24 @@ type CetChainApp struct {
 	keyIncentive     *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
-	accountKeeper       auth.AccountKeeper
-	accountXKeeper      authx.AccountXKeeper
-	feeCollectionKeeper auth.FeeCollectionKeeper
-	bankKeeper          bank.BaseKeeper
-	bankxKeeper         bankx.Keeper // TODO rename to bankXKeeper
-	stakingKeeper       staking.Keeper
-	stakingXKeeper      stakingx.Keeper
-	slashingKeeper      slashing.Keeper
-	distrKeeper         distr.Keeper
-	distrxKeeper        distributionx.Keeper
-	govKeeper           gov.Keeper
-	crisisKeeper        crisis.Keeper
-	incentiveKeeper     incentive.Keeper
-	assetKeeper         asset.BaseKeeper
-	tokenKeeper         asset.TokenKeeper
-	paramsKeeper        params.Keeper
-	marketKeeper        market.Keeper
-	msgQueProducer      msgqueue.Producer
+	accountKeeper   auth.AccountKeeper
+	accountXKeeper  authx.AccountXKeeper
+	bankKeeper      bank.BaseKeeper
+	bankxKeeper     bankx.Keeper // TODO rename to bankXKeeper
+	supplyKeeper    supply.Keeper
+	stakingKeeper   staking.Keeper
+	stakingXKeeper  stakingx.Keeper
+	slashingKeeper  slashing.Keeper
+	distrKeeper     distr.Keeper
+	distrxKeeper    distributionx.Keeper
+	govKeeper       gov.Keeper
+	crisisKeeper    crisis.Keeper
+	incentiveKeeper incentive.Keeper
+	assetKeeper     asset.BaseKeeper
+	tokenKeeper     asset.TokenKeeper
+	paramsKeeper    params.Keeper
+	marketKeeper    market.Keeper
+	msgQueProducer  msgqueue.Producer
 }
 
 // NewCetChainApp returns a reference to an initialized CetChainApp.
@@ -104,12 +106,12 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	bApp.SetCommitMultiStoreTracer(traceStore)
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod)
-	app.initKeepers()
+	app.initKeepers(invCheckPeriod)
 	app.registerCrisisRoutes()
 	app.registerMessageRoutes()
 	app.mountStores()
 
-	ah := authx.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper, app.accountXKeeper,
+	ah := authx.NewAnteHandler(app.accountKeeper, app.supplyKeeper, app.accountXKeeper,
 		newAnteHelper(app.accountXKeeper, app.stakingXKeeper))
 
 	app.SetInitChainer(app.initChainer)
@@ -129,29 +131,29 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 
 func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *CetChainApp {
 	return &CetChainApp{
-		BaseApp:          bApp,
-		cdc:              cdc,
-		invCheckPeriod:   invCheckPeriod,
-		keyMain:          sdk.NewKVStoreKey(bam.MainStoreKey),
-		keyAccount:       sdk.NewKVStoreKey(auth.StoreKey),
-		keyAccountX:      sdk.NewKVStoreKey(authx.StoreKey),
-		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
-		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
-		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
-		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
-		keySlashing:      sdk.NewKVStoreKey(slashing.StoreKey),
-		keyGov:           sdk.NewKVStoreKey(gov.StoreKey),
-		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
-		keyParams:        sdk.NewKVStoreKey(params.StoreKey),
-		tkeyParams:       sdk.NewTransientStoreKey(params.TStoreKey),
-		keyAsset:         sdk.NewKVStoreKey(asset.StoreKey),
-		keyMarket:        sdk.NewKVStoreKey(market.StoreKey),
-		keyIncentive:     sdk.NewKVStoreKey(incentive.StoreKey),
+		BaseApp:        bApp,
+		cdc:            cdc,
+		invCheckPeriod: invCheckPeriod,
+		keyMain:        sdk.NewKVStoreKey(bam.MainStoreKey),
+		keyAccount:     sdk.NewKVStoreKey(auth.StoreKey),
+		keyAccountX:    sdk.NewKVStoreKey(authx.StoreKey),
+		keySupply:      sdk.NewKVStoreKey(supply.StoreKey),
+		keyStaking:     sdk.NewKVStoreKey(staking.StoreKey),
+		tkeyStaking:    sdk.NewTransientStoreKey(staking.TStoreKey),
+		keyDistr:       sdk.NewKVStoreKey(distr.StoreKey),
+		tkeyDistr:      sdk.NewTransientStoreKey(distr.TStoreKey),
+		keySlashing:    sdk.NewKVStoreKey(slashing.StoreKey),
+		keyGov:         sdk.NewKVStoreKey(gov.StoreKey),
+		keyParams:      sdk.NewKVStoreKey(params.StoreKey),
+		tkeyParams:     sdk.NewTransientStoreKey(params.TStoreKey),
+		keyAsset:       sdk.NewKVStoreKey(asset.StoreKey),
+		keyMarket:      sdk.NewKVStoreKey(market.StoreKey),
+		keyIncentive:   sdk.NewKVStoreKey(incentive.StoreKey),
 	}
 }
 
-func (app *CetChainApp) initKeepers() {
-	app.paramsKeeper = params.NewKeeper(app.cdc, app.keyParams, app.tkeyParams)
+func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
+	app.paramsKeeper = params.NewKeeper(app.cdc, app.keyParams, app.tkeyParams, params.DefaultCodespace)
 	app.msgQueProducer = msgqueue.NewProducer()
 	// define the accountKeeper
 	app.accountKeeper = auth.NewAccountKeeper(
@@ -166,39 +168,55 @@ func (app *CetChainApp) initKeepers() {
 		app.paramsKeeper.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
 	)
-	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(
-		app.cdc,
-		app.keyFeeCollection,
-	)
+
+	// account permissions
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     []string{supply.Basic},
+		distr.ModuleName:          []string{supply.Basic},
+		staking.BondedPoolName:    []string{supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: []string{supply.Burner, supply.Staking},
+		gov.ModuleName:            []string{supply.Burner},
+	}
+
+	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper, app.bankKeeper, supply.DefaultCodespace, maccPerms)
+
 	stakingKeeper := staking.NewKeeper(
 		app.cdc,
 		app.keyStaking, app.tkeyStaking,
-		app.bankKeeper, app.paramsKeeper.Subspace(staking.DefaultParamspace),
+		app.supplyKeeper, app.paramsKeeper.Subspace(staking.DefaultParamspace),
 		staking.DefaultCodespace,
 	)
 	app.distrKeeper = distr.NewKeeper(
 		app.cdc,
 		app.keyDistr,
 		app.paramsKeeper.Subspace(distr.DefaultParamspace),
-		app.bankKeeper, &stakingKeeper, app.feeCollectionKeeper,
+		&stakingKeeper,
+		app.supplyKeeper,
 		distr.DefaultCodespace,
+		auth.FeeCollectorName,
 	)
 
-	govBankKeeper := govx.NewKeeper(
-		app.bankKeeper,
-		app.accountKeeper,
-		app.distrKeeper,
-	)
+	// register the proposal types
+	govRouter := gov.NewRouter()
+	govRouter.AddRoute(gov.RouterKey, gov.ProposalHandler).
+		AddRoute(params.RouterKey, params.NewParamChangeProposalHandler(app.paramsKeeper)).
+		AddRoute(distr.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.distrKeeper))
+
 	app.govKeeper = gov.NewKeeper(
 		app.cdc,
 		app.keyGov,
-		app.paramsKeeper, app.paramsKeeper.Subspace(gov.DefaultParamspace), &govBankKeeper, &stakingKeeper,
+		app.paramsKeeper, app.paramsKeeper.Subspace(gov.DefaultParamspace),
+		app.supplyKeeper,
+		&stakingKeeper,
 		gov.DefaultCodespace,
+		govRouter,
 	)
+
 	app.crisisKeeper = crisis.NewKeeper(
 		app.paramsKeeper.Subspace(crisis.DefaultParamspace),
-		app.distrKeeper, app.bankKeeper,
-		app.feeCollectionKeeper,
+		invCheckPeriod,
+		app.supplyKeeper,
+		auth.FeeCollectorName,
 	)
 
 	// cet keepers
@@ -213,11 +231,16 @@ func (app *CetChainApp) initKeepers() {
 	app.slashingKeeper = slashing.NewKeeper(
 		app.cdc,
 		app.keySlashing,
-		app.stakingXKeeper, app.paramsKeeper.Subspace(slashing.DefaultParamspace),
+		app.stakingXKeeper,
+		app.paramsKeeper.Subspace(slashing.DefaultParamspace),
 		slashing.DefaultCodespace,
 	)
 	app.incentiveKeeper = incentive.NewKeeper(
-		app.cdc, app.keyIncentive, app.paramsKeeper.Subspace(incentive.DefaultParamspace), app.feeCollectionKeeper, app.bankKeeper,
+		app.cdc, app.keyIncentive,
+		app.paramsKeeper.Subspace(incentive.DefaultParamspace),
+		app.bankKeeper,
+		app.supplyKeeper,
+		auth.FeeCollectorName,
 	)
 	app.tokenKeeper = asset.NewBaseTokenKeeper(
 		app.cdc, app.keyAsset,
@@ -225,7 +248,6 @@ func (app *CetChainApp) initKeepers() {
 	app.bankxKeeper = bankx.NewKeeper(
 		app.paramsKeeper.Subspace(bankx.DefaultParamspace),
 		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
-		app.feeCollectionKeeper,
 		app.tokenKeeper,
 		app.msgQueProducer,
 	)
@@ -244,7 +266,6 @@ func (app *CetChainApp) initKeepers() {
 		app.keyMarket,
 		app.tokenKeeper,
 		app.bankxKeeper,
-		app.feeCollectionKeeper,
 		app.cdc,
 		app.msgQueProducer,
 		app.paramsKeeper.Subspace(market.StoreKey),
@@ -256,7 +277,6 @@ func (app *CetChainApp) initKeepers() {
 	app.stakingKeeper = *stakingKeeper.SetHooks(
 		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
 	)
-
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {

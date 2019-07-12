@@ -1,10 +1,10 @@
 package authx
 
 import (
+	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-
-	dex "github.com/coinexchain/dex/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 type AnteHelper interface {
@@ -14,10 +14,10 @@ type AnteHelper interface {
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
-func NewAnteHandler(ak auth.AccountKeeper, fck auth.FeeCollectionKeeper,
+func NewAnteHandler(ak auth.AccountKeeper, supplyKeeper types.SupplyKeeper,
 	axk AccountXKeeper, anteHelper AnteHelper) sdk.AnteHandler {
 
-	ah := auth.NewAnteHandler(ak, fck)
+	ah := auth.NewAnteHandler(ak, supplyKeeper, auth.DefaultSigVerificationGasConsumer)
 	return wrapAnteHandler(ah, axk, anteHelper)
 }
 

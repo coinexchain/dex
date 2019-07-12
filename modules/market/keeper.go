@@ -90,7 +90,7 @@ type Keeper struct {
 }
 
 func NewKeeper(key sdk.StoreKey, axkVal ExpectedAssetStatusKeeper,
-	bnkVal ExpectedBankxKeeper, feeK ExpectFeeKeeper,
+	bnkVal ExpectedBankxKeeper,
 	cdcVal *codec.Codec, msgKeeperVal msgqueue.MsgSender,
 	paramstore params.Subspace) Keeper {
 

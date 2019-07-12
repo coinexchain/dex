@@ -1,8 +1,10 @@
 package incentive
 
 import (
+	types2 "github.com/coinexchain/dex/modules/incentive/internal/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
@@ -16,11 +18,12 @@ var (
 )
 
 type Keeper struct {
-	cdc                 *codec.Codec
-	key                 sdk.StoreKey
-	paramSubspace       params.Subspace
-	feeCollectionKeeper FeeCollectionKeeper
-	bankKeeper          BankKeeper
+	cdc              *codec.Codec
+	key              sdk.StoreKey
+	paramSubspace    params.Subspace
+	bankKeeper       types2.BankKeeper
+	supplyKeeper     types.SupplyKeeper
+	feeCollectorName string
 }
 
 func (k Keeper) GetParam(ctx sdk.Context) (param Params) {
@@ -60,13 +63,15 @@ func (k Keeper) AddNewPlan(ctx sdk.Context, plan Plan) {
 	k.SetParam(ctx, param)
 }
 
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace, fck FeeCollectionKeeper, bk BankKeeper) Keeper {
+func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace,
+	bk types2.BankKeeper, supplyKeeper types.SupplyKeeper, feeCollectorName string) Keeper {
 
 	return Keeper{
-		cdc:                 cdc,
-		key:                 key,
-		paramSubspace:       paramSubspace.WithKeyTable(ParamKeyTable()),
-		feeCollectionKeeper: fck,
-		bankKeeper:          bk,
+		cdc:              cdc,
+		key:              key,
+		paramSubspace:    paramSubspace.WithKeyTable(ParamKeyTable()),
+		bankKeeper:       bk,
+		supplyKeeper:     supplyKeeper,
+		feeCollectorName: feeCollectorName,
 	}
 }
