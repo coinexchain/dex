@@ -3,7 +3,7 @@ package client
 import (
 	"github.com/coinexchain/dex/modules/stakingx/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
-	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
+	//stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/go-amino"
 )

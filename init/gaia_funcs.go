@@ -1,8 +1,8 @@
 package init
 
 import (
-	gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
-	gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
+	//gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
+	//gaia_init "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 )
 
 var (
