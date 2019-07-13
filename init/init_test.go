@@ -18,6 +18,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/mock"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
+	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 
 	"github.com/coinexchain/dex/app"
 )
@@ -32,7 +34,7 @@ func TestInitCmd(t *testing.T) {
 
 	ctx := server.NewContext(cfg, logger)
 	cdc := app.MakeCodec()
-	cmd := InitCmd(ctx, cdc)
+	cmd := genutilcli.InitCmd(ctx, cdc)
 
 	require.NoError(t, cmd.RunE(nil, []string{"cetnode-test"}))
 }
@@ -60,7 +62,7 @@ func TestEmptyState(t *testing.T) {
 	ctx := server.NewContext(cfg, logger)
 	cdc := app.MakeCodec()
 
-	cmd := InitCmd(ctx, cdc)
+	cmd := genutilcli.InitCmd(ctx, cdc)
 	require.NoError(t, cmd.RunE(nil, []string{"cetnode-test"}))
 
 	old := os.Stdout
@@ -102,7 +104,7 @@ func TestStartStandAlone(t *testing.T) {
 	require.Nil(t, err)
 	ctx := server.NewContext(cfg, logger)
 	cdc := app.MakeCodec()
-	initCmd := InitCmd(ctx, cdc)
+	initCmd := genutilcli.InitCmd(ctx, cdc)
 	require.NoError(t, initCmd.RunE(nil, []string{"cetnode-test"}))
 
 	app, err := mock.NewApp(home, logger)
@@ -129,7 +131,7 @@ func TestInitNodeValidatorFiles(t *testing.T) {
 	viper.Set(client.FlagName, "moniker")
 	cfg, err := tcmd.ParseConfig()
 	require.Nil(t, err)
-	nodeID, valPubKey, err := InitializeNodeValidatorFiles(cfg)
+	nodeID, valPubKey, err := genutil.InitializeNodeValidatorFiles(cfg)
 	require.Nil(t, err)
 	require.NotEqual(t, "", nodeID)
 	require.NotEqual(t, 0, len(valPubKey.Bytes()))

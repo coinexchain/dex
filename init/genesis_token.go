@@ -2,8 +2,6 @@ package init
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/cosmos/cosmos-sdk/client"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -11,10 +9,13 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/common"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/asset"
 )
 
 const (
@@ -105,7 +106,7 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 				return err
 			}
 
-			return ExportGenesisFile(genFile, genDoc.ChainID, nil, appStateJSON)
+			return genutil.ExportGenesisFile(genFile, genDoc.ChainID, nil, appStateJSON)
 		},
 	}
 

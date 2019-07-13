@@ -24,6 +24,7 @@ import (
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
 	//authtx "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
@@ -182,7 +183,7 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 		return testnetNodeInfo{}, err
 	}
 
-	nodeID, valPubKey, err := InitializeNodeValidatorFiles(config)
+	nodeID, valPubKey, err := genutil.InitializeNodeValidatorFiles(config)
 	if err != nil {
 		_ = os.RemoveAll(outDir)
 		return testnetNodeInfo{}, err
@@ -402,7 +403,7 @@ func collectGenFiles(
 		genFile := config.GenesisFile()
 
 		// overwrite each validator's genesis file to have a canonical genesis time
-		err = ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime)
+		err = genutil.ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime)
 		if err != nil {
 			return err
 		}
