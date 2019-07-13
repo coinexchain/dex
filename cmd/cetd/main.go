@@ -20,7 +20,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
-	gucli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 
 	"github.com/coinexchain/dex/app"
 	dexinit "github.com/coinexchain/dex/init"
@@ -70,8 +71,8 @@ func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 
 func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Command) {
 	var bm module.BasicManager
-	rootCmd.AddCommand(gucli.InitCmd(ctx, cdc, bm, ""))
-	rootCmd.AddCommand(dexinit.CollectGenTxsCmd(ctx, cdc))
+	rootCmd.AddCommand(genutilcli.InitCmd(ctx, cdc, bm, ""))
+	rootCmd.AddCommand(genutilcli.CollectGenTxsCmd(ctx, cdc, genaccounts.AppModuleBasic{}, app.DefaultNodeHome))
 	rootCmd.AddCommand(dexinit.TestnetFilesCmd(ctx, cdc))
 	rootCmd.AddCommand(dexinit.GenTxCmd(ctx, cdc))
 	rootCmd.AddCommand(dexinit.AddGenesisAccountCmd(ctx, cdc))
