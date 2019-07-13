@@ -7,6 +7,9 @@ import (
 	"os"
 	"sort"
 
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -46,7 +49,7 @@ const (
 // default home directories for expected binaries
 var (
 	// default home directories for cetcli
-	DefaultCLIHome  = os.ExpandEnv("$HOME/.cetcli")
+	DefaultCLIHome = os.ExpandEnv("$HOME/.cetcli")
 
 	// default home directories for cetd
 	DefaultNodeHome = os.ExpandEnv("$HOME/.cetd")
@@ -101,6 +104,9 @@ type CetChainApp struct {
 	paramsKeeper    params.Keeper
 	marketKeeper    market.Keeper
 	msgQueProducer  msgqueue.Producer
+
+	// the module manager
+	mm *module.Manager
 }
 
 // NewCetChainApp returns a reference to an initialized CetChainApp.
@@ -185,12 +191,14 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		gov.ModuleName:            []string{supply.Burner},
 	}
 
-	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper, app.bankKeeper, supply.DefaultCodespace, maccPerms)
+	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
+		app.bankKeeper, supply.DefaultCodespace, maccPerms)
 
 	stakingKeeper := staking.NewKeeper(
 		app.cdc,
 		app.keyStaking, app.tkeyStaking,
-		app.supplyKeeper, app.paramsKeeper.Subspace(staking.DefaultParamspace),
+		app.supplyKeeper,
+		app.paramsKeeper.Subspace(staking.DefaultParamspace),
 		staking.DefaultCodespace,
 	)
 	app.distrKeeper = distr.NewKeeper(
@@ -284,10 +292,31 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.stakingKeeper = *stakingKeeper.SetHooks(
 		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
 	)
+
+	//TODO: Add modules of our application: asset, market, authx, bankx, crisisx, ...
+	app.mm = module.NewManager(
+		genaccounts.NewAppModule(app.accountKeeper),
+		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
+		auth.NewAppModule(app.accountKeeper),
+		//authx
+		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
+		//bankx
+		//stakingx
+		crisis.NewAppModule(app.crisisKeeper),
+		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
+		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
+		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
+		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
+		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
+		//asset
+		//market
+		//incentive
+	)
+
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {
-	crisisx.RegisterInvariants(&app.crisisKeeper, app.assetKeeper, app.bankxKeeper, app.feeCollectionKeeper, app.distrKeeper, app.stakingKeeper)
+	crisisx.RegisterInvariants(&app.crisisKeeper, app.assetKeeper, app.bankxKeeper, app.supplyKeeper, auth.FeeCollectorName, app.distrKeeper, app.stakingKeeper)
 	bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
 	distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
 

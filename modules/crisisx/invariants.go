@@ -3,8 +3,9 @@ package crisisx
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/x/staking/exported"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	dType "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -18,11 +19,11 @@ const (
 	ModuleName = "crisisx"
 )
 
-func RegisterInvariants(c *crisis.Keeper, tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) {
-	c.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(tokenKeeper, bk, feek, disk, stk))
+func RegisterInvariants(c *crisis.Keeper, tokenKeeper asset.Keeper, bk ExpectBankxKeeper, supplyKeeper ExpectSupplyKeeper, feeCollectorName string, disk distribution.Keeper, stk staking.Keeper) {
+	c.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(tokenKeeper, bk, supplyKeeper, feeCollectorName, disk, stk))
 }
 
-func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek auth.FeeCollectionKeeper, disk distribution.Keeper, stk staking.Keeper) sdk.Invariant {
+func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, supplyKeeper ExpectSupplyKeeper, feeCollectorName string, disk distribution.Keeper, stk staking.Keeper) sdk.Invariant {
 
 	return func(ctx sdk.Context) error {
 		token := tokenKeeper.GetToken(ctx, types.DefaultBondDenom)
@@ -38,7 +39,8 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek aut
 		//fmt.Printf("basedAccountTotalAmount : %s, totalAmount : %s \n", basedAccountTotalAmount, totalAmount.String())
 
 		// Get all amounts based on the Non-account system
-		feeAmount := feek.GetCollectedFees(ctx).AmountOf(types.CET)
+		feeAmount := GetCollectedFee(ctx, supplyKeeper, feeCollectorName)
+
 		communityAmount := disk.GetFeePool(ctx).CommunityPool.AmountOf(types.CET)
 		totalAmount = totalAmount.Add(feeAmount).Add(communityAmount.RoundInt())
 		//fmt.Printf("feeAmount : %s, communityAmount : %s, totalAmount : %s\n",
@@ -52,7 +54,7 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek aut
 			return false
 		}
 
-		validatorProcess := func(index int64, validator sdk.Validator) bool {
+		validatorProcess := func(index int64, validator exported.ValidatorI) bool {
 			totalAmount = totalAmount.Add(validator.GetTokens())
 			//fmt.Printf("validator addr : %s, tokens : %d, totalTokens : %s\n",
 			//	validator.GetOperator().String(), validator.GetTokens().Int64(), totalAmount.String())
@@ -80,4 +82,10 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, feek aut
 
 		return nil
 	}
+}
+
+func GetCollectedFee(ctx sdk.Context, supplyKeeper ExpectSupplyKeeper, feeCollectorName string) sdk.Int {
+	feeCollector := supplyKeeper.GetModuleAccount(ctx, feeCollectorName)
+	feesCollected := feeCollector.GetCoins()
+	return feesCollected.AmountOf(types.CET)
 }
