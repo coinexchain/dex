@@ -28,10 +28,9 @@ tags:
   - name: Market
     description: Market module APIs
 schemes:
-  - http
   - https
-#host: swagger.coinex.org
-host: localhost:1317
+  - http
+host: dex-api.coinex.org
 securityDefinitions:
   kms:
     type: basic
@@ -542,6 +541,42 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /market/price-precision:
+    post:
+      summary: Modify the price precision of the trading pair in the dex
+      tags:
+        - Market
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: modifyPricePrecision
+      parameters:
+        - in: body
+          name: info
+          description: trading-pair, price-precision as params
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  price_precision:
+                    type: string
+                    example: 10
+                  trading_pair:
+                    type: string
+                    example: etc/cet
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error  
   /market/trading-pairs/{stock}/{money}:
     get:
       summary: Query trading-pair info

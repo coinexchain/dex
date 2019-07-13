@@ -7,14 +7,23 @@ if [ ! -f "$GOPATH/bin/cetd" ]; then
     exit 1
 fi
 
-rm -rdf ~/.cetd
+if [ -d "${HOME}/.cetd" ]; then
+    echo "Please backup and delete ~/.cetd, before run this script. Exiting..."
+    exit 1
+fi
+
+if [ -d "${HOME}/.cetcli" ]; then
+    echo "Please backup and delete ~/.cetcli, before run this script. Exiting..."
+    exit 1
+fi
+
 cetd init moniker0 --chain-id=coinexdex-test1
 cetcli keys add bob <<<$'12345678\n12345678\n'
-cetd add-genesis-account $(cetcli keys show bob -a) 10000000000000000cet
+cetd add-genesis-account $(cetcli keys show bob -a) 100000000000000000cet
 cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	--symbol="cet" \
 	--owner=$(cetcli keys show bob -a)  \
-	--total-supply=10000000000000000 \
+	--total-supply=100000000000000000 \
 	--mintable=false \
 	--burnable=true \
 	--addr-forbiddable=false \

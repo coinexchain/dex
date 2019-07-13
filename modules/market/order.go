@@ -28,7 +28,7 @@ type Order struct {
 }
 
 func (or *Order) OrderID() string {
-	return fmt.Sprintf("%s-%d", or.Sender, or.Sequence)
+	return fmt.Sprintf("%s-%d-%d", or.Sender, or.Sequence, ChainIDVersion)
 }
 
 func (or *Order) GetTagsInOrderCreate() sdk.Tags {

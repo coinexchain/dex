@@ -18,9 +18,11 @@ const (
 	DefaultMarketFeeMin                = 1000000
 	DefaultFeeForZeroDeal              = 1000000
 	DefaultMarketMinExpiredTime        = 60 * 60 * 24 * 7
+	DefaultChainIDVersion              = 0
 )
 
 var (
+	KeyChainIDVersion              = []byte("ChainIDVersion")
 	KeyCreateMarketFee             = []byte("CreateMarketFee")
 	KeyFixedTradeFee               = []byte("FixedTradeFee")
 	keyMarketMinExpiredTime        = []byte("MarketMinExpiredTime")
@@ -42,6 +44,7 @@ type Params struct {
 	MarketFeeRate               int64 `json:"market_fee_rate"`
 	MarketFeeMin                int64 `json:"market_fee_min"`
 	FeeForZeroDeal              int64 `json:"fee_for_zero_deal"`
+	ChainIDVersion              int64 `json:"chain_id_version"`
 }
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
@@ -58,6 +61,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeyMarketFeeRate, Value: &p.MarketFeeRate},
 		{Key: KeyMarketFeeMin, Value: &p.MarketFeeMin},
 		{Key: KeyFeeForZeroDeal, Value: &p.FeeForZeroDeal},
+		{Key: KeyChainIDVersion, Value: &p.ChainIDVersion},
 	}
 }
 
@@ -80,6 +84,7 @@ func DefaultParams() Params {
 		DefaultMarketFeeRate,
 		DefaultMarketFeeMin,
 		DefaultFeeForZeroDeal,
+		DefaultChainIDVersion,
 	}
 }
 

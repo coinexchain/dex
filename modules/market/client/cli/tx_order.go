@@ -204,7 +204,7 @@ func CheckSenderAndOrderID(sender []byte, orderID string) (market.MsgCancelOrder
 	)
 
 	contents := strings.Split(orderID, "-")
-	if len(contents) != 2 {
+	if len(contents) != 3 {
 		return msg, errors.Errorf(" illegal order-id")
 	}
 

@@ -449,7 +449,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, frozenMoney), "The amount is error")
 
 	glk := NewGlobalOrderKeeper(input.mk.marketKey, input.mk.cdc)
-	order := glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 1))
+	order := glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 1, param.ChainIDVersion))
 	require.Equal(t, true, isSameOrderAndMsg(order, msgGteOrder), "order should equal msg")
 
 	msgIOCOrder := MsgCreateOrder{
@@ -473,12 +473,12 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, totalFrozen), "The amount is error")
 
-	order = glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 2))
+	order = glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 2, param.ChainIDVersion))
 	require.Equal(t, true, isSameOrderAndMsg(order, msgIOCOrder), "order should equal msg")
 }
 
-func assemblyOrderID(addr sdk.AccAddress, seq uint64) string {
-	return fmt.Sprintf("%s-%d", addr, seq)
+func assemblyOrderID(addr sdk.AccAddress, seq uint64, chainIDVersion int64) string {
+	return fmt.Sprintf("%s-%d-%d", addr, seq, chainIDVersion)
 }
 
 func isSameOrderAndMsg(order *Order, msg MsgCreateOrder) bool {
@@ -500,10 +500,10 @@ func getAddr(input string) sdk.AccAddress {
 func TestCancelOrderFailed(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	createCetMarket(input, stock)
-
+	chainIDVersion := input.mk.GetParams(input.ctx).ChainIDVersion
 	cancelOrder := MsgCancelOrder{
 		Sender:  haveCetAddress,
-		OrderID: assemblyOrderID(haveCetAddress, 1),
+		OrderID: assemblyOrderID(haveCetAddress, 1, chainIDVersion),
 	}
 
 	failedOrderNotExist := cancelOrder
@@ -526,7 +526,7 @@ func TestCancelOrderFailed(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 
 	failedNotOrderSender := cancelOrder
-	failedNotOrderSender.OrderID = assemblyOrderID(notHaveCetAddress, 2)
+	failedNotOrderSender.OrderID = assemblyOrderID(notHaveCetAddress, 2, chainIDVersion)
 	ret = input.handler(input.ctx, failedNotOrderSender)
 	require.Equal(t, CodeNotFindOrder, ret.Code, "cancel order should failed by not match order sender")
 
@@ -535,6 +535,7 @@ func TestCancelOrderFailed(t *testing.T) {
 func TestCancelOrderSuccess(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	createCetMarket(input, stock)
+	chainIDVersion := input.mk.GetParams(input.ctx).ChainIDVersion
 
 	// create order
 	msgIOCOrder := MsgCreateOrder{
@@ -553,7 +554,7 @@ func TestCancelOrderSuccess(t *testing.T) {
 
 	cancelOrder := MsgCancelOrder{
 		Sender:  haveCetAddress,
-		OrderID: assemblyOrderID(haveCetAddress, 2),
+		OrderID: assemblyOrderID(haveCetAddress, 2, chainIDVersion),
 	}
 	ret = input.handler(input.ctx, cancelOrder)
 	require.Equal(t, true, ret.IsOK(), "cancel order should succeed ; ", ret.Log)
@@ -667,5 +668,54 @@ func TestChargeOrderFee(t *testing.T) {
 	totalFreeze = frozeFee.Add(frozeCoin)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, totalFreeze), "The amount is error ")
+
+}
+
+func TestModifyPricePrecisionFaild(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	createCetMarket(input, stock)
+
+	msg := MsgModifyPricePrecision{
+		Sender:         haveCetAddress,
+		TradingPair:    stock + SymbolSeparator + types.CET,
+		PricePrecision: 12,
+	}
+
+	msgFailedBySender := msg
+	msgFailedBySender.Sender = notHaveCetAddress
+	ret := input.handler(input.ctx, msgFailedBySender)
+	require.Equal(t, CodeNotMatchSender, ret.Code, "the tx should failed by dis match sender")
+
+	msgFailedByPricePrecision := msg
+	msgFailedByPricePrecision.PricePrecision = 19
+	ret = input.handler(input.ctx, msgFailedByPricePrecision)
+	require.Equal(t, CodeInvalidPricePrecision, ret.Code, "the tx should failed by dis match sender")
+
+	msgFailedByPricePrecision.PricePrecision = 2
+	ret = input.handler(input.ctx, msgFailedByPricePrecision)
+	require.Equal(t, CodeInvalidPricePrecision, ret.Code, "the tx should failed, the price precision can only be increased")
+
+	msgFailedByInvalidSymbol := msg
+	msgFailedByInvalidSymbol.TradingPair = stock + SymbolSeparator + "not find"
+	ret = input.handler(input.ctx, msgFailedByInvalidSymbol)
+	require.Equal(t, CodeInvalidSymbol, ret.Code, "the tx should failed by dis match sender")
+
+}
+
+func TestModifyPricePrecisionSuccess(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	createCetMarket(input, stock)
+
+	msg := MsgModifyPricePrecision{
+		Sender:         haveCetAddress,
+		TradingPair:    stock + SymbolSeparator + types.CET,
+		PricePrecision: 12,
+	}
+
+	oldCetCoin := input.getCoinFromAddr(haveCetAddress, types.CET)
+	ret := input.handler(input.ctx, msg)
+	newCetCoin := input.getCoinFromAddr(haveCetAddress, types.CET)
+	require.Equal(t, true, ret.IsOK(), "the tx should success")
+	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, sdk.NewCoin(types.CET, sdk.NewInt(0))), "the amount is error")
 
 }

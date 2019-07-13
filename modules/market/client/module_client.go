@@ -48,6 +48,7 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 		cli.CreateIOCOrderTxCmd(mc.cdc),
 		cli.CancelOrder(mc.cdc),
 		cli.CancelMarket(mc.cdc),
+		cli.ModifyTradingPairPricePrecision(mc.cdc),
 	)...)
 
 	return mktTxCmd

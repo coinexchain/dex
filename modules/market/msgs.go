@@ -20,10 +20,11 @@ const (
 	CreateMarketInfoKey = "create_market_info"
 	CancelMarketInfoKey = "cancel_market_info"
 
-	CreateOrderInfoKey = "create_order_info"
-	FillOrderInfoKey   = "fill_order_info"
-	CancelOrderInfoKey = "del_order_info"
-	HeightInfoKey      = "height-info"
+	CreateOrderInfoKey    = "create_order_info"
+	FillOrderInfoKey      = "fill_order_info"
+	CancelOrderInfoKey    = "del_order_info"
+	HeightInfoKey         = "height-info"
+	PricePrecisionInfoKey = "modify-price-precision"
 )
 
 // cancel order of reasons
@@ -173,7 +174,7 @@ func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidAddress()
 	}
 
-	if len(strings.Split(msg.OrderID, "-")) != 2 {
+	if len(strings.Split(msg.OrderID, "-")) != 3 {
 		return ErrInvalidOrderID()
 	}
 
@@ -198,7 +199,7 @@ type MsgCancelTradingPair struct {
 }
 
 func (msg MsgCancelTradingPair) Route() string {
-	return StoreKey
+	return RouterKey
 }
 
 func (msg MsgCancelTradingPair) Type() string {
@@ -226,6 +227,47 @@ func (msg MsgCancelTradingPair) GetSignBytes() []byte {
 }
 
 func (msg MsgCancelTradingPair) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Sender}
+}
+
+// -------------------------------------------------
+// MsgModifyPricePrecision
+
+type MsgModifyPricePrecision struct {
+	Sender         sdk.AccAddress `json:"sender"`
+	TradingPair    string         `json:"trading_pair"`
+	PricePrecision byte           `json:"price_precision"`
+}
+
+func (msg MsgModifyPricePrecision) Route() string {
+	return RouterKey
+}
+
+func (msg MsgModifyPricePrecision) Type() string {
+	return "modify_trading_pair_price_precision"
+}
+
+func (msg MsgModifyPricePrecision) ValidateBasic() sdk.Error {
+	if len(msg.Sender) == 0 {
+		return ErrInvalidAddress()
+	}
+
+	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
+		return ErrInvalidSymbol()
+	}
+
+	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
+		return ErrInvalidPricePrecision()
+	}
+
+	return nil
+}
+
+func (msg MsgModifyPricePrecision) GetSignBytes() []byte {
+	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+}
+
+func (msg MsgModifyPricePrecision) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }
 
@@ -297,4 +339,11 @@ type CancelOrderInfo struct {
 type NewHeightInfo struct {
 	Height    int64 `json:"height"`
 	TimeStamp int64 `json:"timestamp"`
+}
+
+type ModifyPricePrecisionInfo struct {
+	Sender            string `json:"sender"`
+	TradingPair       string `json:"trading_pair"`
+	OldPricePrecision byte   `json:"old_price_precision"`
+	NewPricePrecision byte   `json:"new_price_precision"`
 }

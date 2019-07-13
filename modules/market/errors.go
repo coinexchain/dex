@@ -11,8 +11,6 @@ const (
 	CodeInvalidToken          sdk.CodeType = 601
 	CodeInvalidPricePrecision sdk.CodeType = 602
 	CodeInvalidTokenIssuer    sdk.CodeType = 603
-	CodeSendTokenFailed       sdk.CodeType = 604
-	CodeNoStoreEngine         sdk.CodeType = 605
 	CodeInvalidAddress        sdk.CodeType = 606
 	CodeNotExistKeyInStore    sdk.CodeType = 607
 	CodeInsufficientCoin      sdk.CodeType = 608

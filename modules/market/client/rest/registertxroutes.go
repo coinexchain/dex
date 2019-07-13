@@ -21,4 +21,5 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 	r.HandleFunc("/market/orders/account/{address}", queryUserOrderListHandlerFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/market/cancel-order", cancelOrderHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc("/market/cancel-trading-pair", cancelMarketHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/market/price-precision", modifyTradingPairPricePrecision(cdc, cliCtx)).Methods("POST")
 }
