@@ -75,12 +75,12 @@ func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Comma
 	var bm module.BasicManager
 	rootCmd.AddCommand(genutilcli.InitCmd(ctx, cdc, bm, ""))
 	rootCmd.AddCommand(genutilcli.CollectGenTxsCmd(ctx, cdc, genaccounts.AppModuleBasic{}, app.DefaultNodeHome))
-	rootCmd.AddCommand(dexinit.TestnetFilesCmd(ctx, cdc))
 	rootCmd.AddCommand(genutilcli.GenTxCmd(ctx, cdc, app.ModuleBasics, staking.AppModuleBasic{},
 		genaccounts.AppModuleBasic{}, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
-	rootCmd.AddCommand(dexinit.AddGenesisTokenCmd(ctx, cdc))
 	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
+	rootCmd.AddCommand(dexinit.AddGenesisTokenCmd(ctx, cdc))
+	rootCmd.AddCommand(dexinit.TestnetFilesCmd(ctx, cdc))
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
