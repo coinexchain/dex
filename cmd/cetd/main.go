@@ -22,6 +22,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
 	dexinit "github.com/coinexchain/dex/init"
@@ -74,7 +75,8 @@ func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Comma
 	rootCmd.AddCommand(genutilcli.InitCmd(ctx, cdc, bm, ""))
 	rootCmd.AddCommand(genutilcli.CollectGenTxsCmd(ctx, cdc, genaccounts.AppModuleBasic{}, app.DefaultNodeHome))
 	rootCmd.AddCommand(dexinit.TestnetFilesCmd(ctx, cdc))
-	rootCmd.AddCommand(dexinit.GenTxCmd(ctx, cdc))
+	rootCmd.AddCommand(genutilcli.GenTxCmd(ctx, cdc, app.ModuleBasics, staking.AppModuleBasic{},
+		genaccounts.AppModuleBasic{}, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(dexinit.AddGenesisAccountCmd(ctx, cdc))
 	rootCmd.AddCommand(dexinit.AddGenesisTokenCmd(ctx, cdc))
 	rootCmd.AddCommand(dexinit.ValidateGenesisCmd(ctx, cdc))

@@ -7,11 +7,6 @@ import (
 	"os"
 	"sort"
 
-	"github.com/cosmos/cosmos-sdk/x/supply"
-
-	"github.com/coinexchain/dex/modules/crisisx"
-	"github.com/coinexchain/dex/modules/distributionx"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -20,6 +15,7 @@ import (
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -28,10 +24,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/crisisx"
+	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/msgqueue"
@@ -46,8 +45,16 @@ const (
 
 // default home directories for expected binaries
 var (
+	// default home directories for cetcli
 	DefaultCLIHome  = os.ExpandEnv("$HOME/.cetcli")
+
+	// default home directories for cetd
 	DefaultNodeHome = os.ExpandEnv("$HOME/.cetd")
+
+	// The ModuleBasicManager is in charge of setting up basic,
+	// non-dependant module elements, such as codec registration
+	// and genesis verification.
+	ModuleBasics module.BasicManager
 )
 
 // Extended ABCI application
