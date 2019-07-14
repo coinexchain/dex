@@ -1,4 +1,4 @@
-package exported
+package types
 
 import (
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type AssetModuleClient interface {
+type ModuleClient interface {
 	// register rest routes
 	RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router)
 

@@ -3,8 +3,8 @@ package client
 import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/asset/client/rest"
-	"github.com/coinexchain/dex/modules/asset/exported"
 	asset_types "github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -65,6 +65,6 @@ func (mc AssetModuleClient) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	return assQueryCmd
 }
 
-func NewAssetModuleClient() exported.AssetModuleClient {
+func NewAssetModuleClient() types.ModuleClient {
 	return AssetModuleClient{}
 }

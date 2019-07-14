@@ -3,7 +3,7 @@ package asset
 import (
 	"encoding/json"
 
-	"github.com/coinexchain/dex/modules/asset/exported"
+	"github.com/coinexchain/dex/types"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 
@@ -25,7 +25,7 @@ var (
 
 // app module basics object
 type AppModuleBasic struct {
-	apc exported.AssetModuleClient
+	apc types.ModuleClient
 }
 
 // module name
@@ -74,11 +74,11 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	assetKeeper BaseKeeper //TODO: rename to AssetKeeper
-	apc         exported.AssetModuleClient
+	apc         types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(assetKeeper BaseKeeper, apc exported.AssetModuleClient) AppModule {
+func NewAppModule(assetKeeper BaseKeeper, apc types.ModuleClient) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{apc: apc},
 		assetKeeper:    assetKeeper,
