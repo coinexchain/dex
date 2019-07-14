@@ -99,9 +99,10 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		force = market.IOC
 	}
 
+	accRetriever := authtypes.NewAccountRetriever(cliCtx)
 	sequence := req.BaseReq.Sequence
 	if sequence == 0 {
-		sequence, err = cliCtx.GetAccountSequence(creator)
+		_, sequence, err = accRetriever.GetAccountNumberSequence(creator)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
 			return
@@ -132,7 +133,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		userToken = symbols[1]
 	}
 
-	account, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(creator)
+	account, err := accRetriever.GetAccount(creator)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, "No have insufficient cet to create market in blockchain")
 		return

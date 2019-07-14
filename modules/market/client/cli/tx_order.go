@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
-	//"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -88,8 +87,9 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 	cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
+	accRetriever := authtypes.NewAccountRetriever(cliCtx)
 	sender := cliCtx.GetFromAddress()
-	sequence, err := cliCtx.GetAccountSequence(sender)
+	_, sequence, err := accRetriever.GetAccountNumberSequence(sender)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		userToken = symbols[1]
 	}
 
-	account, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(sender)
+	account, err := accRetriever.GetAccount(sender)
 	if err != nil {
 		return err
 	}

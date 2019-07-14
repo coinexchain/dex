@@ -8,6 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/market/client/cli"
@@ -53,7 +54,7 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		sequence := req.BaseReq.Sequence
 		if sequence == 0 {
-			sequence, err = cliCtx.GetAccountSequence(creator)
+			_, sequence, err = authtypes.NewAccountRetriever(cliCtx).GetAccountNumberSequence(creator)
 			if err != nil {
 				rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
 				return
