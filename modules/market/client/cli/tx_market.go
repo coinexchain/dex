@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -14,7 +13,8 @@ import (
 	//"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	//authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market"
@@ -45,7 +45,7 @@ Example :
 	--price-precision=8 --gas 20000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
@@ -133,7 +133,7 @@ Example
 	--time=1000000 --trading-pair=etc/cet --from=bob --chain-id=coinexdex 
 	--gas=1000000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
@@ -197,7 +197,7 @@ Example:
 	--price-precision=9 --from=bob --chain-id=coinexdex 
 	--gas=10000000 --fees=10000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
