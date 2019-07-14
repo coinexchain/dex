@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	asset_types "github.com/coinexchain/dex/modules/asset/types"
 	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -515,7 +516,7 @@ func TestMsgModifyTokenDescription_ValidateBasic(t *testing.T) {
 	}
 }
 func TestMsg_Route(t *testing.T) {
-	want := RouterKey
+	want := asset_types.RouterKey
 	tests := []struct {
 		name string
 		msg  sdk.Msg

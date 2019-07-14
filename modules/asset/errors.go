@@ -1,11 +1,12 @@
 package asset
 
 import (
+	asset_types "github.com/coinexchain/dex/modules/asset/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (
-	CodeSpaceAsset sdk.CodespaceType = ModuleName
+	CodeSpaceAsset sdk.CodespaceType = asset_types.ModuleName
 
 	// 501 ~ 599
 	CodeInvalidTokenName        sdk.CodeType = 501

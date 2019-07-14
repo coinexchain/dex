@@ -1,13 +1,13 @@
 package client
 
 import (
+	asset_types "github.com/coinexchain/dex/modules/asset/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/go-amino"
 
 	"github.com/cosmos/cosmos-sdk/client"
 
-	"github.com/coinexchain/dex/modules/asset"
 	assCli "github.com/coinexchain/dex/modules/asset/client/cli"
 )
 
@@ -25,16 +25,16 @@ func NewModuleClient(storeKey string, cdc *amino.Codec) ModuleClient {
 func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	assQueryCmd := &cobra.Command{
-		Use:   asset.ModuleName,
+		Use:   asset_types.ModuleName,
 		Short: "Querying commands for the asset module",
 	}
 
 	assQueryCmd.AddCommand(client.GetCommands(
-		assCli.GetTokenCmd(asset.StoreKey, cdc),
-		assCli.GetTokenListCmd(asset.StoreKey, cdc),
-		assCli.GetWhitelistCmd(asset.StoreKey, cdc),
-		assCli.GetForbiddenAddrCmd(asset.StoreKey, cdc),
-		assCli.GetReservedSymbolsCmd(asset.StoreKey, cdc),
+		assCli.GetTokenCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetTokenListCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetWhitelistCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetForbiddenAddrCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetReservedSymbolsCmd(asset_types.QuerierRoute, cdc),
 	)...)
 
 	return assQueryCmd
@@ -43,12 +43,12 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 // GetTxCmd returns the transaction commands for this module
 func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	assTxCmd := &cobra.Command{
-		Use:   asset.ModuleName,
+		Use:   asset_types.ModuleName,
 		Short: "Asset transactions subcommands",
 	}
 
 	assTxCmd.AddCommand(client.PostCommands(
-		assCli.IssueTokenCmd(asset.StoreKey, cdc),
+		assCli.IssueTokenCmd(asset_types.QuerierRoute, cdc),
 		assCli.TransferOwnershipCmd(cdc),
 		assCli.MintTokenCmd(cdc),
 		assCli.BurnTokenCmd(cdc),

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	asset_types "github.com/coinexchain/dex/modules/asset/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/stretchr/testify/require"
@@ -14,7 +15,7 @@ import (
 func Test_queryToken(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryToken),
+		Path: fmt.Sprintf("custom/%s/%s", asset_types.RouterKey, QueryToken),
 		Data: []byte{},
 	}
 	path0 := []string{QueryToken}
@@ -61,7 +62,7 @@ func Test_queryToken(t *testing.T) {
 func Test_queryAllTokenList(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryTokenList),
+		Path: fmt.Sprintf("custom/%s/%s", asset_types.RouterKey, QueryTokenList),
 		Data: []byte{},
 	}
 	path0 := []string{QueryTokenList}
@@ -99,7 +100,7 @@ func Test_queryWhitelist(t *testing.T) {
 	symbol := "abc"
 	whitelist := mockWhitelist()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryWhitelist),
+		Path: fmt.Sprintf("custom/%s/%s", asset_types.RouterKey, QueryWhitelist),
 		Data: []byte{},
 	}
 	path0 := []string{QueryWhitelist}
@@ -142,7 +143,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 	symbol := "abc"
 	mock := mockAddresses()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryForbiddenAddr),
+		Path: fmt.Sprintf("custom/%s/%s", asset_types.RouterKey, QueryForbiddenAddr),
 		Data: []byte{},
 	}
 	path0 := []string{QueryForbiddenAddr}
@@ -183,7 +184,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 func Test_queryReservedSymbols(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryReservedSymbols),
+		Path: fmt.Sprintf("custom/%s/%s", asset_types.RouterKey, QueryReservedSymbols),
 		Data: []byte{},
 	}
 	path0 := []string{QueryReservedSymbols}
@@ -200,7 +201,7 @@ func Test_queryReservedSymbols(t *testing.T) {
 func Test_queryDefault(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, "unknown"),
+		Path: fmt.Sprintf("custom/%s/%s", asset_types.RouterKey, "unknown"),
 		Data: []byte{},
 	}
 	path0 := []string{"unknown"}

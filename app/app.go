@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 
+	asset_types "github.com/coinexchain/dex/modules/asset/types"
+
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 
@@ -159,7 +161,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 		keyGov:         sdk.NewKVStoreKey(gov.StoreKey),
 		keyParams:      sdk.NewKVStoreKey(params.StoreKey),
 		tkeyParams:     sdk.NewTransientStoreKey(params.TStoreKey),
-		keyAsset:       sdk.NewKVStoreKey(asset.StoreKey),
+		keyAsset:       sdk.NewKVStoreKey(asset_types.StoreKey),
 		keyMarket:      sdk.NewKVStoreKey(market.StoreKey),
 		keyIncentive:   sdk.NewKVStoreKey(incentive.StoreKey),
 	}
@@ -273,7 +275,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.assetKeeper = asset.NewBaseKeeper(
 		app.cdc,
 		app.keyAsset,
-		app.paramsKeeper.Subspace(asset.DefaultParamspace),
+		app.paramsKeeper.Subspace(asset_types.DefaultParamspace),
 		app.bankxKeeper,
 		&app.stakingKeeper,
 	)
@@ -308,6 +310,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
+		asset.NewAppModule(app.assetKeeper),
 		//asset
 		//market
 		//incentive
@@ -332,7 +335,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(gov.RouterKey, gov.NewHandler(app.govKeeper)).
 		AddRoute(crisis.RouterKey, crisis.NewHandler(app.crisisKeeper)).
 		AddRoute(bankx.RouterKey, bankx.NewHandler(app.bankxKeeper)).
-		AddRoute(asset.RouterKey, asset.NewHandler(app.assetKeeper)).
+		AddRoute(asset_types.RouterKey, asset.NewHandler(app.assetKeeper)).
 		AddRoute(market.RouterKey, market.NewHandler(app.marketKeeper)).
 		AddRoute(distributionx.RouterKey, distributionx.NewHandler(app.distrxKeeper))
 
@@ -344,7 +347,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
 		AddRoute(stakingx.QuerierRoute, stakingx.NewQuerier(app.stakingXKeeper, app.cdc)).
-		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.tokenKeeper)).
+		AddRoute(asset_types.QuerierRoute, asset.NewQuerier(app.tokenKeeper)).
 		AddRoute(market.StoreKey, market.NewQuerier(app.marketKeeper, app.cdc))
 }
 

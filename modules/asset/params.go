@@ -13,20 +13,15 @@ import (
 // DefaultParamspace defines the default asset module parameter subspace
 const (
 	// ModuleName is the name of the module
-	ModuleName = "asset"
 
 	// StoreKey is string representation of the store key for asset
-	StoreKey = ModuleName
 
 	// RouterKey is the message route for asset
-	RouterKey = ModuleName
 
 	// QuerierRoute is the querier route for asset
-	QuerierRoute = ModuleName
 
-	DefaultParamspace = ModuleName
-	MaxTokenAmount    = 9E18 // 90 billion * 10 ^ 8
-	RareSymbolLength  = 2
+	MaxTokenAmount   = 9E18 // 90 billion * 10 ^ 8
+	RareSymbolLength = 2
 
 	IssueTokenFee     = 1E12 // 10000 * 10 ^8
 	IssueRareTokenFee = 1E13 // 100000 * 10 ^8

@@ -3,6 +3,8 @@ package asset
 import (
 	"encoding/json"
 
+	asset_types "github.com/coinexchain/dex/modules/asset/types"
+
 	"github.com/coinexchain/dex/modules/asset/client"
 
 	"github.com/coinexchain/dex/modules/asset/client/rest"
@@ -26,7 +28,7 @@ type AppModuleBasic struct{}
 
 // module name
 func (AppModuleBasic) Name() string {
-	return ModuleName
+	return asset_types.ModuleName
 }
 
 // register module codec
@@ -52,7 +54,7 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 
 // register rest routes
 func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr, ModuleCdc, StoreKey)
+	rest.RegisterRoutes(ctx, rtr, ModuleCdc, asset_types.StoreKey)
 }
 
 // get the root tx command of this module
@@ -82,7 +84,7 @@ func NewAppModule(assetKeeper BaseKeeper) AppModule {
 
 // module name
 func (AppModule) Name() string {
-	return ModuleName
+	return asset_types.ModuleName
 }
 
 // register invariants
@@ -96,7 +98,7 @@ func (AppModule) NewHandler() sdk.Handler { return nil }
 
 // module querier route name
 func (AppModule) QuerierRoute() string {
-	return QuerierRoute
+	return asset_types.QuerierRoute
 }
 
 // module querier
