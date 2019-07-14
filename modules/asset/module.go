@@ -5,9 +5,9 @@ import (
 
 	asset_types "github.com/coinexchain/dex/modules/asset/types"
 
-	"github.com/coinexchain/dex/modules/asset/client"
+	//"github.com/coinexchain/dex/modules/asset/client"
 
-	"github.com/coinexchain/dex/modules/asset/client/rest"
+	//"github.com/coinexchain/dex/modules/asset/client/rest"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -54,17 +54,19 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 
 // register rest routes
 func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr, ModuleCdc, asset_types.StoreKey)
+	//rest.RegisterRoutes(ctx, rtr, ModuleCdc, asset_types.StoreKey)
 }
 
 // get the root tx command of this module
 func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return client.GetTxCmd(cdc)
+	//return client.GetTxCmd(cdc)
+	return &cobra.Command{}
 }
 
 // get the root query command of this module
 func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return client.GetQueryCmd(cdc)
+	//return client.GetQueryCmd(cdc)
+	return &cobra.Command{}
 }
 
 //___________________________
