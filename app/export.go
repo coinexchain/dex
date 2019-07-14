@@ -2,7 +2,7 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 	"log"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -21,6 +21,7 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
@@ -74,7 +75,7 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 	/* Handle fee distribution state. */
 
 	// withdraw all validator commission
-	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val sdk.Validator) (stop bool) {
+	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val exported.ValidatorI) (stop bool) {
 		_, _ = app.distrKeeper.WithdrawValidatorCommission(ctx, val.GetOperator())
 		return false
 	})
@@ -96,7 +97,7 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 	ctx = ctx.WithBlockHeight(0)
 
 	// reinitialize all validators
-	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val sdk.Validator) (stop bool) {
+	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val exported.ValidatorI) (stop bool) {
 
 		// donate any unwithdrawn outstanding reward fraction tokens to the community pool
 		scraps := app.distrKeeper.GetValidatorOutstandingRewards(ctx, val.GetOperator())
@@ -184,7 +185,7 @@ func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
 	accounts := app.getAllAccountsForGenesis(ctx, accountsX)
 
 	return NewGenesisState(accounts,
-		auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
+		auth.ExportGenesis(ctx, app.accountKeeper),
 		authx.ExportGenesis(ctx, app.accountXKeeper),
 		bank.ExportGenesis(ctx, app.bankKeeper),
 		bankx.ExportGenesis(ctx, app.bankxKeeper),

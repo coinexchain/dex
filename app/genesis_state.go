@@ -190,9 +190,9 @@ func (gs GenesisState) Validate() error {
 	if err := gov.ValidateGenesis(gs.GovData); err != nil {
 		return err
 	}
-	if err := crisis.ValidateGenesis(gs.CrisisData); err != nil {
-		return err
-	}
+	//if err := crisis.ValidateGenesis(gs.CrisisData); err != nil {
+	//	return err
+	//}
 	if err := slashing.ValidateGenesis(gs.SlashingData); err != nil {
 		return err
 	}
@@ -282,8 +282,8 @@ func CetAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []jso
 	for _, acc := range genesisState.Accounts {
 		for _, coin := range acc.Coins {
 			if coin.Denom == genesisState.StakingData.Params.BondDenom {
-				stakingData.Pool.NotBondedTokens = stakingData.Pool.NotBondedTokens.
-					Add(coin.Amount) // increase the supply
+				//stakingData.Pool.NotBondedTokens = stakingData.Pool.NotBondedTokens.
+				//	Add(coin.Amount) // increase the supply
 			}
 		}
 	}
