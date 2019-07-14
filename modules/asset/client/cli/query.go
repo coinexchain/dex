@@ -38,7 +38,7 @@ $ cetcli query asset token abc
 			}
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
-			res, err := cliCtx.QueryWithData(route, bz)
+			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
 			}
@@ -66,7 +66,7 @@ $ cetcli query asset tokens
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
-			res, err := cliCtx.QueryWithData(route, nil)
+			res, _, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err
 			}
@@ -103,7 +103,7 @@ $ cetcli query asset whitelist abc
 			}
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryWhitelist)
-			res, err := cliCtx.QueryWithData(route, bz)
+			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
 			}
@@ -140,7 +140,7 @@ $ cetcli query asset forbidden-addresses abc
 			}
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryForbiddenAddr)
-			res, err := cliCtx.QueryWithData(route, bz)
+			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
 			}
@@ -170,7 +170,7 @@ $ cetcli query asset reserved-symbols
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryReservedSymbols)
-			res, err := cliCtx.QueryWithData(route, nil)
+			res, _, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err
 			}
