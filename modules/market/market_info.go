@@ -1,8 +1,6 @@
 package market
 
 import (
-	"strconv"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -13,11 +11,11 @@ type MarketInfo struct {
 	LastExecutedPrice sdk.Dec `json:"last_executed_price"`
 }
 
-func (info MarketInfo) GetTags() sdk.Tags {
-	return sdk.NewTags(
-		"stock", info.Stock,
-		"money", info.Money,
-		"price-precision", strconv.Itoa(int(info.PricePrecision)),
-		"last-execute-price", info.LastExecutedPrice.String(),
-	)
-}
+//func (info MarketInfo) GetTags() sdk.Tags {
+//	return sdk.NewTags(
+//		"stock", info.Stock,
+//		"money", info.Money,
+//		"price-precision", strconv.Itoa(int(info.PricePrecision)),
+//		"last-execute-price", info.LastExecutedPrice.String(),
+//	)
+//}

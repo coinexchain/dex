@@ -292,7 +292,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper Keeper, marketParams Params) {
 	delistKeeper.RemoveDelistRequestsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
 }
 
-func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
+func EndBlocker(ctx sdk.Context, keeper Keeper) /*sdk.Tags*/ {
 
 	marketInfoList := keeper.GetAllMarketInfos(ctx)
 	currHeight := ctx.BlockHeight()
@@ -318,7 +318,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		keeper.orderClean.SetUnixTime(ctx, currTime)
 		removeExpiredOrder(ctx, keeper, marketInfoList, marketParams)
 		removeExpiredMarket(ctx, keeper, marketParams)
-		return nil
+		return //nil
 	}
 
 	ordersForUpdateList := make([]map[string]*Order, len(marketInfoList))
@@ -358,7 +358,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 		}
 	}
 
-	return nil
+	//return nil
 }
 
 func sendOrderMsg(order *Order, height int64, feeForZeroDeal int64, keeper Keeper) {
