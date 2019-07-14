@@ -20,7 +20,7 @@ func DevCmd(cdc *codec.Codec, registerRoutesFn func(*lcd.RestServer)) *cobra.Com
 		DefaultParamsCmd(cdc),
 		CosmosHubParamsCmd(),
 		ShowCommandTreeCmd(),
-		RestEndpointsCmd(cdc, registerRoutesFn),
+		RestEndpointsCmd(registerRoutesFn),
 	)
 
 	return devCmd

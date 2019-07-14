@@ -3,6 +3,7 @@ package init
 // DONTCOVER
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -175,7 +176,7 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 	}
 
 	config.Moniker = nodeDirName
-	adjustBlockCommitSpeed(config)
+	//adjustBlockCommitSpeed(config)
 
 	ip, err := getIP(i, viper.GetString(flagStartingIPAddress))
 	if err != nil {
@@ -192,7 +193,7 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 	memo := fmt.Sprintf("%s@%s:26656", nodeID, ip)
 	genFile := config.GenesisFile()
 
-	buf := client.BufferStdin()
+	buf := bufio.NewReader(os.Stdin) // TODO
 	prompt := fmt.Sprintf(
 		"Password for account '%s' (default %s):", nodeDirName, app.DefaultKeyPass,
 	)
@@ -242,7 +243,7 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 		valPubKey,
 		sdk.NewCoin(dex.DefaultBondDenom, minSelfDel),
 		staking.NewDescription(nodeDirName, "", "", ""),
-		staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
+		staking.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
 		minSelfDel,
 	)
 	kb, err := keys.NewKeyBaseFromDir(clientDir)

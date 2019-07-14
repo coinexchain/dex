@@ -76,7 +76,7 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
 
-			token, err := parseTokenInfo()
+			_, err := parseTokenInfo()
 			if err != nil {
 				return err
 			}
@@ -86,32 +86,32 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 				return fmt.Errorf("%s does not exist, run `cetd init` first", genFile)
 			}
 
-			genDoc, err := LoadGenesisDoc(cdc, genFile)
-			if err != nil {
-				return err
-			}
-
-			var appState app.GenesisState
-			if err = cdc.UnmarshalJSON(genDoc.AppState, &appState); err != nil {
-				return err
-			}
-
-			appState, err = addGenesisToken(appState, token)
-			if err != nil {
-				return err
-			}
-
-			appStateJSON, err := cdc.MarshalJSON(appState)
-			if err != nil {
-				return err
-			}
-
-			return genutil.ExportGenesisFile(genFile, genDoc.ChainID, nil, appStateJSON)
+			//genDoc, err := LoadGenesisDoc(cdc, genFile)
+			//if err != nil {
+			//	return err
+			//}
+			//
+			//var appState app.GenesisState
+			//if err = cdc.UnmarshalJSON(genDoc.AppState, &appState); err != nil {
+			//	return err
+			//}
+			//
+			//appState, err = addGenesisToken(appState, token)
+			//if err != nil {
+			//	return err
+			//}
+			//
+			//appStateJSON, err := cdc.MarshalJSON(appState)
+			//if err != nil {
+			//	return err
+			//}
+			//
+			return genutil.ExportGenesisFile(nil, genFile) // TODO
 		},
 	}
 
 	cmd.Flags().String(cli.HomeFlag, app.DefaultNodeHome, "node's home directory")
-	cmd.Flags().String(flagClientHome, app.DefaultCLIHome, "client's home directory")
+	//cmd.Flags().String(flagClientHome, app.DefaultCLIHome, "client's home directory")
 	cmd.Flags().String(flagName, "", "token name is limited to 32 unicode characters")
 	cmd.Flags().String(flagSymbol, "", "token symbol is limited to [a-z][a-z0-9]{1,7}")
 	cmd.Flags().String(flagOwner, "", "token owner")
@@ -140,10 +140,10 @@ func parseTokenInfo() (asset.Token, error) {
 	token := &asset.BaseToken{}
 	var err error
 
-	owner, err := getAddress(viper.GetString(flagOwner))
-	if err != nil {
-		return nil, err
-	}
+	//owner, err := getAddress(viper.GetString(flagOwner))
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	if err = token.SetName(viper.GetString(flagName)); err != nil {
 		return nil, err
@@ -151,9 +151,9 @@ func parseTokenInfo() (asset.Token, error) {
 	if err = token.SetSymbol(viper.GetString(flagSymbol)); err != nil {
 		return nil, err
 	}
-	if err = token.SetOwner(owner); err != nil {
-		return nil, err
-	}
+	//if err = token.SetOwner(owner); err != nil {
+	//	return nil, err
+	//}
 	if err = token.SetTotalSupply(viper.GetInt64(flagTotalSupply)); err != nil {
 		return nil, err
 	}

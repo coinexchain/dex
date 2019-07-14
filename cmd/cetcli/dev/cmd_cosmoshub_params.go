@@ -17,7 +17,7 @@ import (
 )
 
 type genesisDoc struct {
-	AppState gaia_app.GenesisState `json:"app_state"`
+	//AppState gaia_app.GenesisState `json:"app_state"`
 }
 
 func CosmosHubParamsCmd() *cobra.Command {
@@ -41,13 +41,13 @@ func CosmosHubParamsCmd() *cobra.Command {
 			}
 
 			body = fixAddresses(body)
-			genDoc := genesisDoc{}
-			err = gaia_app.MakeCodec().UnmarshalJSON(body, &genDoc)
+			//genDoc := genesisDoc{}
+			//err = gaia_app.MakeCodec().UnmarshalJSON(body, &genDoc)
 			if err != nil {
 				return err
 			}
 
-			printParams(genDoc.AppState)
+			//printParams(genDoc.AppState)
 			return nil
 		},
 	}

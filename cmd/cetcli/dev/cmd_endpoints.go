@@ -9,10 +9,9 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
-	"github.com/cosmos/cosmos-sdk/codec"
 )
 
-func RestEndpointsCmd(cdc *codec.Codec, registerRoutesFn func(*lcd.RestServer)) *cobra.Command {
+func RestEndpointsCmd(registerRoutesFn func(*lcd.RestServer)) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rest-endpoints",
 		Short: "Show LCD REST endpoints",
@@ -21,7 +20,7 @@ func RestEndpointsCmd(cdc *codec.Codec, registerRoutesFn func(*lcd.RestServer)) 
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Method", "Path"})
 
-			router := prepareRouter(cdc, registerRoutesFn)
+			router := prepareRouter(registerRoutesFn)
 			router.Walk(func(route *mux.Route, _ *mux.Router, _ []*mux.Route) error {
 				path, _ := route.GetPathTemplate()
 				method := getMethod(route)
@@ -36,11 +35,10 @@ func RestEndpointsCmd(cdc *codec.Codec, registerRoutesFn func(*lcd.RestServer)) 
 	return cmd
 }
 
-func prepareRouter(cdc *codec.Codec, registerRoutesFn func(*lcd.RestServer)) *mux.Router {
+func prepareRouter(registerRoutesFn func(*lcd.RestServer)) *mux.Router {
 	rs := &lcd.RestServer{
 		Mux:    mux.NewRouter(),
 		CliCtx: context.CLIContext{},
-		Cdc:    cdc,
 	}
 
 	registerRoutesFn(rs)
