@@ -3,19 +3,20 @@ package stakingx
 import (
 	"fmt"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/coinexchain/dex/modules/asset"
 	dex "github.com/coinexchain/dex/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 type AssetViewKeeper interface {
 	GetToken(ctx sdk.Context, symbol string) asset.Token
 }
 
-func RegisterInvariants(c types.CrisisKeeper, k Keeper, assetKeeper AssetViewKeeper, sk staking.Keeper) {
+func RegisterInvariants(c crisis.Keeper, k Keeper, assetKeeper AssetViewKeeper, sk staking.Keeper) {
 
 	c.RegisterRoute(types.ModuleName, "total-supply", TotalSupplyInvariants(k, assetKeeper))
 

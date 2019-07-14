@@ -61,13 +61,13 @@ func (k Keeper) GetNonBondableAddresses(ctx sdk.Context) []sdk.AccAddress {
 }
 
 func (k Keeper) CalcBondPoolStatus(ctx sdk.Context) BondPool {
-	pool := k.sk.GetPool(ctx)
+	//pool := k.sk.GetPool(ctx)
 
 	var bondPool BondPool
-	bondPool.NotBondedTokens = pool.NotBondedTokens
-	bondPool.BondedTokens = pool.BondedTokens
-	bondPool.NonBondableTokens = calcNonBondableTokens(ctx, &k)
-	bondPool.TotalSupply = pool.NotBondedTokens.Add(pool.BondedTokens)
+	//bondPool.NotBondedTokens = pool.NotBondedTokens
+	//bondPool.BondedTokens = pool.BondedTokens
+	//bondPool.NonBondableTokens = calcNonBondableTokens(ctx, &k)
+	//bondPool.TotalSupply = pool.NotBondedTokens.Add(pool.BondedTokens)
 	bondPool.BondRatio = calcBondedRatio(&bondPool)
 
 	return bondPool

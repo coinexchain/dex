@@ -4,8 +4,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	slash "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/exported"
-
-	dex "github.com/coinexchain/dex/types"
 )
 
 var _ slash.StakingKeeper = Keeper{}
@@ -31,25 +29,26 @@ func (k Keeper) Unjail(ctx sdk.Context, consAddr sdk.ConsAddress) {
 }
 
 func (k Keeper) MaxValidators(sdk.Context) uint16 {
-	//TODO:  panic("implement me")
+	//TODO:
+	panic("implement me")
 }
 
 // intercept Slash(), inject CoinEx logic
 func (k Keeper) Slash(ctx sdk.Context, consAddr sdk.ConsAddress, infractionHeight int64, power int64, slashFactor sdk.Dec) {
 	logger := ctx.Logger().With("module", "x/staking")
-	oldBondedTokens := k.sk.GetPool(ctx).BondedTokens
+	//oldBondedTokens := k.sk.GetPool(ctx).BondedTokens
 	k.sk.Slash(ctx, consAddr, infractionHeight, power, slashFactor)
 
 	// update pool
-	pool := k.sk.GetPool(ctx)
-	newBondedTokens := pool.BondedTokens
-	burntTokens := oldBondedTokens.Sub(newBondedTokens)
-	pool.NotBondedTokens = pool.NotBondedTokens.Add(burntTokens)
-	k.sk.SetPool(ctx, pool)
+	//pool := k.sk.GetPool(ctx)
+	//newBondedTokens := pool.BondedTokens
+	//burntTokens := oldBondedTokens.Sub(newBondedTokens)
+	//pool.NotBondedTokens = pool.NotBondedTokens.Add(burntTokens)
+	//k.sk.SetPool(ctx, pool)
 
 	// update FeePool
 	feePool := k.dk.GetFeePool(ctx)
-	feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoins(dex.NewCetCoins(burntTokens.Int64()))) // TODO
+	//feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoins(dex.NewCetCoins(burntTokens.Int64()))) // TODO
 	k.dk.SetFeePool(ctx, feePool)
 
 	// TODO
