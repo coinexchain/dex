@@ -156,7 +156,7 @@ func (gs GenesisState) Validate() error {
 	if err := gs.BankXData.Validate(); err != nil {
 		return err
 	}
-	if err := gs.StakingXData.Validate(); err != nil {
+	if err := gs.StakingXData.ValidateGenesis(); err != nil {
 		return err
 	}
 	if err := gs.AssetData.ValidateGenesis(); err != nil {

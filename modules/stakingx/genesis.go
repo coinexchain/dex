@@ -34,7 +34,7 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
-func (data GenesisState) Validate() error {
+func (data GenesisState) ValidateGenesis() error {
 	msd := data.Params.MinSelfDelegation
 	if !msd.IsPositive() {
 		return ErrInvalidMinSelfDelegation(msd)

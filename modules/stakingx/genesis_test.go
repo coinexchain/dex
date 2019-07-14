@@ -15,7 +15,7 @@ func TestGenesisState_Validate(t *testing.T) {
 	validState := GenesisState{
 		Params: DefaultParams(),
 	}
-	require.Nil(t, validState.Validate())
+	require.Nil(t, validState.ValidateGenesis())
 
 	//invalidMinSelfDelegation
 	invalidMinSelfDelegation := GenesisState{
@@ -24,7 +24,7 @@ func TestGenesisState_Validate(t *testing.T) {
 			NonBondableAddresses: []sdk.AccAddress{},
 		},
 	}
-	require.NotNil(t, invalidMinSelfDelegation.Validate())
+	require.NotNil(t, invalidMinSelfDelegation.ValidateGenesis())
 
 	//invalidNonBondedAddresses
 	nonBondedAddresses := make([]sdk.AccAddress, 2)
@@ -36,7 +36,7 @@ func TestGenesisState_Validate(t *testing.T) {
 			NonBondableAddresses: nonBondedAddresses,
 		},
 	}
-	require.NotNil(t, invalidNonBondedAddresses.Validate())
+	require.NotNil(t, invalidNonBondedAddresses.ValidateGenesis())
 }
 
 func TestDefaultGenesisState(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 )
 
 // GetCmdQueryPool implements the pool query command.
-func GetCmdQueryPool(storeName string, cdc *codec.Codec) *cobra.Command {
+func GetCmdQueryPool(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "pool",
 		Args:  cobra.NoArgs,

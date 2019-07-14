@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 
+	stakingx_client "github.com/coinexchain/dex/modules/stakingx/client"
+
 	"github.com/coinexchain/dex/modules/asset/client"
 
 	asset_types "github.com/coinexchain/dex/modules/asset/types"
@@ -297,7 +299,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
 	)
 
-	//TODO: Add modules of our application: asset, market, authx, bankx, crisisx, ...
+	//TODO: Add modules of our application: market, authx, bankx, crisisx, ...
 	app.mm = module.NewManager(
 		genaccounts.NewAppModule(app.accountKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
@@ -305,19 +307,18 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		//authx
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		//bankx
-		//stakingx
 		crisis.NewAppModule(app.crisisKeeper),
+		//crisisx
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
+		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
 		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
-		//asset
 		//market
 		//incentive
 	)
-
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {
