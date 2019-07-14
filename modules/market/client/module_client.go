@@ -10,7 +10,7 @@ import (
 	"github.com/coinexchain/dex/modules/market/client/cli"
 )
 
-// ModuleClient exports all client functionality from this module
+// AssetModuleClient exports all client functionality from this module
 type ModuleClient struct {
 	storeKey string
 	cdc      *amino.Codec

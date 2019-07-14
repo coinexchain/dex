@@ -3,16 +3,16 @@ package asset
 import (
 	"encoding/json"
 
+	"github.com/coinexchain/dex/modules/asset/exported"
+
+	"github.com/cosmos/cosmos-sdk/client/context"
+
 	asset_types "github.com/coinexchain/dex/modules/asset/types"
 
-	//"github.com/coinexchain/dex/modules/asset/client"
-
-	//"github.com/coinexchain/dex/modules/asset/client/rest"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -24,7 +24,9 @@ var (
 )
 
 // app module basics object
-type AppModuleBasic struct{}
+type AppModuleBasic struct {
+	apc exported.AssetModuleClient
+}
 
 // module name
 func (AppModuleBasic) Name() string {
@@ -53,20 +55,18 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 }
 
 // register rest routes
-func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	//rest.RegisterRoutes(ctx, rtr, ModuleCdc, asset_types.StoreKey)
+func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	amb.apc.RegisterRESTRoutes(ctx, rtr)
 }
 
 // get the root tx command of this module
-func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	//return client.GetTxCmd(cdc)
-	return &cobra.Command{}
+func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	return amb.apc.GetTxCmd(cdc)
 }
 
 // get the root query command of this module
-func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	//return client.GetQueryCmd(cdc)
-	return &cobra.Command{}
+func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+	return amb.apc.GetQueryCmd(cdc)
 }
 
 //___________________________
@@ -74,13 +74,15 @@ func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	assetKeeper BaseKeeper //TODO: rename to AssetKeeper
+	apc         exported.AssetModuleClient
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(assetKeeper BaseKeeper) AppModule {
+func NewAppModule(assetKeeper BaseKeeper, apc exported.AssetModuleClient) AppModule {
 	return AppModule{
-		AppModuleBasic: AppModuleBasic{},
+		AppModuleBasic: AppModuleBasic{apc: apc},
 		assetKeeper:    assetKeeper,
+		apc:            apc,
 	}
 }
 

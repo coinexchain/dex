@@ -10,7 +10,6 @@ import (
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
-	//"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -31,7 +30,7 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().
-				WithCodec(cdc)//.WithAccountDecoder(cdc)
+				WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			to, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {

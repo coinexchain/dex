@@ -1,47 +1,28 @@
 package client
 
 import (
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/client/rest"
+	"github.com/coinexchain/dex/modules/asset/exported"
 	asset_types "github.com/coinexchain/dex/modules/asset/types"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/spf13/cobra"
-	"github.com/tendermint/go-amino"
-
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
 
 	assCli "github.com/coinexchain/dex/modules/asset/client/cli"
 )
 
-// ModuleClient exports all client functionality from this module
-type ModuleClient struct {
-	storeKey string
-	cdc      *amino.Codec
+type AssetModuleClient struct {
 }
 
-func NewModuleClient(storeKey string, cdc *amino.Codec) ModuleClient {
-	return ModuleClient{storeKey, cdc}
+func (mc AssetModuleClient) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr, asset.ModuleCdc, asset_types.StoreKey)
 }
 
-// GetQueryCmd returns the cli query commands for this module
-func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	// Group asset queries under a subcommand
-	assQueryCmd := &cobra.Command{
-		Use:   asset_types.ModuleName,
-		Short: "Querying commands for the asset module",
-	}
-
-	assQueryCmd.AddCommand(client.GetCommands(
-		assCli.GetTokenCmd(asset_types.QuerierRoute, cdc),
-		assCli.GetTokenListCmd(asset_types.QuerierRoute, cdc),
-		assCli.GetWhitelistCmd(asset_types.QuerierRoute, cdc),
-		assCli.GetForbiddenAddrCmd(asset_types.QuerierRoute, cdc),
-		assCli.GetReservedSymbolsCmd(asset_types.QuerierRoute, cdc),
-	)...)
-
-	return assQueryCmd
-}
-
-// GetTxCmd returns the transaction commands for this module
-func GetTxCmd(cdc *codec.Codec) *cobra.Command {
+// get the root tx command of this module
+func (mc AssetModuleClient) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	assTxCmd := &cobra.Command{
 		Use:   asset_types.ModuleName,
 		Short: "Asset transactions subcommands",
@@ -63,4 +44,27 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	)...)
 
 	return assTxCmd
+}
+
+// get the root query command of this module
+func (mc AssetModuleClient) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+	// Group asset queries under a subcommand
+	assQueryCmd := &cobra.Command{
+		Use:   asset_types.ModuleName,
+		Short: "Querying commands for the asset module",
+	}
+
+	assQueryCmd.AddCommand(client.GetCommands(
+		assCli.GetTokenCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetTokenListCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetWhitelistCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetForbiddenAddrCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetReservedSymbolsCmd(asset_types.QuerierRoute, cdc),
+	)...)
+
+	return assQueryCmd
+}
+
+func NewAssetModuleClient() exported.AssetModuleClient {
+	return AssetModuleClient{}
 }

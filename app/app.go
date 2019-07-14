@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 
+	"github.com/coinexchain/dex/modules/asset/client"
+
 	asset_types "github.com/coinexchain/dex/modules/asset/types"
 
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
@@ -310,7 +312,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
-		asset.NewAppModule(app.assetKeeper),
+		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
 		//asset
 		//market
 		//incentive
