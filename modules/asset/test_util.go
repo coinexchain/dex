@@ -35,12 +35,12 @@ func setupTestInput() testInput {
 
 	cdc := codec.New()
 	RegisterCodec(cdc)
-	auth.RegisterBaseAccount(cdc)
+	//auth.RegisterBaseAccount(cdc)
 
 	assetCapKey := sdk.NewKVStoreKey(types2.StoreKey)
 	authCapKey := sdk.NewKVStoreKey(auth.StoreKey)
 	authxCapKey := sdk.NewKVStoreKey(authx.StoreKey)
-	fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
+	//fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
 	keyParams := sdk.NewKVStoreKey(params.StoreKey)
 	keyStaking := sdk.NewKVStoreKey(types.StoreKey)
 	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
@@ -50,50 +50,51 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(assetCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(authCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(authxCapKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(fckCapKey, sdk.StoreTypeIAVL, db)
+	//ms.MountStoreWithDB(fckCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
 
 	_ = ms.LoadLatestVersion()
 
+	var cs sdk.CodespaceType = "" // TODO
 	ak := auth.NewAccountKeeper(
 		cdc,
 		authCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(auth.DefaultParamspace),
+		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(auth.DefaultParamspace),
 		auth.ProtoBaseAccount,
 	)
 	axk := authx.NewKeeper(
 		cdc,
 		authxCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(authx.DefaultParamspace),
+		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(authx.DefaultParamspace),
 	)
 
 	bk := bank.NewBaseKeeper(
 		ak,
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(bank.DefaultParamspace),
+		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(bank.DefaultParamspace),
 		sdk.CodespaceRoot)
-	fck := auth.NewFeeCollectionKeeper(
-		cdc,
-		fckCapKey,
-	)
+	//fck := auth.NewFeeCollectionKeeper(
+	//	cdc,
+	//	fckCapKey,
+	//)
 	ask := NewBaseTokenKeeper(
 		cdc,
 		assetCapKey,
 	)
 	bkx := bankx.NewKeeper(
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(bankx.DefaultParamspace),
-		axk, bk, ak, fck, ask,
+		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(bankx.DefaultParamspace),
+		axk, bk, ak, ask,
 		msgqueue.NewProducer(),
 	)
 
-	sk := staking.NewKeeper(cdc, keyStaking, tkeyStaking, bk,
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(staking.DefaultParamspace),
+	sk := staking.NewKeeper(cdc, keyStaking, tkeyStaking, nil, // TODO
+		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(staking.DefaultParamspace),
 		types.DefaultCodespace)
 
 	tk := NewBaseKeeper(
 		cdc,
 		assetCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams).Subspace(types2.DefaultParamspace),
+		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(types2.DefaultParamspace),
 		bkx,
 		&sk)
 

@@ -104,7 +104,7 @@ func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) s
 		return err
 	}
 
-	k.fck.AddCollectedFees(ctx, amt)
+	//k.fck.AddCollectedFees(ctx, amt)
 	return nil
 }
 
