@@ -4,9 +4,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
-var _ sdk.StakingHooks = StakingHooks{}
+var _ stakingtypes.StakingHooks = StakingHooks{}
 
 // StakingHooks contains combined distribution and slashing hooks needed for the
 // staking module.

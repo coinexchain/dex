@@ -320,11 +320,11 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 
 func (app *CetChainApp) registerCrisisRoutes() {
 	crisisx.RegisterInvariants(&app.crisisKeeper, app.assetKeeper, app.bankxKeeper, app.supplyKeeper, auth.FeeCollectorName, app.distrKeeper, app.stakingKeeper)
-	bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
-	distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
+	//bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
+	//distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
 
 	//Invariants checks of staking module will adjust and included by stakingx.RegisterInvariants
-	stakingx.RegisterInvariants(&app.crisisKeeper, app.stakingXKeeper, app.assetKeeper, app.stakingKeeper)
+	//stakingx.RegisterInvariants(&app.crisisKeeper, app.stakingXKeeper, app.assetKeeper, app.stakingKeeper)
 }
 
 func (app *CetChainApp) registerMessageRoutes() {
@@ -344,8 +344,8 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(authx.QuerierRoute, authx.NewQuerier(app.accountXKeeper)).
 		AddRoute(distr.QuerierRoute, distr.NewQuerier(app.distrKeeper)).
 		AddRoute(gov.QuerierRoute, gov.NewQuerier(app.govKeeper)).
-		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
-		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
+		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper)).
+		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper)).
 		AddRoute(stakingx.QuerierRoute, stakingx.NewQuerier(app.stakingXKeeper, app.cdc)).
 		AddRoute(asset_types.QuerierRoute, asset.NewQuerier(app.tokenKeeper)).
 		AddRoute(market.StoreKey, market.NewQuerier(app.marketKeeper, app.cdc))
@@ -395,19 +395,19 @@ func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 	// there is nothing left over in the validator fee pool,
 	// so as to keep the CanWithdrawInvariant invariant.
 	// TODO: This should really happen at EndBlocker.
-	tags := slashing.BeginBlocker(ctx, req, app.slashingKeeper)
+	slashing.BeginBlocker(ctx, req, app.slashingKeeper)
 
 	return abci.ResponseBeginBlock{
-		Tags: tags.ToKVPairs(),
+		//Tags: tags.ToKVPairs(),
 	}
 }
 
 // application updates every end block
 // nolint: unparam
 func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	tags := gov.EndBlocker(ctx, app.govKeeper)
-	validatorUpdates, endBlockerTags := staking.EndBlocker(ctx, app.stakingKeeper)
-	tags = append(tags, endBlockerTags...)
+	gov.EndBlocker(ctx, app.govKeeper)
+	validatorUpdates := staking.EndBlocker(ctx, app.stakingKeeper)
+	//tags = append(tags, endBlockerTags...)
 	authx.EndBlocker(ctx, app.accountXKeeper, app.accountKeeper)
 	market.EndBlocker(ctx, app.marketKeeper)
 
@@ -417,7 +417,7 @@ func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) ab
 
 	return abci.ResponseEndBlock{
 		ValidatorUpdates: validatorUpdates,
-		Tags:             tags,
+		//Tags:             tags,
 	}
 }
 
@@ -470,13 +470,10 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 	app.loadGenesisAccounts(ctx, genesisState)
 
 	// initialize distribution (must happen before staking)
-	distr.InitGenesis(ctx, app.distrKeeper, genesisState.DistrData)
+	distr.InitGenesis(ctx, app.distrKeeper, app.supplyKeeper, genesisState.DistrData)
 
 	// load the initial staking information
-	validators, err := staking.InitGenesis(ctx, app.stakingKeeper, genesisState.StakingData)
-	if err != nil {
-		panic(err) // TODO find a way to do this w/o panics
-	}
+	validators := staking.InitGenesis(ctx, app.stakingKeeper, app.accountKeeper, app.supplyKeeper, genesisState.StakingData)
 
 	// initialize module-specific stores
 	app.initModuleStores(ctx, genesisState)
@@ -506,13 +503,13 @@ func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState Genesi
 }
 
 func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisState) {
-	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
+	auth.InitGenesis(ctx, app.accountKeeper, genesisState.AuthData)
 	authx.InitGenesis(ctx, app.accountXKeeper, genesisState.AuthXData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
 	stakingx.InitGenesis(ctx, app.stakingXKeeper, genesisState.StakingXData)
-	slashing.InitGenesis(ctx, app.slashingKeeper, genesisState.SlashingData, genesisState.StakingData.Validators.ToSDKValidators())
-	gov.InitGenesis(ctx, app.govKeeper, genesisState.GovData)
+	slashing.InitGenesis(ctx, app.slashingKeeper, app.stakingKeeper, genesisState.SlashingData)
+	gov.InitGenesis(ctx, app.govKeeper, app.supplyKeeper, genesisState.GovData)
 	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
 	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
 	market.InitGenesis(ctx, app.marketKeeper, genesisState.MarketData)
@@ -527,7 +524,7 @@ func (app *CetChainApp) deliverGenTxs(genTxs []json.RawMessage) {
 			panic(err)
 		}
 		bz := app.cdc.MustMarshalBinaryLengthPrefixed(tx)
-		res := app.BaseApp.DeliverTx(bz)
+		res := app.BaseApp.DeliverTx(abci.RequestDeliverTx{Tx: bz})
 		if !res.IsOK() {
 			panic(res.Log)
 		}
