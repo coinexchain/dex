@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"strconv"
 	"strings"
 
@@ -15,6 +14,8 @@ import (
 	//"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	//authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 
 	"github.com/coinexchain/dex/modules/market"
@@ -85,7 +86,7 @@ Example:
 
 func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 	txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-	cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+	cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 	sender := cliCtx.GetFromAddress()
 	sequence, err := cliCtx.GetAccountSequence(sender)
@@ -112,7 +113,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		userToken = symbols[1]
 	}
 
-	account, err := cliCtx.GetAccount(sender)
+	account, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(sender)
 	if err != nil {
 		return err
 	}
@@ -125,7 +126,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		msg.TimeInForce = market.GTE
 	}
 
-	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
 
 func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgCreateOrder, error) {
@@ -179,7 +180,7 @@ Examples:
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			sender := cliCtx.GetFromAddress()
 			orderid := viper.GetString(FlagOrderID)
@@ -188,7 +189,7 @@ Examples:
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 

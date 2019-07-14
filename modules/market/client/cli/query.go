@@ -26,7 +26,7 @@ Example :
 	eth/cet --trust-node=true --chain-id=coinexdex`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 			if len(strings.Split(args[0], market.SymbolSeparator)) != 2 {
 				return errors.Errorf("symbol illegal : %s, For example : eth/cet.", args[0])
 			}
@@ -36,7 +36,7 @@ Example :
 				return err
 			}
 			query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
-			res, err := cliCtx.QueryWithData(query, bz)
+			res, _, err := cliCtx.QueryWithData(query, bz)
 			if err != nil {
 				return err
 			}
@@ -58,7 +58,7 @@ Example:
 	wait-cancel-trading-pair --time=10000 
 	--trust-node=true --chain-id=coinexdex`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			time, err := strconv.Atoi(args[0])
 			if time <= 0 || err != nil {
@@ -71,7 +71,7 @@ Example:
 			}
 
 			query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryWaitCancelMarkets)
-			res, err := cliCtx.QueryWithData(query, bz)
+			res, _, err := cliCtx.QueryWithData(query, bz)
 			if err != nil {
 				return err
 			}
@@ -100,7 +100,7 @@ Example :
 	--trust-node=true --chain-id=coinexdex`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			orderID := args[0]
 			if len(strings.Split(orderID, market.OrderIDSeparator)) != 3 {
@@ -113,7 +113,7 @@ Example :
 			}
 
 			route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryOrder)
-			res, err := cliCtx.QueryWithData(route, bz)
+			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
 			}
@@ -138,7 +138,7 @@ Example:
 	--trust-node=true --chain-id=coinexdex`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			queryAddr := args[0]
 			if _, err := sdk.AccAddressFromBech32(queryAddr); err != nil {
@@ -151,7 +151,7 @@ Example:
 			}
 
 			route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryUserOrders)
-			res, err := cliCtx.QueryWithData(route, bz)
+			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
 			}

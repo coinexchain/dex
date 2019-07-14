@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -45,7 +46,7 @@ Example :
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg, err := parseCreateMarketFlags(creator)
@@ -73,7 +74,7 @@ Example :
 					market.MinTokenPricePrecision, market.MaxTokenPricePrecision)
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -95,7 +96,7 @@ func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, queryRoute string, t
 			return err
 		}
 		fmt.Printf("token :%s\n ", token)
-		if _, err := cliCtx.QueryWithData(route, bz); err != nil {
+		if _, _, err := cliCtx.QueryWithData(route, bz); err != nil {
 			fmt.Printf("route : %s\n", route)
 			return err
 		}
@@ -133,7 +134,7 @@ Example
 	--gas=1000000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg := market.MsgCancelTradingPair{
@@ -146,7 +147,7 @@ Example
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -168,7 +169,7 @@ func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg marke
 		return err
 	}
 	query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
-	res, err := cliCtx.QueryWithData(query, bz)
+	res, _, err := cliCtx.QueryWithData(query, bz)
 	if err != nil {
 		return err
 	}
@@ -197,7 +198,7 @@ Example:
 	--gas=10000000 --fees=10000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg := market.MsgModifyPricePrecision{
@@ -210,7 +211,7 @@ Example:
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 

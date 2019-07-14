@@ -35,7 +35,7 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		rest.PostProcessResponse(w, cdc, queryInfo, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, queryInfo)
 	}
 }
 
@@ -46,7 +46,7 @@ func queryMarketInfo(cdc *codec.Codec, cliCtx context.CLIContext, symbol string)
 	}
 
 	query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
-	res, err := cliCtx.QueryWithData(query, bz)
+	res, _, err := cliCtx.QueryWithData(query, bz)
 	if err != nil {
 		return nil, err
 	}
@@ -76,13 +76,13 @@ func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 		}
 
 		route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryOrder)
-		res, err := cliCtx.QueryWithData(route, bz)
+		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
 
@@ -104,12 +104,12 @@ func queryUserOrderListHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) ht
 
 		route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryUserOrders)
 		fmt.Println(route)
-		res, err := cliCtx.QueryWithData(route, bz)
+		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
