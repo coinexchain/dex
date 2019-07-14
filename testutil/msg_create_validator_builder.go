@@ -11,7 +11,7 @@ import (
 
 type MsgCreateValidatorBuilder struct {
 	description       staking.Description
-	commission        staking.CommissionMsg
+	commission        staking.CommissionRates
 	minSelfDelegation sdk.Int
 	valAddr           sdk.ValAddress
 	pubKey            crypto.PubKey
@@ -21,7 +21,7 @@ type MsgCreateValidatorBuilder struct {
 func NewMsgCreateValidatorBuilder(valAddr sdk.ValAddress, pubKey crypto.PubKey) *MsgCreateValidatorBuilder {
 	return &MsgCreateValidatorBuilder{
 		description: staking.NewDescription("node", "node", "www.node.org", "node"),
-		commission:  staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
+		commission:  staking.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
 		valAddr:     valAddr,
 		pubKey:      pubKey,
 	}
@@ -32,7 +32,7 @@ func (builder *MsgCreateValidatorBuilder) Description(moniker, identity, website
 	return builder
 }
 func (builder *MsgCreateValidatorBuilder) Commission(rate, maxRate, maxChangeRate string) *MsgCreateValidatorBuilder {
-	builder.commission = staking.NewCommissionMsg(
+	builder.commission = staking.NewCommissionRates(
 		sdk.MustNewDecFromStr(rate),
 		sdk.MustNewDecFromStr(maxRate),
 		sdk.MustNewDecFromStr(maxChangeRate),
