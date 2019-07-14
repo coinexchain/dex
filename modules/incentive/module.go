@@ -1,9 +1,7 @@
-package stakingx
+package incentive
 
 import (
 	"encoding/json"
-
-	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/types"
 
@@ -16,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	staking_types "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 var (
@@ -36,17 +33,18 @@ func (AppModuleBasic) Name() string {
 
 // register module codec
 func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
+	RegisterCodec(cdc)
 }
 
 // default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return staking_types.ModuleCdc.MustMarshalJSON(DefaultGenesisState())
+	return ModuleCdc.MustMarshalJSON(DefaultGenesisState())
 }
 
 // module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	var data GenesisState
-	err := staking_types.ModuleCdc.UnmarshalJSON(bz, &data)
+	err := ModuleCdc.UnmarshalJSON(bz, &data)
 	if err != nil {
 		return err
 	}
@@ -73,19 +71,15 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 // app module object
 type AppModule struct {
 	AppModuleBasic
-	stakingXKeeper  Keeper //TODO: rename to StakingXKeeper
-	assetViewKeeper AssetViewKeeper
-	stakingKeeper   *staking.Keeper
+	incentiveKeeper Keeper //TODO: rename to incentiveKeeper
 	apc             types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(stakingxKeeper Keeper, assetViewKeeper AssetViewKeeper, stakingKeeper *staking.Keeper, apc types.ModuleClient) AppModule {
+func NewAppModule(incentiveKeeper Keeper, apc types.ModuleClient) AppModule {
 	return AppModule{
 		AppModuleBasic:  AppModuleBasic{apc: apc},
-		stakingXKeeper:  stakingxKeeper,
-		assetViewKeeper: assetViewKeeper,
-		stakingKeeper:   stakingKeeper,
+		incentiveKeeper: incentiveKeeper,
 		apc:             apc,
 	}
 }
@@ -96,18 +90,7 @@ func (AppModule) Name() string {
 }
 
 // register invariants
-func (am AppModule) RegisterInvariants(invReg sdk.InvariantRegistry) {
-	//TODO:
-	//invReg.RegisterRoute(types.ModuleName, "total-supply", TotalSupplyInvariants(am.stakingXKeeper, am.assetViewKeeper))
-	//
-	//invRegRegisterRoute(types.ModuleName, "nonnegative-power", staking.NonNegativePowerInvariant(sk))
-	//
-	//c.RegisterRoute(types.ModuleName, "positive-delegation",
-	//	staking.PositiveDelegationInvariant(sk))
-	//
-	//c.RegisterRoute(types.ModuleName, "delegator-shares",
-	//	staking.DelegatorSharesInvariant(sk))
-}
+func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // module message route name
 func (AppModule) Route() string { return "" }
@@ -122,25 +105,29 @@ func (AppModule) QuerierRoute() string {
 
 // module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return NewQuerier(am.stakingXKeeper, staking_types.ModuleCdc)
+	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
+		return nil, nil
+	}
 }
 
 // module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
-	staking_types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
-	InitGenesis(ctx, am.stakingXKeeper, genesisState)
+	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	InitGenesis(ctx, am.incentiveKeeper, genesisState)
 	return []abci.ValidatorUpdate{}
 }
 
 // module export genesis
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
-	gs := ExportGenesis(ctx, am.stakingXKeeper)
-	return staking_types.ModuleCdc.MustMarshalJSON(gs)
+	gs := ExportGenesis(ctx, am.incentiveKeeper)
+	return ModuleCdc.MustMarshalJSON(gs)
 }
 
 // module begin-block
-func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
+	_ = BeginBlocker(ctx, am.incentiveKeeper)
+}
 
 // module end-block
 func (AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {

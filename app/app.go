@@ -11,8 +11,6 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset/client"
 
-	asset_types "github.com/coinexchain/dex/modules/asset/types"
-
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 
@@ -165,7 +163,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 		keyGov:         sdk.NewKVStoreKey(gov.StoreKey),
 		keyParams:      sdk.NewKVStoreKey(params.StoreKey),
 		tkeyParams:     sdk.NewTransientStoreKey(params.TStoreKey),
-		keyAsset:       sdk.NewKVStoreKey(asset_types.StoreKey),
+		keyAsset:       sdk.NewKVStoreKey(asset.StoreKey),
 		keyMarket:      sdk.NewKVStoreKey(market.StoreKey),
 		keyIncentive:   sdk.NewKVStoreKey(incentive.StoreKey),
 	}
@@ -279,7 +277,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.assetKeeper = asset.NewBaseKeeper(
 		app.cdc,
 		app.keyAsset,
-		app.paramsKeeper.Subspace(asset_types.DefaultParamspace),
+		app.paramsKeeper.Subspace(asset.DefaultParamspace),
 		app.bankxKeeper,
 		&app.stakingKeeper,
 	)
@@ -314,7 +312,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
-		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
+		stakingx.NewAppModule(app.stakingXKeeper, app.assetKeeper, &app.stakingKeeper, stakingx_client.NewStakingXModuleClient()),
 		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
 		//market
 		//incentive
@@ -338,7 +336,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(gov.RouterKey, gov.NewHandler(app.govKeeper)).
 		AddRoute(crisis.RouterKey, crisis.NewHandler(app.crisisKeeper)).
 		AddRoute(bankx.RouterKey, bankx.NewHandler(app.bankxKeeper)).
-		AddRoute(asset_types.RouterKey, asset.NewHandler(app.assetKeeper)).
+		AddRoute(asset.RouterKey, asset.NewHandler(app.assetKeeper)).
 		AddRoute(market.RouterKey, market.NewHandler(app.marketKeeper)).
 		AddRoute(distributionx.RouterKey, distributionx.NewHandler(app.distrxKeeper))
 
@@ -350,7 +348,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper)).
 		AddRoute(stakingx.QuerierRoute, stakingx.NewQuerier(app.stakingXKeeper, app.cdc)).
-		AddRoute(asset_types.QuerierRoute, asset.NewQuerier(app.tokenKeeper)).
+		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.tokenKeeper)).
 		AddRoute(market.StoreKey, market.NewQuerier(app.marketKeeper, app.cdc))
 }
 

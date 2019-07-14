@@ -12,7 +12,6 @@ var (
 )
 
 func BeginBlocker(ctx sdk.Context, k Keeper) sdk.Error {
-
 	blockRewards := calcRewardsForCurrentBlock(ctx, k)
 	err := collectRewardsFromPool(k, ctx, blockRewards)
 	return err

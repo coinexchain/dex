@@ -166,7 +166,7 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
-	if err := gs.Incentive.Validate(); err != nil {
+	if err := gs.Incentive.ValidateGenesis(); err != nil {
 		return err
 	}
 

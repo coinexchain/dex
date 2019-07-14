@@ -1,8 +1,9 @@
 package incentive
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenesisState_Validate(t *testing.T) {
@@ -63,7 +64,7 @@ func TestGenesisState_Validate(t *testing.T) {
 				State: tt.fields.State,
 				Param: tt.fields.Param,
 			}
-			if err := data.Validate(); (err != nil) != tt.wantErr {
+			if err := data.ValidateGenesis(); (err != nil) != tt.wantErr {
 				t.Errorf("GenesisState.Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -7,8 +7,6 @@ import (
 	"testing"
 	"time"
 
-	asset_types "github.com/coinexchain/dex/modules/asset/types"
-
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/stretchr/testify/require"
@@ -152,7 +150,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	tk := asset.NewBaseKeeper(
 		cdc,
 		keys.assetCapKey,
-		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(asset_types.DefaultParamspace),
+		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(asset.DefaultParamspace),
 		bkx,
 		&sk,
 	)
@@ -233,7 +231,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 
 	keys := storeKeys{}
 	keys.marketKey = sdk.NewKVStoreKey(StoreKey)
-	keys.assetCapKey = sdk.NewKVStoreKey(asset_types.StoreKey)
+	keys.assetCapKey = sdk.NewKVStoreKey(asset.StoreKey)
 	keys.authCapKey = sdk.NewKVStoreKey(auth.StoreKey)
 	keys.authxCapKey = sdk.NewKVStoreKey(authx.StoreKey)
 	keys.fckCapKey = sdk.NewKVStoreKey(auth.FeeStoreKey)

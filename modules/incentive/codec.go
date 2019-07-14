@@ -6,9 +6,9 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(State{}, "incentive/state", nil)
 }
 
-var msgCdc = codec.New()
+var ModuleCdc = codec.New()
 
 func init() {
-	RegisterCodec(msgCdc)
-	msgCdc.Seal()
+	RegisterCodec(ModuleCdc)
+	ModuleCdc.Seal()
 }

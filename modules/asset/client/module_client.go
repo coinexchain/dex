@@ -3,7 +3,6 @@ package client
 import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/asset/client/rest"
-	asset_types "github.com/coinexchain/dex/modules/asset/types"
 	"github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -18,18 +17,18 @@ type AssetModuleClient struct {
 }
 
 func (mc AssetModuleClient) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr, asset.ModuleCdc, asset_types.StoreKey)
+	rest.RegisterRoutes(ctx, rtr, asset.ModuleCdc, asset.StoreKey)
 }
 
 // get the root tx command of this module
 func (mc AssetModuleClient) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	assTxCmd := &cobra.Command{
-		Use:   asset_types.ModuleName,
+		Use:   asset.ModuleName,
 		Short: "Asset transactions subcommands",
 	}
 
 	assTxCmd.AddCommand(client.PostCommands(
-		assCli.IssueTokenCmd(asset_types.QuerierRoute, cdc),
+		assCli.IssueTokenCmd(asset.QuerierRoute, cdc),
 		assCli.TransferOwnershipCmd(cdc),
 		assCli.MintTokenCmd(cdc),
 		assCli.BurnTokenCmd(cdc),
@@ -50,16 +49,16 @@ func (mc AssetModuleClient) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 func (mc AssetModuleClient) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	assQueryCmd := &cobra.Command{
-		Use:   asset_types.ModuleName,
+		Use:   asset.ModuleName,
 		Short: "Querying commands for the asset module",
 	}
 
 	assQueryCmd.AddCommand(client.GetCommands(
-		assCli.GetTokenCmd(asset_types.QuerierRoute, cdc),
-		assCli.GetTokenListCmd(asset_types.QuerierRoute, cdc),
-		assCli.GetWhitelistCmd(asset_types.QuerierRoute, cdc),
-		assCli.GetForbiddenAddrCmd(asset_types.QuerierRoute, cdc),
-		assCli.GetReservedSymbolsCmd(asset_types.QuerierRoute, cdc),
+		assCli.GetTokenCmd(asset.QuerierRoute, cdc),
+		assCli.GetTokenListCmd(asset.QuerierRoute, cdc),
+		assCli.GetWhitelistCmd(asset.QuerierRoute, cdc),
+		assCli.GetForbiddenAddrCmd(asset.QuerierRoute, cdc),
+		assCli.GetReservedSymbolsCmd(asset.QuerierRoute, cdc),
 	)...)
 
 	return assQueryCmd

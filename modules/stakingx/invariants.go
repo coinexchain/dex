@@ -18,7 +18,7 @@ type AssetViewKeeper interface {
 
 func RegisterInvariants(c crisis.Keeper, k Keeper, assetKeeper AssetViewKeeper, sk staking.Keeper) {
 
-	c.RegisterRoute(types.ModuleName, "total-supply", TotalSupplyInvariants(k, assetKeeper))
+	c.RegisterRoute(ModuleName, "total-supply", TotalSupplyInvariants(k, assetKeeper))
 
 	// SupplyInvariants no longer suitable here, new SupplyInvariants will be created
 	// c.RegisterRoute(types.ModuleName, "supply",

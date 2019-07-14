@@ -3,8 +3,6 @@ package asset
 import (
 	"unicode/utf8"
 
-	asset_types "github.com/coinexchain/dex/modules/asset/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -44,7 +42,7 @@ func NewMsgIssueToken(name string, symbol string, amt int64, owner sdk.AccAddres
 
 // Route Implements Msg.
 func (msg MsgIssueToken) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -88,7 +86,7 @@ func NewMsgTransferOwnership(symbol string, originalOwner sdk.AccAddress, newOwn
 
 // Route Implements Msg.
 func (msg MsgTransferOwnership) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -141,7 +139,7 @@ func NewMsgMintToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToke
 
 // Route Implements Msg.
 func (msg MsgMintToken) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -198,7 +196,7 @@ func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgBurnToke
 
 // Route Implements Msg.
 func (msg MsgBurnToken) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -254,7 +252,7 @@ func NewMsgForbidToken(symbol string, owner sdk.AccAddress) MsgForbidToken {
 
 // Route Implements Msg.
 func (msg MsgForbidToken) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -300,7 +298,7 @@ func NewMsgUnForbidToken(symbol string, owner sdk.AccAddress) MsgUnForbidToken {
 
 // Route Implements Msg.
 func (msg MsgUnForbidToken) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -348,7 +346,7 @@ func NewMsgAddTokenWhitelist(symbol string, owner sdk.AccAddress, whitelist []sd
 
 // Route Implements Msg.
 func (msg MsgAddTokenWhitelist) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -399,7 +397,7 @@ func NewMsgRemoveTokenWhitelist(symbol string, owner sdk.AccAddress, whitelist [
 
 // Route Implements Msg.
 func (msg MsgRemoveTokenWhitelist) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -450,7 +448,7 @@ func NewMsgForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.AccAd
 
 // Route Implements Msg.
 func (msg MsgForbidAddr) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -501,7 +499,7 @@ func NewMsgUnForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.Acc
 
 // Route Implements Msg.
 func (msg MsgUnForbidAddr) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -552,7 +550,7 @@ func NewMsgModifyTokenURL(symbol string, url string, owner sdk.AccAddress) MsgMo
 
 // Route Implements Msg.
 func (msg MsgModifyTokenURL) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.
@@ -605,7 +603,7 @@ func NewMsgModifyTokenDescription(symbol string, description string, owner sdk.A
 
 // Route Implements Msg.
 func (msg MsgModifyTokenDescription) Route() string {
-	return asset_types.RouterKey
+	return RouterKey
 }
 
 // Type Implements Msg.

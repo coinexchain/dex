@@ -7,8 +7,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 
-	asset_types "github.com/coinexchain/dex/modules/asset/types"
-
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -30,7 +28,7 @@ type AppModuleBasic struct {
 
 // module name
 func (AppModuleBasic) Name() string {
-	return asset_types.ModuleName
+	return ModuleName
 }
 
 // register module codec
@@ -50,7 +48,7 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	if err != nil {
 		return err
 	}
-	//TODO: make it works as return ValidateGenesis(data)
+
 	return data.ValidateGenesis()
 }
 
@@ -88,21 +86,23 @@ func NewAppModule(assetKeeper BaseKeeper, apc types.ModuleClient) AppModule {
 
 // module name
 func (AppModule) Name() string {
-	return asset_types.ModuleName
+	return ModuleName
 }
 
 // register invariants
 func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // module message route name
-func (AppModule) Route() string { return "" }
+func (AppModule) Route() string { return RouterKey }
 
 // module handler
-func (AppModule) NewHandler() sdk.Handler { return nil }
+func (am AppModule) NewHandler() sdk.Handler {
+	return NewHandler(am.assetKeeper)
+}
 
 // module querier route name
 func (AppModule) QuerierRoute() string {
-	return asset_types.QuerierRoute
+	return QuerierRoute
 }
 
 // module querier

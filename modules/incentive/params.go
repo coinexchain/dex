@@ -5,7 +5,9 @@ import (
 )
 
 const (
-	DefaultParamspace = "incentive"
+	ModuleName        = "incentive"
+	QuerierRoute      = ModuleName
+	DefaultParamspace = ModuleName
 )
 
 var _ params.ParamSet = &Params{}

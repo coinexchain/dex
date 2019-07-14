@@ -1,4 +1,4 @@
-package types
+package asset
 
 const (
 	// ModuleName is the name of the module
