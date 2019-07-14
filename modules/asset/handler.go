@@ -1,11 +1,7 @@
 package asset
 
 import (
-	"strconv"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/coinexchain/dex/modules/asset/tags"
 )
 
 // NewHandler returns a handler for "asset" type messages.
@@ -67,11 +63,11 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg MsgIssueToken) sdk.
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.Owner, msg.Owner.String(),
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.Owner, msg.Owner.String(),
+		//),
 	}
 }
 
@@ -86,12 +82,12 @@ func handleMsgTransferOwnership(ctx sdk.Context, keeper Keeper, msg MsgTransferO
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.OriginalOwner, msg.OriginalOwner.String(),
-			tags.NewOwner, msg.NewOwner.String(),
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.OriginalOwner, msg.OriginalOwner.String(),
+		//	tags.NewOwner, msg.NewOwner.String(),
+		//),
 	}
 }
 
@@ -110,11 +106,11 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg MsgMintToken) sdk.Re
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.Amt, strconv.FormatInt(msg.Amount, 10),
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.Amt, strconv.FormatInt(msg.Amount, 10),
+		//),
 	}
 }
 
@@ -133,11 +129,11 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg MsgBurnToken) sdk.Re
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.Amt, strconv.FormatInt(msg.Amount, 10),
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.Amt, strconv.FormatInt(msg.Amount, 10),
+		//),
 	}
 }
 
@@ -152,10 +148,10 @@ func handleMsgForbidToken(ctx sdk.Context, keeper Keeper, msg MsgForbidToken) sd
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//),
 	}
 }
 
@@ -170,10 +166,10 @@ func handleMsgUnForbidToken(ctx sdk.Context, keeper Keeper, msg MsgUnForbidToken
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//),
 	}
 }
 
@@ -193,11 +189,11 @@ func handleMsgAddTokenWhitelist(ctx sdk.Context, keeper Keeper, msg MsgAddTokenW
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.AddWhitelist, str,
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.AddWhitelist, str,
+		//),
 	}
 }
 
@@ -217,11 +213,11 @@ func handleMsgRemoveTokenWhitelist(ctx sdk.Context, keeper Keeper, msg MsgRemove
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.RemoveWhitelist, str,
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.RemoveWhitelist, str,
+		//),
 	}
 }
 
@@ -241,11 +237,11 @@ func handleMsgForbidAddr(ctx sdk.Context, keeper Keeper, msg MsgForbidAddr) (res
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.Addresses, str,
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.Addresses, str,
+		//),
 	}
 }
 
@@ -265,11 +261,11 @@ func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg MsgUnForbidAddr) 
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.Addresses, str,
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.Addresses, str,
+		//),
 	}
 }
 
@@ -284,11 +280,11 @@ func handleMsgModifyTokenURL(ctx sdk.Context, keeper Keeper, msg MsgModifyTokenU
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.URL, msg.URL,
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.URL, msg.URL,
+		//),
 	}
 }
 
@@ -303,11 +299,11 @@ func handleMsgModifyTokenDescription(ctx sdk.Context, keeper Keeper, msg MsgModi
 	}
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Token, msg.Symbol,
-			tags.Description, msg.Description,
-		),
+		//Tags: sdk.NewTags(
+		//	tags.Category, tags.TxCategory,
+		//	tags.Token, msg.Symbol,
+		//	tags.Description, msg.Description,
+		//),
 	}
 }
 

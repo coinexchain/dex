@@ -28,8 +28,8 @@ func handleMsgDonateToCommunityPool(ctx sdk.Context, k Keeper, msg MsgDonateToCo
 	k.dk.SetFeePool(ctx, feePool)
 
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			TagKeyDonator, msg.FromAddr.String(),
-		),
+		//Tags: sdk.NewTags(
+		//	TagKeyDonator, msg.FromAddr.String(),
+		//),
 	}
 }

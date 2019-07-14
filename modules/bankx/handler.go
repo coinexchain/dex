@@ -88,14 +88,14 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Result {
 
 	if k.ak.GetAccount(ctx, toAddr) == nil {
-		_, _, _ = k.bk.AddCoins(ctx, toAddr, sdk.Coins{})
+		_, _ = k.bk.AddCoins(ctx, toAddr, sdk.Coins{})
 	}
 
 	if err := k.DeductFee(ctx, fromAddr, dex.NewCetCoins(k.GetParam(ctx).LockCoinsFee)); err != nil {
 		return err.Result()
 	}
 
-	_, tag, err := k.bk.SubtractCoins(ctx, fromAddr, amt)
+	_, err := k.bk.SubtractCoins(ctx, fromAddr, amt)
 	if err != nil {
 		return err.Result()
 	}
@@ -115,14 +115,14 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		//record fail sendMsg log
 	}
 	return sdk.Result{
-		Tags: tag,
+		//Tags: tag,
 	}
 }
 
 func normalSend(ctx sdk.Context, k Keeper,
 	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) sdk.Result {
 
-	t, err := k.bk.SendCoins(ctx, fromAddr, toAddr, amt)
+	err := k.bk.SendCoins(ctx, fromAddr, toAddr, amt)
 
 	if err != nil {
 		return err.Result()
@@ -134,7 +134,7 @@ func normalSend(ctx sdk.Context, k Keeper,
 	}
 
 	return sdk.Result{
-		Tags: t,
+		//Tags: t,
 	}
 }
 
@@ -155,9 +155,9 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg MsgSetMemoRequired)
 		//record fail sendMsg log
 	}
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			TagKeyMemoRequired, fmt.Sprintf("%v", required),
-			TagKeyAddr, addr.String(),
-		),
+		//Tags: sdk.NewTags(
+		//	TagKeyMemoRequired, fmt.Sprintf("%v", required),
+		//	TagKeyAddr, addr.String(),
+		//),
 	}
 }
