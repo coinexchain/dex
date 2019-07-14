@@ -23,9 +23,7 @@ func handleMsgDonateToCommunityPool(ctx sdk.Context, k Keeper, msg MsgDonateToCo
 		return res.Result()
 	}
 
-	feePool := k.dk.GetFeePool(ctx)
-	feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoins(msg.Amount))
-	k.dk.SetFeePool(ctx, feePool)
+	k.AddCoinsToFeePool(ctx, msg.Amount)
 
 	return sdk.Result{
 		Tags: sdk.NewTags(
