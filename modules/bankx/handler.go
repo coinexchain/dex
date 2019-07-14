@@ -79,7 +79,7 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 	k.ak.SetAccount(ctx, fromAccount)
 
 	//collect account activation fees
-	k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activationFee))
+	//k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activationFee))
 
 	return sendAmt, nil
 }

@@ -34,7 +34,7 @@ func setupTestInput() testInput {
 	authKey := sdk.NewKVStoreKey("authKey")
 	skey := sdk.NewKVStoreKey("params")
 	tkey := sdk.NewTransientStoreKey("transient_params")
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey, "") // TODO
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(authXKey, sdk.StoreTypeIAVL, db)

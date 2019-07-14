@@ -36,7 +36,7 @@ func QueryAccountX(ctx context.CLIContext, addr sdk.AccAddress) ([]byte, error) 
 
 	route := fmt.Sprintf("custom/%s/%s", authx.StoreKey, authx.QueryAccountX)
 
-	res, err := ctx.QueryWithData(route, bz)
+	res, _, err := ctx.QueryWithData(route, bz)
 	if err != nil {
 		return nil, err
 	}
