@@ -19,7 +19,7 @@ const (
 )
 
 // NewQuerier - creates a querier for asset REST endpoints
-func NewQuerier(keeper ViewKeeper, cdc *codec.Codec) sdk.Querier {
+func NewQuerier(keeper ViewKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
 		case QueryToken:
@@ -51,7 +51,7 @@ func NewQueryAssetParams(s string) QueryTokenParams {
 
 func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
 	var params QueryTokenParams
-	if err := msgCdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
@@ -60,7 +60,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]by
 		return nil, ErrorTokenNotFound(fmt.Sprintf("token %s not found", params.Symbol))
 	}
 
-	bz, err := codec.MarshalJSONIndent(msgCdc, token)
+	bz, err := codec.MarshalJSONIndent(ModuleCdc, token)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -69,7 +69,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]by
 }
 
 func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
-	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetAllTokens(ctx))
+	bz, err := codec.MarshalJSONIndent(ModuleCdc, keeper.GetAllTokens(ctx))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -90,11 +90,11 @@ func NewQueryWhitelistParams(s string) QueryWhitelistParams {
 
 func queryWhitelist(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
 	var params QueryWhitelistParams
-	if err := msgCdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetWhitelist(ctx, params.Symbol))
+	bz, err := codec.MarshalJSONIndent(ModuleCdc, keeper.GetWhitelist(ctx, params.Symbol))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -115,11 +115,11 @@ func NewQueryForbiddenAddrParams(s string) QueryForbiddenAddrParams {
 
 func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
 	var params QueryForbiddenAddrParams
-	if err := msgCdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetForbiddenAddresses(ctx, params.Symbol))
+	bz, err := codec.MarshalJSONIndent(ModuleCdc, keeper.GetForbiddenAddresses(ctx, params.Symbol))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
@@ -128,7 +128,7 @@ func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeepe
 }
 
 func queryReservedSymbols(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
-	bz, err := codec.MarshalJSONIndent(msgCdc, keeper.GetReservedSymbols())
+	bz, err := codec.MarshalJSONIndent(ModuleCdc, keeper.GetReservedSymbols())
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

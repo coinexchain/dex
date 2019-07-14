@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/go-amino"
 
@@ -21,7 +22,7 @@ func NewModuleClient(storeKey string, cdc *amino.Codec) ModuleClient {
 }
 
 // GetQueryCmd returns the cli query commands for this module
-func (mc ModuleClient) GetQueryCmd() *cobra.Command {
+func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	assQueryCmd := &cobra.Command{
 		Use:   asset.ModuleName,
@@ -29,36 +30,36 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 	}
 
 	assQueryCmd.AddCommand(client.GetCommands(
-		assCli.GetTokenCmd(mc.storeKey, mc.cdc),
-		assCli.GetTokenListCmd(mc.storeKey, mc.cdc),
-		assCli.GetWhitelistCmd(mc.storeKey, mc.cdc),
-		assCli.GetForbiddenAddrCmd(mc.storeKey, mc.cdc),
-		assCli.GetReservedSymbolsCmd(mc.storeKey, mc.cdc),
+		assCli.GetTokenCmd(asset.StoreKey, cdc),
+		assCli.GetTokenListCmd(asset.StoreKey, cdc),
+		assCli.GetWhitelistCmd(asset.StoreKey, cdc),
+		assCli.GetForbiddenAddrCmd(asset.StoreKey, cdc),
+		assCli.GetReservedSymbolsCmd(asset.StoreKey, cdc),
 	)...)
 
 	return assQueryCmd
 }
 
 // GetTxCmd returns the transaction commands for this module
-func (mc ModuleClient) GetTxCmd() *cobra.Command {
+func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	assTxCmd := &cobra.Command{
 		Use:   asset.ModuleName,
 		Short: "Asset transactions subcommands",
 	}
 
 	assTxCmd.AddCommand(client.PostCommands(
-		assCli.IssueTokenCmd(mc.storeKey, mc.cdc),
-		assCli.TransferOwnershipCmd(mc.cdc),
-		assCli.MintTokenCmd(mc.cdc),
-		assCli.BurnTokenCmd(mc.cdc),
-		assCli.ForbidTokenCmd(mc.cdc),
-		assCli.UnForbidTokenCmd(mc.cdc),
-		assCli.AddTokenWhitelistCmd(mc.cdc),
-		assCli.RemoveTokenWhitelistCmd(mc.cdc),
-		assCli.ForbidAddrCmd(mc.cdc),
-		assCli.UnForbidAddrCmd(mc.cdc),
-		assCli.ModifyTokenURLCmd(mc.cdc),
-		assCli.ModifyTokenDescriptionCmd(mc.cdc),
+		assCli.IssueTokenCmd(asset.StoreKey, cdc),
+		assCli.TransferOwnershipCmd(cdc),
+		assCli.MintTokenCmd(cdc),
+		assCli.BurnTokenCmd(cdc),
+		assCli.ForbidTokenCmd(cdc),
+		assCli.UnForbidTokenCmd(cdc),
+		assCli.AddTokenWhitelistCmd(cdc),
+		assCli.RemoveTokenWhitelistCmd(cdc),
+		assCli.ForbidAddrCmd(cdc),
+		assCli.UnForbidAddrCmd(cdc),
+		assCli.ModifyTokenURLCmd(cdc),
+		assCli.ModifyTokenDescriptionCmd(cdc),
 	)...)
 
 	return assTxCmd

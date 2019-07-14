@@ -344,7 +344,7 @@ func (app *CetChainApp) registerMessageRoutes() {
 		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper, app.cdc)).
 		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper, app.cdc)).
 		AddRoute(stakingx.QuerierRoute, stakingx.NewQuerier(app.stakingXKeeper, app.cdc)).
-		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.tokenKeeper, app.cdc)).
+		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.tokenKeeper)).
 		AddRoute(market.StoreKey, market.NewQuerier(app.marketKeeper, app.cdc))
 }
 
