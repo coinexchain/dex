@@ -40,12 +40,13 @@ func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) h
 			return
 		}
 
-		if err = cliCtx.EnsureAccountExistsFromAddr(addr); err != nil {
+		accRetriever := authtypes.NewAccountRetriever(cliCtx)
+		if err = accRetriever.EnsureExists(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		acc, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(addr)
+		acc, err := accRetriever.GetAccount(addr)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -75,12 +76,13 @@ func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			return
 		}
 
-		if err = cliCtx.EnsureAccountExistsFromAddr(addr); err != nil {
+		accRetriever := authtypes.NewAccountRetriever(cliCtx)
+		if err = accRetriever.EnsureExists(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		acc, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(addr)
+		acc, err := accRetriever.GetAccount(addr)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return

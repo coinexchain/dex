@@ -27,7 +27,8 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			if err = cliCtx.EnsureAccountExistsFromAddr(key); err != nil {
+			accRetriever := authtypes.NewAccountRetriever(cliCtx)
+			if err = accRetriever.EnsureExists(key); err != nil {
 				return err
 			}
 
