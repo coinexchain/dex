@@ -342,6 +342,7 @@ func (app *CetChainApp) InitModules() {
 		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
 		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
 		//market
+		// market.NewAppModule(app.marketKeeper, )
 	)
 
 	//TODO: set init order of modules

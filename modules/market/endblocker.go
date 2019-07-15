@@ -160,7 +160,7 @@ func filterCandidates(ctx sdk.Context, asKeeper ExpectedAssetStatusKeeper, order
 }
 
 func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keeper Keeper, dataHash []byte, currHeight int64) (map[string]*Order, sdk.Dec) {
-	orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+	orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, ModuleCdc)
 	asKeeper := keeper.axk
 	bxKeeper := keeper.bnk
 	lowPrice := midPrice.Mul(sdk.NewDec(int64(100 - ratio))).Quo(sdk.NewDec(100))
@@ -255,7 +255,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper Keeper, marketInfoList []MarketI
 	currHeight := ctx.BlockHeight()
 	for _, mi := range marketInfoList {
 		symbol := mi.Stock + SymbolSeparator + mi.Money
-		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, ModuleCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
 		filterOrders := filterOldOrders(oldOrders, currHeight, lifeTime)
 
@@ -285,7 +285,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper Keeper, marketParams Params) {
 	delistKeeper := NewDelistKeeper(keeper.marketKey)
 	delistSymbols := delistKeeper.GetDelistSymbolsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
 	for _, symbol := range delistSymbols {
-		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, ModuleCdc)
 		removeOrderOlderThan(ctx, orderKeeper, keeper.bnk, keeper, currHeight+1, marketParams.FeeForZeroDeal)
 		keeper.RemoveMarket(ctx, symbol)
 	}
@@ -342,7 +342,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) /*sdk.Tags*/ {
 			continue
 		}
 		symbol := mi.Stock + "/" + mi.Money
-		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, msgCdc)
+		orderKeeper := NewOrderKeeper(keeper.marketKey, symbol, ModuleCdc)
 		// update the order book
 		for _, order := range ordersForUpdateList[idx] {
 			orderKeeper.Add(ctx, order)
