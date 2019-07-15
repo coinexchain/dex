@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
 	"time"
 
 	tmtypes "github.com/tendermint/tendermint/types"
@@ -126,18 +125,6 @@ func NewGenesisState(
 		AssetData:    assetData,
 		MarketData:   marketData,
 		Incentive:    incentive,
-	}
-}
-
-// Sanitize sorts accounts and coin sets.
-func (gs GenesisState) Sanitize() {
-	sort.Slice(gs.Accounts, func(i, j int) bool {
-		return gs.Accounts[i].AccountNumber < gs.Accounts[j].AccountNumber
-	})
-
-	for _, acc := range gs.Accounts {
-		acc.Coins = acc.Coins.Sort()
-		acc.FrozenCoins = acc.FrozenCoins.Sort()
 	}
 }
 

@@ -2,10 +2,8 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
-	"sort"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -354,13 +352,14 @@ func (app *CetChainApp) InitModules() {
 	// initialized with tokens from genesis accounts.
 	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName, slashing.ModuleName,
-		gov.ModuleName, supply.ModuleName, crisis.ModuleName, genutil.ModuleName,
-		asset.ModuleName,
+		gov.ModuleName, supply.ModuleName, crisis.ModuleName,
 		//TODO: authx.ModuleName,
 		//TODO: bankx.ModuleName,
-		incentive.ModuleName,
-		market.ModuleName,
 		stakingx.ModuleName,
+		asset.ModuleName,
+		market.ModuleName,
+		incentive.ModuleName,
+		genutil.ModuleName, //call DeliverGenTxs in genutil at last
 	)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
@@ -433,72 +432,21 @@ func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) ab
 
 // custom logic for coindex initialization
 func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
-	stateJSON := req.AppStateBytes
-	// TODO is this now the whole genesis file?
-
-	var genesisState GenesisState
-	err := app.cdc.UnmarshalJSON(stateJSON, &genesisState)
-	if err != nil {
-		panic(err) // TODO https://github.com/cosmos/cosmos-sdk/issues/468
-		// return sdk.ErrGenesisParse("").TraceCause(err, "")
-	}
-
-	// for i := range genesisState.Accounts {
-	// 	fmt.Printf("genesis accout address : %s, coins : %s\n", genesisState.Accounts[i].Address.String(), genesisState.Accounts[i].Coins.String())
-	// }
-
-	validators := app.initFromGenesisState(ctx, genesisState)
-
-	// sanity check
-	if len(req.Validators) > 0 {
-		if len(req.Validators) != len(validators) {
-			panic(fmt.Errorf("len(RequestInitChain.Validators) != len(validators) (%d != %d)",
-				len(req.Validators), len(validators)))
-		}
-		sort.Sort(abci.ValidatorUpdates(req.Validators))
-		sort.Sort(abci.ValidatorUpdates(validators))
-		for i, val := range validators {
-			if !val.Equal(req.Validators[i]) {
-				panic(fmt.Errorf("validators[%d] != req.Validators[%d] ", i, i))
-			}
-		}
-	}
-
-	// assert runtime invariants
-	app.assertRuntimeInvariants()
-
-	return abci.ResponseInitChain{
-		Validators: validators,
-	}
+	var genesisState map[string]json.RawMessage
+	app.cdc.MustUnmarshalJSON(req.AppStateBytes, &genesisState)
+	return app.mm.InitGenesis(ctx, genesisState)
+	//app.initFromGenesisState(ctx, genesisState)
 }
 
 // initialize store from a genesis state
-func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState GenesisState) []abci.ValidatorUpdate {
-	genesisState.Sanitize()
-
+func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState GenesisState) {
 	// load the accounts
 	app.loadGenesisAccounts(ctx, genesisState)
 
-	// initialize distribution (must happen before staking)
-	distr.InitGenesis(ctx, app.distrKeeper, app.supplyKeeper, genesisState.DistrData)
-
-	// load the initial staking information
-	validators := staking.InitGenesis(ctx, app.stakingKeeper, app.accountKeeper, app.supplyKeeper, genesisState.StakingData)
-
-	// initialize module-specific stores
-	app.initModuleStores(ctx, genesisState)
-
 	// validate genesis state
 	if err := genesisState.Validate(); err != nil {
-		panic(err) // TODO find a way to do this w/o panics
+		panic(err)
 	}
-
-	if len(genesisState.GenTxs) > 0 {
-		app.deliverGenTxs(genesisState.GenTxs)
-
-		validators = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
-	}
-	return validators
 }
 
 func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState GenesisState) {
@@ -509,35 +457,6 @@ func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState Genesi
 
 		accx := authx.AccountX{Address: gacc.Address, MemoRequired: gacc.MemoRequired, LockedCoins: gacc.LockedCoins}
 		app.accountXKeeper.SetAccountX(ctx, accx)
-	}
-}
-
-func (app *CetChainApp) initModuleStores(ctx sdk.Context, genesisState GenesisState) {
-	auth.InitGenesis(ctx, app.accountKeeper, genesisState.AuthData)
-	authx.InitGenesis(ctx, app.accountXKeeper, genesisState.AuthXData)
-	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-	bankx.InitGenesis(ctx, app.bankxKeeper, genesisState.BankXData)
-	stakingx.InitGenesis(ctx, app.stakingXKeeper, genesisState.StakingXData)
-	slashing.InitGenesis(ctx, app.slashingKeeper, app.stakingKeeper, genesisState.SlashingData)
-	gov.InitGenesis(ctx, app.govKeeper, app.supplyKeeper, genesisState.GovData)
-	crisis.InitGenesis(ctx, app.crisisKeeper, genesisState.CrisisData)
-	asset.InitGenesis(ctx, app.assetKeeper, genesisState.AssetData)
-	market.InitGenesis(ctx, app.marketKeeper, genesisState.MarketData)
-	incentive.InitGenesis(ctx, app.incentiveKeeper, genesisState.Incentive)
-}
-
-func (app *CetChainApp) deliverGenTxs(genTxs []json.RawMessage) {
-	for _, genTx := range genTxs {
-		var tx auth.StdTx
-		err := app.cdc.UnmarshalJSON(genTx, &tx)
-		if err != nil {
-			panic(err)
-		}
-		bz := app.cdc.MustMarshalBinaryLengthPrefixed(tx)
-		res := app.BaseApp.DeliverTx(abci.RequestDeliverTx{Tx: bz})
-		if !res.IsOK() {
-			panic(res.Log)
-		}
 	}
 }
 
