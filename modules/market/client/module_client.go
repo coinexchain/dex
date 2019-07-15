@@ -13,20 +13,20 @@ import (
 	"github.com/coinexchain/dex/modules/market/client/rest"
 )
 
-// AssetModuleClient exports all client functionality from this module
-type ModuleClient struct {
+// MarketModuleClient exports all client functionality from this module
+type MarketModuleClient struct {
 }
 
-func NewModuleClient() ModuleClient {
-	return ModuleClient{}
+func NewMarketModuleClient() MarketModuleClient {
+	return MarketModuleClient{}
 }
 
-func (mc ModuleClient) RegisterRESTRoutes(cliCtx context.CLIContext, rtr *mux.Router) {
+func (mc MarketModuleClient) RegisterRESTRoutes(cliCtx context.CLIContext, rtr *mux.Router) {
 	rest.RegisterRoutes(cliCtx, rtr, market.ModuleCdc)
 }
 
 // GetQueryCmd returns the cli query commands for this module
-func (mc ModuleClient) GetQueryCmd(cdc *amino.Codec) *cobra.Command {
+func (mc MarketModuleClient) GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	mktQueryCmd := &cobra.Command{
 		Use:   market.StoreKey,
@@ -41,7 +41,7 @@ func (mc ModuleClient) GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 }
 
 // GetTxCmd returns the transaction commands for this module
-func (mc ModuleClient) GetTxCmd(cdc *amino.Codec) *cobra.Command {
+func (mc MarketModuleClient) GetTxCmd(cdc *amino.Codec) *cobra.Command {
 	mktTxCmd := &cobra.Command{
 		Use:   market.StoreKey,
 		Short: "market transactions subcommands",
