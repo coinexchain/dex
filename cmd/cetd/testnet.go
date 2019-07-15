@@ -172,7 +172,7 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 	}
 
 	config.Moniker = nodeDirName
-	//adjustBlockCommitSpeed(config)
+	adjustBlockCommitSpeed(config)
 
 	ip, err := getIP(i, viper.GetString(flagStartingIPAddress))
 	if err != nil {

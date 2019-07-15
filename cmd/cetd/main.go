@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
+	tmconfig "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/cli"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
@@ -71,7 +73,11 @@ func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 }
 
 func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Command) {
-	rootCmd.AddCommand(genutilcli.InitCmd(ctx, cdc, app.ModuleBasics, app.DefaultNodeHome))
+	initCmd := genutilcli.InitCmd(ctx, cdc, app.ModuleBasics, app.DefaultNodeHome)
+	initCmd.PreRun = func(cmd *cobra.Command, args []string) {
+		adjustBlockCommitSpeed(ctx.Config)
+	}
+	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(genutilcli.CollectGenTxsCmd(ctx, cdc, genaccounts.AppModuleBasic{}, app.DefaultNodeHome))
 	rootCmd.AddCommand(genutilcli.GenTxCmd(ctx, cdc, app.ModuleBasics, staking.AppModuleBasic{},
 		genaccounts.AppModuleBasic{}, app.DefaultNodeHome, app.DefaultCLIHome))
@@ -79,6 +85,13 @@ func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Comma
 	rootCmd.AddCommand(genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(assetcli.AddGenesisTokenCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(testnetCmd(ctx, cdc))
+}
+
+func adjustBlockCommitSpeed(config *tmconfig.Config) {
+	c := config.Consensus
+	c.TimeoutCommit = 2100 * time.Millisecond
+	c.PeerGossipSleepDuration = 20 * time.Millisecond
+	c.PeerQueryMaj23SleepDuration = 100 * time.Millisecond
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
