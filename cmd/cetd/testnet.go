@@ -55,7 +55,7 @@ var (
 const nodeDirPerm = 0755
 
 // get cmd to initialize all files for tendermint testnet and application
-func TestnetFilesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+func testnetCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "testnet",
 		Short: "Initialize files for a Cetd testnet",

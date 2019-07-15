@@ -18,7 +18,7 @@ func TestTestnetFilesCmd(t *testing.T) {
 		Config: &cfg.Config{},
 	}
 	cdc := app.MakeCodec()
-	cmd := TestnetFilesCmd(&ctx, cdc)
+	cmd := testnetCmd(&ctx, cdc)
 	require.Equal(t, "Initialize files for a Cetd testnet", cmd.Short)
 }
 
