@@ -33,12 +33,7 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
-type testnetNodeInfo struct {
-	nodeID    string
-	valPubKey crypto.PubKey
-	acc       app.GenesisAccount
-	genFile   string
-}
+const nodeDirPerm = 0755
 
 var (
 	flagNodeDirPrefix     = "node-dir-prefix"
@@ -48,12 +43,16 @@ var (
 	flagNodeCliHome       = "node-cli-home"
 	flagStartingIPAddress = "starting-ip-address"
 
-	testnetTokenSupply = int64(588788547005740000)
-
+	testnetTokenSupply       = int64(588788547005740000)
 	testnetMinSelfDelegation = int64(10000e8)
 )
 
-const nodeDirPerm = 0755
+type testnetNodeInfo struct {
+	nodeID    string
+	valPubKey crypto.PubKey
+	acc       app.GenesisAccount
+	genFile   string
+}
 
 // get cmd to initialize all files for tendermint testnet and application
 func testnetCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
@@ -411,25 +410,15 @@ func collectGenFiles(
 	return nil
 }
 
-func getIP(i int, startingIPAddr string) (string, error) {
-	var (
-		ip  string
-		err error
-	)
-
+func getIP(i int, startingIPAddr string) (ip string, err error) {
 	if len(startingIPAddr) == 0 {
 		ip, err = server.ExternalIP()
 		if err != nil {
 			return "", err
 		}
-	} else {
-		ip, err = calculateIP(startingIPAddr, i)
-		if err != nil {
-			return "", err
-		}
+		return ip, nil
 	}
-
-	return ip, nil
+	return calculateIP(startingIPAddr, i)
 }
 
 func writeFile(name string, dir string, contents []byte) error {
