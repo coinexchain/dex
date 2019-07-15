@@ -78,8 +78,7 @@ func init() {
 		slashing.AppModuleBasic{},
 		supply.AppModuleBasic{},
 		asset.AppModuleBasic{},
-		//TODO: bankx
-		//TODO: distributionx
+		distributionx.AppModuleBasic{},
 		//TODO: authx
 		market.AppModuleBasic{},
 		incentive.AppModuleBasic{},
@@ -345,7 +344,7 @@ func (app *CetChainApp) InitModules() {
 		auth.NewAppModule(app.accountKeeper),
 		//TODO: authx
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
-		//TODO: bankx
+		bankx.NewAppModule(app.bankxKeeper),
 		crisis.NewAppModule(app.crisisKeeper),
 		incentive.NewAppModule(app.incentiveKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
@@ -372,7 +371,7 @@ func (app *CetChainApp) InitModules() {
 		staking.ModuleName, auth.ModuleName, bank.ModuleName, slashing.ModuleName,
 		gov.ModuleName, supply.ModuleName, crisis.ModuleName,
 		//TODO: authx.ModuleName,
-		//TODO: bankx.ModuleName,
+		bankx.ModuleName,
 		distributionx.ModuleName,
 		stakingx.ModuleName,
 		asset.ModuleName,

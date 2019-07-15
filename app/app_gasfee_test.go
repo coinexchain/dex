@@ -2,8 +2,9 @@ package app
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"testing"
+
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
