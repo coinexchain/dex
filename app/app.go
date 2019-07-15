@@ -74,6 +74,7 @@ func init() {
 		crisis.AppModuleBasic{},
 		slashing.AppModuleBasic{},
 		supply.AppModuleBasic{},
+		asset.AppModuleBasic{},
 	)
 }
 
