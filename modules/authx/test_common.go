@@ -1,6 +1,7 @@
 package authx
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	"time"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -19,6 +20,7 @@ type testInput struct {
 	ctx sdk.Context
 	axk AccountXKeeper
 	ak  auth.AccountKeeper
+	sk  supply.Keeper
 	cdc *codec.Codec
 }
 
@@ -29,9 +31,11 @@ func setupTestInput() testInput {
 	auth.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	supply.RegisterCodec(cdc)
 
 	authXKey := sdk.NewKVStoreKey("authXKey")
 	authKey := sdk.NewKVStoreKey("authKey")
+	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
 	skey := sdk.NewKVStoreKey("params")
 	tkey := sdk.NewTransientStoreKey("transient_params")
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey, "") // TODO
@@ -41,11 +45,19 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(tkey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keySupply, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
-	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(bank.DefaultParamspace))
+	maccPerms := map[string][]string{
+		ModuleName: []string{supply.Basic},
+	}
+
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
+	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), bank.DefaultCodespace)
+	supplyKeeper := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
+	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(DefaultParamspace), supplyKeeper)
+
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Time: time.Unix(1560334620, 0)}, false, log.NewNopLogger())
 
-	return testInput{ctx: ctx, axk: axk, ak: ak, cdc: cdc}
+	return testInput{ctx: ctx, axk: axk, ak: ak, sk: supplyKeeper, cdc: cdc}
 }
