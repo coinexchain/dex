@@ -9,8 +9,10 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 
 	"github.com/coinexchain/dex/modules/asset"
@@ -126,10 +128,10 @@ func parseTokenInfo() (asset.Token, error) {
 	token := &asset.BaseToken{}
 	var err error
 
-	//owner, err := getAddress(viper.GetString(flagOwner))
-	//if err != nil {
-	//	return nil, err
-	//}
+	owner, err := getAddress(viper.GetString(flagOwner))
+	if err != nil {
+		return nil, err
+	}
 
 	if err = token.SetName(viper.GetString(flagName)); err != nil {
 		return nil, err
@@ -137,9 +139,9 @@ func parseTokenInfo() (asset.Token, error) {
 	if err = token.SetSymbol(viper.GetString(flagSymbol)); err != nil {
 		return nil, err
 	}
-	//if err = token.SetOwner(owner); err != nil {
-	//	return nil, err
-	//}
+	if err = token.SetOwner(owner); err != nil {
+		return nil, err
+	}
 	if err = token.SetTotalSupply(viper.GetInt64(flagTotalSupply)); err != nil {
 		return nil, err
 	}
@@ -157,6 +159,29 @@ func parseTokenInfo() (asset.Token, error) {
 	token.SetIsForbidden(viper.GetBool(flagTokenForbiddable))
 
 	return token, nil
+}
+
+func getAddress(addrOrKeyName string) (addr sdk.AccAddress, err error) {
+	addr, err = sdk.AccAddressFromBech32(addrOrKeyName)
+	if err != nil {
+		return getAddressFromKeyBase(addrOrKeyName)
+	}
+	return
+}
+
+func getAddressFromKeyBase(keyName string) (sdk.AccAddress, error) {
+	kb, err := keys.NewKeyBaseFromDir(viper.GetString(flagClientHome))
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := kb.Get(keyName)
+	if err != nil {
+		return nil, err
+	}
+
+	addr := info.GetAddress()
+	return addr, nil
 }
 
 func addGenesisToken(genesisState *asset.GenesisState, token asset.Token) error {
