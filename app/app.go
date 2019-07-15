@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 
+	"github.com/cosmos/cosmos-sdk/x/mint"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -138,7 +140,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod)
 	app.initKeepers(invCheckPeriod)
-	app.registerCrisisRoutes()
+	app.InitModules()
 	app.registerMessageRoutes()
 	app.mountStores()
 
@@ -319,8 +321,9 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.stakingKeeper = *stakingKeeper.SetHooks(
 		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
 	)
+}
 
-	//TODO: Add modules of our application: market, authx, bankx
+func (app *CetChainApp) InitModules() {
 	app.mm = module.NewManager(
 		genaccounts.NewAppModule(app.accountKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
@@ -340,15 +343,24 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
 		//market
 	)
-}
 
-func (app *CetChainApp) registerCrisisRoutes() {
-	//crisisx.RegisterInvariants(&app.crisisKeeper, app.assetKeeper, app.bankxKeeper, app.supplyKeeper, auth.FeeCollectorName, app.distrKeeper, app.stakingKeeper)
-	//bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
-	//distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
+	//TODO: set init order of modules
 
-	//Invariants checks of staking module will adjust and included by stakingx.RegisterInvariants
-	//stakingx.RegisterInvariants(&app.crisisKeeper, app.stakingXKeeper, app.assetKeeper, app.stakingKeeper)
+	// During begin block slashing happens after distr.BeginBlocker so that
+	// there is nothing left over in the validator fee pool, so as to keep the
+	// CanWithdrawInvariant invariant.
+	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName, slashing.ModuleName)
+
+	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName)
+
+	// genutils must occur after staking so that pools are properly
+	// initialized with tokens from genesis accounts.
+	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, distr.ModuleName,
+		staking.ModuleName, auth.ModuleName, bank.ModuleName, slashing.ModuleName,
+		gov.ModuleName, mint.ModuleName, supply.ModuleName, crisis.ModuleName, genutil.ModuleName)
+
+	app.mm.RegisterInvariants(&app.crisisKeeper)
+	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
 }
 
 func (app *CetChainApp) registerMessageRoutes() {
