@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 
+	distx_client "github.com/coinexchain/dex/modules/distributionx/client"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -344,11 +346,11 @@ func (app *CetChainApp) InitModules() {
 		//TODO: authx
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		//TODO: bankx
-		//TODO: distributionx
 		crisis.NewAppModule(app.crisisKeeper),
 		incentive.NewAppModule(app.incentiveKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
+		distributionx.NewAppModule(app.distrxKeeper, distx_client.NewDistrXModuleClient()),
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
@@ -371,7 +373,7 @@ func (app *CetChainApp) InitModules() {
 		gov.ModuleName, supply.ModuleName, crisis.ModuleName,
 		//TODO: authx.ModuleName,
 		//TODO: bankx.ModuleName,
-		//TODO: distributionx.ModuleName
+		distributionx.ModuleName,
 		stakingx.ModuleName,
 		asset.ModuleName,
 		market.ModuleName,

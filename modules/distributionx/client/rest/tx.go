@@ -7,7 +7,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keys"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
@@ -16,8 +15,8 @@ import (
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
-func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, kb keys.Keybase) {
-	r.HandleFunc("/distribution/{address}/donates", DonateTxRequestHandlerFn(cdc, kb, cliCtx)).Methods("POST")
+func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
+	r.HandleFunc("/distribution/{address}/donates", DonateTxRequestHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
 // SendReq defines the properties of a send request's body.
@@ -27,7 +26,7 @@ type SendReq struct {
 }
 
 // SendRequestHandlerFn - http request handler to send coins to a address.
-func DonateTxRequestHandlerFn(cdc *codec.Codec, _ keys.Keybase, cliCtx context.CLIContext) http.HandlerFunc {
+func DonateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req SendReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {

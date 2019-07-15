@@ -1,6 +1,7 @@
 package distributionx
 
 import (
+	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -8,7 +9,6 @@ import (
 const (
 	ModuleName = "distrx"
 	RouterKey  = ModuleName
-	denom      = "cet"
 )
 
 var _ sdk.Msg = MsgDonateToCommunityPool{}
@@ -36,7 +36,7 @@ func (msg MsgDonateToCommunityPool) GetSigners() []sdk.AccAddress {
 
 // get the bytes for the message signer to sign on
 func (msg MsgDonateToCommunityPool) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // quick validity check
@@ -48,7 +48,7 @@ func (msg MsgDonateToCommunityPool) ValidateBasic() sdk.Error {
 	if msg.Amount.Len() != 1 {
 		return ErrorInvalidDonation("invalid donation length")
 	}
-	if msg.Amount[0].Denom != denom {
+	if msg.Amount[0].Denom != types.DefaultBondDenom {
 		return ErrorInvalidDonation("donation's denom must be cet")
 	}
 
