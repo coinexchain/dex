@@ -7,8 +7,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
+const ModuleName = "authx"
+
 // DefaultParamspace defines the default authx module parameter subspace
-const DefaultParamspace = "authx"
+const DefaultParamspace = ModuleName
 
 // Default parameter values
 const (

@@ -342,18 +342,15 @@ func (app *CetChainApp) InitModules() {
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
 		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
-		//market
 		market.NewAppModule(app.marketKeeper, market_client.NewMarketModuleClient()),
 	)
-
-	//TODO: set init order of modules
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
-	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName, slashing.ModuleName)
+	app.mm.SetOrderBeginBlockers(market.ModuleName, incentive.ModuleName, distr.ModuleName, slashing.ModuleName)
 
-	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName)
+	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, authx.ModuleName, market.ModuleName, crisis.ModuleName)
 
 	// genutils must occur after staking so that pools are properly
 	// initialized with tokens from genesis accounts.
@@ -420,43 +417,13 @@ func MakeCodec() *codec.Codec {
 
 // application updates every end block
 func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	market.BeginBlocker(ctx, app.marketKeeper)
-
-	//block incentive for the previous block
-	_ = incentive.BeginBlocker(ctx, app.incentiveKeeper)
-
-	// distribute rewards for the previous block
-	distr.BeginBlocker(ctx, req, app.distrKeeper)
-
-	// slash anyone who double signed.
-	// NOTE: This should happen after distr.BeginBlocker so that
-	// there is nothing left over in the validator fee pool,
-	// so as to keep the CanWithdrawInvariant invariant.
-	// TODO: This should really happen at EndBlocker.
-	slashing.BeginBlocker(ctx, req, app.slashingKeeper)
-
-	return abci.ResponseBeginBlock{
-		//Tags: tags.ToKVPairs(),
-	}
+	return app.mm.BeginBlock(ctx, req)
 }
 
 // application updates every end block
 // nolint: unparam
 func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	gov.EndBlocker(ctx, app.govKeeper)
-	validatorUpdates := staking.EndBlocker(ctx, app.stakingKeeper)
-	//tags = append(tags, endBlockerTags...)
-	authx.EndBlocker(ctx, app.accountXKeeper, app.accountKeeper)
-	market.EndBlocker(ctx, app.marketKeeper)
-
-	if app.invCheckPeriod != 0 && ctx.BlockHeight()%int64(app.invCheckPeriod) == 0 {
-		app.assertRuntimeInvariants()
-	}
-
-	return abci.ResponseEndBlock{
-		ValidatorUpdates: validatorUpdates,
-		//Tags:             tags,
-	}
+	return app.mm.EndBlock(ctx, req)
 }
 
 // custom logic for coindex initialization
