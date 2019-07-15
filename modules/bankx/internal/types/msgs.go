@@ -1,4 +1,4 @@
-package bankx
+package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -6,8 +6,8 @@ import (
 
 // RouterKey is the name of the bankx module
 const (
-	RouterKey = "bankx"
-	Topic     = RouterKey
+	RouterKey = ModuleName
+	Topic     = ModuleName
 )
 
 var _ sdk.Msg = MsgSetMemoRequired{}
@@ -36,7 +36,7 @@ func (msg MsgSetMemoRequired) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgSetMemoRequired) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgSetMemoRequired) GetSigners() []sdk.AccAddress {
@@ -85,7 +85,7 @@ func (msg MsgSend) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgSend) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgSend) GetSigners() []sdk.AccAddress {

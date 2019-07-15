@@ -1,12 +1,11 @@
 package app
 
 import (
+	"github.com/coinexchain/dex/modules/bankx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
@@ -31,8 +30,6 @@ func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Err
 	}
 
 	switch msg := msg.(type) {
-	case bank.MsgSend: // should not be here!
-		return ah.checkMemo(ctx, msg.ToAddress, memo)
 	case bankx.MsgSend:
 		return ah.checkMemo(ctx, msg.ToAddress, memo)
 	case staking.MsgCreateValidator:

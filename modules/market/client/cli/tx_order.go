@@ -85,7 +85,7 @@ Example:
 
 func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-	cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
+	cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 	accRetriever := authtypes.NewAccountRetriever(cliCtx)
 	sender := cliCtx.GetFromAddress()
@@ -180,7 +180,7 @@ Examples:
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			sender := cliCtx.GetFromAddress()
 			orderid := viper.GetString(FlagOrderID)

@@ -2,12 +2,12 @@ package cli
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -65,7 +65,7 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			msg := bankx.NewMsgSend(from, to, coins, unlockTime)
+			msg := types.NewMsgSend(from, to, coins, unlockTime)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}

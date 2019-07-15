@@ -81,6 +81,7 @@ func init() {
 		//TODO: authx
 		market.AppModuleBasic{},
 		incentive.AppModuleBasic{},
+		bankx.AppModuleBasic{},
 	)
 }
 

@@ -1,9 +1,9 @@
-package bankx
+package types
 
 import sdk "github.com/cosmos/cosmos-sdk/types"
 
 const (
-	CodeSpaceBankx sdk.CodespaceType = "bankx"
+	CodeSpaceBankx sdk.CodespaceType = ModuleName
 
 	// 301 ～ 399
 	CodeMemoMissing                     sdk.CodeType = 301

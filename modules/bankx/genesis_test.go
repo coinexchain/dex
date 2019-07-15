@@ -7,7 +7,7 @@ import (
 
 func TestValidate(t *testing.T) {
 	genes := DefaultGenesisState()
-	err := genes.Validate()
+	err := genes.ValidateGenesis()
 	require.Equal(t, nil, err)
 }
 

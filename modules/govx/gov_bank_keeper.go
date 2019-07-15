@@ -16,7 +16,7 @@ type GovBankKeeper struct {
 	dk DistributionKeeper
 }
 
-func NewKeeper(/*ck gov.BankKeeper, */ak auth.AccountKeeper, dk DistributionKeeper) GovBankKeeper {
+func NewKeeper( /*ck gov.BankKeeper, */ ak auth.AccountKeeper, dk DistributionKeeper) GovBankKeeper {
 
 	return GovBankKeeper{
 		//ck: ck,
@@ -34,7 +34,7 @@ func NewKeeper(/*ck gov.BankKeeper, */ak auth.AccountKeeper, dk DistributionKeep
 //}
 
 func (k GovBankKeeper) SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress,
-	amt sdk.Coins) (/*sdk.Tags, */sdk.Error) {
+	amt sdk.Coins) /*sdk.Tags, */ sdk.Error {
 
 	//if fromAddr.Equals(gov.DepositedCoinsAccAddr) && toAddr.Equals(gov.BurnedDepositCoinsAccAddr) {
 	//	_, err := subtractCoins(ctx, k.ak, fromAddr, amt)

@@ -1,16 +1,17 @@
 package bankx
 
 import (
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
-	Param Params `json:"params"`
+	Param types.Params `json:"params"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(param Params) GenesisState {
+func NewGenesisState(param types.Params) GenesisState {
 	return GenesisState{
 		Param: param,
 	}
@@ -18,7 +19,7 @@ func NewGenesisState(param Params) GenesisState {
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParams())
+	return NewGenesisState(types.DefaultParams())
 }
 
 // InitGenesis - Init store state from genesis data
@@ -34,13 +35,13 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
-func (data GenesisState) Validate() error {
+func (data GenesisState) ValidateGenesis() error {
 	activationFee := data.Param.ActivationFee
 	if activationFee < 0 {
-		return sdk.NewError(CodeSpaceBankx, CodeInvalidActivationFee, "invalid activated fees")
+		return sdk.NewError(types.CodeSpaceBankx, types.CodeInvalidActivationFee, "invalid activated fees")
 	}
 	if lockCoinsFee := data.Param.LockCoinsFee; lockCoinsFee < 0 {
-		return sdk.NewError(CodeSpaceBankx, CodeInvalidLockCoinsFee, "invalid lock coins fee")
+		return sdk.NewError(types.CodeSpaceBankx, types.CodeInvalidLockCoinsFee, "invalid lock coins fee")
 	}
 	return nil
 }

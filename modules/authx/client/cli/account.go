@@ -20,7 +20,7 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().
-				WithCodec(cdc)//.WithAccountDecoder(cdc)
+				WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			key, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {

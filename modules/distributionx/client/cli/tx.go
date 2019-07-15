@@ -25,7 +25,7 @@ func DonateTxCmd(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().
-				WithCodec(cdc)//.WithAccountDecoder(cdc)
+				WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			// parse coins trying to be sent
 			coins, err := sdk.ParseCoins(args[0])
