@@ -14,7 +14,6 @@ import (
 
 func TestDefaultGenesisState(t *testing.T) {
 	state := NewDefaultGenesisState()
-	require.NoError(t, state.Validate())
 
 	//auth
 	require.Equal(t, 512, int(state.AuthData.Params.MaxMemoCharacters))

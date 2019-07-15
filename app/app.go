@@ -343,12 +343,12 @@ func (app *CetChainApp) InitModules() {
 		//TODO: authx
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		//TODO: bankx
+		//TODO: distributionx
 		crisis.NewAppModule(app.crisisKeeper),
 		incentive.NewAppModule(app.incentiveKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
-		//TODO: govx
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
@@ -370,12 +370,15 @@ func (app *CetChainApp) InitModules() {
 		gov.ModuleName, supply.ModuleName, crisis.ModuleName,
 		//TODO: authx.ModuleName,
 		//TODO: bankx.ModuleName,
+		//TODO: distributionx.ModuleName
 		stakingx.ModuleName,
 		asset.ModuleName,
 		market.ModuleName,
 		incentive.ModuleName,
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
 	)
+
+	//TODO: set export genesis order
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
@@ -405,19 +408,18 @@ func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) ab
 func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	var genesisState map[string]json.RawMessage
 	app.cdc.MustUnmarshalJSON(req.AppStateBytes, &genesisState)
+
+	if err := ModuleBasics.ValidateGenesis(genesisState); err != nil {
+		panic(err)
+	}
+
 	return app.mm.InitGenesis(ctx, genesisState)
-	//app.initFromGenesisState(ctx, genesisState)
 }
 
 // initialize store from a genesis state
 func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState GenesisState) {
 	// load the accounts
 	app.loadGenesisAccounts(ctx, genesisState)
-
-	// validate genesis state
-	if err := genesisState.Validate(); err != nil {
-		panic(err)
-	}
 }
 
 func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState GenesisState) {
