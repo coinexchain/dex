@@ -2,8 +2,9 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 	"log"
+
+	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmtypes "github.com/tendermint/tendermint/types"
@@ -70,7 +71,7 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 	}
 
 	/* Just to be safe, assert the invariants on current state. */
-	app.assertRuntimeInvariantsOnContext(ctx)
+	app.crisisKeeper.AssertInvariants(ctx)
 
 	/* Handle fee distribution state. */
 
