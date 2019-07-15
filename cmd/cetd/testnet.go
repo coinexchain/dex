@@ -24,6 +24,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
@@ -51,7 +52,7 @@ var (
 type testnetNodeInfo struct {
 	nodeID    string
 	valPubKey crypto.PubKey
-	acc       app.GenesisAccount
+	acc       genaccounts.GenesisAccount
 	genFile   string
 }
 
@@ -123,7 +124,7 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 
 	nodeIDs := make([]string, numValidators)
 	valPubKeys := make([]crypto.PubKey, numValidators)
-	accs := make([]app.GenesisAccount, numValidators)
+	accs := make([]genaccounts.GenesisAccount, numValidators)
 	genFiles := make([]string, numValidators)
 
 	dexConfig := srvconfig.DefaultConfig()
@@ -131,7 +132,8 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 
 	// generate private keys, node IDs, and initial transactions
 	for i := 0; i < numValidators; i++ {
-		nodeInfo, err := initTestnetNode(config, cdc, outputDir, chainID, nodeDaemonHome, nodeCLIHome, i)
+		nodeInfo, err := initTestnetNode(config, cdc, outputDir, chainID,
+			nodeDaemonHome, nodeCLIHome, startingIPAddress, i)
 		if err != nil {
 			return err
 		}
@@ -142,7 +144,7 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 		genFiles[i] = nodeInfo.genFile
 	}
 
-	if err := initGenFiles(cdc, chainID, accs, genFiles, numValidators); err != nil {
+	if err := initGenFiles(cdc, mbm, chainID, accs, genFiles, numValidators); err != nil {
 		return err
 	}
 
@@ -154,12 +156,12 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 		return err
 	}
 
-	fmt.Printf("Successfully initialized %d node directories\n", numValidators)
+	cmd.PrintErrf("Successfully initialized %d node directories\n", numValidators)
 	return nil
 }
 
 func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
-	outDir, chainID, nodeDaemonHome, nodeCLIHome string, i int,
+	outDir, chainID, nodeDaemonHome, nodeCLIHome, startingIPAddr string, i int,
 ) (testnetNodeInfo, error) {
 
 	nodeDirName := fmt.Sprintf("%s%d", viper.GetString(flagNodeDirPrefix), i)
@@ -178,7 +180,7 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 	config.Moniker = nodeDirName
 	adjustBlockCommitSpeed(config)
 
-	ip, err := getIP(i, viper.GetString(flagStartingIPAddress))
+	ip, err := getIP(i, startingIPAddr)
 	if err != nil {
 		_ = os.RemoveAll(outDir)
 		return testnetNodeInfo{}, err
@@ -231,7 +233,7 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 
 	minSelfDel := stakingx.DefaultParams().MinSelfDelegation.Quo(sdk.NewInt(100))
 	accStakingTokens := minSelfDel.MulRaw(10)
-	acc := app.GenesisAccount{
+	acc := genaccounts.GenesisAccount{
 		Address: addr,
 		Coins: sdk.Coins{
 			sdk.NewCoin(dex.DefaultBondDenom, accStakingTokens),
@@ -299,8 +301,8 @@ func mkNodeHomeDirs(outDir, nodeDir, clientDir string) error {
 }
 
 func initGenFiles(
-	cdc *codec.Codec, chainID string, accs []app.GenesisAccount,
-	genFiles []string, numValidators int,
+	cdc *codec.Codec, mbm module.BasicManager, chainID string,
+	accs []genaccounts.GenesisAccount, genFiles []string, numValidators int,
 ) error {
 
 	appGenState := app.NewDefaultGenesisState()
@@ -308,7 +310,7 @@ func initGenFiles(
 	addCetTokenForTesting(&appGenState, testnetTokenSupply, accs[0].Address)
 
 	accs = assureTokenDistributionInGenesis(accs, testnetTokenSupply)
-	appGenState.Accounts = accs
+	//appGenState.Accounts = accs
 
 	appGenStateJSON, err := codec.MarshalJSONIndent(cdc, appGenState)
 	if err != nil {
@@ -331,14 +333,14 @@ func initGenFiles(
 	return nil
 }
 
-func assureTokenDistributionInGenesis(accs []app.GenesisAccount, testnetSupply int64) []app.GenesisAccount {
+func assureTokenDistributionInGenesis(accs []genaccounts.GenesisAccount, testnetSupply int64) []genaccounts.GenesisAccount {
 	var distributedTokens int64
 	for _, acc := range accs {
 		distributedTokens += acc.Coins[0].Amount.Int64()
 	}
 
 	if testnetSupply > distributedTokens {
-		accs = append(accs, app.GenesisAccount{
+		accs = append(accs, genaccounts.GenesisAccount{
 			Address: sdk.AccAddress(crypto.AddressHash([]byte("left_tokens"))),
 			Coins: sdk.Coins{
 				sdk.NewCoin(dex.DefaultBondDenom, sdk.NewInt(testnetSupply-distributedTokens)),

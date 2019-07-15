@@ -9,6 +9,8 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 )
 
+// TODO: use genaccounts.GenesisAccount, save AccountX info separately
+
 // GenesisAccount defines an account initialized at genesis.
 type GenesisAccount struct {
 	Address       sdk.AccAddress `json:"address"`
