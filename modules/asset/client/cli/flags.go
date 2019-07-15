@@ -11,15 +11,14 @@ const (
 	flagTokenURL         = "url"
 	flagTokenDescription = "description"
 
-	flagClientHome       = "home-client"
-	flagOwner            = "owner"
-	flagTotalBurn        = "total-burn"
-	flagTotalMint        = "total-mint"
-	flagIsForbidden      = "is-forbidden"
+	flagClientHome  = "home-client"
+	flagOwner       = "owner"
+	flagTotalBurn   = "total-burn"
+	flagTotalMint   = "total-mint"
+	flagIsForbidden = "is-forbidden"
 
 	flagNewOwner  = "new-owner"
 	flagAmount    = "amount"
 	flagWhitelist = "whitelist"
 	flagAddresses = "addresses"
 )
-
