@@ -69,13 +69,28 @@ func init() {
 		auth.AppModuleBasic{},
 		bank.AppModuleBasic{},
 		staking.AppModuleBasic{},
+		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
 		slashing.AppModuleBasic{},
 		supply.AppModuleBasic{},
 		asset.AppModuleBasic{},
+		//TODO: bankx
+		//TODO: distributionx
+		//TODO: authx
+		market.AppModuleBasic{},
+		incentive.AppModuleBasic{},
 	)
+}
+
+// custom tx codec
+func MakeCodec() *codec.Codec {
+	var cdc = codec.New()
+	ModuleBasics.RegisterCodec(cdc)
+	sdk.RegisterCodec(cdc)
+	codec.RegisterCrypto(cdc)
+	return cdc
 }
 
 // Extended ABCI application
@@ -201,11 +216,11 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 
 	// account permissions
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     []string{supply.Basic},
-		distr.ModuleName:          []string{supply.Basic},
-		staking.BondedPoolName:    []string{supply.Burner, supply.Staking},
-		staking.NotBondedPoolName: []string{supply.Burner, supply.Staking},
-		gov.ModuleName:            []string{supply.Burner},
+		auth.FeeCollectorName:     {supply.Basic},
+		distr.ModuleName:          {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
 	}
 
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
@@ -373,26 +388,6 @@ func (app *CetChainApp) mountStores() {
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
 		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,
 	)
-}
-
-// custom tx codec
-func MakeCodec() *codec.Codec {
-	var cdc = codec.New()
-	bankx.RegisterCodec(cdc)
-	staking.RegisterCodec(cdc)
-	distr.RegisterCodec(cdc)
-	distributionx.RegisterCodec(cdc)
-	slashing.RegisterCodec(cdc)
-	gov.RegisterCodec(cdc)
-	auth.RegisterCodec(cdc)
-	authx.RegisterCodec(cdc)
-	crisis.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-	asset.RegisterCodec(cdc)
-	market.RegisterCodec(cdc)
-	incentive.RegisterCodec(cdc)
-	return cdc
 }
 
 // application updates every end block
