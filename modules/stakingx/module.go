@@ -3,8 +3,6 @@ package stakingx
 import (
 	"encoding/json"
 
-	"github.com/cosmos/cosmos-sdk/x/staking"
-
 	"github.com/coinexchain/dex/types"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -73,20 +71,16 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 // app module object
 type AppModule struct {
 	AppModuleBasic
-	stakingXKeeper  Keeper //TODO: rename to StakingXKeeper
-	assetViewKeeper AssetViewKeeper
-	stakingKeeper   *staking.Keeper
-	apc             types.ModuleClient
+	stakingXKeeper Keeper //TODO: rename to StakingXKeeper
+	apc            types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(stakingxKeeper Keeper, assetViewKeeper AssetViewKeeper, stakingKeeper *staking.Keeper, apc types.ModuleClient) AppModule {
+func NewAppModule(stakingxKeeper Keeper, apc types.ModuleClient) AppModule {
 	return AppModule{
-		AppModuleBasic:  AppModuleBasic{apc: apc},
-		stakingXKeeper:  stakingxKeeper,
-		assetViewKeeper: assetViewKeeper,
-		stakingKeeper:   stakingKeeper,
-		apc:             apc,
+		AppModuleBasic: AppModuleBasic{apc: apc},
+		stakingXKeeper: stakingxKeeper,
+		apc:            apc,
 	}
 }
 
@@ -97,16 +91,8 @@ func (AppModule) Name() string {
 
 // register invariants
 func (am AppModule) RegisterInvariants(invReg sdk.InvariantRegistry) {
-	//TODO:
-	//invReg.RegisterRoute(types.ModuleName, "total-supply", TotalSupplyInvariants(am.stakingXKeeper, am.assetViewKeeper))
-	//
-	//invRegRegisterRoute(types.ModuleName, "nonnegative-power", staking.NonNegativePowerInvariant(sk))
-	//
-	//c.RegisterRoute(types.ModuleName, "positive-delegation",
-	//	staking.PositiveDelegationInvariant(sk))
-	//
-	//c.RegisterRoute(types.ModuleName, "delegator-shares",
-	//	staking.DelegatorSharesInvariant(sk))
+	invReg.RegisterRoute(ModuleName, "total-supply", TotalSupplyInvariants(am.stakingXKeeper))
+	invReg.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(am.stakingXKeeper))
 }
 
 // module message route name

@@ -258,8 +258,17 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.keyAccountX,
 		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 	)
+
 	app.stakingXKeeper = stakingx.NewKeeper(
-		app.paramsKeeper.Subspace(stakingx.DefaultParamspace), &stakingKeeper, app.distrKeeper, app.accountKeeper)
+		app.paramsKeeper.Subspace(stakingx.DefaultParamspace),
+		app.assetKeeper,
+		&stakingKeeper,
+		app.distrKeeper,
+		app.accountKeeper,
+		app.bankxKeeper,
+		app.supplyKeeper,
+		auth.FeeCollectorName,
+	)
 
 	app.slashingKeeper = slashing.NewKeeper(
 		app.cdc,
@@ -311,7 +320,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
 	)
 
-	//TODO: Add modules of our application: market, authx, bankx, crisisx, ...
+	//TODO: Add modules of our application: market, authx, bankx
 	app.mm = module.NewManager(
 		genaccounts.NewAppModule(app.accountKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
@@ -320,7 +329,6 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		//bankx
 		crisis.NewAppModule(app.crisisKeeper),
-		//crisisx
 		incentive.NewAppModule(app.incentiveKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
@@ -328,7 +336,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		//govx
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
-		stakingx.NewAppModule(app.stakingXKeeper, app.assetKeeper, &app.stakingKeeper, stakingx_client.NewStakingXModuleClient()),
+		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
 		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
 		//market
 	)

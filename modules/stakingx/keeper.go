@@ -24,19 +24,34 @@ const (
 type Keeper struct {
 	paramSubspace params.Subspace
 
+	assetViewKeeper AssetViewKeeper
+
 	sk *staking.Keeper
 
 	dk DistributionKeeper
 
 	ak auth.AccountKeeper
+
+	bk ExpectBankxKeeper
+
+	supplyKeeper ExpectSupplyKeeper
+
+	feeCollectorName string
 }
 
-func NewKeeper(paramSubspace params.Subspace, sk *staking.Keeper, dk DistributionKeeper, ak auth.AccountKeeper) Keeper {
+func NewKeeper(paramSubspace params.Subspace, assetViewKeeper AssetViewKeeper, sk *staking.Keeper,
+	dk DistributionKeeper, ak auth.AccountKeeper, bk ExpectBankxKeeper,
+	supplyKeeper ExpectSupplyKeeper, feeCollectorName string) Keeper {
+
 	return Keeper{
-		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
-		sk:            sk,
-		dk:            dk,
-		ak:            ak,
+		paramSubspace:    paramSubspace.WithKeyTable(ParamKeyTable()),
+		assetViewKeeper:  assetViewKeeper,
+		sk:               sk,
+		dk:               dk,
+		ak:               ak,
+		bk:               bk,
+		supplyKeeper:     supplyKeeper,
+		feeCollectorName: feeCollectorName,
 	}
 }
 

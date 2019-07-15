@@ -3,46 +3,19 @@ package stakingx
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	dType "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/types"
 )
 
-type AssetViewKeeper interface {
-	GetToken(ctx sdk.Context, symbol string) asset.Token
-}
-
-func RegisterInvariants(c crisis.Keeper, k Keeper, assetKeeper asset.Keeper, bk ExpectBankxKeeper, supplyKeeper ExpectSupplyKeeper, feeCollectorName string, disk distribution.Keeper, stk staking.Keeper) {
-
-	c.RegisterRoute(ModuleName, "total-supply", TotalSupplyInvariants(k, assetKeeper))
-
-	c.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(assetKeeper, bk, supplyKeeper, feeCollectorName, disk, stk))
-
-	// SupplyInvariants no longer suitable here, new SupplyInvariants will be created
-	// c.RegisterRoute(types.ModuleName, "supply",
-	//	SupplyInvariants(k, f, d, am))
-
-	//c.RegisterRoute(types.ModuleName, "nonnegative-power",
-	//	staking.NonNegativePowerInvariant(sk))
-	//
-	//c.RegisterRoute(types.ModuleName, "positive-delegation",
-	//	staking.PositiveDelegationInvariant(sk))
-	//
-	//c.RegisterRoute(types.ModuleName, "delegator-shares",
-	//	staking.DelegatorSharesInvariant(sk))
-}
-
-func TotalSupplyInvariants(k Keeper, assetKeeper AssetViewKeeper) sdk.Invariant {
+func TotalSupplyInvariants(k Keeper) sdk.Invariant {
 	return func(ctx sdk.Context) error {
-		token := assetKeeper.GetToken(ctx, types.DefaultBondDenom)
+		token := k.assetViewKeeper.GetToken(ctx, types.DefaultBondDenom)
 		if token == nil {
 			return fmt.Errorf("cet not found")
 		}
@@ -50,6 +23,7 @@ func TotalSupplyInvariants(k Keeper, assetKeeper AssetViewKeeper) sdk.Invariant 
 		ts := token.GetTotalSupply()
 		bondPool := k.CalcBondPoolStatus(ctx)
 
+		//TODO: compare with supplyKeeper.TotalSupply
 		if ts != bondPool.TotalSupply.Int64() {
 			return fmt.Errorf("total-supply invariance:\n"+
 				"\tinconsistent total-supply: \n"+
@@ -61,11 +35,11 @@ func TotalSupplyInvariants(k Keeper, assetKeeper AssetViewKeeper) sdk.Invariant 
 	}
 }
 
-func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, supplyKeeper ExpectSupplyKeeper,
-	feeCollectorName string, disk distribution.Keeper, stk staking.Keeper) sdk.Invariant {
+func SupplyCETInvariant(k Keeper) sdk.Invariant {
+	assetKeeper := k.assetViewKeeper
 
 	return func(ctx sdk.Context) error {
-		token := tokenKeeper.GetToken(ctx, types.DefaultBondDenom)
+		token := assetKeeper.GetToken(ctx, types.DefaultBondDenom)
 		if token == nil {
 			return fmt.Errorf("cet not found")
 		}
@@ -73,14 +47,14 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, supplyKe
 		var totalAmount = sdk.ZeroInt()
 
 		// Get all amounts based on the account system
-		basedAccountTotalAmount := bk.TotalAmountOfCoin(ctx, types.CET)
+		basedAccountTotalAmount := k.bk.TotalAmountOfCoin(ctx, types.CET)
 		totalAmount = totalAmount.Add(basedAccountTotalAmount)
 		//fmt.Printf("basedAccountTotalAmount : %s, totalAmount : %s \n", basedAccountTotalAmount, totalAmount.String())
 
 		// Get all amounts based on the Non-account system
-		feeAmount := GetCollectedFee(ctx, supplyKeeper, feeCollectorName)
+		feeAmount := GetCollectedFee(ctx, k.supplyKeeper, k.feeCollectorName)
 
-		communityAmount := disk.GetFeePool(ctx).CommunityPool.AmountOf(types.CET)
+		communityAmount := k.dk.GetFeePool(ctx).CommunityPool.AmountOf(types.CET)
 		totalAmount = totalAmount.Add(feeAmount).Add(communityAmount.RoundInt())
 		//fmt.Printf("feeAmount : %s, communityAmount : %s, totalAmount : %s\n",
 		//	feeAmount.String(), communityAmount.String(), totalAmount.String())
@@ -109,9 +83,9 @@ func SupplyCETInvariant(tokenKeeper asset.Keeper, bk ExpectBankxKeeper, supplyKe
 			return false
 		}
 
-		disk.IterateValidatorOutstandingRewards(ctx, outStandingProcess)
-		stk.IterateUnbondingDelegations(ctx, unbondingProcess)
-		stk.IterateValidators(ctx, validatorProcess)
+		k.dk.IterateValidatorOutstandingRewards(ctx, outStandingProcess)
+		k.sk.IterateUnbondingDelegations(ctx, unbondingProcess)
+		k.sk.IterateValidators(ctx, validatorProcess)
 
 		// Judge equality
 		if totalAmount.Int64() != token.GetTotalSupply() {
