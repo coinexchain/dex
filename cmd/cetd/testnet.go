@@ -22,6 +22,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -40,7 +41,7 @@ var (
 	flagNumValidators     = "v"
 	flagOutputDir         = "output-dir"
 	flagNodeDaemonHome    = "node-daemon-home"
-	flagNodeCliHome       = "node-cli-home"
+	flagNodeCLIHome       = "node-cli-home"
 	flagStartingIPAddress = "starting-ip-address"
 
 	testnetTokenSupply       = int64(588788547005740000)
@@ -55,7 +56,9 @@ type testnetNodeInfo struct {
 }
 
 // get cmd to initialize all files for tendermint testnet and application
-func testnetCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+func testnetCmd(ctx *server.Context, cdc *codec.Codec,
+	mbm module.BasicManager, genAccIterator genutil.GenesisAccountsIterator) *cobra.Command {
+
 	cmd := &cobra.Command{
 		Use:   "testnet",
 		Short: "Initialize files for a Cetd testnet",
@@ -67,9 +70,20 @@ Note, strict routability for addresses is turned off in the config file.
 Example:
 	cetd testnet --v 4 --output-dir ./output --starting-ip-address 192.168.10.2
 	`,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			config := ctx.Config
-			return initTestnet(config, cdc)
+
+			outputDir := viper.GetString(flagOutputDir)
+			chainID := viper.GetString(client.FlagChainID)
+			minGasPrices := viper.GetString(server.FlagMinGasPrices)
+			nodeDirPrefix := viper.GetString(flagNodeDirPrefix)
+			nodeDaemonHome := viper.GetString(flagNodeDaemonHome)
+			nodeCLIHome := viper.GetString(flagNodeCLIHome)
+			startingIPAddress := viper.GetString(flagStartingIPAddress)
+			numValidators := viper.GetInt(flagNumValidators)
+
+			return initTestnet(cmd, config, cdc, mbm, genAccIterator, outputDir, chainID,
+				minGasPrices, nodeDirPrefix, nodeDaemonHome, nodeCLIHome, startingIPAddress, numValidators)
 		},
 	}
 
@@ -91,7 +105,7 @@ func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 	cmd.Flags().String(flagNodeDaemonHome, "cetd",
 		"Home directory of the node's daemon configuration",
 	)
-	cmd.Flags().String(flagNodeCliHome, "cetcli",
+	cmd.Flags().String(flagNodeCLIHome, "cetcli",
 		"Home directory of the node's cli configuration",
 	)
 	cmd.Flags().String(flagStartingIPAddress, "192.168.0.1",
@@ -106,11 +120,11 @@ func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 	)
 }
 
-func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
-	outDir := viper.GetString(flagOutputDir)
-	numValidators := viper.GetInt(flagNumValidators)
+func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
+	mbm module.BasicManager, genAccIterator genutil.GenesisAccountsIterator,
+	outputDir, chainID, minGasPrices, nodeDirPrefix, nodeDaemonHome,
+	nodeCLIHome, startingIPAddress string, numValidators int) error {
 
-	chainID := viper.GetString(client.FlagChainID)
 	if chainID == "" {
 		chainID = "chain-" + cmn.RandStr(6)
 	}
@@ -121,11 +135,11 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 	genFiles := make([]string, numValidators)
 
 	dexConfig := srvconfig.DefaultConfig()
-	dexConfig.MinGasPrices = viper.GetString(server.FlagMinGasPrices)
+	dexConfig.MinGasPrices = minGasPrices
 
 	// generate private keys, node IDs, and initial transactions
 	for i := 0; i < numValidators; i++ {
-		nodeInfo, err := initTestnetNode(config, cdc, outDir, chainID, i)
+		nodeInfo, err := initTestnetNode(config, cdc, outputDir, chainID, nodeDaemonHome, nodeCLIHome, i)
 		if err != nil {
 			return err
 		}
@@ -142,8 +156,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 	err := collectGenFiles(
 		cdc, config, chainID, nodeIDs, valPubKeys, numValidators,
-		outDir, viper.GetString(flagNodeDirPrefix), viper.GetString(flagNodeDaemonHome),
-		nil, // TODO
+		outputDir, nodeDirPrefix, nodeDaemonHome, genAccIterator,
 	)
 	if err != nil {
 		return err
@@ -154,14 +167,12 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 }
 
 func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
-	outDir, chainID string, i int,
+	outDir, chainID, nodeDaemonHome, nodeCLIHome string, i int,
 ) (testnetNodeInfo, error) {
 
 	nodeDirName := fmt.Sprintf("%s%d", viper.GetString(flagNodeDirPrefix), i)
-	nodeDaemonHomeName := viper.GetString(flagNodeDaemonHome)
-	nodeCliHomeName := viper.GetString(flagNodeCliHome)
-	nodeDir := filepath.Join(outDir, nodeDirName, nodeDaemonHomeName)
-	clientDir := filepath.Join(outDir, nodeDirName, nodeCliHomeName)
+	nodeDir := filepath.Join(outDir, nodeDirName, nodeDaemonHome)
+	clientDir := filepath.Join(outDir, nodeDirName, nodeCLIHome)
 	gentxsDir := filepath.Join(outDir, "gentxs")
 
 	config.SetRoot(nodeDir)
