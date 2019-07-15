@@ -25,7 +25,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
-	dexinit "github.com/coinexchain/dex/init"
 	cli2 "github.com/coinexchain/dex/modules/asset/client/cli"
 	dexserver "github.com/coinexchain/dex/server"
 	dex "github.com/coinexchain/dex/types"
@@ -79,7 +78,7 @@ func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Comma
 	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
 	rootCmd.AddCommand(genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(cli2.AddGenesisTokenCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
-	rootCmd.AddCommand(dexinit.TestnetFilesCmd(ctx, cdc))
+	rootCmd.AddCommand(TestnetFilesCmd(ctx, cdc))
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {

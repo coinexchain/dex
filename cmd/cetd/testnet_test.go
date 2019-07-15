@@ -1,13 +1,16 @@
-package init
+package main
 
 import (
-	"github.com/coinexchain/dex/app"
-	"github.com/cosmos/cosmos-sdk/server"
+	"os"
+	"testing"
+
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	cfg "github.com/tendermint/tendermint/config"
-	"os"
-	"testing"
+
+	"github.com/cosmos/cosmos-sdk/server"
+
+	"github.com/coinexchain/dex/app"
 )
 
 func TestTestnetFilesCmd(t *testing.T) {
