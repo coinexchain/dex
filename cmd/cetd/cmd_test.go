@@ -1,14 +1,12 @@
 package main
 
 import (
-	"github.com/tendermint/tendermint/libs/log"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/coinexchain/dex/app"
 	dex "github.com/coinexchain/dex/types"
@@ -17,10 +15,8 @@ import (
 
 func TestCreateRootCmd(t *testing.T) {
 	dex.InitSdkConfig()
-	cdc := app.MakeCodec()
-	ctx := server.NewDefaultContext()
 
-	rootCmd := createCetdCmd(ctx, cdc)
+	rootCmd := createCetdCmd()
 	require.Equal(t, 15, len(rootCmd.Commands()))
 }
 

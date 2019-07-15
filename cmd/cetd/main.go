@@ -39,15 +39,10 @@ var invCheckPeriod uint
 
 func main() {
 	dex.InitSdkConfig()
-	cdc := app.MakeCodec()
-	ctx := server.NewDefaultContext()
-
-	rootCmd := createCetdCmd(ctx, cdc)
+	rootCmd := createCetdCmd()
 
 	// prepare and add flags
 	executor := cli.PrepareBaseCmd(rootCmd, "GA", app.DefaultNodeHome)
-	rootCmd.PersistentFlags().UintVar(&invCheckPeriod, flagInvCheckPeriod,
-		0, "Assert registered invariants every N blocks")
 	err := executor.Execute()
 	if err != nil {
 		// handle with #870
@@ -55,8 +50,10 @@ func main() {
 	}
 }
 
-func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
+func createCetdCmd() *cobra.Command {
 	cobra.EnableCommandSorting = false
+	cdc := app.MakeCodec()
+	ctx := server.NewDefaultContext()
 
 	rootCmd := &cobra.Command{
 		Use:               "cetd",
@@ -68,6 +65,9 @@ func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
 	rootCmd.AddCommand(version.Cmd)
+
+	rootCmd.PersistentFlags().UintVar(&invCheckPeriod, flagInvCheckPeriod,
+		0, "Assert registered invariants every N blocks")
 
 	return rootCmd
 }
