@@ -7,18 +7,17 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/cli"
-	"github.com/tendermint/tendermint/libs/common"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
 )
 
 const (
+	flagClientHome       = "home-client"
 	flagName             = "name"
 	flagSymbol           = "symbol"
 	flagOwner            = "owner"
@@ -50,8 +49,11 @@ var tokenFlags = []string{
 	flagTokenDescription,
 }
 
+// TODO: move this cmd to modules/asset/client/cli
+
 // AddGenesisTokenCmd returns add-genesis-token cobra Command.
-func AddGenesisTokenCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+func AddGenesisTokenCmd(ctx *server.Context, cdc *codec.Codec,
+	defaultNodeHome, defaultClientHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-genesis-token",
 		Short: "Add genesis token to genesis.json",
@@ -76,42 +78,45 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
 
-			_, err := parseTokenInfo()
+			token, err := parseTokenInfo()
 			if err != nil {
 				return err
 			}
 
+			// retrieve the app state
 			genFile := config.GenesisFile()
-			if !common.FileExists(genFile) {
-				return fmt.Errorf("%s does not exist, run `cetd init` first", genFile)
+			appState, genDoc, err := genutil.GenesisStateFromGenFile(cdc, genFile)
+			if err != nil {
+				return err
 			}
 
-			//genDoc, err := LoadGenesisDoc(cdc, genFile)
-			//if err != nil {
-			//	return err
-			//}
-			//
-			//var appState app.GenesisState
-			//if err = cdc.UnmarshalJSON(genDoc.AppState, &appState); err != nil {
-			//	return err
-			//}
-			//
-			//appState, err = addGenesisToken(appState, token)
-			//if err != nil {
-			//	return err
-			//}
-			//
-			//appStateJSON, err := cdc.MarshalJSON(appState)
-			//if err != nil {
-			//	return err
-			//}
-			//
-			return genutil.ExportGenesisFile(nil, genFile) // TODO
+			// add genesis account to the app state
+			var genesisState asset.GenesisState
+
+			cdc.MustUnmarshalJSON(appState[asset.ModuleName], &genesisState)
+
+			err = addGenesisToken(&genesisState, token)
+			if err != nil {
+				return err
+			}
+
+			genesisStateBz := cdc.MustMarshalJSON(genesisState)
+			appState[asset.ModuleName] = genesisStateBz
+
+			appStateJSON, err := cdc.MarshalJSON(appState)
+			if err != nil {
+				return err
+			}
+
+			// export app state
+			genDoc.AppState = appStateJSON
+
+			return genutil.ExportGenesisFile(genDoc, genFile)
 		},
 	}
 
-	cmd.Flags().String(cli.HomeFlag, app.DefaultNodeHome, "node's home directory")
-	//cmd.Flags().String(flagClientHome, app.DefaultCLIHome, "client's home directory")
+	cmd.Flags().String(cli.HomeFlag, defaultNodeHome, "node's home directory")
+	cmd.Flags().String(flagClientHome, defaultClientHome, "client's home directory")
 	cmd.Flags().String(flagName, "", "token name is limited to 32 unicode characters")
 	cmd.Flags().String(flagSymbol, "", "token symbol is limited to [a-z][a-z0-9]{1,7}")
 	cmd.Flags().String(flagOwner, "", "token owner")
@@ -173,13 +178,13 @@ func parseTokenInfo() (asset.Token, error) {
 	return token, nil
 }
 
-func addGenesisToken(appState app.GenesisState, token asset.Token) (app.GenesisState, error) {
-	for _, t := range appState.AssetData.Tokens {
+func addGenesisToken(genesisState *asset.GenesisState, token asset.Token) error {
+	for _, t := range genesisState.Tokens {
 		if token.GetSymbol() == t.GetSymbol() {
-			return appState, fmt.Errorf("the application state already contains token %s", token.GetSymbol())
+			return fmt.Errorf("the application state already contains token %s", token.GetSymbol())
 		}
 	}
-	appState.AssetData.Tokens = append(appState.AssetData.Tokens, token)
+	genesisState.Tokens = append(genesisState.Tokens, token)
 
-	return appState, nil
+	return nil
 }

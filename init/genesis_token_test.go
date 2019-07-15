@@ -1,14 +1,17 @@
 package init
 
 import (
-	"github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/cosmos/cosmos-sdk/server"
+	"os"
+	"testing"
+
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
+
+	"github.com/cosmos/cosmos-sdk/server"
+
+	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/asset"
 )
 
 func TestAddGenesisToken(t *testing.T) {
