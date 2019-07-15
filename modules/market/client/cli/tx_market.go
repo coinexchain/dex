@@ -32,7 +32,7 @@ var createMarketFlags = []string{
 	FlagPricePrecision,
 }
 
-func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func CreateMarketCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create-trading-pair ",
 		Short: "generate tx to create trading pair",
@@ -46,7 +46,7 @@ Example :
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg, err := parseCreateMarketFlags(creator)
@@ -64,7 +64,7 @@ Example :
 			//	return errors.New("No have insufficient cet to create market in blockchain")
 			//}
 
-			if err := hasTokens(cliCtx, cdc, queryRoute, msg.Stock, msg.Money); err != nil {
+			if err := hasTokens(cliCtx, cdc, msg.Stock, msg.Money); err != nil {
 				return err
 			}
 
@@ -88,8 +88,8 @@ Example :
 	return cmd
 }
 
-func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, queryRoute string, tokens ...string) error {
-	route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
+func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, tokens ...string) error {
+	route := fmt.Sprintf("custom/%s/%s", asset.QuerierRoute, asset.QueryToken)
 	for _, token := range tokens {
 		bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(token))
 		if err != nil {
@@ -134,7 +134,7 @@ Example
 	--gas=1000000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg := market.MsgCancelTradingPair{
@@ -198,7 +198,7 @@ Example:
 	--gas=10000000 --fees=10000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg := market.MsgModifyPricePrecision{

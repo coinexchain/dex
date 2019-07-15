@@ -39,6 +39,7 @@ import (
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
+	market_client "github.com/coinexchain/dex/modules/market/client"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
 	stakingx_client "github.com/coinexchain/dex/modules/stakingx/client"
@@ -342,7 +343,7 @@ func (app *CetChainApp) InitModules() {
 		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
 		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
 		//market
-		// market.NewAppModule(app.marketKeeper, )
+		market.NewAppModule(app.marketKeeper, market_client.NewModuleClient()),
 	)
 
 	//TODO: set init order of modules
