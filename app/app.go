@@ -7,8 +7,6 @@ import (
 	"os"
 	"sort"
 
-	"github.com/cosmos/cosmos-sdk/x/mint"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -329,15 +327,15 @@ func (app *CetChainApp) InitModules() {
 		genaccounts.NewAppModule(app.accountKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		auth.NewAppModule(app.accountKeeper),
-		//authx
+		//TODO: authx
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
-		//bankx
+		//TODO: bankx
 		crisis.NewAppModule(app.crisisKeeper),
 		incentive.NewAppModule(app.incentiveKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
-		//govx
+		//TODO: govx
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
@@ -356,7 +354,14 @@ func (app *CetChainApp) InitModules() {
 	// initialized with tokens from genesis accounts.
 	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName, slashing.ModuleName,
-		gov.ModuleName, mint.ModuleName, supply.ModuleName, crisis.ModuleName, genutil.ModuleName)
+		gov.ModuleName, supply.ModuleName, crisis.ModuleName, genutil.ModuleName,
+		asset.ModuleName,
+		//TODO: authx.ModuleName,
+		//TODO: bankx.ModuleName,
+		incentive.ModuleName,
+		market.ModuleName,
+		stakingx.ModuleName,
+	)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
