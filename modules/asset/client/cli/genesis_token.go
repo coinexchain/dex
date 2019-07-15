@@ -32,8 +32,6 @@ var tokenFlags = []string{
 	flagTokenDescription,
 }
 
-// TODO: move this cmd to modules/asset/client/cli
-
 // AddGenesisTokenCmd returns add-genesis-token cobra Command.
 func AddGenesisTokenCmd(ctx *server.Context, cdc *codec.Codec,
 	defaultNodeHome, defaultClientHome string) *cobra.Command {
