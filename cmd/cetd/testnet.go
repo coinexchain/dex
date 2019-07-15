@@ -132,8 +132,8 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 
 	// generate private keys, node IDs, and initial transactions
 	for i := 0; i < numValidators; i++ {
-		nodeInfo, err := initTestnetNode(config, cdc, outputDir, chainID,
-			nodeDaemonHome, nodeCLIHome, startingIPAddress, i)
+		nodeInfo, err := initTestnetNode(cmd, config, cdc, outputDir, chainID,
+			nodeDirPrefix, nodeDaemonHome, nodeCLIHome, startingIPAddress, i)
 		if err != nil {
 			return err
 		}
@@ -160,20 +160,20 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 	return nil
 }
 
-func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
-	outDir, chainID, nodeDaemonHome, nodeCLIHome, startingIPAddr string, i int,
+func initTestnetNode(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
+	outputDir, chainID, nodeDirPrefix, nodeDaemonHome, nodeCLIHome, startingIPAddr string, i int,
 ) (testnetNodeInfo, error) {
 
-	nodeDirName := fmt.Sprintf("%s%d", viper.GetString(flagNodeDirPrefix), i)
-	nodeDir := filepath.Join(outDir, nodeDirName, nodeDaemonHome)
-	clientDir := filepath.Join(outDir, nodeDirName, nodeCLIHome)
-	gentxsDir := filepath.Join(outDir, "gentxs")
+	nodeDirName := fmt.Sprintf("%s%d", nodeDirPrefix, i)
+	nodeDir := filepath.Join(outputDir, nodeDirName, nodeDaemonHome)
+	clientDir := filepath.Join(outputDir, nodeDirName, nodeCLIHome)
+	gentxsDir := filepath.Join(outputDir, "gentxs")
 
 	config.SetRoot(nodeDir)
+	config.RPC.ListenAddress = "tcp://0.0.0.0:26657"
 
-	err := mkNodeHomeDirs(outDir, nodeDir, clientDir)
-	if err != nil {
-		_ = os.RemoveAll(outDir)
+	if err := mkNodeHomeDirs(outputDir, nodeDir, clientDir); err != nil {
+		_ = os.RemoveAll(outputDir)
 		return testnetNodeInfo{}, err
 	}
 
@@ -182,20 +182,20 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 
 	ip, err := getIP(i, startingIPAddr)
 	if err != nil {
-		_ = os.RemoveAll(outDir)
+		_ = os.RemoveAll(outputDir)
 		return testnetNodeInfo{}, err
 	}
 
 	nodeID, valPubKey, err := genutil.InitializeNodeValidatorFiles(config)
 	if err != nil {
-		_ = os.RemoveAll(outDir)
+		_ = os.RemoveAll(outputDir)
 		return testnetNodeInfo{}, err
 	}
 
 	memo := fmt.Sprintf("%s@%s:26656", nodeID, ip)
 	genFile := config.GenesisFile()
 
-	buf := bufio.NewReader(os.Stdin) // TODO
+	buf := bufio.NewReader(cmd.InOrStdin())
 	prompt := fmt.Sprintf(
 		"Password for account '%s' (default %s):", nodeDirName, app.DefaultKeyPass,
 	)
@@ -214,7 +214,7 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 
 	addr, secret, err := server.GenerateSaveCoinKey(clientDir, nodeDirName, keyPass, true)
 	if err != nil {
-		_ = os.RemoveAll(outDir)
+		_ = os.RemoveAll(outputDir)
 		return testnetNodeInfo{}, err
 	}
 
@@ -257,20 +257,20 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 
 	signedTx, err := txBldr.SignStdTx(nodeDirName, app.DefaultKeyPass, tx, false)
 	if err != nil {
-		_ = os.RemoveAll(outDir)
+		_ = os.RemoveAll(outputDir)
 		return testnetNodeInfo{}, err
 	}
 
 	txBytes, err := cdc.MarshalJSON(signedTx)
 	if err != nil {
-		_ = os.RemoveAll(outDir)
+		_ = os.RemoveAll(outputDir)
 		return testnetNodeInfo{}, err
 	}
 
 	// gather gentxs folder
 	err = writeFile(fmt.Sprintf("%v.json", nodeDirName), gentxsDir, txBytes)
 	if err != nil {
-		_ = os.RemoveAll(outDir)
+		_ = os.RemoveAll(outputDir)
 		return testnetNodeInfo{}, err
 	}
 
@@ -284,16 +284,14 @@ func initTestnetNode(config *tmconfig.Config, cdc *codec.Codec,
 	}, nil
 }
 
-func mkNodeHomeDirs(outDir, nodeDir, clientDir string) error {
-	err := os.MkdirAll(filepath.Join(nodeDir, "config"), nodeDirPerm)
-	if err != nil {
-		_ = os.RemoveAll(outDir)
+func mkNodeHomeDirs(outputDir, nodeDir, clientDir string) error {
+	if err := os.MkdirAll(filepath.Join(nodeDir, "config"), nodeDirPerm); err != nil {
+		_ = os.RemoveAll(outputDir)
 		return err
 	}
 
-	err = os.MkdirAll(clientDir, nodeDirPerm)
-	if err != nil {
-		_ = os.RemoveAll(outDir)
+	if err := os.MkdirAll(clientDir, nodeDirPerm); err != nil {
+		_ = os.RemoveAll(outputDir)
 		return err
 	}
 
