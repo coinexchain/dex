@@ -3,7 +3,6 @@ package init
 import (
 	"github.com/coinexchain/dex/app"
 	"github.com/cosmos/cosmos-sdk/server"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	cfg "github.com/tendermint/tendermint/config"
@@ -35,19 +34,19 @@ func TestInitTestnet(t *testing.T) {
 
 func TestInitGenFiles(t *testing.T) {
 
-	cdc := app.MakeCodec()
-	coins := sdk.Coins{
-		sdk.Coin{Denom: "abc", Amount: sdk.NewInt(100)},
-	}
-	addr, _ := sdk.AccAddressFromBech32("coinex1paehyhx9sxdfwc3rjf85vwn6kjnmzjemtedpnl")
-	accInfo := &accountInfo{
-		addr,
-		coins,
-		coins,
-		100,
-		200,
-	}
-	acc, _ := newGenesisAccount(accInfo)
-	err := initGenFiles(cdc, "chain", []app.GenesisAccount{acc}, []string{"./genesis.json"}, 1)
-	require.Equal(t, nil, err)
+	//cdc := app.MakeCodec()
+	//coins := sdk.Coins{
+	//	sdk.Coin{Denom: "abc", Amount: sdk.NewInt(100)},
+	//}
+	//addr, _ := sdk.AccAddressFromBech32("coinex1paehyhx9sxdfwc3rjf85vwn6kjnmzjemtedpnl")
+	//accInfo := &accountInfo{
+	//	addr,
+	//	coins,
+	//	coins,
+	//	100,
+	//	200,
+	//}
+	//acc, _ := newGenesisAccount(accInfo)
+	//err := initGenFiles(cdc, "chain", []app.GenesisAccount{acc}, []string{"./genesis.json"}, 1)
+	//require.Equal(t, nil, err)
 }
