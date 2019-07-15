@@ -14,6 +14,7 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/types"
+	tmtime "github.com/tendermint/tendermint/types/time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
@@ -143,6 +144,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 	err := collectGenFiles(
 		cdc, config, chainID, nodeIDs, valPubKeys, numValidators,
 		outDir, viper.GetString(flagNodeDirPrefix), viper.GetString(flagNodeDaemonHome),
+		nil, // TODO
 	)
 	if err != nil {
 		return err
@@ -345,7 +347,6 @@ func assureTokenDistributionInGenesis(accs []app.GenesisAccount, testnetSupply i
 }
 
 func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64, cetOwner sdk.AccAddress) {
-
 	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
 		"cet",
 		tokenTotalSupply,
@@ -365,46 +366,46 @@ func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64
 func collectGenFiles(
 	cdc *codec.Codec, config *tmconfig.Config, chainID string,
 	nodeIDs []string, valPubKeys []crypto.PubKey,
-	numValidators int, outDir, nodeDirPrefix, nodeDaemonHomeName string,
+	numValidators int, outputDir, nodeDirPrefix, nodeDaemonHome string,
+	genAccIterator genutil.GenesisAccountsIterator,
 ) error {
 
-	//var appState json.RawMessage
-	//genTime := tmtime.Now()
+	var appState json.RawMessage
+	genTime := tmtime.Now()
 
 	for i := 0; i < numValidators; i++ {
 		nodeDirName := fmt.Sprintf("%s%d", nodeDirPrefix, i)
-		nodeDir := filepath.Join(outDir, nodeDirName, nodeDaemonHomeName)
-		gentxsDir := filepath.Join(outDir, "gentxs")
+		nodeDir := filepath.Join(outputDir, nodeDirName, nodeDaemonHome)
+		gentxsDir := filepath.Join(outputDir, "gentxs")
+		moniker := nodeDirName
 		config.Moniker = nodeDirName
 
 		config.SetRoot(nodeDir)
 
 		nodeID, valPubKey := nodeIDs[i], valPubKeys[i]
-		println(gentxsDir, nodeID, valPubKey) // TODO
-		//initCfg := newInitConfig(chainID, gentxsDir, nodeID, valPubKey)
-		//
-		//genDoc, err := LoadGenesisDoc(cdc, config.GenesisFile())
-		//if err != nil {
-		//	return err
-		//}
-		//
-		//nodeAppState, err := genAppStateFromConfig(cdc, config, initCfg, genDoc)
-		//if err != nil {
-		//	return err
-		//}
-		//
-		//if appState == nil {
-		//	// set the canonical application state (they should not differ)
-		//	appState = nodeAppState
-		//}
-		//
-		//genFile := config.GenesisFile()
-		//
-		//// overwrite each validator's genesis file to have a canonical genesis time
-		//err = genutil.ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime)
-		//if err != nil {
-		//	return err
-		//}
+		initCfg := genutil.NewInitConfig(chainID, gentxsDir, moniker, nodeID, valPubKey)
+
+		genDoc, err := types.GenesisDocFromFile(config.GenesisFile())
+		if err != nil {
+			return err
+		}
+
+		nodeAppState, err := genutil.GenAppStateFromConfig(cdc, config, initCfg, *genDoc, genAccIterator)
+		if err != nil {
+			return err
+		}
+
+		if appState == nil {
+			// set the canonical application state (they should not differ)
+			appState = nodeAppState
+		}
+
+		genFile := config.GenesisFile()
+
+		// overwrite each validator's genesis file to have a canonical genesis time
+		if err := genutil.ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime); err != nil {
+			return err
+		}
 	}
 
 	return nil
