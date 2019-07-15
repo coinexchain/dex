@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -85,22 +86,21 @@ type CetChainApp struct {
 	invCheckPeriod uint
 
 	// keys to access the substores
-	keyMain          *sdk.KVStoreKey
-	keyAccount       *sdk.KVStoreKey
-	keyAccountX      *sdk.KVStoreKey
-	keySupply        *sdk.KVStoreKey
-	keyStaking       *sdk.KVStoreKey
-	tkeyStaking      *sdk.TransientStoreKey
-	keySlashing      *sdk.KVStoreKey
-	keyDistr         *sdk.KVStoreKey
-	tkeyDistr        *sdk.TransientStoreKey
-	keyGov           *sdk.KVStoreKey
-	keyFeeCollection *sdk.KVStoreKey
-	keyParams        *sdk.KVStoreKey
-	tkeyParams       *sdk.TransientStoreKey
-	keyAsset         *sdk.KVStoreKey
-	keyMarket        *sdk.KVStoreKey
-	keyIncentive     *sdk.KVStoreKey
+	keyMain      *sdk.KVStoreKey
+	keyAccount   *sdk.KVStoreKey
+	keyAccountX  *sdk.KVStoreKey
+	keySupply    *sdk.KVStoreKey
+	keyStaking   *sdk.KVStoreKey
+	tkeyStaking  *sdk.TransientStoreKey
+	keySlashing  *sdk.KVStoreKey
+	keyDistr     *sdk.KVStoreKey
+	tkeyDistr    *sdk.TransientStoreKey
+	keyGov       *sdk.KVStoreKey
+	keyParams    *sdk.KVStoreKey
+	tkeyParams   *sdk.TransientStoreKey
+	keyAsset     *sdk.KVStoreKey
+	keyMarket    *sdk.KVStoreKey
+	keyIncentive *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
 	accountKeeper   auth.AccountKeeper
@@ -134,11 +134,11 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
+	bApp.SetAppVersion(version.Version)
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod)
 	app.initKeepers(invCheckPeriod)
 	app.InitModules()
-	app.registerMessageRoutes()
 	app.mountStores()
 
 	ah := authx.NewAnteHandler(app.accountKeeper, app.supplyKeeper, app.accountXKeeper,
@@ -366,34 +366,10 @@ func (app *CetChainApp) InitModules() {
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
 }
 
-func (app *CetChainApp) registerMessageRoutes() {
-	app.Router().
-		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
-		AddRoute(distr.RouterKey, distr.NewHandler(app.distrKeeper)).
-		AddRoute(slashing.RouterKey, slashing.NewHandler(app.slashingKeeper)).
-		AddRoute(gov.RouterKey, gov.NewHandler(app.govKeeper)).
-		AddRoute(crisis.RouterKey, crisis.NewHandler(app.crisisKeeper)).
-		AddRoute(bankx.RouterKey, bankx.NewHandler(app.bankxKeeper)).
-		AddRoute(asset.RouterKey, asset.NewHandler(app.assetKeeper)).
-		AddRoute(market.RouterKey, market.NewHandler(app.marketKeeper)).
-		AddRoute(distributionx.RouterKey, distributionx.NewHandler(app.distrxKeeper))
-
-	app.QueryRouter().
-		AddRoute(auth.QuerierRoute, auth.NewQuerier(app.accountKeeper)).
-		AddRoute(authx.QuerierRoute, authx.NewQuerier(app.accountXKeeper)).
-		AddRoute(distr.QuerierRoute, distr.NewQuerier(app.distrKeeper)).
-		AddRoute(gov.QuerierRoute, gov.NewQuerier(app.govKeeper)).
-		AddRoute(slashing.QuerierRoute, slashing.NewQuerier(app.slashingKeeper)).
-		AddRoute(staking.QuerierRoute, staking.NewQuerier(app.stakingKeeper)).
-		AddRoute(stakingx.QuerierRoute, stakingx.NewQuerier(app.stakingXKeeper, app.cdc)).
-		AddRoute(asset.QuerierRoute, asset.NewQuerier(app.tokenKeeper)).
-		AddRoute(market.StoreKey, market.NewQuerier(app.marketKeeper, app.cdc))
-}
-
 // initialize BaseApp
 func (app *CetChainApp) mountStores() {
 	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyDistr,
-		app.keySlashing, app.keyGov, app.keyFeeCollection, app.keyParams,
+		app.keySlashing, app.keyGov, app.keyParams,
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
 		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,
 	)
