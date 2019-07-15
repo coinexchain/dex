@@ -321,15 +321,16 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		//bankx
 		crisis.NewAppModule(app.crisisKeeper),
 		//crisisx
+		incentive.NewAppModule(app.incentiveKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
+		//govx
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		stakingx.NewAppModule(app.stakingXKeeper, app.assetKeeper, &app.stakingKeeper, stakingx_client.NewStakingXModuleClient()),
 		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
 		//market
-		//incentive
 	)
 }
 

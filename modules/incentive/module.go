@@ -3,8 +3,6 @@ package incentive
 import (
 	"encoding/json"
 
-	"github.com/coinexchain/dex/types"
-
 	"github.com/cosmos/cosmos-sdk/client/context"
 
 	"github.com/gorilla/mux"
@@ -23,7 +21,6 @@ var (
 
 // app module basics object
 type AppModuleBasic struct {
-	apc types.ModuleClient
 }
 
 // module name
@@ -54,17 +51,17 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 
 // register rest routes
 func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	amb.apc.RegisterRESTRoutes(ctx, rtr)
+	return
 }
 
 // get the root tx command of this module
 func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.apc.GetTxCmd(cdc)
+	return nil
 }
 
 // get the root query command of this module
 func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.apc.GetQueryCmd(cdc)
+	return nil
 }
 
 //___________________________
@@ -72,15 +69,13 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	incentiveKeeper Keeper //TODO: rename to incentiveKeeper
-	apc             types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(incentiveKeeper Keeper, apc types.ModuleClient) AppModule {
+func NewAppModule(incentiveKeeper Keeper) AppModule {
 	return AppModule{
-		AppModuleBasic:  AppModuleBasic{apc: apc},
+		AppModuleBasic:  AppModuleBasic{},
 		incentiveKeeper: incentiveKeeper,
-		apc:             apc,
 	}
 }
 
