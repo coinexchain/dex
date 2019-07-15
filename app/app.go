@@ -365,11 +365,16 @@ func (app *CetChainApp) InitModules() {
 
 	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, authx.ModuleName, market.ModuleName, crisis.ModuleName)
 
-	// genutils must occur after staking so that pools are properly
-	// initialized with tokens from genesis accounts.
-	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, distr.ModuleName,
-		staking.ModuleName, auth.ModuleName, bank.ModuleName, slashing.ModuleName,
-		gov.ModuleName, supply.ModuleName, crisis.ModuleName,
+	initGenesisOrder := []string{
+		genaccounts.ModuleName,
+		distr.ModuleName,
+		staking.ModuleName,
+		auth.ModuleName,
+		bank.ModuleName,
+		slashing.ModuleName,
+		gov.ModuleName,
+		supply.ModuleName,
+		crisis.ModuleName,
 		//TODO: authx.ModuleName,
 		bankx.ModuleName,
 		distributionx.ModuleName,
@@ -378,9 +383,14 @@ func (app *CetChainApp) InitModules() {
 		market.ModuleName,
 		incentive.ModuleName,
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
-	)
+	}
 
-	//TODO: set export genesis order
+	// genutils must occur after staking so that pools are properly
+	// initialized with tokens from genesis accounts.
+	app.mm.SetOrderInitGenesis(initGenesisOrder...)
+
+	exportGenesisOrder := initGenesisOrder
+	app.mm.SetOrderExportGenesis(exportGenesisOrder...)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
