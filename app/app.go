@@ -34,7 +34,6 @@ import (
 	"github.com/coinexchain/dex/modules/asset/client"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/crisisx"
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
@@ -335,7 +334,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 }
 
 func (app *CetChainApp) registerCrisisRoutes() {
-	crisisx.RegisterInvariants(&app.crisisKeeper, app.assetKeeper, app.bankxKeeper, app.supplyKeeper, auth.FeeCollectorName, app.distrKeeper, app.stakingKeeper)
+	//crisisx.RegisterInvariants(&app.crisisKeeper, app.assetKeeper, app.bankxKeeper, app.supplyKeeper, auth.FeeCollectorName, app.distrKeeper, app.stakingKeeper)
 	//bank.RegisterInvariants(&app.crisisKeeper, app.accountKeeper)
 	//distr.RegisterInvariants(&app.crisisKeeper, app.distrKeeper, app.stakingKeeper)
 
