@@ -1,4 +1,4 @@
-package init
+package cli
 
 import (
 	"fmt"
@@ -14,23 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 
 	"github.com/coinexchain/dex/modules/asset"
-)
-
-const (
-	flagClientHome       = "home-client"
-	flagName             = "name"
-	flagSymbol           = "symbol"
-	flagOwner            = "owner"
-	flagTotalSupply      = "total-supply"
-	flagMintable         = "mintable"
-	flagBurnable         = "burnable"
-	flagAddrForbiddable  = "addr-forbiddable"
-	flagTokenForbiddable = "token-forbiddable"
-	flagTotalBurn        = "total-burn"
-	flagTotalMint        = "total-mint"
-	flagIsForbidden      = "is-forbidden"
-	flagTokenURL         = "url"
-	flagTokenDescription = "description"
 )
 
 var tokenFlags = []string{

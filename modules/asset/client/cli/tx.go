@@ -21,23 +21,6 @@ import (
 	"github.com/coinexchain/dex/types"
 )
 
-const (
-	flagName             = "name"
-	flagSymbol           = "symbol"
-	flagTotalSupply      = "total-supply"
-	flagMintable         = "mintable"
-	flagBurnable         = "burnable"
-	flagAddrForbiddable  = "addr-forbiddable"
-	flagTokenForbiddable = "token-forbiddable"
-	flagTokenURL         = "url"
-	flagTokenDescription = "description"
-
-	flagNewOwner  = "new-owner"
-	flagAmount    = "amount"
-	flagWhitelist = "whitelist"
-	flagAddresses = "addresses"
-)
-
 var issueTokenFlags = []string{
 	flagName,
 	flagSymbol,

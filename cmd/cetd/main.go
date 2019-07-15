@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	cli2 "github.com/coinexchain/dex/modules/asset/client/cli"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -77,7 +78,7 @@ func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Comma
 		genaccounts.AppModuleBasic{}, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
 	rootCmd.AddCommand(genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
-	rootCmd.AddCommand(dexinit.AddGenesisTokenCmd(ctx, cdc))
+	rootCmd.AddCommand(cli2.AddGenesisTokenCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(dexinit.TestnetFilesCmd(ctx, cdc))
 }
 
