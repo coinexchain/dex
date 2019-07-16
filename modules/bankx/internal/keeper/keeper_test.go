@@ -49,7 +49,7 @@ func defaultContext() (sdk.Context, params.Keeper) {
 
 	_ = cms.LoadLatestVersion()
 	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
 
 	return ctx, paramsKeeper
 }

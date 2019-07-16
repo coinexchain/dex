@@ -80,13 +80,19 @@ func setupTestInput() testInput {
 	//	cdc,
 	//	fckCapKey,
 	//)
+	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName: []string{supply.Basic},
+	}
+	supplyKeeper := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
+
 	ask := NewBaseTokenKeeper(
 		cdc,
 		assetCapKey,
 	)
 	bkx := bankx.NewKeeper(
 		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(bankx.DefaultParamspace),
-		axk, bk, ak, ask,
+		axk, bk, ak, ask, supplyKeeper,
 		msgqueue.NewProducer(),
 	)
 

@@ -2,14 +2,15 @@ package keeper
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/modules/msgqueue"
 )
 
@@ -19,12 +20,13 @@ type Keeper struct {
 	Bk            bank.BaseKeeper
 	Ak            auth.AccountKeeper
 	Tk            types.ExpectedAssetStatusKeeper
+	Sk            types.SupplyKeeper
 	MsgProducer   msgqueue.Producer
 }
 
 func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	bk bank.BaseKeeper, ak auth.AccountKeeper,
-	tk types.ExpectedAssetStatusKeeper, msgProducer msgqueue.Producer) Keeper {
+	tk types.ExpectedAssetStatusKeeper, sk supply.Keeper, msgProducer msgqueue.Producer) Keeper {
 
 	return Keeper{
 		ParamSubspace: paramSubspace.WithKeyTable(types.ParamKeyTable()),
@@ -32,6 +34,7 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 		Bk:            bk,
 		Ak:            ak,
 		Tk:            tk,
+		Sk:            sk,
 		MsgProducer:   msgProducer,
 	}
 }
@@ -54,11 +57,11 @@ func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddres
 }
 
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	_, err := k.Bk.SubtractCoins(ctx, addr, amt)
+
+	err := k.Sk.SendCoinsFromAccountToModule(ctx, addr, authx.ModuleName, amt)
 	if err != nil {
 		return err
 	}
-
 	accx := k.Axk.GetOrCreateAccountX(ctx, addr)
 	frozenCoins := accx.FrozenCoins.Add(amt)
 	accx.FrozenCoins = frozenCoins
@@ -68,6 +71,12 @@ func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins)
 }
 
 func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+
+	err := k.Sk.SendCoinsFromModuleToAccount(ctx, authx.ModuleName, addr, amt)
+	if err != nil {
+		return err
+	}
+
 	accx, ok := k.Axk.GetAccountX(ctx, addr)
 	if !ok {
 		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
@@ -80,11 +89,6 @@ func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 
 	accx.FrozenCoins = frozenCoins
 	k.Axk.SetAccountX(ctx, accx)
-
-	_, err := k.Bk.AddCoins(ctx, addr, amt)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -101,11 +105,11 @@ func (k Keeper) AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sd
 }
 
 func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if _, err := k.Bk.SubtractCoins(ctx, addr, amt); err != nil {
+
+	err := k.Sk.SendCoinsFromAccountToModule(ctx, addr, auth.FeeCollectorName, amt)
+	if err != nil {
 		return err
 	}
-
-	//k.fck.AddCollectedFees(ctx, amt)
 	return nil
 }
 
@@ -117,6 +121,7 @@ func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddr
 	}
 	return false
 }
+
 func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 	acc := k.Ak.GetAccount(ctx, addr)
 	accx, found := k.Axk.GetAccountX(ctx, addr)

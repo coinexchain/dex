@@ -2,13 +2,13 @@ package bankx
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -37,6 +37,8 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 
 	fromAccount := k.Ak.GetAccount(ctx, msg.FromAddress)
 	toAccount := k.Ak.GetAccount(ctx, msg.ToAddress)
+
+	//TODO: add codes to check whether fromAccount & toAccount is moduleAccount
 
 	amt := msg.Amount
 	if !fromAccount.GetCoins().IsAllGTE(amt) {
@@ -73,14 +75,10 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 		return sendAmt, types.ErrorInsufficientCETForActivatingFee()
 	}
 
-	// sub the activationFees from fromAddress
-	oldCoins := fromAccount.GetCoins()
-	newCoins, _ := oldCoins.SafeSub(dex.NewCetCoins(activationFee))
-	_ = fromAccount.SetCoins(newCoins)
-	k.Ak.SetAccount(ctx, fromAccount)
-
-	//collect account activation fees
-	//k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activationFee))
+	err := k.DeductFee(ctx, fromAccount.GetAddress(), dex.NewCetCoins(activationFee))
+	if err != nil {
+		return sendAmt, err
+	}
 
 	return sendAmt, nil
 }
@@ -96,7 +94,7 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		return err.Result()
 	}
 
-	_, err := k.Bk.SubtractCoins(ctx, fromAddr, amt)
+	err := k.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, authx.ModuleName, amt)
 	if err != nil {
 		return err.Result()
 	}

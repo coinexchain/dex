@@ -312,6 +312,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.paramsKeeper.Subspace(bankx.DefaultParamspace),
 		app.accountXKeeper, app.bankKeeper, app.accountKeeper,
 		app.tokenKeeper,
+		app.supplyKeeper,
 		app.msgQueProducer,
 	)
 	app.distrxKeeper = distributionx.NewKeeper(
