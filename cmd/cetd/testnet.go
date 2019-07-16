@@ -298,14 +298,16 @@ func mkNodeHomeDirs(outputDir, nodeDir, clientDir string) error {
 	return nil
 }
 
-func initGenFiles(
-	cdc *codec.Codec, mbm module.BasicManager, chainID string,
-	accs []genaccounts.GenesisAccount, genFiles []string, numValidators int,
-) error {
+func initGenFiles(cdc *codec.Codec, mbm module.BasicManager, chainID string,
+	accs []genaccounts.GenesisAccount, genFiles []string, numValidators int) error {
 
-	appGenState := app.NewDefaultGenesisState()
-	appGenState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(testnetMinSelfDelegation)
-	addCetTokenForTesting(&appGenState, testnetTokenSupply, accs[0].Address)
+	appGenState := mbm.DefaultGenesis()
+
+	// set the accounts in the genesis state
+	appGenState = genaccounts.SetGenesisStateInAppState(cdc, appGenState, accs)
+
+	//appGenState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(testnetMinSelfDelegation)
+	addCetTokenForTesting(cdc, appGenState, testnetTokenSupply, accs[0].Address)
 
 	accs = assureTokenDistributionInGenesis(accs, testnetTokenSupply)
 	//appGenState.Accounts = accs
@@ -348,7 +350,12 @@ func assureTokenDistributionInGenesis(accs []genaccounts.GenesisAccount, testnet
 	return accs
 }
 
-func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64, cetOwner sdk.AccAddress) {
+func addCetTokenForTesting(cdc *codec.Codec,
+	appGenState map[string]json.RawMessage, tokenTotalSupply int64, cetOwner sdk.AccAddress) {
+
+	var assetData asset.GenesisState
+	cdc.MustUnmarshalJSON(appGenState[asset.ModuleName], &assetData)
+
 	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
 		"cet",
 		tokenTotalSupply,
@@ -362,15 +369,16 @@ func addCetTokenForTesting(appGenState *app.GenesisState, tokenTotalSupply int64
 	)
 
 	var token asset.Token = baseToken
-	appGenState.AssetData.Tokens = []asset.Token{token}
+	assetData.Tokens = []asset.Token{token}
+
+	appGenState[asset.ModuleName] = cdc.MustMarshalJSON(assetData)
 }
 
 func collectGenFiles(
 	cdc *codec.Codec, config *tmconfig.Config, chainID string,
 	nodeIDs []string, valPubKeys []crypto.PubKey,
 	numValidators int, outputDir, nodeDirPrefix, nodeDaemonHome string,
-	genAccIterator genutil.GenesisAccountsIterator,
-) error {
+	genAccIterator genutil.GenesisAccountsIterator) error {
 
 	var appState json.RawMessage
 	genTime := tmtime.Now()
@@ -424,6 +432,19 @@ func getIP(i int, startingIPAddr string) (ip string, err error) {
 	return calculateIP(startingIPAddr, i)
 }
 
+func calculateIP(ip string, i int) (string, error) {
+	ipv4 := net.ParseIP(ip).To4()
+	if ipv4 == nil {
+		return "", fmt.Errorf("%v: non ipv4 address", ip)
+	}
+
+	for j := 0; j < i; j++ {
+		ipv4[3]++
+	}
+
+	return ipv4.String(), nil
+}
+
 func writeFile(name string, dir string, contents []byte) error {
 	writePath := filepath.Join(dir)
 	file := filepath.Join(writePath, name)
@@ -439,17 +460,4 @@ func writeFile(name string, dir string, contents []byte) error {
 	}
 
 	return nil
-}
-
-func calculateIP(ip string, i int) (string, error) {
-	ipv4 := net.ParseIP(ip).To4()
-	if ipv4 == nil {
-		return "", fmt.Errorf("%v: non ipv4 address", ip)
-	}
-
-	for j := 0; j < i; j++ {
-		ipv4[3]++
-	}
-
-	return ipv4.String(), nil
 }

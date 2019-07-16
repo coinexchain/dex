@@ -6,10 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
-	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/types"
 )
 
 func TestDefaultGenesisState(t *testing.T) {
@@ -51,42 +47,4 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// others
 	require.Equal(t, sdk.NewDec(20), state.AuthXData.Params.MinGasPriceLimit)
-}
-
-func TestGenesisAccountToAccount(t *testing.T) {
-
-	_, _, addr := testutil.KeyPubAddr()
-	bAcc := auth.NewBaseAccountWithAddress(addr)
-	bAcc.SetCoins(types.NewCetCoins(1000))
-	continuousAcc := auth.NewContinuousVestingAccount(&bAcc, 10000, 12345)
-	delayedAcc := auth.NewDelayedVestingAccount(&bAcc, 12345)
-
-	gcAcc := NewGenesisAccountI(continuousAcc)
-	gdAcc := NewGenesisAccountI(delayedAcc)
-
-	toAcc1 := gcAcc.ToAccount()
-	toAcc2 := gdAcc.ToAccount()
-
-	require.Equal(t, continuousAcc.String(), toAcc1.String())
-	require.Equal(t, delayedAcc.String(), toAcc2.String())
-
-}
-
-func TestGenesisAccountValidate(t *testing.T) {
-
-	duplicatedAccounts := []GenesisAccount{
-		{Address: sdk.AccAddress("myaddr"), Coins: types.NewCetCoins(100), OriginalVesting: types.NewCetCoins(100)},
-		{Address: sdk.AccAddress("myaddr"), Coins: types.NewCetCoins(100), OriginalVesting: types.NewCetCoins(200)},
-	}
-	invalidDelayedVestingAccounts := []GenesisAccount{
-		{Address: sdk.AccAddress("myaddr1"), Coins: types.NewCetCoins(100), OriginalVesting: types.NewCetCoins(100)},
-	}
-	invalidContinuousAccounts := []GenesisAccount{
-		{Address: sdk.AccAddress("myaddr2"), Coins: types.NewCetCoins(100), OriginalVesting: types.NewCetCoins(100), StartTime: 10000, EndTime: 900},
-	}
-
-	require.NotNil(t, validateGenesisStateAccounts(duplicatedAccounts))
-	require.NotNil(t, validateGenesisStateAccounts(invalidContinuousAccounts))
-	require.NotNil(t, validateGenesisStateAccounts(invalidDelayedVestingAccounts))
-
 }

@@ -1,6 +1,7 @@
 package dev
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -78,8 +79,9 @@ func generateGenesisJSON(cdc *codec.Codec) error {
 	return printGenesisState(cdc, genState, chainID)
 }
 
-func printGenesisState(cdc *codec.Codec, genState app.GenesisState, chainID string) error {
-	gneStateBytes, err := codec.MarshalJSONIndent(cdc, genState)
+func printGenesisState(cdc *codec.Codec, genState map[string]json.RawMessage, chainID string) error {
+	orderedGenState := app.NewOrderedGenesisState(genState)
+	gneStateBytes, err := codec.MarshalJSONIndent(cdc, orderedGenState)
 	if err != nil {
 		return err
 	}

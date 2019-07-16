@@ -2,122 +2,74 @@ package app
 
 import (
 	"encoding/json"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/crisis"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/slashing"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/incentive"
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/stakingx"
-	dex "github.com/coinexchain/dex/types"
 )
 
 // State to Unmarshal
-type GenesisState struct {
-	//Accounts     []GenesisAccount          `json:"accounts"`
-	AuthData     auth.GenesisState         `json:"auth"`
-	AuthXData    authx.GenesisState        `json:"authx"`
-	BankData     bank.GenesisState         `json:"bank"`
-	BankXData    bankx.GenesisState        `json:"bankx"`
-	StakingData  staking.GenesisState      `json:"staking"`
-	StakingXData stakingx.GenesisState     `json:"stakingx"`
-	DistrData    distribution.GenesisState `json:"distr"`
-	GovData      gov.GenesisState          `json:"gov"`
-	CrisisData   crisis.GenesisState       `json:"crisis"`
-	SlashingData slashing.GenesisState     `json:"slashing"`
-	AssetData    asset.GenesisState        `json:"asset"`
-	MarketData   market.GenesisState       `json:"market"`
-	Incentive    incentive.GenesisState    `json:"incentive"`
-	GenTxs       []json.RawMessage         `json:"gentxs"`
+type OrderedGenesisState struct {
+	Accounts     json.RawMessage `json:"accounts"`
+	AuthData     json.RawMessage `json:"auth"`
+	AuthXData    json.RawMessage `json:"authx"`
+	BankData     json.RawMessage `json:"bank"`
+	BankXData    json.RawMessage `json:"bankx"`
+	StakingData  json.RawMessage `json:"staking"`
+	StakingXData json.RawMessage `json:"stakingx"`
+	DistrData    json.RawMessage `json:"distr"`
+	GovData      json.RawMessage `json:"gov"`
+	CrisisData   json.RawMessage `json:"crisis"`
+	SlashingData json.RawMessage `json:"slashing"`
+	AssetData    json.RawMessage `json:"asset"`
+	MarketData   json.RawMessage `json:"market"`
+	Incentive    json.RawMessage `json:"incentive"`
+	GenUtil      json.RawMessage `json:"genutil"`
 }
 
-// NewDefaultGenesisState generates the default state for coindex.
-func NewDefaultGenesisState() GenesisState {
-	gs := GenesisState{
-		//Accounts:     nil,
-		AuthData:     auth.DefaultGenesisState(),
-		AuthXData:    authx.DefaultGenesisState(),
-		BankData:     bank.DefaultGenesisState(),
-		BankXData:    bankx.DefaultGenesisState(),
-		StakingData:  staking.DefaultGenesisState(),
-		StakingXData: stakingx.DefaultGenesisState(),
-		DistrData:    distribution.DefaultGenesisState(),
-		GovData:      gov.DefaultGenesisState(),
-		CrisisData:   crisis.DefaultGenesisState(),
-		SlashingData: slashing.DefaultGenesisState(),
-		AssetData:    asset.DefaultGenesisState(),
-		MarketData:   market.DefaultGenesisState(),
-		Incentive:    incentive.DefaultGenesisState(),
-		GenTxs:       nil,
-	}
-	// TODO: create staking.GenesisState & gov.GenesisState & crisis.GenesisState from scratch
-	adjustDefaultParams(&gs)
-	return gs
-}
-
-func adjustDefaultParams(gs *GenesisState) {
-	gs.AuthData.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
-	gs.StakingData.Params.UnbondingTime = DefaultUnbondingTime
-	gs.StakingData.Params.MaxValidators = DefaultMaxValidators
-	gs.StakingData.Params.BondDenom = dex.DefaultBondDenom
-	gs.SlashingData.Params.MaxEvidenceAge = DefaultMaxEvidenceAge
-	gs.SlashingData.Params.SignedBlocksWindow = DefaultSignedBlocksWindow
-	gs.SlashingData.Params.MinSignedPerWindow = DefaultMinSignedPerWindow
-	gs.SlashingData.Params.SlashFractionDoubleSign = DefaultSlashFractionDoubleSign
-	gs.SlashingData.Params.SlashFractionDowntime = DefaultSlashFractionDowntime
-	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
-	gs.GovData.DepositParams.MinDeposit[0].Amount = DefaultGovMinDeposit
-	gs.GovData.DepositParams.MaxDepositPeriod = DefaultPeriod
-	gs.GovData.VotingParams.VotingPeriod = DefaultPeriod
-	gs.GovData.TallyParams = gov.TallyParams{
-		Quorum:    sdk.NewDecWithPrec(4, 1),
-		Threshold: sdk.NewDecWithPrec(5, 1),
-		Veto:      sdk.NewDecWithPrec(334, 3),
-	}
-	gs.CrisisData.ConstantFee.Denom = dex.DefaultBondDenom
-	gs.CrisisData.ConstantFee.Amount = DefaultCrisisConstantFee
-}
-
-func NewGenesisState(
-	//accounts []GenesisAccount,
-	authData auth.GenesisState,
-	authxData authx.GenesisState,
-	bankData bank.GenesisState,
-	bankxData bankx.GenesisState,
-	stakingData staking.GenesisState,
-	stakingxData stakingx.GenesisState,
-	distrData distribution.GenesisState,
-	govData gov.GenesisState,
-	crisisData crisis.GenesisState,
-	slashingData slashing.GenesisState,
-	assetData asset.GenesisState,
-	marketData market.GenesisState,
-	incentive incentive.GenesisState,
-) GenesisState {
-
-	return GenesisState{
-		//Accounts:     accounts,
-		AuthData:     authData,
-		AuthXData:    authxData,
-		BankData:     bankData,
-		BankXData:    bankxData,
-		StakingData:  stakingData,
-		StakingXData: stakingxData,
-		DistrData:    distrData,
-		GovData:      govData,
-		CrisisData:   crisisData,
-		SlashingData: slashingData,
-		AssetData:    assetData,
-		MarketData:   marketData,
-		Incentive:    incentive,
+func NewOrderedGenesisState(unordered map[string]json.RawMessage) OrderedGenesisState {
+	return OrderedGenesisState{
+		Accounts     : getAndDelete(unordered, "accounts"),
+		AuthData     : getAndDelete(unordered, "auth"),
+		AuthXData    : getAndDelete(unordered, "authx"),
+		BankData     : getAndDelete(unordered, "bank"),
+		BankXData    : getAndDelete(unordered, "bankx"),
+		StakingData  : getAndDelete(unordered, "staking"),
+		StakingXData : getAndDelete(unordered, "stakingx"),
+		DistrData    : getAndDelete(unordered, "distr"),
+		GovData      : getAndDelete(unordered, "gov"),
+		CrisisData   : getAndDelete(unordered, "crisis"),
+		SlashingData : getAndDelete(unordered, "slashing"),
+		AssetData    : getAndDelete(unordered, "asset"),
+		MarketData   : getAndDelete(unordered, "market"),
+		Incentive    : getAndDelete(unordered, "incentive"),
+		GenUtil      : getAndDelete(unordered, "genutil"),
 	}
 }
+
+func getAndDelete(m map[string]json.RawMessage, key string) json.RawMessage {
+	if val, ok := m[key]; ok {
+		delete(m, key)
+		return val
+	}
+	panic("key not exist: " + key)
+}
+
+//func adjustDefaultParams(gs *GenesisState) {
+//	gs.AuthData.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
+//	gs.StakingData.Params.UnbondingTime = DefaultUnbondingTime
+//	gs.StakingData.Params.MaxValidators = DefaultMaxValidators
+//	gs.StakingData.Params.BondDenom = dex.DefaultBondDenom
+//	gs.SlashingData.Params.MaxEvidenceAge = DefaultMaxEvidenceAge
+//	gs.SlashingData.Params.SignedBlocksWindow = DefaultSignedBlocksWindow
+//	gs.SlashingData.Params.MinSignedPerWindow = DefaultMinSignedPerWindow
+//	gs.SlashingData.Params.SlashFractionDoubleSign = DefaultSlashFractionDoubleSign
+//	gs.SlashingData.Params.SlashFractionDowntime = DefaultSlashFractionDowntime
+//	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
+//	gs.GovData.DepositParams.MinDeposit[0].Amount = DefaultGovMinDeposit
+//	gs.GovData.DepositParams.MaxDepositPeriod = DefaultPeriod
+//	gs.GovData.VotingParams.VotingPeriod = DefaultPeriod
+//	gs.GovData.TallyParams = gov.TallyParams{
+//		Quorum:    sdk.NewDecWithPrec(4, 1),
+//		Threshold: sdk.NewDecWithPrec(5, 1),
+//		Veto:      sdk.NewDecWithPrec(334, 3),
+//	}
+//	gs.CrisisData.ConstantFee.Denom = dex.DefaultBondDenom
+//	gs.CrisisData.ConstantFee.Amount = DefaultCrisisConstantFee
+//}

@@ -8,7 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
@@ -16,14 +15,15 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
-func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
-	genState := app.NewDefaultGenesisState()
-	//genState.Accounts = createExampleGenesisAccounts()
-	//genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
-	genState.AssetData = createExampleGenesisAssetData()
-	genState.MarketData = createExampleGenesisMarketData()
-	genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
-	return genState
+func createExampleGenesisState(cdc *codec.Codec) map[string]json.RawMessage {
+	//genState := app.NewDefaultGenesisState()
+	////genState.Accounts = createExampleGenesisAccounts()
+	////genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
+	//genState.AssetData = createExampleGenesisAssetData()
+	//genState.MarketData = createExampleGenesisMarketData()
+	//genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
+	//return genState
+	return nil
 }
 
 func createExampleGenesisAccounts() (accs []genaccounts.GenesisAccount) {
