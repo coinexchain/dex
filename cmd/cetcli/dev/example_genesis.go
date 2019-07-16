@@ -5,6 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
@@ -17,7 +18,7 @@ import (
 
 func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 	genState := app.NewDefaultGenesisState()
-	genState.Accounts = createExampleGenesisAccounts()
+	//genState.Accounts = createExampleGenesisAccounts()
 	//genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
 	genState.AssetData = createExampleGenesisAssetData()
 	genState.MarketData = createExampleGenesisMarketData()
@@ -25,7 +26,7 @@ func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 	return genState
 }
 
-func createExampleGenesisAccounts() (accs []app.GenesisAccount) {
+func createExampleGenesisAccounts() (accs []genaccounts.GenesisAccount) {
 	accs = append(accs,
 		newBaseGenesisAccount(incentive.PoolAddr.String(), 31500000000000000),
 		newBaseGenesisAccount("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke", 288800000000000000),

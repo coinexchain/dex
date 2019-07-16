@@ -5,10 +5,6 @@ import (
 	"io"
 	"os"
 
-	authx_client "github.com/coinexchain/dex/modules/authx/client"
-
-	distx_client "github.com/coinexchain/dex/modules/distributionx/client"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -36,14 +32,17 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/asset/client"
 	"github.com/coinexchain/dex/modules/authx"
+	authx_client "github.com/coinexchain/dex/modules/authx/client"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/distributionx"
+	distx_client "github.com/coinexchain/dex/modules/distributionx/client"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	market_client "github.com/coinexchain/dex/modules/market/client"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
 	stakingx_client "github.com/coinexchain/dex/modules/stakingx/client"
+
 )
 
 const (
@@ -431,19 +430,6 @@ func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 	}
 
 	return app.mm.InitGenesis(ctx, genesisState)
-}
-
-// initialize store from a genesis state
-func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState GenesisState) {
-	// load the accounts
-	app.loadGenesisAccounts(ctx, genesisState)
-}
-
-func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState GenesisState) {
-	for _, gacc := range genesisState.Accounts {
-		accx := authx.AccountX{Address: gacc.Address, MemoRequired: gacc.MemoRequired, LockedCoins: gacc.LockedCoins}
-		app.accountXKeeper.SetAccountX(ctx, accx)
-	}
 }
 
 // load a particular height

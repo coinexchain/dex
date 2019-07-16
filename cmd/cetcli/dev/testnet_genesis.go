@@ -3,19 +3,22 @@ package dev
 import (
 	"time"
 
+	"github.com/spf13/viper"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/types"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/spf13/viper"
 )
 
 func createTestnetGenesisState(cdc *codec.Codec) app.GenesisState {
 	genState := app.NewDefaultGenesisState()
-	genState.Accounts = createGenesisAccounts()
+	//genState.Accounts = createGenesisAccounts()
 	genState.AssetData = createTestnetGenesisAssetData()
 
 	addNonBondableAddresses(&genState.StakingXData.Params)
@@ -63,7 +66,7 @@ func createTestnetGenesisAssetData() asset.GenesisState {
 	return state
 }
 
-func createGenesisAccounts() (accs []app.GenesisAccount) {
+func createGenesisAccounts() (accs []genaccounts.GenesisAccount) {
 	accs = append(accs,
 		newBaseGenesisAccount(incentive.PoolAddr.String(), 31536000000000000),
 		newBaseGenesisAccount(viper.GetString(flagAddrCirculation), 288788547005740000),
