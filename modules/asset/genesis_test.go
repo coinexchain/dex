@@ -1,7 +1,6 @@
 package asset
 
 import (
-	types2 "github.com/coinexchain/dex/modules/asset/types"
 	"testing"
 
 	"github.com/coinexchain/dex/types"
@@ -17,7 +16,7 @@ func TestGenesis(t *testing.T) {
 
 	state := DefaultGenesisState()
 
-	cet := &types2.BaseToken{
+	cet := &BaseToken{
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",
 		TotalSupply:      588788547005740000,
@@ -30,7 +29,7 @@ func TestGenesis(t *testing.T) {
 		TotalMint:        0,
 		IsForbidden:      false,
 	}
-	abc := &types2.BaseToken{
+	abc := &BaseToken{
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
 		TotalSupply:      588788547005740000,
@@ -43,7 +42,7 @@ func TestGenesis(t *testing.T) {
 		TotalMint:        0,
 		IsForbidden:      false,
 	}
-	abcDump := &types2.BaseToken{
+	abcDump := &BaseToken{
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
 		TotalSupply:      588788547005740000,
@@ -56,7 +55,7 @@ func TestGenesis(t *testing.T) {
 		TotalMint:        0,
 		IsForbidden:      false,
 	}
-	abcInvalid := &types2.BaseToken{
+	abcInvalid := &BaseToken{
 		Name:             "ABC Chain Native Token",
 		Symbol:           "933",
 		TotalSupply:      588788547005740000,

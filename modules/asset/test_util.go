@@ -1,119 +1,124 @@
 package asset
 
 import (
-	types2 "github.com/coinexchain/dex/modules/asset/types"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-
-	"github.com/coinexchain/dex/modules/msgqueue"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/cosmos/cosmos-sdk/x/supply"
-	abci "github.com/tendermint/tendermint/abci/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	dbm "github.com/tendermint/tendermint/libs/db"
-	"github.com/tendermint/tendermint/libs/log"
-
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-var _, _, tAccAddr = keyPubAddr()
-
-type testInput struct {
-	cdc     *codec.Codec
-	ctx     sdk.Context
-	tk      BaseKeeper
-	handler sdk.Handler
-}
-
-func setupTestInput() testInput {
-	db := dbm.NewMemDB()
-
-	cdc := codec.New()
-	types2.RegisterCodec(cdc)
-	//auth.RegisterBaseAccount(cdc)
-
-	assetCapKey := sdk.NewKVStoreKey(types2.StoreKey)
-	authCapKey := sdk.NewKVStoreKey(auth.StoreKey)
-	authxCapKey := sdk.NewKVStoreKey(authx.StoreKey)
-	//fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
-	keyParams := sdk.NewKVStoreKey(params.StoreKey)
-	keyStaking := sdk.NewKVStoreKey(types.StoreKey)
-	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
-	tkeyStaking := sdk.NewTransientStoreKey(types.TStoreKey)
-
-	ms := store.NewCommitMultiStore(db)
-	ms.MountStoreWithDB(assetCapKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(authCapKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(authxCapKey, sdk.StoreTypeIAVL, db)
-	//ms.MountStoreWithDB(fckCapKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
-
-	_ = ms.LoadLatestVersion()
-
-	var cs sdk.CodespaceType = "" // TODO
-	ak := auth.NewAccountKeeper(
-		cdc,
-		authCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(auth.DefaultParamspace),
-		auth.ProtoBaseAccount,
-	)
-	axk := authx.NewKeeper(
-		cdc,
-		authxCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(authx.DefaultParamspace),
-		supply.Keeper{},
-		ak,
-	)
-
-	bk := bank.NewBaseKeeper(
-		ak,
-		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(bank.DefaultParamspace),
-		sdk.CodespaceRoot)
-	//fck := auth.NewFeeCollectionKeeper(
-	//	cdc,
-	//	fckCapKey,
-	//)
-	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
-	maccPerms := map[string][]string{
-		auth.FeeCollectorName: []string{supply.Basic},
-	}
-	supplyKeeper := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
-
-	ask := NewBaseTokenKeeper(
-		cdc,
-		assetCapKey,
-	)
-	bkx := bankx.NewKeeper(
-		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(bankx.DefaultParamspace),
-		axk, bk, ak, ask, supplyKeeper,
-		msgqueue.NewProducer(),
-	)
-
-	sk := staking.NewKeeper(cdc, keyStaking, tkeyStaking, nil, // TODO
-		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(staking.DefaultParamspace),
-		types.DefaultCodespace)
-
-	tk := NewBaseKeeper(
-		cdc,
-		assetCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(types2.DefaultParamspace),
-		bkx,
-		&sk)
-
-	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-	tk.SetParams(ctx, types2.DefaultParams())
-	handler := NewHandler(tk)
-
-	return testInput{cdc, ctx, tk, handler}
-}
+//import (
+//	"github.com/coinexchain/dex/modules/authx"
+//	"github.com/coinexchain/dex/modules/bankx"
+//
+//	"github.com/coinexchain/dex/modules/msgqueue"
+//	"github.com/cosmos/cosmos-sdk/x/bank"
+//	"github.com/cosmos/cosmos-sdk/x/staking"
+//	"github.com/cosmos/cosmos-sdk/x/staking/types"
+//	"github.com/cosmos/cosmos-sdk/x/supply"
+//	abci "github.com/tendermint/tendermint/abci/types"
+//	"github.com/tendermint/tendermint/crypto"
+//	"github.com/tendermint/tendermint/crypto/secp256k1"
+//	dbm "github.com/tendermint/tendermint/libs/db"
+//	"github.com/tendermint/tendermint/libs/log"
+//
+//	"github.com/cosmos/cosmos-sdk/codec"
+//	"github.com/cosmos/cosmos-sdk/store"
+//	sdk "github.com/cosmos/cosmos-sdk/types"
+//	"github.com/cosmos/cosmos-sdk/x/auth"
+//	"github.com/cosmos/cosmos-sdk/x/params"
+//)
+//
+//var _, _, tAccAddr = keyPubAddr()
+//
+//type testInput struct {
+//	cdc     *codec.Codec
+//	ctx     sdk.Context
+//	tk      BaseKeeper
+//	handler sdk.Handler
+//}
+//
+//func setupTestInput() testInput {
+//	db := dbm.NewMemDB()
+//
+//	cdc := codec.New()
+//	RegisterCodec(cdc)
+//	//auth.RegisterBaseAccount(cdc)
+//
+//	assetCapKey := sdk.NewKVStoreKey(StoreKey)
+//	authCapKey := sdk.NewKVStoreKey(auth.StoreKey)
+//	authxCapKey := sdk.NewKVStoreKey(authx.StoreKey)
+//	//fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
+//	keyParams := sdk.NewKVStoreKey(params.StoreKey)
+//	keyStaking := sdk.NewKVStoreKey(types.StoreKey)
+//	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
+//	tkeyStaking := sdk.NewTransientStoreKey(types.TStoreKey)
+//
+//	ms := store.NewCommitMultiStore(db)
+//	ms.MountStoreWithDB(assetCapKey, sdk.StoreTypeIAVL, db)
+//	ms.MountStoreWithDB(authCapKey, sdk.StoreTypeIAVL, db)
+//	ms.MountStoreWithDB(authxCapKey, sdk.StoreTypeIAVL, db)
+//	//ms.MountStoreWithDB(fckCapKey, sdk.StoreTypeIAVL, db)
+//	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
+//	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
+//
+//	_ = ms.LoadLatestVersion()
+//
+//	var cs sdk.CodespaceType = "" // TODO
+//	ak := auth.NewAccountKeeper(
+//		cdc,
+//		authCapKey,
+//		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(auth.DefaultParamspace),
+//		auth.ProtoBaseAccount,
+//	)
+//	axk := authx.NewKeeper(
+//		cdc,
+//		authxCapKey,
+//		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(authx.DefaultParamspace),
+//		supply.Keeper{},
+//		ak,
+//	)
+//
+//	bk := bank.NewBaseKeeper(
+//		ak,
+//		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(bank.DefaultParamspace),
+//		sdk.CodespaceRoot)
+//	//fck := auth.NewFeeCollectionKeeper(
+//	//	cdc,
+//	//	fckCapKey,
+//	//)
+//	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
+//	maccPerms := map[string][]string{
+//		auth.FeeCollectorName: []string{supply.Basic},
+//	}
+//	supplyKeeper := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
+//
+//	ask := NewBaseTokenKeeper(
+//		cdc,
+//		assetCapKey,
+//	)
+//	bkx := bankx.NewKeeper(
+//		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(bankx.DefaultParamspace),
+//		axk, bk, ak, ask, supplyKeeper,
+//		msgqueue.NewProducer(),
+//	)
+//
+//	sk := staking.NewKeeper(cdc, keyStaking, tkeyStaking, nil, // TODO
+//		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(staking.DefaultParamspace),
+//		types.DefaultCodespace)
+//
+//	tk := NewBaseKeeper(
+//		cdc,
+//		assetCapKey,
+//		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(DefaultParamspace),
+//		bkx,
+//		&sk)
+//
+//	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
+//	tk.SetParams(ctx, DefaultParams())
+//	handler := NewHandler(tk)
+//
+//	return testInput{cdc, ctx, tk, handler}
+//}
 
 func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
 	key := secp256k1.GenPrivKey()

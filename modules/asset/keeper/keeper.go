@@ -1,18 +1,19 @@
-package asset
+package keeper
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset/types"
 	"strings"
+
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/tendermint/tendermint/libs/bech32"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/modules/asset/types"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -46,8 +47,6 @@ type Keeper interface {
 	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
-	SetParams(ctx sdk.Context, params types.Params)
-	GetParams(ctx sdk.Context) (params types.Params)
 }
 
 var _ Keeper = (*BaseKeeper)(nil)
@@ -63,19 +62,19 @@ type BaseKeeper struct {
 
 	paramSubspace params.Subspace
 
-	bkx ExpectedBankxKeeper
+	bkx types.ExpectedBankxKeeper
 	sk  *staking.Keeper
 }
 
 // NewBaseKeeper returns a new BaseKeeper that uses go-amino to (binary) encode and decode concrete Token.
 func NewBaseKeeper(cdc *codec.Codec, key sdk.StoreKey,
-	paramStore params.Subspace, bkx ExpectedBankxKeeper, sk *staking.Keeper) BaseKeeper {
+	paramStore params.Subspace, bkx types.ExpectedBankxKeeper, sk *staking.Keeper) BaseKeeper {
 	return BaseKeeper{
 		BaseTokenKeeper: NewBaseTokenKeeper(cdc, key),
 
 		cdc:           cdc,
 		key:           key,
-		paramSubspace: paramStore.WithKeyTable(types.ParamKeyTable()),
+		paramSubspace: paramStore.WithKeyTable(ParamKeyTable()),
 		bkx:           bkx,
 		sk:            sk,
 	}
@@ -99,17 +98,6 @@ func (keeper BaseKeeper) SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt
 	return keeper.bkx.SubtractCoins(ctx, addr, amt)
 }
 
-// SetParams sets the asset module's parameters.
-func (keeper BaseKeeper) SetParams(ctx sdk.Context, params types.Params) {
-	keeper.paramSubspace.SetParamSet(ctx, &params)
-}
-
-// GetParams gets the asset module's parameters.
-func (keeper BaseKeeper) GetParams(ctx sdk.Context) (params types.Params) {
-	keeper.paramSubspace.GetParamSet(ctx, &params)
-	return
-}
-
 //IssueToken - new token and store it
 func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string, totalSupply int64, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool, url string, description string) sdk.Error {
@@ -119,7 +107,7 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 	}
 
 	// only cet owner can issue reserved token
-	if isReserved(symbol) && symbol != dex.CET {
+	if types.IsReservedSymbol(symbol) && symbol != dex.CET {
 		cetToken := keeper.GetToken(ctx, dex.CET)
 		if cetToken == nil || !owner.Equals(cetToken.GetOwner()) {
 			return types.ErrorInvalidTokenOwner("only coinex dex foundation can issue reserved symbol token, you can run \n" +
@@ -523,7 +511,6 @@ type ViewKeeper interface {
 	GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddress
 	GetForbiddenAddresses(ctx sdk.Context, symbol string) []sdk.AccAddress
 	ExportAddrKeys(ctx sdk.Context, prefix []byte) []string
-	GetReservedSymbols() []string
 }
 
 var _ ViewKeeper = (*BaseViewKeeper)(nil)
@@ -611,11 +598,6 @@ func (keeper BaseViewKeeper) ExportAddrKeys(ctx sdk.Context, prefix []byte) []st
 	})
 
 	return res
-}
-
-// GetReservedSymbols - get all reserved symbols
-func (keeper BaseViewKeeper) GetReservedSymbols() []string {
-	return reserved
 }
 
 func (keeper BaseViewKeeper) iterateTokenValue(ctx sdk.Context, process func(types.Token) (stop bool)) {

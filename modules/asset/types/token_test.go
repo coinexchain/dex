@@ -1,7 +1,6 @@
-package asset
+package types
 
 import (
-	"github.com/coinexchain/dex/modules/asset/types"
 	"reflect"
 	"testing"
 )
@@ -9,12 +8,12 @@ import (
 func TestBaseToken_Validate(t *testing.T) {
 	tests := []struct {
 		name    string
-		token   *types.BaseToken
+		token   *BaseToken
 		wantErr error
 	}{
 		{
 			"base-case",
-			&types.BaseToken{
+			&BaseToken{
 				"ABC Token",
 				"abc",
 				210000000000,
@@ -33,7 +32,7 @@ func TestBaseToken_Validate(t *testing.T) {
 		},
 		{
 			"case-invalid-total-mint",
-			&types.BaseToken{
+			&BaseToken{
 				"ABC Token",
 				"abc",
 				210000000000,
@@ -48,11 +47,11 @@ func TestBaseToken_Validate(t *testing.T) {
 				"",
 				"",
 			},
-			types.ErrorInvalidTokenMint("Invalid total mint: -1"),
+			ErrorInvalidTokenMint("Invalid total mint: -1"),
 		},
 		{
 			"case-invalid-total-burn",
-			&types.BaseToken{
+			&BaseToken{
 				"ABC Token",
 				"abc",
 				210000000000,
@@ -67,11 +66,11 @@ func TestBaseToken_Validate(t *testing.T) {
 				"",
 				"",
 			},
-			types.ErrorInvalidTokenBurn("Invalid total burn: 9000000000000000001"),
+			ErrorInvalidTokenBurn("Invalid total burn: 9000000000000000001"),
 		},
 		{
 			"case-invalid-forbidden-state",
-			&types.BaseToken{
+			&BaseToken{
 				"ABC Token",
 				"abc",
 				210000000000,
@@ -86,7 +85,7 @@ func TestBaseToken_Validate(t *testing.T) {
 				"",
 				"",
 			},
-			types.ErrorInvalidTokenForbidden("Invalid Forbidden state"),
+			ErrorInvalidTokenForbidden("Invalid Forbidden state"),
 		},
 	}
 

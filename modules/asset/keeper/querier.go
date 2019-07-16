@@ -1,15 +1,16 @@
-package asset
+package keeper
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset/types"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/coinexchain/dex/modules/asset/types"
 )
+
+
 
 // NewQuerier - creates a querier for asset REST endpoints
 func NewQuerier(keeper ViewKeeper) sdk.Querier {
@@ -31,8 +32,19 @@ func NewQuerier(keeper ViewKeeper) sdk.Querier {
 	}
 }
 
+// QueryTokenParams defines the params for query: "custom/asset/token-info"
+type QueryTokenParams struct {
+	Symbol string
+}
+
+func NewQueryAssetParams(s string) QueryTokenParams {
+	return QueryTokenParams{
+		Symbol: s,
+	}
+}
+
 func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
-	var params types.QueryTokenParams
+	var params QueryTokenParams
 	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -59,8 +71,19 @@ func queryAllTokenList(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper
 	return bz, nil
 }
 
+// QueryWhitelistParams defines the params for query: "custom/asset/token-whitelist"
+type QueryWhitelistParams struct {
+	Symbol string
+}
+
+func NewQueryWhitelistParams(s string) QueryWhitelistParams {
+	return QueryWhitelistParams{
+		Symbol: s,
+	}
+}
+
 func queryWhitelist(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
-	var params types.QueryWhitelistParams
+	var params QueryWhitelistParams
 	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -73,8 +96,19 @@ func queryWhitelist(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) (
 	return bz, nil
 }
 
+// QueryForbiddenAddrParams defines the params for query: "custom/asset/addr-forbidden"
+type QueryForbiddenAddrParams struct {
+	Symbol string
+}
+
+func NewQueryForbiddenAddrParams(s string) QueryForbiddenAddrParams {
+	return QueryForbiddenAddrParams{
+		Symbol: s,
+	}
+}
+
 func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
-	var params types.QueryForbiddenAddrParams
+	var params QueryForbiddenAddrParams
 	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
@@ -88,7 +122,7 @@ func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeepe
 }
 
 func queryReservedSymbols(ctx sdk.Context, req abci.RequestQuery, keeper ViewKeeper) ([]byte, sdk.Error) {
-	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, keeper.GetReservedSymbols())
+	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, types.GetReservedSymbols())
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

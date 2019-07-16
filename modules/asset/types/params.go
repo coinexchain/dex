@@ -1,6 +1,6 @@
 package types
-
 import (
+	"bytes"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -11,14 +11,6 @@ import (
 
 // DefaultParamspace defines the default asset module parameter subspace
 const (
-	// ModuleName is the name of the module
-
-	// StoreKey is string representation of the store key for asset
-
-	// RouterKey is the message route for asset
-
-	// QuerierRoute is the querier route for asset
-
 	MaxTokenAmount   = 9E18 // 90 billion * 10 ^ 8
 	RareSymbolLength = 2
 
@@ -41,11 +33,6 @@ type Params struct {
 	IssueRareTokenFee sdk.Coins `json:"issue_rare_token_fee"`
 }
 
-// ParamKeyTable for asset module
-func ParamKeyTable() params.KeyTable {
-	return params.NewKeyTable().RegisterParamSet(&Params{})
-}
-
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 // pairs of asset module's parameters.
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
@@ -56,11 +43,11 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 }
 
 // Equal returns a boolean determining if two Params types are identical.
-//func (p Params) Equal(p2 Params) bool {
-//	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-//	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-//	return bytes.Equal(bz1, bz2)
-//}
+func (p Params) Equal(p2 Params) bool {
+	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	return bytes.Equal(bz1, bz2)
+}
 
 func (p *Params) ValidateGenesis() error {
 	for _, pair := range p.ParamSetPairs() {

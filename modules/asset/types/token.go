@@ -3,10 +3,9 @@ package types
 import (
 	"errors"
 	"fmt"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"regexp"
 	"unicode/utf8"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Token is an interface used to store asset at a given token within state.

@@ -1,9 +1,8 @@
 package asset
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/coinexchain/dex/modules/asset/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewHandler returns a handler for "asset" type messages.
