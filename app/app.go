@@ -42,6 +42,7 @@ import (
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
 	stakingx_client "github.com/coinexchain/dex/modules/stakingx/client"
+	"github.com/coinexchain/dex/modules/supplyx"
 )
 
 const (
@@ -229,13 +230,8 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
 		app.bankKeeper, supply.DefaultCodespace, maccPerms)
 
-	stakingKeeper := staking.NewKeeper(
-		app.cdc,
-		app.keyStaking, app.tkeyStaking,
-		app.supplyKeeper,
-		app.paramsKeeper.Subspace(staking.DefaultParamspace),
-		staking.DefaultCodespace,
-	)
+	var stakingKeeper staking.Keeper
+
 	app.distrKeeper = distr.NewKeeper(
 		app.cdc,
 		app.keyDistr,
@@ -244,6 +240,16 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.supplyKeeper,
 		distr.DefaultCodespace,
 		auth.FeeCollectorName,
+	)
+	supplyxKeeper := supplyx.NewKeeper(app.supplyKeeper, app.distrKeeper)
+
+	stakingKeeper = staking.NewKeeper(
+		app.cdc,
+		app.keyStaking, app.tkeyStaking,
+		supplyxKeeper,
+		//app.supplyKeeper,
+		app.paramsKeeper.Subspace(staking.DefaultParamspace),
+		staking.DefaultCodespace,
 	)
 
 	// register the proposal types
@@ -256,7 +262,8 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.cdc,
 		app.keyGov,
 		app.paramsKeeper, app.paramsKeeper.Subspace(gov.DefaultParamspace),
-		app.supplyKeeper,
+		//app.supplyKeeper,
+		supplyxKeeper,
 		&stakingKeeper,
 		gov.DefaultCodespace,
 		govRouter,
@@ -292,7 +299,8 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.slashingKeeper = slashing.NewKeeper(
 		app.cdc,
 		app.keySlashing,
-		app.stakingXKeeper,
+		//app.stakingXKeeper,
+		&stakingKeeper,
 		app.paramsKeeper.Subspace(slashing.DefaultParamspace),
 		slashing.DefaultCodespace,
 	)
