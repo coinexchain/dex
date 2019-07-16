@@ -1,10 +1,12 @@
 package incentive
 
 import (
-	"github.com/coinexchain/dex/types"
 	"github.com/tendermint/tendermint/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/types"
 )
 
 var (
@@ -18,13 +20,12 @@ func BeginBlocker(ctx sdk.Context, k Keeper) sdk.Error {
 }
 
 func collectRewardsFromPool(k Keeper, ctx sdk.Context, blockRewards sdk.Coins) sdk.Error {
-	coins, err := k.bankKeeper.SubtractCoins(ctx, PoolAddr, blockRewards)
-	if err != nil || !coins.IsValid() {
+
+	//transfer rewards into collected_fees for further distribution
+	err := k.supplyKeeper.SendCoinsFromAccountToModule(ctx, PoolAddr, auth.FeeCollectorName, blockRewards)
+	if err != nil {
 		return err
 	}
-
-	//add rewards into collected_fees for further distribution
-	//k.feeCollectionKeeper.AddCollectedFees(ctx, blockRewards)
 	return nil
 }
 

@@ -42,7 +42,6 @@ import (
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
 	stakingx_client "github.com/coinexchain/dex/modules/stakingx/client"
-
 )
 
 const (
