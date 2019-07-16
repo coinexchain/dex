@@ -46,7 +46,7 @@ import (
 )
 
 const (
-	appName = "CetChainApp"
+	appName = "CoinExChainApp"
 	// DefaultKeyPass contains the default key password for genesis transactions
 	DefaultKeyPass = "12345678"
 )
@@ -402,7 +402,7 @@ func (app *CetChainApp) InitModules() {
 
 // initialize BaseApp
 func (app *CetChainApp) mountStores() {
-	app.MountStores(app.keyMain, app.keyAccount, app.keyStaking, app.keyDistr,
+	app.MountStores(app.keyMain, app.keyAccount, app.keySupply, app.keyStaking, app.keyDistr,
 		app.keySlashing, app.keyGov, app.keyParams,
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
 		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,

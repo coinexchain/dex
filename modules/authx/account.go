@@ -15,6 +15,17 @@ type AccountX struct {
 	FrozenCoins  sdk.Coins      `json:"frozen_coins"`
 }
 
+type AccountXs []AccountX
+
+func NewAccountX(address sdk.AccAddress, memoRequired bool, lockedCoins LockedCoins, frozenCoins sdk.Coins) *AccountX {
+	return &AccountX{
+		Address:      address,
+		MemoRequired: memoRequired,
+		LockedCoins:  lockedCoins,
+		FrozenCoins:  frozenCoins,
+	}
+}
+
 func (acc *AccountX) GetAddress() sdk.AccAddress {
 	return acc.Address
 }

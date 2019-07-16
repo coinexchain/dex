@@ -5,29 +5,41 @@ import (
 )
 
 type GenesisState struct {
-	Params Params `json:"params"`
+	Params    Params    `json:"params"`
+	AccountXs AccountXs `json:"accountxs"`
 }
 
-func NewGenesisState(params Params) GenesisState {
+func NewGenesisState(params Params, accountXs AccountXs) GenesisState {
 	return GenesisState{
-		Params: params,
+		Params:    params,
+		AccountXs: accountXs,
 	}
 }
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParams())
+	return NewGenesisState(DefaultParams(), AccountXs{})
 }
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper AccountXKeeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
+
+	for _, accx := range data.AccountXs {
+		accountx := NewAccountX(accx.Address, accx.MemoRequired, accx.LockedCoins, accx.FrozenCoins)
+		keeper.SetAccountX(ctx, *accountx)
+	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, keeper AccountXKeeper) GenesisState {
-	params := keeper.GetParams(ctx)
-	return NewGenesisState(params)
+	var accountXs AccountXs
+	keeper.IterateAccounts(ctx, func(accountX AccountX) (stop bool) {
+		accountXs = append(accountXs, accountX)
+		return false
+	})
+
+	return NewGenesisState(keeper.GetParams(ctx), accountXs)
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
@@ -37,5 +49,8 @@ func (data GenesisState) ValidateGenesis() error {
 	if limit.IsNegative() {
 		return ErrInvalidMinGasPriceLimit(limit)
 	}
+
+	//TODO: validate genesis state in
+
 	return nil
 }
