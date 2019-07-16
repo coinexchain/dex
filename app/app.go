@@ -275,6 +275,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.keyAccountX,
 		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 		app.supplyKeeper,
+		app.accountKeeper,
 	)
 
 	app.stakingXKeeper = stakingx.NewKeeper(
@@ -379,7 +380,6 @@ func (app *CetChainApp) InitModules() {
 		crisis.ModuleName,
 		//TODO: authx.ModuleName,
 		bankx.ModuleName,
-		distributionx.ModuleName,
 		stakingx.ModuleName,
 		asset.ModuleName,
 		market.ModuleName,
@@ -438,10 +438,6 @@ func (app *CetChainApp) initFromGenesisState(ctx sdk.Context, genesisState Genes
 
 func (app *CetChainApp) loadGenesisAccounts(ctx sdk.Context, genesisState GenesisState) {
 	for _, gacc := range genesisState.Accounts {
-		acc := gacc.ToAccount()
-		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
-		app.accountKeeper.SetAccount(ctx, acc)
-
 		accx := authx.AccountX{Address: gacc.Address, MemoRequired: gacc.MemoRequired, LockedCoins: gacc.LockedCoins}
 		app.accountXKeeper.SetAccountX(ctx, accx)
 	}

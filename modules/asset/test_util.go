@@ -69,6 +69,7 @@ func setupTestInput() testInput {
 		authxCapKey,
 		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(authx.DefaultParamspace),
 		supply.Keeper{},
+		ak,
 	)
 
 	bk := bank.NewBaseKeeper(

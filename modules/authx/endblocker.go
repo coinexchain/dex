@@ -2,10 +2,9 @@ package authx
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
-func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper auth.AccountKeeper) {
+func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeeper) {
 	currentTime := ctx.BlockHeader().Time.Unix()
 	iterator := aux.UnlockedCoinsQueueIterator(ctx, currentTime)
 	defer iterator.Close()

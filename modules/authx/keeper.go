@@ -35,10 +35,11 @@ type AccountXKeeper struct {
 	paramSubspace params.Subspace
 
 	supplyKeeper SupplyKeeper
+
+	ak ExpectedAccountKeeper
 }
 
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace, keeper SupplyKeeper) AccountXKeeper {
-
+func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace, keeper SupplyKeeper, ak ExpectedAccountKeeper) AccountXKeeper {
 	// ensure authx module account is set
 	if addr := keeper.GetModuleAddress(ModuleName); addr == nil {
 		panic(fmt.Sprintf("%s module account has not been set", ModuleName))
@@ -49,6 +50,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace
 		cdc:           cdc,
 		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
 		supplyKeeper:  keeper,
+		ak:            ak,
 	}
 }
 
