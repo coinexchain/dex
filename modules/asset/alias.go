@@ -27,7 +27,6 @@ var (
 type (
 	Keeper = keeper.BaseKeeper
 	TokenKeeper = keeper.TokenKeeper
-	ViewKeeper = keeper.ViewKeeper
 	Params = types.Params
 	GenesisState = types.GenesisState
 	Token = types.Token

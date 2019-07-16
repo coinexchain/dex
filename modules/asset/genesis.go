@@ -2,8 +2,7 @@ package asset
 
 import (
 	"errors"
-
-	key "github.com/coinexchain/dex/modules/asset/keeper"
+	"github.com/coinexchain/dex/modules/asset/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -11,21 +10,21 @@ import (
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 
-	//for _, token := range data.Tokens {
-	//	if err := keeper.setToken(ctx, token); err != nil {
-	//		panic(err)
-	//	}
-	//}
-	//for _, addr := range data.Whitelist {
-	//	if err := keeper.importAddrKey(ctx, key.WhitelistKeyPrefix, addr); err != nil {
-	//		panic(err)
-	//	}
-	//}
-	//for _, addr := range data.ForbiddenAddresses {
-	//	if err := keeper.importAddrKey(ctx, key.ForbiddenAddrKeyPrefix, addr); err != nil {
-	//		panic(err)
-	//	}
-	//}
+	for _, token := range data.Tokens {
+		if err := keeper.SetToken(ctx, token); err != nil {
+			panic(err)
+		}
+	}
+	for _, addr := range data.Whitelist {
+		if err := keeper.ImportGenesisAddrKeys(ctx, types.WhitelistKey, addr); err != nil {
+			panic(err)
+		}
+	}
+	for _, addr := range data.ForbiddenAddresses {
+		if err := keeper.ImportGenesisAddrKeys(ctx, types.ForbiddenAddrKey, addr); err != nil {
+			panic(err)
+		}
+	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
@@ -33,8 +32,8 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	return NewGenesisState(
 		keeper.GetParams(ctx),
 		keeper.GetAllTokens(ctx),
-		keeper.ExportAddrKeys(ctx, key.WhitelistKeyPrefix),
-		keeper.ExportAddrKeys(ctx, key.ForbiddenAddrKeyPrefix))
+		keeper.ExportGenesisAddrKeys(ctx, types.WhitelistKey),
+		keeper.ExportGenesisAddrKeys(ctx, types.ForbiddenAddrKey))
 }
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
