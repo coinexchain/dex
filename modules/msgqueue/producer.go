@@ -17,6 +17,7 @@ const (
 
 type MsgSender interface {
 	SendMsg(topic string, key string, v interface{}) error
+	IsSubScribe(topic string) bool
 }
 
 type Producer struct {
@@ -81,4 +82,9 @@ func (k Producer) SendMsg(topic string, key string, v interface{}) error {
 	}
 
 	return nil
+}
+
+func (k Producer) IsSubScribe(topic string) bool {
+	_, ok := k.topicWrites[topic]
+	return ok
 }
