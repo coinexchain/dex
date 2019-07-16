@@ -5,10 +5,11 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
-	//clientrest "github.com/cosmos/cosmos-sdk/client/rest"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/market/client/cli"
@@ -63,7 +64,7 @@ func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			return
 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -98,9 +99,10 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		force = market.IOC
 	}
 
+	accRetriever := authtypes.NewAccountRetriever(cliCtx)
 	sequence := req.BaseReq.Sequence
 	if sequence == 0 {
-		sequence, err = cliCtx.GetAccountSequence(creator)
+		_, sequence, err = accRetriever.GetAccountNumberSequence(creator)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
 			return
@@ -131,7 +133,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		userToken = symbols[1]
 	}
 
-	account, err := cliCtx.GetAccount(creator)
+	account, err := accRetriever.GetAccount(creator)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, "No have insufficient cet to create market in blockchain")
 		return
@@ -141,5 +143,5 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		return
 	}
 
-	clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 }

@@ -1,27 +1,52 @@
 package client
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/tendermint/go-amino"
-
-	"github.com/cosmos/cosmos-sdk/client"
-
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/client/rest"
+	"github.com/coinexchain/dex/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
+
 	assCli "github.com/coinexchain/dex/modules/asset/client/cli"
 )
 
-// ModuleClient exports all client functionality from this module
-type ModuleClient struct {
-	storeKey string
-	cdc      *amino.Codec
+type AssetModuleClient struct {
 }
 
-func NewModuleClient(storeKey string, cdc *amino.Codec) ModuleClient {
-	return ModuleClient{storeKey, cdc}
+func (mc AssetModuleClient) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr, asset.ModuleCdc, asset.StoreKey)
 }
 
-// GetQueryCmd returns the cli query commands for this module
-func (mc ModuleClient) GetQueryCmd() *cobra.Command {
+// get the root tx command of this module
+func (mc AssetModuleClient) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	assTxCmd := &cobra.Command{
+		Use:   asset.ModuleName,
+		Short: "Asset transactions subcommands",
+	}
+
+	assTxCmd.AddCommand(client.PostCommands(
+		assCli.IssueTokenCmd(asset.QuerierRoute, cdc),
+		assCli.TransferOwnershipCmd(cdc),
+		assCli.MintTokenCmd(cdc),
+		assCli.BurnTokenCmd(cdc),
+		assCli.ForbidTokenCmd(cdc),
+		assCli.UnForbidTokenCmd(cdc),
+		assCli.AddTokenWhitelistCmd(cdc),
+		assCli.RemoveTokenWhitelistCmd(cdc),
+		assCli.ForbidAddrCmd(cdc),
+		assCli.UnForbidAddrCmd(cdc),
+		assCli.ModifyTokenURLCmd(cdc),
+		assCli.ModifyTokenDescriptionCmd(cdc),
+	)...)
+
+	return assTxCmd
+}
+
+// get the root query command of this module
+func (mc AssetModuleClient) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	assQueryCmd := &cobra.Command{
 		Use:   asset.ModuleName,
@@ -29,37 +54,16 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 	}
 
 	assQueryCmd.AddCommand(client.GetCommands(
-		assCli.GetTokenCmd(mc.storeKey, mc.cdc),
-		assCli.GetTokenListCmd(mc.storeKey, mc.cdc),
-		assCli.GetWhitelistCmd(mc.storeKey, mc.cdc),
-		assCli.GetForbiddenAddrCmd(mc.storeKey, mc.cdc),
-		assCli.GetReservedSymbolsCmd(mc.storeKey, mc.cdc),
+		assCli.GetTokenCmd(asset.QuerierRoute, cdc),
+		assCli.GetTokenListCmd(asset.QuerierRoute, cdc),
+		assCli.GetWhitelistCmd(asset.QuerierRoute, cdc),
+		assCli.GetForbiddenAddrCmd(asset.QuerierRoute, cdc),
+		assCli.GetReservedSymbolsCmd(asset.QuerierRoute, cdc),
 	)...)
 
 	return assQueryCmd
 }
 
-// GetTxCmd returns the transaction commands for this module
-func (mc ModuleClient) GetTxCmd() *cobra.Command {
-	assTxCmd := &cobra.Command{
-		Use:   asset.ModuleName,
-		Short: "Asset transactions subcommands",
-	}
-
-	assTxCmd.AddCommand(client.PostCommands(
-		assCli.IssueTokenCmd(mc.storeKey, mc.cdc),
-		assCli.TransferOwnershipCmd(mc.cdc),
-		assCli.MintTokenCmd(mc.cdc),
-		assCli.BurnTokenCmd(mc.cdc),
-		assCli.ForbidTokenCmd(mc.cdc),
-		assCli.UnForbidTokenCmd(mc.cdc),
-		assCli.AddTokenWhitelistCmd(mc.cdc),
-		assCli.RemoveTokenWhitelistCmd(mc.cdc),
-		assCli.ForbidAddrCmd(mc.cdc),
-		assCli.UnForbidAddrCmd(mc.cdc),
-		assCli.ModifyTokenURLCmd(mc.cdc),
-		assCli.ModifyTokenDescriptionCmd(mc.cdc),
-	)...)
-
-	return assTxCmd
+func NewAssetModuleClient() types.ModuleClient {
+	return AssetModuleClient{}
 }

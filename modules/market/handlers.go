@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 
 	"github.com/coinexchain/dex/types"
@@ -75,7 +74,9 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg MsgCreateTradingPair, keepe
 		CreateHeight:   ctx.BlockHeight(),
 	}
 	keeper.msgProducer.SendMsg(Topic, CreateMarketInfoKey, msgInfo)
-	return sdk.Result{Tags: info.GetTags()}
+	return sdk.Result{
+		//Tags: info.GetTags()
+	}
 }
 
 func checkMsgCreateTradingPair(ctx sdk.Context, msg MsgCreateTradingPair, keeper Keeper) sdk.Result {
@@ -243,7 +244,9 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 	}
 	sendCreateOrderMsg(keeper, order, featureFee)
 
-	return sdk.Result{Tags: order.GetTagsInOrderCreate()}
+	return sdk.Result{
+		//Tags: order.GetTagsInOrderCreate()
+	}
 }
 
 func checkMsgCreateOrder(ctx sdk.Context, keeper Keeper, msg MsgCreateOrder, cetFee int64, amount int64, denom string) sdk.Result {
@@ -317,10 +320,11 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 	}
 	keeper.SendMsg(CancelOrderInfoKey, msgInfo)
 
-	return sdk.Result{Tags: sdk.NewTags(
-		Sender, msg.Sender.String(),
-		OrderID, msg.OrderID,
-	),
+	return sdk.Result{
+		//Tags: sdk.NewTags(
+		//	Sender, msg.Sender.String(),
+		//	OrderID, msg.OrderID,
+		//),
 	}
 }
 
@@ -362,11 +366,13 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg MsgCancelTradingPair, keepe
 	}
 	keeper.SendMsg(CancelMarketInfoKey, msgInfo)
 
-	return sdk.Result{Tags: sdk.NewTags(
-		Sender, msg.Sender.String(),
-		TradingPair, msg.TradingPair,
-		EffectiveTime, strconv.Itoa(int(msg.EffectiveTime)),
-	)}
+	return sdk.Result{
+		//Tags: sdk.NewTags(
+		//	Sender, msg.Sender.String(),
+		//	TradingPair, msg.TradingPair,
+		//	EffectiveTime, strconv.Itoa(int(msg.EffectiveTime)),
+		//),
+	}
 }
 
 func checkMsgCancelTradingPair(keeper Keeper, msg MsgCancelTradingPair, ctx sdk.Context) sdk.Error {
@@ -433,11 +439,13 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg MsgModifyPricePrecision,
 		NewPricePrecision: info.PricePrecision,
 	})
 
-	return sdk.Result{Tags: sdk.NewTags(
-		TradingPair, msg.TradingPair,
-		Sender, msg.Sender.String(),
-		PricePrecision, strconv.Itoa(int(msg.PricePrecision)),
-	)}
+	return sdk.Result{
+		//Tags: sdk.NewTags(
+		//	TradingPair, msg.TradingPair,
+		//	Sender, msg.Sender.String(),
+		//	PricePrecision, strconv.Itoa(int(msg.PricePrecision)),
+		//),
+	}
 }
 
 func checkMsgModifyPricePrecision(ctx sdk.Context, msg MsgModifyPricePrecision, k Keeper) sdk.Result {

@@ -3,51 +3,43 @@ package authx
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	dbm "github.com/tendermint/tendermint/libs/db"
-	"github.com/tendermint/tendermint/libs/log"
-
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
+	"github.com/coinexchain/dex/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/params"
-
-	"github.com/coinexchain/dex/testutil"
+	"github.com/stretchr/testify/require"
 )
 
-type testContext struct {
-	ctx sdk.Context
-	axk AccountXKeeper
-	ak  auth.AccountKeeper
-}
+//type testContext struct {
+//	ctx sdk.Context
+//	axk AccountXKeeper
+//	ak  auth.AccountKeeper
+//}
 
-func setupTestCtx() testContext {
-	db := dbm.NewMemDB()
-	cdc := codec.New()
-	RegisterCodec(cdc)
-	auth.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-
-	authXKey := sdk.NewKVStoreKey("authXKey")
-	authKey := sdk.NewKVStoreKey(auth.StoreKey)
-
-	ms := store.NewCommitMultiStore(db)
-	ms.MountStoreWithDB(authXKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
-	ms.LoadLatestVersion()
-
-	skey := sdk.NewKVStoreKey("test")
-	tkey := sdk.NewTransientStoreKey("transient_test")
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
-
-	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(DefaultParamspace))
-	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
-	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-
-	return testContext{ctx: ctx, axk: axk, ak: ak}
-}
+//func setupTestCtx() testContext {
+//	db := dbm.NewMemDB()
+//	cdc := codec.New()
+//	RegisterCodec(cdc)
+//	auth.RegisterCodec(cdc)
+//	codec.RegisterCrypto(cdc)
+//
+//	authXKey := sdk.NewKVStoreKey("authXKey")
+//	authKey := sdk.NewKVStoreKey(auth.StoreKey)
+//
+//	ms := store.NewCommitMultiStore(db)
+//	ms.MountStoreWithDB(authXKey, sdk.StoreTypeIAVL, db)
+//	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
+//	ms.LoadLatestVersion()
+//
+//	skey := sdk.NewKVStoreKey("test")
+//	tkey := sdk.NewTransientStoreKey("transient_test")
+//	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+//
+//	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(DefaultParamspace))
+//	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
+//	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
+//
+//	return testContext{ctx: ctx, axk: axk, ak: ak}
+//}
 
 func TestAccountX_GetAllUnlockedCoinsAtTheTime(t *testing.T) {
 	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
@@ -104,7 +96,8 @@ func TestAccountX_GetLockedCoinsByDemon(t *testing.T) {
 }
 
 func TestAccountX_TransferUnlockedCoins(t *testing.T) {
-	ctx := setupTestCtx()
+
+	input := setupTestInput()
 	_, pub, addr := testutil.KeyPubAddr()
 
 	fromAccount := auth.NewBaseAccountWithAddress(addr)
@@ -112,7 +105,7 @@ func TestAccountX_TransferUnlockedCoins(t *testing.T) {
 	oneCoins := sdk.Coins{sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}}
 	_ = fromAccount.SetCoins(oneCoins)
 
-	ctx.ak.SetAccount(ctx.ctx, &fromAccount)
+	input.ak.SetAccount(input.ctx, &fromAccount)
 
 	var acc = AccountX{Address: addr, MemoRequired: false}
 	coins := LockedCoins{
@@ -121,13 +114,21 @@ func TestAccountX_TransferUnlockedCoins(t *testing.T) {
 		NewLockedCoin("eos", sdk.NewInt(40), 3000),
 	}
 	acc.LockedCoins = coins
-	ctx.axk.SetAccountX(ctx.ctx, acc)
+	input.axk.SetAccountX(input.ctx, acc)
 
-	acc.TransferUnlockedCoins(1000, ctx.ctx, ctx.axk, ctx.ak)
+	moduleAccount := input.sk.GetModuleAccount(input.ctx, ModuleName)
+	_ = moduleAccount.SetCoins(sdk.NewCoins(
+		sdk.NewCoin("bch", sdk.NewInt(20)),
+		sdk.NewCoin("eth", sdk.NewInt(30)),
+		sdk.NewCoin("eos", sdk.NewInt(40)),
+	))
+	input.sk.SetModuleAccount(input.ctx, moduleAccount)
+
+	acc.TransferUnlockedCoins(1000, input.ctx, input.axk, input.ak)
 	require.Equal(t, "eth", acc.LockedCoins[0].Coin.Denom)
 	require.Equal(t, "eos", acc.LockedCoins[1].Coin.Denom)
 
-	require.Equal(t, int64(40), ctx.ak.GetAccount(ctx.ctx, addr).GetCoins().AmountOf("bch").Int64())
+	require.Equal(t, int64(40), input.ak.GetAccount(input.ctx, addr).GetCoins().AmountOf("bch").Int64())
 }
 
 func TestAccountX_AddLockedCoins(t *testing.T) {

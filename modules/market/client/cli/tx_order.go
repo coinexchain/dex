@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"strconv"
 	"strings"
 
@@ -12,10 +11,11 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
-	//"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	//authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/market/match"
@@ -84,11 +84,12 @@ Example:
 }
 
 func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
-	txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-	cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+	cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
+	accRetriever := authtypes.NewAccountRetriever(cliCtx)
 	sender := cliCtx.GetFromAddress()
-	sequence, err := cliCtx.GetAccountSequence(sender)
+	_, sequence, err := accRetriever.GetAccountNumberSequence(sender)
 	if err != nil {
 		return err
 	}
@@ -112,7 +113,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		userToken = symbols[1]
 	}
 
-	account, err := cliCtx.GetAccount(sender)
+	account, err := accRetriever.GetAccount(sender)
 	if err != nil {
 		return err
 	}
@@ -125,7 +126,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		msg.TimeInForce = market.GTE
 	}
 
-	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
 
 func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgCreateOrder, error) {
@@ -178,8 +179,8 @@ Examples:
 	--trust-node=true --from=bob --chain-id=coinexdex`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			sender := cliCtx.GetFromAddress()
 			orderid := viper.GetString(FlagOrderID)
@@ -188,7 +189,7 @@ Examples:
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 

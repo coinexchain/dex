@@ -211,8 +211,8 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 }
 
 func updateBondPoolStatus(amount int64, keeper BaseKeeper, ctx sdk.Context) {
-	decreaseNotBondedAmt := sdk.NewInt(amount).Neg()
-	keeper.sk.InflateSupply(ctx, decreaseNotBondedAmt)
+	//decreaseNotBondedAmt := sdk.NewInt(amount).Neg()
+	//keeper.sk.InflateSupply(ctx, decreaseNotBondedAmt)
 }
 
 //ForbidToken - forbid token

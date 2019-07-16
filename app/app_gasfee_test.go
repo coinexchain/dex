@@ -2,6 +2,8 @@ package app
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/bankx"
+
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,7 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )

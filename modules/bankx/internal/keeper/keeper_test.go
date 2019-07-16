@@ -1,7 +1,9 @@
-package bankx
+package keeper
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/bankx"
+	types2 "github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
 
@@ -54,11 +56,11 @@ func defaultContext() (sdk.Context, params.Keeper) {
 
 func TestParamGetSet(t *testing.T) {
 	ctx, paramsKeeper := defaultContext()
-	subspace := paramsKeeper.Subspace(DefaultParamspace)
+	subspace := paramsKeeper.Subspace(types2.DefaultParamspace)
 	bkxKepper := NewKeeper(subspace, authx.AccountXKeeper{}, bank.BaseKeeper{}, auth.AccountKeeper{}, auth.FeeCollectionKeeper{}, fakeAssetStatusKeeper{}, msgqueue.NewProducer())
 
 	//expect DefaultActivationFees=1
-	defaultParam := DefaultParams()
+	defaultParam := types2.DefaultParams()
 	require.Equal(t, int64(100000000), defaultParam.ActivationFee)
 
 	//expect SetParam don't panic
@@ -68,41 +70,41 @@ func TestParamGetSet(t *testing.T) {
 	require.Equal(t, defaultParam, bkxKepper.GetParam(ctx))
 }
 
-func givenAccountWith(input testInput, addr sdk.AccAddress, coinsString string) {
+func givenAccountWith(input bankx.testInput, addr sdk.AccAddress, coinsString string) {
 	coins, _ := sdk.ParseCoins(coinsString)
 
 	acc := auth.NewBaseAccountWithAddress(addr)
 	_ = acc.SetCoins(coins)
-	input.ak.SetAccount(input.ctx, &acc)
+	input.ak.SetAccount(bankx.ctx, &acc)
 
 	accX := authx.AccountX{
 		Address: addr,
 	}
-	input.axk.SetAccountX(input.ctx, accX)
+	input.axk.SetAccountX(bankx.ctx, accX)
 }
 
-func coinsOf(input testInput, addr sdk.AccAddress) string {
+func coinsOf(input bankx.testInput, addr sdk.AccAddress) string {
 	return input.ak.GetAccount(input.ctx, addr).GetCoins().String()
 }
 
-func frozenCoinsOf(input testInput, addr sdk.AccAddress) string {
-	accX, _ := input.axk.GetAccountX(input.ctx, addr)
+func frozenCoinsOf(input bankx.testInput, addr sdk.AccAddress) string {
+	accX, _ := input.axk.GetAccountX(bankx.ctx, addr)
 	return accX.FrozenCoins.String()
 }
 
 func TestFreezeMultiCoins(t *testing.T) {
-	input := setupTestInput()
+	input := bankx.setupTestInput()
 
 	givenAccountWith(input, myaddr, "1000000000cet,100abc")
 
 	freezeCoins, _ := sdk.ParseCoins("300000000cet, 20abc")
-	err := input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
+	err := bankx.bxk.FreezeCoins(bankx.ctx, myaddr, freezeCoins)
 
 	require.Nil(t, err)
 	require.Equal(t, "80abc,700000000cet", coinsOf(input, myaddr))
 	require.Equal(t, "20abc,300000000cet", frozenCoinsOf(input, myaddr))
 
-	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, freezeCoins)
+	err = bankx.bxk.UnFreezeCoins(bankx.ctx, myaddr, freezeCoins)
 
 	require.Nil(t, err)
 	require.Equal(t, "100abc,1000000000cet", coinsOf(input, myaddr))
@@ -110,18 +112,18 @@ func TestFreezeMultiCoins(t *testing.T) {
 }
 
 func TestFreezeUnFreezeOK(t *testing.T) {
-	input := setupTestInput()
+	input := bankx.setupTestInput()
 
 	givenAccountWith(input, myaddr, "1000000000cet")
 
 	freezeCoins := types.NewCetCoins(300000000)
-	err := input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
+	err := bankx.bxk.FreezeCoins(bankx.ctx, myaddr, freezeCoins)
 
 	require.Nil(t, err)
 	require.Equal(t, "700000000cet", coinsOf(input, myaddr))
 	require.Equal(t, "300000000cet", frozenCoinsOf(input, myaddr))
 
-	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, freezeCoins)
+	err = bankx.bxk.UnFreezeCoins(bankx.ctx, myaddr, freezeCoins)
 
 	require.Nil(t, err)
 	require.Equal(t, "1000000000cet", coinsOf(input, myaddr))
@@ -129,35 +131,35 @@ func TestFreezeUnFreezeOK(t *testing.T) {
 }
 
 func TestFreezeUnFreezeInvalidAccount(t *testing.T) {
-	input := setupTestInput()
+	input := bankx.setupTestInput()
 
 	freezeCoins := types.NewCetCoins(500000000)
-	err := input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
+	err := bankx.bxk.FreezeCoins(bankx.ctx, myaddr, freezeCoins)
 	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds;  < 500000000cet"), err)
 
-	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, freezeCoins)
+	err = bankx.bxk.UnFreezeCoins(bankx.ctx, myaddr, freezeCoins)
 	require.Equal(t, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", myaddr)), err)
 }
 
 func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {
-	input := setupTestInput()
+	input := bankx.setupTestInput()
 
 	givenAccountWith(input, myaddr, "10cet")
 
 	InvalidFreezeCoins := types.NewCetCoins(50)
-	err := input.bxk.FreezeCoins(input.ctx, myaddr, InvalidFreezeCoins)
+	err := bankx.bxk.FreezeCoins(bankx.ctx, myaddr, InvalidFreezeCoins)
 	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds; 10cet < 50cet"), err)
 
 	freezeCoins := types.NewCetCoins(5)
-	err = input.bxk.FreezeCoins(input.ctx, myaddr, freezeCoins)
+	err = bankx.bxk.FreezeCoins(bankx.ctx, myaddr, freezeCoins)
 	require.Nil(t, err)
 
-	err = input.bxk.UnFreezeCoins(input.ctx, myaddr, InvalidFreezeCoins)
+	err = bankx.bxk.UnFreezeCoins(bankx.ctx, myaddr, InvalidFreezeCoins)
 	require.Equal(t, sdk.ErrInsufficientCoins("account has insufficient coins to unfreeze"), err)
 }
 
 func TestGetTotalCoins(t *testing.T) {
-	input := setupTestInput()
+	input := bankx.setupTestInput()
 	givenAccountWith(input, myaddr, "100cet, 20bch, 30btc")
 
 	lockedCoins := authx.LockedCoins{
@@ -175,7 +177,7 @@ func TestGetTotalCoins(t *testing.T) {
 		FrozenCoins: frozenCoins,
 	}
 
-	input.axk.SetAccountX(input.ctx, accX)
+	input.axk.SetAccountX(bankx.ctx, accX)
 
 	expected := sdk.NewCoins(
 		sdk.Coin{Denom: "bch", Amount: sdk.NewInt(40)},
@@ -184,14 +186,14 @@ func TestGetTotalCoins(t *testing.T) {
 		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(40)},
 	)
 	expected = expected.Sort()
-	coins := input.bxk.GetTotalCoins(input.ctx, myaddr)
+	coins := bankx.bxk.GetTotalCoins(bankx.ctx, myaddr)
 
 	require.Equal(t, expected, coins)
 }
 
 func TestKeeper_TotalAmountOfCoin(t *testing.T) {
-	input := setupTestInput()
-	amount := input.bxk.TotalAmountOfCoin(input.ctx, "cet")
+	input := bankx.setupTestInput()
+	amount := bankx.bxk.TotalAmountOfCoin(bankx.ctx, "cet")
 	require.Equal(t, int64(0), amount.Int64())
 
 	givenAccountWith(input, myaddr, "100cet")
@@ -206,13 +208,13 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 		LockedCoins: lockedCoins,
 		FrozenCoins: frozenCoins,
 	}
-	input.axk.SetAccountX(input.ctx, accX)
-	amount = input.bxk.TotalAmountOfCoin(input.ctx, "cet")
+	input.axk.SetAccountX(bankx.ctx, accX)
+	amount = bankx.bxk.TotalAmountOfCoin(bankx.ctx, "cet")
 	require.Equal(t, int64(300), amount.Int64())
 }
 
 func TestKeeper_AddCoins(t *testing.T) {
-	input := setupTestInput()
+	input := bankx.setupTestInput()
 	coins := sdk.NewCoins(
 		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(10)},
 		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(20)},
@@ -223,32 +225,32 @@ func TestKeeper_AddCoins(t *testing.T) {
 		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(10)},
 	)
 
-	err := input.bxk.AddCoins(input.ctx, myaddr, coins)
+	err := bankx.bxk.AddCoins(bankx.ctx, myaddr, coins)
 	require.Equal(t, nil, err)
-	err = input.bxk.SubtractCoins(input.ctx, myaddr, coins2)
+	err = bankx.bxk.SubtractCoins(bankx.ctx, myaddr, coins2)
 	require.Equal(t, nil, err)
-	cs := input.bxk.GetTotalCoins(input.ctx, myaddr)
+	cs := bankx.bxk.GetTotalCoins(bankx.ctx, myaddr)
 	require.Equal(t, coins2, cs)
 
 	coins3 := sdk.NewCoins(
 		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(15)},
 		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(10)},
 	)
-	err = input.bxk.SubtractCoins(input.ctx, myaddr, coins3)
+	err = bankx.bxk.SubtractCoins(bankx.ctx, myaddr, coins3)
 	require.Error(t, err)
 }
 
 func TestKeeper_SendCoins(t *testing.T) {
-	input := setupTestInput()
+	input := bankx.setupTestInput()
 	coins := sdk.NewCoins(
 		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(10)},
 	)
 	addr2 := testutil.ToAccAddress("addr2")
-	_ = input.bxk.AddCoins(input.ctx, myaddr, coins)
-	exist := input.bxk.HasCoins(input.ctx, myaddr, coins)
+	_ = bankx.bxk.AddCoins(bankx.ctx, myaddr, coins)
+	exist := bankx.bxk.HasCoins(bankx.ctx, myaddr, coins)
 	assert.True(t, exist)
-	err := input.bxk.SendCoins(input.ctx, myaddr, addr2, coins)
+	err := bankx.bxk.SendCoins(bankx.ctx, myaddr, addr2, coins)
 	require.Equal(t, nil, err)
-	cs := input.bxk.GetTotalCoins(input.ctx, addr2)
+	cs := bankx.bxk.GetTotalCoins(bankx.ctx, addr2)
 	require.Equal(t, coins, cs)
 }

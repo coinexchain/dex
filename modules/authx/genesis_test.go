@@ -10,10 +10,10 @@ import (
 
 func TestValidate(t *testing.T) {
 	genState := DefaultGenesisState()
-	require.Nil(t, genState.Validate())
+	require.Nil(t, genState.ValidateGenesis())
 
 	errGenState := NewGenesisState(NewParams(sdk.NewDec(-1)))
-	require.NotNil(t, errGenState.Validate())
+	require.NotNil(t, errGenState.ValidateGenesis())
 }
 
 func TestExport(t *testing.T) {

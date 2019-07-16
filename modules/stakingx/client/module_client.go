@@ -2,33 +2,42 @@ package client
 
 import (
 	"github.com/coinexchain/dex/modules/stakingx/client/cli"
+	"github.com/coinexchain/dex/modules/stakingx/client/rest"
 	"github.com/cosmos/cosmos-sdk/client"
-	//stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/codec"
+	staking_cli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
+	staking_types "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/go-amino"
+
+	"github.com/coinexchain/dex/types"
 )
 
-// ModuleClient exports all client functionality from this module
-type ModuleClient struct {
-	stakingMC *stakingclient.ModuleClient
-	storeKey  string
-	cdc       *amino.Codec
+func NewStakingXModuleClient() types.ModuleClient {
+	return StakingXModuleClient{}
 }
 
-func NewModuleClient(mc *stakingclient.ModuleClient, storeKey string, cdc *amino.Codec) ModuleClient {
-	return ModuleClient{mc, storeKey, cdc}
+type StakingXModuleClient struct {
 }
 
-// GetQueryCmd returns the cli query commands for this module
-func (mc ModuleClient) GetQueryCmd() *cobra.Command {
-	stakingQueryCmd := mc.stakingMC.GetQueryCmd()
-	BondPoolCmd := client.GetCommands(cli.GetCmdQueryPool(mc.storeKey, mc.cdc))[0]
+func (StakingXModuleClient) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr)
+}
+
+func (StakingXModuleClient) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	return staking_cli.GetTxCmd(staking_types.StoreKey, cdc)
+}
+
+func (StakingXModuleClient) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+	stakingQueryCmd := staking_cli.GetQueryCmd(staking_types.QuerierRoute, cdc)
+	BondPoolCmd := client.GetCommands(cli.GetCmdQueryPool(cdc))[0]
 
 	//replace pool cmd with new bondPoolCmd which can also show the non-bondable-cet-tokens in locked positions
-	return mc.replacePoolCmd(stakingQueryCmd, BondPoolCmd)
+	return replacePoolCmd(stakingQueryCmd, BondPoolCmd)
 }
 
-func (mc ModuleClient) replacePoolCmd(stakingQueryCmd *cobra.Command, BondPoolCmd *cobra.Command) *cobra.Command {
+func replacePoolCmd(stakingQueryCmd *cobra.Command, BondPoolCmd *cobra.Command) *cobra.Command {
 	var oldPoolCmd *cobra.Command
 	for _, cmd := range stakingQueryCmd.Commands() {
 		if cmd.Use == "pool" {
@@ -40,9 +49,4 @@ func (mc ModuleClient) replacePoolCmd(stakingQueryCmd *cobra.Command, BondPoolCm
 	stakingQueryCmd.AddCommand(BondPoolCmd)
 
 	return stakingQueryCmd
-}
-
-// GetTxCmd returns the transaction commands for this module
-func (mc ModuleClient) GetTxCmd() *cobra.Command {
-	return mc.stakingMC.GetTxCmd()
 }

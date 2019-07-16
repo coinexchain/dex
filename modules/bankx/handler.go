@@ -2,6 +2,7 @@ package bankx
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -14,9 +15,9 @@ import (
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
-		case MsgSend:
+		case types.MsgSend:
 			return handleMsgSend(ctx, k, msg)
-		case MsgSetMemoRequired:
+		case types.MsgSetMemoRequired:
 			return handleMsgSetMemoRequired(ctx, k, msg)
 		default:
 			errMsg := "Unrecognized bank Msg type: %s" + msg.Type()
@@ -25,17 +26,17 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
-func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
-	if !k.bk.GetSendEnabled(ctx) {
-		return bank.ErrSendDisabled(k.bk.Codespace()).Result()
+func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
+	if !k.Bk.GetSendEnabled(ctx) {
+		return bank.ErrSendDisabled(k.Bk.Codespace()).Result()
 	}
 
 	if k.IsSendForbidden(ctx, msg.Amount, msg.FromAddress) {
-		return ErrTokenForbiddenByOwner("transfer has been forbidden by token owner").Result()
+		return types.ErrTokenForbiddenByOwner("transfer has been forbidden by token owner").Result()
 	}
 
-	fromAccount := k.ak.GetAccount(ctx, msg.FromAddress)
-	toAccount := k.ak.GetAccount(ctx, msg.ToAddress)
+	fromAccount := k.Ak.GetAccount(ctx, msg.FromAddress)
+	toAccount := k.Ak.GetAccount(ctx, msg.ToAddress)
 
 	amt := msg.Amount
 	if !fromAccount.GetCoins().IsAllGTE(amt) {
@@ -54,7 +55,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg MsgSend) sdk.Result {
 	time := msg.UnlockTime
 	if time != 0 {
 		if time < ctx.BlockHeader().Time.Unix() {
-			return ErrUnlockTime("Invalid Unlock Time").Result()
+			return types.ErrUnlockTime("Invalid Unlock Time").Result()
 		}
 		return sendLockedCoins(ctx, k, msg.FromAddress, msg.ToAddress, amt, time)
 	}
@@ -69,17 +70,17 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 	//check whether the first transfer contains at least activationFee cet
 	sendAmt, neg := sendAmt.SafeSub(dex.NewCetCoins(activationFee))
 	if neg {
-		return sendAmt, ErrorInsufficientCETForActivatingFee()
+		return sendAmt, types.ErrorInsufficientCETForActivatingFee()
 	}
 
 	// sub the activationFees from fromAddress
 	oldCoins := fromAccount.GetCoins()
 	newCoins, _ := oldCoins.SafeSub(dex.NewCetCoins(activationFee))
 	_ = fromAccount.SetCoins(newCoins)
-	k.ak.SetAccount(ctx, fromAccount)
+	k.Ak.SetAccount(ctx, fromAccount)
 
 	//collect account activation fees
-	k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activationFee))
+	//k.fck.AddCollectedFees(ctx, dex.NewCetCoins(activationFee))
 
 	return sendAmt, nil
 }
@@ -87,77 +88,77 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 func sendLockedCoins(ctx sdk.Context, k Keeper,
 	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Result {
 
-	if k.ak.GetAccount(ctx, toAddr) == nil {
-		_, _, _ = k.bk.AddCoins(ctx, toAddr, sdk.Coins{})
+	if k.Ak.GetAccount(ctx, toAddr) == nil {
+		_, _ = k.Bk.AddCoins(ctx, toAddr, sdk.Coins{})
 	}
 
 	if err := k.DeductFee(ctx, fromAddr, dex.NewCetCoins(k.GetParam(ctx).LockCoinsFee)); err != nil {
 		return err.Result()
 	}
 
-	_, tag, err := k.bk.SubtractCoins(ctx, fromAddr, amt)
+	_, err := k.Bk.SubtractCoins(ctx, fromAddr, amt)
 	if err != nil {
 		return err.Result()
 	}
 
-	ax := k.axk.GetOrCreateAccountX(ctx, toAddr)
+	ax := k.Axk.GetOrCreateAccountX(ctx, toAddr)
 	for _, coin := range amt {
 		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
 	}
-	k.axk.SetAccountX(ctx, ax)
+	k.Axk.SetAccountX(ctx, ax)
 
 	if amt != nil {
-		k.axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
+		k.Axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 	}
 
-	e := k.msgProducer.SendMsg(Topic, "send_lock_coins", NewMsgSend(fromAddr, toAddr, amt, unlockTime))
+	e := k.MsgProducer.SendMsg(types.Topic, "send_lock_coins", types.NewMsgSend(fromAddr, toAddr, amt, unlockTime))
 	if e != nil {
 		//record fail sendMsg log
 	}
 	return sdk.Result{
-		Tags: tag,
+		//Tags: tag,
 	}
 }
 
 func normalSend(ctx sdk.Context, k Keeper,
 	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) sdk.Result {
 
-	t, err := k.bk.SendCoins(ctx, fromAddr, toAddr, amt)
+	err := k.Bk.SendCoins(ctx, fromAddr, toAddr, amt)
 
 	if err != nil {
 		return err.Result()
 	}
 
-	e := k.msgProducer.SendMsg(Topic, "send_coins", NewMsgSend(fromAddr, toAddr, amt, 0))
+	e := k.MsgProducer.SendMsg(types.Topic, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
 	if e != nil {
 		//record fail sendMsg log
 	}
 
 	return sdk.Result{
-		Tags: t,
+		//Tags: t,
 	}
 }
 
-func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg MsgSetMemoRequired) sdk.Result {
+func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoRequired) sdk.Result {
 	addr := msg.Address
 	required := msg.Required
 
-	account := k.ak.GetAccount(ctx, addr)
+	account := k.Ak.GetAccount(ctx, addr)
 	if account == nil {
 		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr)).Result()
 	}
 
-	accountX := k.axk.GetOrCreateAccountX(ctx, addr)
+	accountX := k.Axk.GetOrCreateAccountX(ctx, addr)
 	accountX.MemoRequired = required
-	k.axk.SetAccountX(ctx, accountX)
-	e := k.msgProducer.SendMsg(Topic, "send_memo_required", msg)
+	k.Axk.SetAccountX(ctx, accountX)
+	e := k.MsgProducer.SendMsg(types.Topic, "send_memo_required", msg)
 	if e != nil {
 		//record fail sendMsg log
 	}
 	return sdk.Result{
-		Tags: sdk.NewTags(
-			TagKeyMemoRequired, fmt.Sprintf("%v", required),
-			TagKeyAddr, addr.String(),
-		),
+		//Tags: sdk.NewTags(
+		//	TagKeyMemoRequired, fmt.Sprintf("%v", required),
+		//	TagKeyAddr, addr.String(),
+		//),
 	}
 }

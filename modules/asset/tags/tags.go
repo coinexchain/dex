@@ -1,9 +1,5 @@
 package tags
 
-import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-)
-
 const (
 	Category   = "category"
 	TxCategory = "asset"
@@ -22,6 +18,6 @@ const (
 )
 
 // Tag keys and values
-var (
-	Action = sdk.TagAction
-)
+//var (
+//	Action = sdk.TagAction
+//)

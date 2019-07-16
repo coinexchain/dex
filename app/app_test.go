@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/coinexchain/dex/modules/bankx"
 	"os"
 	"testing"
 	"time"
@@ -19,7 +20,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"

@@ -1,6 +1,8 @@
 package bankx
 
 import (
+	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -28,7 +30,7 @@ type testInput struct {
 	bk      bank.Keeper
 	bxk     Keeper
 	axk     authx.AccountXKeeper
-	ask     ExpectedAssetStatusKeeper
+	ask     types.ExpectedAssetStatusKeeper
 	handler sdk.Handler
 }
 
@@ -65,14 +67,14 @@ func setupTestInput() testInput {
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
 	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
-	bxkKeeper := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, fakeAssetStatusKeeper{}, producer)
+	bxkKeeper := keeper.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, keeper.fakeAssetStatusKeeper{}, producer)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
-	bxkKeeper.SetParam(ctx, DefaultParams())
+	bxkKeeper.SetParam(ctx, types.DefaultParams())
 
 	handler := NewHandler(bxkKeeper)
-	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, ask: fakeAssetStatusKeeper{}, handler: handler}
+	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, ask: keeper.fakeAssetStatusKeeper{}, handler: handler}
 }
 
 func TestHandlerMsgSend(t *testing.T) {
@@ -90,7 +92,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
+	msgSend := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
 	input.handle(msgSend)
 
 	//send 0 to toaddr results toAccount to be created
@@ -115,7 +117,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, sdk.NewInt(200000000), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(100000000), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 
-	newMsg := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 1}
+	newMsg := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 1}
 	input.handle(newMsg)
 	aux, _ := input.axk.GetAccountX(input.ctx, toAddr)
 	require.Equal(t, sdk.NewInt(100000000), aux.LockedCoins[0].Coin.Amount)
@@ -124,7 +126,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, sdk.NewInt(100000000+fee), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 	require.Equal(t, int64(1), aux.LockedCoins[0].UnlockTime)
 
-	newMsg2 := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	newMsg2 := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
 	input.handle(newMsg2)
 	aux, _ = input.axk.GetAccountX(input.ctx, toAddr)
 	require.Equal(t, sdk.NewInt(100000000), aux.LockedCoins[0].Coin.Amount)
@@ -152,12 +154,12 @@ func TestHandlerMsgSendFail(t *testing.T) {
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 
 	input.bk.SetSendEnabled(input.ctx, false)
-	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
+	msgSend := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
 	res := input.handle(msgSend)
 	require.Equal(t, bank.CodeSendDisabled, res.Code)
 
 	input.bk.SetSendEnabled(input.ctx, true)
-	msgSend = MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(200000000), UnlockTime: 0}
+	msgSend = types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(200000000), UnlockTime: 0}
 	res = input.handle(msgSend)
 	require.Equal(t, sdk.CodeInsufficientCoins, res.Code)
 
@@ -176,7 +178,7 @@ func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	msgSend := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
 	input.handle(msgSend)
 	require.Equal(t, sdk.NewInt(900000000+fee), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
@@ -184,7 +186,7 @@ func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 	require.Equal(t, true, found)
 	require.Equal(t, sdk.NewInt(100000000+fee), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
 
-	msgSend2 := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	msgSend2 := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
 	input.handle(msgSend2)
 	require.Equal(t, sdk.NewInt(800000000), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
@@ -196,7 +198,7 @@ func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 func TestHandleMsgSetMemoRequiredAccountNotExisted(t *testing.T) {
 	input := setupTestInput()
 
-	msg := NewMsgSetTransferMemoRequired(testutil.ToAccAddress("xxx"), true)
+	msg := types.NewMsgSetTransferMemoRequired(testutil.ToAccAddress("xxx"), true)
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodespaceRoot, result.Codespace)
 	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
@@ -209,7 +211,7 @@ func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
 	//accX := authx.NewAccountXWithAddress(addr)
 	//input.axk.SetAccountX(input.ctx, accX)
 
-	msg := NewMsgSetTransferMemoRequired(addr, true)
+	msg := types.NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodespaceRoot, result.Codespace)
 	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
@@ -225,7 +227,7 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 	//accX, _ = input.axk.GetAccountX(input.ctx, addr)
 	//require.Equal(t, false, accX.MemoRequired)
 
-	msg := NewMsgSetTransferMemoRequired(addr, true)
+	msg := types.NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodeOK, result.Code)
 
@@ -247,7 +249,7 @@ func TestUnlockQueueNotAppend(t *testing.T) {
 	input.ak.SetAccount(input.ctx, fromAccount)
 	input.axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 10000}
+	msgSend := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 10000}
 	input.handle(msgSend)
 
 	//send 0 to toaddr results toAccount to be created

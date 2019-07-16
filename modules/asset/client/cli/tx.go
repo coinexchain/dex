@@ -4,34 +4,21 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
-	//"github.com/cosmos/cosmos-sdk/client/utils"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	//authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
+
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/types"
-)
-
-const (
-	flagName             = "name"
-	flagSymbol           = "symbol"
-	flagTotalSupply      = "total-supply"
-	flagMintable         = "mintable"
-	flagBurnable         = "burnable"
-	flagAddrForbiddable  = "addr-forbiddable"
-	flagTokenForbiddable = "token-forbiddable"
-	flagTokenURL         = "url"
-	flagTokenDescription = "description"
-
-	flagNewOwner  = "new-owner"
-	flagAmount    = "amount"
-	flagWhitelist = "whitelist"
-	flagAddresses = "addresses"
 )
 
 var issueTokenFlags = []string{
@@ -67,7 +54,7 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			tokenOwner := cliCtx.GetFromAddress()
 			msg, err := parseIssueFlags(tokenOwner)
 			if err != nil {
@@ -83,12 +70,12 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 				return err
 			}
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
-			if res, _ := cliCtx.QueryWithData(route, bz); res != nil {
+			if res, _, _ := cliCtx.QueryWithData(route, bz); res != nil {
 				return fmt.Errorf("token symbol already exists，please query tokens and issue another symbol")
 			}
 
 			// ensure account has enough coins
-			account, err := cliCtx.GetAccount(tokenOwner)
+			account, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(tokenOwner)
 			if err != nil {
 				return err
 			}
@@ -101,8 +88,8 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -144,7 +131,7 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			originalOwner := cliCtx.GetFromAddress()
 			msg, err := parseTransferOwnershipFlags(originalOwner)
 			if err != nil {
@@ -155,13 +142,13 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(originalOwner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(originalOwner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -195,7 +182,7 @@ $ cetcli tx asset mint-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseMintTokenFlags(owner)
 			if err != nil {
@@ -206,13 +193,13 @@ $ cetcli tx asset mint-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -246,7 +233,7 @@ $ cetcli tx asset burn-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseBurnTokenFlags(owner)
 			if err != nil {
@@ -257,13 +244,13 @@ $ cetcli tx asset burn-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -295,7 +282,7 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseForbidTokenFlags(owner)
 			if err != nil {
@@ -306,13 +293,13 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -339,7 +326,7 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseUnForbidTokenFlags(owner)
 			if err != nil {
@@ -350,13 +337,13 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -390,7 +377,7 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseAddWhitelistFlags(owner)
 			if err != nil {
@@ -401,13 +388,13 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -437,7 +424,7 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseRemoveWhitelistFlags(owner)
 			if err != nil {
@@ -448,13 +435,13 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -489,7 +476,7 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseForbidAddrFlags(owner)
 			if err != nil {
@@ -500,13 +487,13 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -536,7 +523,7 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseUnForbidAddrFlags(owner)
 			if err != nil {
@@ -547,13 +534,13 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -587,7 +574,7 @@ $ cetcli tx asset modify-token-url --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseModifyTokenURLFlags(owner)
 			if err != nil {
@@ -598,13 +585,13 @@ $ cetcli tx asset modify-token-url --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -638,7 +625,7 @@ $ cetcli tx asset modify-token-description --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			owner := cliCtx.GetFromAddress()
 			msg, err := parseModifyTokenDescriptionFlags(owner)
 			if err != nil {
@@ -649,13 +636,13 @@ $ cetcli tx asset modify-token-description --symbol="abc" \
 				return err
 			}
 
-			if _, err = cliCtx.GetAccount(owner); err != nil {
+			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 

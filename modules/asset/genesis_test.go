@@ -1,9 +1,10 @@
 package asset
 
 import (
+	"testing"
+
 	"github.com/coinexchain/dex/types"
 	"github.com/stretchr/testify/require"
-	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -68,7 +69,7 @@ func TestGenesis(t *testing.T) {
 		IsForbidden:      false,
 	}
 	state.Tokens = append(state.Tokens, cet, abc, abcDump, abcInvalid)
-	require.Error(t, state.Validate())
+	require.Error(t, state.ValidateGenesis())
 	state.Tokens = state.Tokens[:2]
 
 	whitelist := []string{"cet:coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke"}
@@ -77,7 +78,7 @@ func TestGenesis(t *testing.T) {
 	forbiddenList := []string{"abc:coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g"}
 	state.ForbiddenAddresses = append(state.ForbiddenAddresses, forbiddenList...)
 
-	require.NoError(t, state.Validate())
+	require.NoError(t, state.ValidateGenesis())
 	InitGenesis(input.ctx, input.tk, state)
 
 	res := input.tk.GetWhitelist(input.ctx, "cet")

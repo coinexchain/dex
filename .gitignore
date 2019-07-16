@@ -10,6 +10,7 @@ cetd
 cetcli
 !cetd/
 !cetcli/
+testhome/
 
 build/
 cmd/cetcli/statik/statik.go

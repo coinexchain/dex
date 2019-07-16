@@ -2,6 +2,7 @@ package asset
 
 import (
 	"errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -60,7 +61,7 @@ func ExportGenesis(ctx sdk.Context, keeper BaseKeeper) GenesisState {
 
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
-func (data GenesisState) Validate() error {
+func (data GenesisState) ValidateGenesis() error {
 	if err := data.Params.ValidateGenesis(); err != nil {
 		return err
 	}

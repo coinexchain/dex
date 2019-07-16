@@ -18,7 +18,7 @@ import (
 func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
 	genState := app.NewDefaultGenesisState()
 	genState.Accounts = createExampleGenesisAccounts()
-	genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
+	//genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
 	genState.AssetData = createExampleGenesisAssetData()
 	genState.MarketData = createExampleGenesisMarketData()
 	genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
@@ -115,7 +115,7 @@ func createExampleGenTx(cdc *codec.Codec) json.RawMessage {
 	rate, _ := sdk.NewDecFromStr("0.1")
 	maxRate, _ := sdk.NewDecFromStr("0.2")
 	maxChangeRate, _ := sdk.NewDecFromStr("0.01")
-	commissionMsg := staking.NewCommissionMsg(rate, maxRate, maxChangeRate)
+	commissionMsg := staking.NewCommissionRates(rate, maxRate, maxChangeRate)
 
 	minSelfDelegation := sdk.NewInt(10000000000000000)
 

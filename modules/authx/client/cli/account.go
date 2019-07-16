@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	clientx "github.com/coinexchain/dex/client"
 	"github.com/coinexchain/dex/modules/authx"
@@ -19,18 +20,19 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).WithAccountDecoder(cdc)
+				WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			key, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
 
-			if err = cliCtx.EnsureAccountExistsFromAddr(key); err != nil {
+			accRetriever := authtypes.NewAccountRetriever(cliCtx)
+			if err = accRetriever.EnsureExists(key); err != nil {
 				return err
 			}
 
-			acc, err := cliCtx.GetAccount(key)
+			acc, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(key)
 			if err != nil {
 				return err
 			}

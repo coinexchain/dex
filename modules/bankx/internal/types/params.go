@@ -1,11 +1,12 @@
-package bankx
+package types
 
 import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 const (
-	DefaultParamspace = "bankx"
+	ModuleName        = "bankx"
+	DefaultParamspace = ModuleName
 )
 
 var _ params.ParamSet = &Params{}

@@ -29,9 +29,9 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgModifyTokenDescription{}, "asset/MsgModifyTokenDescription", nil)
 }
 
-var msgCdc = codec.New()
+var ModuleCdc = codec.New()
 
 func init() {
-	RegisterCodec(msgCdc)
-	msgCdc.Seal()
+	RegisterCodec(ModuleCdc)
+	ModuleCdc.Seal()
 }

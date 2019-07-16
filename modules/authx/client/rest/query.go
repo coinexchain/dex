@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	clientx "github.com/coinexchain/dex/client"
 	"github.com/coinexchain/dex/modules/authx"
@@ -39,12 +40,13 @@ func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) h
 			return
 		}
 
-		if err = cliCtx.EnsureAccountExistsFromAddr(addr); err != nil {
+		accRetriever := authtypes.NewAccountRetriever(cliCtx)
+		if err = accRetriever.EnsureExists(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		acc, err := cliCtx.GetAccount(addr)
+		acc, err := accRetriever.GetAccount(addr)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -57,7 +59,7 @@ func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) h
 
 		mix := authx.NewAccountMix(acc, aux)
 
-		rest.PostProcessResponse(w, cdc, mix, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, mix)
 	}
 }
 
@@ -74,12 +76,13 @@ func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			return
 		}
 
-		if err = cliCtx.EnsureAccountExistsFromAddr(addr); err != nil {
+		accRetriever := authtypes.NewAccountRetriever(cliCtx)
+		if err = accRetriever.EnsureExists(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		acc, err := cliCtx.GetAccount(addr)
+		acc, err := accRetriever.GetAccount(addr)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -96,6 +99,6 @@ func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			L authx.LockedCoins `json:"locked_coins"`
 		}{acc.GetCoins(), lockedCoins}
 
-		rest.PostProcessResponse(w, cdc, all, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, all)
 	}
 }

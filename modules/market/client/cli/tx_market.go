@@ -13,7 +13,8 @@ import (
 	//"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	//authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market"
@@ -31,7 +32,7 @@ var createMarketFlags = []string{
 	FlagPricePrecision,
 }
 
-func CreateMarketCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func CreateMarketCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create-trading-pair ",
 		Short: "generate tx to create trading pair",
@@ -44,8 +45,8 @@ Example :
 	--price-precision=8 --gas 20000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg, err := parseCreateMarketFlags(creator)
@@ -63,7 +64,7 @@ Example :
 			//	return errors.New("No have insufficient cet to create market in blockchain")
 			//}
 
-			if err := hasTokens(cliCtx, cdc, queryRoute, msg.Stock, msg.Money); err != nil {
+			if err := hasTokens(cliCtx, cdc, msg.Stock, msg.Money); err != nil {
 				return err
 			}
 
@@ -73,7 +74,7 @@ Example :
 					market.MinTokenPricePrecision, market.MaxTokenPricePrecision)
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -87,15 +88,15 @@ Example :
 	return cmd
 }
 
-func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, queryRoute string, tokens ...string) error {
-	route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
+func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, tokens ...string) error {
+	route := fmt.Sprintf("custom/%s/%s", asset.QuerierRoute, asset.QueryToken)
 	for _, token := range tokens {
 		bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(token))
 		if err != nil {
 			return err
 		}
 		fmt.Printf("token :%s\n ", token)
-		if _, err := cliCtx.QueryWithData(route, bz); err != nil {
+		if _, _, err := cliCtx.QueryWithData(route, bz); err != nil {
 			fmt.Printf("route : %s\n", route)
 			return err
 		}
@@ -132,8 +133,8 @@ Example
 	--time=1000000 --trading-pair=etc/cet --from=bob --chain-id=coinexdex 
 	--gas=1000000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg := market.MsgCancelTradingPair{
@@ -146,7 +147,7 @@ Example
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -168,7 +169,7 @@ func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg marke
 		return err
 	}
 	query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
-	res, err := cliCtx.QueryWithData(query, bz)
+	res, _, err := cliCtx.QueryWithData(query, bz)
 	if err != nil {
 		return err
 	}
@@ -196,8 +197,8 @@ Example:
 	--price-precision=9 --from=bob --chain-id=coinexdex 
 	--gas=10000000 --fees=10000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
 			msg := market.MsgModifyPricePrecision{
@@ -210,7 +211,7 @@ Example:
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 

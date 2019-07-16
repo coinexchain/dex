@@ -2,8 +2,9 @@ package asset
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"testing"
+
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/stretchr/testify/require"
 
@@ -17,7 +18,7 @@ func Test_queryToken(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{QueryToken}
-	query := NewQuerier(input.tk, input.tk.cdc)
+	query := NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, []string{QueryToken}, req)
@@ -64,7 +65,7 @@ func Test_queryAllTokenList(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{QueryTokenList}
-	query := NewQuerier(input.tk, input.tk.cdc)
+	query := NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.NoError(t, err)
@@ -102,7 +103,7 @@ func Test_queryWhitelist(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{QueryWhitelist}
-	query := NewQuerier(input.tk, input.tk.cdc)
+	query := NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, path0, req)
@@ -145,7 +146,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{QueryForbiddenAddr}
-	query := NewQuerier(input.tk, input.tk.cdc)
+	query := NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, path0, req)
@@ -186,13 +187,13 @@ func Test_queryReservedSymbols(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{QueryReservedSymbols}
-	query := NewQuerier(input.tk, input.tk.cdc)
+	query := NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
-	bz, _ := codec.MarshalJSONIndent(msgCdc, reserved)
+	bz, _ := codec.MarshalJSONIndent(ModuleCdc, reserved)
 	require.Equal(t, bz, res)
 }
 
@@ -203,7 +204,7 @@ func Test_queryDefault(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{"unknown"}
-	query := NewQuerier(input.tk, input.tk.cdc)
+	query := NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.Error(t, err)

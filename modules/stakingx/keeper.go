@@ -24,19 +24,34 @@ const (
 type Keeper struct {
 	paramSubspace params.Subspace
 
+	assetViewKeeper AssetViewKeeper
+
 	sk *staking.Keeper
 
 	dk DistributionKeeper
 
 	ak auth.AccountKeeper
+
+	bk ExpectBankxKeeper
+
+	supplyKeeper ExpectSupplyKeeper
+
+	feeCollectorName string
 }
 
-func NewKeeper(paramSubspace params.Subspace, sk *staking.Keeper, dk DistributionKeeper, ak auth.AccountKeeper) Keeper {
+func NewKeeper(paramSubspace params.Subspace, assetViewKeeper AssetViewKeeper, sk *staking.Keeper,
+	dk DistributionKeeper, ak auth.AccountKeeper, bk ExpectBankxKeeper,
+	supplyKeeper ExpectSupplyKeeper, feeCollectorName string) Keeper {
+
 	return Keeper{
-		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
-		sk:            sk,
-		dk:            dk,
-		ak:            ak,
+		paramSubspace:    paramSubspace.WithKeyTable(ParamKeyTable()),
+		assetViewKeeper:  assetViewKeeper,
+		sk:               sk,
+		dk:               dk,
+		ak:               ak,
+		bk:               bk,
+		supplyKeeper:     supplyKeeper,
+		feeCollectorName: feeCollectorName,
 	}
 }
 
@@ -61,13 +76,13 @@ func (k Keeper) GetNonBondableAddresses(ctx sdk.Context) []sdk.AccAddress {
 }
 
 func (k Keeper) CalcBondPoolStatus(ctx sdk.Context) BondPool {
-	pool := k.sk.GetPool(ctx)
+	//pool := k.sk.GetPool(ctx)
 
 	var bondPool BondPool
-	bondPool.NotBondedTokens = pool.NotBondedTokens
-	bondPool.BondedTokens = pool.BondedTokens
-	bondPool.NonBondableTokens = calcNonBondableTokens(ctx, &k)
-	bondPool.TotalSupply = pool.NotBondedTokens.Add(pool.BondedTokens)
+	//bondPool.NotBondedTokens = pool.NotBondedTokens
+	//bondPool.BondedTokens = pool.BondedTokens
+	//bondPool.NonBondableTokens = calcNonBondableTokens(ctx, &k)
+	//bondPool.TotalSupply = pool.NotBondedTokens.Add(pool.BondedTokens)
 	bondPool.BondRatio = calcBondedRatio(&bondPool)
 
 	return bondPool

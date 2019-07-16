@@ -2,6 +2,7 @@ package authx
 
 import (
 	"bytes"
+	"fmt"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -32,13 +33,24 @@ type AccountXKeeper struct {
 	cdc *codec.Codec
 
 	paramSubspace params.Subspace
+
+	supplyKeeper SupplyKeeper
+
+	ak ExpectedAccountKeeper
 }
 
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace) AccountXKeeper {
+func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace, keeper SupplyKeeper, ak ExpectedAccountKeeper) AccountXKeeper {
+	// ensure authx module account is set
+	if addr := keeper.GetModuleAddress(ModuleName); addr == nil {
+		panic(fmt.Sprintf("%s module account has not been set", ModuleName))
+	}
+
 	return AccountXKeeper{
 		key:           key,
 		cdc:           cdc,
 		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
+		supplyKeeper:  keeper,
+		ak:            ak,
 	}
 }
 

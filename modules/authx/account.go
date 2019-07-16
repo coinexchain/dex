@@ -2,6 +2,7 @@ package authx
 
 import (
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/tendermint/tendermint/crypto"
@@ -78,9 +79,7 @@ func (acc *AccountX) GetAllUnlockedCoinsAtTheTime(time int64) LockedCoins {
 	return coins
 }
 
-func (acc *AccountX) TransferUnlockedCoins(time int64, ctx sdk.Context, kx AccountXKeeper, keeper auth.AccountKeeper) {
-	account := keeper.GetAccount(ctx, acc.Address)
-	oldCoins := account.GetCoins()
+func (acc *AccountX) TransferUnlockedCoins(time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
 	var coins = sdk.Coins{}
 	var temp LockedCoins
 	for _, c := range acc.LockedCoins {
@@ -91,9 +90,8 @@ func (acc *AccountX) TransferUnlockedCoins(time int64, ctx sdk.Context, kx Accou
 		}
 	}
 	coins = coins.Sort()
-	newCoins := oldCoins.Add(coins)
-	_ = account.SetCoins(newCoins)
-	keeper.SetAccount(ctx, account)
+	kx.supplyKeeper.SendCoinsFromModuleToAccount(ctx, ModuleName, acc.Address, coins)
+
 	acc.LockedCoins = temp
 	kx.SetAccountX(ctx, *acc)
 }

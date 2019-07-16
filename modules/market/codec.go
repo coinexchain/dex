@@ -4,10 +4,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 )
 
-var (
-	msgCdc = codec.New()
-)
-
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(Order{}, "market/Order", nil)
 	cdc.RegisterConcrete(MarketInfo{}, "market/TradingPair", nil)
@@ -19,7 +15,9 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgModifyPricePrecision{}, "MsgModifyPricePrecision", nil)
 }
 
+var ModuleCdc = codec.New()
+
 func init() {
-	RegisterCodec(msgCdc)
-	msgCdc.Seal()
+	RegisterCodec(ModuleCdc)
+	ModuleCdc.Seal()
 }

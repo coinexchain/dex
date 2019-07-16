@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
 	"time"
 
 	tmtypes "github.com/tendermint/tendermint/types"
@@ -129,77 +128,6 @@ func NewGenesisState(
 	}
 }
 
-// Sanitize sorts accounts and coin sets.
-func (gs GenesisState) Sanitize() {
-	sort.Slice(gs.Accounts, func(i, j int) bool {
-		return gs.Accounts[i].AccountNumber < gs.Accounts[j].AccountNumber
-	})
-
-	for _, acc := range gs.Accounts {
-		acc.Coins = acc.Coins.Sort()
-		acc.FrozenCoins = acc.FrozenCoins.Sort()
-	}
-}
-
-// ValidateGenesisState ensures that the genesis state obeys the expected invariants
-// TODO: No validators are both bonded and jailed (#2088)
-// TODO: Error if there is a duplicate validator (#1708)
-// TODO: Ensure all state machine parameters are in genesis (#1704)
-func (gs GenesisState) Validate() error {
-	if err := validateGenesisStateAccounts(gs.Accounts); err != nil {
-		return err
-	}
-
-	if err := gs.AuthXData.Validate(); err != nil {
-		return err
-	}
-	if err := gs.BankXData.Validate(); err != nil {
-		return err
-	}
-	if err := gs.StakingXData.Validate(); err != nil {
-		return err
-	}
-	if err := gs.AssetData.Validate(); err != nil {
-		return err
-	}
-	if err := gs.MarketData.Validate(); err != nil {
-		return err
-	}
-
-	if err := gs.Incentive.Validate(); err != nil {
-		return err
-	}
-
-	// skip stakingData validation as genesis is created from txs
-	if len(gs.GenTxs) > 0 {
-		return nil
-	}
-
-	if err := auth.ValidateGenesis(gs.AuthData); err != nil {
-		return err
-	}
-	if err := bank.ValidateGenesis(gs.BankData); err != nil {
-		return err
-	}
-	if err := staking.ValidateGenesis(gs.StakingData); err != nil {
-		return err
-	}
-	if err := distribution.ValidateGenesis(gs.DistrData); err != nil {
-		return err
-	}
-	if err := gov.ValidateGenesis(gs.GovData); err != nil {
-		return err
-	}
-	if err := crisis.ValidateGenesis(gs.CrisisData); err != nil {
-		return err
-	}
-	if err := slashing.ValidateGenesis(gs.SlashingData); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // validateGenesisStateAccounts performs validation of genesis accounts. It
 // ensures that there are no duplicate accounts in the genesis state and any
 // provided vesting accounts are valid.
@@ -282,8 +210,8 @@ func CetAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []jso
 	for _, acc := range genesisState.Accounts {
 		for _, coin := range acc.Coins {
 			if coin.Denom == genesisState.StakingData.Params.BondDenom {
-				stakingData.Pool.NotBondedTokens = stakingData.Pool.NotBondedTokens.
-					Add(coin.Amount) // increase the supply
+				//stakingData.Pool.NotBondedTokens = stakingData.Pool.NotBondedTokens.
+				//	Add(coin.Amount) // increase the supply
 			}
 		}
 	}

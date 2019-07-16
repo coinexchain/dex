@@ -12,10 +12,6 @@ import (
 
 // RouterKey is the name of the market module
 const (
-	RouterKey = "market"
-	StoreKey  = RouterKey
-	Topic     = RouterKey
-
 	// msg keys for Kafka
 	CreateMarketInfoKey = "create_market_info"
 	CancelMarketInfoKey = "cancel_market_info"
@@ -82,7 +78,7 @@ func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgCreateTradingPair) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgCreateTradingPair) GetSigners() []sdk.AccAddress {
@@ -142,7 +138,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgCreateOrder) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgCreateOrder) GetSigners() []sdk.AccAddress {
@@ -182,7 +178,7 @@ func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgCancelOrder) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
@@ -223,7 +219,7 @@ func (msg MsgCancelTradingPair) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgCancelTradingPair) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgCancelTradingPair) GetSigners() []sdk.AccAddress {
@@ -264,7 +260,7 @@ func (msg MsgModifyPricePrecision) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgModifyPricePrecision) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgModifyPricePrecision) GetSigners() []sdk.AccAddress {

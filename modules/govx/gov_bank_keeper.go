@@ -5,54 +5,54 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/gov"
 )
 
 type GovBankKeeper struct {
 	// The reference to the CoinKeeper to modify balances
-	ck gov.BankKeeper
+	//ck gov.BankKeeper
 
 	ak auth.AccountKeeper
 
 	dk DistributionKeeper
 }
 
-func NewKeeper(ck gov.BankKeeper, ak auth.AccountKeeper, dk DistributionKeeper) GovBankKeeper {
+func NewKeeper( /*ck gov.BankKeeper, */ ak auth.AccountKeeper, dk DistributionKeeper) GovBankKeeper {
 
 	return GovBankKeeper{
-		ck: ck,
+		//ck: ck,
 		ak: ak,
 		dk: dk,
 	}
 }
 
-func (k GovBankKeeper) GetCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
-	return k.ck.GetCoins(ctx, addr)
-}
+//func (k GovBankKeeper) GetCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+//	return k.ck.GetCoins(ctx, addr)
+//}
 
-func (k GovBankKeeper) SetSendEnabled(ctx sdk.Context, enabled bool) {
-	k.ck.SetSendEnabled(ctx, enabled)
-}
+//func (k GovBankKeeper) SetSendEnabled(ctx sdk.Context, enabled bool) {
+//	k.ck.SetSendEnabled(ctx, enabled)
+//}
 
 func (k GovBankKeeper) SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress,
-	amt sdk.Coins) (sdk.Tags, sdk.Error) {
+	amt sdk.Coins) /*sdk.Tags, */ sdk.Error {
 
-	if fromAddr.Equals(gov.DepositedCoinsAccAddr) && toAddr.Equals(gov.BurnedDepositCoinsAccAddr) {
-		_, err := subtractCoins(ctx, k.ak, fromAddr, amt)
-		if err != nil {
-			ctx.Logger().Error("subtractCoins error %v", err)
-			panic(err)
-		}
-
-		// update FeePool
-		feePool := k.dk.GetFeePool(ctx)
-		feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoins(amt))
-		k.dk.SetFeePool(ctx, feePool)
-		ctx.Logger().Info("burnt token %v send to community pool", amt)
-		return nil, nil
-	}
-
-	return k.ck.SendCoins(ctx, fromAddr, toAddr, amt)
+	//if fromAddr.Equals(gov.DepositedCoinsAccAddr) && toAddr.Equals(gov.BurnedDepositCoinsAccAddr) {
+	//	_, err := subtractCoins(ctx, k.ak, fromAddr, amt)
+	//	if err != nil {
+	//		ctx.Logger().Error("subtractCoins error %v", err)
+	//		panic(err)
+	//	}
+	//
+	//	// update FeePool
+	//	feePool := k.dk.GetFeePool(ctx)
+	//	feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoins(amt))
+	//	k.dk.SetFeePool(ctx, feePool)
+	//	ctx.Logger().Info("burnt token %v send to community pool", amt)
+	//	return nil, nil
+	//}
+	//
+	//return k.ck.SendCoins(ctx, fromAddr, toAddr, amt)
+	return nil
 }
 
 func subtractCoins(ctx sdk.Context, ak auth.AccountKeeper, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, sdk.Error) {

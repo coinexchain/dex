@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
+	tmconfig "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/cli"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
@@ -18,12 +20,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/store"
-	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
-	gucli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+	genaccscli "github.com/cosmos/cosmos-sdk/x/genaccounts/client/cli"
+	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
-	dexinit "github.com/coinexchain/dex/init"
+	assetcli "github.com/coinexchain/dex/modules/asset/client/cli"
 	dexserver "github.com/coinexchain/dex/server"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -35,15 +39,10 @@ var invCheckPeriod uint
 
 func main() {
 	dex.InitSdkConfig()
-	cdc := app.MakeCodec()
-	ctx := server.NewDefaultContext()
-
-	rootCmd := createCetdCmd(ctx, cdc)
+	rootCmd := createCetdCmd()
 
 	// prepare and add flags
 	executor := cli.PrepareBaseCmd(rootCmd, "GA", app.DefaultNodeHome)
-	rootCmd.PersistentFlags().UintVar(&invCheckPeriod, flagInvCheckPeriod,
-		0, "Assert registered invariants every N blocks")
 	err := executor.Execute()
 	if err != nil {
 		// handle with #870
@@ -51,8 +50,10 @@ func main() {
 	}
 }
 
-func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
+func createCetdCmd() *cobra.Command {
 	cobra.EnableCommandSorting = false
+	cdc := app.MakeCodec()
+	ctx := server.NewDefaultContext()
 
 	rootCmd := &cobra.Command{
 		Use:               "cetd",
@@ -65,18 +66,32 @@ func createCetdCmd(ctx *server.Context, cdc *amino.Codec) *cobra.Command {
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
 	rootCmd.AddCommand(version.Cmd)
 
+	rootCmd.PersistentFlags().UintVar(&invCheckPeriod, flagInvCheckPeriod,
+		0, "Assert registered invariants every N blocks")
+
 	return rootCmd
 }
 
 func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Command) {
-	var bm module.BasicManager
-	rootCmd.AddCommand(gucli.InitCmd(ctx, cdc, bm, ""))
-	rootCmd.AddCommand(dexinit.CollectGenTxsCmd(ctx, cdc))
-	rootCmd.AddCommand(dexinit.TestnetFilesCmd(ctx, cdc))
-	rootCmd.AddCommand(dexinit.GenTxCmd(ctx, cdc))
-	rootCmd.AddCommand(dexinit.AddGenesisAccountCmd(ctx, cdc))
-	rootCmd.AddCommand(dexinit.AddGenesisTokenCmd(ctx, cdc))
-	rootCmd.AddCommand(dexinit.ValidateGenesisCmd(ctx, cdc))
+	initCmd := genutilcli.InitCmd(ctx, cdc, app.ModuleBasics, app.DefaultNodeHome)
+	initCmd.PreRun = func(cmd *cobra.Command, args []string) {
+		adjustBlockCommitSpeed(ctx.Config)
+	}
+	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(genutilcli.CollectGenTxsCmd(ctx, cdc, genaccounts.AppModuleBasic{}, app.DefaultNodeHome))
+	rootCmd.AddCommand(genutilcli.GenTxCmd(ctx, cdc, app.ModuleBasics, staking.AppModuleBasic{},
+		genaccounts.AppModuleBasic{}, app.DefaultNodeHome, app.DefaultCLIHome))
+	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
+	rootCmd.AddCommand(genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
+	rootCmd.AddCommand(assetcli.AddGenesisTokenCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
+	rootCmd.AddCommand(testnetCmd(ctx, cdc, app.ModuleBasics, genaccounts.AppModuleBasic{}))
+}
+
+func adjustBlockCommitSpeed(config *tmconfig.Config) {
+	c := config.Consensus
+	c.TimeoutCommit = 2100 * time.Millisecond
+	c.PeerGossipSleepDuration = 20 * time.Millisecond
+	c.PeerQueryMaj23SleepDuration = 100 * time.Millisecond
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {

@@ -1,8 +1,9 @@
 package asset
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"unicode/utf8"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // MsgIssueToken
@@ -58,7 +59,7 @@ func (msg MsgIssueToken) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgIssueToken) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -111,7 +112,7 @@ func (msg MsgTransferOwnership) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgTransferOwnership) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -168,7 +169,7 @@ func (msg MsgMintToken) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgMintToken) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -226,7 +227,7 @@ func (msg MsgBurnToken) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgBurnToken) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -272,7 +273,7 @@ func (msg MsgForbidToken) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgForbidToken) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -318,7 +319,7 @@ func (msg MsgUnForbidToken) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgUnForbidToken) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -369,7 +370,7 @@ func (msg MsgAddTokenWhitelist) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgAddTokenWhitelist) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -420,7 +421,7 @@ func (msg MsgRemoveTokenWhitelist) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgRemoveTokenWhitelist) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -471,7 +472,7 @@ func (msg MsgForbidAddr) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgForbidAddr) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -522,7 +523,7 @@ func (msg MsgUnForbidAddr) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgUnForbidAddr) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -575,7 +576,7 @@ func (msg MsgModifyTokenURL) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgModifyTokenURL) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
@@ -628,7 +629,7 @@ func (msg MsgModifyTokenDescription) ValidateBasic() sdk.Error {
 
 // GetSignBytes Implements Msg.
 func (msg MsgModifyTokenDescription) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.

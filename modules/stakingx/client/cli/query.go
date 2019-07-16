@@ -9,7 +9,7 @@ import (
 )
 
 // GetCmdQueryPool implements the pool query command.
-func GetCmdQueryPool(storeName string, cdc *codec.Codec) *cobra.Command {
+func GetCmdQueryPool(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "pool",
 		Args:  cobra.NoArgs,
@@ -21,7 +21,7 @@ $ cetcli query staking pool
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			res, err := cliCtx.QueryWithData("custom/stakingx/pool", nil)
+			res, _, err := cliCtx.QueryWithData("custom/stakingx/pool", nil)
 			if err != nil {
 				return err
 			}

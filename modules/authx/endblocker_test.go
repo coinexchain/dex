@@ -36,6 +36,11 @@ func TestEndBlocker(t *testing.T) {
 	_ = acc2.SetCoins(sdk.Coins{coin})
 	input.ak.SetAccount(input.ctx, acc2)
 
+	//set module account for authx
+	moduleAccount := input.sk.GetModuleAccount(input.ctx, ModuleName)
+	moduleAccount.SetCoins(types.NewCetCoins(2))
+	input.sk.SetModuleAccount(input.ctx, moduleAccount)
+
 	input.axk.InsertUnlockedCoinsQueue(input.ctx, input.ctx.BlockHeader().Time.Unix()-1, addr1)
 	input.axk.InsertUnlockedCoinsQueue(input.ctx, input.ctx.BlockHeader().Time.Unix()+1, addr2)
 	EndBlocker(input.ctx, input.axk, input.ak)

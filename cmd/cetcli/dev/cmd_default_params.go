@@ -2,6 +2,7 @@ package dev
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/bankx"
 	"os"
 	"reflect"
 
@@ -17,7 +18,6 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
 )

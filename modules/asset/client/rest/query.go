@@ -42,20 +42,20 @@ func QueryTokenRequestHandlerFn(
 		}
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryToken)
-		res, err := cliCtx.QueryWithData(route, bz)
+		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		if len(res) == 0 {
-			rest.PostProcessResponse(w, cdc, asset.BaseToken{}, cliCtx.Indent)
+			rest.PostProcessResponse(w, cliCtx, asset.BaseToken{})
 			return
 		}
 
 		var token asset.Token
 		cdc.MustUnmarshalJSON(res, &token)
 
-		rest.PostProcessResponse(w, cdc, token, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, token)
 	}
 }
 
@@ -66,7 +66,7 @@ func QueryTokensRequestHandlerFn(
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryTokenList)
-		res, err := cliCtx.QueryWithData(route, nil)
+		res, _, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -76,7 +76,7 @@ func QueryTokensRequestHandlerFn(
 			res = []byte("[]")
 		}
 
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
 
@@ -95,7 +95,7 @@ func QueryWhitelistRequestHandlerFn(
 		}
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryWhitelist)
-		res, err := cliCtx.QueryWithData(route, bz)
+		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -104,7 +104,7 @@ func QueryWhitelistRequestHandlerFn(
 			res = []byte("[]")
 		}
 
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
 
@@ -123,7 +123,7 @@ func QueryForbiddenAddrRequestHandlerFn(
 		}
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryForbiddenAddr)
-		res, err := cliCtx.QueryWithData(route, bz)
+		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -132,7 +132,7 @@ func QueryForbiddenAddrRequestHandlerFn(
 			res = []byte("[]")
 		}
 
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
 
@@ -143,7 +143,7 @@ func QueryReservedSymbolsRequestHandlerFn(
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryReservedSymbols)
-		res, err := cliCtx.QueryWithData(route, nil)
+		res, _, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -153,6 +153,6 @@ func QueryReservedSymbolsRequestHandlerFn(
 			res = []byte("[]")
 		}
 
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
