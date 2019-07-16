@@ -220,12 +220,12 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 
 	// account permissions
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     []string{supply.Basic},
-		distr.ModuleName:          []string{supply.Basic},
-		staking.BondedPoolName:    []string{supply.Burner, supply.Staking},
-		staking.NotBondedPoolName: []string{supply.Burner, supply.Staking},
-		gov.ModuleName:            []string{supply.Burner},
-		authx.ModuleName:          []string{supply.Basic},
+		auth.FeeCollectorName:     {supply.Basic},
+		distr.ModuleName:          {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		authx.ModuleName:          {supply.Basic},
 	}
 
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
