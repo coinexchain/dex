@@ -22,7 +22,7 @@ func NewQuerier(keeper TokenKeeper) sdk.Querier {
 		case types.QueryForbiddenAddr:
 			return queryForbiddenAddr(ctx, req, keeper)
 		case types.QueryReservedSymbols:
-			return queryReservedSymbols(ctx, req, keeper)
+			return queryReservedSymbols()
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown asset query endpoint")
 		}
@@ -85,7 +85,7 @@ func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, keeper TokenKeep
 	return bz, nil
 }
 
-func queryReservedSymbols(ctx sdk.Context, req abci.RequestQuery, keeper TokenKeeper) ([]byte, sdk.Error) {
+func queryReservedSymbols() ([]byte, sdk.Error) {
 	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, types.GetReservedSymbols())
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))

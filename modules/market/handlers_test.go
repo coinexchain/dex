@@ -3,7 +3,6 @@ package market
 import (
 	"bytes"
 	"fmt"
-	types2 "github.com/coinexchain/dex/modules/asset/types"
 	"github.com/coinexchain/dex/modules/bankx"
 	"math"
 	"testing"
@@ -111,7 +110,7 @@ type storeKeys struct {
 }
 
 func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) ExpectedAssetStatusKeeper {
-	types2.RegisterCodec(cdc)
+	asset.RegisterCodec(cdc)
 	auth.RegisterBaseAccount(cdc)
 
 	//create auth, asset keeper
@@ -151,11 +150,11 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	tk := asset.NewBaseKeeper(
 		cdc,
 		keys.assetCapKey,
-		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(types2.DefaultParamspace),
+		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(asset.DefaultParamspace),
 		bkx,
 		&sk,
 	)
-	tk.SetParams(ctx, types2.DefaultParams())
+	tk.SetParams(ctx, asset.DefaultParams())
 
 	// create an account by auth keeper
 	cetacc := ak.NewAccountWithAddress(ctx, haveCetAddress)
@@ -168,15 +167,15 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		sdk.NewCoin(types.CET, sdk.NewInt(issueAmount))))
 	ak.SetAccount(ctx, usdtacc)
 	onlyIssueToken := ak.NewAccountWithAddress(ctx, notHaveCetAddress)
-	onlyIssueToken.SetCoins(types.NewCetCoins(types2.IssueTokenFee))
+	onlyIssueToken.SetCoins(types.NewCetCoins( asset.IssueTokenFee))
 	ak.SetAccount(ctx, onlyIssueToken)
 
 	// issue tokens
-	msgStock := types2.NewMsgIssueToken(stock, stock, issueAmount, haveCetAddress,
+	msgStock :=  asset.NewMsgIssueToken(stock, stock, issueAmount, haveCetAddress,
 		false, false, addrForbid, tokenForbid, "", "")
-	msgMoney := types2.NewMsgIssueToken(money, money, issueAmount, notHaveCetAddress,
+	msgMoney :=  asset.NewMsgIssueToken(money, money, issueAmount, notHaveCetAddress,
 		false, false, addrForbid, tokenForbid, "", "")
-	msgCet := types2.NewMsgIssueToken("cet", "cet", issueAmount, haveCetAddress,
+	msgCet :=  asset.NewMsgIssueToken("cet", "cet", issueAmount, haveCetAddress,
 		false, false, addrForbid, tokenForbid, "", "")
 	handler := asset.NewHandler(tk)
 	ret := handler(ctx, msgStock)
@@ -187,7 +186,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	require.Equal(t, true, ret.IsOK(), "issue token should succeed", ret)
 
 	if tokenForbid {
-		msgForbidToken := types2.MsgForbidToken{
+		msgForbidToken :=  asset.MsgForbidToken{
 			Symbol:       stock,
 			OwnerAddress: haveCetAddress,
 		}
@@ -196,7 +195,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		tk.ForbidToken(ctx, msgForbidToken.Symbol, msgForbidToken.OwnerAddress)
 	}
 	if addrForbid {
-		msgForbidAddr := types2.MsgForbidAddr{
+		msgForbidAddr :=  asset.MsgForbidAddr{
 			Symbol:    money,
 			OwnerAddr: haveCetAddress,
 			Addresses: []sdk.AccAddress{forbidAddr},
@@ -232,7 +231,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 
 	keys := storeKeys{}
 	keys.marketKey = sdk.NewKVStoreKey(StoreKey)
-	keys.assetCapKey = sdk.NewKVStoreKey(types2.StoreKey)
+	keys.assetCapKey = sdk.NewKVStoreKey( asset.StoreKey)
 	keys.authCapKey = sdk.NewKVStoreKey(auth.StoreKey)
 	keys.authxCapKey = sdk.NewKVStoreKey(authx.StoreKey)
 	keys.fckCapKey = sdk.NewKVStoreKey(auth.FeeStoreKey)
@@ -271,7 +270,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 
 func TestMarketInfoSetFailed(t *testing.T) {
 	input := prepareMockInput(t, false, true)
-	remainCoin := types.NewCetCoin(OriginHaveCetAmount + issueAmount - types2.IssueTokenFee*2)
+	remainCoin := types.NewCetCoin(OriginHaveCetAmount + issueAmount -  asset.IssueTokenFee*2)
 	msgMarket := MsgCreateTradingPair{
 		Stock:          stock,
 		Money:          money,

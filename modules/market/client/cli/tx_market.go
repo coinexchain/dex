@@ -15,7 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	assettypes "github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market"
 )
 
@@ -88,9 +88,9 @@ Example :
 }
 
 func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, tokens ...string) error {
-	route := fmt.Sprintf("custom/%s/%s", assettypes.QuerierRoute, assettypes.QueryToken)
+	route := fmt.Sprintf("custom/%s/%s", asset.QuerierRoute, asset.QueryToken)
 	for _, token := range tokens {
-		bz, err := cdc.MarshalJSON(assettypes.NewQueryAssetParams(token))
+		bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(token))
 		if err != nil {
 			return err
 		}

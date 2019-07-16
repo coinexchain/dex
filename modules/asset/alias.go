@@ -6,19 +6,30 @@ import (
 )
 
 const (
-	DefaultParamspace = types.DefaultParamspace
-	ModuleName        = types.ModuleName
-	StoreKey          = types.StoreKey
-	QuerierRoute      = types.QuerierRoute
-	RouterKey         = types.RouterKey
+	DefaultParamspace    = types.DefaultParamspace
+	ModuleName           = types.ModuleName
+	StoreKey             = types.StoreKey
+	QuerierRoute         = types.QuerierRoute
+	RouterKey            = types.RouterKey
+	QueryToken           = types.QueryToken
+	QueryTokenList       = types.QueryTokenList
+	QueryWhitelist       = types.QueryWhitelist
+	QueryForbiddenAddr   = types.QueryForbiddenAddr
+	QueryReservedSymbols = types.QueryReservedSymbols
 )
 
 var (
 	// functions aliases
-	NewQuerier          = keeper.NewQuerier
-	RegisterCodec       = types.RegisterCodec
-	DefaultGenesisState = types.DefaultGenesisState
-	NewGenesisState     = types.NewGenesisState
+	NewQuerier                  = keeper.NewQuerier
+	NewBaseTokenKeeper          = keeper.NewBaseTokenKeeper
+	RegisterCodec               = types.RegisterCodec
+	DefaultGenesisState         = types.DefaultGenesisState
+	NewGenesisState             = types.NewGenesisState
+	NewQueryAssetParams         = types.NewQueryAssetParams
+	NewQueryWhitelistParams     = types.NewQueryWhitelistParams
+	NewQueryForbiddenAddrParams = types.NewQueryForbiddenAddrParams
+	NewMsgIssueToken            = types.NewMsgIssueToken
+	NewMsgTransferOwnership     = types.NewMsgTransferOwnership
 
 	// variable aliases
 	ModuleCdc = types.ModuleCdc
