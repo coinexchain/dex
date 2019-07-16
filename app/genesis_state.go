@@ -53,14 +53,17 @@ func getAndDelete(m map[string]json.RawMessage, key string) json.RawMessage {
 
 //func adjustDefaultParams(gs *GenesisState) {
 //	gs.AuthData.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
+
 //	gs.StakingData.Params.UnbondingTime = DefaultUnbondingTime
 //	gs.StakingData.Params.MaxValidators = DefaultMaxValidators
 //	gs.StakingData.Params.BondDenom = dex.DefaultBondDenom
+
 //	gs.SlashingData.Params.MaxEvidenceAge = DefaultMaxEvidenceAge
 //	gs.SlashingData.Params.SignedBlocksWindow = DefaultSignedBlocksWindow
 //	gs.SlashingData.Params.MinSignedPerWindow = DefaultMinSignedPerWindow
 //	gs.SlashingData.Params.SlashFractionDoubleSign = DefaultSlashFractionDoubleSign
 //	gs.SlashingData.Params.SlashFractionDowntime = DefaultSlashFractionDowntime
+
 //	gs.GovData.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
 //	gs.GovData.DepositParams.MinDeposit[0].Amount = DefaultGovMinDeposit
 //	gs.GovData.DepositParams.MaxDepositPeriod = DefaultPeriod
@@ -70,6 +73,7 @@ func getAndDelete(m map[string]json.RawMessage, key string) json.RawMessage {
 //		Threshold: sdk.NewDecWithPrec(5, 1),
 //		Veto:      sdk.NewDecWithPrec(334, 3),
 //	}
+
 //	gs.CrisisData.ConstantFee.Denom = dex.DefaultBondDenom
 //	gs.CrisisData.ConstantFee.Amount = DefaultCrisisConstantFee
 //}

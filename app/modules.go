@@ -1,0 +1,84 @@
+package app
+
+import (
+	"encoding/json"
+	"github.com/cosmos/cosmos-sdk/x/crisis"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	"github.com/cosmos/cosmos-sdk/x/slashing"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+
+	dex "github.com/coinexchain/dex/types"
+)
+
+
+type AuthModuleBasic struct {
+	auth.AppModuleBasic
+}
+
+func (AuthModuleBasic) DefaultGenesis() json.RawMessage {
+	genState := auth.DefaultGenesisState()
+	genState.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
+	return auth.ModuleCdc.MustMarshalJSON(genState)
+}
+
+
+type StakingModuleBasic struct {
+	staking.AppModuleBasic
+}
+
+func (StakingModuleBasic) DefaultGenesis() json.RawMessage {
+	genState := staking.DefaultGenesisState()
+	genState.Params.UnbondingTime = DefaultUnbondingTime
+	genState.Params.MaxValidators = DefaultMaxValidators
+	genState.Params.BondDenom = dex.DefaultBondDenom
+	return staking.ModuleCdc.MustMarshalJSON(genState)
+}
+
+
+type SlashingModuleBasic struct {
+	slashing.AppModuleBasic
+}
+
+func (SlashingModuleBasic) DefaultGenesis() json.RawMessage {
+	genState := slashing.DefaultGenesisState()
+	genState.Params.MaxEvidenceAge = DefaultMaxEvidenceAge
+	genState.Params.SignedBlocksWindow = DefaultSignedBlocksWindow
+	genState.Params.MinSignedPerWindow = DefaultMinSignedPerWindow
+	genState.Params.SlashFractionDoubleSign = DefaultSlashFractionDoubleSign
+	genState.Params.SlashFractionDowntime = DefaultSlashFractionDowntime
+	return slashing.ModuleCdc.MustMarshalJSON(genState)
+}
+
+
+type GovModuleBasic struct {
+	gov.AppModuleBasic
+}
+
+func (GovModuleBasic) DefaultGenesis() json.RawMessage {
+	genState := gov.DefaultGenesisState()
+	genState.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
+	genState.DepositParams.MinDeposit[0].Amount = DefaultGovMinDeposit
+	genState.DepositParams.MaxDepositPeriod = DefaultPeriod
+	genState.VotingParams.VotingPeriod = DefaultPeriod
+	genState.TallyParams = gov.TallyParams{
+			Quorum:    sdk.NewDecWithPrec(4, 1),
+			Threshold: sdk.NewDecWithPrec(5, 1),
+			Veto:      sdk.NewDecWithPrec(334, 3),
+		}
+	return gov.ModuleCdc.MustMarshalJSON(genState)
+}
+
+
+type CrisisModuleBasic struct {
+	crisis.AppModuleBasic
+}
+
+func (CrisisModuleBasic) DefaultGenesis() json.RawMessage {
+	genState := crisis.DefaultGenesisState()
+	genState.ConstantFee.Denom = dex.DefaultBondDenom
+	genState.ConstantFee.Amount = DefaultCrisisConstantFee
+	return crisis.ModuleCdc.MustMarshalJSON(genState)
+}
