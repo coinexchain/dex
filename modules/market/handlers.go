@@ -2,11 +2,13 @@ package market
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
 	"strings"
 
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -69,14 +71,14 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg MsgCreateTradingPair, keepe
 	}
 
 	// send msg to kafka
-	// msgInfo := CreateMarketInfo{
-	// 	Stock:          msg.Stock,
-	// 	Money:          msg.Money,
-	// 	PricePrecision: msg.PricePrecision,
-	// 	Creator:        msg.Creator.String(),
-	// 	CreateHeight:   ctx.BlockHeight(),
-	// }
-	// keeper.msgProducer.SendMsg(Topic, CreateMarketInfoKey, msgInfo)
+	msgInfo := CreateMarketInfo{
+		Stock:          msg.Stock,
+		Money:          msg.Money,
+		PricePrecision: msg.PricePrecision,
+		Creator:        msg.Creator.String(),
+		CreateHeight:   ctx.BlockHeight(),
+	}
+	fillMsgQueue(ctx, keeper, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -91,8 +93,20 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg MsgCreateTradingPair, keepe
 			sdk.NewAttribute(AttributeKeyLastExecutePrice, info.LastExecutedPrice.String()),
 		),
 	})
+
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
+	}
+}
+
+func fillMsgQueue(ctx sdk.Context, keeper Keeper, msg interface{}) {
+	if keeper.msgProducer.IsSubScribe(Topic) {
+		bytes, err := json.Marshal(msg)
+		if err != nil {
+			return
+		}
+		ctx.EventManager().EmitEvent(sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(msgqueue.AttributeKeyKafkaMsg, string(bytes))))
 	}
 }
 
@@ -192,7 +206,7 @@ func handleFeeForCreateOrder(ctx sdk.Context, keeper Keeper, amount int64, denom
 	return nil
 }
 
-func sendCreateOrderMsg(keeper Keeper, order Order, featureFee int64) {
+func sendCreateOrderMsg(ctx sdk.Context, keeper Keeper, order Order, featureFee int64) {
 	// send msg to kafka
 	msgInfo := CreateOrderInfo{
 		OrderID:     order.OrderID(),
@@ -208,7 +222,7 @@ func sendCreateOrderMsg(keeper Keeper, order Order, featureFee int64) {
 		Freeze:      order.Freeze,
 		FeatureFee:  featureFee,
 	}
-	keeper.SendMsg(CreateOrderInfoKey, msgInfo)
+	fillMsgQueue(ctx, keeper, msgInfo)
 }
 
 func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sdk.Result {
@@ -259,7 +273,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg MsgCreateOrder, keeper Keeper) sd
 	if err := handleFeeForCreateOrder(ctx, keeper, amount, denom, order.Sender, frozenFee, featureFee); err != nil {
 		return err.Result()
 	}
-	// sendCreateOrderMsg(keeper, order, featureFee)
+	sendCreateOrderMsg(ctx, keeper, order, featureFee)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
@@ -338,17 +352,17 @@ func handleMsgCancelOrder(ctx sdk.Context, msg MsgCancelOrder, keeper Keeper) sd
 	removeOrder(ctx, ork, keeper.bnk, keeper, order, marketParams.FeeForZeroDeal)
 
 	// send msg to kafka
-	// msgInfo := CancelOrderInfo{
-	// 	OrderID:        msg.OrderID,
-	// 	DelReason:      CancelOrderByManual,
-	// 	DelHeight:      ctx.BlockHeight(),
-	// 	UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
-	// 	LeftStock:      order.LeftStock,
-	// 	RemainAmount:   order.Freeze,
-	// 	DealStock:      order.DealStock,
-	// 	DealMoney:      order.DealMoney,
-	// }
-	// keeper.SendMsg(CancelOrderInfoKey, msgInfo)
+	msgInfo := CancelOrderInfo{
+		OrderID:        msg.OrderID,
+		DelReason:      CancelOrderByManual,
+		DelHeight:      ctx.BlockHeight(),
+		UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+		LeftStock:      order.LeftStock,
+		RemainAmount:   order.Freeze,
+		DealStock:      order.DealStock,
+		DealMoney:      order.DealMoney,
+	}
+	fillMsgQueue(ctx, keeper, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
@@ -397,14 +411,14 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg MsgCancelTradingPair, keepe
 	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.TradingPair)
 
 	// send msg to kafka
-	// values := strings.Split(msg.TradingPair, SymbolSeparator)
-	// msgInfo := CancelMarketInfo{
-	// 	Stock:   values[0],
-	// 	Money:   values[1],
-	// 	Deleter: msg.Sender.String(),
-	// 	DelTime: msg.EffectiveTime,
-	// }
-	// keeper.SendMsg(CancelMarketInfoKey, msgInfo)
+	values := strings.Split(msg.TradingPair, SymbolSeparator)
+	msgInfo := CancelMarketInfo{
+		Stock:   values[0],
+		Money:   values[1],
+		Deleter: msg.Sender.String(),
+		DelTime: msg.EffectiveTime,
+	}
+	fillMsgQueue(ctx, keeper, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
@@ -475,12 +489,13 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg MsgModifyPricePrecision,
 		return err.Result()
 	}
 
-	// k.SendMsg(PricePrecisionInfoKey, ModifyPricePrecisionInfo{
-	// 	Sender:            msg.Sender.String(),
-	// 	TradingPair:       msg.TradingPair,
-	// 	OldPricePrecision: oldInfo.PricePrecision,
-	// 	NewPricePrecision: info.PricePrecision,
-	// })
+	msgInfo := ModifyPricePrecisionInfo{
+		Sender:            msg.Sender.String(),
+		TradingPair:       msg.TradingPair,
+		OldPricePrecision: oldInfo.PricePrecision,
+		NewPricePrecision: info.PricePrecision,
+	}
+	fillMsgQueue(ctx, k, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
