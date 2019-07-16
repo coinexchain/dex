@@ -2,6 +2,7 @@ package distributionx
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
@@ -18,7 +19,7 @@ func NewHandler(k Keeper) sdk.Handler {
 
 func handleMsgDonateToCommunityPool(ctx sdk.Context, k Keeper, msg MsgDonateToCommunityPool) sdk.Result {
 
-	res := k.bxk.SubtractCoins(ctx, msg.FromAddr, msg.Amount)
+	res := k.bxk.Sk.SendCoinsFromAccountToModule(ctx, msg.FromAddr, distribution.ModuleName, msg.Amount)
 	if res != nil {
 		return res.Result()
 	}
