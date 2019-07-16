@@ -1,7 +1,8 @@
-package client
+package cli
 
 import (
 	"fmt"
+
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,11 +22,6 @@ func GetAccountX(ctx context.CLIContext, address []byte) (authx.AccountX, error)
 	}
 
 	return accountX, nil
-}
-
-func EnsureAccountExistsFromAddr(ctx context.CLIContext, addr sdk.AccAddress) error {
-	_, err := QueryAccountX(ctx, addr)
-	return err
 }
 
 func QueryAccountX(ctx context.CLIContext, addr sdk.AccAddress) ([]byte, error) {

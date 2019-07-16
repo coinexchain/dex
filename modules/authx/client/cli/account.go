@@ -9,7 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	clientx "github.com/coinexchain/dex/client"
 	"github.com/coinexchain/dex/modules/authx"
 )
 
@@ -37,7 +36,7 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			aux, err := clientx.GetAccountX(cliCtx, key)
+			aux, err := GetAccountX(cliCtx, key)
 			if err != nil { // it's ok
 				aux = authx.AccountX{}
 			}

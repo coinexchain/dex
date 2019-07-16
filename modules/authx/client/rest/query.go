@@ -3,6 +3,8 @@ package rest
 import (
 	"net/http"
 
+	"github.com/coinexchain/dex/modules/authx/client/cli"
+
 	"github.com/gorilla/mux"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -11,7 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	clientx "github.com/coinexchain/dex/client"
 	"github.com/coinexchain/dex/modules/authx"
 )
 
@@ -52,7 +53,7 @@ func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) h
 			return
 		}
 
-		aux, err := clientx.GetAccountX(cliCtx, addr)
+		aux, err := cli.GetAccountX(cliCtx, addr)
 		if err != nil {
 			aux = authx.AccountX{}
 		}
@@ -89,7 +90,7 @@ func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 		}
 
 		lockedCoins := make(authx.LockedCoins, 0)
-		aux, err := clientx.GetAccountX(cliCtx, addr)
+		aux, err := cli.GetAccountX(cliCtx, addr)
 		if err == nil {
 			lockedCoins = aux.GetAllLockedCoins()
 		}
