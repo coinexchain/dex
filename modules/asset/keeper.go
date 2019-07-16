@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/x/staking"
-
 	"github.com/tendermint/tendermint/libs/bech32"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	"github.com/coinexchain/dex/modules/asset/types"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -46,8 +46,8 @@ type Keeper interface {
 	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
-	SetParams(ctx sdk.Context, params Params)
-	GetParams(ctx sdk.Context) (params Params)
+	SetParams(ctx sdk.Context, params types.Params)
+	GetParams(ctx sdk.Context) (params types.Params)
 }
 
 var _ Keeper = (*BaseKeeper)(nil)
@@ -75,7 +75,7 @@ func NewBaseKeeper(cdc *codec.Codec, key sdk.StoreKey,
 
 		cdc:           cdc,
 		key:           key,
-		paramSubspace: paramStore.WithKeyTable(ParamKeyTable()),
+		paramSubspace: paramStore.WithKeyTable(types.ParamKeyTable()),
 		bkx:           bkx,
 		sk:            sk,
 	}
@@ -100,12 +100,12 @@ func (keeper BaseKeeper) SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt
 }
 
 // SetParams sets the asset module's parameters.
-func (keeper BaseKeeper) SetParams(ctx sdk.Context, params Params) {
+func (keeper BaseKeeper) SetParams(ctx sdk.Context, params types.Params) {
 	keeper.paramSubspace.SetParamSet(ctx, &params)
 }
 
 // GetParams gets the asset module's parameters.
-func (keeper BaseKeeper) GetParams(ctx sdk.Context) (params Params) {
+func (keeper BaseKeeper) GetParams(ctx sdk.Context) (params types.Params) {
 	keeper.paramSubspace.GetParamSet(ctx, &params)
 	return
 }
@@ -115,20 +115,20 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool, url string, description string) sdk.Error {
 
 	if keeper.IsTokenExists(ctx, symbol) {
-		return ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
+		return types.ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
 	}
 
 	// only cet owner can issue reserved token
 	if isReserved(symbol) && symbol != dex.CET {
 		cetToken := keeper.GetToken(ctx, dex.CET)
 		if cetToken == nil || !owner.Equals(cetToken.GetOwner()) {
-			return ErrorInvalidTokenOwner("only coinex dex foundation can issue reserved symbol token, you can run \n" +
+			return types.ErrorInvalidTokenOwner("only coinex dex foundation can issue reserved symbol token, you can run \n" +
 				"$ cetcli query asset reserved-symbol \n" +
 				"to query reserved token symbol")
 		}
 	}
 
-	token, err := NewToken(
+	token, err := types.NewToken(
 		name,
 		symbol,
 		totalSupply,
@@ -156,7 +156,7 @@ func (keeper BaseKeeper) TransferOwnership(ctx sdk.Context, symbol string, origi
 	}
 
 	if err := token.SetOwner(newOwner); err != nil {
-		return ErrorInvalidTokenOwner("token new owner is invalid")
+		return types.ErrorInvalidTokenOwner("token new owner is invalid")
 	}
 
 	return keeper.setToken(ctx, token)
@@ -170,15 +170,15 @@ func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.Acc
 	}
 
 	if !token.GetMintable() {
-		return ErrorInvalidTokenMint(fmt.Sprintf("token %s do not support mint", symbol))
+		return types.ErrorInvalidTokenMint(fmt.Sprintf("token %s do not support mint", symbol))
 	}
 
 	if err := token.SetTotalMint(amount + token.GetTotalMint()); err != nil {
-		return ErrorInvalidTokenMint(err.Error())
+		return types.ErrorInvalidTokenMint(err.Error())
 	}
 
 	if err := token.SetTotalSupply(amount + token.GetTotalSupply()); err != nil {
-		return ErrorInvalidTokenSupply(err.Error())
+		return types.ErrorInvalidTokenSupply(err.Error())
 	}
 
 	return keeper.setToken(ctx, token)
@@ -192,15 +192,15 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 	}
 
 	if !token.GetBurnable() {
-		return ErrorInvalidTokenBurn(fmt.Sprintf("token %s do not support burn", symbol))
+		return types.ErrorInvalidTokenBurn(fmt.Sprintf("token %s do not support burn", symbol))
 	}
 
 	if err := token.SetTotalBurn(amount + token.GetTotalBurn()); err != nil {
-		return ErrorInvalidTokenBurn(err.Error())
+		return types.ErrorInvalidTokenBurn(err.Error())
 	}
 
 	if err := token.SetTotalSupply(token.GetTotalSupply() - amount); err != nil {
-		return ErrorInvalidTokenSupply(err.Error())
+		return types.ErrorInvalidTokenSupply(err.Error())
 	}
 
 	if token.GetSymbol() == dex.CET {
@@ -223,10 +223,10 @@ func (keeper BaseKeeper) ForbidToken(ctx sdk.Context, symbol string, owner sdk.A
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token", symbol))
+		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token", symbol))
 	}
 	if token.GetIsForbidden() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has been forbidden", symbol))
+		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has been forbidden", symbol))
 	}
 	token.SetIsForbidden(true)
 
@@ -241,10 +241,10 @@ func (keeper BaseKeeper) UnForbidToken(ctx sdk.Context, symbol string, owner sdk
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid token", symbol))
+		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid token", symbol))
 	}
 	if !token.GetIsForbidden() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has not been forbidden", symbol))
+		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has not been forbidden", symbol))
 	}
 	token.SetIsForbidden(false)
 
@@ -259,10 +259,10 @@ func (keeper BaseKeeper) AddTokenWhitelist(ctx sdk.Context, symbol string, owner
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token and add whitelist", symbol))
+		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token and add whitelist", symbol))
 	}
 	if err = keeper.addWhitelist(ctx, symbol, whitelist); err != nil {
-		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
+		return types.ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
 	}
 	return nil
 }
@@ -275,10 +275,10 @@ func (keeper BaseKeeper) RemoveTokenWhitelist(ctx sdk.Context, symbol string, ow
 	}
 
 	if !token.GetTokenForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token and remove whitelist", symbol))
+		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token and remove whitelist", symbol))
 	}
 	if err = keeper.removeWhitelist(ctx, symbol, whitelist); err != nil {
-		return ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
+		return types.ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
 	}
 	return nil
 }
@@ -291,10 +291,10 @@ func (keeper BaseKeeper) ForbidAddress(ctx sdk.Context, symbol string, owner sdk
 	}
 
 	if !token.GetAddrForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid address", symbol))
+		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid address", symbol))
 	}
 	if err = keeper.addForbiddenAddress(ctx, symbol, addresses); err != nil {
-		return ErrorInvalidAddress(fmt.Sprintf("forbid addr is invalid"))
+		return types.ErrorInvalidAddress(fmt.Sprintf("forbid addr is invalid"))
 	}
 	return nil
 }
@@ -307,10 +307,10 @@ func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner s
 	}
 
 	if !token.GetAddrForbiddable() {
-		return ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid address", symbol))
+		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid address", symbol))
 	}
 	if err = keeper.removeForbiddenAddress(ctx, symbol, addresses); err != nil {
-		return ErrorInvalidAddress(fmt.Sprintf("unforbid addr is invalid"))
+		return types.ErrorInvalidAddress(fmt.Sprintf("unforbid addr is invalid"))
 	}
 	return nil
 }
@@ -323,7 +323,7 @@ func (keeper BaseKeeper) ModifyTokenURL(ctx sdk.Context, symbol string, owner sd
 	}
 
 	if err := token.SetURL(url); err != nil {
-		return ErrorInvalidTokenURL(err.Error())
+		return types.ErrorInvalidTokenURL(err.Error())
 	}
 
 	return keeper.setToken(ctx, token)
@@ -337,26 +337,26 @@ func (keeper BaseKeeper) ModifyTokenDescription(ctx sdk.Context, symbol string, 
 	}
 
 	if err := token.SetDescription(description); err != nil {
-		return ErrorInvalidTokenDescription(err.Error())
+		return types.ErrorInvalidTokenDescription(err.Error())
 	}
 
 	return keeper.setToken(ctx, token)
 }
 
-func (keeper BaseKeeper) checkPrecondition(ctx sdk.Context, symbol string, owner sdk.AccAddress) (Token, sdk.Error) {
+func (keeper BaseKeeper) checkPrecondition(ctx sdk.Context, symbol string, owner sdk.AccAddress) (types.Token, sdk.Error) {
 	token := keeper.GetToken(ctx, symbol)
 	if token == nil {
-		return nil, ErrorTokenNotFound(fmt.Sprintf("token %s not found", symbol))
+		return nil, types.ErrorTokenNotFound(fmt.Sprintf("token %s not found", symbol))
 	}
 
 	if !token.GetOwner().Equals(owner) {
-		return nil, ErrorInvalidTokenOwner("Only token owner can do this action")
+		return nil, types.ErrorInvalidTokenOwner("Only token owner can do this action")
 	}
 
 	return token, nil
 }
 
-func (keeper BaseKeeper) setToken(ctx sdk.Context, token Token) sdk.Error {
+func (keeper BaseKeeper) setToken(ctx sdk.Context, token types.Token) sdk.Error {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(keeper.key)
 
@@ -368,7 +368,7 @@ func (keeper BaseKeeper) setToken(ctx sdk.Context, token Token) sdk.Error {
 	return nil
 }
 
-func (keeper BaseKeeper) removeToken(ctx sdk.Context, token Token) {
+func (keeper BaseKeeper) removeToken(ctx sdk.Context, token types.Token) {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(keeper.key)
 	store.Delete(TokenStoreKey(symbol))
@@ -518,8 +518,8 @@ func (keeper BaseTokenKeeper) importAddrKey(ctx sdk.Context, prefix []byte, addr
 
 // ViewKeeper defines a module interface that facilitates read only access to token store info.
 type ViewKeeper interface {
-	GetToken(ctx sdk.Context, symbol string) Token
-	GetAllTokens(ctx sdk.Context) []Token
+	GetToken(ctx sdk.Context, symbol string) types.Token
+	GetAllTokens(ctx sdk.Context) []types.Token
 	GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddress
 	GetForbiddenAddresses(ctx sdk.Context, symbol string) []sdk.AccAddress
 	ExportAddrKeys(ctx sdk.Context, prefix []byte) []string
@@ -545,7 +545,7 @@ func NewBaseViewKeeper(cdc *codec.Codec, key sdk.StoreKey) BaseViewKeeper {
 }
 
 // GetToken - return token by symbol
-func (keeper BaseViewKeeper) GetToken(ctx sdk.Context, symbol string) Token {
+func (keeper BaseViewKeeper) GetToken(ctx sdk.Context, symbol string) types.Token {
 	store := ctx.KVStore(keeper.key)
 	bz := store.Get(TokenStoreKey(symbol))
 	if bz == nil {
@@ -555,10 +555,10 @@ func (keeper BaseViewKeeper) GetToken(ctx sdk.Context, symbol string) Token {
 }
 
 // GetAllTokens - returns all tokens.
-func (keeper BaseViewKeeper) GetAllTokens(ctx sdk.Context) []Token {
-	tokens := make([]Token, 0)
+func (keeper BaseViewKeeper) GetAllTokens(ctx sdk.Context) []types.Token {
+	tokens := make([]types.Token, 0)
 
-	keeper.iterateTokenValue(ctx, func(token Token) (stop bool) {
+	keeper.iterateTokenValue(ctx, func(token types.Token) (stop bool) {
 		tokens = append(tokens, token)
 		return false
 	})
@@ -618,7 +618,7 @@ func (keeper BaseViewKeeper) GetReservedSymbols() []string {
 	return reserved
 }
 
-func (keeper BaseViewKeeper) iterateTokenValue(ctx sdk.Context, process func(Token) (stop bool)) {
+func (keeper BaseViewKeeper) iterateTokenValue(ctx sdk.Context, process func(types.Token) (stop bool)) {
 	store := ctx.KVStore(keeper.key)
 	iter := sdk.KVStorePrefixIterator(store, TokenStoreKeyPrefix)
 	defer iter.Close()
@@ -648,7 +648,7 @@ func (keeper BaseViewKeeper) iterateAddrKey(ctx sdk.Context, prefix []byte, proc
 		iter.Next()
 	}
 }
-func (keeper BaseViewKeeper) decodeToken(bz []byte) (token Token) {
+func (keeper BaseViewKeeper) decodeToken(bz []byte) (token types.Token) {
 	if err := keeper.cdc.UnmarshalBinaryBare(bz, &token); err != nil {
 		panic(err)
 	}

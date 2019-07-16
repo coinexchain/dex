@@ -1,6 +1,7 @@
 package asset
 
 import (
+	types2 "github.com/coinexchain/dex/modules/asset/types"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 
@@ -35,10 +36,10 @@ func setupTestInput() testInput {
 	db := dbm.NewMemDB()
 
 	cdc := codec.New()
-	RegisterCodec(cdc)
+	types2.RegisterCodec(cdc)
 	//auth.RegisterBaseAccount(cdc)
 
-	assetCapKey := sdk.NewKVStoreKey(StoreKey)
+	assetCapKey := sdk.NewKVStoreKey(types2.StoreKey)
 	authCapKey := sdk.NewKVStoreKey(auth.StoreKey)
 	authxCapKey := sdk.NewKVStoreKey(authx.StoreKey)
 	//fckCapKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
@@ -103,12 +104,12 @@ func setupTestInput() testInput {
 	tk := NewBaseKeeper(
 		cdc,
 		assetCapKey,
-		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(DefaultParamspace),
+		params.NewKeeper(cdc, keyParams, tkeyParams, cs).Subspace(types2.DefaultParamspace),
 		bkx,
 		&sk)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-	tk.SetParams(ctx, DefaultParams())
+	tk.SetParams(ctx, types2.DefaultParams())
 	handler := NewHandler(tk)
 
 	return testInput{cdc, ctx, tk, handler}

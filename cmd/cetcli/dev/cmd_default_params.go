@@ -2,7 +2,6 @@ package dev
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/bankx"
 	"os"
 	"reflect"
 
@@ -16,8 +15,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/types"
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
@@ -46,7 +46,7 @@ func getParamSets() []moduleParamSet {
 		toParamSet("authx", authx.DefaultParams()),
 		toParamSet("bankx", bankx.DefaultParams()),
 		toParamSet("stakingx", stakingx.DefaultParams()),
-		toParamSet("asset", asset.DefaultParams()),
+		toParamSet("asset", types.DefaultParams()),
 		toParamSet("market", market.DefaultParams()),
 	}
 	if viper.GetBool("include-sdk") {

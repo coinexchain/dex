@@ -1,28 +1,27 @@
 package cli
 
 import (
+	"github.com/coinexchain/dex/modules/asset/types"
 	"os"
 	"testing"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/coinexchain/dex/modules/asset"
 )
 
 func TestAddGenesisToken(t *testing.T) {
-	token := &asset.BaseToken{}
+	token := &types.BaseToken{}
 	_ = token.SetName("aaa")
 	_ = token.SetSymbol("aaa")
 
-	genesis := asset.GenesisState{
-		Tokens: []asset.Token{token},
+	genesis := types.GenesisState{
+		Tokens: []types.Token{token},
 	}
 	err := addGenesisToken(&genesis, token)
 	assert.Error(t, err)
 
-	token = &asset.BaseToken{}
+	token = &types.BaseToken{}
 	_ = token.SetName("bbb")
 	_ = token.SetSymbol("bbb")
 	_ = addGenesisToken(&genesis, token)

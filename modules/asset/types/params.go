@@ -1,7 +1,6 @@
-package asset
+package types
 
 import (
-	"bytes"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -57,11 +56,11 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 }
 
 // Equal returns a boolean determining if two Params types are identical.
-func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
-}
+//func (p Params) Equal(p2 Params) bool {
+//	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+//	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+//	return bytes.Equal(bz1, bz2)
+//}
 
 func (p *Params) ValidateGenesis() error {
 	for _, pair := range p.ParamSetPairs() {

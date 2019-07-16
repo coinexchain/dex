@@ -3,17 +3,18 @@ package asset
 import (
 	"encoding/json"
 
-	"github.com/coinexchain/dex/types"
-
-	"github.com/cosmos/cosmos-sdk/client/context"
-
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
+	"github.com/coinexchain/dex/modules/asset/client/cli"
+	"github.com/coinexchain/dex/modules/asset/client/rest"
+	"github.com/coinexchain/dex/modules/asset/types"
 )
 
 var (
@@ -22,29 +23,27 @@ var (
 )
 
 // app module basics object
-type AppModuleBasic struct {
-	apc types.ModuleClient
-}
+type AppModuleBasic struct {}
 
 // module name
 func (AppModuleBasic) Name() string {
-	return ModuleName
+	return types.ModuleName
 }
 
 // register module codec
 func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
-	RegisterCodec(cdc)
+	types.RegisterCodec(cdc)
 }
 
 // default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return ModuleCdc.MustMarshalJSON(DefaultGenesisState())
+	return types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
 // module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
-	var data GenesisState
-	err := ModuleCdc.UnmarshalJSON(bz, &data)
+	var data types.GenesisState
+	err := types.ModuleCdc.UnmarshalJSON(bz, &data)
 	if err != nil {
 		return err
 	}
@@ -53,18 +52,18 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 }
 
 // register rest routes
-func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	amb.apc.RegisterRESTRoutes(ctx, rtr)
+func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr, types.ModuleCdc, types.StoreKey)
 }
 
 // get the root tx command of this module
-func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.apc.GetTxCmd(cdc)
+func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetTxCmd(cdc)
 }
 
 // get the root query command of this module
-func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.apc.GetQueryCmd(cdc)
+func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetQueryCmd(cdc)
 }
 
 //___________________________
@@ -72,28 +71,25 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	assetKeeper BaseKeeper //TODO: rename to AssetKeeper
-	apc         types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(assetKeeper BaseKeeper, apc types.ModuleClient) AppModule {
+func NewAppModule(assetKeeper BaseKeeper) AppModule {
 	return AppModule{
-		AppModuleBasic: AppModuleBasic{apc: apc},
 		assetKeeper:    assetKeeper,
-		apc:            apc,
 	}
 }
 
 // module name
 func (AppModule) Name() string {
-	return ModuleName
+	return types.ModuleName
 }
 
 // register invariants
 func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // module message route name
-func (AppModule) Route() string { return RouterKey }
+func (AppModule) Route() string { return types.RouterKey }
 
 // module handler
 func (am AppModule) NewHandler() sdk.Handler {
@@ -102,7 +98,7 @@ func (am AppModule) NewHandler() sdk.Handler {
 
 // module querier route name
 func (AppModule) QuerierRoute() string {
-	return QuerierRoute
+	return types.QuerierRoute
 }
 
 // module querier
@@ -112,8 +108,8 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 
 // module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState GenesisState
-	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	var genesisState types.GenesisState
+	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.assetKeeper, genesisState)
 	return []abci.ValidatorUpdate{}
 }
@@ -121,7 +117,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 // module export genesis
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.assetKeeper)
-	return ModuleCdc.MustMarshalJSON(gs)
+	return types.ModuleCdc.MustMarshalJSON(gs)
 }
 
 // module begin-block

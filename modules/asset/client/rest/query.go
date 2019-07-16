@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
-	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/types"
 )
 
 // register REST routes
@@ -35,24 +35,24 @@ func QueryTokenRequestHandlerFn(
 		vars := mux.Vars(r)
 		symbol := vars["symbol"]
 
-		bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(symbol))
+		bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(symbol))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryToken)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryToken)
 		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		if len(res) == 0 {
-			rest.PostProcessResponse(w, cliCtx, asset.BaseToken{})
+			rest.PostProcessResponse(w, cliCtx, types.BaseToken{})
 			return
 		}
 
-		var token asset.Token
+		var token types.Token
 		cdc.MustUnmarshalJSON(res, &token)
 
 		rest.PostProcessResponse(w, cliCtx, token)
@@ -65,7 +65,7 @@ func QueryTokensRequestHandlerFn(
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryTokenList)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryTokenList)
 		res, _, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -88,13 +88,13 @@ func QueryWhitelistRequestHandlerFn(
 		vars := mux.Vars(r)
 		symbol := vars["symbol"]
 
-		bz, err := cdc.MarshalJSON(asset.NewQueryWhitelistParams(symbol))
+		bz, err := cdc.MarshalJSON(types.NewQueryWhitelistParams(symbol))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryWhitelist)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryWhitelist)
 		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -116,13 +116,13 @@ func QueryForbiddenAddrRequestHandlerFn(
 		vars := mux.Vars(r)
 		symbol := vars["symbol"]
 
-		bz, err := cdc.MarshalJSON(asset.NewQueryForbiddenAddrParams(symbol))
+		bz, err := cdc.MarshalJSON(types.NewQueryForbiddenAddrParams(symbol))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryForbiddenAddr)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryForbiddenAddr)
 		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -142,7 +142,7 @@ func QueryReservedSymbolsRequestHandlerFn(
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryReservedSymbols)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryReservedSymbols)
 		res, _, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())

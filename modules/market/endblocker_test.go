@@ -3,14 +3,13 @@ package market
 import (
 	"bytes"
 	"fmt"
+	types2 "github.com/coinexchain/dex/modules/asset/types"
 	"sort"
 	"testing"
 	"time"
 
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/types"
-
-	"github.com/coinexchain/dex/modules/asset"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -73,7 +72,7 @@ func (k *mocAssertStatusKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom 
 	}
 	return false
 }
-func (k *mocAssertStatusKeeper) GetToken(ctx sdk.Context, symbol string) asset.Token {
+func (k *mocAssertStatusKeeper) GetToken(ctx sdk.Context, symbol string) types2.Token {
 	return nil
 }
 

@@ -1,4 +1,4 @@
-package asset
+package types
 
 import (
 	"unicode/utf8"

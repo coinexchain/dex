@@ -1,11 +1,11 @@
 package dev
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 
+	"github.com/coinexchain/dex/modules/asset/types"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -41,8 +41,8 @@ func accAddressFromBech32(address string) sdk.AccAddress {
 	return addr
 }
 
-func createCetToken(ownerAddr string) asset.Token {
-	token := &asset.BaseToken{
+func createCetToken(ownerAddr string) types.Token {
+	token := &types.BaseToken{
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",
 		TotalSupply:      588788547005740000,

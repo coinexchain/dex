@@ -8,7 +8,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/types"
 )
 
 func checkFlags(flags []string, help string) error {
@@ -21,12 +21,12 @@ func checkFlags(flags []string, help string) error {
 	return nil
 }
 
-func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
+func parseIssueFlags(owner sdk.AccAddress) (*types.MsgIssueToken, error) {
 	if err := checkFlags(issueTokenFlags, "$ cetcli tx asset issue-token -h"); err != nil {
 		return nil, err
 	}
 
-	msg := asset.NewMsgIssueToken(
+	msg := types.NewMsgIssueToken(
 		viper.GetString(flagName),
 		viper.GetString(flagSymbol),
 		viper.GetInt64(flagTotalSupply),
@@ -42,13 +42,13 @@ func parseIssueFlags(owner sdk.AccAddress) (*asset.MsgIssueToken, error) {
 	return &msg, nil
 }
 
-func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransferOwnership, error) {
+func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*types.MsgTransferOwnership, error) {
 	if err := checkFlags(transferOwnershipFlags, "$ cetcli tx asset transfer-ownership -h"); err != nil {
 		return nil, err
 	}
 
 	newOwner, _ := sdk.AccAddressFromBech32(viper.GetString(flagNewOwner))
-	msg := asset.NewMsgTransferOwnership(
+	msg := types.NewMsgTransferOwnership(
 		viper.GetString(flagSymbol),
 		orginalOwner,
 		newOwner,
@@ -57,12 +57,12 @@ func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*asset.MsgTransfe
 	return &msg, nil
 }
 
-func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
+func parseMintTokenFlags(owner sdk.AccAddress) (*types.MsgMintToken, error) {
 	if err := checkFlags(mintTokenFlags, "$ cetcli tx asset mint-token -h"); err != nil {
 		return nil, err
 	}
 
-	msg := asset.NewMsgMintToken(
+	msg := types.NewMsgMintToken(
 		viper.GetString(flagSymbol),
 		viper.GetInt64(flagAmount),
 		owner,
@@ -71,12 +71,12 @@ func parseMintTokenFlags(owner sdk.AccAddress) (*asset.MsgMintToken, error) {
 	return &msg, nil
 }
 
-func parseBurnTokenFlags(owner sdk.AccAddress) (*asset.MsgBurnToken, error) {
+func parseBurnTokenFlags(owner sdk.AccAddress) (*types.MsgBurnToken, error) {
 	if err := checkFlags(burnTokenFlags, "$ cetcli tx asset burn-token -h"); err != nil {
 		return nil, err
 	}
 
-	msg := asset.NewMsgBurnToken(
+	msg := types.NewMsgBurnToken(
 		viper.GetString(flagSymbol),
 		viper.GetInt64(flagAmount),
 		owner,
@@ -85,12 +85,12 @@ func parseBurnTokenFlags(owner sdk.AccAddress) (*asset.MsgBurnToken, error) {
 	return &msg, nil
 }
 
-func parseForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgForbidToken, error) {
+func parseForbidTokenFlags(owner sdk.AccAddress) (*types.MsgForbidToken, error) {
 	if err := checkFlags(symbolFlags, "$ cetcli tx asset forbid-token -h"); err != nil {
 		return nil, err
 	}
 
-	msg := asset.NewMsgForbidToken(
+	msg := types.NewMsgForbidToken(
 		viper.GetString(flagSymbol),
 		owner,
 	)
@@ -98,12 +98,12 @@ func parseForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgForbidToken, error) 
 	return &msg, nil
 }
 
-func parseUnForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgUnForbidToken, error) {
+func parseUnForbidTokenFlags(owner sdk.AccAddress) (*types.MsgUnForbidToken, error) {
 	if err := checkFlags(symbolFlags, "$ cetcli tx asset unforbid-token -h"); err != nil {
 		return nil, err
 	}
 
-	msg := asset.NewMsgUnForbidToken(
+	msg := types.NewMsgUnForbidToken(
 		viper.GetString(flagSymbol),
 		owner,
 	)
@@ -111,7 +111,7 @@ func parseUnForbidTokenFlags(owner sdk.AccAddress) (*asset.MsgUnForbidToken, err
 	return &msg, nil
 }
 
-func parseAddWhitelistFlags(owner sdk.AccAddress) (*asset.MsgAddTokenWhitelist, error) {
+func parseAddWhitelistFlags(owner sdk.AccAddress) (*types.MsgAddTokenWhitelist, error) {
 	var addr sdk.AccAddress
 	whitelist := make([]sdk.AccAddress, 0)
 	var err error
@@ -128,7 +128,7 @@ func parseAddWhitelistFlags(owner sdk.AccAddress) (*asset.MsgAddTokenWhitelist, 
 		whitelist = append(whitelist, addr)
 	}
 
-	msg := asset.NewMsgAddTokenWhitelist(
+	msg := types.NewMsgAddTokenWhitelist(
 		viper.GetString(flagSymbol),
 		owner,
 		whitelist,
@@ -137,7 +137,7 @@ func parseAddWhitelistFlags(owner sdk.AccAddress) (*asset.MsgAddTokenWhitelist, 
 	return &msg, nil
 }
 
-func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*asset.MsgRemoveTokenWhitelist, error) {
+func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*types.MsgRemoveTokenWhitelist, error) {
 	var addr sdk.AccAddress
 	whitelist := make([]sdk.AccAddress, 0)
 	var err error
@@ -154,7 +154,7 @@ func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*asset.MsgRemoveTokenWhite
 		whitelist = append(whitelist, addr)
 	}
 
-	msg := asset.NewMsgRemoveTokenWhitelist(
+	msg := types.NewMsgRemoveTokenWhitelist(
 		viper.GetString(flagSymbol),
 		owner,
 		whitelist,
@@ -163,7 +163,7 @@ func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*asset.MsgRemoveTokenWhite
 	return &msg, nil
 }
 
-func parseForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgForbidAddr, error) {
+func parseForbidAddrFlags(owner sdk.AccAddress) (*types.MsgForbidAddr, error) {
 	var addr sdk.AccAddress
 	addresses := make([]sdk.AccAddress, 0)
 	var err error
@@ -180,7 +180,7 @@ func parseForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgForbidAddr, error) {
 		addresses = append(addresses, addr)
 	}
 
-	msg := asset.NewMsgForbidAddr(
+	msg := types.NewMsgForbidAddr(
 		viper.GetString(flagSymbol),
 		owner,
 		addresses,
@@ -189,7 +189,7 @@ func parseForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgForbidAddr, error) {
 	return &msg, nil
 }
 
-func parseUnForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgUnForbidAddr, error) {
+func parseUnForbidAddrFlags(owner sdk.AccAddress) (*types.MsgUnForbidAddr, error) {
 	var addr sdk.AccAddress
 	addresses := make([]sdk.AccAddress, 0)
 	var err error
@@ -206,7 +206,7 @@ func parseUnForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgUnForbidAddr, error
 		addresses = append(addresses, addr)
 	}
 
-	msg := asset.NewMsgUnForbidAddr(
+	msg := types.NewMsgUnForbidAddr(
 		viper.GetString(flagSymbol),
 		owner,
 		addresses,
@@ -215,12 +215,12 @@ func parseUnForbidAddrFlags(owner sdk.AccAddress) (*asset.MsgUnForbidAddr, error
 	return &msg, nil
 }
 
-func parseModifyTokenURLFlags(owner sdk.AccAddress) (*asset.MsgModifyTokenURL, error) {
+func parseModifyTokenURLFlags(owner sdk.AccAddress) (*types.MsgModifyTokenURL, error) {
 	if err := checkFlags(modifyTokenURLFlags, "$ cetcli tx asset modify-token-url -h"); err != nil {
 		return nil, err
 	}
 
-	msg := asset.NewMsgModifyTokenURL(
+	msg := types.NewMsgModifyTokenURL(
 		viper.GetString(flagSymbol),
 		viper.GetString(flagTokenURL),
 		owner,
@@ -229,12 +229,12 @@ func parseModifyTokenURLFlags(owner sdk.AccAddress) (*asset.MsgModifyTokenURL, e
 	return &msg, nil
 }
 
-func parseModifyTokenDescriptionFlags(owner sdk.AccAddress) (*asset.MsgModifyTokenDescription, error) {
+func parseModifyTokenDescriptionFlags(owner sdk.AccAddress) (*types.MsgModifyTokenDescription, error) {
 	if err := checkFlags(modifyTokenDescriptionFlags, "$ cetcli tx asset modify-token-description -h"); err != nil {
 		return nil, err
 	}
 
-	msg := asset.NewMsgModifyTokenDescription(
+	msg := types.NewMsgModifyTokenDescription(
 		viper.GetString(flagSymbol),
 		viper.GetString(flagTokenDescription),
 		owner,

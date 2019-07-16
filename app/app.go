@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/coinexchain/dex/modules/asset/types"
 	"io"
 	"os"
 
@@ -30,7 +31,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/asset/client"
 	"github.com/coinexchain/dex/modules/authx"
 	authx_client "github.com/coinexchain/dex/modules/authx/client"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -194,7 +194,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 		keyGov:         sdk.NewKVStoreKey(gov.StoreKey),
 		keyParams:      sdk.NewKVStoreKey(params.StoreKey),
 		tkeyParams:     sdk.NewTransientStoreKey(params.TStoreKey),
-		keyAsset:       sdk.NewKVStoreKey(asset.StoreKey),
+		keyAsset:       sdk.NewKVStoreKey(types.StoreKey),
 		keyMarket:      sdk.NewKVStoreKey(market.StoreKey),
 		keyIncentive:   sdk.NewKVStoreKey(incentive.StoreKey),
 	}
@@ -328,7 +328,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.assetKeeper = asset.NewBaseKeeper(
 		app.cdc,
 		app.keyAsset,
-		app.paramsKeeper.Subspace(asset.DefaultParamspace),
+		app.paramsKeeper.Subspace(types.DefaultParamspace),
 		app.bankxKeeper,
 		&app.stakingKeeper,
 	)
@@ -366,7 +366,7 @@ func (app *CetChainApp) InitModules() {
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
-		asset.NewAppModule(app.assetKeeper, client.NewAssetModuleClient()),
+		asset.NewAppModule(app.assetKeeper),
 		market.NewAppModule(app.marketKeeper, market_client.NewMarketModuleClient()),
 	)
 
@@ -390,7 +390,7 @@ func (app *CetChainApp) InitModules() {
 		authx.ModuleName,
 		bankx.ModuleName,
 		stakingx.ModuleName,
-		asset.ModuleName,
+		types.ModuleName,
 		market.ModuleName,
 		incentive.ModuleName,
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last

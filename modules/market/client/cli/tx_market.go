@@ -10,13 +10,12 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
-	//"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	"github.com/coinexchain/dex/modules/asset"
+	assettypes "github.com/coinexchain/dex/modules/asset/types"
 	"github.com/coinexchain/dex/modules/market"
 )
 
@@ -89,9 +88,9 @@ Example :
 }
 
 func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, tokens ...string) error {
-	route := fmt.Sprintf("custom/%s/%s", asset.QuerierRoute, asset.QueryToken)
+	route := fmt.Sprintf("custom/%s/%s", assettypes.QuerierRoute, assettypes.QueryToken)
 	for _, token := range tokens {
-		bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(token))
+		bz, err := cdc.MarshalJSON(assettypes.NewQueryAssetParams(token))
 		if err != nil {
 			return err
 		}

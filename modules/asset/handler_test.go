@@ -1,6 +1,7 @@
 package asset
 
 import (
+	types2 "github.com/coinexchain/dex/modules/asset/types"
 	"reflect"
 	"strings"
 	"testing"
@@ -33,124 +34,124 @@ func Test_handleMsg(t *testing.T) {
 	}{
 		{
 			"issue_token",
-			NewMsgIssueToken("ABC Token", "abc", 210000000000, tAccAddr,
+			types2.NewMsgIssueToken("ABC Token", "abc", 210000000000, tAccAddr,
 				true, true, true, true, "", ""),
 			true,
 		},
 		{
 			"issue_token_invalid",
-			NewMsgIssueToken("999 Token", "999", 210000000000, tAccAddr,
+			types2.NewMsgIssueToken("999 Token", "999", 210000000000, tAccAddr,
 				true, true, true, true, "", ""),
 			false,
 		},
 		{
 			"transfer_ownership",
-			NewMsgTransferOwnership("abc", tAccAddr, owner),
+			types2.NewMsgTransferOwnership("abc", tAccAddr, owner),
 			true,
 		},
 		{
 			"transfer_ownership_invalid",
-			NewMsgTransferOwnership("abc", tAccAddr, owner),
+			types2.NewMsgTransferOwnership("abc", tAccAddr, owner),
 			false,
 		},
 		{
 			"mint_token",
-			NewMsgMintToken("abc", 1000, owner),
+			types2.NewMsgMintToken("abc", 1000, owner),
 			true,
 		},
 		{
 			"mint_token_invalid",
-			NewMsgMintToken("abc", -1000, owner),
+			types2.NewMsgMintToken("abc", -1000, owner),
 			false,
 		},
 		{
 			"burn_token",
-			NewMsgBurnToken("abc", 1000, owner),
+			types2.NewMsgBurnToken("abc", 1000, owner),
 			true,
 		},
 		{
 			"burn_token_invalid",
-			NewMsgBurnToken("abc", 9E18+1000, owner),
+			types2.NewMsgBurnToken("abc", 9E18+1000, owner),
 			false,
 		},
 		{
 			"forbid_token",
-			NewMsgForbidToken("abc", owner),
+			types2.NewMsgForbidToken("abc", owner),
 			true,
 		},
 		{
 			"forbid_token_invalid",
-			NewMsgForbidToken("abc", tAccAddr),
+			types2.NewMsgForbidToken("abc", tAccAddr),
 			false,
 		},
 		{
 			"unforbid_token",
-			NewMsgUnForbidToken("abc", owner),
+			types2.NewMsgUnForbidToken("abc", owner),
 			true,
 		},
 		{
 			"unforbid_token_invalid",
-			NewMsgUnForbidToken("abc", tAccAddr),
+			types2.NewMsgUnForbidToken("abc", tAccAddr),
 			false,
 		},
 		{
 			"add_token_whitelist",
-			NewMsgAddTokenWhitelist("abc", owner, mockWhitelist()),
+			types2.NewMsgAddTokenWhitelist("abc", owner, mockWhitelist()),
 			true,
 		},
 		{
 			"add_token_whitelist_invalid",
-			NewMsgAddTokenWhitelist("abc", owner, []sdk.AccAddress{}),
+			types2.NewMsgAddTokenWhitelist("abc", owner, []sdk.AccAddress{}),
 			false,
 		},
 		{
 			"remove_token_whitelist",
-			NewMsgRemoveTokenWhitelist("abc", owner, mockWhitelist()),
+			types2.NewMsgRemoveTokenWhitelist("abc", owner, mockWhitelist()),
 			true,
 		},
 		{
 			"remove_token_whitelist_invalid",
-			NewMsgRemoveTokenWhitelist("abc", owner, []sdk.AccAddress{}),
+			types2.NewMsgRemoveTokenWhitelist("abc", owner, []sdk.AccAddress{}),
 			false,
 		},
 		{
 			"forbid_address",
-			NewMsgForbidAddr("abc", owner, mockAddresses()),
+			types2.NewMsgForbidAddr("abc", owner, mockAddresses()),
 			true,
 		},
 		{
 			"forbid_address_invalid",
-			NewMsgForbidAddr("abc", owner, []sdk.AccAddress{}),
+			types2.NewMsgForbidAddr("abc", owner, []sdk.AccAddress{}),
 			false,
 		},
 		{
 			"unforbid_address",
-			NewMsgUnForbidAddr("abc", owner, mockAddresses()),
+			types2.NewMsgUnForbidAddr("abc", owner, mockAddresses()),
 			true,
 		},
 		{
 			"unforbid_address_invalid",
-			NewMsgUnForbidAddr("abc", owner, []sdk.AccAddress{}),
+			types2.NewMsgUnForbidAddr("abc", owner, []sdk.AccAddress{}),
 			false,
 		},
 		{
 			"modify_token_url",
-			NewMsgModifyTokenURL("abc", "www.abc.com", owner),
+			types2.NewMsgModifyTokenURL("abc", "www.abc.com", owner),
 			true,
 		},
 		{
 			"modify_token_url_invalid",
-			NewMsgModifyTokenURL("abc", string(make([]byte, 100+1)), owner),
+			types2.NewMsgModifyTokenURL("abc", string(make([]byte, 100+1)), owner),
 			false,
 		},
 		{
 			"modify_token_description",
-			NewMsgModifyTokenDescription("abc", "abc example description", owner),
+			types2.NewMsgModifyTokenDescription("abc", "abc example description", owner),
 			true,
 		},
 		{
 			"modify_token_description_invalid",
-			NewMsgModifyTokenDescription("abc", string(make([]byte, 1024+1)), owner),
+			types2.NewMsgModifyTokenDescription("abc", string(make([]byte, 1024+1)), owner),
 			false,
 		},
 	}
@@ -169,7 +170,7 @@ func Test_IssueToken_DeductFee(t *testing.T) {
 	h := NewHandler(input.tk)
 
 	// invalid account issue token
-	msg := NewMsgIssueToken("ABC Token", symbol, 210000000000, tAccAddr,
+	msg := types2.NewMsgIssueToken("ABC Token", symbol, 210000000000, tAccAddr,
 		false, false, false, false, "", "")
 	res := h(input.ctx, msg)
 	require.False(t, res.IsOK())
@@ -192,7 +193,7 @@ func Test_BurnToken_SubtractCoins(t *testing.T) {
 	h := NewHandler(input.tk)
 
 	// issue token
-	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, tAccAddr,
+	msgIssue := types2.NewMsgIssueToken("ABC Token", symbol, 2100, tAccAddr,
 		true, true, false, false, "", "")
 	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
 	require.NoError(t, err)
@@ -200,7 +201,7 @@ func Test_BurnToken_SubtractCoins(t *testing.T) {
 	require.True(t, res.IsOK())
 
 	// burn token
-	msgBurn := NewMsgBurnToken(symbol, 100, tAccAddr)
+	msgBurn := types2.NewMsgBurnToken(symbol, 100, tAccAddr)
 	res = h(input.ctx, msgBurn)
 	require.True(t, res.IsOK())
 
@@ -214,7 +215,7 @@ func Test_MintToken_AddCoins(t *testing.T) {
 	h := NewHandler(input.tk)
 
 	// issue token
-	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, tAccAddr,
+	msgIssue := types2.NewMsgIssueToken("ABC Token", symbol, 2100, tAccAddr,
 		true, true, false, false, "", "")
 	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
 	require.NoError(t, err)
@@ -222,7 +223,7 @@ func Test_MintToken_AddCoins(t *testing.T) {
 	require.True(t, res.IsOK())
 
 	// mint token
-	msgMint := NewMsgMintToken(symbol, 100, tAccAddr)
+	msgMint := types2.NewMsgMintToken(symbol, 100, tAccAddr)
 	res = h(input.ctx, msgMint)
 	require.True(t, res.IsOK())
 

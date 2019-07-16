@@ -15,7 +15,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 
-	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/types"
 )
 
 var tokenFlags = []string{
@@ -74,9 +74,9 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 			}
 
 			// add genesis account to the app state
-			var genesisState asset.GenesisState
+			var genesisState types.GenesisState
 
-			cdc.MustUnmarshalJSON(appState[asset.ModuleName], &genesisState)
+			cdc.MustUnmarshalJSON(appState[types.ModuleName], &genesisState)
 
 			err = addGenesisToken(&genesisState, token)
 			if err != nil {
@@ -84,7 +84,7 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 			}
 
 			genesisStateBz := cdc.MustMarshalJSON(genesisState)
-			appState[asset.ModuleName] = genesisStateBz
+			appState[types.ModuleName] = genesisStateBz
 
 			appStateJSON, err := cdc.MarshalJSON(appState)
 			if err != nil {
@@ -124,8 +124,8 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	return cmd
 }
 
-func parseTokenInfo() (asset.Token, error) {
-	token := &asset.BaseToken{}
+func parseTokenInfo() (types.Token, error) {
+	token := &types.BaseToken{}
 	var err error
 
 	owner, err := getAddress(viper.GetString(flagOwner))
@@ -184,7 +184,7 @@ func getAddressFromKeyBase(keyName string) (sdk.AccAddress, error) {
 	return addr, nil
 }
 
-func addGenesisToken(genesisState *asset.GenesisState, token asset.Token) error {
+func addGenesisToken(genesisState *types.GenesisState, token types.Token) error {
 	for _, t := range genesisState.Tokens {
 		if token.GetSymbol() == t.GetSymbol() {
 			return fmt.Errorf("the application state already contains token %s", token.GetSymbol())

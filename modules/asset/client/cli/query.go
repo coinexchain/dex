@@ -6,11 +6,31 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 
-	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/types"
 )
+
+// get the root query command of this module
+func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+	// Group asset queries under a subcommand
+	assQueryCmd := &cobra.Command{
+		Use:   types.ModuleName,
+		Short: "Querying commands for the asset module",
+	}
+
+	assQueryCmd.AddCommand(client.GetCommands(
+		GetTokenCmd(types.QuerierRoute, cdc),
+		GetTokenListCmd(types.QuerierRoute, cdc),
+		GetWhitelistCmd(types.QuerierRoute, cdc),
+		GetForbiddenAddrCmd(types.QuerierRoute, cdc),
+		GetReservedSymbolsCmd(types.QuerierRoute, cdc),
+	)...)
+
+	return assQueryCmd
+}
 
 // GetTokenCmd returns a query token that will display the info of the
 // token at a given token symbol
@@ -32,12 +52,12 @@ $ cetcli query asset token abc
 
 			symbol := args[0]
 
-			bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(symbol))
+			bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(symbol))
 			if err != nil {
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken)
 			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
@@ -65,7 +85,7 @@ $ cetcli query asset tokens
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokenList)
 			res, _, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err
@@ -97,12 +117,12 @@ $ cetcli query asset whitelist abc
 
 			symbol := args[0]
 
-			bz, err := cdc.MarshalJSON(asset.NewQueryWhitelistParams(symbol))
+			bz, err := cdc.MarshalJSON(types.NewQueryWhitelistParams(symbol))
 			if err != nil {
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryWhitelist)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryWhitelist)
 			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
@@ -134,12 +154,12 @@ $ cetcli query asset forbidden-addresses abc
 
 			symbol := args[0]
 
-			bz, err := cdc.MarshalJSON(asset.NewQueryForbiddenAddrParams(symbol))
+			bz, err := cdc.MarshalJSON(types.NewQueryForbiddenAddrParams(symbol))
 			if err != nil {
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryForbiddenAddr)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryForbiddenAddr)
 			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
@@ -169,7 +189,7 @@ $ cetcli query asset reserved-symbols
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryReservedSymbols)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryReservedSymbols)
 			res, _, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err

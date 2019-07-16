@@ -8,7 +8,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/asset/types"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/testutil"
@@ -16,14 +17,14 @@ import (
 )
 
 func createExampleGenesisState(cdc *codec.Codec) map[string]json.RawMessage {
-	//genState := app.NewDefaultGenesisState()
-	////genState.Accounts = createExampleGenesisAccounts()
-	////genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
+	genState := app.ModuleBasics.DefaultGenesis()
+	//genState.Accounts = createExampleGenesisAccounts()
+	//genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
 	//genState.AssetData = createExampleGenesisAssetData()
 	//genState.MarketData = createExampleGenesisMarketData()
 	//genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
 	//return genState
-	return nil
+	return genState
 }
 
 func createExampleGenesisAccounts() (accs []genaccounts.GenesisAccount) {
@@ -40,17 +41,17 @@ func createExampleGenesisAccounts() (accs []genaccounts.GenesisAccount) {
 	return
 }
 
-func createExampleGenesisAssetData() asset.GenesisState {
+func createExampleGenesisAssetData() types.GenesisState {
 	cet := createCetToken("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	abc := createAbcToken()
 
-	state := asset.DefaultGenesisState()
+	state := types.DefaultGenesisState()
 	state.Tokens = append(state.Tokens, cet, abc)
 	return state
 }
 
-func createAbcToken() asset.Token {
-	token := &asset.BaseToken{
+func createAbcToken() types.Token {
+	token := &types.BaseToken{
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
 		TotalSupply:      588788547005740000,

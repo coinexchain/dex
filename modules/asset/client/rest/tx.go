@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/types"
 )
 
 const (
@@ -67,7 +67,7 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
-		msg := asset.NewMsgIssueToken(req.Name, req.Symbol, req.TotalSupply, owner,
+		msg := types.NewMsgIssueToken(req.Name, req.Symbol, req.TotalSupply, owner,
 			req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable, req.URL, req.Description)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -105,7 +105,7 @@ func transferOwnerRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 
 		vars := mux.Vars(r)
 		symbol := vars["symbol"]
-		msg := asset.NewMsgTransferOwnership(symbol, original, req.NewOwner)
+		msg := types.NewMsgTransferOwnership(symbol, original, req.NewOwner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -142,7 +142,7 @@ func mintTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgMintToken(symbol, req.Amount, owner)
+		msg := types.NewMsgMintToken(symbol, req.Amount, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -179,7 +179,7 @@ func burnTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgBurnToken(symbol, req.Amount, owner)
+		msg := types.NewMsgBurnToken(symbol, req.Amount, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -215,7 +215,7 @@ func forbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgForbidToken(symbol, owner)
+		msg := types.NewMsgForbidToken(symbol, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -251,7 +251,7 @@ func unForbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgUnForbidToken(symbol, owner)
+		msg := types.NewMsgUnForbidToken(symbol, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -288,7 +288,7 @@ func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgAddTokenWhitelist(symbol, owner, req.AddrList)
+		msg := types.NewMsgAddTokenWhitelist(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -319,7 +319,7 @@ func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgRemoveTokenWhitelist(symbol, owner, req.AddrList)
+		msg := types.NewMsgRemoveTokenWhitelist(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -350,7 +350,7 @@ func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgForbidAddr(symbol, owner, req.AddrList)
+		msg := types.NewMsgForbidAddr(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -381,7 +381,7 @@ func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgUnForbidAddr(symbol, owner, req.AddrList)
+		msg := types.NewMsgUnForbidAddr(symbol, owner, req.AddrList)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -418,7 +418,7 @@ func modifyTokenURLHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgModifyTokenURL(symbol, req.URL, owner)
+		msg := types.NewMsgModifyTokenURL(symbol, req.URL, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -455,7 +455,7 @@ func modifyTokenDescriptionHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext
 
 		symbol := getSymbol(r)
 
-		msg := asset.NewMsgModifyTokenDescription(symbol, req.Description, owner)
+		msg := types.NewMsgModifyTokenDescription(symbol, req.Description, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

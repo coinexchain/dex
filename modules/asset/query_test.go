@@ -2,6 +2,7 @@ package asset
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset/types"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -14,7 +15,7 @@ import (
 func Test_queryToken(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryToken),
+		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, QueryToken),
 		Data: []byte{},
 	}
 	path0 := []string{QueryToken}
@@ -26,7 +27,7 @@ func Test_queryToken(t *testing.T) {
 	require.Nil(t, res)
 
 	// set token
-	token, err := NewToken("ABC Token", "abc", 2100, tAccAddr,
+	token, err := types.NewToken("ABC Token", "abc", 2100, tAccAddr,
 		false, false, false, false, "", "")
 	require.NoError(t, err)
 	err = input.tk.setToken(input.ctx, token)
@@ -52,7 +53,7 @@ func Test_queryToken(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
-	var resToken Token
+	var resToken types.Token
 	input.cdc.MustUnmarshalJSON(res, &resToken)
 	require.Equal(t, "abc", resToken.GetSymbol())
 
@@ -61,7 +62,7 @@ func Test_queryToken(t *testing.T) {
 func Test_queryAllTokenList(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryTokenList),
+		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, QueryTokenList),
 		Data: []byte{},
 	}
 	path0 := []string{QueryTokenList}
@@ -71,13 +72,13 @@ func Test_queryAllTokenList(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, []byte("[]"), res)
 
-	token1, err := NewToken("ABC Token", "abc", 2100, tAccAddr,
+	token1, err := types.NewToken("ABC Token", "abc", 2100, tAccAddr,
 		false, false, false, false, "", "")
 	require.NoError(t, err)
 	err = input.tk.setToken(input.ctx, token1)
 	require.NoError(t, err)
 
-	token2, err := NewToken("XYZ Token", "xyz", 2100, tAccAddr,
+	token2, err := types.NewToken("XYZ Token", "xyz", 2100, tAccAddr,
 		false, false, false, false, "", "")
 	require.NoError(t, err)
 	err = input.tk.setToken(input.ctx, token2)
@@ -87,7 +88,7 @@ func Test_queryAllTokenList(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
-	var tokens []Token
+	var tokens []types.Token
 	input.cdc.MustUnmarshalJSON(res, &tokens)
 	require.Equal(t, 2, len(tokens))
 	require.Contains(t, []string{"abc", "xyz"}, tokens[0].GetSymbol())
@@ -99,7 +100,7 @@ func Test_queryWhitelist(t *testing.T) {
 	symbol := "abc"
 	whitelist := mockWhitelist()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryWhitelist),
+		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, QueryWhitelist),
 		Data: []byte{},
 	}
 	path0 := []string{QueryWhitelist}
@@ -111,7 +112,7 @@ func Test_queryWhitelist(t *testing.T) {
 	require.Nil(t, res)
 
 	// set token
-	token, err := NewToken("ABC Token", symbol, 2100, tAccAddr,
+	token, err := types.NewToken("ABC Token", symbol, 2100, tAccAddr,
 		false, false, false, true, "", "")
 	require.NoError(t, err)
 	err = input.tk.setToken(input.ctx, token)
@@ -142,7 +143,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 	symbol := "abc"
 	mock := mockAddresses()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryForbiddenAddr),
+		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, QueryForbiddenAddr),
 		Data: []byte{},
 	}
 	path0 := []string{QueryForbiddenAddr}
@@ -154,7 +155,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 	require.Nil(t, res)
 
 	// set token
-	token, err := NewToken("ABC Token", symbol, 2100, tAccAddr,
+	token, err := types.NewToken("ABC Token", symbol, 2100, tAccAddr,
 		false, false, true, true, "", "")
 	require.NoError(t, err)
 	err = input.tk.setToken(input.ctx, token)
@@ -183,7 +184,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 func Test_queryReservedSymbols(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, QueryReservedSymbols),
+		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, QueryReservedSymbols),
 		Data: []byte{},
 	}
 	path0 := []string{QueryReservedSymbols}
@@ -193,14 +194,14 @@ func Test_queryReservedSymbols(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
-	bz, _ := codec.MarshalJSONIndent(ModuleCdc, reserved)
+	bz, _ := codec.MarshalJSONIndent(types.ModuleCdc, reserved)
 	require.Equal(t, bz, res)
 }
 
 func Test_queryDefault(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", RouterKey, "unknown"),
+		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, "unknown"),
 		Data: []byte{},
 	}
 	path0 := []string{"unknown"}

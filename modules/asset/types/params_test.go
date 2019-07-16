@@ -1,6 +1,7 @@
-package asset
+package types
 
 import (
+	"github.com/coinexchain/dex/modules/asset"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -14,16 +15,16 @@ func TestParams_Equal(t *testing.T) {
 	p1 := DefaultParams()
 	p2 := DefaultParams()
 	require.Equal(t, p1, p2)
-	require.True(t, p1.Equal(p2))
+	require.True(t, Equal(p2))
 
 	// mount should equal
 	cet := types.NewCetCoins(10)
-	p1.IssueTokenFee = cet
+	IssueTokenFee = cet
 	require.NotEqual(t, p1, p2)
 
 	// denom should equal
-	abc := newTokenCoins("abc", 1E12)
-	p1.IssueTokenFee = abc
+	abc := asset.newTokenCoins("abc", 1E12)
+	IssueTokenFee = abc
 	require.NotEqual(t, p1, p2)
 }
 
@@ -49,7 +50,7 @@ func TestParams_ValidateGenesis(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.p.ValidateGenesis(); (err != nil) != tt.wantErr {
+			if err := ValidateGenesis(); (err != nil) != tt.wantErr {
 				t.Errorf("Params.ValidateGenesis() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

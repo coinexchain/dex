@@ -4,20 +4,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/coinexchain/dex/modules/asset"
+	assettypes "github.com/coinexchain/dex/modules/asset/types"
 	"github.com/coinexchain/dex/types"
 )
 
@@ -31,6 +28,31 @@ var issueTokenFlags = []string{
 	flagTokenForbiddable,
 	flagTokenURL,
 	flagTokenDescription,
+}
+
+// get the root tx command of this module
+func GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	assTxCmd := &cobra.Command{
+		Use:   assettypes.ModuleName,
+		Short: "Asset transactions subcommands",
+	}
+
+	assTxCmd.AddCommand(client.PostCommands(
+		IssueTokenCmd(assettypes.QuerierRoute, cdc),
+		TransferOwnershipCmd(cdc),
+		MintTokenCmd(cdc),
+		BurnTokenCmd(cdc),
+		ForbidTokenCmd(cdc),
+		UnForbidTokenCmd(cdc),
+		AddTokenWhitelistCmd(cdc),
+		RemoveTokenWhitelistCmd(cdc),
+		ForbidAddrCmd(cdc),
+		UnForbidAddrCmd(cdc),
+		ModifyTokenURLCmd(cdc),
+		ModifyTokenDescriptionCmd(cdc),
+	)...)
+
+	return assTxCmd
 }
 
 // IssueTokenCmd will create a issue token tx and sign.
@@ -65,11 +87,11 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 				return err
 			}
 
-			bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(msg.Symbol))
+			bz, err := cdc.MarshalJSON(assettypes.NewQueryAssetParams(msg.Symbol))
 			if err != nil {
 				return err
 			}
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, assettypes.QueryToken)
 			if res, _, _ := cliCtx.QueryWithData(route, bz); res != nil {
 				return fmt.Errorf("token symbol already exists，please query tokens and issue another symbol")
 			}
@@ -79,9 +101,9 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 			if err != nil {
 				return err
 			}
-			issueFee := types.NewCetCoins(asset.IssueTokenFee)
-			if len(msg.Symbol) == asset.RareSymbolLength {
-				issueFee = types.NewCetCoins(asset.IssueRareTokenFee)
+			issueFee := types.NewCetCoins(assettypes.IssueTokenFee)
+			if len(msg.Symbol) == assettypes.RareSymbolLength {
+				issueFee = types.NewCetCoins(assettypes.IssueRareTokenFee)
 			}
 			if !account.GetCoins().IsAllGTE(issueFee) {
 				return fmt.Errorf("address %s doesn't have enough cet to issue token", tokenOwner)

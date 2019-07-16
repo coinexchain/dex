@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 
-	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/types"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
@@ -57,8 +57,8 @@ func addNonBondableAddress(params *stakingx.Params, address string) {
 	params.NonBondableAddresses = append(params.NonBondableAddresses, addr)
 }
 
-func createTestnetGenesisAssetData() asset.GenesisState {
-	state := asset.DefaultGenesisState()
+func createTestnetGenesisAssetData() types.GenesisState {
+	state := types.DefaultGenesisState()
 	cetOwnerAddr := viper.GetString(flagAddrCoinExFoundation)
 	state.Tokens = append(state.Tokens, createCetToken(cetOwnerAddr))
 	return state
