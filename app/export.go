@@ -4,27 +4,13 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/cosmos/cosmos-sdk/x/staking/exported"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/crisis"
-	distr "github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/incentive"
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/stakingx"
 )
 
 // export the state of CoinEx chain for a genesis file
@@ -38,9 +24,9 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 		app.prepForZeroHeightGenesis(ctx, jailWhiteList)
 	}
 
-	genState := app.exportGenesisState(ctx)
-	if forZeroHeight {
-		genState.Incentive.State.HeightAdjustment = genState.Incentive.State.HeightAdjustment + ctx.BlockHeader().Height
+	genState := app.mm.ExportGenesis(ctx)
+	if forZeroHeight { // TODO
+		//genState.Incentive.State.HeightAdjustment = genState.Incentive.State.HeightAdjustment + ctx.BlockHeader().Height
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.cdc, genState)
@@ -52,6 +38,8 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 }
 
 // prepare for fresh start at zero height
+// NOTE zero height genesis is a temporary feature which will be deprecated
+//      in favour of export at a block height
 func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []string) {
 	applyWhiteList := false
 
@@ -76,7 +64,7 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 	/* Handle fee distribution state. */
 
 	// withdraw all validator commission
-	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val exported.ValidatorI) (stop bool) {
+	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val staking.ValidatorI) (stop bool) {
 		_, _ = app.distrKeeper.WithdrawValidatorCommission(ctx, val.GetOperator())
 		return false
 	})
@@ -98,7 +86,7 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 	ctx = ctx.WithBlockHeight(0)
 
 	// reinitialize all validators
-	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val exported.ValidatorI) (stop bool) {
+	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val staking.ValidatorI) (stop bool) {
 
 		// donate any unwithdrawn outstanding reward fraction tokens to the community pool
 		scraps := app.distrKeeper.GetValidatorOutstandingRewards(ctx, val.GetOperator())
@@ -178,49 +166,4 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 			return false
 		},
 	)
-}
-
-func (app *CetChainApp) exportGenesisState(ctx sdk.Context) GenesisState {
-	// iterate to get the accounts
-	accountsX := app.getAccountsXMapForGenesis(ctx)
-	accounts := app.getAllAccountsForGenesis(ctx, accountsX)
-
-	return NewGenesisState(accounts,
-		auth.ExportGenesis(ctx, app.accountKeeper),
-		authx.ExportGenesis(ctx, app.accountXKeeper),
-		bank.ExportGenesis(ctx, app.bankKeeper),
-		bankx.ExportGenesis(ctx, app.bankxKeeper),
-		staking.ExportGenesis(ctx, app.stakingKeeper),
-		stakingx.ExportGenesis(ctx, app.stakingXKeeper),
-		distr.ExportGenesis(ctx, app.distrKeeper),
-		gov.ExportGenesis(ctx, app.govKeeper),
-		crisis.ExportGenesis(ctx, app.crisisKeeper),
-		slashing.ExportGenesis(ctx, app.slashingKeeper),
-		asset.ExportGenesis(ctx, app.assetKeeper),
-		market.ExportGenesis(ctx, app.marketKeeper),
-		incentive.ExportGenesis(ctx, app.incentiveKeeper),
-	)
-}
-
-func (app *CetChainApp) getAllAccountsForGenesis(ctx sdk.Context, accountsX map[string]authx.AccountX) (accounts []GenesisAccount) {
-	appendFn := func(acc auth.Account) (stop bool) {
-		account := NewGenesisAccountI(acc)
-		account.MemoRequired = accountsX[account.Address.String()].MemoRequired
-		account.LockedCoins = accountsX[account.Address.String()].LockedCoins
-		account.FrozenCoins = accountsX[account.Address.String()].FrozenCoins
-		accounts = append(accounts, account)
-		return false
-	}
-	app.accountKeeper.IterateAccounts(ctx, appendFn)
-	return
-}
-
-func (app *CetChainApp) getAccountsXMapForGenesis(ctx sdk.Context) (accountsX map[string]authx.AccountX) {
-	accountsX = make(map[string]authx.AccountX)
-	appendFn := func(accountX authx.AccountX) (stop bool) {
-		accountsX[accountX.Address.String()] = accountX
-		return false
-	}
-	app.accountXKeeper.IterateAccounts(ctx, appendFn)
-	return
 }
