@@ -2,8 +2,8 @@ package distributionx
 
 import (
 	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
-	types2 "github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/coinexchain/dex/modules/bankx"
+
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/stretchr/testify/require"
@@ -56,7 +56,7 @@ func setupTestInput() testInput {
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
-	bxkKeeper := keeper.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, auth.FeeCollectionKeeper{}, asset.BaseTokenKeeper{}, msgqueue.Producer{})
+	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, msgqueue.Producer{})
 	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace), bk, staking.Keeper{}, auth.FeeCollectionKeeper{}, distribution.DefaultCodespace)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
@@ -129,7 +129,7 @@ func TestNewHandler(t *testing.T) {
 	input := setupTestInput()
 	handler := NewHandler(input.k)
 
-	msg := types2.MsgSetMemoRequired{}
+	msg := bankx.MsgSetMemoRequired{}
 	res := handler(input.ctx, msg)
 
 	require.Equal(t, sdk.CodeUnknownRequest, res.Code)

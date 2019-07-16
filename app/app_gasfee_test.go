@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	"testing"
+	"github.com/coinexchain/dex/modules/bankx"
 
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	"testing"
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -28,7 +28,7 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 	// deliver tx
 	coins := dex.NewCetCoins(100000000000)
 	toAddr := sdk.AccAddress([]byte("addr"))
-	msg := types.NewMsgSend(acc.Address, toAddr, coins, 0)
+	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
@@ -57,7 +57,7 @@ func TestMinGasPriceLimit(t *testing.T) {
 	// deliver tx
 	coins := dex.NewCetCoins(1e8)
 	toAddr := sdk.AccAddress([]byte("addr"))
-	msg := types.NewMsgSend(acc.Address, toAddr, coins, 0)
+	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(10000000000, 1).AccNumSeqKey(0, 0, key).Build()
 
@@ -77,7 +77,7 @@ func TestSmallAccountGasCost(t *testing.T) {
 	// deliver tx
 	coins := dex.NewCetCoins(1e8)
 	toAddr := sdk.AccAddress([]byte("addr"))
-	msg := types.NewMsgSend(acc.Address, toAddr, coins, 0)
+	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(41000, 100).AccNumSeqKey(0, 0, key).Build()
 
@@ -103,7 +103,7 @@ func TestBigAccountGasCost(t *testing.T) {
 	// deliver tx
 	coins := dex.NewCetCoins(1e8)
 	toAddr := sdk.AccAddress([]byte("addr"))
-	msg := types.NewMsgSend(acc.Address, toAddr, coins, 0)
+	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(3000000, 100).AccNumSeqKey(0, 0, key).Build()
 

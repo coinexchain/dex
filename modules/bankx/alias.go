@@ -16,17 +16,21 @@ const (
 
 var (
 	// functions aliases
-	RegisterCodec = types.RegisterCodec
-	ParamKeyTable = types.ParamKeyTable
-	DefaultParams = types.DefaultParams
-	NewKeeper     = keeper.NewKeeper
+	RegisterCodec                        = types.RegisterCodec
+	ParamKeyTable                        = types.ParamKeyTable
+	DefaultParams                        = types.DefaultParams
+	NewKeeper                            = keeper.NewKeeper
+	NewMsgSend                           = types.NewMsgSend
+	NewMsgSetTransferMemoRequired        = types.NewMsgSetTransferMemoRequired
+	ErrMemoMissing                       = types.ErrMemoMissing
+	ErrorInsufficientCETForActivatingFee = types.ErrorInsufficientCETForActivatingFee
 	// variable aliases
-	ModuleCdc      = types.ModuleCdc
-	ErrMemoMissing = types.ErrMemoMissing
+	ModuleCdc       = types.ModuleCdc
+	CodeMemoMissing = types.CodeMemoMissing
 )
 
 type (
-	Keeper       = keeper.Keeper
-	MsgSend      = types.MsgSend
-	MsgMultiSend = types.MsgSetMemoRequired
+	Keeper             = keeper.Keeper
+	MsgSend            = types.MsgSend
+	MsgSetMemoRequired = types.MsgSetMemoRequired
 )

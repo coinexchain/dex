@@ -1,7 +1,7 @@
 package app
 
 import (
-	types2 "github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/coinexchain/dex/modules/bankx"
 	"os"
 	"testing"
 	"time"
@@ -124,7 +124,7 @@ func TestGenTx(t *testing.T) {
 	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
-	msg := types2.NewMsgSend(fromAddr, toAddr, dex.NewCetCoins(1000000000), time.Now().Unix()+10000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, dex.NewCetCoins(1000000000), time.Now().Unix()+10000)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
@@ -156,14 +156,14 @@ func TestSend(t *testing.T) {
 
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
-	msg := types2.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeType(0), result.Code)
 
-	msg = types2.NewMsgSend(fromAddr, toAddr, coins, 0)
+	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
 	tx = newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
@@ -183,19 +183,19 @@ func TestMemo(t *testing.T) {
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
 	// deliver tx
-	msgSetMemoRequired := types2.NewMsgSetTransferMemoRequired(addr, true)
+	msgSetMemoRequired := bankx.NewMsgSetTransferMemoRequired(addr, true)
 	tx1 := newStdTxBuilder().
 		Msgs(msgSetMemoRequired).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 	result1 := app.Deliver(tx1)
 	require.Equal(t, errors.CodeOK, result1.Code)
 
 	coins := dex.NewCetCoins(100)
-	msgSend := types2.NewMsgSend(addr, addr, coins, 0)
+	msgSend := bankx.NewMsgSend(addr, addr, coins, 0)
 	tx2 := newStdTxBuilder().
 		Msgs(msgSend).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
 	result2 := app.Deliver(tx2)
-	require.Equal(t, types2.CodeMemoMissing, result2.Code)
+	require.Equal(t, bankx.CodeMemoMissing, result2.Code)
 }
 
 func TestSendFromIncentiveAddr(t *testing.T) {
@@ -214,7 +214,7 @@ func TestSendFromIncentiveAddr(t *testing.T) {
 
 	// deliver tx
 	coins = dex.NewCetCoins(1000)
-	msg := types2.NewMsgSend(fromAddr, toAddr, coins, 0)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
