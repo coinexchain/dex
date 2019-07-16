@@ -66,6 +66,7 @@ func IsReservedSymbol(symbol string) bool {
 	var _, found = reservedSymbolMap[symbol]
 	return found
 }
+
 func GetReservedSymbols() []string {
 	return reserved
 }

@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"regexp"
 	"unicode/utf8"
@@ -309,4 +310,21 @@ func (t BaseToken) String() string {
 		t.Name, t.Symbol, t.TotalSupply, t.Owner.String(), t.Mintable, t.Burnable,
 		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsForbidden, t.URL, t.Description,
 	)
+}
+
+func MustMarshalToken(cdc *codec.Codec, token Token) []byte {
+	return cdc.MustMarshalBinaryLengthPrefixed(token)
+}
+
+func MustUnmarshalToken(cdc *codec.Codec, value []byte) Token {
+	validator, err := UnmarshalToken(cdc, value)
+	if err != nil {
+		panic(err)
+	}
+	return validator
+}
+
+func UnmarshalToken(cdc *codec.Codec, value []byte) (token Token, err error) {
+	err = cdc.UnmarshalBinaryLengthPrefixed(value, &token)
+	return token, err
 }

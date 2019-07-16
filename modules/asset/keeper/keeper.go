@@ -17,13 +17,6 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
-var (
-	SeparateKeyPrefix      = []byte{0x3A}
-	TokenStoreKeyPrefix    = []byte{0x01}
-	WhitelistKeyPrefix     = []byte{0x02}
-	ForbiddenAddrKeyPrefix = []byte{0x03}
-)
-
 // -----------------------------------------------------------------------------
 
 // Keeper defines a module interface that keep token info.

@@ -1,12 +1,11 @@
 package types
+
 import (
 	"bytes"
 	"fmt"
-
+	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-
-	"github.com/coinexchain/dex/types"
 )
 
 // DefaultParamspace defines the default asset module parameter subspace

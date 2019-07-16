@@ -6,6 +6,22 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// ensure Msg interface compliance at compile time
+var (
+	_ sdk.Msg = &MsgIssueToken{}
+	_ sdk.Msg = &MsgTransferOwnership{}
+	_ sdk.Msg = &MsgMintToken{}
+	_ sdk.Msg = &MsgBurnToken{}
+	_ sdk.Msg = &MsgForbidToken{}
+	_ sdk.Msg = &MsgUnForbidToken{}
+	_ sdk.Msg = &MsgAddTokenWhitelist{}
+	_ sdk.Msg = &MsgRemoveTokenWhitelist{}
+	_ sdk.Msg = &MsgForbidAddr{}
+	_ sdk.Msg = &MsgUnForbidAddr{}
+	_ sdk.Msg = &MsgModifyTokenDescription{}
+	_ sdk.Msg = &MsgModifyTokenURL{}
+)
+
 // MsgIssueToken
 type MsgIssueToken struct {
 	Name             string         `json:"name"`              // Name of the newly issued asset, limited to 32 unicode characters
@@ -19,8 +35,6 @@ type MsgIssueToken struct {
 	URL              string         `json:"url"`               //URL of token website
 	Description      string         `json:"description"`       //Description of token info
 }
-
-var _ sdk.Msg = MsgIssueToken{}
 
 // NewMsgIssueToken
 func NewMsgIssueToken(name string, symbol string, amt int64, owner sdk.AccAddress,
@@ -74,8 +88,6 @@ type MsgTransferOwnership struct {
 	NewOwner      sdk.AccAddress `json:"new_owner"`
 }
 
-var _ sdk.Msg = MsgTransferOwnership{}
-
 func NewMsgTransferOwnership(symbol string, originalOwner sdk.AccAddress, newOwner sdk.AccAddress) MsgTransferOwnership {
 	return MsgTransferOwnership{
 		symbol,
@@ -126,8 +138,6 @@ type MsgMintToken struct {
 	Amount       int64          `json:"amount"`
 	OwnerAddress sdk.AccAddress `json:"owner_address"`
 }
-
-var _ sdk.Msg = MsgMintToken{}
 
 func NewMsgMintToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToken {
 	return MsgMintToken{
@@ -184,8 +194,6 @@ type MsgBurnToken struct {
 	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
 }
 
-var _ sdk.Msg = MsgBurnToken{}
-
 func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgBurnToken {
 	return MsgBurnToken{
 		symbol,
@@ -241,8 +249,6 @@ type MsgForbidToken struct {
 	OwnerAddress sdk.AccAddress `json:"owner_address"`
 }
 
-var _ sdk.Msg = MsgForbidToken{}
-
 func NewMsgForbidToken(symbol string, owner sdk.AccAddress) MsgForbidToken {
 	return MsgForbidToken{
 		symbol,
@@ -286,8 +292,6 @@ type MsgUnForbidToken struct {
 	Symbol       string         `json:"symbol"`
 	OwnerAddress sdk.AccAddress `json:"owner_address"`
 }
-
-var _ sdk.Msg = MsgUnForbidToken{}
 
 func NewMsgUnForbidToken(symbol string, owner sdk.AccAddress) MsgUnForbidToken {
 	return MsgUnForbidToken{
@@ -333,8 +337,6 @@ type MsgAddTokenWhitelist struct {
 	OwnerAddress sdk.AccAddress   `json:"owner_address"`
 	Whitelist    []sdk.AccAddress `json:"whitelist"`
 }
-
-var _ sdk.Msg = MsgAddTokenWhitelist{}
 
 func NewMsgAddTokenWhitelist(symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) MsgAddTokenWhitelist {
 	return MsgAddTokenWhitelist{
@@ -385,8 +387,6 @@ type MsgRemoveTokenWhitelist struct {
 	Whitelist    []sdk.AccAddress `json:"whitelist"`
 }
 
-var _ sdk.Msg = MsgRemoveTokenWhitelist{}
-
 func NewMsgRemoveTokenWhitelist(symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) MsgRemoveTokenWhitelist {
 	return MsgRemoveTokenWhitelist{
 		symbol,
@@ -435,8 +435,6 @@ type MsgForbidAddr struct {
 	OwnerAddr sdk.AccAddress   `json:"owner_address"`
 	Addresses []sdk.AccAddress `json:"addresses"`
 }
-
-var _ sdk.Msg = MsgForbidAddr{}
 
 func NewMsgForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) MsgForbidAddr {
 	return MsgForbidAddr{
@@ -487,8 +485,6 @@ type MsgUnForbidAddr struct {
 	Addresses []sdk.AccAddress `json:"addresses"`
 }
 
-var _ sdk.Msg = MsgUnForbidAddr{}
-
 func NewMsgUnForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) MsgUnForbidAddr {
 	return MsgUnForbidAddr{
 		symbol,
@@ -537,8 +533,6 @@ type MsgModifyTokenURL struct {
 	URL          string         `json:"url"`
 	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
 }
-
-var _ sdk.Msg = MsgModifyTokenURL{}
 
 func NewMsgModifyTokenURL(symbol string, url string, owner sdk.AccAddress) MsgModifyTokenURL {
 	return MsgModifyTokenURL{
@@ -590,8 +584,6 @@ type MsgModifyTokenDescription struct {
 	Description  string         `json:"description"`
 	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
 }
-
-var _ sdk.Msg = MsgModifyTokenDescription{}
 
 func NewMsgModifyTokenDescription(symbol string, description string, owner sdk.AccAddress) MsgModifyTokenDescription {
 	return MsgModifyTokenDescription{

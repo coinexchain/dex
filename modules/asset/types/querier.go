@@ -20,6 +20,17 @@ func NewQueryAssetParams(s string) QueryTokenParams {
 	}
 }
 
+// QueryWhitelistParams defines the params for query: "custom/asset/token-whitelist"
+type QueryWhitelistParams struct {
+	Symbol string
+}
+
+func NewQueryWhitelistParams(s string) QueryWhitelistParams {
+	return QueryWhitelistParams{
+		Symbol: s,
+	}
+}
+
 // QueryForbiddenAddrParams defines the params for query: "custom/asset/addr-forbidden"
 type QueryForbiddenAddrParams struct {
 	Symbol string
@@ -31,13 +42,3 @@ func NewQueryForbiddenAddrParams(s string) QueryForbiddenAddrParams {
 	}
 }
 
-// QueryWhitelistParams defines the params for query: "custom/asset/token-whitelist"
-type QueryWhitelistParams struct {
-	Symbol string
-}
-
-func NewQueryWhitelistParams(s string) QueryWhitelistParams {
-	return QueryWhitelistParams{
-		Symbol: s,
-	}
-}
