@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	"github.com/coinexchain/dex/modules/comment"
+	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
 type NewThreadReq struct {
@@ -57,12 +57,12 @@ func createNewThreadHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			return
 		}
 
-		if req.ContentType == comment.ShortHanziLZ4 {
+		if req.ContentType == types.ShortHanziLZ4 {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "ShortHanziLZ4 is not valid for rest.")
 			return
 		}
 
-		msg := comment.NewMsgCommentToken(sender, req.Token, donation, req.Title, req.Content, req.ContentType, nil)
+		msg := types.NewMsgCommentToken(sender, req.Token, donation, req.Title, req.Content, req.ContentType, nil)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -120,7 +120,7 @@ func createFollowupCommentHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext)
 			return
 		}
 
-		crefs := make([]comment.CommentRef, 1)
+		crefs := make([]types.CommentRef, 1)
 		idRewarded, err := strconv.ParseInt(req.IDRewarded, 10, 63)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Comment ID.")
@@ -142,12 +142,12 @@ func createFollowupCommentHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext)
 		crefs[0].RewardAmount = rewardAmount
 		crefs[0].Attitudes = req.Attitudes
 
-		if req.ContentType == comment.ShortHanziLZ4 {
+		if req.ContentType == types.ShortHanziLZ4 {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "ShortHanziLZ4 is not valid for rest.")
 			return
 		}
 
-		msg := comment.NewMsgCommentToken(sender, req.Token, donation, req.Title, req.Content, req.ContentType, crefs)
+		msg := types.NewMsgCommentToken(sender, req.Token, donation, req.Title, req.Content, req.ContentType, crefs)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -198,7 +198,7 @@ func createRewardCommentsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 		}
 		req.BaseReq.Sequence = sequence
 
-		crefs := make([]comment.CommentRef, len(req.References))
+		crefs := make([]types.CommentRef, len(req.References))
 		for i, r := range req.References {
 			idRewarded, err := strconv.ParseInt(r.ID, 10, 63)
 			if err != nil {
@@ -222,7 +222,7 @@ func createRewardCommentsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			crefs[i].Attitudes = r.Attitudes
 		}
 
-		msg := comment.NewMsgCommentToken(sender, req.Token, 0, "", "", comment.UTF8Text, crefs)
+		msg := types.NewMsgCommentToken(sender, req.Token, 0, "", "", types.UTF8Text, crefs)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
