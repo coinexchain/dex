@@ -25,33 +25,32 @@ const (
 
 var (
 	// functions aliases
-	NewQuerier              = keeper.NewQuerier
-	NewBaseKeeper           = keeper.NewBaseKeeper
-	NewBaseTokenKeeper      = keeper.NewBaseTokenKeeper
-	RegisterCodec           = types.RegisterCodec
-	DefaultGenesisState     = types.DefaultGenesisState
-	NewGenesisState         = types.NewGenesisState
-	NewQueryAssetParams     = types.NewQueryAssetParams
-	NewToken                = types.NewToken
-	NewMsgIssueToken        = types.NewMsgIssueToken
-	NewMsgTransferOwnership = types.NewMsgTransferOwnership
-	NewMsgMintToken = types.NewMsgMintToken
-		NewMsgBurnToken = types.NewMsgBurnToken
-	NewMsgForbidToken = types.NewMsgForbidToken
-	NewMsgUnForbidToken = types.NewMsgUnForbidToken
-	NewMsgAddTokenWhitelist = types.NewMsgAddTokenWhitelist
-	NewMsgRemoveTokenWhitelist = types.NewMsgRemoveTokenWhitelist
-	NewMsgForbidAddr = types.NewMsgForbidAddr
-	NewMsgUnForbidAddr = types.NewMsgUnForbidAddr
-	NewMsgModifyTokenURL = types.NewMsgModifyTokenURL
+
+	NewQuerier                   = keeper.NewQuerier
+	NewBaseKeeper                = keeper.NewBaseKeeper
+	NewBaseTokenKeeper           = keeper.NewBaseTokenKeeper
+	RegisterCodec                = types.RegisterCodec
+	DefaultGenesisState          = types.DefaultGenesisState
+	NewGenesisState              = types.NewGenesisState
+	NewQueryAssetParams          = types.NewQueryAssetParams
+	NewToken                     = types.NewToken
+	NewMsgIssueToken             = types.NewMsgIssueToken
+	NewMsgTransferOwnership      = types.NewMsgTransferOwnership
+	NewMsgMintToken              = types.NewMsgMintToken
+	NewMsgBurnToken              = types.NewMsgBurnToken
+	NewMsgForbidToken            = types.NewMsgForbidToken
+	NewMsgUnForbidToken          = types.NewMsgUnForbidToken
+	NewMsgAddTokenWhitelist      = types.NewMsgAddTokenWhitelist
+	NewMsgRemoveTokenWhitelist   = types.NewMsgRemoveTokenWhitelist
+	NewMsgForbidAddr             = types.NewMsgForbidAddr
+	NewMsgUnForbidAddr           = types.NewMsgUnForbidAddr
+	NewMsgModifyTokenURL         = types.NewMsgModifyTokenURL
 	NewMsgModifyTokenDescription = types.NewMsgModifyTokenDescription
 
-
-
-
-	DefaultParams           = types.DefaultParams
+	DefaultParams = types.DefaultParams
 
 	// variable aliases
+
 	ModuleCdc = types.ModuleCdc
 )
 

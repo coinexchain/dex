@@ -23,7 +23,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgModifyTokenDescription{}, "asset/MsgModifyTokenDescription", nil)
 }
 
-// module wide codec
+// ModuleCdc wide codec
 var ModuleCdc *codec.Codec
 
 func init() {

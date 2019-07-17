@@ -228,7 +228,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, 2100, testAddr,
 		true, false, false, false, "", "")
 	require.NoError(t, err)
-	err = input.tk.MintToken(input.ctx, symbol, testAddr, 9E18+1, )
+	err = input.tk.MintToken(input.ctx, symbol, testAddr, 9E18+1)
 	require.Error(t, err)
 
 	// remove token
