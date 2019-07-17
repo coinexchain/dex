@@ -6,7 +6,6 @@ import (
 
 // Bankx Keeper will implement the interface
 type ExpectedBankxKeeper interface {
-	SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error // to tranfer coins
 }
 

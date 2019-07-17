@@ -8,7 +8,8 @@ import (
 	"testing"
 
 	"github.com/coinexchain/dex/modules/comment/shorthanzi"
-	"github.com/coinexchain/dex/modules/market/internal/types"
+	"github.com/coinexchain/dex/modules/comment/internal/keepers"
+	"github.com/coinexchain/dex/modules/comment/internal/types"
 
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -31,24 +32,11 @@ type mocBankxKeeper struct {
 	maxAmount sdk.Int
 }
 
-func (k *mocBankxKeeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	coinStrList := make([]string, len(amt))
-	for i, coin := range amt {
-		if coin.Amount.GT(k.maxAmount) {
-			return sdk.NewError(CodeSpaceComment, 999, "Not enough coins")
-		}
-		coinStrList[i] = coin.Amount.String() + coin.Denom
-	}
-	s := "Subtract " + strings.Join(coinStrList, ",") + " from " + addr.String()
-	logStrAppend(s)
-	return nil
-}
-
 func (k *mocBankxKeeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	coinStrList := make([]string, len(amt))
 	for i, coin := range amt {
 		if coin.Amount.GT(k.maxAmount) {
-			return sdk.NewError(CodeSpaceComment, 999, "Not enough coins")
+			return sdk.NewError(types.CodeSpaceComment, 999, "Not enough coins")
 		}
 		coinStrList[i] = coin.Amount.String() + coin.Denom
 	}
@@ -66,17 +54,22 @@ func (k *mocAssetStatusKeeper) IsTokenExists(ctx sdk.Context, denom string) bool
 	return ok
 }
 
-type mocDistributionKeeper struct {
+type mocDistributionxKeeper struct {
 	poolName string
+	maxAmount sdk.Int
 }
 
-func (k *mocDistributionKeeper) AddCoinsToFeePool(ctx sdk.Context, coins sdk.Coins) {
+func (k *mocDistributionxKeeper) DonateToCommunityPool(ctx sdk.Context, sender sdk.AccAddress, coins sdk.Coins) sdk.Error {
 	coinStrList := make([]string, len(coins))
 	for i, coin := range coins {
 		coinStrList[i] = coin.Amount.String() + coin.Denom
+		if coin.Amount.GT(k.maxAmount) {
+			return sdk.NewError(types.CodeSpaceComment, 999, "Not enough coins")
+		}
 	}
 	s := "Add " + strings.Join(coinStrList, ",") + " to " + k.poolName
 	logStrAppend(s)
+	return nil
 }
 
 func msgSend(key string, v interface{}) error {
@@ -98,11 +91,11 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: chainid, Height: 1000}, false, log.NewNopLogger())
-	cck := NewCommentCountKeeper(key)
-	k := NewKeeper(cck,
+	cck := keepers.NewCommentCountKeeper(key)
+	k := keepers.NewKeeper(cck,
 		&mocBankxKeeper{maxAmount: sdk.NewInt(100)},
 		&mocAssetStatusKeeper{assets: map[string]bool{"usdt": true, "btc": true, "cet": true}},
-		&mocDistributionKeeper{poolName: "comPool"},
+		&mocDistributionxKeeper{poolName: "comPool", maxAmount: sdk.NewInt(100)},
 		msgSend,
 	)
 	return ctx, k
@@ -127,7 +120,7 @@ func testParseContentType() {
 	inList := []string{"ipfs", "magnet", "http", "utf8text", "shorthanzi", "rawbytes", "fuck"}
 	outList := make([]string, len(inList))
 	for i, s := range inList {
-		outList[i] = fmt.Sprintf("%s:%d", s, ParseContentType(s))
+		outList[i] = fmt.Sprintf("%s:%d", s, types.ParseContentType(s))
 	}
 	logStrAppend(strings.Join(outList, ","))
 }
@@ -137,7 +130,7 @@ func testParseAttitude() {
 		"speechless", "favorite", "condolences", "fuck"}
 	outList := make([]string, len(inList))
 	for i, s := range inList {
-		outList[i] = fmt.Sprintf("%s:%d", s, ParseAttitude(s))
+		outList[i] = fmt.Sprintf("%s:%d", s, types.ParseAttitude(s))
 	}
 	logStrAppend(strings.Join(outList, ","))
 }
@@ -147,21 +140,21 @@ func simpleAddr(s string) sdk.AccAddress {
 	return a
 }
 
-func getRefs() []CommentRef {
-	return []CommentRef{
+func getRefs() []types.CommentRef {
+	return []types.CommentRef{
 		{
 			ID:           900,
 			RewardTarget: simpleAddr("00002"),
 			RewardToken:  "cet",
 			RewardAmount: 10000,
-			Attitudes:    []int32{Like, Favorite},
+			Attitudes:    []int32{types.Like, types.Favorite},
 		},
 		{
 			ID:           901,
 			RewardTarget: simpleAddr("00003"),
 			RewardToken:  "usdt",
 			RewardAmount: 10,
-			Attitudes:    []int32{Laugh, Favorite},
+			Attitudes:    []int32{types.Laugh, types.Favorite},
 		},
 	}
 }
@@ -172,59 +165,59 @@ func Test1(t *testing.T) {
 	testParseAttitude()
 	refs := getRefs()
 	////// ShortHanzi
-	msg := NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text0, ShortHanzi, refs)
+	msg := types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text0, types.ShortHanzi, refs)
 
 	if res := msg.ValidateBasic(); res != nil {
 		fmt.Println(res.ABCILog())
 		t.Errorf("This should be a valid Msg!")
 	}
 
-	tc := NewTokenComment(msg, 108)
-	if msg.ContentType != ShortHanzi || shorthanzi.Text0 != tc.Content || tc.ContentType != UTF8Text {
+	tc := types.NewTokenComment(msg, 108)
+	if msg.ContentType != types.ShortHanzi || shorthanzi.Text0 != tc.Content || tc.ContentType != types.UTF8Text {
 		t.Errorf("Invalid Token Comment!")
 	}
 
 	////// ShortHanziLZ4
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text1, ShortHanzi, refs)
-	tc = NewTokenComment(msg, 108)
-	if msg.ContentType != ShortHanziLZ4 || shorthanzi.Text1 != tc.Content || tc.ContentType != UTF8Text {
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text1, types.ShortHanzi, refs)
+	tc = types.NewTokenComment(msg, 108)
+	if msg.ContentType != types.ShortHanziLZ4 || shorthanzi.Text1 != tc.Content || tc.ContentType != types.UTF8Text {
 		t.Errorf("Invalid Token Comment!")
 	}
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text2, ShortHanzi, refs)
-	tc = NewTokenComment(msg, 108)
-	if msg.ContentType != ShortHanziLZ4 || shorthanzi.Text2 != tc.Content || tc.ContentType != UTF8Text {
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text2, types.ShortHanzi, refs)
+	tc = types.NewTokenComment(msg, 108)
+	if msg.ContentType != types.ShortHanziLZ4 || shorthanzi.Text2 != tc.Content || tc.ContentType != types.UTF8Text {
 		t.Errorf("Invalid Token Comment!")
 	}
 
 	////// RawBytes
 	s := base64.StdEncoding.EncodeToString([]byte("大获全胜"))
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, RawBytes, refs)
-	tc = NewTokenComment(msg, 108)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.RawBytes, refs)
+	tc = types.NewTokenComment(msg, 108)
 	fmt.Printf("Here! %s %d\n", tc.Content, tc.ContentType)
-	if tc.Content != s || tc.ContentType != RawBytes {
+	if tc.Content != s || tc.ContentType != types.RawBytes {
 		t.Errorf("Invalid Token Comment!")
 	}
 
 	////// UTF8Text
 	s = "孜孜不倦"
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, UTF8Text, refs)
-	tc = NewTokenComment(msg, 108)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.UTF8Text, refs)
+	tc = types.NewTokenComment(msg, 108)
 	fmt.Printf("Here! %s %d\n", tc.Content, tc.ContentType)
-	if tc.Content != s || tc.ContentType != UTF8Text {
+	if tc.Content != s || tc.ContentType != types.UTF8Text {
 		t.Errorf("Invalid Token Comment!")
 	}
 
 	////// HTTP
 	s = "http://google.com"
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
-	tc = NewTokenComment(msg, 108)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
+	tc = types.NewTokenComment(msg, 108)
 	fmt.Printf("Here! %s %d\n", tc.Content, tc.ContentType)
-	if tc.Content != s || tc.ContentType != HTTP {
+	if tc.Content != s || tc.ContentType != types.HTTP {
 		t.Errorf("Invalid Token Comment!")
 	}
 
 	//len(msg.Sender) == 0
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 	msg.Sender = nil
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
@@ -232,7 +225,7 @@ func Test1(t *testing.T) {
 		logStrList = append(logStrList, res.ABCILog())
 	}
 	//if len(msg.Token) == 0
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 	msg.Token = ""
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
@@ -240,7 +233,7 @@ func Test1(t *testing.T) {
 		logStrList = append(logStrList, res.ABCILog())
 	}
 	//if msg.Donation < 0
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 	msg.Donation = -1
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
@@ -248,7 +241,7 @@ func Test1(t *testing.T) {
 		logStrList = append(logStrList, res.ABCILog())
 	}
 	//if len(msg.Title) == 0 || len(msg.References) <= 1 { return ErrNoTitle() }
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 	msg.Title = ""
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
@@ -256,7 +249,7 @@ func Test1(t *testing.T) {
 		logStrList = append(logStrList, res.ABCILog())
 	}
 	//if msg.ContentType < IPFS || msg.ContentType > ShortHanziLZ4
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 	msg.ContentType = 100
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
@@ -264,8 +257,8 @@ func Test1(t *testing.T) {
 		logStrList = append(logStrList, res.ABCILog())
 	}
 	//	if !utf8.Valid(msg.Content) { return ErrInvalidContent() }
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text2, ShortHanzi, refs)
-	msg.ContentType = ShortHanzi
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text2, types.ShortHanzi, refs)
+	msg.ContentType = types.ShortHanzi
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
 	} else {
@@ -274,7 +267,7 @@ func Test1(t *testing.T) {
 
 	//if len(msg.Content) > MaxContentSize
 	text := shorthanzi.Text3 + shorthanzi.Text3
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", text, UTF8Text, refs)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", text, types.UTF8Text, refs)
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf(fmt.Sprintf("This should be an invalid Msg %d", len(text)))
 	} else {
@@ -283,7 +276,7 @@ func Test1(t *testing.T) {
 	//	if a < Like || a > Condolences { return ErrInvalidAttitude(a) }
 	refs = getRefs()
 	refs[0].Attitudes = []int32{100}
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
 	} else {
@@ -292,7 +285,7 @@ func Test1(t *testing.T) {
 	//	if ref.RewardAmount < 0 { return ErrNegativeReward() }
 	refs = getRefs()
 	refs[1].RewardAmount = -1
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
+	msg = types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
 	} else {
@@ -320,20 +313,36 @@ func Test1(t *testing.T) {
 	}
 }
 
+type MsgCreateTradingPair struct {
+	Stock          string         `json:"stock"`
+	Money          string         `json:"money"`
+	Creator        sdk.AccAddress `json:"creator"`
+	PricePrecision byte           `json:"price_precision"`
+}
+func (msg MsgCreateTradingPair) Route() string { return "market" }
+
+func (msg MsgCreateTradingPair) Type() string { return "create_market_info" }
+
+func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error { return nil }
+
+func (msg MsgCreateTradingPair) GetSignBytes() []byte { return nil }
+
+func (msg MsgCreateTradingPair) GetSigners() []sdk.AccAddress { return nil }
+
 func Test2(t *testing.T) {
 	ctx, keeper := newContextAndKeeper("test-1")
 	logStrClear()
 	testGenesis(ctx, keeper)
 
 	msgHandler := NewHandler(*keeper)
-	msgCTP := &types.MsgCreateTradingPair{
+	msgCTP := &MsgCreateTradingPair{
 		Stock:          "cet",
 		Money:          "usdt",
 		Creator:        simpleAddr("00200"),
 		PricePrecision: 10,
 	}
 	res := msgHandler(ctx, msgCTP)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.cck.GetCommentCount(ctx)))
+	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
 	if res.IsOK() {
 		t.Errorf("This should be a failed Result!")
 	} else {
@@ -342,10 +351,10 @@ func Test2(t *testing.T) {
 
 	s := "http://google.com"
 	refs := getRefs()
-	msg := NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
+	msg := types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 
 	res = msgHandler(ctx, *msg)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.cck.GetCommentCount(ctx)))
+	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
 	logStrList = append(logStrList, res.Log)
 	if res.IsOK() {
 		t.Errorf("This should be a fail result! " + res.Log)
@@ -353,7 +362,7 @@ func Test2(t *testing.T) {
 
 	msg.References[0].RewardAmount = 0
 	res = msgHandler(ctx, *msg)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.cck.GetCommentCount(ctx)))
+	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
 	logStrList = append(logStrList, res.Log)
 	if !res.IsOK() {
 		t.Errorf("This should be a OK result! " + res.Log)
@@ -361,7 +370,7 @@ func Test2(t *testing.T) {
 
 	msg.Donation = 1000
 	res = msgHandler(ctx, *msg)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.cck.GetCommentCount(ctx)))
+	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
 	logStrList = append(logStrList, res.Log)
 	if res.IsOK() {
 		t.Errorf("This should be a fail result! " + res.Log)
@@ -370,7 +379,7 @@ func Test2(t *testing.T) {
 	msg.Donation = 10
 	msg.Token = "bnb"
 	res = msgHandler(ctx, *msg)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.cck.GetCommentCount(ctx)))
+	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
 	logStrList = append(logStrList, res.Log)
 	if res.IsOK() {
 		t.Errorf("This should be a fail result! " + res.Log)
