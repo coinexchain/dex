@@ -17,14 +17,14 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
-func createExampleGenesisState(cdc *codec.Codec) map[string]json.RawMessage {
-	genState := app.ModuleBasics.DefaultGenesis()
-	//genState.Accounts = createExampleGenesisAccounts()
+func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {
+	gsMap := app.ModuleBasics.DefaultGenesis()
+	genState := app.FromMap(cdc, gsMap)
+	genState.Accounts = createExampleGenesisAccounts()
 	//genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(588788547005740000)
-	//genState.AssetData = createExampleGenesisAssetData()
-	//genState.MarketData = createExampleGenesisMarketData()
-	//genState.GenTxs = append(genState.GenTxs, createExampleGenTx(cdc))
-	//return genState
+	genState.AssetData = createExampleGenesisAssetData()
+	genState.MarketData = createExampleGenesisMarketData()
+	genState.GenUtil.GenTxs = append(genState.GenUtil.GenTxs, createExampleGenTx(cdc))
 	return genState
 }
 
