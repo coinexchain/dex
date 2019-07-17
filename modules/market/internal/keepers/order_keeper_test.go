@@ -94,7 +94,7 @@ func simpleAddr(s string) (sdk.AccAddress, error) {
 	return sdk.AccAddressFromHex("01234567890123456789012345678901234" + s)
 }
 
-func NewTO(sender string, seq uint64, price int64, qua int64, side byte, tif int, h int64) *types.Order {
+func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int, h int64) *types.Order {
 	addr, _ := simpleAddr(sender)
 	decPrice := sdk.NewDec(price).QuoInt(sdk.NewInt(10000))
 	freeze := qua
@@ -137,24 +137,24 @@ func sameTO(a, order *types.Order) bool {
 func createTO1() []*types.Order {
 	return []*types.Order{
 		//sender seq   price quantity       height
-		NewTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998),   //0
-		NewTO("00002", 2, 11080, 50, types.BUY, types.GTE, 998),   //1 good
-		NewTO("00002", 3, 10900, 50, types.BUY, types.GTE, 992),   //2
-		NewTO("00003", 2, 11010, 100, types.SELL, types.IOC, 997), //3 good
-		NewTO("00004", 4, 11032, 60, types.SELL, types.GTE, 990),  //4
-		NewTO("00005", 5, 12039, 120, types.SELL, types.GTE, 996), //5
+		newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998),   //0
+		newTO("00002", 2, 11080, 50, types.BUY, types.GTE, 998),   //1 good
+		newTO("00002", 3, 10900, 50, types.BUY, types.GTE, 992),   //2
+		newTO("00003", 2, 11010, 100, types.SELL, types.IOC, 997), //3 good
+		newTO("00004", 4, 11032, 60, types.SELL, types.GTE, 990),  //4
+		newTO("00005", 5, 12039, 120, types.SELL, types.GTE, 996), //5
 	}
 }
 
 func createTO3() []*types.Order {
 	return []*types.Order{
 		//sender seq   price quantity       height
-		NewTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998),   //0
-		NewTO("00002", 2, 11080, 50, types.BUY, types.GTE, 998),   //1
-		NewTO("00002", 3, 10900, 50, types.BUY, types.GTE, 992),   //2
-		NewTO("00003", 2, 12010, 100, types.SELL, types.IOC, 997), //3
-		NewTO("00004", 4, 12032, 60, types.SELL, types.GTE, 990),  //4
-		NewTO("00005", 5, 12039, 120, types.SELL, types.GTE, 996), //5
+		newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998),   //0
+		newTO("00002", 2, 11080, 50, types.BUY, types.GTE, 998),   //1
+		newTO("00002", 3, 10900, 50, types.BUY, types.GTE, 992),   //2
+		newTO("00003", 2, 12010, 100, types.SELL, types.IOC, 997), //3
+		newTO("00004", 4, 12032, 60, types.SELL, types.GTE, 990),  //4
+		newTO("00005", 5, 12039, 120, types.SELL, types.GTE, 996), //5
 	}
 }
 
@@ -178,7 +178,7 @@ func TestOrderBook1(t *testing.T) {
 		}
 		//fmt.Printf("BB: %s %d\n", order.OrderID(), order.Height)
 	}
-	newOrder := NewTO("00005", 6, 11030, 20, types.SELL, types.GTE, 993)
+	newOrder := newTO("00005", 6, 11030, 20, types.SELL, types.GTE, 993)
 	if keeper.Remove(ctx, newOrder) == nil {
 		t.Errorf("Error in Remove")
 	}
