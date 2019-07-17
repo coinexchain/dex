@@ -77,8 +77,7 @@ func generateGenesisJSON(cdc *codec.Codec) error {
 }
 
 func printGenesisState(cdc *codec.Codec, genState app.GenesisState, chainID string) error {
-	orderedGenState := app.NewDefaultGenesisState()
-	gneStateBytes, err := codec.MarshalJSONIndent(cdc, orderedGenState)
+	gneStateBytes, err := codec.MarshalJSONIndent(cdc, genState)
 	if err != nil {
 		return err
 	}
