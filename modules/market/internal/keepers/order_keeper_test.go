@@ -12,10 +12,10 @@ import (
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
+// TODO
 type storeKeys struct {
 	assetCapKey *sdk.KVStoreKey
 	authCapKey  *sdk.KVStoreKey
@@ -68,7 +68,7 @@ func newContextAndMarketKey(chainid string) (sdk.Context, storeKeys) {
 }
 
 func TestOrderCleanUpDayKeeper(t *testing.T) {
-	ctx, keys := newContextAndMarketKey(market.testNetSubString)
+	ctx, keys := newContextAndMarketKey(types.TestNetSubString)
 	k := NewOrderCleanUpDayKeeper(keys.marketKey)
 	k.SetUnixTime(ctx, 19673122)
 	if k.GetUnixTime(ctx) != 19673122 {
@@ -83,11 +83,11 @@ func TestOrderCleanUpDayKeeper(t *testing.T) {
 }
 
 func newKeeperForTest(key sdk.StoreKey) OrderKeeper {
-	return NewOrderKeeper(key, "cet/usdt", msgCdc)
+	return NewOrderKeeper(key, "cet/usdt", types.ModuleCdc)
 }
 
 func newGlobalKeeperForTest(key sdk.StoreKey) GlobalOrderKeeper {
-	return NewGlobalOrderKeeper(key, msgCdc)
+	return NewGlobalOrderKeeper(key, types.ModuleCdc)
 }
 
 func simpleAddr(s string) (sdk.AccAddress, error) {
@@ -98,7 +98,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 	addr, _ := simpleAddr(sender)
 	decPrice := sdk.NewDec(price).QuoInt(sdk.NewInt(10000))
 	freeze := qua
-	if side == Buy {
+	if side == types.BUY {
 		freeze = decPrice.Mul(sdk.NewDec(qua)).RoundInt64()
 	}
 	return &types.Order{
@@ -116,11 +116,11 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 	}
 }
 
-func sameTO(a, b *types.Order) bool {
-	res := bytes.Equal(market.Sender, market.Sender) && market.Sequence == market.Sequence &&
-		market.TradingPair == market.TradingPair && market.OrderType == market.OrderType && a.Price.Equal(market.Price) &&
-		market.Quantity == market.Quantity && market.Side == market.Side && market.TimeInForce == market.TimeInForce &&
-		market.Height == market.Height
+func sameTO(a, order *types.Order) bool {
+	res := bytes.Equal(order.Sender, order.Sender) && order.Sequence == order.Sequence &&
+		order.TradingPair == order.TradingPair && order.OrderType == order.OrderType && a.Price.Equal(order.Price) &&
+		order.Quantity == order.Quantity && order.Side == order.Side && order.TimeInForce == order.TimeInForce &&
+		order.Height == order.Height
 	//if !res {
 	//	fmt.Printf("seq: %d %d\n", a.Sequence, b.Sequence)
 	//	fmt.Printf("symbol: %s %s\n", a.Symbol, b.Symbol)
@@ -137,38 +137,38 @@ func sameTO(a, b *types.Order) bool {
 func createTO1() []*types.Order {
 	return []*types.Order{
 		//sender seq   price quantity       height
-		newTO("00001", 1, 11051, 50, Buy, types.GTE, 998),   //0
-		newTO("00002", 2, 11080, 50, Buy, types.GTE, 998),   //1 good
-		newTO("00002", 3, 10900, 50, Buy, types.GTE, 992),   //2
-		newTO("00003", 2, 11010, 100, Sell, types.IOC, 997), //3 good
-		newTO("00004", 4, 11032, 60, Sell, types.GTE, 990),  //4
-		newTO("00005", 5, 12039, 120, Sell, types.GTE, 996), //5
+		newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998),   //0
+		newTO("00002", 2, 11080, 50, types.BUY, types.GTE, 998),   //1 good
+		newTO("00002", 3, 10900, 50, types.BUY, types.GTE, 992),   //2
+		newTO("00003", 2, 11010, 100, types.SELL, types.IOC, 997), //3 good
+		newTO("00004", 4, 11032, 60, types.SELL, types.GTE, 990),  //4
+		newTO("00005", 5, 12039, 120, types.SELL, types.GTE, 996), //5
 	}
 }
 
 func createTO3() []*types.Order {
 	return []*types.Order{
 		//sender seq   price quantity       height
-		newTO("00001", 1, 11051, 50, Buy, types.GTE, 998),   //0
-		newTO("00002", 2, 11080, 50, Buy, types.GTE, 998),   //1
-		newTO("00002", 3, 10900, 50, Buy, types.GTE, 992),   //2
-		newTO("00003", 2, 12010, 100, Sell, types.IOC, 997), //3
-		newTO("00004", 4, 12032, 60, Sell, types.GTE, 990),  //4
-		newTO("00005", 5, 12039, 120, Sell, types.GTE, 996), //5
+		newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998),   //0
+		newTO("00002", 2, 11080, 50, types.BUY, types.GTE, 998),   //1
+		newTO("00002", 3, 10900, 50, types.BUY, types.GTE, 992),   //2
+		newTO("00003", 2, 12010, 100, types.SELL, types.IOC, 997), //3
+		newTO("00004", 4, 12032, 60, types.SELL, types.GTE, 990),  //4
+		newTO("00005", 5, 12039, 120, types.SELL, types.GTE, 996), //5
 	}
 }
 
 func TestOrderBook1(t *testing.T) {
 	orders := createTO1()
-	ctx, keys := newContextAndMarketKey(market.testNetSubString)
-	keeper := newKeeperForTest(market.marketKey)
+	ctx, keys := newContextAndMarketKey(types.TestNetSubString)
+	keeper := newKeeperForTest(keys.marketKey)
 	if keeper.GetSymbol() != "cet/usdt" {
 		t.Errorf("Error in GetSymbol")
 	}
-	gkeeper := newGlobalKeeperForTest(market.marketKey)
+	gkeeper := newGlobalKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		keeper.Add(ctx, order)
-		fmt.Printf("AA: %s %d\n", market.OrderID(), market.Height)
+		fmt.Printf("AA: %s %d\n", order.OrderID(), order.Height)
 	}
 	orderseq := []int{5, 0, 3, 4, 1, 2}
 	for i, order := range gkeeper.GetAllOrders(ctx) {
@@ -178,7 +178,7 @@ func TestOrderBook1(t *testing.T) {
 		}
 		//fmt.Printf("BB: %s %d\n", order.OrderID(), order.Height)
 	}
-	newOrder := newTO("00005", 6, 11030, 20, Sell, types.GTE, 993)
+	newOrder := newTO("00005", 6, 11030, 20, types.SELL, types.GTE, 993)
 	if keeper.Remove(ctx, newOrder) == nil {
 		t.Errorf("Error in Remove")
 	}
@@ -203,19 +203,19 @@ func TestOrderBook1(t *testing.T) {
 		t.Errorf("Error in GetOrdersFromUser")
 	}
 	orderseq = []int{1, 3, 4, 0}
-	for i, order := range keeper.GetMatchingCandidates(ctx) {
-		j := orderseq[i]
-		if market.OrderID() != market.OrderID() {
+	for _, order := range keeper.GetMatchingCandidates(ctx) {
+		//j := orderseq[i]
+		if order.OrderID() != order.OrderID() {
 			t.Errorf("Error in GetMatchingCandidates")
 			//fmt.Printf("orderID %s %s\n", order.OrderID(), order.Price.String())
 		}
 	}
 	for _, order := range orders {
-		if gkeeper.QueryOrder(ctx, market.OrderID()) == nil {
+		if gkeeper.QueryOrder(ctx, order.OrderID()) == nil {
 			t.Errorf("Can not find added orders!")
 			continue
 		}
-		qorder := gkeeper.QueryOrder(ctx, market.OrderID())
+		qorder := gkeeper.QueryOrder(ctx, order.OrderID())
 		if !sameTO(order, qorder) {
 			t.Errorf("Order's content is changed!")
 		}
@@ -224,10 +224,10 @@ func TestOrderBook1(t *testing.T) {
 
 func TestOrderBook2a(t *testing.T) {
 	orders := createTO1()
-	ctx, keys := newContextAndMarketKey(market.testNetSubString)
-	keeper := newKeeperForTest(market.marketKey)
+	ctx, keys := newContextAndMarketKey(types.TestNetSubString)
+	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
-		if market.Side == Buy {
+		if order.Side == types.BUY {
 			keeper.Add(ctx, order)
 		}
 	}
@@ -238,10 +238,10 @@ func TestOrderBook2a(t *testing.T) {
 
 func TestOrderBook2b(t *testing.T) {
 	orders := createTO1()
-	ctx, keys := newContextAndMarketKey(market.testNetSubString)
-	keeper := newKeeperForTest(market.marketKey)
+	ctx, keys := newContextAndMarketKey(types.TestNetSubString)
+	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
-		if market.Side == Sell {
+		if order.Side == types.SELL {
 			keeper.Add(ctx, order)
 		}
 	}
@@ -252,8 +252,8 @@ func TestOrderBook2b(t *testing.T) {
 
 func TestOrderBook3(t *testing.T) {
 	orders := createTO3()
-	ctx, keys := newContextAndMarketKey(market.testNetSubString)
-	keeper := newKeeperForTest(market.marketKey)
+	ctx, keys := newContextAndMarketKey(types.TestNetSubString)
+	keeper := newKeeperForTest(keys.marketKey)
 	for _, order := range orders {
 		keeper.Add(ctx, order)
 	}

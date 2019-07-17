@@ -11,6 +11,11 @@ const (
 	ModuleName = types.ModuleName
 )
 
+const (
+	testNetSubString = types.TestNetSubString
+	mainNetSubString = types.MainNetSubString
+)
+
 var (
 	NewBaseKeeper = keepers.NewKeeper
 	DefaultParams = keepers.DefaultParams

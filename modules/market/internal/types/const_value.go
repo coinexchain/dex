@@ -25,3 +25,8 @@ const (
 	IOC          = 4
 	LIMIT        = 2
 )
+
+const (
+	TestNetSubString = "coinexdex-test"
+	MainNetSubString = "coinexdex-main"
+)

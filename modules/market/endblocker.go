@@ -14,11 +14,6 @@ import (
 	"github.com/coinexchain/dex/modules/market/match"
 )
 
-const (
-	testNetSubString = "coinexdex-test"
-	mainNetSubString = "coinexdex-main"
-)
-
 // Some handlers which are useful when orders are matched and traded.
 type InfoForDeal struct {
 	bxKeeper      mtype.ExpectedBankxKeeper
