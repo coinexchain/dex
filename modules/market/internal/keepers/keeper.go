@@ -88,7 +88,7 @@ type Keeper struct {
 	axk           types.ExpectedAssetStatusKeeper
 	bnk           types.ExpectedBankxKeeper
 	cdc           *codec.Codec
-	orderClean    *OrderCleanUpDayKeeper
+	ock           *OrderCleanUpDayKeeper
 	gmk           GlobalMarketInfoKeeper
 	msgProducer   msgqueue.MsgSender
 }
@@ -104,14 +104,14 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 		bnk:           bnkVal,
 		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
 		cdc:           cdcVal,
-		orderClean:    NewOrderCleanUpDayKeeper(key),
+		ock:           NewOrderCleanUpDayKeeper(key),
 		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
 		msgProducer:   msgKeeperVal,
 	}
 }
 
 func (k Keeper) SetUnixTime(ctx sdk.Context, unixTime int64) {
-	k.orderClean.SetUnixTime(ctx, unixTime)
+	k.ock.SetUnixTime(ctx, unixTime)
 }
 
 func (k Keeper) GetToken(ctx sdk.Context, symbol string) asset.Token {
@@ -146,11 +146,11 @@ func (k Keeper) IsTokenForbidden(ctx sdk.Context, symbol string) bool {
 	return k.axk.IsTokenForbidden(ctx, symbol)
 }
 func (k Keeper) GetOrderCleanTime(ctx sdk.Context) int64 {
-	return k.orderClean.GetUnixTime(ctx)
+	return k.ock.GetUnixTime(ctx)
 }
 
 func (k Keeper) SetOrderCleanTime(ctx sdk.Context, t int64) {
-	k.orderClean.SetUnixTime(ctx, t)
+	k.ock.SetUnixTime(ctx, t)
 }
 
 func (k Keeper) GetBankxKeeper() types.ExpectedBankxKeeper {
