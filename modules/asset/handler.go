@@ -1,13 +1,18 @@
 package asset
 
 import (
+	"strconv"
+
 	"github.com/coinexchain/dex/modules/asset/internal/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewHandler returns a handler for "asset" type messages.
 func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+		ctx.WithEventManager(sdk.NewEventManager())
+
 		switch msg := msg.(type) {
 		case types.MsgIssueToken:
 			return handleMsgIssueToken(ctx, keeper, msg)
@@ -63,12 +68,17 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken
 		return err.Result()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyTokenOwner, msg.Owner.String()),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.Owner, msg.Owner.String(),
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -82,13 +92,17 @@ func handleMsgTransferOwnership(ctx sdk.Context, keeper Keeper, msg types.MsgTra
 		return err.Result()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyTokenOwner, msg.NewOwner.String()),
+			sdk.NewAttribute(types.AttributeKeyOriginalOwner, msg.OriginalOwner.String()),
+		),
+	})
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.OriginalOwner, msg.OriginalOwner.String(),
-		//	tags.NewOwner, msg.NewOwner.String(),
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -106,12 +120,17 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg types.MsgMintToken) 
 		return err.Result()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyMintAmount, strconv.FormatInt(msg.Amount, 10)),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.Amt, strconv.FormatInt(msg.Amount, 10),
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -129,12 +148,17 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg types.MsgBurnToken) 
 		return err.Result()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyMintAmount, strconv.FormatInt(msg.Amount, 10)),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.Amt, strconv.FormatInt(msg.Amount, 10),
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -148,11 +172,16 @@ func handleMsgForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgForbidTok
 		return err.Result()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -166,11 +195,16 @@ func handleMsgUnForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbi
 		return err.Result()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -189,12 +223,16 @@ func handleMsgAddTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.MsgAdd
 		str = str + addr.String() + ","
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyAddWhitelist, str),
+		),
+	})
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.AddWhitelist, str,
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -213,12 +251,17 @@ func handleMsgRemoveTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.Msg
 		str = str + addr.String()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyRemoveWhitelist, str),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.RemoveWhitelist, str,
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -237,12 +280,17 @@ func handleMsgForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgForbidAddr
 		str = str + addr.String() + ","
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyAddr, str),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.Addresses, str,
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -261,12 +309,17 @@ func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbid
 		str = str + addr.String() + ","
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyAddr, str),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.Addresses, str,
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -280,12 +333,16 @@ func handleMsgModifyTokenURL(ctx sdk.Context, keeper Keeper, msg types.MsgModify
 		return err.Result()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyURL, msg.URL),
+		),
+	})
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.URL, msg.URL,
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -299,12 +356,16 @@ func handleMsgModifyTokenDescription(ctx sdk.Context, keeper Keeper, msg types.M
 		return err.Result()
 	}
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyDescription, msg.Description),
+		),
+	})
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	tags.Category, tags.TxCategory,
-		//	tags.Token, msg.Symbol,
-		//	tags.Description, msg.Description,
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }
 
