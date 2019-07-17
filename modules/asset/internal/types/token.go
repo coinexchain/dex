@@ -321,6 +321,6 @@ func MustUnmarshalToken(cdc *codec.Codec, value []byte) Token {
 }
 
 func UnmarshalToken(cdc *codec.Codec, value []byte) (token Token, err error) {
-	err = cdc.UnmarshalBinaryLengthPrefixed(value, &token)
+	err = cdc.UnmarshalBinaryBare(value, &token)
 	return token, err
 }
