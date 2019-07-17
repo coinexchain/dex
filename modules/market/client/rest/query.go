@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,12 +27,12 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 		stock := vars["stock"]
 		money := vars["money"]
 
-		res, err := queryMarketInfo(cdc, cliCtx, stock+market.SymbolSeparator+money)
+		res, err := queryMarketInfo(cdc, cliCtx, stock+types.SymbolSeparator+money)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		var queryInfo market.QueryMarketInfo
+		var queryInfo keepers.QueryMarketInfo
 		if err := cdc.UnmarshalJSON(res, &queryInfo); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -40,12 +42,12 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 }
 
 func queryMarketInfo(cdc *codec.Codec, cliCtx context.CLIContext, symbol string) ([]byte, error) {
-	bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(symbol))
+	bz, err := cdc.MarshalJSON(keepers.NewQueryMarketParam(symbol))
 	if err != nil {
 		return nil, err
 	}
 
-	query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
+	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
 	res, _, err := cliCtx.QueryWithData(query, bz)
 	if err != nil {
 		return nil, err
@@ -69,13 +71,13 @@ func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 			return
 		}
 
-		bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(orderID))
+		bz, err := cdc.MarshalJSON(keepers.NewQueryOrderParam(orderID))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return
 		}
 
-		route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryOrder)
+		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryOrder)
 		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -96,13 +98,13 @@ func queryUserOrderListHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) ht
 			return
 		}
 
-		bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: addr})
+		bz, err := cdc.MarshalJSON(keepers.QueryUserOrderList{User: addr})
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryUserOrders)
+		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryUserOrders)
 		fmt.Println(route)
 		res, _, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {

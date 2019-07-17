@@ -11,9 +11,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/market/client/cli"
-	"github.com/coinexchain/dex/modules/market/match"
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
 // SendReq defines the properties of a send request's body.
@@ -80,7 +80,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 	}
 
 	if req.ExistBlocks <= 0 {
-		req.ExistBlocks = market.DefaultGTEOrderLifetime
+		req.ExistBlocks = keepers.DefaultGTEOrderLifetime
 	}
 
 	creator, err := sdk.AccAddressFromBech32(req.BaseReq.From)
@@ -94,9 +94,9 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		return
 	}
 
-	force := market.GTE
+	force := types.GTE
 	if !isGTE {
-		force = market.IOC
+		force = types.IOC
 	}
 
 	accRetriever := authtypes.NewAccountRetriever(cliCtx)
@@ -109,7 +109,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		}
 	}
 
-	msg := market.MsgCreateOrder{
+	msg := types.MsgCreateOrder{
 		Sender:         creator,
 		Sequence:       sequence,
 		TradingPair:    req.TradingPair,
@@ -127,9 +127,9 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		return
 	}
 
-	symbols := strings.Split(msg.TradingPair, market.SymbolSeparator)
+	symbols := strings.Split(msg.TradingPair, types.SymbolSeparator)
 	userToken := symbols[0]
-	if msg.Side == match.BUY {
+	if msg.Side == types.BUY {
 		userToken = symbols[1]
 	}
 

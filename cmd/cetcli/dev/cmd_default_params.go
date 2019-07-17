@@ -2,9 +2,11 @@ package dev
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/authx/types"
 	"os"
 	"reflect"
+
+	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -18,7 +20,6 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
 
@@ -47,7 +48,7 @@ func getParamSets() []moduleParamSet {
 		toParamSet("bankx", bankx.DefaultParams()),
 		toParamSet("stakingx", stakingx.DefaultParams()),
 		toParamSet("asset", asset.DefaultParams()),
-		toParamSet("market", market.DefaultParams()),
+		toParamSet("market", keepers.DefaultParams()),
 	}
 	if viper.GetBool("include-sdk") {
 		set = append(set,

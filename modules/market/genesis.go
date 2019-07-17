@@ -4,16 +4,19 @@ import (
 	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
 type GenesisState struct {
-	Params      Params       `json:"params"`
-	Orders      []*Order     `json:"orders"`
-	MarketInfos []MarketInfo `json:"market_infos"`
+	Params      keepers.Params     `json:"params"`
+	Orders      []*types.Order     `json:"orders"`
+	MarketInfos []types.MarketInfo `json:"market_infos"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params Params, orders []*Order, infos []MarketInfo) GenesisState {
+func NewGenesisState(params keepers.Params, orders []*types.Order, infos []types.MarketInfo) GenesisState {
 	return GenesisState{
 		Params:      params,
 		Orders:      orders,
@@ -23,11 +26,11 @@ func NewGenesisState(params Params, orders []*Order, infos []MarketInfo) Genesis
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParams(), []*Order{}, []MarketInfo{})
+	return NewGenesisState(keepers.DefaultParams(), []*types.Order{}, []types.MarketInfo{})
 }
 
 // InitGenesis - Init store state from genesis data
-func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+func InitGenesis(ctx sdk.Context, keeper keepers.Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 
 	for _, token := range data.Orders {
@@ -40,7 +43,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
-func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
+func ExportGenesis(ctx sdk.Context, k keepers.Keeper) GenesisState {
 	return NewGenesisState(k.GetParams(ctx), k.GetAllOrders(ctx), k.GetAllMarketInfos(ctx))
 }
 
@@ -62,7 +65,7 @@ func (data GenesisState) Validate() error {
 
 	infos := make(map[string]interface{})
 	for _, info := range data.MarketInfos {
-		symbol := info.Stock + SymbolSeparator + info.Money
+		symbol := info.Stock + types.SymbolSeparator + info.Money
 		if _, exists := infos[symbol]; exists {
 			return errors.New("duplicate market found during market ValidateGenesis")
 		}

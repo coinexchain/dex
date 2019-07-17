@@ -12,7 +12,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
 func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
@@ -27,15 +28,15 @@ Example :
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
-			if len(strings.Split(args[0], market.SymbolSeparator)) != 2 {
+			if len(strings.Split(args[0], types.SymbolSeparator)) != 2 {
 				return errors.Errorf("symbol illegal : %s, For example : eth/cet.", args[0])
 			}
 
-			bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(args[0]))
+			bz, err := cdc.MarshalJSON(keepers.NewQueryMarketParam(args[0]))
 			if err != nil {
 				return err
 			}
-			query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
+			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
 			res, _, err := cliCtx.QueryWithData(query, bz)
 			if err != nil {
 				return err
@@ -65,12 +66,12 @@ Example:
 				return errors.Errorf("Invalid unix time")
 			}
 
-			bz, err := cdc.MarshalJSON(market.QueryCancelMarkets{Time: int64(time)})
+			bz, err := cdc.MarshalJSON(keepers.QueryCancelMarkets{Time: int64(time)})
 			if err != nil {
 				return err
 			}
 
-			query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryWaitCancelMarkets)
+			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryWaitCancelMarkets)
 			res, _, err := cliCtx.QueryWithData(query, bz)
 			if err != nil {
 				return err
@@ -103,16 +104,16 @@ Example :
 			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			orderID := args[0]
-			if len(strings.Split(orderID, market.OrderIDSeparator)) != 3 {
+			if len(strings.Split(orderID, types.OrderIDSeparator)) != 3 {
 				return fmt.Errorf("order-id is incorrect")
 			}
 
-			bz, err := cdc.MarshalJSON(market.NewQueryOrderParam(orderID))
+			bz, err := cdc.MarshalJSON(keepers.NewQueryOrderParam(orderID))
 			if err != nil {
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryOrder)
+			route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryOrder)
 			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
@@ -145,12 +146,12 @@ Example:
 				return err
 			}
 
-			bz, err := cdc.MarshalJSON(market.QueryUserOrderList{User: queryAddr})
+			bz, err := cdc.MarshalJSON(keepers.QueryUserOrderList{User: queryAddr})
 			if err != nil {
 				return err
 			}
 
-			route := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryUserOrders)
+			route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryUserOrders)
 			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err

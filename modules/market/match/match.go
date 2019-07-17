@@ -6,13 +6,9 @@ import (
 	"sort"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/market/internal/types"
 )
-
-const BID = 1
-const BUY = 1
-
-const ASK = 2
-const SELL = 2
 
 type Account interface {
 	String() string
@@ -56,11 +52,11 @@ func Match(highPrice, midPrice, lowPrice sdk.Dec, bidList []OrderForTrade, askLi
 
 // return true if a should precede b in a sorted list, i.e. index of a is smaller
 func precede(a, b OrderForTrade) bool {
-	if (a.GetSide() == ASK && a.GetPrice().LT(b.GetPrice())) || //for ask, lower price has priority
-		(a.GetSide() == BID && a.GetPrice().GT(b.GetPrice())) { //for bid, higher price has priority
+	if (a.GetSide() == types.ASK && a.GetPrice().LT(b.GetPrice())) || //for ask, lower price has priority
+		(a.GetSide() == types.BID && a.GetPrice().GT(b.GetPrice())) { //for bid, higher price has priority
 		return true
-	} else if (a.GetSide() == ASK && a.GetPrice().GT(b.GetPrice())) ||
-		(a.GetSide() == BID && a.GetPrice().LT(b.GetPrice())) {
+	} else if (a.GetSide() == types.ASK && a.GetPrice().GT(b.GetPrice())) ||
+		(a.GetSide() == types.BID && a.GetPrice().LT(b.GetPrice())) {
 		return false
 	} else if a.GetHeight() < b.GetHeight() { //lower height has priority
 		return true
@@ -101,7 +97,7 @@ func ExecuteOrderList(price sdk.Dec, bidList []OrderForTrade, askList []OrderFor
 func ExecuteOrder(price sdk.Dec, currOrder OrderForTrade, orderList []OrderForTrade) []OrderForTrade {
 	firstNonZeroIndex := 0
 	for _, otherSide := range orderList {
-		if otherSide.GetSide() == BUY {
+		if otherSide.GetSide() == types.BUY {
 			if otherSide.GetPrice().LT(price) {
 				break
 			}
@@ -177,9 +173,9 @@ func createPricePointList(orders []OrderForTrade) []PricePoint {
 			})
 		}
 		//fmt.Printf("ppList[%d]: %s\n", offset, ppList[offset].String())
-		if order.GetSide() == ASK {
+		if order.GetSide() == types.ASK {
 			ppList[offset].askAmount += order.GetAmount()
-		} else if order.GetSide() == BID {
+		} else if order.GetSide() == types.BID {
 			ppList[offset].bidAmount += order.GetAmount()
 		}
 	}

@@ -10,8 +10,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/market/client/cli"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
 // SendReq defines the properties of a send request's body.
@@ -62,7 +62,7 @@ func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 
 		req.BaseReq.Sequence = sequence
-		msg := market.NewMsgCreateTradingPair(req.Stock, req.Money, creator, byte(req.PricePrecision))
+		msg := types.NewMsgCreateTradingPair(req.Stock, req.Money, creator, byte(req.PricePrecision))
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -85,7 +85,7 @@ func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 
 		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
-		msg := market.MsgCancelTradingPair{
+		msg := types.MsgCancelTradingPair{
 			Sender:        sender,
 			TradingPair:   req.TradingPair,
 			EffectiveTime: req.Time,
@@ -113,7 +113,7 @@ func modifyTradingPairPricePrecision(cdc *codec.Codec, cliCtx context.CLIContext
 		}
 
 		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
-		msg := market.MsgModifyPricePrecision{
+		msg := types.MsgModifyPricePrecision{
 			Sender:         sender,
 			TradingPair:    req.TradingPair,
 			PricePrecision: byte(req.PricePrecision),

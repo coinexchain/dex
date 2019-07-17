@@ -1,4 +1,4 @@
-package market
+package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,12 +10,3 @@ type MarketInfo struct {
 	PricePrecision    byte    `json:"price_precision"`
 	LastExecutedPrice sdk.Dec `json:"last_executed_price"`
 }
-
-//func (info MarketInfo) GetTags() sdk.Tags {
-//	return sdk.NewTags(
-//		"stock", info.Stock,
-//		"money", info.Money,
-//		"price-precision", strconv.Itoa(int(info.PricePrecision)),
-//		"last-execute-price", info.LastExecutedPrice.String(),
-//	)
-//}

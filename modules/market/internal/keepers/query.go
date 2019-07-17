@@ -1,4 +1,4 @@
-package market
+package keepers
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	types2 "github.com/coinexchain/dex/modules/market/internal/types"
 )
 
 const (
@@ -60,7 +62,7 @@ func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sd
 
 	info, err := mk.GetMarketInfo(ctx, param.TradingPair)
 	if err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "may be the market have deleted or not exist")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeInvalidSymbol, "may be the market have deleted or not exist")
 	}
 
 	queryInfo := QueryMarketInfo{
@@ -72,7 +74,7 @@ func queryMarket(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sd
 	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, queryInfo)
 	if err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeMarshalFailed, "could not marshal result to JSON")
 	}
 	return bz, nil
 }
@@ -90,17 +92,17 @@ func NewQueryOrderParam(orderID string) QueryOrderParam {
 func queryOrder(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
 	var param QueryOrderParam
 	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeUnMarshalFailed, "failed to parse param")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeUnMarshalFailed, "failed to parse param")
 	}
 
 	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
 	order := okp.QueryOrder(ctx, param.OrderID)
 	if order == nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeInvalidOrderID, "may be the order have deleted or not exist")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeInvalidOrderID, "may be the order have deleted or not exist")
 	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, *order)
 	if err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeMarshalFailed, "could not marshal result to JSON")
 	}
 
 	return bz, nil
@@ -113,7 +115,7 @@ type QueryUserOrderList struct {
 func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
 	var param QueryUserOrderList
 	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeUnMarshalFailed, "failed to parse param")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeUnMarshalFailed, "failed to parse param")
 	}
 
 	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
@@ -121,7 +123,7 @@ func queryUserOrderList(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]b
 
 	bz, err := codec.MarshalJSONIndent(mk.cdc, orders)
 	if err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeMarshalFailed, "could not marshal result to JSON")
 	}
 	return bz, nil
 }
@@ -133,14 +135,14 @@ type QueryCancelMarkets struct {
 func queryWaitCancelMarkets(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
 	var param QueryCancelMarkets
 	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeUnMarshalFailed, "failed to parse param")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeUnMarshalFailed, "failed to parse param")
 	}
 
 	dlk := NewDelistKeeper(mk.marketKey)
 	markets := dlk.GetDelistSymbolsBeforeTime(ctx, param.Time+1)
 	bz, err := codec.MarshalJSONIndent(mk.cdc, markets)
 	if err != nil {
-		return nil, sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "could not marshal result to JSON")
+		return nil, sdk.NewError(types2.CodeSpaceMarket, types2.CodeMarshalFailed, "could not marshal result to JSON")
 	}
 	return bz, nil
 }

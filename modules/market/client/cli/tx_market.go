@@ -16,7 +16,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
 const (
@@ -67,10 +68,10 @@ Example :
 				return err
 			}
 
-			if msg.PricePrecision < market.MinTokenPricePrecision ||
-				msg.PricePrecision > market.MaxTokenPricePrecision {
+			if msg.PricePrecision < types.MinTokenPricePrecision ||
+				msg.PricePrecision > types.MaxTokenPricePrecision {
 				return errors.Errorf("price precision out of range [%d, %d]",
-					market.MinTokenPricePrecision, market.MaxTokenPricePrecision)
+					types.MinTokenPricePrecision, types.MaxTokenPricePrecision)
 			}
 
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
@@ -104,7 +105,7 @@ func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, tokens ...string) er
 	return nil
 }
 
-func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateTradingPair, error) {
+func parseCreateMarketFlags(creator sdk.AccAddress) (*types.MsgCreateTradingPair, error) {
 	for _, flag := range createMarketFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
@@ -112,7 +113,7 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*market.MsgCreateTradingPai
 		}
 	}
 
-	msg := &market.MsgCreateTradingPair{
+	msg := &types.MsgCreateTradingPair{
 		Stock:          viper.GetString(FlagStock),
 		Money:          viper.GetString(FlagMoney),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
@@ -136,7 +137,7 @@ Example
 			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
-			msg := market.MsgCancelTradingPair{
+			msg := types.MsgCancelTradingPair{
 				Sender:        creator,
 				EffectiveTime: viper.GetInt64(FlagTime),
 				TradingPair:   viper.GetString(FlagSymbol),
@@ -158,22 +159,22 @@ Example
 	return cmd
 }
 
-func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg market.MsgCancelTradingPair) error {
+func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg types.MsgCancelTradingPair) error {
 	if err := msg.ValidateBasic(); err != nil {
 		return err
 	}
 
-	bz, err := cdc.MarshalJSON(market.NewQueryMarketParam(msg.TradingPair))
+	bz, err := cdc.MarshalJSON(keepers.NewQueryMarketParam(msg.TradingPair))
 	if err != nil {
 		return err
 	}
-	query := fmt.Sprintf("custom/%s/%s", market.StoreKey, market.QueryMarket)
+	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
 	res, _, err := cliCtx.QueryWithData(query, bz)
 	if err != nil {
 		return err
 	}
 
-	var msgMarket market.QueryMarketInfo
+	var msgMarket keepers.QueryMarketInfo
 	if err := cdc.UnmarshalJSON(res, &msgMarket); err != nil {
 		return err
 	}
@@ -200,7 +201,7 @@ Example:
 			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			creator := cliCtx.GetFromAddress()
-			msg := market.MsgModifyPricePrecision{
+			msg := types.MsgModifyPricePrecision{
 				Sender:         creator,
 				TradingPair:    viper.GetString(FlagSymbol),
 				PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
@@ -221,8 +222,8 @@ Example:
 	return cmd
 }
 
-func CheckModifyPricePrecision(msg market.MsgModifyPricePrecision) error {
-	if len(strings.Split(msg.TradingPair, market.SymbolSeparator)) != 2 {
+func CheckModifyPricePrecision(msg types.MsgModifyPricePrecision) error {
+	if len(strings.Split(msg.TradingPair, types.SymbolSeparator)) != 2 {
 		return errors.Errorf("the invalid trading pair : %s ", viper.GetString(FlagSymbol))
 	}
 	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {

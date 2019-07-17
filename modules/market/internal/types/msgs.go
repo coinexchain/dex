@@ -1,13 +1,12 @@
-package market
+package types
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/modules/market/match"
+	"github.com/coinexchain/dex/modules/asset"
 )
 
 // RouterKey is the name of the market module
@@ -118,7 +117,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [0, 18]. actual : %d", msg.PricePrecision))
 	}
 
-	if msg.Side != match.BUY && msg.Side != match.SELL {
+	if msg.Side != BUY && msg.Side != SELL {
 		return ErrInvalidTradeSide()
 	}
 

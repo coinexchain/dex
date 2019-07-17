@@ -36,7 +36,6 @@ import (
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
-	market_client "github.com/coinexchain/dex/modules/market/client"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/modules/supplyx"
@@ -329,7 +328,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.bankxKeeper,
 		&app.stakingKeeper,
 	)
-	app.marketKeeper = market.NewKeeper(
+	app.marketKeeper = market.NewBaseKeeper(
 		app.keyMarket,
 		app.tokenKeeper,
 		app.bankxKeeper,
@@ -363,7 +362,7 @@ func (app *CetChainApp) InitModules() {
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		stakingx.NewAppModule(app.stakingXKeeper),
 		asset.NewAppModule(app.assetKeeper),
-		market.NewAppModule(app.marketKeeper, market_client.NewMarketModuleClient()),
+		market.NewAppModule(app.marketKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that

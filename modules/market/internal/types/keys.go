@@ -1,4 +1,4 @@
-package market
+package types
 
 const (
 	// RouterKey = "market"

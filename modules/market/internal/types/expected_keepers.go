@@ -1,7 +1,8 @@
-package market
+package types
 
 import (
 	"github.com/coinexchain/dex/modules/asset"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 

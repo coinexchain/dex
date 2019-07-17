@@ -17,8 +17,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/market/match"
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
 const (
@@ -107,9 +107,9 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		return err
 	}
 
-	symbols := strings.Split(msg.TradingPair, market.SymbolSeparator)
+	symbols := strings.Split(msg.TradingPair, types.SymbolSeparator)
 	userToken := symbols[0]
-	if msg.Side == match.BUY {
+	if msg.Side == types.BUY {
 		userToken = symbols[1]
 	}
 
@@ -121,26 +121,26 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		return errors.New("No have insufficient cet to create market in blockchain")
 	}
 
-	msg.TimeInForce = market.IOC
+	msg.TimeInForce = types.IOC
 	if isGTE {
-		msg.TimeInForce = market.GTE
+		msg.TimeInForce = types.GTE
 	}
 
 	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
 
-func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*market.MsgCreateOrder, error) {
+func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*types.MsgCreateOrder, error) {
 	for _, flag := range createOrderFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop" + flag)
 		}
 	}
-	blocks := market.DefaultGTEOrderLifetime
+	blocks := keepers.DefaultGTEOrderLifetime
 	if viper.GetInt(FlagBlocks) > 0 {
 		blocks = viper.GetInt(FlagBlocks)
 	}
 
-	msg := &market.MsgCreateOrder{
+	msg := &types.MsgCreateOrder{
 		Sender:         sender,
 		TradingPair:    viper.GetString(FlagSymbol),
 		OrderType:      byte(viper.GetInt(FlagOrderType)),
@@ -197,11 +197,11 @@ Examples:
 	return cmd
 }
 
-func CheckSenderAndOrderID(sender []byte, orderID string) (market.MsgCancelOrder, error) {
+func CheckSenderAndOrderID(sender []byte, orderID string) (types.MsgCancelOrder, error) {
 	var (
 		addr sdk.AccAddress
 		err  error
-		msg  market.MsgCancelOrder
+		msg  types.MsgCancelOrder
 	)
 
 	contents := strings.Split(orderID, "-")
@@ -220,7 +220,7 @@ func CheckSenderAndOrderID(sender []byte, orderID string) (market.MsgCancelOrder
 		return msg, errors.Errorf("illegal order sequence, actual %d", sequence)
 	}
 
-	msg = market.MsgCancelOrder{
+	msg = types.MsgCancelOrder{
 		Sender:  sender,
 		OrderID: orderID,
 	}

@@ -4,15 +4,17 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/coinexchain/dex/modules/comment/shorthanzi"
-	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/market/internal/types"
+
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
-	"strings"
-	"testing"
 )
 
 var logStrList = make([]string, 0, 100)
@@ -311,7 +313,7 @@ func Test1(t *testing.T) {
 		`{"codespace":"comment","code":908,"message":"Reward can not be negative"}`,
 	}
 	for i, s := range logStrList {
-		if refLogs[i]!=s {
+		if refLogs[i] != s {
 			t.Errorf("Log String Mismatch!")
 		}
 		fmt.Println(s)
@@ -324,7 +326,7 @@ func Test2(t *testing.T) {
 	testGenesis(ctx, keeper)
 
 	msgHandler := NewHandler(*keeper)
-	msgCTP := &market.MsgCreateTradingPair{
+	msgCTP := &types.MsgCreateTradingPair{
 		Stock:          "cet",
 		Money:          "usdt",
 		Creator:        simpleAddr("00200"),
