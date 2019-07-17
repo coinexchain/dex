@@ -83,7 +83,6 @@ func sameTO(a, order *types.Order) bool {
 	return res
 }
 
-
 type mocBankxKeeper struct {
 	records []string
 }

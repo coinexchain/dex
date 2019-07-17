@@ -11,7 +11,6 @@ const (
 
 	DefaultParamspace       = types.DefaultParamspace
 	DefaultMinGasPriceLimit = types.DefaultMinGasPriceLimit
-
 )
 
 var (
