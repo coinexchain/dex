@@ -22,11 +22,7 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg MsgCommentToken) sdk.R
 	}
 	if msg.Donation > 0 {
 		donatedCoin := sdk.Coins{sdk.Coin{Denom: "cet", Amount: sdk.NewInt(msg.Donation)}}
-		res := k.bxk.SubtractCoins(ctx, msg.Sender, donatedCoin)
-		if res != nil {
-			return res.Result()
-		}
-		k.dk.AddCoinsToFeePool(ctx, donatedCoin)
+		k.dk.DonateToCommunityPool(ctx, msg.Sender, donatedCoin)
 	}
 
 	for _, ref := range msg.References {
