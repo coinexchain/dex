@@ -105,6 +105,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	asset.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	supply.RegisterCodec(cdc)
 
 	//create auth, asset keeper
 	ak := auth.NewAccountKeeper(
