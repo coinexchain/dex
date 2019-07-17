@@ -419,6 +419,10 @@ func (keeper BaseKeeper) removeForbiddenAddress(ctx sdk.Context, symbol string, 
 	return nil
 }
 
+func (keeper BaseKeeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+	return keeper.bkx.GetTotalCoins(ctx, addr)
+}
+
 // -----------------------------------------------------------------------------
 
 // TokenKeeper defines a module interface that facilitates read only access to token store info.

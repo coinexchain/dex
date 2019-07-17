@@ -35,6 +35,20 @@ var (
 	NewToken                = types.NewToken
 	NewMsgIssueToken        = types.NewMsgIssueToken
 	NewMsgTransferOwnership = types.NewMsgTransferOwnership
+	NewMsgMintToken = types.NewMsgMintToken
+		NewMsgBurnToken = types.NewMsgBurnToken
+	NewMsgForbidToken = types.NewMsgForbidToken
+	NewMsgUnForbidToken = types.NewMsgUnForbidToken
+	NewMsgAddTokenWhitelist = types.NewMsgAddTokenWhitelist
+	NewMsgRemoveTokenWhitelist = types.NewMsgRemoveTokenWhitelist
+	NewMsgForbidAddr = types.NewMsgForbidAddr
+	NewMsgUnForbidAddr = types.NewMsgUnForbidAddr
+	NewMsgModifyTokenURL = types.NewMsgModifyTokenURL
+	NewMsgModifyTokenDescription = types.NewMsgModifyTokenDescription
+
+
+
+
 	DefaultParams           = types.DefaultParams
 
 	// variable aliases

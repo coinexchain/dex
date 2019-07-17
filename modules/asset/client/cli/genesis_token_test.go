@@ -1,18 +1,21 @@
 package cli
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
-	"os"
-	"testing"
-
+	dex "github.com/coinexchain/dex/types"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"os"
+	"testing"
 )
 
+func TestMain(m *testing.M) {
+	dex.InitSdkConfig()
+	os.Exit(m.Run())
+}
 func TestAddGenesisToken(t *testing.T) {
-	token := &asset.BaseToken{}
+	token := &types.BaseToken{}
 	_ = token.SetName("aaa")
 	_ = token.SetSymbol("aaa")
 

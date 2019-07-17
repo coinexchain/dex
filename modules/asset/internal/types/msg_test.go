@@ -1,18 +1,11 @@
 package types
 
 import (
-	"os"
 	"reflect"
 	"testing"
 
-	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
-
-func TestMain(m *testing.M) {
-	dex.InitSdkConfig()
-	os.Exit(m.Run())
-}
 
 func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 

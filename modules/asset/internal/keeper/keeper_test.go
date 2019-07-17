@@ -11,7 +11,7 @@ import (
 )
 
 func TestTokenKeeper_IssueToken(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 
 	type args struct {
 		ctx sdk.Context
@@ -72,7 +72,7 @@ func TestTokenKeeper_IssueToken(t *testing.T) {
 }
 
 func TestTokenKeeper_TokenStore(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 
 	// set token
 	token1, err := types.NewToken("ABC token", "abc", 2100, testAddr,
@@ -102,7 +102,7 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 
 }
 func TestTokenKeeper_TokenReserved(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	addr, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	expectErr := types.ErrInvalidIssueOwner()
 
@@ -134,7 +134,7 @@ func TestTokenKeeper_TokenReserved(t *testing.T) {
 }
 
 func TestTokenKeeper_TransferOwnership(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	var addr1, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
@@ -166,7 +166,7 @@ func TestTokenKeeper_TransferOwnership(t *testing.T) {
 }
 
 func TestTokenKeeper_MintToken(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
@@ -243,7 +243,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 }
 
 func TestTokenKeeper_BurnToken(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
@@ -320,7 +320,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 }
 
 func TestTokenKeeper_ForbidToken(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
@@ -377,7 +377,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 }
 
 func TestTokenKeeper_UnForbidToken(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 
 	//case 1: base-case ok
@@ -413,7 +413,7 @@ func TestTokenKeeper_UnForbidToken(t *testing.T) {
 }
 
 func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	whitelist := mockAddrList()
 
@@ -449,7 +449,7 @@ func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
 }
 
 func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	whitelist := mockAddrList()
 
@@ -491,7 +491,7 @@ func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 }
 
 func TestTokenKeeper_ForbidAddress(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	mock := mockAddrList()
 
@@ -527,7 +527,7 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 }
 
 func TestTokenKeeper_UnForbidAddress(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	mock := mockAddrList()
 
@@ -569,7 +569,7 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 }
 
 func TestTokenKeeper_ModifyTokenURL(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
@@ -600,7 +600,7 @@ func TestTokenKeeper_ModifyTokenURL(t *testing.T) {
 }
 
 func TestTokenKeeper_ModifyTokenDescription(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 

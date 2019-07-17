@@ -1,16 +1,22 @@
 package asset
 
 import (
+	"os"
 	"testing"
 
 	"github.com/coinexchain/dex/types"
-	"github.com/stretchr/testify/require"
-
+	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 )
 
+func TestMain(m *testing.M) {
+	dex.InitSdkConfig()
+	os.Exit(m.Run())
+}
+
 func TestGenesis(t *testing.T) {
-	input := setupTestInput()
+	input := createTestInput()
 	owner, _ := sdk.AccAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd")
 	input.tk.SetParams(input.ctx, DefaultParams())
 
@@ -69,7 +75,7 @@ func TestGenesis(t *testing.T) {
 		IsForbidden:      false,
 	}
 	state.Tokens = append(state.Tokens, cet, abc, abcDump, abcInvalid)
-	require.Error(t, state.ValidateGenesis())
+	require.Error(t, ValidateGenesis(state))
 	state.Tokens = state.Tokens[:2]
 
 	whitelist := []string{"cet:coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke"}
@@ -78,7 +84,7 @@ func TestGenesis(t *testing.T) {
 	forbiddenList := []string{"abc:coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g"}
 	state.ForbiddenAddresses = append(state.ForbiddenAddresses, forbiddenList...)
 
-	require.NoError(t, state.ValidateGenesis())
+	require.NoError(t, ValidateGenesis(state))
 	InitGenesis(input.ctx, input.tk, state)
 
 	res := input.tk.GetWhitelist(input.ctx, "cet")

@@ -1,4 +1,4 @@
-package keeper
+package asset
 
 import (
 	"github.com/coinexchain/dex/modules/asset/internal/types"
@@ -27,7 +27,7 @@ import (
 type testInput struct {
 	cdc *codec.Codec
 	ctx sdk.Context
-	tk  BaseKeeper
+	tk  Keeper
 }
 
 func createTestInput() testInput {

@@ -1,7 +1,6 @@
 package asset
 
 import (
-	"github.com/coinexchain/dex/modules/asset/internal/keeper"
 	"reflect"
 	"strings"
 	"testing"
@@ -12,19 +11,20 @@ import (
 )
 
 func TestInvalidMsg(t *testing.T) {
-	h := NewHandler(BaseKeeper{})
+	input := createTestInput()
+	h := NewHandler(input.tk)
 
-	res := h(sdk.Context{}, sdk.NewTestMsg())
+	res := h(input.ctx, sdk.NewTestMsg())
 	require.False(t, res.IsOK())
 	require.True(t, strings.Contains(res.Log, "Unrecognized asset Msg type: "))
 }
 
 func Test_handleMsg(t *testing.T) {
-	input := setupTestInput()
+	input := createTestInput()
 	h := NewHandler(input.tk)
 	owner, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
-	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, types.NewCetCoins(1E18))
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -34,24 +34,24 @@ func Test_handleMsg(t *testing.T) {
 	}{
 		{
 			"issue_token",
-			NewMsgIssueToken("ABC Token", "abc", 210000000000, tAccAddr,
+			NewMsgIssueToken("ABC Token", "abc", 210000000000, testAddr,
 				true, true, true, true, "", ""),
 			true,
 		},
 		{
 			"issue_token_invalid",
-			NewMsgIssueToken("999 Token", "999", 210000000000, tAccAddr,
+			NewMsgIssueToken("999 Token", "999", 210000000000, testAddr,
 				true, true, true, true, "", ""),
 			false,
 		},
 		{
 			"transfer_ownership",
-			NewMsgTransferOwnership("abc", tAccAddr, owner),
+			NewMsgTransferOwnership("abc", testAddr, owner),
 			true,
 		},
 		{
 			"transfer_ownership_invalid",
-			NewMsgTransferOwnership("abc", tAccAddr, owner),
+			NewMsgTransferOwnership("abc", testAddr, owner),
 			false,
 		},
 		{
@@ -81,7 +81,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"forbid_token_invalid",
-			NewMsgForbidToken("abc", tAccAddr),
+			NewMsgForbidToken("abc", testAddr),
 			false,
 		},
 		{
@@ -91,12 +91,12 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"unforbid_token_invalid",
-			NewMsgUnForbidToken("abc", tAccAddr),
+			NewMsgUnForbidToken("abc", testAddr),
 			false,
 		},
 		{
 			"add_token_whitelist",
-			NewMsgAddTokenWhitelist("abc", owner, keeper.mockWhitelist()),
+			NewMsgAddTokenWhitelist("abc", owner, mockAddrList()),
 			true,
 		},
 		{
@@ -106,7 +106,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"remove_token_whitelist",
-			NewMsgRemoveTokenWhitelist("abc", owner, keeper.mockWhitelist()),
+			NewMsgRemoveTokenWhitelist("abc", owner, mockAddrList()),
 			true,
 		},
 		{
@@ -116,7 +116,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"forbid_address",
-			NewMsgForbidAddr("abc", owner, keeper.mockAddresses()),
+			NewMsgForbidAddr("abc", owner, mockAddrList()),
 			true,
 		},
 		{
@@ -126,7 +126,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"unforbid_address",
-			NewMsgUnForbidAddr("abc", owner, keeper.mockAddresses()),
+			NewMsgUnForbidAddr("abc", owner, mockAddrList()),
 			true,
 		},
 		{
@@ -165,69 +165,69 @@ func Test_handleMsg(t *testing.T) {
 }
 
 func Test_IssueToken_DeductFee(t *testing.T) {
-	input := setupTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	h := NewHandler(input.tk)
 
 	// invalid account issue token
-	msg := NewMsgIssueToken("ABC Token", symbol, 210000000000, tAccAddr,
+	msg := NewMsgIssueToken("ABC Token", symbol, 210000000000, testAddr,
 		false, false, false, false, "", "")
 	res := h(input.ctx, msg)
 	require.False(t, res.IsOK())
 
 	// issue token deduct fee
-	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, types.NewCetCoins(1E18))
 	require.NoError(t, err)
 	res = h(input.ctx, msg)
 	require.True(t, res.IsOK())
 
-	coins := input.tk.bkx.GetTotalCoins(input.ctx, tAccAddr)
+	coins := input.tk.GetTotalCoins(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(210000000000), coins.AmountOf(symbol))
 	require.Equal(t, sdk.NewInt(1E18-1E12), coins.AmountOf("cet"))
 
 }
 
 func Test_BurnToken_SubtractCoins(t *testing.T) {
-	input := setupTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	h := NewHandler(input.tk)
 
 	// issue token
-	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, tAccAddr,
+	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, testAddr,
 		true, true, false, false, "", "")
-	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, types.NewCetCoins(1E18))
 	require.NoError(t, err)
 	res := h(input.ctx, msgIssue)
 	require.True(t, res.IsOK())
 
 	// burn token
-	msgBurn := NewMsgBurnToken(symbol, 100, tAccAddr)
+	msgBurn := NewMsgBurnToken(symbol, 100, testAddr)
 	res = h(input.ctx, msgBurn)
 	require.True(t, res.IsOK())
 
-	coins := input.tk.bkx.GetTotalCoins(input.ctx, tAccAddr)
+	coins := input.tk.GetTotalCoins(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(2000), coins.AmountOf(symbol))
 }
 
 func Test_MintToken_AddCoins(t *testing.T) {
-	input := setupTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	h := NewHandler(input.tk)
 
 	// issue token
-	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, tAccAddr,
+	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, testAddr,
 		true, true, false, false, "", "")
-	err := input.tk.AddToken(input.ctx, tAccAddr, types.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, types.NewCetCoins(1E18))
 	require.NoError(t, err)
 	res := h(input.ctx, msgIssue)
 	require.True(t, res.IsOK())
 
 	// mint token
-	msgMint := NewMsgMintToken(symbol, 100, tAccAddr)
+	msgMint := NewMsgMintToken(symbol, 100, testAddr)
 	res = h(input.ctx, msgMint)
 	require.True(t, res.IsOK())
 
-	coins := input.tk.bkx.GetTotalCoins(input.ctx, tAccAddr)
+	coins := input.tk.GetTotalCoins(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(2200), coins.AmountOf(symbol))
 
 }

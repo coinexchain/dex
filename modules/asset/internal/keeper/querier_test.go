@@ -13,7 +13,7 @@ import (
 )
 
 func Test_queryToken(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, types.QueryToken),
 		Data: []byte{},
@@ -60,7 +60,7 @@ func Test_queryToken(t *testing.T) {
 }
 
 func Test_queryAllTokenList(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, types.QueryTokenList),
 		Data: []byte{},
@@ -96,7 +96,7 @@ func Test_queryAllTokenList(t *testing.T) {
 }
 
 func Test_queryWhitelist(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	whitelist := mockAddrList()
 	req := abci.RequestQuery{
@@ -139,7 +139,7 @@ func Test_queryWhitelist(t *testing.T) {
 }
 
 func Test_queryForbiddenAddr(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	symbol := "abc"
 	mock := mockAddrList()
 	req := abci.RequestQuery{
@@ -182,7 +182,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 }
 
 func Test_queryReservedSymbols(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, types.QueryReservedSymbols),
 		Data: []byte{},
@@ -199,7 +199,7 @@ func Test_queryReservedSymbols(t *testing.T) {
 }
 
 func Test_queryDefault(t *testing.T) {
-	input := CreateTestInput()
+	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, "unknown"),
 		Data: []byte{},
