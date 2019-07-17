@@ -15,8 +15,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
-
-	"github.com/coinexchain/dex/modules/asset"
 )
 
 var tokenFlags = []string{
@@ -75,7 +73,7 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 			}
 
 			// add genesis account to the app state
-			var genesisState asset.GenesisState
+			var genesisState types.GenesisState
 
 			cdc.MustUnmarshalJSON(appState[types.ModuleName], &genesisState)
 
