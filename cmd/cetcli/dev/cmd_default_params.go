@@ -2,11 +2,11 @@ package dev
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/market"
 	"os"
 	"reflect"
 
 	"github.com/coinexchain/dex/modules/authx/types"
-	"github.com/coinexchain/dex/modules/market/internal/keepers"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -48,7 +48,7 @@ func getParamSets() []moduleParamSet {
 		toParamSet("bankx", bankx.DefaultParams()),
 		toParamSet("stakingx", stakingx.DefaultParams()),
 		toParamSet("asset", asset.DefaultParams()),
-		toParamSet("market", keepers.DefaultParams()),
+		toParamSet("market", market.DefaultParams()),
 	}
 	if viper.GetBool("include-sdk") {
 		set = append(set,

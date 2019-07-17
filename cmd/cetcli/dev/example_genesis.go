@@ -12,7 +12,6 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/market/internal/types"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -72,7 +71,7 @@ func createAbcToken() asset.Token {
 }
 
 func createExampleGenesisMarketData() market.GenesisState {
-	order0 := &types.Order{
+	order0 := &market.Order{
 		Sender:      accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Sequence:    100,
 		TradingPair: "abc/cet",
@@ -83,7 +82,7 @@ func createExampleGenesisMarketData() market.GenesisState {
 		TimeInForce: 10092839,
 		Height:      100,
 	}
-	order1 := &types.Order{
+	order1 := &market.Order{
 		Sender:      accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Sequence:    170,
 		TradingPair: "btc/cet",
@@ -95,7 +94,7 @@ func createExampleGenesisMarketData() market.GenesisState {
 		Height:      100,
 	}
 
-	market0 := types.MarketInfo{
+	market0 := market.MarketInfo{
 		Stock:             "abc",
 		Money:             "cet",
 		PricePrecision:    8,
