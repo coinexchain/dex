@@ -4,9 +4,12 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
 	types2 "github.com/coinexchain/dex/modules/distributionx/types"
+
 	"os"
 	"testing"
 	"time"
+
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 
 	"github.com/stretchr/testify/require"
 
@@ -55,7 +58,7 @@ func initAppWithBaseAccounts(accs ...auth.BaseAccount) *CetChainApp {
 func addGenesisAccounts(genState *GenesisState, accs ...auth.BaseAccount) {
 	var amount int64
 	for _, acc := range accs {
-		genAcc := NewGenesisAccount(&acc)
+		genAcc := genaccounts.NewGenesisAccount(&acc)
 		genState.Accounts = append(genState.Accounts, genAcc)
 		amount = amount + acc.Coins.AmountOf(dex.CET).Int64()
 	}
