@@ -48,4 +48,6 @@ type (
 	GenesisState = types.GenesisState
 	Token        = types.Token
 	BaseToken    = types.BaseToken
+	MsgForbidToken = types.MsgForbidToken
+	MsgForbidAddr = types.MsgForbidAddr
 )
