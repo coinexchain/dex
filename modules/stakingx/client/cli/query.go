@@ -8,12 +8,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 	staking_cli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
-	staking_types "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	stakingQueryCmd := staking_cli.GetQueryCmd(staking_types.QuerierRoute, cdc)
+	stakingQueryCmd := staking_cli.GetQueryCmd(staking.QuerierRoute, cdc)
 	BondPoolCmd := client.GetCommands(GetCmdQueryPool(cdc))[0]
 
 	//replace pool cmd with new bondPoolCmd which can also show the non-bondable-cet-tokens in locked positions
