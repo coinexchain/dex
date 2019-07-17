@@ -3,18 +3,20 @@ package stakingx
 import (
 	"encoding/json"
 
-	"github.com/coinexchain/dex/types"
-
-	"github.com/cosmos/cosmos-sdk/client/context"
-
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	staking_cli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 	staking_types "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	stakingx_cli "github.com/coinexchain/dex/modules/stakingx/client/cli"
+	stakingx_rest "github.com/coinexchain/dex/modules/stakingx/client/rest"
+	"github.com/coinexchain/dex/types"
 )
 
 var (
@@ -54,17 +56,17 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 
 // register rest routes
 func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	amb.apc.RegisterRESTRoutes(ctx, rtr)
+	stakingx_rest.RegisterRoutes(ctx, rtr)
 }
 
 // get the root tx command of this module
 func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.apc.GetTxCmd(cdc)
+	return staking_cli.GetTxCmd(staking_types.StoreKey, cdc)
 }
 
 // get the root query command of this module
 func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.apc.GetQueryCmd(cdc)
+	return stakingx_cli.GetQueryCmd(cdc)
 }
 
 //___________________________
@@ -76,11 +78,9 @@ type AppModule struct {
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(stakingxKeeper Keeper, apc types.ModuleClient) AppModule {
+func NewAppModule(stakingxKeeper Keeper) AppModule {
 	return AppModule{
-		AppModuleBasic: AppModuleBasic{apc: apc},
 		stakingXKeeper: stakingxKeeper,
-		apc:            apc,
 	}
 }
 

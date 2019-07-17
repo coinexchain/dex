@@ -39,7 +39,6 @@ import (
 	market_client "github.com/coinexchain/dex/modules/market/client"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
-	stakingx_client "github.com/coinexchain/dex/modules/stakingx/client"
 	"github.com/coinexchain/dex/modules/supplyx"
 )
 
@@ -362,7 +361,7 @@ func (app *CetChainApp) InitModules() {
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
-		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
+		stakingx.NewAppModule(app.stakingXKeeper),
 		asset.NewAppModule(app.assetKeeper),
 		market.NewAppModule(app.marketKeeper, market_client.NewMarketModuleClient()),
 	)
