@@ -16,8 +16,8 @@ import (
 
 type Keeper struct {
 	ParamSubspace params.Subspace
-	Axk           authx.AccountXKeeper
-	Bk            bank.BaseKeeper
+	Axk           types.ExpectedAccountXKeeper
+	Bk            bank.Keeper
 	Ak            auth.AccountKeeper
 	Tk            types.ExpectedAssetStatusKeeper
 	Sk            types.SupplyKeeper
