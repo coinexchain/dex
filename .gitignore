@@ -16,3 +16,6 @@ build/
 cmd/cetcli/statik/statik.go
 /cmd/cetcli/swagger/bower_components/
 tools-stamp
+*.swp
+*.un~
+*.go~
