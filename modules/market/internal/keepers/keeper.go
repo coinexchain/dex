@@ -85,9 +85,9 @@ func (keeper *DelistKeeper) RemoveDelistRequestsBeforeTime(ctx sdk.Context, time
 type Keeper struct {
 	paramSubspace params.Subspace
 	marketKey     sdk.StoreKey
+	cdc           *codec.Codec
 	axk           types.ExpectedAssetStatusKeeper
 	bnk           types.ExpectedBankxKeeper
-	cdc           *codec.Codec
 	ock           *OrderCleanUpDayKeeper
 	gmk           GlobalMarketInfoKeeper
 	msgProducer   msgqueue.MsgSender
@@ -99,11 +99,11 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 	paramstore params.Subspace) Keeper {
 
 	return Keeper{
+		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
 		marketKey:     key,
+		cdc:           cdcVal,
 		axk:           axkVal,
 		bnk:           bnkVal,
-		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
-		cdc:           cdcVal,
 		ock:           NewOrderCleanUpDayKeeper(key),
 		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
 		msgProducer:   msgKeeperVal,
