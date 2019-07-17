@@ -221,6 +221,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
 		authx.ModuleName:          {supply.Basic},
+		asset.ModuleName:          {supply.Burner, supply.Minter},
 	}
 
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
