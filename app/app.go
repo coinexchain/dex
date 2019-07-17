@@ -30,7 +30,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/asset"
-	asset_client "github.com/coinexchain/dex/modules/asset/client"
 	"github.com/coinexchain/dex/modules/authx"
 	authx_client "github.com/coinexchain/dex/modules/authx/client"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -364,7 +363,7 @@ func (app *CetChainApp) InitModules() {
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		stakingx.NewAppModule(app.stakingXKeeper, stakingx_client.NewStakingXModuleClient()),
-		asset.NewAppModule(app.assetKeeper, asset_client.NewAssetModuleClient()),
+		asset.NewAppModule(app.assetKeeper),
 		market.NewAppModule(app.marketKeeper, market_client.NewMarketModuleClient()),
 	)
 

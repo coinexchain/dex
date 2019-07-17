@@ -3,17 +3,17 @@ package asset
 import (
 	"encoding/json"
 
-	"github.com/coinexchain/dex/types"
-
-	"github.com/cosmos/cosmos-sdk/client/context"
-
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
+	"github.com/coinexchain/dex/modules/asset/client/cli"
+	"github.com/coinexchain/dex/modules/asset/client/rest"
 )
 
 var (
@@ -22,9 +22,7 @@ var (
 )
 
 // app module basics object
-type AppModuleBasic struct {
-	apc types.ModuleClient
-}
+type AppModuleBasic struct{}
 
 // module name
 func (AppModuleBasic) Name() string {
@@ -53,34 +51,31 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 }
 
 // register rest routes
-func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	amb.apc.RegisterRESTRoutes(ctx, rtr)
+func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr, ModuleCdc, StoreKey)
 }
 
 // get the root tx command of this module
-func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.apc.GetTxCmd(cdc)
+func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetTxCmd(cdc)
 }
 
 // get the root query command of this module
-func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.apc.GetQueryCmd(cdc)
+func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetQueryCmd(cdc)
 }
 
 //___________________________
 // app module object
 type AppModule struct {
 	AppModuleBasic
-	assetKeeper Keeper //TODO: rename to AssetKeeper
-	apc         types.ModuleClient
+	assetKeeper Keeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(assetKeeper Keeper, apc types.ModuleClient) AppModule {
+func NewAppModule(assetKeeper Keeper) AppModule {
 	return AppModule{
-		AppModuleBasic: AppModuleBasic{apc: apc},
-		assetKeeper:    assetKeeper,
-		apc:            apc,
+		assetKeeper: assetKeeper,
 	}
 }
 
