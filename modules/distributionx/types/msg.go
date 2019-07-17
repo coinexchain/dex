@@ -1,8 +1,9 @@
-package distributionx
+package types
 
 import (
-	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/types"
 )
 
 // RouterKey is the name of the bankx module

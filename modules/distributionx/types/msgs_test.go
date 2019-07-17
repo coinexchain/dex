@@ -1,4 +1,4 @@
-package distributionx
+package types
 
 import (
 	"os"
@@ -24,8 +24,8 @@ func TestMain(m *testing.M) {
 func TestDonateToCommunityPoolRoute(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgDonateToCommunityPool(addr, types.NewCetCoins(1e8))
-	require.Equal(t, msg.Route(), "distrx")
-	require.Equal(t, msg.Type(), "donate_to_community_pool")
+	require.Equal(t, Route(), "distrx")
+	require.Equal(t, Type(), "donate_to_community_pool")
 }
 
 func TestDonateToCommunityPoolValidation(t *testing.T) {
@@ -49,7 +49,7 @@ func TestDonateToCommunityPoolValidation(t *testing.T) {
 func TestDonateToCommunityPoolGetSignBytes(t *testing.T) {
 	addr := sdk.AccAddress(crypto.AddressHash([]byte("addr")))
 	msg := NewMsgDonateToCommunityPool(addr, validCoins)
-	sign := msg.GetSignBytes()
+	sign := GetSignBytes()
 
 	expected := `{"type":"distrx/MsgDonateToCommunityPool","value":{"amount":[{"amount":"1000000000","denom":"cet"}],"from_addr":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"}}`
 	require.Equal(t, expected, string(sign))
@@ -58,7 +58,7 @@ func TestDonateToCommunityPoolGetSignBytes(t *testing.T) {
 func TestDonateToCommunityPoolGetSigners(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgDonateToCommunityPool(addr, validCoins)
-	signers := msg.GetSigners()
+	signers := GetSigners()
 	require.Equal(t, 1, len(signers))
 	require.Equal(t, addr, signers[0])
 }

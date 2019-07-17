@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/coinexchain/dex/modules/distributionx/types"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -10,8 +11,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-
-	"github.com/coinexchain/dex/modules/distributionx"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
@@ -44,7 +43,7 @@ func DonateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			return
 		}
 
-		msg := distributionx.NewMsgDonateToCommunityPool(fromAddr, req.Amount)
+		msg := types.NewMsgDonateToCommunityPool(fromAddr, req.Amount)
 		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }

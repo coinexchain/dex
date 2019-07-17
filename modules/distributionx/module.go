@@ -3,17 +3,18 @@ package distributionx
 import (
 	"encoding/json"
 
-	"github.com/coinexchain/dex/types"
-
-	"github.com/cosmos/cosmos-sdk/client/context"
-
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
+	"github.com/coinexchain/dex/modules/distributionx/client/cli"
+	"github.com/coinexchain/dex/modules/distributionx/client/rest"
+	"github.com/coinexchain/dex/modules/distributionx/types"
 )
 
 var (
@@ -22,18 +23,16 @@ var (
 )
 
 // app module basics object
-type AppModuleBasic struct {
-	mc types.ModuleClient
-}
+type AppModuleBasic struct {}
 
 // module name
 func (AppModuleBasic) Name() string {
-	return ModuleName
+	return types.ModuleName
 }
 
 // register module codec
 func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
-	RegisterCodec(cdc)
+	types.RegisterCodec(cdc)
 }
 
 // default genesis state
@@ -48,17 +47,17 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 
 // register rest routes
 func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	amb.mc.RegisterRESTRoutes(ctx, rtr)
+	rest.RegisterRoutes(ctx, rtr, types.ModuleCdc)
 }
 
 // get the root tx command of this module
 func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.mc.GetTxCmd(cdc)
+	return cli.DonateTxCmd(cdc)
 }
 
 // get the root query command of this module
 func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return amb.mc.GetQueryCmd(cdc)
+	return nil
 }
 
 //___________________________
@@ -66,28 +65,23 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	k  Keeper
-	mc types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(k Keeper, mc types.ModuleClient) AppModule {
-	return AppModule{
-		AppModuleBasic: AppModuleBasic{mc: mc},
-		k:              k,
-		mc:             mc,
-	}
+func NewAppModule(k Keeper) AppModule {
+	return AppModule{k: k}
 }
 
 // module name
 func (AppModule) Name() string {
-	return ModuleName
+	return types.ModuleName
 }
 
 // register invariants
 func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // module message route name
-func (AppModule) Route() string { return RouterKey }
+func (AppModule) Route() string { return types.RouterKey }
 
 // module handler
 func (am AppModule) NewHandler() sdk.Handler {

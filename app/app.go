@@ -35,7 +35,6 @@ import (
 	authx_client "github.com/coinexchain/dex/modules/authx/client"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/distributionx"
-	distx_client "github.com/coinexchain/dex/modules/distributionx/client"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	market_client "github.com/coinexchain/dex/modules/market/client"
@@ -360,7 +359,7 @@ func (app *CetChainApp) InitModules() {
 		incentive.NewAppModule(app.incentiveKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
-		distributionx.NewAppModule(app.distrxKeeper, distx_client.NewDistrXModuleClient()),
+		distributionx.NewAppModule(app.distrxKeeper),
 		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),

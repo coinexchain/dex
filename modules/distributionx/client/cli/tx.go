@@ -13,7 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/coinexchain/dex/modules/distributionx"
+	"github.com/coinexchain/dex/modules/distributionx/types"
 )
 
 // DonateTxCmd will create a DonateToCommunityPool tx and sign it with the given key.
@@ -45,7 +45,7 @@ func DonateTxCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// build and sign the transaction, then broadcast to Tendermint
-			msg := distributionx.NewMsgDonateToCommunityPool(from, coins)
+			msg := types.NewMsgDonateToCommunityPool(from, coins)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}

@@ -1,4 +1,4 @@
-package distributionx
+package types
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"

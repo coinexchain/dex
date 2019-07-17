@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
+	types2 "github.com/coinexchain/dex/modules/distributionx/types"
 	"os"
 	"testing"
 	"time"
@@ -20,7 +21,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/testutil"
@@ -381,7 +381,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 
 	//build tx
 	coins = dex.NewCetCoins(1e8)
-	msg := distributionx.NewMsgDonateToCommunityPool(fromAddr, coins)
+	msg := types2.NewMsgDonateToCommunityPool(fromAddr, coins)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 

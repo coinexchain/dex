@@ -3,6 +3,7 @@ package distributionx
 import (
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
+	types2 "github.com/coinexchain/dex/modules/distributionx/types"
 
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -77,7 +78,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 
 	addr := sdk.AccAddress([]byte("addr"))
 	acc := auth.NewBaseAccountWithAddress(addr)
-	acc.SetCoins(validCoins)
+	acc.SetCoins(types2.validCoins)
 	input.ak.SetAccount(input.ctx, &acc)
 
 	fromAcc := input.ak.GetAccount(input.ctx, addr)
@@ -87,7 +88,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 	require.Nil(t, feePool.CommunityPool)
 
 	Coins := types.NewCetCoins(1e8)
-	msg := NewMsgDonateToCommunityPool(addr, Coins)
+	msg := types2.NewMsgDonateToCommunityPool(addr, Coins)
 	res := handleMsgDonateToCommunityPool(input.ctx, input.k, msg)
 
 	require.True(t, res.IsOK())
@@ -104,7 +105,7 @@ func TestDonateToCommunityPoolFailed(t *testing.T) {
 
 	addr := sdk.AccAddress([]byte("addr"))
 	acc := auth.NewBaseAccountWithAddress(addr)
-	acc.SetCoins(validCoins)
+	acc.SetCoins(types2.validCoins)
 	input.ak.SetAccount(input.ctx, &acc)
 
 	fromAcc := input.ak.GetAccount(input.ctx, addr)
@@ -114,7 +115,7 @@ func TestDonateToCommunityPoolFailed(t *testing.T) {
 	require.Nil(t, feePool.CommunityPool)
 
 	Coins := types.NewCetCoins(11e8)
-	msg := NewMsgDonateToCommunityPool(addr, Coins)
+	msg := types2.NewMsgDonateToCommunityPool(addr, Coins)
 	res := handleMsgDonateToCommunityPool(input.ctx, input.k, msg)
 
 	require.False(t, res.IsOK())
