@@ -2,9 +2,6 @@ package keeper
 
 import (
 	"bytes"
-	"github.com/coinexchain/dex/modules/asset/internal/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 	"strings"
 
 	"github.com/tendermint/tendermint/libs/bech32"
@@ -12,7 +9,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -41,6 +41,9 @@ type Keeper interface {
 	SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	SetParams(ctx sdk.Context, params types.Params)
 	GetParams(ctx sdk.Context) (params types.Params)
+
+	SendCoinsFromAssetModuleToAccount(ctx sdk.Context, addresses sdk.AccAddress, amt sdk.Coins) sdk.Error
+	SendCoinsFromAccountToAssetModule(ctx sdk.Context, addresses sdk.AccAddress, amt sdk.Coins) sdk.Error
 }
 
 var _ Keeper = (*BaseKeeper)(nil)
@@ -125,7 +128,11 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 		return err
 	}
 
-	return keeper.SetToken(ctx, token)
+	if err := keeper.SetToken(ctx, token); err != nil {
+		return err
+	}
+
+	return keeper.sk.MintCoins(ctx, types.ModuleName, types.NewTokenCoins(symbol, totalSupply))
 }
 
 //TransferOwnership - transfer token owner
@@ -161,7 +168,11 @@ func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.Acc
 		return err
 	}
 
-	return keeper.SetToken(ctx, token)
+	if err := keeper.SetToken(ctx, token); err != nil {
+		return err
+	}
+
+	return keeper.sk.MintCoins(ctx, types.ModuleName, types.NewTokenCoins(symbol, amount))
 }
 
 //BurnToken - burn token
@@ -182,14 +193,19 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 	if err := token.SetTotalSupply(token.GetTotalSupply() - amount); err != nil {
 		return err
 	}
+	//do not need anymore since notbondedAccount can not burn tokens
+	//if token.GetSymbol() == dex.CET {
+	//	if err := updateNotBondPool(amount, keeper, ctx); err != nil {
+	//		return err
+	//	}
+	//}
 
-	if token.GetSymbol() == dex.CET {
-		if err := updateNotBondPool(amount, keeper, ctx); err != nil {
-			return err
-		}
+	if err := keeper.SetToken(ctx, token); err != nil {
+		return err
 	}
 
-	return keeper.SetToken(ctx, token)
+	return keeper.sk.BurnCoins(ctx, types.ModuleName, types.NewTokenCoins(symbol, amount))
+
 }
 
 func updateNotBondPool(amount int64, keeper BaseKeeper, ctx sdk.Context) sdk.Error {
@@ -340,6 +356,14 @@ func (keeper BaseKeeper) SetToken(ctx sdk.Context, token types.Token) sdk.Error 
 	return nil
 }
 
+func (keeper BaseKeeper) SendCoinsFromAssetModuleToAccount(ctx sdk.Context, addresses sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return keeper.sk.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addresses, amt)
+}
+
+func (keeper BaseKeeper) SendCoinsFromAccountToAssetModule(ctx sdk.Context, addresses sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return keeper.sk.SendCoinsFromAccountToModule(ctx, addresses, types.ModuleName, amt)
+}
+
 func (keeper BaseKeeper) checkPrecondition(ctx sdk.Context, symbol string, owner sdk.AccAddress) (types.Token, sdk.Error) {
 	token := keeper.GetToken(ctx, symbol)
 	if token == nil {
@@ -439,7 +463,8 @@ func (keeper BaseTokenKeeper) GetToken(ctx sdk.Context, symbol string) types.Tok
 }
 
 // GetAllTokens - returns all tokens.
-func (keeper BaseTokenKeeper) GetAllTokens(ctx sdk.Context) (tokens []types.Token) {
+func (keeper BaseTokenKeeper) GetAllTokens(ctx sdk.Context) []types.Token {
+	tokens := make([]types.Token, 0)
 	store := ctx.KVStore(keeper.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.TokenKey)
 	defer iterator.Close()
@@ -452,7 +477,8 @@ func (keeper BaseTokenKeeper) GetAllTokens(ctx sdk.Context) (tokens []types.Toke
 }
 
 // GetWhitelist - returns whitelist.
-func (keeper BaseTokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) (whitelist []sdk.AccAddress) {
+func (keeper BaseTokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddress {
+	whitelist := make([]sdk.AccAddress, 0)
 	keyPrefix := types.GetWhitelistKeyPrefix(symbol)
 
 	keeper.iterateAddrKey(ctx, keyPrefix, func(key []byte) (stop bool) {
@@ -465,7 +491,8 @@ func (keeper BaseTokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) (whit
 }
 
 // GetForbiddenAddresses - returns all forbidden addr
-func (keeper BaseTokenKeeper) GetForbiddenAddresses(ctx sdk.Context, symbol string) (addresses []sdk.AccAddress) {
+func (keeper BaseTokenKeeper) GetForbiddenAddresses(ctx sdk.Context, symbol string) []sdk.AccAddress {
+	addresses := make([]sdk.AccAddress, 0)
 	keyPrefix := types.GetForbiddenAddrKeyPrefix(symbol)
 
 	keeper.iterateAddrKey(ctx, keyPrefix, func(key []byte) (stop bool) {

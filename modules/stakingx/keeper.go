@@ -89,16 +89,18 @@ func (k Keeper) CalcBondPoolStatus(ctx sdk.Context) BondPool {
 }
 
 func calcBondedRatio(p *BondPool) sdk.Dec {
-	if p.BondedTokens.IsNegative() || p.NonBondableTokens.IsNegative() {
-		return sdk.ZeroDec()
-	}
-
-	bondableTokens := p.TotalSupply.Sub(p.NonBondableTokens)
-	if !bondableTokens.IsPositive() {
-		return sdk.ZeroDec()
-	}
-
-	return p.BondedTokens.ToDec().QuoInt(bondableTokens)
+	//if p.BondedTokens.IsNegative() || p.NonBondableTokens.IsNegative() {
+	//	return sdk.ZeroDec()
+	//}
+	//
+	//bondableTokens := p.TotalSupply.Sub(p.NonBondableTokens)
+	//if !bondableTokens.IsPositive() {
+	//	return sdk.ZeroDec()
+	//}
+	//
+	//return p.BondedTokens.ToDec().QuoInt(bondableTokens)
+	//TODO:
+	return sdk.ZeroDec()
 }
 
 func calcNonBondableTokens(ctx sdk.Context, k *Keeper) sdk.Int {

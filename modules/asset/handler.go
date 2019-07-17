@@ -3,9 +3,9 @@ package asset
 import (
 	"strconv"
 
-	"github.com/coinexchain/dex/modules/asset/internal/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 // NewHandler returns a handler for "asset" type messages.
@@ -64,9 +64,13 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken
 		return err.Result()
 	}
 
-	if err := keeper.AddToken(ctx, msg.Owner, types.NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
+	if err := keeper.SendCoinsFromAssetModuleToAccount(ctx, msg.Owner, types.NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
 		return err.Result()
 	}
+
+	//if err := keeper.AddToken(ctx, msg.Owner, types.NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
+	//	return err.Result()
+	//}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(types.EventTypeAsset,
@@ -115,10 +119,13 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg types.MsgMintToken) 
 	if err := keeper.MintToken(ctx, msg.Symbol, msg.OwnerAddress, msg.Amount); err != nil {
 		return err.Result()
 	}
-
-	if err := keeper.AddToken(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
+	if err := keeper.SendCoinsFromAssetModuleToAccount(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
 		return err.Result()
 	}
+
+	//if err := keeper.AddToken(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
+	//	return err.Result()
+	//}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(types.EventTypeAsset,
@@ -139,14 +146,17 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg types.MsgBurnToken) 
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
+	if err := keeper.SendCoinsFromAccountToAssetModule(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
+		return err.Result()
+	}
 
 	if err := keeper.BurnToken(ctx, msg.Symbol, msg.OwnerAddress, msg.Amount); err != nil {
 		return err.Result()
 	}
 
-	if err := keeper.SubtractToken(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
-		return err.Result()
-	}
+	//if err := keeper.SubtractToken(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
+	//	return err.Result()
+	//}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(types.EventTypeAsset,

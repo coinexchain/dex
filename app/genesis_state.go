@@ -73,22 +73,28 @@ func (app *CetChainApp) ExportGenesisState(ctx sdk.Context) GenesisState {
 func FromMap(cdc *codec.Codec, g map[string]json.RawMessage) GenesisState {
 	gs := GenesisState{}
 
-	cdc.MustUnmarshalJSON(g[genaccounts.ModuleName], &gs.Accounts)
-	cdc.MustUnmarshalJSON(g[auth.ModuleName], &gs.AuthData)
-	cdc.MustUnmarshalJSON(g[authx.ModuleName], &gs.AuthXData)
-	cdc.MustUnmarshalJSON(g[bank.ModuleName], &gs.BankData)
-	cdc.MustUnmarshalJSON(g[bankx.ModuleName], &gs.BankXData)
-	cdc.MustUnmarshalJSON(g[staking.ModuleName], &gs.StakingData)
-	cdc.MustUnmarshalJSON(g[stakingx.ModuleName], &gs.StakingXData)
-	cdc.MustUnmarshalJSON(g[distribution.ModuleName], &gs.DistrData)
-	cdc.MustUnmarshalJSON(g[gov.ModuleName], &gs.GovData)
-	cdc.MustUnmarshalJSON(g[crisis.ModuleName], &gs.CrisisData)
-	cdc.MustUnmarshalJSON(g[slashing.ModuleName], &gs.SlashingData)
-	cdc.MustUnmarshalJSON(g[asset.ModuleName], &gs.AssetData)
-	cdc.MustUnmarshalJSON(g[market.ModuleName], &gs.MarketData)
-	cdc.MustUnmarshalJSON(g[incentive.ModuleName], &gs.Incentive)
-	cdc.MustUnmarshalJSON(g[supply.ModuleName], &gs.Supply)
-	cdc.MustUnmarshalJSON(g[genutil.ModuleName], &gs.GenUtil)
+	unmarshalField(cdc, g[genaccounts.ModuleName], &gs.Accounts)
+	unmarshalField(cdc, g[auth.ModuleName], &gs.AuthData)
+	unmarshalField(cdc, g[authx.ModuleName], &gs.AuthXData)
+	unmarshalField(cdc, g[bank.ModuleName], &gs.BankData)
+	unmarshalField(cdc, g[bankx.ModuleName], &gs.BankXData)
+	unmarshalField(cdc, g[staking.ModuleName], &gs.StakingData)
+	unmarshalField(cdc, g[stakingx.ModuleName], &gs.StakingXData)
+	unmarshalField(cdc, g[distribution.ModuleName], &gs.DistrData)
+	unmarshalField(cdc, g[gov.ModuleName], &gs.GovData)
+	unmarshalField(cdc, g[crisis.ModuleName], &gs.CrisisData)
+	unmarshalField(cdc, g[slashing.ModuleName], &gs.SlashingData)
+	unmarshalField(cdc, g[asset.ModuleName], &gs.AssetData)
+	unmarshalField(cdc, g[market.ModuleName], &gs.MarketData)
+	unmarshalField(cdc, g[incentive.ModuleName], &gs.Incentive)
+	unmarshalField(cdc, g[supply.ModuleName], &gs.Supply)
+	unmarshalField(cdc, g[genutil.ModuleName], &gs.GenUtil)
 
 	return gs
+}
+
+func unmarshalField(cdc *codec.Codec, bz []byte, ptr interface{}) {
+	if bz != nil {
+		cdc.MustUnmarshalJSON(bz, ptr)
+	}
 }

@@ -309,7 +309,7 @@ func (t BaseToken) String() string {
 }
 
 func MustMarshalToken(cdc *codec.Codec, token Token) []byte {
-	return cdc.MustMarshalBinaryLengthPrefixed(token)
+	return cdc.MustMarshalBinaryBare(token)
 }
 
 func MustUnmarshalToken(cdc *codec.Codec, value []byte) Token {
