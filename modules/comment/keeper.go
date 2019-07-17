@@ -48,14 +48,14 @@ type Keeper struct {
 	cck         *CommentCountKeeper
 	bxk         ExpectedBankxKeeper
 	axk         ExpectedAssetStatusKeeper
-	dk          ExpectedDistributionKeeper
+	dk          ExpectedDistributionxKeeper
 	msgSendFunc func(key string, v interface{}) error
 }
 
 func NewKeeper(cck *CommentCountKeeper,
 	bxk ExpectedBankxKeeper,
 	axk ExpectedAssetStatusKeeper,
-	dk ExpectedDistributionKeeper,
+	dk ExpectedDistributionxKeeper,
 	msgSendFunc func(key string, v interface{}) error) *Keeper {
 	return &Keeper{
 		cck:         cck,

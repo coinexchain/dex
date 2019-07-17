@@ -1,7 +1,6 @@
 package types
 
 import (
-	"errors"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,16 +11,16 @@ import (
 // Token is an interface used to store asset at a given token within state.
 // Many complex conditions can be used in the concrete struct which implements Token.
 type Token interface {
-	SetName(string) error
+	SetName(string) sdk.Error
 
 	GetSymbol() string
-	SetSymbol(string) error
+	SetSymbol(string) sdk.Error
 
 	GetTotalSupply() int64
-	SetTotalSupply(int64) error
+	SetTotalSupply(int64) sdk.Error
 
 	GetOwner() sdk.AccAddress
-	SetOwner(sdk.AccAddress) error
+	SetOwner(sdk.AccAddress) sdk.Error
 
 	GetMintable() bool
 	SetMintable(bool)
@@ -36,21 +35,21 @@ type Token interface {
 	SetTokenForbiddable(bool)
 
 	GetTotalBurn() int64
-	SetTotalBurn(int64) error
+	SetTotalBurn(int64) sdk.Error
 
 	GetTotalMint() int64
-	SetTotalMint(int64) error
+	SetTotalMint(int64) sdk.Error
 
 	GetIsForbidden() bool
 	SetIsForbidden(bool)
 
 	GetURL() string
-	SetURL(string) error
+	SetURL(string) sdk.Error
 
 	GetDescription() string
-	SetDescription(string) error
+	SetDescription(string) sdk.Error
 
-	Validate() error
+	Validate() sdk.Error
 	// Ensure that token implements stringer
 	String() string
 }
@@ -76,8 +75,8 @@ type BaseToken struct {
 }
 
 var (
-	// TokenSymbolRegex : Token symbol can be 2 ~ 8 characters long.
-	TokenSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}$")
+	// tokenSymbolRegex : Token symbol can be 2 ~ 8 characters long.
+	tokenSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}$")
 )
 
 // NewToken - new base token
@@ -86,24 +85,24 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	url string, description string) (*BaseToken, sdk.Error) {
 
 	t := &BaseToken{}
-	var err error
+	var err sdk.Error
 	if err = t.SetName(name); err != nil {
-		return nil, ErrorInvalidTokenName(err.Error())
+		return nil, err
 	}
 	if err = t.SetOwner(owner); err != nil {
-		return nil, ErrorInvalidTokenOwner(err.Error())
+		return nil, err
 	}
 	if err = t.SetSymbol(symbol); err != nil {
-		return nil, ErrorInvalidTokenSymbol(err.Error())
+		return nil, err
 	}
-	if err := t.SetTotalSupply(totalSupply); err != nil {
-		return nil, ErrorInvalidTokenSupply(err.Error())
+	if err = t.SetTotalSupply(totalSupply); err != nil {
+		return nil, err
 	}
 	if err = t.SetURL(url); err != nil {
-		return nil, ErrorInvalidTokenURL(err.Error())
+		return nil, err
 	}
 	if err = t.SetDescription(description); err != nil {
-		return nil, ErrorInvalidTokenDescription(err.Error())
+		return nil, err
 	}
 
 	t.SetMintable(mintable)
@@ -112,17 +111,17 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	t.SetTokenForbiddable(tokenForbiddable)
 
 	if err = t.SetTotalMint(0); err != nil {
-		return nil, ErrorInvalidTokenMint(err.Error())
+		return nil, err
 	}
 	if err = t.SetTotalBurn(0); err != nil {
-		return nil, ErrorInvalidTokenBurn(err.Error())
+		return nil, err
 	}
 	t.SetIsForbidden(false)
 
 	return t, nil
 }
 
-func (t *BaseToken) Validate() error {
+func (t *BaseToken) Validate() sdk.Error {
 	_, err := NewToken(t.Name, t.Symbol, t.TotalSupply, t.Owner,
 		t.Mintable, t.Burnable, t.AddrForbiddable, t.TokenForbiddable, t.URL, t.Description)
 
@@ -131,23 +130,23 @@ func (t *BaseToken) Validate() error {
 	}
 
 	if !t.TokenForbiddable && t.IsForbidden {
-		return ErrorInvalidTokenForbidden("Invalid Forbidden state")
+		return ErrTokenForbiddenNotSupported(t.GetSymbol())
 	}
 
-	if t.TotalMint < 0 || (!t.Mintable && t.TotalMint > 0) {
-		return ErrorInvalidTokenMint(fmt.Sprintf("Invalid total mint: %d", t.TotalMint))
+	if !t.Mintable && t.TotalMint > 0 {
+		return ErrTokenMintNotSupported(t.GetSymbol())
 	}
 
-	if t.TotalBurn < 0 || (!t.Burnable && t.TotalBurn > 0) {
-		return ErrorInvalidTokenBurn(fmt.Sprintf("Invalid total burn: %d", t.TotalBurn))
+	if !t.Burnable && t.TotalBurn > 0 {
+		return ErrTokenBurnNotSupported(t.GetSymbol())
 	}
 
 	return nil
 }
 
-func (t *BaseToken) SetName(name string) error {
+func (t *BaseToken) SetName(name string) sdk.Error {
 	if utf8.RuneCountInString(name) > 32 {
-		return errors.New("token name is limited to 32 unicode characters")
+		return ErrInvalidTokenName(name)
 	}
 
 	t.Name = name
@@ -158,14 +157,14 @@ func (t BaseToken) GetSymbol() string {
 	return t.Symbol
 }
 
-func ValidateTokenSymbol(symbol string) error {
-	if !TokenSymbolRegex.MatchString(symbol) {
-		return errors.New("token symbol not match with [a-z][a-z0-9]{1,7}")
+func ValidateTokenSymbol(symbol string) sdk.Error {
+	if !tokenSymbolRegex.MatchString(symbol) {
+		return ErrInvalidTokenSymbol(symbol)
 	}
 	return nil
 }
 
-func (t *BaseToken) SetSymbol(symbol string) error {
+func (t *BaseToken) SetSymbol(symbol string) sdk.Error {
 	if err := ValidateTokenSymbol(symbol); err != nil {
 		return err
 	}
@@ -178,12 +177,9 @@ func (t BaseToken) GetTotalSupply() int64 {
 	return t.TotalSupply
 }
 
-func (t *BaseToken) SetTotalSupply(amt int64) error {
-	if amt > MaxTokenAmount {
-		return errors.New("token total supply before 1e8 boosting should be less than 90 billion")
-	}
-	if amt <= 0 {
-		return errors.New("token total supply must be positive")
+func (t *BaseToken) SetTotalSupply(amt int64) sdk.Error {
+	if amt > MaxTokenAmount || amt <= 0 {
+		return ErrInvalidTokenSupply(amt)
 	}
 	t.TotalSupply = amt
 	return nil
@@ -193,9 +189,9 @@ func (t BaseToken) GetOwner() sdk.AccAddress {
 	return t.Owner
 }
 
-func (t *BaseToken) SetOwner(addr sdk.AccAddress) error {
+func (t *BaseToken) SetOwner(addr sdk.AccAddress) sdk.Error {
 	if addr.Empty() {
-		return errors.New("token owner is invalid")
+		return ErrNilTokenOwner()
 	}
 
 	t.Owner = addr
@@ -238,9 +234,9 @@ func (t BaseToken) GetURL() string {
 	return t.URL
 }
 
-func (t *BaseToken) SetURL(url string) error {
+func (t *BaseToken) SetURL(url string) sdk.Error {
 	if utf8.RuneCountInString(url) > 100 {
-		return errors.New("token url is limited to 100 unicode characters")
+		return ErrInvalidTokenURL(url)
 	}
 	t.URL = url
 	return nil
@@ -250,9 +246,9 @@ func (t BaseToken) GetDescription() string {
 	return t.Description
 }
 
-func (t *BaseToken) SetDescription(description string) error {
+func (t *BaseToken) SetDescription(description string) sdk.Error {
 	if len(description) > 1024 {
-		return errors.New("token description is limited to 1k size")
+		return ErrInvalidTokenDescription(description)
 	}
 	t.Description = description
 	return nil
@@ -262,9 +258,9 @@ func (t BaseToken) GetTotalBurn() int64 {
 	return t.TotalBurn
 }
 
-func (t *BaseToken) SetTotalBurn(amt int64) error {
+func (t *BaseToken) SetTotalBurn(amt int64) sdk.Error {
 	if amt > MaxTokenAmount || amt < 0 {
-		return errors.New("token total burn amt is invalid")
+		return ErrInvalidTokenBurnAmt(amt)
 	}
 	t.TotalBurn = amt
 	return nil
@@ -274,9 +270,9 @@ func (t BaseToken) GetTotalMint() int64 {
 	return t.TotalMint
 }
 
-func (t *BaseToken) SetTotalMint(amt int64) error {
+func (t *BaseToken) SetTotalMint(amt int64) sdk.Error {
 	if amt > MaxTokenAmount || amt < 0 {
-		return errors.New("token total mint amt is invalid")
+		return ErrInvalidTokenMintAmt(amt)
 	}
 	t.TotalMint = amt
 	return nil
@@ -325,6 +321,6 @@ func MustUnmarshalToken(cdc *codec.Codec, value []byte) Token {
 }
 
 func UnmarshalToken(cdc *codec.Codec, value []byte) (token Token, err error) {
-	err = cdc.UnmarshalBinaryLengthPrefixed(value, &token)
+	err = cdc.UnmarshalBinaryBare(value, &token)
 	return token, err
 }

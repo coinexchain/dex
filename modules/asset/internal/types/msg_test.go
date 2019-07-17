@@ -32,7 +32,7 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 			"case-name",
 			NewMsgIssueToken(string(make([]byte, 32+1)), "abc", 100000, tAccAddr,
 				false, false, false, false, "", ""),
-			ErrorInvalidTokenName("token name is limited to 32 unicode characters"),
+			ErrorInvalidTokenName(string(make([]byte, 32+1))),
 		},
 		{
 			"case-owner",
@@ -315,7 +315,7 @@ func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidWhitelist",
 			NewMsgAddTokenWhitelist("abc", tAccAddr, []sdk.AccAddress{}),
-			ErrorInvalidTokenWhitelist("add nil token whitelist"),
+			ErrorNilTokenWhitelist(),
 		},
 	}
 
@@ -353,7 +353,7 @@ func TestMsgRemoveTokenWhitelist_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidWhitelist",
 			NewMsgRemoveTokenWhitelist("abc", tAccAddr, []sdk.AccAddress{}),
-			ErrorInvalidTokenWhitelist("remove nil token whitelist"),
+			ErrorNilTokenWhitelist(),
 		},
 	}
 
@@ -391,7 +391,7 @@ func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidAddr",
 			NewMsgForbidAddr("abc", tAccAddr, []sdk.AccAddress{}),
-			ErrorInvalidAddress("forbid nil address"),
+			ErrorNilForbiddenAddress(),
 		},
 	}
 
@@ -429,7 +429,7 @@ func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidAddr",
 			NewMsgUnForbidAddr("abc", tAccAddr, []sdk.AccAddress{}),
-			ErrorInvalidAddress("unforbid nil address"),
+			ErrorNilForbiddenAddress(),
 		},
 	}
 

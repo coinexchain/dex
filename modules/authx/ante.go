@@ -3,9 +3,8 @@ package authx
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	types2 "github.com/coinexchain/dex/modules/authx/types"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -16,7 +15,7 @@ type AnteHelper interface {
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
-func NewAnteHandler(ak auth.AccountKeeper, supplyKeeper types.SupplyKeeper,
+func NewAnteHandler(ak auth.AccountKeeper, supplyKeeper authtypes.SupplyKeeper,
 	axk AccountXKeeper, anteHelper AnteHelper) sdk.AnteHandler {
 
 	ah := auth.NewAnteHandler(ak, supplyKeeper, auth.DefaultSigVerificationGasConsumer)
@@ -71,7 +70,7 @@ func checkGasPrice(ctx sdk.Context, tx auth.StdTx, axk AccountXKeeper) sdk.Error
 	gasPrice := tx.Fee.GasPrices().AmountOf(dex.CET)
 	minGasPrice := axk.GetParams(ctx).MinGasPriceLimit
 	if gasPrice.LT(minGasPrice) {
-		return types2.ErrGasPriceTooLow(minGasPrice, gasPrice)
+		return ErrGasPriceTooLow(minGasPrice, gasPrice)
 	}
 	return nil
 }

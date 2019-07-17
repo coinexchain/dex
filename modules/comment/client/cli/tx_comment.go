@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/comment"
 )
@@ -136,8 +136,8 @@ Example:
 }
 
 func createAndBroadcastComment(cdc *codec.Codec, subcmd string, rewardsArrayPtr *[]string) error {
-	txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-	cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+	cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 	sender := cliCtx.GetFromAddress()
 
@@ -150,7 +150,7 @@ func createAndBroadcastComment(cdc *codec.Codec, subcmd string, rewardsArrayPtr 
 		return err
 	}
 
-	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
 
 func parseRewardLine(line string) (*comment.CommentRef, error) {

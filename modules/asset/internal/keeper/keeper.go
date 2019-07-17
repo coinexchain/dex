@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"strings"
 
@@ -98,16 +97,14 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool, url string, description string) sdk.Error {
 
 	if keeper.IsTokenExists(ctx, symbol) {
-		return types.ErrorDuplicateTokenSymbol(fmt.Sprintf("token symbol already exists in store"))
+		return types.ErrDuplicateTokenSymbol(symbol)
 	}
 
 	// only cet owner can issue reserved token
 	if types.IsReservedSymbol(symbol) && symbol != dex.CET {
 		cetToken := keeper.GetToken(ctx, dex.CET)
 		if cetToken == nil || !owner.Equals(cetToken.GetOwner()) {
-			return types.ErrorInvalidTokenOwner("only coinex dex foundation can issue reserved symbol token, you can run \n" +
-				"$ cetcli query asset reserved-symbol \n" +
-				"to query reserved token symbol")
+			return types.ErrInvalidIssueOwner()
 		}
 	}
 
@@ -139,7 +136,7 @@ func (keeper BaseKeeper) TransferOwnership(ctx sdk.Context, symbol string, origi
 	}
 
 	if err := token.SetOwner(newOwner); err != nil {
-		return types.ErrorInvalidTokenOwner("token new owner is invalid")
+		return err
 	}
 
 	return keeper.SetToken(ctx, token)
@@ -153,15 +150,15 @@ func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.Acc
 	}
 
 	if !token.GetMintable() {
-		return types.ErrorInvalidTokenMint(fmt.Sprintf("token %s do not support mint", symbol))
+		return types.ErrTokenMintNotSupported(symbol)
 	}
 
 	if err := token.SetTotalMint(amount + token.GetTotalMint()); err != nil {
-		return types.ErrorInvalidTokenMint(err.Error())
+		return err
 	}
 
 	if err := token.SetTotalSupply(amount + token.GetTotalSupply()); err != nil {
-		return types.ErrorInvalidTokenSupply(err.Error())
+		return err
 	}
 
 	return keeper.SetToken(ctx, token)
@@ -175,15 +172,15 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 	}
 
 	if !token.GetBurnable() {
-		return types.ErrorInvalidTokenBurn(fmt.Sprintf("token %s do not support burn", symbol))
+		return types.ErrTokenBurnNotSupported(symbol)
 	}
 
 	if err := token.SetTotalBurn(amount + token.GetTotalBurn()); err != nil {
-		return types.ErrorInvalidTokenBurn(err.Error())
+		return err
 	}
 
 	if err := token.SetTotalSupply(token.GetTotalSupply() - amount); err != nil {
-		return types.ErrorInvalidTokenSupply(err.Error())
+		return err
 	}
 
 	if token.GetSymbol() == dex.CET {
@@ -206,10 +203,10 @@ func (keeper BaseKeeper) ForbidToken(ctx sdk.Context, symbol string, owner sdk.A
 	}
 
 	if !token.GetTokenForbiddable() {
-		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token", symbol))
+		return types.ErrTokenForbiddenNotSupported(symbol)
 	}
 	if token.GetIsForbidden() {
-		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has been forbidden", symbol))
+		return types.ErrInvalidTokenForbidden(symbol)
 	}
 	token.SetIsForbidden(true)
 
@@ -224,10 +221,10 @@ func (keeper BaseKeeper) UnForbidToken(ctx sdk.Context, symbol string, owner sdk
 	}
 
 	if !token.GetTokenForbiddable() {
-		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid token", symbol))
+		return types.ErrTokenForbiddenNotSupported(symbol)
 	}
 	if !token.GetIsForbidden() {
-		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s has not been forbidden", symbol))
+		return types.ErrInvalidTokenUnForbidden(symbol)
 	}
 	token.SetIsForbidden(false)
 
@@ -242,10 +239,10 @@ func (keeper BaseKeeper) AddTokenWhitelist(ctx sdk.Context, symbol string, owner
 	}
 
 	if !token.GetTokenForbiddable() {
-		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token and add whitelist", symbol))
+		return types.ErrTokenForbiddenNotSupported(symbol)
 	}
 	if err = keeper.addWhitelist(ctx, symbol, whitelist); err != nil {
-		return types.ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
+		return types.ErrInvalidTokenWhitelist()
 	}
 	return nil
 }
@@ -258,10 +255,10 @@ func (keeper BaseKeeper) RemoveTokenWhitelist(ctx sdk.Context, symbol string, ow
 	}
 
 	if !token.GetTokenForbiddable() {
-		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid token and remove whitelist", symbol))
+		return types.ErrTokenForbiddenNotSupported(symbol)
 	}
 	if err = keeper.removeWhitelist(ctx, symbol, whitelist); err != nil {
-		return types.ErrorInvalidTokenWhitelist(fmt.Sprintf("token whitelist is invalid"))
+		return types.ErrInvalidTokenWhitelist()
 	}
 	return nil
 }
@@ -274,10 +271,10 @@ func (keeper BaseKeeper) ForbidAddress(ctx sdk.Context, symbol string, owner sdk
 	}
 
 	if !token.GetAddrForbiddable() {
-		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support forbid address", symbol))
+		return types.ErrAddressForbiddenNotSupported(symbol)
 	}
 	if err = keeper.addForbiddenAddress(ctx, symbol, addresses); err != nil {
-		return types.ErrorInvalidAddress(fmt.Sprintf("forbid addr is invalid"))
+		return types.ErrInvalidForbiddenAddress()
 	}
 	return nil
 }
@@ -290,10 +287,10 @@ func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner s
 	}
 
 	if !token.GetAddrForbiddable() {
-		return types.ErrorInvalidTokenForbidden(fmt.Sprintf("token %s do not support unforbid address", symbol))
+		return types.ErrAddressForbiddenNotSupported(symbol)
 	}
 	if err = keeper.removeForbiddenAddress(ctx, symbol, addresses); err != nil {
-		return types.ErrorInvalidAddress(fmt.Sprintf("unforbid addr is invalid"))
+		return types.ErrInvalidForbiddenAddress()
 	}
 	return nil
 }
@@ -306,7 +303,7 @@ func (keeper BaseKeeper) ModifyTokenURL(ctx sdk.Context, symbol string, owner sd
 	}
 
 	if err := token.SetURL(url); err != nil {
-		return types.ErrorInvalidTokenURL(err.Error())
+		return err
 	}
 
 	return keeper.SetToken(ctx, token)
@@ -320,7 +317,7 @@ func (keeper BaseKeeper) ModifyTokenDescription(ctx sdk.Context, symbol string, 
 	}
 
 	if err := token.SetDescription(description); err != nil {
-		return types.ErrorInvalidTokenDescription(err.Error())
+		return err
 	}
 
 	return keeper.SetToken(ctx, token)
@@ -341,11 +338,11 @@ func (keeper BaseKeeper) SetToken(ctx sdk.Context, token types.Token) sdk.Error 
 func (keeper BaseKeeper) checkPrecondition(ctx sdk.Context, symbol string, owner sdk.AccAddress) (types.Token, sdk.Error) {
 	token := keeper.GetToken(ctx, symbol)
 	if token == nil {
-		return nil, types.ErrorTokenNotFound(fmt.Sprintf("token %s not found", symbol))
+		return nil, types.ErrTokenNotFound(symbol)
 	}
 
 	if !token.GetOwner().Equals(owner) {
-		return nil, types.ErrorInvalidTokenOwner("Only token owner can do this action")
+		return nil, types.ErrNeedTokenOwner(token.GetOwner())
 	}
 
 	return token, nil

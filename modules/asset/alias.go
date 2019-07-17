@@ -42,10 +42,10 @@ var (
 )
 
 type (
-	Keeper = keeper.BaseKeeper
-	TokenKeeper = keeper.TokenKeeper
-	Params = types.Params
+	Keeper       = keeper.BaseKeeper
+	TokenKeeper  = keeper.TokenKeeper
+	Params       = types.Params
 	GenesisState = types.GenesisState
-	Token = types.Token
-	BaseToken = types.BaseToken
+	Token        = types.Token
+	BaseToken    = types.BaseToken
 )

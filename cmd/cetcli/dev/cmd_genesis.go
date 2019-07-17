@@ -1,16 +1,13 @@
 package dev
 
 import (
-	"encoding/json"
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/client"
-
-	"github.com/spf13/viper"
-
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	tm "github.com/tendermint/tendermint/types"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/coinexchain/dex/app"
@@ -73,13 +70,13 @@ func addCmdFlags(cmd *cobra.Command) {
 }
 
 func generateGenesisJSON(cdc *codec.Codec) error {
-	genState := createTestnetGenesisState(cdc)
+	genState := createTestnetGenesisState()
 
 	chainID := viper.GetString(client.FlagChainID)
 	return printGenesisState(cdc, genState, chainID)
 }
 
-func printGenesisState(cdc *codec.Codec, genState map[string]json.RawMessage, chainID string) error {
+func printGenesisState(cdc *codec.Codec, genState app.GenesisState, chainID string) error {
 	orderedGenState := app.NewDefaultGenesisState()
 	gneStateBytes, err := codec.MarshalJSONIndent(cdc, orderedGenState)
 	if err != nil {

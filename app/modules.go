@@ -13,7 +13,6 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
-
 type AuthModuleBasic struct {
 	auth.AppModuleBasic
 }
@@ -23,7 +22,6 @@ func (AuthModuleBasic) DefaultGenesis() json.RawMessage {
 	genState.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
 	return auth.ModuleCdc.MustMarshalJSON(genState)
 }
-
 
 type StakingModuleBasic struct {
 	staking.AppModuleBasic
@@ -36,7 +34,6 @@ func (StakingModuleBasic) DefaultGenesis() json.RawMessage {
 	genState.Params.BondDenom = dex.DefaultBondDenom
 	return staking.ModuleCdc.MustMarshalJSON(genState)
 }
-
 
 type SlashingModuleBasic struct {
 	slashing.AppModuleBasic
@@ -52,7 +49,6 @@ func (SlashingModuleBasic) DefaultGenesis() json.RawMessage {
 	return slashing.ModuleCdc.MustMarshalJSON(genState)
 }
 
-
 type GovModuleBasic struct {
 	gov.AppModuleBasic
 }
@@ -64,13 +60,12 @@ func (GovModuleBasic) DefaultGenesis() json.RawMessage {
 	genState.DepositParams.MaxDepositPeriod = DefaultPeriod
 	genState.VotingParams.VotingPeriod = DefaultPeriod
 	genState.TallyParams = gov.TallyParams{
-			Quorum:    sdk.NewDecWithPrec(4, 1),
-			Threshold: sdk.NewDecWithPrec(5, 1),
-			Veto:      sdk.NewDecWithPrec(334, 3),
-		}
+		Quorum:    sdk.NewDecWithPrec(4, 1),
+		Threshold: sdk.NewDecWithPrec(5, 1),
+		Veto:      sdk.NewDecWithPrec(334, 3),
+	}
 	return gov.ModuleCdc.MustMarshalJSON(genState)
 }
-
 
 type CrisisModuleBasic struct {
 	crisis.AppModuleBasic

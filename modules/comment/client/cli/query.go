@@ -21,9 +21,9 @@ Example :
 	cetcli query comment get-count --trust-node=true --chain-id=coinexdex`,
 		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 			query := fmt.Sprintf("custom/%s/%s", comment.StoreKey, comment.QueryCommentCount)
-			res, err := cliCtx.QueryWithData(query, nil)
+			res, _, err := cliCtx.QueryWithData(query, nil)
 			if err != nil {
 				return err
 			}

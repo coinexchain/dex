@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -12,7 +11,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )
 
 func RequireMemoCmd(cdc *codec.Codec) *cobra.Command {
@@ -31,7 +31,7 @@ func RequireMemoCmd(cdc *codec.Codec) *cobra.Command {
 				WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			addr := cliCtx.GetFromAddress()
-			_, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(addr)
+			_, err = auth.NewAccountRetriever(cliCtx).GetAccount(addr)
 			if err != nil {
 				return err
 			}

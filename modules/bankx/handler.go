@@ -8,10 +8,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	types2 "github.com/coinexchain/dex/modules/authx/types"
-	"github.com/coinexchain/dex/modules/msgqueue"
-
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -97,14 +96,14 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		return err.Result()
 	}
 
-	err := k.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, types2.ModuleName, amt)
+	err := k.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, authx.ModuleName, amt)
 	if err != nil {
 		return err.Result()
 	}
 
 	ax := k.Axk.GetOrCreateAccountX(ctx, toAddr)
 	for _, coin := range amt {
-		ax.LockedCoins = append(ax.LockedCoins, types2.LockedCoin{Coin: coin, UnlockTime: unlockTime})
+		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
 	}
 	k.Axk.SetAccountX(ctx, ax)
 

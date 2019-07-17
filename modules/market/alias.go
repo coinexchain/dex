@@ -6,12 +6,18 @@ import (
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 )
 
+const (
+	StoreKey   = types.StoreKey
+	ModuleName = types.ModuleName
+)
+
 var (
 	NewBaseKeeper = keepers.NewKeeper
-	StoreKey      = types.StoreKey
-	ModuleName    = types.ModuleName
+	DefaultParams = keepers.DefaultParams
 )
 
 type (
-	Keeper = keepers.Keeper
+	Keeper     = keepers.Keeper
+	Order      = types.Order
+	MarketInfo = types.MarketInfo
 )

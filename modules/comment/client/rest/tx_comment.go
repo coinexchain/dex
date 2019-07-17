@@ -5,10 +5,11 @@ import (
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
-	clientrest "github.com/cosmos/cosmos-sdk/client/rest"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/comment"
 )
@@ -42,7 +43,7 @@ func createNewThreadHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 
 		sequence := req.BaseReq.Sequence
 		if sequence == 0 {
-			sequence, err = cliCtx.GetAccountSequence(sender)
+			_, sequence, err = auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(sender)
 			if err != nil {
 				rest.WriteErrorResponse(w, http.StatusBadRequest, "Can not get sequence from blockchain.")
 				return
@@ -67,7 +68,7 @@ func createNewThreadHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			return
 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -105,7 +106,7 @@ func createFollowupCommentHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext)
 
 		sequence := req.BaseReq.Sequence
 		if sequence == 0 {
-			sequence, err = cliCtx.GetAccountSequence(sender)
+			_, sequence, err = auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(sender)
 			if err != nil {
 				rest.WriteErrorResponse(w, http.StatusBadRequest, "Can not get sequence from blockchain.")
 				return
@@ -152,7 +153,7 @@ func createFollowupCommentHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext)
 			return
 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -189,7 +190,7 @@ func createRewardCommentsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 
 		sequence := req.BaseReq.Sequence
 		if sequence == 0 {
-			sequence, err = cliCtx.GetAccountSequence(sender)
+			_, sequence, err = auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(sender)
 			if err != nil {
 				rest.WriteErrorResponse(w, http.StatusBadRequest, "Can not get sequence from blockchain.")
 				return
@@ -227,6 +228,6 @@ func createRewardCommentsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			return
 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
