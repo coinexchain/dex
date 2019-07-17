@@ -8,10 +8,6 @@ import (
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterInterface((*Token)(nil), nil)
 	cdc.RegisterConcrete(&BaseToken{}, "asset/BaseToken", nil)
-	//cdc.RegisterInterface((*keeper.Keeper)(nil), nil)
-	//cdc.RegisterConcrete(&keeper.BaseKeeper{}, "asset/BaseKeeper", nil)
-	//cdc.RegisterInterface((*keeper.TokenKeeper)(nil), nil)
-	//cdc.RegisterConcrete(&keeper.BaseTokenKeeper{}, "asset/BaseTokenKeeper", nil)
 
 	cdc.RegisterConcrete(MsgIssueToken{}, "asset/MsgIssueToken", nil)
 	cdc.RegisterConcrete(MsgTransferOwnership{}, "asset/MsgTransferOwnership", nil)
