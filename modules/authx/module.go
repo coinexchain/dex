@@ -23,7 +23,7 @@ var (
 )
 
 // app module basics object
-type AppModuleBasic struct {}
+type AppModuleBasic struct{}
 
 // module name
 func (AppModuleBasic) Name() string {

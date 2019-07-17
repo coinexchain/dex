@@ -41,4 +41,3 @@ func NewQueryForbiddenAddrParams(s string) QueryForbiddenAddrParams {
 		Symbol: s,
 	}
 }
-

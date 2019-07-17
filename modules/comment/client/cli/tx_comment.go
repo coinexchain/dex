@@ -137,7 +137,7 @@ Example:
 
 func createAndBroadcastComment(cdc *codec.Codec, subcmd string, rewardsArrayPtr *[]string) error {
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-	cliCtx := context.NewCLIContext().WithCodec(cdc)//.WithAccountDecoder(cdc)
+	cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 	sender := cliCtx.GetFromAddress()
 
