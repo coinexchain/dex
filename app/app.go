@@ -345,8 +345,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	// NOTE: The stakingKeeper above is passed by reference, so that it can be
 	// modified like below:
 	app.stakingKeeper = *stakingKeeper.SetHooks(
-		NewStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
-	)
+		staking.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()))
 }
 
 func (app *CetChainApp) InitModules() {
