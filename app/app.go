@@ -383,7 +383,7 @@ func (app *CetChainApp) InitModules() {
 		gov.ModuleName,
 		supply.ModuleName,
 		crisis.ModuleName,
-		types.ModuleName,
+		authx.ModuleName,
 		bankx.ModuleName,
 		stakingx.ModuleName,
 		asset.ModuleName,

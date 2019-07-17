@@ -13,6 +13,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/stakingx"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
@@ -60,4 +61,28 @@ func NewDefaultGenesisState() GenesisState {
 		Supply:       supply.DefaultGenesisState(),
 		GenUtil:      genutil.GenesisState{},
 	}
+}
+
+func (app *CetChainApp) ExportGenesisState(ctx sdk.Context) GenesisState {
+	g := app.mm.ExportGenesis(ctx)
+	gs := GenesisState{}
+
+	app.cdc.MustUnmarshalJSON(g[genaccounts.ModuleName], &gs.Accounts)
+	app.cdc.MustUnmarshalJSON(g[auth.ModuleName], &gs.AuthData)
+	app.cdc.MustUnmarshalJSON(g[authx.ModuleName], &gs.AuthXData)
+	app.cdc.MustUnmarshalJSON(g[bank.ModuleName], &gs.BankData)
+	app.cdc.MustUnmarshalJSON(g[bankx.ModuleName], &gs.BankXData)
+	app.cdc.MustUnmarshalJSON(g[staking.ModuleName], &gs.StakingData)
+	app.cdc.MustUnmarshalJSON(g[stakingx.ModuleName], &gs.StakingXData)
+	app.cdc.MustUnmarshalJSON(g[distribution.ModuleName], &gs.DistrData)
+	app.cdc.MustUnmarshalJSON(g[gov.ModuleName], &gs.GovData)
+	app.cdc.MustUnmarshalJSON(g[crisis.ModuleName], &gs.CrisisData)
+	app.cdc.MustUnmarshalJSON(g[slashing.ModuleName], &gs.SlashingData)
+	app.cdc.MustUnmarshalJSON(g[asset.ModuleName], &gs.AssetData)
+	app.cdc.MustUnmarshalJSON(g[market.ModuleName], &gs.MarketData)
+	app.cdc.MustUnmarshalJSON(g[incentive.ModuleName], &gs.Incentive)
+	app.cdc.MustUnmarshalJSON(g[supply.ModuleName], &gs.Supply)
+	app.cdc.MustUnmarshalJSON(g[genutil.ModuleName], &gs.GenUtil)
+
+	return gs
 }
