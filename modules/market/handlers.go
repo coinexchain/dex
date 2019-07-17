@@ -67,7 +67,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg mtype.MsgCreateTradingPair,
 		Creator:        msg.Creator.String(),
 		CreateHeight:   ctx.BlockHeight(),
 	}
-	fillMsgQueue(ctx, keeper, msgInfo)
+	fillMsgQueue(ctx, keeper, mtype.CreateTradingInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -88,14 +88,14 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg mtype.MsgCreateTradingPair,
 	}
 }
 
-func fillMsgQueue(ctx sdk.Context, keeper keepers.Keeper, msg interface{}) {
+func fillMsgQueue(ctx sdk.Context, keeper keepers.Keeper, key string, msg interface{}) {
 	if keeper.IsSubScribe(mtype.Topic) {
 		bytes, err := json.Marshal(msg)
 		if err != nil {
 			return
 		}
-		ctx.EventManager().EmitEvent(sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(msgqueue.AttributeKeyKafkaMsg, string(bytes))))
+		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
+			sdk.NewAttribute(key, string(bytes))))
 	}
 }
 
@@ -211,7 +211,7 @@ func sendCreateOrderMsg(ctx sdk.Context, keeper keepers.Keeper, order mtype.Orde
 		Freeze:      order.Freeze,
 		FeatureFee:  featureFee,
 	}
-	fillMsgQueue(ctx, keeper, msgInfo)
+	fillMsgQueue(ctx, keeper, mtype.CreateOrderInfoKey, msgInfo)
 }
 
 func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keepers.Keeper) sdk.Result {
@@ -351,7 +351,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg mtype.MsgCancelOrder, keeper keep
 		DealStock:      order.DealStock,
 		DealMoney:      order.DealMoney,
 	}
-	fillMsgQueue(ctx, keeper, msgInfo)
+	fillMsgQueue(ctx, keeper, mtype.CancelOrderInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
@@ -407,7 +407,7 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg mtype.MsgCancelTradingPair,
 		Deleter: msg.Sender.String(),
 		DelTime: msg.EffectiveTime,
 	}
-	fillMsgQueue(ctx, keeper, msgInfo)
+	fillMsgQueue(ctx, keeper, mtype.CancelTradingInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
@@ -481,7 +481,7 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg mtype.MsgModifyPricePrec
 		OldPricePrecision: oldInfo.PricePrecision,
 		NewPricePrecision: info.PricePrecision,
 	}
-	fillMsgQueue(ctx, k, msgInfo)
+	fillMsgQueue(ctx, k, mtype.PricePrecisionInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
