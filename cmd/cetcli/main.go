@@ -23,6 +23,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/cmd/cetcli/dev"
 	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
 	dex "github.com/coinexchain/dex/types"
@@ -74,6 +75,7 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		client.LineBreak,
 		version.Cmd,
 		client.NewCompletionCmd(rootCmd, true),
+		dev.DevCmd(cdc, registerRoutes),
 	)
 
 	return rootCmd
