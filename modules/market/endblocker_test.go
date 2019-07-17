@@ -9,10 +9,10 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
-	types2 "github.com/coinexchain/dex/modules/market/internal/types"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 
 	"github.com/coinexchain/dex/modules/msgqueue"
-	"github.com/coinexchain/dex/types"
+	dex "github.com/coinexchain/dex/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -104,7 +104,7 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 	}
 
 	coinFee := sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity)).RoundInt64()
-	refout = fmt.Sprintf("addr : %s, fee : %s", order.Sender, types.NewCetCoin(coinFee).String())
+	refout = fmt.Sprintf("addr : %s, fee : %s", order.Sender, dex.NewCetCoin(coinFee).String())
 	if refout != mockFeeK.records[0] {
 		t.Errorf("Error in unfreezeCoinsForOrder")
 	}
@@ -115,7 +115,7 @@ func TestRemoveOrders(t *testing.T) {
 	axk := &mocAssertStatusKeeper{}
 	bnk := &mocBankxKeeper{}
 	ctx, keys := keepers.newContextAndMarketKey(testNetSubString)
-	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(types2.StoreKey)
+	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(types.StoreKey)
 	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace)
 	keeper.orderClean.SetUnixTime(ctx, time.Now().Unix())
 	ctx = ctx.WithBlockTime(time.Unix(time.Now().Unix()+int64(25*60*60), 0))
@@ -124,13 +124,13 @@ func TestRemoveOrders(t *testing.T) {
 	parameters.MaxExecutedPriceChangeRatio = keepers.DefaultMaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
-	keeper.SetMarket(ctx, types2.MarketInfo{
+	keeper.SetMarket(ctx, types.MarketInfo{
 		Stock:             "cet",
 		Money:             "usdt",
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
-	keeper.SetMarket(ctx, types2.MarketInfo{
+	keeper.SetMarket(ctx, types.MarketInfo{
 		Stock:             "btc",
 		Money:             "usdt",
 		PricePrecision:    8,
@@ -180,7 +180,7 @@ func TestDelist(t *testing.T) {
 	axk.forbiddenAddrList = []sdk.AccAddress{addr01}
 	bnk := &mocBankxKeeper{}
 	ctx, keys := keepers.newContextAndMarketKey(testNetSubString)
-	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(types2.StoreKey)
+	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams).Subspace(types.StoreKey)
 	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace)
 	delistKeeper := keepers.NewDelistKeeper(keys.marketKey)
 	delistKeeper.AddDelistRequest(ctx, ctx.BlockHeight(), "btc/usdt")
@@ -193,25 +193,25 @@ func TestDelist(t *testing.T) {
 	parameters.MaxExecutedPriceChangeRatio = keepers.DefaultMaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
-	keeper.SetMarket(ctx, types2.MarketInfo{
+	keeper.SetMarket(ctx, types.MarketInfo{
 		Stock:             "cet",
 		Money:             "usdt",
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
-	keeper.SetMarket(ctx, types2.MarketInfo{
+	keeper.SetMarket(ctx, types.MarketInfo{
 		Stock:             "btc",
 		Money:             "usdt",
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
-	keeper.SetMarket(ctx, types2.MarketInfo{
+	keeper.SetMarket(ctx, types.MarketInfo{
 		Stock:             "bch",
 		Money:             "usdt",
 		PricePrecision:    8,
 		LastExecutedPrice: sdk.NewDec(0),
 	})
-	keeper.SetMarket(ctx, types2.MarketInfo{
+	keeper.SetMarket(ctx, types.MarketInfo{
 		Stock:             "bsv",
 		Money:             "cet",
 		PricePrecision:    8,
@@ -220,7 +220,7 @@ func TestDelist(t *testing.T) {
 
 	cetKeeper := keepers.NewOrderKeeper(keeper.marketKey, "cet/usdt", msgCdc)
 	btcKeeper := keepers.NewOrderKeeper(keeper.marketKey, "btc/usdt", msgCdc)
-	orders := make([]*types2.Order, 10)
+	orders := make([]*types.Order, 10)
 	orders[0] = keepers.newTO("00001", 1, 11051, 60, keepers.Buy, keepers.GTE, 98)
 	orders[0].TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, orders[0])
