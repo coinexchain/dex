@@ -18,7 +18,6 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/types"
 
-	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -70,7 +69,7 @@ func addAccountForDanglingCET(amount int64, genState *GenesisState) {
 	accAmount := cetToken().GetTotalSupply() - amount
 	if accAmount > 0 {
 		_, acc := testutil.NewBaseAccount(accAmount, 0, 0)
-		genAcc := NewGenesisAccount(&acc)
+		genAcc := genaccounts.NewGenesisAccount(&acc)
 		genState.Accounts = append(genState.Accounts, genAcc)
 	}
 }
@@ -87,7 +86,8 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 		cb(&genState)
 	}
 
-	genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(cetToken.GetTotalSupply())
+	//TODO:
+	//genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(cetToken.GetTotalSupply())
 
 	// init chain
 	genStateBytes, _ := app.cdc.MarshalJSON(genState)
@@ -113,13 +113,6 @@ func cetToken() asset.Token {
 	}
 }
 
-func TestRouter(t *testing.T) {
-	bApp := bam.NewBaseApp(appName, nil, nil, nil)
-	app := &CetChainApp{BaseApp: bApp}
-	app.registerMessageRoutes()
-	require.Nil(t, app.Router().Route("bank"))
-}
-
 func TestGenTx(t *testing.T) {
 
 	_, _, toAddr := testutil.KeyPubAddr()
@@ -135,7 +128,7 @@ func TestGenTx(t *testing.T) {
 	app := initApp(func(state *GenesisState) {
 		addGenesisAccounts(state, acc0)
 		txbz, _ := cdc.MarshalJSON(tx)
-		state.GenTxs = append(state.GenTxs, txbz)
+		state.GenUtil.GenTxs = append(state.GenUtil.GenTxs, txbz)
 
 	})
 
@@ -233,7 +226,7 @@ func TestMinSelfDelegation(t *testing.T) {
 
 	// init app
 	app := initApp(func(genState *GenesisState) {
-		genState.Accounts = append(genState.Accounts, NewGenesisAccountI(&acc0))
+		genState.Accounts = append(genState.Accounts, genaccounts.NewGenesisAccount(&acc0))
 		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(500)
 
 		addAccountForDanglingCET(1000, genState)
@@ -327,10 +320,12 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	//note: context need to be updated after beginblock
 	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
 	ctx := app.NewContext(false, abci.Header{Height: 1})
-	app.stakingKeeper.SetPool(ctx, staking.Pool{
-		NotBondedTokens: sdk.NewInt(1e9),
-		BondedTokens:    sdk.ZeroInt(),
-	})
+
+	//TODO:
+	//app.stakingKeeper.SetPool(ctx, staking.Pool{
+	//	NotBondedTokens: sdk.NewInt(1e9),
+	//	BondedTokens:    sdk.ZeroInt(),
+	//})
 
 	// create validator & self delegate 1 CET
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
