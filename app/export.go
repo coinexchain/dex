@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/coinexchain/dex/modules/incentive"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 
@@ -25,8 +27,11 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 	}
 
 	genState := app.mm.ExportGenesis(ctx)
-	if forZeroHeight { // TODO
-		//genState.Incentive.State.HeightAdjustment = genState.Incentive.State.HeightAdjustment + ctx.BlockHeader().Height
+	if forZeroHeight {
+		var ig incentive.GenesisState
+		incentive.ModuleCdc.MustUnmarshalJSON(genState[incentive.ModuleName], &ig)
+		ig.State.HeightAdjustment = ig.State.HeightAdjustment + ctx.BlockHeader().Height
+		genState[incentive.ModuleName] = incentive.ModuleCdc.MustMarshalJSON(ig)
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.cdc, genState)
@@ -133,7 +138,6 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 	iter := sdk.KVStoreReversePrefixIterator(store, staking.ValidatorsKey)
 	counter := int16(0)
 
-	var valConsAddrs []sdk.ConsAddress
 	for ; iter.Valid(); iter.Next() {
 		addr := sdk.ValAddress(iter.Key()[1:])
 		validator, found := app.stakingKeeper.GetValidator(ctx, addr)
@@ -142,7 +146,6 @@ func (app *CetChainApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList 
 		}
 
 		validator.UnbondingHeight = 0
-		valConsAddrs = append(valConsAddrs, validator.ConsAddress())
 		if applyWhiteList && !whiteListMap[addr.String()] {
 			validator.Jailed = true
 		}
