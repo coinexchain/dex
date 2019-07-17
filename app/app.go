@@ -31,7 +31,6 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
@@ -221,7 +220,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
-		types.ModuleName:          {supply.Basic},
+		authx.ModuleName:          {supply.Basic},
 	}
 
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
@@ -277,7 +276,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.accountXKeeper = authx.NewKeeper(
 		app.cdc,
 		app.keyAccountX,
-		app.paramsKeeper.Subspace(types.DefaultParamspace),
+		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 		app.supplyKeeper,
 		app.accountKeeper,
 	)
@@ -371,7 +370,7 @@ func (app *CetChainApp) InitModules() {
 	// CanWithdrawInvariant invariant.
 	app.mm.SetOrderBeginBlockers(market.ModuleName, incentive.ModuleName, distr.ModuleName, slashing.ModuleName)
 
-	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, types.ModuleName, market.ModuleName, crisis.ModuleName)
+	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, authx.ModuleName, market.ModuleName, crisis.ModuleName)
 
 	initGenesisOrder := []string{
 		genaccounts.ModuleName,
