@@ -76,6 +76,7 @@ func init() {
 		GovModuleBasic{gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler)},
 		authx.AppModuleBasic{},
 		bankx.AppModuleBasic{},
+		stakingx.AppModuleBasic{},
 		distributionx.AppModuleBasic{},
 		incentive.AppModuleBasic{},
 		asset.AppModuleBasic{},
