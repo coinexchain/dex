@@ -2,7 +2,6 @@ package distributionx
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
 
 	"github.com/coinexchain/dex/modules/distributionx/types"
 )
@@ -20,13 +19,11 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 func handleMsgDonateToCommunityPool(ctx sdk.Context, k Keeper, msg types.MsgDonateToCommunityPool) sdk.Result {
-	res := k.bxk.Sk.SendCoinsFromAccountToModule(ctx, msg.FromAddr, distribution.ModuleName, msg.Amount)
-	if res != nil {
-		return res.Result()
+
+	err := k.DonateToCommunityPool(ctx, msg.FromAddr, msg.Amount)
+	if err != nil {
+		return err.Result()
 	}
-
-	k.AddCoinsToFeePool(ctx, msg.Amount)
-
 	return sdk.Result{
 		//Tags: sdk.NewTags(
 		//	TagKeyDonator, msg.FromAddr.String(),

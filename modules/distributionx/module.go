@@ -23,7 +23,7 @@ var (
 )
 
 // app module basics object
-type AppModuleBasic struct {}
+type AppModuleBasic struct{}
 
 // module name
 func (AppModuleBasic) Name() string {
@@ -64,7 +64,7 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 // app module object
 type AppModule struct {
 	AppModuleBasic
-	k  Keeper
+	k Keeper
 }
 
 // NewAppModule creates a new AppModule object
