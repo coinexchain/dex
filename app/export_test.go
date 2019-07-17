@@ -1,7 +1,13 @@
 package app
 
 import (
+	"sort"
 	"testing"
+
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
+
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/authx/types"
 
@@ -49,7 +55,7 @@ func TestExportRestore(t *testing.T) {
 		*genState = genState1
 	})
 	ctx2 := app2.NewContext(false, abci.Header{Height: app2.LastBlockHeight()})
-	genState2 := app2.mm.ExportGenesis(ctx2)
+	genState2 := app2.ExportGenesisState(ctx2)
 
 	// check
 	json1, err1 := codec.MarshalJSONIndent(app1.cdc, genState1)
@@ -79,11 +85,20 @@ func TestExportGenesisState(t *testing.T) {
 	app.accountXKeeper.SetAccountX(ctx, accx)
 
 	state := app.ExportGenesisState(ctx)
-	require.Equal(t, 1, len(state.Accounts))
+	sort.Slice(state.Accounts, func(i, j int) bool {
+		return state.Accounts[i].ModuleName < state.Accounts[j].ModuleName
+	})
+
+	require.Equal(t, 5, len(state.Accounts))
+	require.Equal(t, "", state.Accounts[0].ModuleName)
+	require.Equal(t, staking.BondedPoolName, state.Accounts[1].ModuleName)
+	require.Equal(t, staking.NotBondedPoolName, state.Accounts[2].ModuleName)
+	require.Equal(t, distribution.ModuleName, state.Accounts[3].ModuleName)
+	require.Equal(t, gov.ModuleName, state.Accounts[4].ModuleName)
+
 	require.Equal(t, sdk.NewInt(amount), state.Accounts[0].Coins.AmountOf("cet"))
 
 	accountX := state.AuthXData.AccountXs[0]
-
 	require.Equal(t, true, accountX.MemoRequired)
 	require.Equal(t, int64(10), accountX.LockedCoins[0].UnlockTime)
 	require.Equal(t, sdk.NewInt(int64(10)), accountX.LockedCoins[0].Coin.Amount)
@@ -103,13 +118,14 @@ func TestExportDefaultAccountXState(t *testing.T) {
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
 	state := app.ExportGenesisState(ctx)
-	require.Equal(t, 1, len(state.Accounts))
+	sort.Slice(state.Accounts, func(i, j int) bool {
+		return state.Accounts[i].ModuleName < state.Accounts[j].ModuleName
+	})
+
+	require.Equal(t, 5, len(state.Accounts))
 	require.Equal(t, sdk.NewInt(amount), state.Accounts[0].Coins.AmountOf("cet"))
 
-	accountX := state.AuthXData.AccountXs[0]
-	require.Equal(t, false, accountX.MemoRequired)
-	require.Nil(t, accountX.LockedCoins)
-	require.Nil(t, accountX.FrozenCoins)
+	require.Equal(t, 0, len(state.AuthXData.AccountXs))
 }
 
 func TestExportAppStateAndValidators(t *testing.T) {
@@ -161,9 +177,20 @@ func TestExportAppStateAndValidators(t *testing.T) {
 	require.Equal(t, cetToken().GetTotalSupply()-minSelfDelegate.Int64()-100, valAcc.GetCoins().AmountOf("cet").Int64())
 
 	//TODO:
-	//feesCollected := appState.AuthData.CollectedFees
-	//require.Equal(t, sdk.NewInt(100), feesCollected.AmountOf("cet"))
+	//feeCollectAccount := getFeeCollectAccount(&appState)
+	//require.NotNil(t, feeCollectAccount)
+	//require.Equal(t, sdk.NewInt(100).Int64(), feeCollectAccount.Coins.AmountOf(dex.DefaultBondDenom).Int64())
 }
+
+//func getFeeCollectAccount(gs *GenesisState) *genaccounts.GenesisAccount {
+//	for _, acc := range gs.Accounts {
+//		if acc.ModuleName == distribution.ModuleName {
+//			return &acc
+//		}
+//	}
+//
+//	return nil
+//}
 
 func TestExportValidatorsUpdateRestore(t *testing.T) {
 	sk, pk, addr := testutil.KeyPubAddr()
@@ -203,7 +230,7 @@ func TestExportValidatorsUpdateRestore(t *testing.T) {
 	// restore & reexport
 	app2 := initAppWithValidators(exportState1)
 	ctx2 := app2.NewContext(false, abci.Header{Height: app2.LastBlockHeight()})
-	exportState2 := app2.mm.ExportGenesis(ctx2)
+	exportState2 := app2.ExportGenesisState(ctx2)
 
 	// check
 	json1, err1 := codec.MarshalJSONIndent(app1.cdc, exportState1)

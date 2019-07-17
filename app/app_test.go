@@ -89,9 +89,6 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 		cb(&genState)
 	}
 
-	//TODO:
-	//genState.StakingData.Pool.NotBondedTokens = sdk.NewInt(cetToken.GetTotalSupply())
-
 	// init chain
 	genStateBytes, _ := app.cdc.MarshalJSON(genState)
 	app.InitChain(abci.RequestInitChain{ChainId: testChainID, AppStateBytes: genStateBytes})

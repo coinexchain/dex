@@ -282,17 +282,6 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.accountKeeper,
 	)
 
-	app.stakingXKeeper = stakingx.NewKeeper(
-		app.paramsKeeper.Subspace(stakingx.DefaultParamspace),
-		app.assetKeeper,
-		&stakingKeeper,
-		app.distrKeeper,
-		app.accountKeeper,
-		app.bankxKeeper,
-		app.supplyKeeper,
-		auth.FeeCollectorName,
-	)
-
 	app.slashingKeeper = slashing.NewKeeper(
 		app.cdc,
 		app.keySlashing,
@@ -328,6 +317,16 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
 		app.bankxKeeper,
 		app.supplyKeeper,
+	)
+	app.stakingXKeeper = stakingx.NewKeeper(
+		app.paramsKeeper.Subspace(stakingx.DefaultParamspace),
+		app.assetKeeper,
+		&stakingKeeper,
+		app.distrKeeper,
+		app.accountKeeper,
+		app.bankxKeeper,
+		app.supplyKeeper,
+		auth.FeeCollectorName,
 	)
 	app.marketKeeper = market.NewBaseKeeper(
 		app.keyMarket,
