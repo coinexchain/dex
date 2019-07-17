@@ -1,4 +1,4 @@
-package comment
+package types
 
 import (
 	"encoding/base64"
@@ -11,10 +11,6 @@ import (
 
 // RouterKey is the name of the market module
 const (
-	RouterKey = "comment"
-	StoreKey  = RouterKey
-	Topic     = RouterKey
-
 	TokenCommentKey = "token_comment"
 
 	HanziLengthForLZ4 = 512
@@ -229,7 +225,7 @@ func (msg MsgCommentToken) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgCommentToken) GetSignBytes() []byte {
-	return sdk.MustSortJSON(msgCdc.MustMarshalJSON(msg))
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 func (msg MsgCommentToken) GetSigners() []sdk.AccAddress {

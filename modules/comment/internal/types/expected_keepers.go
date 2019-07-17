@@ -1,4 +1,4 @@
-package comment
+package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -16,5 +16,5 @@ type ExpectedAssetStatusKeeper interface {
 }
 
 type ExpectedDistributionxKeeper interface {
-	DonateToCommunityPool(ctx sdk.Context, fromAddr sdk.AccAddress, amt sdk.Coins)
+	DonateToCommunityPool(ctx sdk.Context, fromAddr sdk.AccAddress, amt sdk.Coins) sdk.Error
 }
