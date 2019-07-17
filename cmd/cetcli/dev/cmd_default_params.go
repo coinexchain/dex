@@ -2,6 +2,7 @@ package dev
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/authx/types"
 	"os"
 	"reflect"
 
@@ -16,7 +17,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
@@ -43,7 +43,7 @@ func DefaultParamsCmd(cdc *codec.Codec) *cobra.Command {
 
 func getParamSets() []moduleParamSet {
 	set := []moduleParamSet{
-		toParamSet("authx", authx.DefaultParams()),
+		toParamSet("authx", types.DefaultParams()),
 		toParamSet("bankx", bankx.DefaultParams()),
 		toParamSet("stakingx", stakingx.DefaultParams()),
 		toParamSet("asset", asset.DefaultParams()),

@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/coinexchain/dex/modules/authx/types"
 	"net/http"
 
 	"github.com/coinexchain/dex/modules/authx/client/cli"
@@ -12,8 +13,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
-	"github.com/coinexchain/dex/modules/authx"
 )
 
 // register REST routes
@@ -55,10 +54,10 @@ func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) h
 
 		aux, err := cli.GetAccountX(cliCtx, addr)
 		if err != nil {
-			aux = authx.AccountX{}
+			aux = types.AccountX{}
 		}
 
-		mix := authx.NewAccountMix(acc, aux)
+		mix := types.NewAccountMix(acc, aux)
 
 		rest.PostProcessResponse(w, cliCtx, mix)
 	}
@@ -89,7 +88,7 @@ func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			return
 		}
 
-		lockedCoins := make(authx.LockedCoins, 0)
+		lockedCoins := make(types.LockedCoins, 0)
 		aux, err := cli.GetAccountX(cliCtx, addr)
 		if err == nil {
 			lockedCoins = aux.GetAllLockedCoins()
@@ -97,7 +96,7 @@ func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 
 		all := struct {
 			C sdk.Coins         `json:"coins"`
-			L authx.LockedCoins `json:"locked_coins"`
+			L types.LockedCoins `json:"locked_coins"`
 		}{acc.GetCoins(), lockedCoins}
 
 		rest.PostProcessResponse(w, cliCtx, all)

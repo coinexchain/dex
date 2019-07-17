@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	types2 "github.com/coinexchain/dex/modules/authx/types"
 	"net"
 	"os"
 	"path/filepath"
@@ -30,7 +31,6 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -109,7 +109,7 @@ func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 	cmd.Flags().String(
 		client.FlagChainID, "", "genesis file chain-id, if left blank will be randomly created")
 	cmd.Flags().String(
-		server.FlagMinGasPrices, fmt.Sprintf("%s%s", authx.DefaultMinGasPriceLimit, dex.DefaultBondDenom), //20sato.CET
+		server.FlagMinGasPrices, fmt.Sprintf("%s%s", types2.DefaultMinGasPriceLimit, dex.DefaultBondDenom), //20sato.CET
 		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 20cet)")
 }
 

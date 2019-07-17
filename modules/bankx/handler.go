@@ -2,12 +2,12 @@ package bankx
 
 import (
 	"fmt"
+	types2 "github.com/coinexchain/dex/modules/authx/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -94,14 +94,14 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		return err.Result()
 	}
 
-	err := k.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, authx.ModuleName, amt)
+	err := k.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, types2.ModuleName, amt)
 	if err != nil {
 		return err.Result()
 	}
 
 	ax := k.Axk.GetOrCreateAccountX(ctx, toAddr)
 	for _, coin := range amt {
-		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
+		ax.LockedCoins = append(ax.LockedCoins, types2.LockedCoin{Coin: coin, UnlockTime: unlockTime})
 	}
 	k.Axk.SetAccountX(ctx, ax)
 

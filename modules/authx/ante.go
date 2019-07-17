@@ -1,10 +1,12 @@
 package authx
 
 import (
-	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	types2 "github.com/coinexchain/dex/modules/authx/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 type AnteHelper interface {
@@ -69,7 +71,7 @@ func checkGasPrice(ctx sdk.Context, tx auth.StdTx, axk AccountXKeeper) sdk.Error
 	gasPrice := tx.Fee.GasPrices().AmountOf(dex.CET)
 	minGasPrice := axk.GetParams(ctx).MinGasPriceLimit
 	if gasPrice.LT(minGasPrice) {
-		return ErrGasPriceTooLow(minGasPrice, gasPrice)
+		return types2.ErrGasPriceTooLow(minGasPrice, gasPrice)
 	}
 	return nil
 }

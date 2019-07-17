@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"github.com/coinexchain/dex/modules/distributionx/types"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,6 +10,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+
+	"github.com/coinexchain/dex/modules/distributionx/types"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application

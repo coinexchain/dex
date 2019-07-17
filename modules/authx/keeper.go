@@ -8,13 +8,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-)
 
-const (
-	// StoreKey is string representation of the store key for authx
-	StoreKey = "accx"
-	// QuerierRoute is the querier route for accx
-	QuerierRoute = StoreKey
+	"github.com/coinexchain/dex/modules/authx/types"
 )
 
 var (
@@ -41,14 +36,14 @@ type AccountXKeeper struct {
 
 func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace, keeper SupplyKeeper, ak ExpectedAccountKeeper) AccountXKeeper {
 	// ensure authx module account is set
-	if addr := keeper.GetModuleAddress(ModuleName); addr == nil {
-		panic(fmt.Sprintf("%s module account has not been set", ModuleName))
+	if addr := keeper.GetModuleAddress(types.ModuleName); addr == nil {
+		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
 
 	return AccountXKeeper{
 		key:           key,
 		cdc:           cdc,
-		paramSubspace: paramSubspace.WithKeyTable(ParamKeyTable()),
+		paramSubspace: paramSubspace.WithKeyTable(types.ParamKeyTable()),
 		supplyKeeper:  keeper,
 		ak:            ak,
 	}
@@ -61,16 +56,16 @@ func AddressStoreKey(addr sdk.AccAddress) []byte {
 // -----------------------------------------------------------------------------
 // AccountX
 
-func (axk AccountXKeeper) GetOrCreateAccountX(ctx sdk.Context, addr sdk.AccAddress) AccountX {
+func (axk AccountXKeeper) GetOrCreateAccountX(ctx sdk.Context, addr sdk.AccAddress) types.AccountX {
 	ax, ok := axk.GetAccountX(ctx, addr)
 	if !ok {
-		ax = AccountX{Address: addr}
+		ax = types.AccountX{Address: addr}
 		axk.SetAccountX(ctx, ax)
 	}
 	return ax
 }
 
-func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax AccountX, ok bool) {
+func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax types.AccountX, ok bool) {
 	store := ctx.KVStore(axk.key)
 	bz := store.Get(AddressStoreKey(addr))
 	if bz == nil {
@@ -81,7 +76,7 @@ func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax 
 	return acc, true
 }
 
-func (axk AccountXKeeper) SetAccountX(ctx sdk.Context, ax AccountX) {
+func (axk AccountXKeeper) SetAccountX(ctx sdk.Context, ax types.AccountX) {
 	addr := ax.Address
 	store := ctx.KVStore(axk.key)
 	bz, err := axk.cdc.MarshalBinaryBare(ax)
@@ -91,7 +86,7 @@ func (axk AccountXKeeper) SetAccountX(ctx sdk.Context, ax AccountX) {
 	store.Set(AddressStoreKey(addr), bz)
 }
 
-func (axk AccountXKeeper) IterateAccounts(ctx sdk.Context, process func(AccountX) (stop bool)) {
+func (axk AccountXKeeper) IterateAccounts(ctx sdk.Context, process func(types.AccountX) (stop bool)) {
 	store := ctx.KVStore(axk.key)
 	iter := sdk.KVStorePrefixIterator(store, AddressStoreKeyPrefix)
 	defer iter.Close()
@@ -132,12 +127,12 @@ func (axk AccountXKeeper) RemoveFromUnlockedCoinsQueueByKey(ctx sdk.Context, key
 // Params
 
 // SetParams sets the asset module's parameters.
-func (axk AccountXKeeper) SetParams(ctx sdk.Context, params Params) {
+func (axk AccountXKeeper) SetParams(ctx sdk.Context, params types.Params) {
 	axk.paramSubspace.SetParamSet(ctx, &params)
 }
 
 // GetParams gets the asset module's parameters.
-func (axk AccountXKeeper) GetParams(ctx sdk.Context) (params Params) {
+func (axk AccountXKeeper) GetParams(ctx sdk.Context) (params types.Params) {
 	axk.paramSubspace.GetParamSet(ctx, &params)
 	return
 }
@@ -145,7 +140,7 @@ func (axk AccountXKeeper) GetParams(ctx sdk.Context) (params Params) {
 // -----------------------------------------------------------------------------
 // Codec
 
-func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax AccountX) {
+func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax types.AccountX) {
 	err := axk.cdc.UnmarshalBinaryBare(bz, &ax)
 
 	if err != nil {

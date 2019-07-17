@@ -1,11 +1,12 @@
-package authx
+package types
 
 import (
 	"fmt"
 
+	"github.com/tendermint/tendermint/crypto"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/tendermint/tendermint/crypto"
 )
 
 type AccountX struct {
@@ -88,23 +89,6 @@ func (acc *AccountX) GetAllUnlockedCoinsAtTheTime(time int64) LockedCoins {
 		}
 	}
 	return coins
-}
-
-func (acc *AccountX) TransferUnlockedCoins(time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
-	var coins = sdk.Coins{}
-	var temp LockedCoins
-	for _, c := range acc.LockedCoins {
-		if c.UnlockTime <= time {
-			coins = coins.Add(sdk.Coins{c.Coin})
-		} else {
-			temp = append(temp, c)
-		}
-	}
-	coins = coins.Sort()
-	kx.supplyKeeper.SendCoinsFromModuleToAccount(ctx, ModuleName, acc.Address, coins)
-
-	acc.LockedCoins = temp
-	kx.SetAccountX(ctx, *acc)
 }
 
 func (acc AccountX) String() string {

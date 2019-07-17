@@ -1,4 +1,4 @@
-package authx
+package types
 
 import (
 	"github.com/stretchr/testify/require"

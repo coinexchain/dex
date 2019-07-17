@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"fmt"
+	types2 "github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
 	"math"
 	"testing"
@@ -122,7 +123,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	axk := authx.NewKeeper(
 		cdc,
 		keys.authxCapKey,
-		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(authx.DefaultParamspace),
+		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams).Subspace(types2.DefaultParamspace),
 	)
 	bk := bank.NewBaseKeeper(
 		ak,
@@ -215,7 +216,7 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) Expec
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, keys.fckCapKey)
-	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
+	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(types2.DefaultParamspace))
 	ask := asset.NewBaseTokenKeeper(cdc, keys.assetCapKey)
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, producer)
 	bk.SetSendEnabled(ctx, true)

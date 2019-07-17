@@ -2,6 +2,7 @@ package distributionx
 
 import (
 	"github.com/coinexchain/dex/modules/asset"
+	types3 "github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
 	types2 "github.com/coinexchain/dex/modules/distributionx/types"
 
@@ -56,7 +57,7 @@ func setupTestInput() testInput {
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
-	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
+	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(types3.DefaultParamspace))
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, msgqueue.Producer{})
 	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace), bk, staking.Keeper{}, auth.FeeCollectionKeeper{}, distribution.DefaultCodespace)
 

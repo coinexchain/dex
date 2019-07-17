@@ -1,6 +1,7 @@
 package authx
 
 import (
+	"github.com/coinexchain/dex/modules/authx/types"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/x/supply"
@@ -28,7 +29,7 @@ type testInput struct {
 func setupTestInput() testInput {
 	db := dbm.NewMemDB()
 	cdc := codec.New()
-	RegisterCodec(cdc)
+	types.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
@@ -50,7 +51,7 @@ func setupTestInput() testInput {
 	ms.LoadLatestVersion()
 
 	maccPerms := map[string][]string{
-		ModuleName: []string{supply.Basic},
+		types.ModuleName: []string{supply.Basic},
 	}
 
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)

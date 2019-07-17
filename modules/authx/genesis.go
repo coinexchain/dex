@@ -4,14 +4,16 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/authx/types"
 )
 
 type GenesisState struct {
-	Params    Params    `json:"params"`
-	AccountXs AccountXs `json:"accountxs"`
+	Params    types.Params    `json:"params"`
+	AccountXs types.AccountXs `json:"accountxs"`
 }
 
-func NewGenesisState(params Params, accountXs AccountXs) GenesisState {
+func NewGenesisState(params types.Params, accountXs types.AccountXs) GenesisState {
 	return GenesisState{
 		Params:    params,
 		AccountXs: accountXs,
@@ -20,7 +22,7 @@ func NewGenesisState(params Params, accountXs AccountXs) GenesisState {
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParams(), AccountXs{})
+	return NewGenesisState(types.DefaultParams(), types.AccountXs{})
 }
 
 // InitGenesis - Init store state from genesis data
@@ -28,16 +30,16 @@ func InitGenesis(ctx sdk.Context, keeper AccountXKeeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 
 	for _, accx := range data.AccountXs {
-		accountX := NewAccountX(accx.Address, accx.MemoRequired, accx.LockedCoins, accx.FrozenCoins)
+		accountX := types.NewAccountX(accx.Address, accx.MemoRequired, accx.LockedCoins, accx.FrozenCoins)
 		keeper.SetAccountX(ctx, *accountX)
 	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, keeper AccountXKeeper) GenesisState {
-	var accountXs AccountXs
+	var accountXs types.AccountXs
 
-	keeper.IterateAccounts(ctx, func(accountX AccountX) (stop bool) {
+	keeper.IterateAccounts(ctx, func(accountX types.AccountX) (stop bool) {
 		accountXs = append(accountXs, accountX)
 		return false
 	})
@@ -50,7 +52,7 @@ func ExportGenesis(ctx sdk.Context, keeper AccountXKeeper) GenesisState {
 func (data GenesisState) ValidateGenesis() error {
 	limit := data.Params.MinGasPriceLimit
 	if limit.IsNegative() {
-		return ErrInvalidMinGasPriceLimit(limit)
+		return types.ErrInvalidMinGasPriceLimit(limit)
 	}
 
 	addrMap := make(map[string]bool, len(data.AccountXs))

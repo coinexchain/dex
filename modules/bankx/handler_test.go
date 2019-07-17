@@ -1,6 +1,7 @@
 package bankx
 
 import (
+	types2 "github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"testing"
@@ -66,7 +67,7 @@ func setupTestInput() testInput {
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
-	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
+	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(types2.DefaultParamspace))
 	bxkKeeper := keeper.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, keeper.fakeAssetStatusKeeper{}, producer)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
@@ -84,7 +85,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	toAddr := []byte("toaddr")
 
 	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
-	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
+	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(100000000)
 	_ = fromAccount.SetCoins(oneCoins)
@@ -145,7 +146,7 @@ func TestHandlerMsgSendFail(t *testing.T) {
 	toAddr := []byte("toaddr")
 
 	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
-	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
+	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(100000000)
 	_ = fromAccount.SetCoins(oneCoins)
@@ -171,7 +172,7 @@ func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 	fromAddr := []byte("fromaddr")
 	toAddr := []byte("toaddr")
 	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
-	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
+	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
 	fee := input.bxk.GetParam(input.ctx).LockCoinsFee
 	Coins := dex.NewCetCoins(1000000000 + fee*2)
 	_ = fromAccount.SetCoins(Coins)
@@ -241,7 +242,7 @@ func TestUnlockQueueNotAppend(t *testing.T) {
 	toAddr := []byte("toaddr")
 
 	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
-	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
+	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(10100000000)
 	_ = fromAccount.SetCoins(oneCoins)

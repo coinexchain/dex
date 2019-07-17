@@ -2,23 +2,23 @@ package cli
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/authx/types"
 
-	"github.com/coinexchain/dex/modules/authx"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
-func GetAccountX(ctx context.CLIContext, address []byte) (authx.AccountX, error) {
+func GetAccountX(ctx context.CLIContext, address []byte) (types.AccountX, error) {
 
 	res, err := QueryAccountX(ctx, address)
 	if err != nil {
-		return authx.AccountX{}, err
+		return types.AccountX{}, err
 	}
 
-	var accountX authx.AccountX
+	var accountX types.AccountX
 	if err := ctx.Codec.UnmarshalJSON(res, &accountX); err != nil {
-		return authx.AccountX{}, err
+		return types.AccountX{}, err
 	}
 
 	return accountX, nil
@@ -30,7 +30,7 @@ func QueryAccountX(ctx context.CLIContext, addr sdk.AccAddress) ([]byte, error) 
 		return nil, err
 	}
 
-	route := fmt.Sprintf("custom/%s/%s", authx.StoreKey, authx.QueryAccountX)
+	route := fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryAccountX)
 
 	res, _, err := ctx.QueryWithData(route, bz)
 	if err != nil {

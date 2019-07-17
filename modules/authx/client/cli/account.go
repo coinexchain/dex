@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -8,8 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
-	"github.com/coinexchain/dex/modules/authx"
 )
 
 func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
@@ -38,10 +37,10 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 
 			aux, err := GetAccountX(cliCtx, key)
 			if err != nil { // it's ok
-				aux = authx.AccountX{}
+				aux = types.AccountX{}
 			}
 
-			all := authx.AccountAll{Account: acc, AccountX: aux}
+			all := types.AccountAll{Account: acc, AccountX: aux}
 
 			return cliCtx.PrintOutput(all)
 		},

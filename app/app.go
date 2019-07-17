@@ -31,7 +31,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
-	authx_client "github.com/coinexchain/dex/modules/authx/client"
+	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
@@ -222,7 +222,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
-		authx.ModuleName:          {supply.Basic},
+		types.ModuleName:          {supply.Basic},
 	}
 
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
@@ -278,7 +278,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.accountXKeeper = authx.NewKeeper(
 		app.cdc,
 		app.keyAccountX,
-		app.paramsKeeper.Subspace(authx.DefaultParamspace),
+		app.paramsKeeper.Subspace(types.DefaultParamspace),
 		app.supplyKeeper,
 		app.accountKeeper,
 	)
@@ -351,7 +351,7 @@ func (app *CetChainApp) InitModules() {
 		genaccounts.NewAppModule(app.accountKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		auth.NewAppModule(app.accountKeeper),
-		authx.NewAppModule(app.accountXKeeper, authx_client.NewAuthXModuleClient()),
+		authx.NewAppModule(app.accountXKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		bankx.NewAppModule(app.bankxKeeper),
 		crisis.NewAppModule(app.crisisKeeper),
@@ -372,7 +372,7 @@ func (app *CetChainApp) InitModules() {
 	// CanWithdrawInvariant invariant.
 	app.mm.SetOrderBeginBlockers(market.ModuleName, incentive.ModuleName, distr.ModuleName, slashing.ModuleName)
 
-	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, authx.ModuleName, market.ModuleName, crisis.ModuleName)
+	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, types.ModuleName, market.ModuleName, crisis.ModuleName)
 
 	initGenesisOrder := []string{
 		genaccounts.ModuleName,
@@ -384,7 +384,7 @@ func (app *CetChainApp) InitModules() {
 		gov.ModuleName,
 		supply.ModuleName,
 		crisis.ModuleName,
-		authx.ModuleName,
+		types.ModuleName,
 		bankx.ModuleName,
 		stakingx.ModuleName,
 		asset.ModuleName,

@@ -3,23 +3,20 @@ package authx
 import (
 	"fmt"
 
+	abci "github.com/tendermint/tendermint/abci/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-)
-
-// query endpoints supported by the auth Querier
-const (
-	QueryAccountX = "accountx"
+	"github.com/coinexchain/dex/modules/authx/types"
 )
 
 // creates a querier for auth REST endpoints
 func NewQuerier(keeper AccountXKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
-		case QueryAccountX:
+		case types.QueryAccountX:
 			return queryAccountX(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown authx query endpoint")

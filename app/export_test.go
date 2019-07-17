@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/coinexchain/dex/modules/authx/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -67,10 +67,10 @@ func TestExportGenesisState(t *testing.T) {
 	app := initAppWithBaseAccounts(acc)
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
 
-	accx := authx.AccountX{
+	accx := types.AccountX{
 		Address:      addr,
 		MemoRequired: true,
-		LockedCoins: []authx.LockedCoin{
+		LockedCoins: []types.LockedCoin{
 			{Coin: dex.NewCetCoin(10), UnlockTime: 10},
 		},
 		FrozenCoins: dex.NewCetCoins(1000),

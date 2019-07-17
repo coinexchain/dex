@@ -1,6 +1,7 @@
 package authx
 
 import (
+	"github.com/coinexchain/dex/modules/authx/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,7 +11,7 @@ import (
 
 func TestGetSetParams(t *testing.T) {
 	input := setupTestInput()
-	params := DefaultParams()
+	params := types.DefaultParams()
 	input.axk.SetParams(input.ctx, params)
 	params2 := input.axk.GetParams(input.ctx)
 	require.True(t, params.Equal(params2))
@@ -24,7 +25,7 @@ func TestAccountXGetSet(t *testing.T) {
 	require.False(t, ok)
 
 	//create account
-	acc := NewAccountXWithAddress(addr)
+	acc := types.NewAccountXWithAddress(addr)
 	require.Equal(t, addr, acc.Address)
 
 	input.axk.SetAccountX(input.ctx, acc)
@@ -71,8 +72,8 @@ func TestIteratorAccounts(t *testing.T) {
 	input.axk.GetOrCreateAccountX(input.ctx, sdk.AccAddress([]byte("addr2")))
 	input.axk.GetOrCreateAccountX(input.ctx, sdk.AccAddress([]byte("addr3")))
 
-	var accxs []AccountX
-	input.axk.IterateAccounts(input.ctx, func(accx AccountX) bool {
+	var accxs []types.AccountX
+	input.axk.IterateAccounts(input.ctx, func(accx types.AccountX) bool {
 		accxs = append(accxs, accx)
 		return false
 	})

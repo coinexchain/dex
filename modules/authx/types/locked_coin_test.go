@@ -1,4 +1,4 @@
-package authx
+package types
 
 import (
 	"github.com/stretchr/testify/require"
@@ -9,8 +9,8 @@ import (
 
 func TestToString(t *testing.T) {
 	lockedCoin := NewLockedCoin("cet", sdk.NewInt(100), 12345)
-	require.Equal(t, "coin: 100cet, unlocked_time: 12345\n", lockedCoin.String())
+	require.Equal(t, "coin: 100cet, unlocked_time: 12345\n", String())
 
 	lockedCoins := LockedCoins{lockedCoin, lockedCoin}
-	require.Equal(t, "coin: 100cet, unlocked_time: 12345\ncoin: 100cet, unlocked_time: 12345", lockedCoins.String())
+	require.Equal(t, "coin: 100cet, unlocked_time: 12345\ncoin: 100cet, unlocked_time: 12345", String())
 }

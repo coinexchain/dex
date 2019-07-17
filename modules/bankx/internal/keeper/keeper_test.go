@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	types3 "github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
 	types2 "github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/stretchr/testify/assert"
@@ -77,7 +78,7 @@ func givenAccountWith(input bankx.testInput, addr sdk.AccAddress, coinsString st
 	_ = acc.SetCoins(coins)
 	input.ak.SetAccount(bankx.ctx, &acc)
 
-	accX := authx.AccountX{
+	accX := types3.AccountX{
 		Address: addr,
 	}
 	input.axk.SetAccountX(bankx.ctx, accX)
@@ -162,16 +163,16 @@ func TestGetTotalCoins(t *testing.T) {
 	input := bankx.setupTestInput()
 	givenAccountWith(input, myaddr, "100cet, 20bch, 30btc")
 
-	lockedCoins := authx.LockedCoins{
-		authx.NewLockedCoin("bch", sdk.NewInt(20), 1000),
-		authx.NewLockedCoin("eth", sdk.NewInt(30), 2000),
+	lockedCoins := types3.LockedCoins{
+		types3.NewLockedCoin("bch", sdk.NewInt(20), 1000),
+		types3.NewLockedCoin("eth", sdk.NewInt(30), 2000),
 	}
 
 	frozenCoins := sdk.NewCoins(sdk.Coin{Denom: "btc", Amount: sdk.NewInt(50)},
 		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(10)},
 	)
 
-	accX := authx.AccountX{
+	accX := types3.AccountX{
 		Address:     myaddr,
 		LockedCoins: lockedCoins,
 		FrozenCoins: frozenCoins,
@@ -198,12 +199,12 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 
 	givenAccountWith(input, myaddr, "100cet")
 
-	lockedCoins := authx.LockedCoins{
-		authx.NewLockedCoin("cet", sdk.NewInt(100), 1000),
+	lockedCoins := types3.LockedCoins{
+		types3.NewLockedCoin("cet", sdk.NewInt(100), 1000),
 	}
 	frozenCoins := sdk.NewCoins(sdk.Coin{Denom: "cet", Amount: sdk.NewInt(100)})
 
-	accX := authx.AccountX{
+	accX := types3.AccountX{
 		Address:     myaddr,
 		LockedCoins: lockedCoins,
 		FrozenCoins: frozenCoins,

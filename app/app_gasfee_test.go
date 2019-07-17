@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
 
 	"testing"
@@ -11,7 +12,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -62,7 +62,7 @@ func TestMinGasPriceLimit(t *testing.T) {
 		Msgs(msg).GasAndFee(10000000000, 1).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
-	require.Equal(t, authx.CodeGasPriceTooLow, result.Code)
+	require.Equal(t, types.CodeGasPriceTooLow, result.Code)
 }
 
 func TestSmallAccountGasCost(t *testing.T) {

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/coinexchain/dex/modules/authx/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -66,6 +67,6 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// others
 	var authxData authx.GenesisState
-	authx.ModuleCdc.MustUnmarshalJSON(state[authx.ModuleName], &authxData)
+	types.ModuleCdc.MustUnmarshalJSON(state[types.ModuleName], &authxData)
 	require.Equal(t, sdk.NewDec(20), authxData.Params.MinGasPriceLimit)
 }

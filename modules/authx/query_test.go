@@ -2,6 +2,7 @@ package authx
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
@@ -36,12 +37,12 @@ func Test_queryAccount(t *testing.T) {
 	acc := input.ak.NewAccountWithAddress(input.ctx, addr)
 
 	input.ak.SetAccount(input.ctx, acc)
-	input.axk.SetAccountX(input.ctx, NewAccountXWithAddress(addr))
+	input.axk.SetAccountX(input.ctx, types.NewAccountXWithAddress(addr))
 	res, err = queryAccountX(input.ctx, req, input.axk)
 	require.Nil(t, err)
 	require.NotNil(t, res)
 
-	var account AccountX
+	var account types.AccountX
 	err2 := input.cdc.UnmarshalJSON(res, &account)
 	require.Nil(t, err2)
 }
