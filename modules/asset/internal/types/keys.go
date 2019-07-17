@@ -54,7 +54,7 @@ func GetForbiddenAddrStoreKey(symbol string, addr sdk.AccAddress) []byte {
 
 // GetForbiddenAddrKeyPrefix - ForbiddenAddrKey | Symbol | :
 func GetForbiddenAddrKeyPrefix(symbol string) []byte {
-	return append(append(WhitelistKey, symbol...), SeparateKey...)
+	return append(append(ForbiddenAddrKey, symbol...), SeparateKey...)
 }
 
 // GetForbiddenAddrKeyPrefixLength - ForbiddenAddrKey length

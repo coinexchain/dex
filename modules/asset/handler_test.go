@@ -1,6 +1,7 @@
 package asset
 
 import (
+	"github.com/coinexchain/dex/modules/asset/internal/keeper"
 	"reflect"
 	"strings"
 	"testing"
@@ -95,7 +96,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"add_token_whitelist",
-			NewMsgAddTokenWhitelist("abc", owner, mockWhitelist()),
+			NewMsgAddTokenWhitelist("abc", owner, keeper.mockWhitelist()),
 			true,
 		},
 		{
@@ -105,7 +106,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"remove_token_whitelist",
-			NewMsgRemoveTokenWhitelist("abc", owner, mockWhitelist()),
+			NewMsgRemoveTokenWhitelist("abc", owner, keeper.mockWhitelist()),
 			true,
 		},
 		{
@@ -115,7 +116,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"forbid_address",
-			NewMsgForbidAddr("abc", owner, mockAddresses()),
+			NewMsgForbidAddr("abc", owner, keeper.mockAddresses()),
 			true,
 		},
 		{
@@ -125,7 +126,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"unforbid_address",
-			NewMsgUnForbidAddr("abc", owner, mockAddresses()),
+			NewMsgUnForbidAddr("abc", owner, keeper.mockAddresses()),
 			true,
 		},
 		{

@@ -463,7 +463,8 @@ func (keeper BaseTokenKeeper) GetToken(ctx sdk.Context, symbol string) types.Tok
 }
 
 // GetAllTokens - returns all tokens.
-func (keeper BaseTokenKeeper) GetAllTokens(ctx sdk.Context) (tokens []types.Token) {
+func (keeper BaseTokenKeeper) GetAllTokens(ctx sdk.Context) []types.Token {
+	tokens := make([]types.Token, 0)
 	store := ctx.KVStore(keeper.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.TokenKey)
 	defer iterator.Close()
@@ -476,7 +477,8 @@ func (keeper BaseTokenKeeper) GetAllTokens(ctx sdk.Context) (tokens []types.Toke
 }
 
 // GetWhitelist - returns whitelist.
-func (keeper BaseTokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) (whitelist []sdk.AccAddress) {
+func (keeper BaseTokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) []sdk.AccAddress {
+	whitelist := make([]sdk.AccAddress, 0)
 	keyPrefix := types.GetWhitelistKeyPrefix(symbol)
 
 	keeper.iterateAddrKey(ctx, keyPrefix, func(key []byte) (stop bool) {
@@ -489,7 +491,8 @@ func (keeper BaseTokenKeeper) GetWhitelist(ctx sdk.Context, symbol string) (whit
 }
 
 // GetForbiddenAddresses - returns all forbidden addr
-func (keeper BaseTokenKeeper) GetForbiddenAddresses(ctx sdk.Context, symbol string) (addresses []sdk.AccAddress) {
+func (keeper BaseTokenKeeper) GetForbiddenAddresses(ctx sdk.Context, symbol string) []sdk.AccAddress {
+	addresses := make([]sdk.AccAddress, 0)
 	keyPrefix := types.GetForbiddenAddrKeyPrefix(symbol)
 
 	keeper.iterateAddrKey(ctx, keyPrefix, func(key []byte) (stop bool) {
