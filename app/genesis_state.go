@@ -20,26 +20,28 @@ type OrderedGenesisState struct {
 	AssetData    json.RawMessage `json:"asset"`
 	MarketData   json.RawMessage `json:"market"`
 	Incentive    json.RawMessage `json:"incentive"`
+	Supply       json.RawMessage `json:"supply"`
 	GenUtil      json.RawMessage `json:"genutil"`
 }
 
 func NewOrderedGenesisState(unordered map[string]json.RawMessage) OrderedGenesisState {
 	return OrderedGenesisState{
-		Accounts     : getAndDelete(unordered, "accounts"),
-		AuthData     : getAndDelete(unordered, "auth"),
-		AuthXData    : getAndDelete(unordered, "authx"),
-		BankData     : getAndDelete(unordered, "bank"),
-		BankXData    : getAndDelete(unordered, "bankx"),
-		StakingData  : getAndDelete(unordered, "staking"),
-		StakingXData : getAndDelete(unordered, "stakingx"),
-		DistrData    : getAndDelete(unordered, "distr"),
-		GovData      : getAndDelete(unordered, "gov"),
-		CrisisData   : getAndDelete(unordered, "crisis"),
-		SlashingData : getAndDelete(unordered, "slashing"),
-		AssetData    : getAndDelete(unordered, "asset"),
-		MarketData   : getAndDelete(unordered, "market"),
-		Incentive    : getAndDelete(unordered, "incentive"),
-		GenUtil      : getAndDelete(unordered, "genutil"),
+		Accounts:     getAndDelete(unordered, "accounts"),
+		AuthData:     getAndDelete(unordered, "auth"),
+		AuthXData:    getAndDelete(unordered, "authx"),
+		BankData:     getAndDelete(unordered, "bank"),
+		BankXData:    getAndDelete(unordered, "bankx"),
+		StakingData:  getAndDelete(unordered, "staking"),
+		StakingXData: getAndDelete(unordered, "stakingx"),
+		DistrData:    getAndDelete(unordered, "distr"),
+		GovData:      getAndDelete(unordered, "gov"),
+		CrisisData:   getAndDelete(unordered, "crisis"),
+		SlashingData: getAndDelete(unordered, "slashing"),
+		AssetData:    getAndDelete(unordered, "asset"),
+		MarketData:   getAndDelete(unordered, "market"),
+		Incentive:    getAndDelete(unordered, "incentive"),
+		Supply:       getAndDelete(unordered, "supply"),
+		GenUtil:      getAndDelete(unordered, "genutil"),
 	}
 }
 
