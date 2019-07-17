@@ -1,13 +1,13 @@
-package types
+package comment
 
 import "github.com/cosmos/cosmos-sdk/codec"
 
 var (
-	ModuleCdc = codec.New()
+	msgCdc = codec.New()
 )
 
 func init() {
-	RegisterCodec(ModuleCdc)
+	RegisterCodec(msgCdc)
 }
 
 func RegisterCodec(cdc *codec.Codec) {

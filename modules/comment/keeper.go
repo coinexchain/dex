@@ -1,8 +1,7 @@
-package keepers
+package comment
 
 import (
 	"encoding/binary"
-	"github.com/coinexchain/dex/modules/comment/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -46,23 +45,23 @@ func (keeper *CommentCountKeeper) SetCommentCount(ctx sdk.Context, count uint64)
 }
 
 type Keeper struct {
-	Cck         *CommentCountKeeper
-	Bxk         types.ExpectedBankxKeeper
-	Axk         types.ExpectedAssetStatusKeeper
-	Dk          types.ExpectedDistributionKeeper
-	MsgSendFunc func(key string, v interface{}) error
+	cck         *CommentCountKeeper
+	bxk         ExpectedBankxKeeper
+	axk         ExpectedAssetStatusKeeper
+	dk          ExpectedDistributionKeeper
+	msgSendFunc func(key string, v interface{}) error
 }
 
 func NewKeeper(cck *CommentCountKeeper,
-	bxk types.ExpectedBankxKeeper,
-	axk types.ExpectedAssetStatusKeeper,
-	dk types.ExpectedDistributionKeeper,
+	bxk ExpectedBankxKeeper,
+	axk ExpectedAssetStatusKeeper,
+	dk ExpectedDistributionKeeper,
 	msgSendFunc func(key string, v interface{}) error) *Keeper {
 	return &Keeper{
-		Cck:         cck,
-		Bxk:         bxk,
-		Axk:         axk,
-		Dk:          dk,
-		MsgSendFunc: msgSendFunc,
+		cck:         cck,
+		bxk:         bxk,
+		axk:         axk,
+		dk:          dk,
+		msgSendFunc: msgSendFunc,
 	}
 }

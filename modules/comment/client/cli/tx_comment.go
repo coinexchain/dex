@@ -14,7 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	"github.com/coinexchain/dex/modules/comment/internal/types"
+	"github.com/coinexchain/dex/modules/comment"
 )
 
 const (
@@ -153,7 +153,7 @@ func createAndBroadcastComment(cdc *codec.Codec, subcmd string, rewardsArrayPtr 
 	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
 
-func parseRewardLine(line string) (*types.CommentRef, error) {
+func parseRewardLine(line string) (*comment.CommentRef, error) {
 	symbols := strings.Split(line, ";")
 	if len(symbols) != 5 {
 		return nil, errors.Errorf("invalid format: " + line)
@@ -177,13 +177,13 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 	attitudes := strings.Split(symbols[4], ",")
 	attList := make([]int32, len(attitudes))
 	for i, a := range attitudes {
-		attList[i] = types.ParseAttitude(a)
+		attList[i] = comment.ParseAttitude(a)
 		if attList[i] < 0 {
 			return nil, errors.Errorf("invalid attitude: " + a)
 		}
 	}
 
-	cref := &types.CommentRef{
+	cref := &comment.CommentRef{
 		ID:           uint64(id),
 		RewardTarget: target,
 		RewardToken:  symbols[2],
@@ -193,23 +193,23 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 	return cref, nil
 }
 
-func parseFlags(sender sdk.AccAddress, rewardsArrayPtr *[]string) (*types.MsgCommentToken, error) {
+func parseFlags(sender sdk.AccAddress, rewardsArrayPtr *[]string) (*comment.MsgCommentToken, error) {
 	ctstr := viper.GetString(FlagContentType)
-	ct := types.ParseContentType(ctstr)
+	ct := comment.ParseContentType(ctstr)
 	if ct < 0 {
 		return nil, errors.Errorf(ctstr + " is not a valid content type.")
 	}
 
-	var references []types.CommentRef
+	var references []comment.CommentRef
 	followup := viper.GetString(FlagFollow)
 	if len(followup) != 0 {
 		cref, err := parseRewardLine(followup)
 		if err != nil {
 			return nil, err
 		}
-		references = []types.CommentRef{*cref}
+		references = []comment.CommentRef{*cref}
 	} else {
-		references = make([]types.CommentRef, 0, len(*rewardsArrayPtr))
+		references = make([]comment.CommentRef, 0, len(*rewardsArrayPtr))
 		for _, line := range *rewardsArrayPtr {
 			cref, err := parseRewardLine(line)
 			if err != nil {
@@ -223,5 +223,5 @@ func parseFlags(sender sdk.AccAddress, rewardsArrayPtr *[]string) (*types.MsgCom
 	donation := viper.GetInt64(FlagDonation)
 	title := viper.GetString(FlagTitle)
 	content := viper.GetString(FlagContent)
-	return types.NewMsgCommentToken(sender, token, donation, title, content, ct, references), nil
+	return comment.NewMsgCommentToken(sender, token, donation, title, content, ct, references), nil
 }

@@ -1,8 +1,7 @@
-package keepers
+package comment
 
 import (
-	abcitypes "github.com/tendermint/tendermint/abci/types"
-	"github.com/coinexchain/dex/modules/comment/internal/types"
+	"github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,7 +13,7 @@ const (
 
 // creates a querier for asset REST endpoints
 func NewQuerier(mk Keeper, cdc *codec.Codec) sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abcitypes.RequestQuery) (res []byte, err sdk.Error) {
+	return func(ctx sdk.Context, path []string, req types.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
 		case QueryCommentCount:
 			return queryCommentCount(ctx, req, mk)
@@ -28,15 +27,15 @@ type CommentCountInfo struct {
 	CommentCount uint64 `json:"comment_count"`
 }
 
-func queryCommentCount(ctx sdk.Context, req abcitypes.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
-	count := mk.Cck.GetCommentCount(ctx)
+func queryCommentCount(ctx sdk.Context, req types.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
+	count := mk.cck.GetCommentCount(ctx)
 
 	queryInfo := CommentCountInfo{
 		CommentCount: count,
 	}
-	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, queryInfo)
+	bz, err := codec.MarshalJSONIndent(msgCdc, queryInfo)
 	if err != nil {
-		return nil, sdk.NewError(types.CodeSpaceComment, types.CodeMarshalFailed, "could not marshal result to JSON")
+		return nil, sdk.NewError(CodeSpaceComment, CodeMarshalFailed, "could not marshal result to JSON")
 	}
 	return bz, nil
 }

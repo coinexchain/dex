@@ -22,12 +22,12 @@ func DefaultGenesisState() GenesisState {
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
-	keeper.Cck.SetCommentCount(ctx, data.CommentCount)
+	keeper.cck.SetCommentCount(ctx, data.CommentCount)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
-	return NewGenesisState(k.Cck.GetCommentCount(ctx))
+	return NewGenesisState(k.cck.GetCommentCount(ctx))
 }
 
 func (data GenesisState) Validate() error {
