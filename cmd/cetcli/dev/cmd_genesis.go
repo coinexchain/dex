@@ -80,7 +80,7 @@ func generateGenesisJSON(cdc *codec.Codec) error {
 }
 
 func printGenesisState(cdc *codec.Codec, genState map[string]json.RawMessage, chainID string) error {
-	orderedGenState := app.NewOrderedGenesisState(genState)
+	orderedGenState := app.NewDefaultGenesisState()
 	gneStateBytes, err := codec.MarshalJSONIndent(cdc, orderedGenState)
 	if err != nil {
 		return err
