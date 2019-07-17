@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	"math"
 	"testing"
 	"time"
@@ -18,7 +19,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/coinexchain/dex/modules/asset"
@@ -35,6 +35,8 @@ type testInput struct {
 	mk      keepers.Keeper
 	handler sdk.Handler
 	akp     auth.AccountKeeper
+	keys    storeKeys
+	cdc     *codec.Codec // mk.cdc
 }
 
 func (t testInput) getCoinFromAddr(addr sdk.AccAddress, denom string) (cetCoin sdk.Coin) {
@@ -102,6 +104,8 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	asset.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
 
+	sk := supply.NewKeeper() // TODO
+
 	//create auth, asset keeper
 	ak := auth.NewAccountKeeper(
 		cdc,
@@ -112,8 +116,8 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		cdc,
 		keys.authxCapKey,
 		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(authx.DefaultParamspace),
-		nil, // TODO
-		nil, // TODO
+		sk,
+		ak,
 	)
 	bk := bank.NewBaseKeeper(
 		ak,
@@ -127,20 +131,15 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	bkx := bankx.NewKeeper(
 		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(bankx.DefaultParamspace),
 		axk, bk, ak, ask,
-		nil,
+		sk,
 		msgqueue.NewProducer(),
 	)
-
-	sk := staking.NewKeeper(cdc, keys.keyStaking, keys.tkeyStaking, bk,
-		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(staking.DefaultParamspace),
-		stakingtypes.DefaultCodespace)
-
 	tk := asset.NewBaseKeeper(
 		cdc,
 		keys.assetCapKey,
 		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(asset.DefaultParamspace),
 		bkx,
-		&sk,
+		sk,
 	)
 	tk.SetParams(ctx, asset.DefaultParams())
 
@@ -197,14 +196,14 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 }
 
 func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) types.ExpectedBankxKeeper {
-
+	sk := supply.NewKeeper() // TODO
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	producer := msgqueue.NewProducer()
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
-	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
+	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak) // TODO
 	ask := asset.NewBaseTokenKeeper(cdc, keys.assetCapKey)
-	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, producer)
+	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, sk, producer)
 	bk.SetSendEnabled(ctx, true)
 	bxkKeeper.SetParam(ctx, bankx.DefaultParams())
 
@@ -243,7 +242,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	mk := keepers.NewKeeper(keys.marketKey, ak, bk, cdc,
 		msgqueue.NewProducer(), paramsKeeper.Subspace(types.StoreKey))
-	types.RegisterCodec(mk.cdc)
+	types.RegisterCodec(cdc)
 
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	// subspace := paramsKeeper.Subspace(StoreKey)
@@ -251,7 +250,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	parameters := keepers.DefaultParams()
 	mk.SetParams(ctx, parameters)
 
-	return testInput{ctx: ctx, mk: mk, handler: NewHandler(mk), akp: akp}
+	return testInput{ctx: ctx, mk: mk, handler: NewHandler(mk), akp: akp, keys: keys, cdc: cdc}
 }
 
 func TestMarketInfoSetFailed(t *testing.T) {
@@ -434,7 +433,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create GTE order should succeed")
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, frozenMoney), "The amount is error")
 
-	glk := keepers.NewGlobalOrderKeeper(input.mk.marketKey, input.mk.cdc)
+	glk := keepers.NewGlobalOrderKeeper(input.keys.marketKey, input.cdc)
 	order := glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 1, param.ChainIDVersion))
 	require.Equal(t, true, isSameOrderAndMsg(order, msgGteOrder), "order should equal msg")
 
@@ -574,7 +573,6 @@ func TestCancelMarketFailed(t *testing.T) {
 	failedSender.Sender = notHaveCetAddress
 	ret = input.handler(input.ctx, failedSender)
 	require.Equal(t, types.CodeNotMatchSender, ret.Code, "cancel order should failed by not match sender")
-
 }
 
 func TestCancelMarketSuccess(t *testing.T) {
@@ -590,12 +588,11 @@ func TestCancelMarketSuccess(t *testing.T) {
 	ret := input.handler(input.ctx, msgCancelMarket)
 	require.Equal(t, true, ret.IsOK(), "cancel market should success")
 
-	dlk := keepers.NewDelistKeeper(input.mk.marketKey)
+	dlk := keepers.NewDelistKeeper(input.keys.marketKey)
 	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, keepers.DefaultMarketMinExpiredTime+10+1)[0]
 	if delSymbol != stock+types.SymbolSeparator+"cet" {
 		t.Error("Not find del market in store")
 	}
-
 }
 
 func TestChargeOrderFee(t *testing.T) {
@@ -653,7 +650,6 @@ func TestChargeOrderFee(t *testing.T) {
 	totalFreeze = frozeFee.Add(frozeCoin)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, totalFreeze), "The amount is error ")
-
 }
 
 func TestModifyPricePrecisionFaild(t *testing.T) {
@@ -684,7 +680,6 @@ func TestModifyPricePrecisionFaild(t *testing.T) {
 	msgFailedByInvalidSymbol.TradingPair = stock + types.SymbolSeparator + "not find"
 	ret = input.handler(input.ctx, msgFailedByInvalidSymbol)
 	require.Equal(t, types.CodeInvalidSymbol, ret.Code, "the tx should failed by dis match sender")
-
 }
 
 func TestModifyPricePrecisionSuccess(t *testing.T) {

@@ -7,7 +7,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
@@ -26,7 +25,7 @@ type Keeper struct {
 
 func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	bk bank.BaseKeeper, ak auth.AccountKeeper,
-	tk types.ExpectedAssetStatusKeeper, sk supply.Keeper, msgProducer msgqueue.Producer) Keeper {
+	tk types.ExpectedAssetStatusKeeper, sk types.SupplyKeeper, msgProducer msgqueue.Producer) Keeper {
 
 	return Keeper{
 		ParamSubspace: paramSubspace.WithKeyTable(types.ParamKeyTable()),
