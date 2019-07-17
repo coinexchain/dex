@@ -16,6 +16,19 @@ import (
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
+type storeKeys struct {
+	assetCapKey *sdk.KVStoreKey
+	authCapKey  *sdk.KVStoreKey
+	authxCapKey *sdk.KVStoreKey
+	fckCapKey   *sdk.KVStoreKey
+	keyParams   *sdk.KVStoreKey
+	tkeyParams  *sdk.TransientStoreKey
+	marketKey   *sdk.KVStoreKey
+	authxKey    *sdk.KVStoreKey
+	keyStaking  *sdk.KVStoreKey
+	tkeyStaking *sdk.TransientStoreKey
+}
+
 func bytes2str(slice []byte) string {
 	s := ""
 	for _, v := range slice {
@@ -37,17 +50,17 @@ func Test_concatCopyPreAllocate(t *testing.T) {
 	}
 }
 
-func newContextAndMarketKey(chainid string) (sdk.Context, market.storeKeys) {
+func newContextAndMarketKey(chainid string) (sdk.Context, storeKeys) {
 	db := dbm.NewMemDB()
 	ms := sdkstore.NewCommitMultiStore(db)
 
-	keys := market.storeKeys{}
-	market.marketKey = sdk.NewKVStoreKey(types.StoreKey)
-	market.keyParams = sdk.NewKVStoreKey(params.StoreKey)
-	market.tkeyParams = sdk.NewTransientStoreKey(params.TStoreKey)
-	ms.MountStoreWithDB(market.keyParams, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(market.tkeyParams, sdk.StoreTypeTransient, db)
-	ms.MountStoreWithDB(market.marketKey, sdk.StoreTypeIAVL, db)
+	keys := storeKeys{}
+	keys.marketKey = sdk.NewKVStoreKey(types.StoreKey)
+	keys.keyParams = sdk.NewKVStoreKey(params.StoreKey)
+	keys.tkeyParams = sdk.NewTransientStoreKey(params.TStoreKey)
+	ms.MountStoreWithDB(keys.keyParams, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.tkeyParams, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: chainid, Height: 1000}, false, log.NewNopLogger())
@@ -56,7 +69,7 @@ func newContextAndMarketKey(chainid string) (sdk.Context, market.storeKeys) {
 
 func TestOrderCleanUpDayKeeper(t *testing.T) {
 	ctx, keys := newContextAndMarketKey(market.testNetSubString)
-	k := NewOrderCleanUpDayKeeper(market.marketKey)
+	k := NewOrderCleanUpDayKeeper(keys.marketKey)
 	k.SetUnixTime(ctx, 19673122)
 	if k.GetUnixTime(ctx) != 19673122 {
 		t.Errorf("Error for OrderCleanUpDayKeeper")
@@ -89,17 +102,17 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 		freeze = decPrice.Mul(sdk.NewDec(qua)).RoundInt64()
 	}
 	return &types.Order{
-		market.Sender:      addr,
-		market.Sequence:    seq,
-		market.TradingPair: "cet/usdt",
-		market.OrderType:   LIMIT,
-		market.Price:       decPrice,
-		market.Quantity:    qua,
-		market.Side:        side,
-		market.TimeInForce: tif,
-		market.Height:      h,
-		market.Freeze:      freeze,
-		market.LeftStock:   qua,
+		Sender:      addr,
+		Sequence:    seq,
+		TradingPair: "cet/usdt",
+		OrderType:   types.LIMIT,
+		Price:       decPrice,
+		Quantity:    qua,
+		Side:        side,
+		TimeInForce: tif,
+		Height:      h,
+		Freeze:      freeze,
+		LeftStock:   qua,
 	}
 }
 
@@ -124,24 +137,24 @@ func sameTO(a, b *types.Order) bool {
 func createTO1() []*types.Order {
 	return []*types.Order{
 		//sender seq   price quantity       height
-		newTO("00001", 1, 11051, 50, Buy, GTE, 998),   //0
-		newTO("00002", 2, 11080, 50, Buy, GTE, 998),   //1 good
-		newTO("00002", 3, 10900, 50, Buy, GTE, 992),   //2
-		newTO("00003", 2, 11010, 100, Sell, IOC, 997), //3 good
-		newTO("00004", 4, 11032, 60, Sell, GTE, 990),  //4
-		newTO("00005", 5, 12039, 120, Sell, GTE, 996), //5
+		newTO("00001", 1, 11051, 50, Buy, types.GTE, 998),   //0
+		newTO("00002", 2, 11080, 50, Buy, types.GTE, 998),   //1 good
+		newTO("00002", 3, 10900, 50, Buy, types.GTE, 992),   //2
+		newTO("00003", 2, 11010, 100, Sell, types.IOC, 997), //3 good
+		newTO("00004", 4, 11032, 60, Sell, types.GTE, 990),  //4
+		newTO("00005", 5, 12039, 120, Sell, types.GTE, 996), //5
 	}
 }
 
 func createTO3() []*types.Order {
 	return []*types.Order{
 		//sender seq   price quantity       height
-		newTO("00001", 1, 11051, 50, Buy, GTE, 998),   //0
-		newTO("00002", 2, 11080, 50, Buy, GTE, 998),   //1
-		newTO("00002", 3, 10900, 50, Buy, GTE, 992),   //2
-		newTO("00003", 2, 12010, 100, Sell, IOC, 997), //3
-		newTO("00004", 4, 12032, 60, Sell, GTE, 990),  //4
-		newTO("00005", 5, 12039, 120, Sell, GTE, 996), //5
+		newTO("00001", 1, 11051, 50, Buy, types.GTE, 998),   //0
+		newTO("00002", 2, 11080, 50, Buy, types.GTE, 998),   //1
+		newTO("00002", 3, 10900, 50, Buy, types.GTE, 992),   //2
+		newTO("00003", 2, 12010, 100, Sell, types.IOC, 997), //3
+		newTO("00004", 4, 12032, 60, Sell, types.GTE, 990),  //4
+		newTO("00005", 5, 12039, 120, Sell, types.GTE, 996), //5
 	}
 }
 
@@ -165,7 +178,7 @@ func TestOrderBook1(t *testing.T) {
 		}
 		//fmt.Printf("BB: %s %d\n", order.OrderID(), order.Height)
 	}
-	newOrder := newTO("00005", 6, 11030, 20, Sell, GTE, 993)
+	newOrder := newTO("00005", 6, 11030, 20, Sell, types.GTE, 993)
 	if keeper.Remove(ctx, newOrder) == nil {
 		t.Errorf("Error in Remove")
 	}
