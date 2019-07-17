@@ -454,6 +454,13 @@ func checkMsgCancelTradingPair(keeper Keeper, msg MsgCancelTradingPair, ctx sdk.
 		return sdk.NewError(CodeSpaceMarket, CodeNotMatchSender, "Not match market info sender")
 	}
 
+	// TODO. Will add unit test
+	if !stockToken.GetTokenForbiddable() {
+		if info.Money == types.CET {
+			return sdk.NewError(CodeSpaceMarket, CodeNotAllowedOffline, "stock token don't have globally forbidden attribute, so a trade with CET would not be allowed ")
+		}
+	}
+
 	return nil
 }
 
