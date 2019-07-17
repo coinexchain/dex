@@ -93,7 +93,6 @@ type storeKeys struct {
 	assetCapKey *sdk.KVStoreKey
 	authCapKey  *sdk.KVStoreKey
 	authxCapKey *sdk.KVStoreKey
-	fckCapKey   *sdk.KVStoreKey
 	keyParams   *sdk.KVStoreKey
 	tkeyParams  *sdk.TransientStoreKey
 	marketKey   *sdk.KVStoreKey
@@ -105,6 +104,7 @@ type storeKeys struct {
 func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) types.ExpectedAssetStatusKeeper {
 	asset.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
+	codec.RegisterCrypto(cdc)
 
 	//create auth, asset keeper
 	ak := auth.NewAccountKeeper(
@@ -121,6 +121,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	// account permissions
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:     {supply.Basic},
+		authx.ModuleName:          {supply.Basic},
 		distr.ModuleName:          {supply.Basic},
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
@@ -128,6 +129,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		types.ModuleName:          {supply.Basic},
 	}
 	sk := supply.NewKeeper(cdc, keys.keyParams, ak, bk, supply.DefaultCodespace, maccPerms)
+	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
 
 	axk := authx.NewKeeper(
 		cdc,
@@ -251,7 +253,6 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 
 	ms.MountStoreWithDB(keys.assetCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.authCapKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keys.fckCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.keyParams, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.tkeyParams, sdk.StoreTypeTransient, db)
 	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
