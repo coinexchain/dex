@@ -79,8 +79,11 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 
 	// genesis state
 	genState := NewDefaultGenesisState()
+
 	cetToken := cetToken()
 	genState.AssetData.Tokens = append(genState.AssetData.Tokens, cetToken)
+	genState.StakingData.Params.BondDenom = dex.DefaultBondDenom
+
 	genState.AuthXData.Params.MinGasPriceLimit = sdk.MustNewDecFromStr("0.00000001")
 	if cb != nil {
 		cb(&genState)
@@ -111,30 +114,6 @@ func cetToken() asset.Token {
 		TotalMint:        0,
 		IsForbidden:      false,
 	}
-}
-
-func TestGenTx(t *testing.T) {
-
-	_, _, toAddr := testutil.KeyPubAddr()
-	key, _, fromAddr := testutil.KeyPubAddr()
-	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
-	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
-
-	msg := bankx.NewMsgSend(fromAddr, toAddr, dex.NewCetCoins(1000000000), time.Now().Unix()+10000)
-	tx := newStdTxBuilder().
-		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
-
-	cdc := MakeCodec()
-	app := initApp(func(state *GenesisState) {
-		addGenesisAccounts(state, acc0)
-		txbz, _ := cdc.MarshalJSON(tx)
-		state.GenUtil.GenTxs = append(state.GenUtil.GenTxs, txbz)
-
-	})
-
-	ctx := app.NewContext(false, abci.Header{Height: 1})
-	acc1 := app.accountKeeper.GetAccount(ctx, toAddr)
-	require.NotNil(t, acc1)
 }
 
 func TestSend(t *testing.T) {
@@ -320,12 +299,6 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	//note: context need to be updated after beginblock
 	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
 	ctx := app.NewContext(false, abci.Header{Height: 1})
-
-	//TODO:
-	//app.stakingKeeper.SetPool(ctx, staking.Pool{
-	//	NotBondedTokens: sdk.NewInt(1e9),
-	//	BondedTokens:    sdk.ZeroInt(),
-	//})
 
 	// create validator & self delegate 1 CET
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).

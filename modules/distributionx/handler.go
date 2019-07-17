@@ -8,6 +8,8 @@ import (
 
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+		ctx.WithEventManager(sdk.NewEventManager())
+
 		switch msg := msg.(type) {
 		case types.MsgDonateToCommunityPool:
 			return handleMsgDonateToCommunityPool(ctx, k, msg)
@@ -24,9 +26,13 @@ func handleMsgDonateToCommunityPool(ctx sdk.Context, k Keeper, msg types.MsgDona
 	if err != nil {
 		return err.Result()
 	}
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(types.AttributeKeyDonator, msg.FromAddr.String()),
+		),
+	})
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	TagKeyDonator, msg.FromAddr.String(),
-		//),
+		Events: ctx.EventManager().Events(),
 	}
 }

@@ -6,6 +6,15 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/market/internal/types"
+)
+
+const (
+	ASK  = types.ASK
+	BID  = types.BID
+	BUY  = types.BUY
+	SELL = types.SELL
 )
 
 type dealRecord struct {

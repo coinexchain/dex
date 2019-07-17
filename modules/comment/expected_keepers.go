@@ -15,6 +15,6 @@ type ExpectedAssetStatusKeeper interface {
 	IsTokenExists(ctx sdk.Context, denom string) bool // check whether there is a coin named "denom"
 }
 
-type ExpectedDistributionKeeper interface {
-	AddCoinsToFeePool(ctx sdk.Context, coins sdk.Coins)
+type ExpectedDistributionxKeeper interface {
+	DonateToCommunityPool(ctx sdk.Context, fromAddr sdk.AccAddress, amt sdk.Coins)
 }

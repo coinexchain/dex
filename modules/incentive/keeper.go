@@ -1,11 +1,12 @@
 package incentive
 
 import (
-	types2 "github.com/coinexchain/dex/modules/incentive/internal/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/modules/incentive/internal/types"
 )
 
 const (
@@ -21,8 +22,8 @@ type Keeper struct {
 	cdc              *codec.Codec
 	key              sdk.StoreKey
 	paramSubspace    params.Subspace
-	bankKeeper       types2.BankKeeper
-	supplyKeeper     types.SupplyKeeper
+	bankKeeper       types.BankKeeper
+	supplyKeeper     authtypes.SupplyKeeper
 	feeCollectorName string
 }
 
@@ -64,7 +65,7 @@ func (k Keeper) AddNewPlan(ctx sdk.Context, plan Plan) {
 }
 
 func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace,
-	bk types2.BankKeeper, supplyKeeper types.SupplyKeeper, feeCollectorName string) Keeper {
+	bk types.BankKeeper, supplyKeeper authtypes.SupplyKeeper, feeCollectorName string) Keeper {
 
 	return Keeper{
 		cdc:              cdc,

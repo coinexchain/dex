@@ -33,6 +33,7 @@ const (
 	CodeAddressForbiddenNotSupported sdk.CodeType = 522
 	CodeNilTokenWhitelist            sdk.CodeType = 523
 	CodeNilForbiddenAddress          sdk.CodeType = 524
+	CodeBurnUnboundCET               sdk.CodeType = 525
 )
 
 func ErrInvalidTokenName(name string) sdk.Error {
@@ -89,15 +90,16 @@ func ErrTokenNotFound(symbol string) sdk.Error {
 	msg := fmt.Sprintf("token %s is not in store", symbol)
 	return sdk.NewError(CodeSpaceAsset, CodeTokenNotFound, msg)
 }
+
 func ErrDuplicateTokenSymbol(symbol string) sdk.Error {
 	msg := fmt.Sprintf("token symbol %s already exists in store", symbol)
 	return sdk.NewError(CodeSpaceAsset, CodeDuplicateTokenSymbol, msg)
 }
+
 func ErrTransferSelfTokenOwner() sdk.Error {
 	msg := fmt.Sprintf("can not and no need to transfer ownership to self")
 	return sdk.NewError(CodeSpaceAsset, CodeTransferSelfTokenOwner, msg)
 }
-
 func ErrNilTokenOwner() sdk.Error {
 	msg := fmt.Sprintf("token owner is nil")
 	return sdk.NewError(CodeSpaceAsset, CodeNilTokenOwner, msg)
@@ -112,27 +114,38 @@ func ErrInvalidIssueOwner() sdk.Error {
 		"to query reserved token symbol")
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidIssueOwner, msg)
 }
+
 func ErrTokenMintNotSupported(symbol string) sdk.Error {
 	msg := fmt.Sprintf("token %s do not support mint", symbol)
 	return sdk.NewError(CodeSpaceAsset, CodeTokenMintNotSupported, msg)
 }
+
 func ErrTokenBurnNotSupported(symbol string) sdk.Error {
 	msg := fmt.Sprintf("token %s do not support burn", symbol)
 	return sdk.NewError(CodeSpaceAsset, CodeTokenBurnNotSupported, msg)
 }
+
 func ErrTokenForbiddenNotSupported(symbol string) sdk.Error {
 	msg := fmt.Sprintf("token %s do not support token forbid", symbol)
 	return sdk.NewError(CodeSpaceAsset, CodeTokenForbiddenNotSupported, msg)
 }
+
 func ErrAddressForbiddenNotSupported(symbol string) sdk.Error {
 	msg := fmt.Sprintf("token %s do not support address forbid", symbol)
 	return sdk.NewError(CodeSpaceAsset, CodeAddressForbiddenNotSupported, msg)
 }
+
 func ErrNilTokenWhitelist() sdk.Error {
 	msg := fmt.Sprintf("whitelist is nil")
 	return sdk.NewError(CodeSpaceAsset, CodeNilTokenWhitelist, msg)
 }
+
 func ErrNilForbiddenAddress() sdk.Error {
 	msg := fmt.Sprintf("forbidden address is nil")
 	return sdk.NewError(CodeSpaceAsset, CodeNilForbiddenAddress, msg)
+}
+
+func ErrBurnUnboundCET(amt int64, err error) sdk.Error {
+	msg := fmt.Sprintf("failed to burn %d cet unbound : %s", amt, err)
+	return sdk.NewError(CodeSpaceAsset, CodeBurnUnboundCET, msg)
 }

@@ -1,14 +1,15 @@
 package cli
 
 import (
-	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/authx/types"
 )
 
 func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
@@ -25,12 +26,12 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			accRetriever := authtypes.NewAccountRetriever(cliCtx)
+			accRetriever := auth.NewAccountRetriever(cliCtx)
 			if err = accRetriever.EnsureExists(key); err != nil {
 				return err
 			}
 
-			acc, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(key)
+			acc, err := auth.NewAccountRetriever(cliCtx).GetAccount(key)
 			if err != nil {
 				return err
 			}

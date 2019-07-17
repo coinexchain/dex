@@ -7,7 +7,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/tendermint/go-amino"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,6 +17,21 @@ import (
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
+
+// GetQueryCmd returns the cli query commands for this module
+func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
+	// Group asset queries under a subcommand
+	mktQueryCmd := &cobra.Command{
+		Use:   types.StoreKey,
+		Short: "Querying commands for the market module",
+	}
+	mktQueryCmd.AddCommand(client.GetCommands(
+		QueryMarketCmd(cdc),
+		QueryOrderCmd(cdc),
+		QueryUserOrderList(cdc))...)
+	// cli.QueryWaitCancelMarkets(mc.cdc))...)
+	return mktQueryCmd
+}
 
 func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{

@@ -2,13 +2,11 @@ package keeper
 
 import (
 	"fmt"
-	types2 "github.com/coinexchain/dex/modules/authx/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
@@ -17,8 +15,8 @@ import (
 
 type Keeper struct {
 	ParamSubspace params.Subspace
-	Axk           authx.AccountXKeeper
-	Bk            bank.BaseKeeper
+	Axk           types.ExpectedAccountXKeeper
+	Bk            bank.Keeper
 	Ak            auth.AccountKeeper
 	Tk            types.ExpectedAssetStatusKeeper
 	Sk            types.SupplyKeeper
@@ -27,7 +25,7 @@ type Keeper struct {
 
 func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	bk bank.BaseKeeper, ak auth.AccountKeeper,
-	tk types.ExpectedAssetStatusKeeper, sk supply.Keeper, msgProducer msgqueue.Producer) Keeper {
+	tk types.ExpectedAssetStatusKeeper, sk types.SupplyKeeper, msgProducer msgqueue.Producer) Keeper {
 
 	return Keeper{
 		ParamSubspace: paramSubspace.WithKeyTable(types.ParamKeyTable()),
@@ -59,7 +57,7 @@ func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddres
 
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 
-	err := k.Sk.SendCoinsFromAccountToModule(ctx, addr, types2.ModuleName, amt)
+	err := k.Sk.SendCoinsFromAccountToModule(ctx, addr, authx.ModuleName, amt)
 	if err != nil {
 		return err
 	}
@@ -73,7 +71,7 @@ func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins)
 
 func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 
-	err := k.Sk.SendCoinsFromModuleToAccount(ctx, types2.ModuleName, addr, amt)
+	err := k.Sk.SendCoinsFromModuleToAccount(ctx, authx.ModuleName, addr, amt)
 	if err != nil {
 		return err
 	}
@@ -142,7 +140,7 @@ func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int {
 		axkTotalAmount = sdk.ZeroInt()
 		akTotalAmount  = sdk.ZeroInt()
 	)
-	axkProcess := func(acc types2.AccountX) bool {
+	axkProcess := func(acc authx.AccountX) bool {
 		val := acc.GetAllCoins().AmountOf(denom)
 		axkTotalAmount = axkTotalAmount.Add(val)
 		//fmt.Printf("axkTotalAmount : %d, val : %d, addr : %s\n", axkTotalAmount.Int64(), val.Int64(), acc.Address.String())

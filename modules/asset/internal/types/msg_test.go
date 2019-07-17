@@ -15,7 +15,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestMsgIssueToken_ValidateBasic(t *testing.T) {
-	invalidTokenSymbol := ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}")
 
 	tests := []struct {
 		name string
@@ -24,69 +23,69 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgIssueToken("ABC Token", "abc", 100000, tAccAddr,
+			NewMsgIssueToken("ABC Token", "abc", 100000, testAddr,
 				false, false, false, false, "", ""),
 			nil,
 		},
 		{
 			"case-name",
-			NewMsgIssueToken(string(make([]byte, 32+1)), "abc", 100000, tAccAddr,
+			NewMsgIssueToken(string(make([]byte, 32+1)), "abc", 100000, testAddr,
 				false, false, false, false, "", ""),
-			ErrorInvalidTokenName(string(make([]byte, 32+1))),
+			ErrInvalidTokenName(string(make([]byte, 32+1))),
 		},
 		{
 			"case-owner",
 			NewMsgIssueToken("ABC Token", "abc", 100000, sdk.AccAddress{},
 				false, false, false, false, "", ""),
-			ErrorInvalidTokenOwner("token owner is invalid"),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-symbol1",
-			NewMsgIssueToken("ABC Token", "1aa", 100000, tAccAddr,
+			NewMsgIssueToken("ABC Token", "1aa", 100000, testAddr,
 				false, false, false, false, "", ""),
-			invalidTokenSymbol,
+			ErrInvalidTokenSymbol("1aa"),
 		},
 		{
 			"case-symbol2",
-			NewMsgIssueToken("ABC Token", "A999", 100000, tAccAddr,
+			NewMsgIssueToken("ABC Token", "A999", 100000, testAddr,
 				false, false, false, false, "", ""),
-			invalidTokenSymbol,
+			ErrInvalidTokenSymbol("A999"),
 		},
 		{
 			"case-symbol3",
-			NewMsgIssueToken("ABC Token", "aa1234567", 100000, tAccAddr,
+			NewMsgIssueToken("ABC Token", "aa1234567", 100000, testAddr,
 				false, false, false, false, "", ""),
-			invalidTokenSymbol,
+			ErrInvalidTokenSymbol("aa1234567"),
 		},
 		{
 			"case-symbol4",
-			NewMsgIssueToken("ABC Token", "a*aa", 100000, tAccAddr,
+			NewMsgIssueToken("ABC Token", "a*aa", 100000, testAddr,
 				false, false, false, false, "", ""),
-			invalidTokenSymbol,
+			ErrInvalidTokenSymbol("a*aa"),
 		},
 		{
 			"case-totalSupply1",
-			NewMsgIssueToken("ABC Token", "abc", 9E18+1, tAccAddr,
+			NewMsgIssueToken("ABC Token", "abc", 9E18+1, testAddr,
 				false, false, false, false, "", ""),
-			ErrorInvalidTokenSupply("token total supply before 1e8 boosting should be less than 90 billion"),
+			ErrInvalidTokenSupply(9E18 + 1),
 		},
 		{
 			"case-totalSupply2",
-			NewMsgIssueToken("ABC Token", "abc", -1, tAccAddr,
+			NewMsgIssueToken("ABC Token", "abc", -1, testAddr,
 				false, false, false, false, "", ""),
-			ErrorInvalidTokenSupply("token total supply must be positive"),
+			ErrInvalidTokenSupply(-1),
 		},
 		{
 			"case-url",
-			NewMsgIssueToken("name", "coin", 2100, tAccAddr,
+			NewMsgIssueToken("name", "coin", 2100, testAddr,
 				false, false, false, false, string(make([]byte, 100+1)), ""),
-			ErrorInvalidTokenURL("token url is limited to 100 unicode characters"),
+			ErrInvalidTokenURL(string(make([]byte, 100+1))),
 		},
 		{
 			"case-description",
-			NewMsgIssueToken("name", "coin", 2100, tAccAddr,
+			NewMsgIssueToken("name", "coin", 2100, testAddr,
 				false, false, false, false, "", string(make([]byte, 1024+1))),
-			ErrorInvalidTokenDescription("token description is limited to 1k size"),
+			ErrInvalidTokenDescription(string(make([]byte, 1024+1))),
 		},
 	}
 
@@ -108,28 +107,28 @@ func TestMsgTransferOwnership_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgTransferOwnership("abc", tAccAddr, addr),
+			NewMsgTransferOwnership("abc", testAddr, addr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgTransferOwnership("123", tAccAddr, addr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgTransferOwnership("123", testAddr, addr),
+			ErrInvalidTokenSymbol("123"),
 		},
 		{
 			"case-invalid1",
-			NewMsgTransferOwnership("abc", sdk.AccAddress{}, tAccAddr),
-			ErrorInvalidTokenOwner("transfer owner ship need a valid addr"),
+			NewMsgTransferOwnership("abc", sdk.AccAddress{}, testAddr),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalid2",
-			NewMsgTransferOwnership("abc", tAccAddr, sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("transfer owner ship need a valid addr"),
+			NewMsgTransferOwnership("abc", testAddr, sdk.AccAddress{}),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalid3",
-			NewMsgTransferOwnership("abc", tAccAddr, tAccAddr),
-			ErrorInvalidTokenOwner("Can not and no need to transfer ownership to self"),
+			NewMsgTransferOwnership("abc", testAddr, testAddr),
+			ErrTransferSelfTokenOwner(),
 		},
 	}
 
@@ -150,28 +149,28 @@ func TestMsgMintToken_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgMintToken("abc", 10000, tAccAddr),
+			NewMsgMintToken("abc", 10000, testAddr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgMintToken("()2", 10000, tAccAddr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgMintToken("()2", 10000, testAddr),
+			ErrInvalidTokenSymbol("()2"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgMintToken("abc", 10000, sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("mint token need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidAmt1",
-			NewMsgMintToken("abc", 9E18+1, tAccAddr),
-			ErrorInvalidTokenMint("token total supply before 1e8 boosting should be less than 90 billion"),
+			NewMsgMintToken("abc", 9E18+1, testAddr),
+			ErrInvalidTokenMintAmt(9E18 + 1),
 		},
 		{
 			"case-invalidAmt2",
-			NewMsgMintToken("abc", -1, tAccAddr),
-			ErrorInvalidTokenMint("mint amount should be positive"),
+			NewMsgMintToken("abc", -1, testAddr),
+			ErrInvalidTokenMintAmt(-1),
 		},
 	}
 
@@ -192,28 +191,28 @@ func TestMsgBurnToken_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgBurnToken("abc", 10000, tAccAddr),
+			NewMsgBurnToken("abc", 10000, testAddr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgBurnToken("w♞", 10000, tAccAddr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgBurnToken("w♞", 10000, testAddr),
+			ErrInvalidTokenSymbol("w♞"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgBurnToken("abc", 10000, sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("burn token need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidAmt1",
-			NewMsgBurnToken("abc", 9E18+1, tAccAddr),
-			ErrorInvalidTokenBurn("token total supply before 1e8 boosting should be less than 90 billion"),
+			NewMsgBurnToken("abc", 9E18+1, testAddr),
+			ErrInvalidTokenBurnAmt(9E18 + 1),
 		},
 		{
 			"case-invalidAmt2",
-			NewMsgBurnToken("abc", -1, tAccAddr),
-			ErrorInvalidTokenBurn("burn amount should be positive"),
+			NewMsgBurnToken("abc", -1, testAddr),
+			ErrInvalidTokenBurnAmt(-1),
 		},
 	}
 
@@ -234,18 +233,18 @@ func TestMsgForbidToken_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgForbidToken("abc", tAccAddr),
+			NewMsgForbidToken("abc", testAddr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgForbidToken("*90", tAccAddr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgForbidToken("*90", testAddr),
+			ErrInvalidTokenSymbol("*90"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgForbidToken("abc", sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("forbid token need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 	}
 
@@ -266,18 +265,18 @@ func TestMsgUnForbidToken_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgUnForbidToken("abc", tAccAddr),
+			NewMsgUnForbidToken("abc", testAddr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgUnForbidToken("a¥0", tAccAddr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgUnForbidToken("a¥0", testAddr),
+			ErrInvalidTokenSymbol("a¥0"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgUnForbidToken("abc", sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("forbid token need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 	}
 
@@ -291,7 +290,7 @@ func TestMsgUnForbidToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
-	whitelist := mockWhitelist()
+	whitelist := mockAddrList()
 	tests := []struct {
 		name string
 		msg  MsgAddTokenWhitelist
@@ -299,23 +298,23 @@ func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgAddTokenWhitelist("abc", tAccAddr, whitelist),
+			NewMsgAddTokenWhitelist("abc", testAddr, whitelist),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgAddTokenWhitelist("abcdefghi", tAccAddr, whitelist),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgAddTokenWhitelist("abcdefghi", testAddr, whitelist),
+			ErrInvalidTokenSymbol("abcdefghi"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgAddTokenWhitelist("abc", sdk.AccAddress{}, whitelist),
-			ErrorInvalidTokenOwner("add token whitelist need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidWhitelist",
-			NewMsgAddTokenWhitelist("abc", tAccAddr, []sdk.AccAddress{}),
-			ErrorNilTokenWhitelist(),
+			NewMsgAddTokenWhitelist("abc", testAddr, []sdk.AccAddress{}),
+			ErrNilTokenWhitelist(),
 		},
 	}
 
@@ -329,7 +328,7 @@ func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgRemoveTokenWhitelist_ValidateBasic(t *testing.T) {
-	whitelist := mockWhitelist()
+	whitelist := mockAddrList()
 	tests := []struct {
 		name string
 		msg  MsgRemoveTokenWhitelist
@@ -337,23 +336,23 @@ func TestMsgRemoveTokenWhitelist_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgRemoveTokenWhitelist("abc", tAccAddr, whitelist),
+			NewMsgRemoveTokenWhitelist("abc", testAddr, whitelist),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgRemoveTokenWhitelist("a℃", tAccAddr, whitelist),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgRemoveTokenWhitelist("a℃", testAddr, whitelist),
+			ErrInvalidTokenSymbol("a℃"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgRemoveTokenWhitelist("abc", sdk.AccAddress{}, whitelist),
-			ErrorInvalidTokenOwner("remove token whitelist need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidWhitelist",
-			NewMsgRemoveTokenWhitelist("abc", tAccAddr, []sdk.AccAddress{}),
-			ErrorNilTokenWhitelist(),
+			NewMsgRemoveTokenWhitelist("abc", testAddr, []sdk.AccAddress{}),
+			ErrNilTokenWhitelist(),
 		},
 	}
 
@@ -367,7 +366,7 @@ func TestMsgRemoveTokenWhitelist_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
-	addr := mockAddresses()
+	addresses := mockAddrList()
 	tests := []struct {
 		name string
 		msg  MsgForbidAddr
@@ -375,23 +374,23 @@ func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgForbidAddr("abc", tAccAddr, addr),
+			NewMsgForbidAddr("abc", testAddr, addresses),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgForbidAddr("a⎝⎠", tAccAddr, addr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgForbidAddr("a⎝⎠", testAddr, addresses),
+			ErrInvalidTokenSymbol("a⎝⎠"),
 		},
 		{
 			"case-invalidOwner",
-			NewMsgForbidAddr("abc", sdk.AccAddress{}, addr),
-			ErrorInvalidTokenOwner("forbid address need a valid owner addr"),
+			NewMsgForbidAddr("abc", sdk.AccAddress{}, addresses),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidAddr",
-			NewMsgForbidAddr("abc", tAccAddr, []sdk.AccAddress{}),
-			ErrorNilForbiddenAddress(),
+			NewMsgForbidAddr("abc", testAddr, []sdk.AccAddress{}),
+			ErrNilForbiddenAddress(),
 		},
 	}
 
@@ -405,7 +404,7 @@ func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
-	addr := mockAddresses()
+	addr := mockAddrList()
 	tests := []struct {
 		name string
 		msg  MsgUnForbidAddr
@@ -413,23 +412,23 @@ func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgUnForbidAddr("abc", tAccAddr, addr),
+			NewMsgUnForbidAddr("abc", testAddr, addr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgUnForbidAddr("a⥇", tAccAddr, addr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgUnForbidAddr("a⥇", testAddr, addr),
+			ErrInvalidTokenSymbol("a⥇"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgUnForbidAddr("abc", sdk.AccAddress{}, addr),
-			ErrorInvalidTokenOwner("unforbid address need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidAddr",
-			NewMsgUnForbidAddr("abc", tAccAddr, []sdk.AccAddress{}),
-			ErrorNilForbiddenAddress(),
+			NewMsgUnForbidAddr("abc", testAddr, []sdk.AccAddress{}),
+			ErrNilForbiddenAddress(),
 		},
 	}
 
@@ -450,23 +449,23 @@ func TestMsgModifyTokenURL_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgModifyTokenURL("abc", "www.abc.org", tAccAddr),
+			NewMsgModifyTokenURL("abc", "www.abc.org", testAddr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgModifyTokenURL("a😃", "www.abc.org", tAccAddr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgModifyTokenURL("a😃", "www.abc.org", testAddr),
+			ErrInvalidTokenSymbol("a😃"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgModifyTokenURL("abc", "www.abc.org", sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("modify token url need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidURL",
-			NewMsgModifyTokenURL("abc", string(make([]byte, 100+1)), tAccAddr),
-			ErrorInvalidTokenURL("token url is limited to 100 unicode characters"),
+			NewMsgModifyTokenURL("abc", string(make([]byte, 100+1)), testAddr),
+			ErrInvalidTokenURL(string(make([]byte, 100+1))),
 		},
 	}
 
@@ -486,23 +485,23 @@ func TestMsgModifyTokenDescription_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgModifyTokenDescription("abc", "abc example description", tAccAddr),
+			NewMsgModifyTokenDescription("abc", "abc example description", testAddr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgModifyTokenDescription("a❡", "abc example description", tAccAddr),
-			ErrorInvalidTokenSymbol("token symbol not match with [a-z][a-z0-9]{1,7}"),
+			NewMsgModifyTokenDescription("a❡", "abc example description", testAddr),
+			ErrInvalidTokenSymbol("a❡"),
 		},
 		{
 			"case-invalidOwner",
 			NewMsgModifyTokenDescription("abc", "abc example description", sdk.AccAddress{}),
-			ErrorInvalidTokenOwner("modify token description need a valid owner addr"),
+			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidDescription",
-			NewMsgModifyTokenDescription("abc", string(make([]byte, 1024+1)), tAccAddr),
-			ErrorInvalidTokenDescription("token description is limited to 1k size"),
+			NewMsgModifyTokenDescription("abc", string(make([]byte, 1024+1)), testAddr),
+			ErrInvalidTokenDescription(string(make([]byte, 1024+1))),
 		},
 	}
 
@@ -664,64 +663,64 @@ func TestMsg_GetSigners(t *testing.T) {
 	}{
 		{
 			"issue-token",
-			NewMsgIssueToken("ABC Token", "abc", 100000, tAccAddr,
+			NewMsgIssueToken("ABC Token", "abc", 100000, testAddr,
 				false, false, false, false, "", ""),
-			[]sdk.AccAddress{tAccAddr},
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"transfer-ownership",
-			NewMsgTransferOwnership("abc", tAccAddr, sdk.AccAddress{}),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgTransferOwnership("abc", testAddr, sdk.AccAddress{}),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"burn-token",
-			NewMsgBurnToken("abc", 100000, tAccAddr),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgBurnToken("abc", 100000, testAddr),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"mint-token",
-			NewMsgMintToken("abc", 100000, tAccAddr),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgMintToken("abc", 100000, testAddr),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"forbid-token",
-			NewMsgForbidToken("abc", tAccAddr),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgForbidToken("abc", testAddr),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"unforbid-token",
-			NewMsgUnForbidToken("abc", tAccAddr),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgUnForbidToken("abc", testAddr),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"add_token_whitelist",
-			NewMsgAddTokenWhitelist("abc", tAccAddr, mockWhitelist()),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgAddTokenWhitelist("abc", testAddr, mockAddrList()),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"remove-token-whitelist",
-			NewMsgRemoveTokenWhitelist("abc", tAccAddr, mockWhitelist()),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgRemoveTokenWhitelist("abc", testAddr, mockAddrList()),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"forbid-addr",
-			NewMsgForbidAddr("abc", tAccAddr, mockAddresses()),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgForbidAddr("abc", testAddr, mockAddrList()),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"unforbid-addr",
-			NewMsgUnForbidAddr("abc", tAccAddr, mockAddresses()),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgUnForbidAddr("abc", testAddr, mockAddrList()),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"modify-token-url",
-			NewMsgModifyTokenURL("abc", "www.abc.com", tAccAddr),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgModifyTokenURL("abc", "www.abc.com", testAddr),
+			[]sdk.AccAddress{testAddr},
 		},
 		{
 			"modify-token-description",
-			NewMsgModifyTokenDescription("abc", "abc example description", tAccAddr),
-			[]sdk.AccAddress{tAccAddr},
+			NewMsgModifyTokenDescription("abc", "abc example description", testAddr),
+			[]sdk.AccAddress{testAddr},
 		},
 	}
 

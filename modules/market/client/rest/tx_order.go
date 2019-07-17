@@ -8,8 +8,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/coinexchain/dex/modules/market/client/cli"
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
@@ -99,7 +99,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		force = types.IOC
 	}
 
-	accRetriever := authtypes.NewAccountRetriever(cliCtx)
+	accRetriever := auth.NewAccountRetriever(cliCtx)
 	sequence := req.BaseReq.Sequence
 	if sequence == 0 {
 		_, sequence, err = accRetriever.GetAccountNumberSequence(creator)

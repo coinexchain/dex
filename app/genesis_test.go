@@ -16,6 +16,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 )
 
+func TestFromMap(t *testing.T) {
+	gsMap := ModuleBasics.DefaultGenesis()
+	_ = FromMap(MakeCodec(), gsMap)
+}
+
 func TestDefaultGenesisState(t *testing.T) {
 	state := ModuleBasics.DefaultGenesis()
 

@@ -1,14 +1,16 @@
 package bankx
 
 import (
+	"encoding/json"
 	"fmt"
-	types2 "github.com/coinexchain/dex/modules/authx/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -94,14 +96,14 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		return err.Result()
 	}
 
-	err := k.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, types2.ModuleName, amt)
+	err := k.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, authx.ModuleName, amt)
 	if err != nil {
 		return err.Result()
 	}
 
 	ax := k.Axk.GetOrCreateAccountX(ctx, toAddr)
 	for _, coin := range amt {
-		ax.LockedCoins = append(ax.LockedCoins, types2.LockedCoin{Coin: coin, UnlockTime: unlockTime})
+		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
 	}
 	k.Axk.SetAccountX(ctx, ax)
 
@@ -122,18 +124,19 @@ func normalSend(ctx sdk.Context, k Keeper,
 	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) sdk.Result {
 
 	err := k.Bk.SendCoins(ctx, fromAddr, toAddr, amt)
-
 	if err != nil {
 		return err.Result()
 	}
+	fillMsgQueue(ctx, k, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
 
-	e := k.MsgProducer.SendMsg(types.Topic, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
-	if e != nil {
-		//record fail sendMsg log
-	}
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		),
+	})
 
 	return sdk.Result{
-		//Tags: t,
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -149,14 +152,28 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 	accountX := k.Axk.GetOrCreateAccountX(ctx, addr)
 	accountX.MemoRequired = required
 	k.Axk.SetAccountX(ctx, accountX)
-	e := k.MsgProducer.SendMsg(types.Topic, "send_memo_required", msg)
-	if e != nil {
-		//record fail sendMsg log
-	}
+	fillMsgQueue(ctx, k, "send_memo_required", msg)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(types.AttributeKeyAddr, addr.String()),
+			sdk.NewAttribute(types.AttributeKeyMemoRequired, fmt.Sprintf("%v", required)),
+		),
+	})
+
 	return sdk.Result{
-		//Tags: sdk.NewTags(
-		//	TagKeyMemoRequired, fmt.Sprintf("%v", required),
-		//	TagKeyAddr, addr.String(),
-		//),
+		Events: ctx.EventManager().Events(),
+	}
+}
+
+func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
+	if keeper.MsgProducer.IsSubScribe(types.Topic) {
+		bytes, err := json.Marshal(msg)
+		if err != nil {
+			return
+		}
+		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
+			sdk.NewAttribute(key, string(bytes))))
 	}
 }

@@ -43,7 +43,7 @@ func createNewThreadHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 
 		sequence := req.BaseReq.Sequence
 		if sequence == 0 {
-			_, sequence, err =  auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(sender)
+			_, sequence, err = auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(sender)
 			if err != nil {
 				rest.WriteErrorResponse(w, http.StatusBadRequest, "Can not get sequence from blockchain.")
 				return

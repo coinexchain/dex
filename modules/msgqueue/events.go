@@ -1,5 +1,5 @@
 package msgqueue
 
 var (
-	AttributeKeyKafkaMsg = "kafka"
+	EventTypeMsgQueue = "kafka"
 )
