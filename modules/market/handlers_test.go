@@ -3,7 +3,6 @@ package market
 import (
 	"bytes"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 	"math"
 	"testing"
 	"time"
@@ -18,8 +17,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	distr "github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
@@ -104,14 +106,29 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	asset.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
 
-	sk := supply.NewKeeper() // TODO
-
 	//create auth, asset keeper
 	ak := auth.NewAccountKeeper(
 		cdc,
 		keys.authCapKey,
 		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount,
 	)
+	bk := bank.NewBaseKeeper(
+		ak,
+		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(bank.DefaultParamspace),
+		sdk.CodespaceRoot,
+	)
+
+	// account permissions
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     {supply.Basic},
+		distr.ModuleName:          {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		types.ModuleName:          {supply.Basic},
+	}
+	sk := supply.NewKeeper(cdc, keys.keyParams, ak, bk, supply.DefaultCodespace, maccPerms)
+
 	axk := authx.NewKeeper(
 		cdc,
 		keys.authxCapKey,
@@ -119,11 +136,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		sk,
 		ak,
 	)
-	bk := bank.NewBaseKeeper(
-		ak,
-		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(bank.DefaultParamspace),
-		sdk.CodespaceRoot,
-	)
+
 	ask := asset.NewBaseTokenKeeper(
 		cdc,
 		keys.assetCapKey,
@@ -196,11 +209,21 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 }
 
 func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) types.ExpectedBankxKeeper {
-	sk := supply.NewKeeper() // TODO
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	producer := msgqueue.NewProducer()
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
+
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     {supply.Basic},
+		distr.ModuleName:          {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		types.ModuleName:          {supply.Basic},
+	}
+	sk := supply.NewKeeper(cdc, keys.keyParams, ak, bk, supply.DefaultCodespace, maccPerms)
+
 	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak) // TODO
 	ask := asset.NewBaseTokenKeeper(cdc, keys.assetCapKey)
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, sk, producer)
@@ -223,8 +246,8 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	keys.keyParams = sdk.NewKVStoreKey(params.StoreKey)
 	keys.tkeyParams = sdk.NewTransientStoreKey(params.TStoreKey)
 	keys.authxKey = sdk.NewKVStoreKey(authx.StoreKey)
-	keys.keyStaking = sdk.NewKVStoreKey(stakingtypes.StoreKey)
-	keys.tkeyStaking = sdk.NewTransientStoreKey(stakingtypes.TStoreKey)
+	keys.keyStaking = sdk.NewKVStoreKey(staking.StoreKey)
+	keys.tkeyStaking = sdk.NewTransientStoreKey(staking.TStoreKey)
 
 	ms.MountStoreWithDB(keys.assetCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.authCapKey, sdk.StoreTypeIAVL, db)
