@@ -15,7 +15,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
@@ -87,7 +86,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 	cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
-	accRetriever := authtypes.NewAccountRetriever(cliCtx)
+	accRetriever := auth.NewAccountRetriever(cliCtx)
 	sender := cliCtx.GetFromAddress()
 	_, sequence, err := accRetriever.GetAccountNumberSequence(sender)
 	if err != nil {

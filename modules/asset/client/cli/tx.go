@@ -12,7 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 	dex "github.com/coinexchain/dex/types"
@@ -97,7 +96,7 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 			}
 
 			// ensure account has enough coins
-			account, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(tokenOwner)
+			account, err := auth.NewAccountRetriever(cliCtx).GetAccount(tokenOwner)
 			if err != nil {
 				return err
 			}
@@ -164,7 +163,7 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(originalOwner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(originalOwner); err != nil {
 				return err
 			}
 
@@ -215,7 +214,7 @@ $ cetcli tx asset mint-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -266,7 +265,7 @@ $ cetcli tx asset burn-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -315,7 +314,7 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -359,7 +358,7 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -410,7 +409,7 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -457,7 +456,7 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -509,7 +508,7 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -556,7 +555,7 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -607,7 +606,7 @@ $ cetcli tx asset modify-token-url --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -658,7 +657,7 @@ $ cetcli tx asset modify-token-description --symbol="abc" \
 				return err
 			}
 
-			if _, err = authtypes.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
+			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 

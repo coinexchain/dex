@@ -1,10 +1,7 @@
 package rest
 
 import (
-	"github.com/coinexchain/dex/modules/authx/types"
 	"net/http"
-
-	"github.com/coinexchain/dex/modules/authx/client/cli"
 
 	"github.com/gorilla/mux"
 
@@ -12,7 +9,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/authx/client/cli"
+	"github.com/coinexchain/dex/modules/authx/types"
 )
 
 // register REST routes
@@ -40,7 +40,7 @@ func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) h
 			return
 		}
 
-		accRetriever := authtypes.NewAccountRetriever(cliCtx)
+		accRetriever := auth.NewAccountRetriever(cliCtx)
 		if err = accRetriever.EnsureExists(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -76,7 +76,7 @@ func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			return
 		}
 
-		accRetriever := authtypes.NewAccountRetriever(cliCtx)
+		accRetriever := auth.NewAccountRetriever(cliCtx)
 		if err = accRetriever.EnsureExists(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return

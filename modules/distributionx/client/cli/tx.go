@@ -11,7 +11,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/coinexchain/dex/modules/distributionx/types"
 )
@@ -34,7 +33,7 @@ func DonateTxCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			from := cliCtx.GetFromAddress()
-			account, err := authtypes.NewAccountRetriever(cliCtx).GetAccount(from)
+			account, err := auth.NewAccountRetriever(cliCtx).GetAccount(from)
 			if err != nil {
 				return err
 			}
