@@ -324,3 +324,7 @@ func UnmarshalToken(cdc *codec.Codec, value []byte) (token Token, err error) {
 	err = cdc.UnmarshalBinaryBare(value, &token)
 	return token, err
 }
+
+func NewTokenCoins(denom string, amount int64) sdk.Coins {
+	return sdk.NewCoins(sdk.NewInt64Coin(denom, amount))
+}
