@@ -1,7 +1,7 @@
 package app
 
 import (
-	types2 "github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
 	"os"
 	"testing"
@@ -93,9 +93,9 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 	return app
 }
 
-func cetToken() types2.Token {
+func cetToken() asset.Token {
 	cetOwnerAddr, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
-	return &types2.BaseToken{
+	return &asset.BaseToken{
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",
 		TotalSupply:      588788547005740000,

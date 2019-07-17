@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 // register REST routes

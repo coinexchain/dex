@@ -1,7 +1,7 @@
 package stakingx
 
 import (
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,10 +11,10 @@ import (
 )
 
 type mockAssetKeeper struct {
-	tokens []types.BaseToken
+	tokens []asset.BaseToken
 }
 
-func (k mockAssetKeeper) GetToken(ctx sdk.Context, symbol string) types.Token {
+func (k mockAssetKeeper) GetToken(ctx sdk.Context, symbol string) asset.Token {
 	for _, token := range k.tokens {
 		if token.Symbol == symbol {
 			return &token
@@ -25,12 +25,12 @@ func (k mockAssetKeeper) GetToken(ctx sdk.Context, symbol string) types.Token {
 
 func TestTotalSupplyInvariants(t *testing.T) {
 	//intialize keeper & params
-	defaultToken := types.BaseToken{
+	defaultToken := asset.BaseToken{
 		Symbol:      "cet",
 		TotalSupply: 100e8,
 	}
 	ak := mockAssetKeeper{
-		tokens: []types.BaseToken{defaultToken},
+		tokens: []asset.BaseToken{defaultToken},
 	}
 	sxk, ctx, _ := setUpInput()
 	sxk.SetParams(ctx, DefaultParams())
@@ -48,12 +48,12 @@ func TestTotalSupplyInvariants(t *testing.T) {
 
 func TestTotalSupplyInvariantsFail(t *testing.T) {
 	//intialize keeper & params
-	defaultToken := types.BaseToken{
+	defaultToken := asset.BaseToken{
 		Symbol:      "cet",
 		TotalSupply: 200e8,
 	}
 	ak := mockAssetKeeper{
-		tokens: []types.BaseToken{defaultToken},
+		tokens: []asset.BaseToken{defaultToken},
 	}
 	sxk, ctx, _ := setUpInput()
 	sxk.SetParams(ctx, DefaultParams())
@@ -72,7 +72,7 @@ func TestTotalSupplyInvariantsFail(t *testing.T) {
 func TestTotalSupplyInvariantsNil(t *testing.T) {
 	//intialize keeper & params
 	ak := mockAssetKeeper{
-		tokens: []types.BaseToken{},
+		tokens: []asset.BaseToken{},
 	}
 	sxk, ctx, _ := setUpInput()
 	sxk.SetParams(ctx, DefaultParams())

@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 const (

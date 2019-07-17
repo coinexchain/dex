@@ -3,7 +3,7 @@ package keeper
 import (
 	"bytes"
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/x/staking"

@@ -1,7 +1,7 @@
 package stakingx
 
 import (
-	types2 "github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	supplyexported "github.com/cosmos/cosmos-sdk/x/supply/exported"
@@ -24,5 +24,5 @@ type ExpectSupplyKeeper interface {
 }
 
 type AssetViewKeeper interface {
-	GetToken(ctx sdk.Context, symbol string) types2.Token
+	GetToken(ctx sdk.Context, symbol string) asset.Token
 }

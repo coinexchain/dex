@@ -2,7 +2,7 @@ package keeper
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"

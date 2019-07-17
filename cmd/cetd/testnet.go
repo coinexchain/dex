@@ -29,7 +29,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
-	types2 "github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/stakingx"
 	dex "github.com/coinexchain/dex/types"
@@ -353,10 +353,10 @@ func assureTokenDistributionInGenesis(accs []genaccounts.GenesisAccount, testnet
 func addCetTokenForTesting(cdc *codec.Codec,
 	appGenState map[string]json.RawMessage, tokenTotalSupply int64, cetOwner sdk.AccAddress) {
 
-	var assetData types2.GenesisState
-	cdc.MustUnmarshalJSON(appGenState[types2.ModuleName], &assetData)
+	var assetData asset.GenesisState
+	cdc.MustUnmarshalJSON(appGenState[asset.ModuleName], &assetData)
 
-	baseToken, _ := types2.NewToken("CoinEx Chain Native Token",
+	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
 		"cet",
 		tokenTotalSupply,
 		cetOwner,
@@ -368,10 +368,10 @@ func addCetTokenForTesting(cdc *codec.Codec,
 		"A public chain built for the decentralized exchange",
 	)
 
-	var token types2.Token = baseToken
-	assetData.Tokens = []types2.Token{token}
+	var token asset.Token = baseToken
+	assetData.Tokens = []asset.Token{token}
 
-	appGenState[types2.ModuleName] = cdc.MustMarshalJSON(assetData)
+	appGenState[asset.ModuleName] = cdc.MustMarshalJSON(assetData)
 }
 
 func collectGenFiles(

@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/testutil"
@@ -41,17 +41,17 @@ func createExampleGenesisAccounts() (accs []genaccounts.GenesisAccount) {
 	return
 }
 
-func createExampleGenesisAssetData() types.GenesisState {
+func createExampleGenesisAssetData() asset.GenesisState {
 	cet := createCetToken("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	abc := createAbcToken()
 
-	state := types.DefaultGenesisState()
+	state := asset.DefaultGenesisState()
 	state.Tokens = append(state.Tokens, cet, abc)
 	return state
 }
 
-func createAbcToken() types.Token {
-	token := &types.BaseToken{
+func createAbcToken() asset.Token {
+	token := &asset.BaseToken{
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
 		TotalSupply:      588788547005740000,

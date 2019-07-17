@@ -2,13 +2,12 @@ package cli
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"strings"
 
 	"github.com/spf13/viper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/coinexchain/dex/modules/asset/types"
 )
 
 func checkFlags(flags []string, help string) error {

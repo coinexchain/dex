@@ -1,7 +1,8 @@
 package cli
 
 import (
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"os"
 	"testing"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func TestAddGenesisToken(t *testing.T) {
-	token := &types.BaseToken{}
+	token := &asset.BaseToken{}
 	_ = token.SetName("aaa")
 	_ = token.SetSymbol("aaa")
 

@@ -1,7 +1,7 @@
 package market
 
 import (
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -21,7 +21,7 @@ type ExpectedAssetStatusKeeper interface {
 	IsTokenExists(ctx sdk.Context, denom string) bool    // check whether there is a coin named "denom"
 	IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool
 	IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool
-	GetToken(ctx sdk.Context, symbol string) types.Token
+	GetToken(ctx sdk.Context, symbol string) asset.Token
 }
 
 type ExpectFeeKeeper interface {

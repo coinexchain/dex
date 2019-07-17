@@ -2,7 +2,7 @@ package market
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset/types"
+	"github.com/coinexchain/dex/modules/asset"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -130,7 +130,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidSymbol()
 	}
 
-	if msg.Price <= 0 || msg.Price > types.MaxTokenAmount {
+	if msg.Price <= 0 || msg.Price > asset.MaxTokenAmount {
 		return ErrInvalidPrice(msg.Price)
 	}
 
