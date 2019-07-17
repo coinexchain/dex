@@ -37,7 +37,7 @@ func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper TokenKeeper) ([]b
 
 	token := keeper.GetToken(ctx, params.Symbol)
 	if token == nil {
-		return nil, types.ErrorTokenNotFound(fmt.Sprintf("token %s not found", params.Symbol))
+		return nil, types.ErrTokenNotFound(params.Symbol)
 	}
 
 	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, token)

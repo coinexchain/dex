@@ -109,15 +109,15 @@ func (msg MsgTransferOwnership) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgTransferOwnership) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 
 	if msg.OriginalOwner.Empty() || msg.NewOwner.Empty() {
-		return ErrorInvalidTokenOwner("transfer owner ship need a valid addr")
+		return ErrNilTokenOwner()
 	}
 
 	if msg.OriginalOwner.Equals(msg.NewOwner) {
-		return ErrorInvalidTokenOwner("Can not and no need to transfer ownership to self")
+		return ErrTransferSelfTokenOwner()
 	}
 	return nil
 }
@@ -160,20 +160,18 @@ func (msg MsgMintToken) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgMintToken) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("mint token need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 
-	if msg.Amount > MaxTokenAmount {
-		return ErrorInvalidTokenMint("token total supply before 1e8 boosting should be less than 90 billion")
+	amt := msg.Amount
+	if amt > MaxTokenAmount || amt <= 0 {
+		return ErrInvalidTokenMintAmt(amt)
 	}
 
-	if msg.Amount <= 0 {
-		return ErrorInvalidTokenMint("mint amount should be positive")
-	}
 	return nil
 }
 
@@ -215,19 +213,16 @@ func (msg MsgBurnToken) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgBurnToken) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("burn token need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 
-	if msg.Amount > MaxTokenAmount {
-		return ErrorInvalidTokenBurn("token total supply before 1e8 boosting should be less than 90 billion")
-	}
-
-	if msg.Amount <= 0 {
-		return ErrorInvalidTokenBurn("burn amount should be positive")
+	amt := msg.Amount
+	if amt > MaxTokenAmount || amt <= 0 {
+		return ErrInvalidTokenBurnAmt(amt)
 	}
 
 	return nil
@@ -269,10 +264,10 @@ func (msg MsgForbidToken) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgForbidToken) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("forbid token need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 	return nil
 }
@@ -313,10 +308,10 @@ func (msg MsgUnForbidToken) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgUnForbidToken) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("forbid token need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 	return nil
 }
@@ -359,13 +354,13 @@ func (msg MsgAddTokenWhitelist) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgAddTokenWhitelist) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("add token whitelist need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 	if len(msg.Whitelist) == 0 {
-		return ErrorInvalidTokenWhitelist("add nil token whitelist")
+		return ErrNilTokenWhitelist()
 	}
 	return nil
 }
@@ -408,13 +403,13 @@ func (msg MsgRemoveTokenWhitelist) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgRemoveTokenWhitelist) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("remove token whitelist need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 	if len(msg.Whitelist) == 0 {
-		return ErrorInvalidTokenWhitelist("remove nil token whitelist")
+		return ErrNilTokenWhitelist()
 	}
 	return nil
 }
@@ -457,13 +452,13 @@ func (msg MsgForbidAddr) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgForbidAddr) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 	if msg.OwnerAddr.Empty() {
-		return ErrorInvalidTokenOwner("forbid address need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 	if len(msg.Addresses) == 0 {
-		return ErrorInvalidAddress("forbid nil address")
+		return ErrNilForbiddenAddress()
 	}
 	return nil
 }
@@ -506,13 +501,13 @@ func (msg MsgUnForbidAddr) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgUnForbidAddr) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 	if msg.OwnerAddr.Empty() {
-		return ErrorInvalidTokenOwner("unforbid address need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 	if len(msg.Addresses) == 0 {
-		return ErrorInvalidAddress("unforbid nil address")
+		return ErrNilForbiddenAddress()
 	}
 	return nil
 }
@@ -555,15 +550,15 @@ func (msg MsgModifyTokenURL) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgModifyTokenURL) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("modify token url need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 
 	if utf8.RuneCountInString(msg.URL) > 100 {
-		return ErrorInvalidTokenURL("token url is limited to 100 unicode characters")
+		return ErrInvalidTokenURL(msg.URL)
 	}
 	return nil
 }
@@ -606,15 +601,15 @@ func (msg MsgModifyTokenDescription) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgModifyTokenDescription) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return ErrorInvalidTokenSymbol(err.Error())
+		return err
 	}
 
 	if msg.OwnerAddress.Empty() {
-		return ErrorInvalidTokenOwner("modify token description need a valid owner addr")
+		return ErrNilTokenOwner()
 	}
 
 	if len(msg.Description) > 1024 {
-		return ErrorInvalidTokenDescription("token description is limited to 1k size")
+		return ErrInvalidTokenDescription(msg.Description)
 	}
 	return nil
 }
