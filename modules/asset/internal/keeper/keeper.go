@@ -3,9 +3,9 @@ package keeper
 import (
 	"bytes"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
-	"strings"
-
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
+	"strings"
 
 	"github.com/tendermint/tendermint/libs/bech32"
 
@@ -57,12 +57,12 @@ type BaseKeeper struct {
 	paramSubspace params.Subspace
 
 	bkx types.ExpectedBankxKeeper
-	sk  *staking.Keeper
+	sk  supply.Keeper
 }
 
 // NewBaseKeeper returns a new BaseKeeper that uses go-amino to (binary) encode and decode concrete Token.
 func NewBaseKeeper(cdc *codec.Codec, key sdk.StoreKey,
-	paramStore params.Subspace, bkx types.ExpectedBankxKeeper, sk *staking.Keeper) BaseKeeper {
+	paramStore params.Subspace, bkx types.ExpectedBankxKeeper, sk supply.Keeper) BaseKeeper {
 	return BaseKeeper{
 		BaseTokenKeeper: NewBaseTokenKeeper(cdc, key),
 
@@ -184,15 +184,20 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 	}
 
 	if token.GetSymbol() == dex.CET {
-		updateBondPoolStatus(amount, keeper, ctx)
+		if err := updateNotBondPool(amount, keeper, ctx); err != nil {
+			return err
+		}
 	}
 
 	return keeper.SetToken(ctx, token)
 }
 
-func updateBondPoolStatus(amount int64, keeper BaseKeeper, ctx sdk.Context) {
-	//decreaseNotBondedAmt := sdk.NewInt(amount).Neg()
-	//keeper.sk.InflateSupply(ctx, decreaseNotBondedAmt)
+func updateNotBondPool(amount int64, keeper BaseKeeper, ctx sdk.Context) sdk.Error {
+	coins := dex.NewCetCoins(amount)
+	if err := keeper.sk.BurnCoins(ctx, staking.NotBondedPoolName, coins); err != nil {
+		return err
+	}
+	return nil
 }
 
 //ForbidToken - forbid token

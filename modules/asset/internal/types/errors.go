@@ -33,6 +33,7 @@ const (
 	CodeAddressForbiddenNotSupported sdk.CodeType = 522
 	CodeNilTokenWhitelist            sdk.CodeType = 523
 	CodeNilForbiddenAddress          sdk.CodeType = 524
+	CodeBurnUnboundCET               sdk.CodeType = 525
 )
 
 func ErrInvalidTokenName(name string) sdk.Error {
@@ -135,4 +136,8 @@ func ErrNilTokenWhitelist() sdk.Error {
 func ErrNilForbiddenAddress() sdk.Error {
 	msg := fmt.Sprintf("forbidden address is nil")
 	return sdk.NewError(CodeSpaceAsset, CodeNilForbiddenAddress, msg)
+}
+func ErrBurnUnboundCET(amt int64, err error) sdk.Error {
+	msg := fmt.Sprintf("failed to burn %d cet unbound : %s", amt, err)
+	return sdk.NewError(CodeSpaceAsset, CodeBurnUnboundCET, msg)
 }

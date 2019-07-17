@@ -327,7 +327,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.keyAsset,
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
 		app.bankxKeeper,
-		&app.stakingKeeper,
+		app.supplyKeeper,
 	)
 	app.marketKeeper = market.NewBaseKeeper(
 		app.keyMarket,
