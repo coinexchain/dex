@@ -21,13 +21,12 @@ const (
 var (
 	// functions aliases
 	NewQuerier                  = keeper.NewQuerier
+	NewBaseKeeper               = keeper.NewBaseKeeper
 	NewBaseTokenKeeper          = keeper.NewBaseTokenKeeper
 	RegisterCodec               = types.RegisterCodec
 	DefaultGenesisState         = types.DefaultGenesisState
 	NewGenesisState             = types.NewGenesisState
 	NewQueryAssetParams         = types.NewQueryAssetParams
-	NewQueryWhitelistParams     = types.NewQueryWhitelistParams
-	NewQueryForbiddenAddrParams = types.NewQueryForbiddenAddrParams
 	NewMsgIssueToken            = types.NewMsgIssueToken
 	NewMsgTransferOwnership     = types.NewMsgTransferOwnership
 
