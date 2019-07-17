@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+
 	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
 
@@ -79,14 +80,15 @@ func TestSmallAccountGasCost(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
 	tx := newStdTxBuilder().
-		Msgs(msg).GasAndFee(41000, 100).AccNumSeqKey(0, 0, key).Build()
+		Msgs(msg).GasAndFee(90000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	// ok
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
-	require.Equal(t, 41000, int(result.GasWanted))
-	require.Equal(t, 40503, int(result.GasUsed))
+	require.Equal(t, 90000, int(result.GasWanted))
+	require.Equal(t, 57770, int(result.GasUsed))
 }
+
 func TestBigAccountGasCost(t *testing.T) {
 	// acc & app
 	key, acc := testutil.NewBaseAccount(1e10, 0, 0)
@@ -105,11 +107,11 @@ func TestBigAccountGasCost(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
 	tx := newStdTxBuilder().
-		Msgs(msg).GasAndFee(3000000, 100).AccNumSeqKey(0, 0, key).Build()
+		Msgs(msg).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	// ok
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
-	require.Equal(t, 3000000, int(result.GasWanted))
-	require.Equal(t, 2477283, int(result.GasUsed))
+	require.Equal(t, 9000000, int(result.GasWanted))
+	require.Equal(t, 3569600, int(result.GasUsed))
 }
