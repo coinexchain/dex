@@ -40,6 +40,7 @@ func setupTestInput() testInput {
 	db := dbm.NewMemDB()
 	cdc := codec.New()
 	auth.RegisterCodec(cdc)
+	supply.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 
 	authKey := sdk.NewKVStoreKey(auth.StoreKey)
@@ -65,7 +66,7 @@ func setupTestInput() testInput {
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:     {supply.Basic},
 		authx.ModuleName:          {supply.Basic},
-		distribution.ModuleName:          {supply.Basic},
+		distribution.ModuleName:   {supply.Basic},
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
