@@ -16,9 +16,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -36,6 +40,7 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 	tkey := sdk.NewTransientStoreKey("transient_test")
 	distKey := sdk.NewKVStoreKey(distribution.StoreKey)
 	authKey := sdk.NewKVStoreKey(auth.StoreKey)
+	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
@@ -50,14 +55,28 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
+
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     {supply.Basic},
+		authx.ModuleName:          {supply.Basic},
+		distribution.ModuleName:   {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		asset.ModuleName:          {supply.Minter},
+	}
+	splk := supply.NewKeeper(cdc, supplyKey, ak, bk, supply.DefaultCodespace, maccPerms)
+	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
+	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
+
 	sk := staking.NewKeeper(
 		cdc,
-		keyStaking, tkey, nil, // TODO
+		keyStaking, tkey, splk,
 		paramsKeeper.Subspace(staking.DefaultParamspace),
 		staking.DefaultCodespace,
 	)
-	dk := distribution.NewKeeper(cdc, distKey, paramsKeeper.Subspace(distribution.StoreKey), sk, nil, types.DefaultCodespace, auth.FeeCollectorName) // TODO
-	sxk := NewKeeper(paramsKeeper.Subspace(DefaultParamspace), nil, &sk, dk, ak, nil, nil, auth.FeeCollectorName) // TODO
+	dk := distribution.NewKeeper(cdc, distKey, paramsKeeper.Subspace(distribution.StoreKey), sk, splk, types.DefaultCodespace, auth.FeeCollectorName)
+	sxk := NewKeeper(paramsKeeper.Subspace(DefaultParamspace), nil, &sk, dk, ak, nil, splk, auth.FeeCollectorName) // TODO
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
