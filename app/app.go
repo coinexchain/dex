@@ -345,9 +345,8 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 }
 
 func (app *CetChainApp) InitModules() {
-	app.mm = module.NewManager(
+	modules := []module.AppModule{
 		genaccounts.NewAppModule(app.accountKeeper),
-		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		auth.NewAppModule(app.accountKeeper),
 		authx.NewAppModule(app.accountXKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
@@ -363,7 +362,10 @@ func (app *CetChainApp) InitModules() {
 		stakingx.NewAppModule(app.stakingXKeeper),
 		asset.NewAppModule(app.assetKeeper),
 		market.NewAppModule(app.marketKeeper),
-	)
+		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
+	}
+
+	app.mm = module.NewManager(modules...)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
@@ -374,20 +376,20 @@ func (app *CetChainApp) InitModules() {
 
 	initGenesisOrder := []string{
 		genaccounts.ModuleName,
-		distr.ModuleName,
-		staking.ModuleName,
 		auth.ModuleName,
-		bank.ModuleName,
-		slashing.ModuleName,
-		gov.ModuleName,
-		supply.ModuleName,
-		crisis.ModuleName,
 		authx.ModuleName,
+		bank.ModuleName,
 		bankx.ModuleName,
+		crisis.ModuleName,
+		incentive.ModuleName,
+		supply.ModuleName,
+		distr.ModuleName,
+		gov.ModuleName,
+		slashing.ModuleName,
+		staking.ModuleName,
 		stakingx.ModuleName,
 		asset.ModuleName,
 		market.ModuleName,
-		incentive.ModuleName,
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
 	}
 
@@ -399,7 +401,18 @@ func (app *CetChainApp) InitModules() {
 	app.mm.SetOrderExportGenesis(exportGenesisOrder...)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
-	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
+	registerRoutes(&modules, app.Router(), app.QueryRouter())
+}
+
+func registerRoutes(modules *[]module.AppModule, router sdk.Router, queryRouter sdk.QueryRouter) {
+	for _, module := range *modules {
+		if module.Route() != "" {
+			router.AddRoute(module.Route(), module.NewHandler())
+		}
+		if module.QuerierRoute() != "" {
+			queryRouter.AddRoute(module.QuerierRoute(), module.NewQuerierHandler())
+		}
+	}
 }
 
 // initialize BaseApp
