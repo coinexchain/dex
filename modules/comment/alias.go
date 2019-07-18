@@ -1,8 +1,8 @@
 package comment
 
 import (
-	"github.com/coinexchain/dex/modules/comment/internal/types"
 	"github.com/coinexchain/dex/modules/comment/internal/keepers"
+	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
 const (
@@ -15,5 +15,5 @@ var (
 )
 
 type (
-	Keeper     = keepers.Keeper
+	Keeper = keepers.Keeper
 )

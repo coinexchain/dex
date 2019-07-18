@@ -1,8 +1,8 @@
 package comment
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {

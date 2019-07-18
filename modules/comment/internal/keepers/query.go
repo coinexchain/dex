@@ -3,9 +3,9 @@ package keepers
 import (
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/coinexchain/dex/modules/comment/internal/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
 const (

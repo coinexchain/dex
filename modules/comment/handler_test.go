@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coinexchain/dex/modules/comment/shorthanzi"
 	"github.com/coinexchain/dex/modules/comment/internal/keepers"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
+	"github.com/coinexchain/dex/modules/comment/shorthanzi"
 
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -55,7 +55,7 @@ func (k *mocAssetStatusKeeper) IsTokenExists(ctx sdk.Context, denom string) bool
 }
 
 type mocDistributionxKeeper struct {
-	poolName string
+	poolName  string
 	maxAmount sdk.Int
 }
 
@@ -319,6 +319,7 @@ type MsgCreateTradingPair struct {
 	Creator        sdk.AccAddress `json:"creator"`
 	PricePrecision byte           `json:"price_precision"`
 }
+
 func (msg MsgCreateTradingPair) Route() string { return "market" }
 
 func (msg MsgCreateTradingPair) Type() string { return "create_market_info" }
