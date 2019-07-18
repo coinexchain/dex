@@ -77,7 +77,7 @@ func defaultContext() (sdk.Context, *codec.Codec, Keeper) {
 		gov.ModuleName:            {supply.Burner},
 		authx.ModuleName:          {supply.Basic},
 		bank.ModuleName:           {supply.Basic},
-		"bankx":          {supply.Basic},
+		"bankx":                   {supply.Basic},
 	}
 
 	ask := fakeAssetStatusKeeper{}

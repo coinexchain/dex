@@ -105,7 +105,7 @@ func initStates(ctx sdk.Context, sxk Keeper) {
 		NotBondedTokens: sdk.NewInt(1000e8),
 		BondedTokens:    sdk.NewInt(0),
 	}
-	pool.String()//sxk.sk.SetPool(ctx, pool)
+	pool.String() //sxk.sk.SetPool(ctx, pool)
 }
 
 func TestSlashTokensToCommunityPool(t *testing.T) {
