@@ -21,7 +21,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
-
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -30,7 +29,6 @@ import (
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
-
 )
 
 const testChainID = "c1"

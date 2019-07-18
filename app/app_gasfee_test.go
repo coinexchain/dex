@@ -147,7 +147,6 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
 	res := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, res.Code)
-	fmt.Println("issue token", res.GasUsed)
 
 	//create market info
 	msgMarketInfo := market.MsgCreateTradingPair{Stock: stock, Money: money, Creator: acc.Address, PricePrecision: 8}
@@ -155,7 +154,6 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 		Msgs(msgMarketInfo).GasAndFee(9000000, 100).AccNumSeqKey(0, 1, key).Build()
 	res = app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, res.Code)
-	fmt.Println("create market info", res.GasUsed)
 
 	for i := 0; i < 1000; i++ {
 		coin := sdk.NewCoin(fmt.Sprintf("coin%d", i), sdk.NewInt(1e8))
@@ -181,8 +179,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	fmt.Println("create trading pair", result.GasUsed)
-	//require.Equal(t,1806341 , int(result.GasUsed))
+	require.Equal(t, 1806341, int(result.GasUsed))
 
 }
 
@@ -209,7 +206,6 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
 	res := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, res.Code)
-	fmt.Println("issue token", res.GasUsed)
 
 	//create market info
 	msgMarketInfo := market.MsgCreateTradingPair{Stock: stock, Money: money, Creator: acc.Address, PricePrecision: 8}
@@ -217,7 +213,6 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 		Msgs(msgMarketInfo).GasAndFee(9000000, 100).AccNumSeqKey(0, 1, key).Build()
 	res = app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, res.Code)
-	fmt.Println("create market info", res.GasUsed)
 
 	//create trading pair
 	msgCreateOrder := market.MsgCreateOrder{
@@ -238,7 +233,6 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	fmt.Println("create trading pair", result.GasUsed)
-	//require.Equal(t,105019 , int(result.GasUsed))
+	require.Equal(t, 105019, int(result.GasUsed))
 
 }
