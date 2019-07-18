@@ -14,6 +14,10 @@ const (
 const (
 	IntegrationNetSubString = types.IntegrationNetSubString
 	OrderIDPartsNum         = types.OrderIDPartsNum
+	SymbolSeparator         = types.SymbolSeparator
+	LimitOrder              = types.LimitOrder
+	SELL                    = types.SELL
+	GTE                     = types.GTE
 )
 
 var (
@@ -22,7 +26,9 @@ var (
 )
 
 type (
-	Keeper     = keepers.Keeper
-	Order      = types.Order
-	MarketInfo = types.MarketInfo
+	Keeper               = keepers.Keeper
+	Order                = types.Order
+	MarketInfo           = types.MarketInfo
+	MsgCreateOrder       = types.MsgCreateOrder
+	MsgCreateTradingPair = types.MsgCreateTradingPair
 )

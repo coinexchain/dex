@@ -1,15 +1,9 @@
 package app
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/bankx"
-	types2 "github.com/coinexchain/dex/modules/distributionx/types"
-
 	"os"
 	"testing"
 	"time"
-
-	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 
 	"github.com/stretchr/testify/require"
 
@@ -21,12 +15,22 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
+
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	types2 "github.com/coinexchain/dex/modules/distributionx/types"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
+
 )
 
 const testChainID = "c1"
@@ -64,6 +68,23 @@ func addGenesisAccounts(genState *GenesisState, accs ...auth.BaseAccount) {
 
 	addAccountForDanglingCET(amount, genState)
 }
+func addModuleAccounts(genState *GenesisState) {
+	maccs := []*supply.ModuleAccount{
+		supply.NewEmptyModuleAccount(auth.FeeCollectorName, supply.Basic),
+		supply.NewEmptyModuleAccount(distribution.ModuleName, supply.Basic),
+		supply.NewEmptyModuleAccount(staking.BondedPoolName, supply.Burner, supply.Staking),
+		supply.NewEmptyModuleAccount(staking.NotBondedPoolName, supply.Burner, supply.Staking),
+		supply.NewEmptyModuleAccount(gov.ModuleName, supply.Burner),
+		supply.NewEmptyModuleAccount(authx.ModuleName, supply.Basic),
+		supply.NewEmptyModuleAccount(asset.ModuleName, supply.Burner, supply.Minter),
+	}
+	for _, macc := range maccs {
+		genMacc, err := genaccounts.NewGenesisAccountI(*macc)
+		if err != nil {
+			genState.Accounts = append(genState.Accounts, genMacc)
+		}
+	}
+}
 
 func addAccountForDanglingCET(amount int64, genState *GenesisState) {
 	accAmount := cetToken().GetTotalSupply() - amount
@@ -96,6 +117,12 @@ func initApp(cb genesisStateCallback) *CetChainApp {
 	return app
 }
 
+func initAppWithAccounts(accs ...auth.BaseAccount) *CetChainApp {
+	return initApp(func(genState *GenesisState) {
+		addGenesisAccounts(genState, accs...)
+		addModuleAccounts(genState)
+	})
+}
 func cetToken() asset.Token {
 	cetOwnerAddr, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	return &asset.BaseToken{

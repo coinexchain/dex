@@ -2,9 +2,11 @@ package app
 
 import (
 	"fmt"
-
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/market"
 
 	"testing"
 
@@ -114,4 +116,129 @@ func TestBigAccountGasCost(t *testing.T) {
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
 	require.Equal(t, 3569600, int(result.GasUsed))
+}
+
+func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
+	// acc & app
+	key, acc := testutil.NewBaseAccount(1e16, 0, 0)
+	_, acc2 := testutil.NewBaseAccount(1e8, 1, 0)
+
+	for i := 0; i < 1000; i++ {
+		coin := sdk.NewCoin(fmt.Sprintf("coin%d", i), sdk.NewInt(1e10))
+		acc2.Coins = acc2.Coins.Add(sdk.NewCoins(coin))
+	}
+	app := initAppWithAccounts(acc, acc2)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	ctx := app.NewContext(false, header)
+
+	var (
+		stock             = "usdt000"
+		money             = "cet"
+		issueAmount int64 = 210000000000
+	)
+
+	// issue tokens
+	msgStock := asset.NewMsgIssueToken(stock, stock, issueAmount, acc.Address,
+		false, false, false, false, "", "")
+	tx := newStdTxBuilder().
+		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
+	res := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, res.Code)
+	fmt.Println("issue token", res.GasUsed)
+
+	//create market info
+	msgMarketInfo := market.MsgCreateTradingPair{Stock: stock, Money: money, Creator: acc.Address, PricePrecision: 8}
+	tx = newStdTxBuilder().
+		Msgs(msgMarketInfo).GasAndFee(9000000, 100).AccNumSeqKey(0, 1, key).Build()
+	res = app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, res.Code)
+	fmt.Println("create market info", res.GasUsed)
+
+	for i := 0; i < 1000; i++ {
+		coin := sdk.NewCoin(fmt.Sprintf("coin%d", i), sdk.NewInt(1e8))
+		_ = app.supplyKeeper.SendCoinsFromAccountToModule(ctx, acc2.Address, authx.ModuleName, sdk.Coins{coin})
+	}
+
+	//create trading pair
+	msgCreateOrder := market.MsgCreateOrder{
+		Sender:         acc.Address,
+		Sequence:       2,
+		TradingPair:    stock + market.SymbolSeparator + money,
+		OrderType:      market.LimitOrder,
+		PricePrecision: 8,
+		Price:          100,
+		Quantity:       10000000,
+		Side:           market.SELL,
+		TimeInForce:    market.GTE,
+	}
+	tx = newStdTxBuilder().
+		Msgs(msgCreateOrder).GasAndFee(9000000, 100).AccNumSeqKey(0, 2, key).Build()
+
+	// ok
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+	require.Equal(t, 9000000, int(result.GasWanted))
+	fmt.Println("create trading pair", result.GasUsed)
+	//require.Equal(t,1806341 , int(result.GasUsed))
+
+}
+
+func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
+	// acc & app
+	key, acc := testutil.NewBaseAccount(1e16, 0, 0)
+
+	app := initAppWithAccounts(acc)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	var (
+		stock             = "usdt000"
+		money             = "cet"
+		issueAmount int64 = 210000000000
+	)
+
+	// issue tokens
+	msgStock := asset.NewMsgIssueToken(stock, stock, issueAmount, acc.Address,
+		false, false, false, false, "", "")
+	tx := newStdTxBuilder().
+		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
+	res := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, res.Code)
+	fmt.Println("issue token", res.GasUsed)
+
+	//create market info
+	msgMarketInfo := market.MsgCreateTradingPair{Stock: stock, Money: money, Creator: acc.Address, PricePrecision: 8}
+	tx = newStdTxBuilder().
+		Msgs(msgMarketInfo).GasAndFee(9000000, 100).AccNumSeqKey(0, 1, key).Build()
+	res = app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, res.Code)
+	fmt.Println("create market info", res.GasUsed)
+
+	//create trading pair
+	msgCreateOrder := market.MsgCreateOrder{
+		Sender:         acc.Address,
+		Sequence:       2,
+		TradingPair:    stock + market.SymbolSeparator + money,
+		OrderType:      market.LimitOrder,
+		PricePrecision: 8,
+		Price:          100,
+		Quantity:       10000000,
+		Side:           market.SELL,
+		TimeInForce:    market.GTE,
+	}
+	tx = newStdTxBuilder().
+		Msgs(msgCreateOrder).GasAndFee(9000000, 100).AccNumSeqKey(0, 2, key).Build()
+
+	// ok
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+	require.Equal(t, 9000000, int(result.GasWanted))
+	fmt.Println("create trading pair", result.GasUsed)
+	//require.Equal(t,105019 , int(result.GasUsed))
+
 }
