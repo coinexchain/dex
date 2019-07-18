@@ -2,13 +2,14 @@ package authx
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/authx/types"
-	"github.com/coinexchain/dex/testutil"
-	"github.com/cosmos/cosmos-sdk/x/auth"
+	"testing"
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"testing"
+
+	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/testutil"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
 func Test_queryAccount(t *testing.T) {
