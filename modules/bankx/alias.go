@@ -16,6 +16,7 @@ const (
 
 var (
 	// functions aliases
+
 	RegisterCodec                        = types.RegisterCodec
 	ParamKeyTable                        = types.ParamKeyTable
 	DefaultParams                        = types.DefaultParams
@@ -24,7 +25,9 @@ var (
 	NewMsgSetTransferMemoRequired        = types.NewMsgSetTransferMemoRequired
 	ErrMemoMissing                       = types.ErrMemoMissing
 	ErrorInsufficientCETForActivatingFee = types.ErrorInsufficientCETForActivatingFee
+
 	// variable aliases
+
 	ModuleCdc       = types.ModuleCdc
 	CodeMemoMissing = types.CodeMemoMissing
 )

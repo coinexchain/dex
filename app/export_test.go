@@ -138,11 +138,11 @@ func TestExportAppStateAndValidators(t *testing.T) {
 	sk, pk, addr := testutil.KeyPubAddr()
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
 
-	app, ctx := startAppWithOneValidator(acc, addr, pk, sk, t)
+	app := startAppWithOneValidator(acc, addr, pk, sk, t)
 
 	//next block
 	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: app.LastBlockHeight() + 1}})
-	ctx = app.NewContext(false, abci.Header{Height: app.LastBlockHeight() + 1})
+	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight() + 1})
 	app.EndBlock(abci.RequestEndBlock{Height: app.LastBlockHeight() + 1})
 	app.Commit()
 
@@ -179,7 +179,7 @@ func getDistributionAccount(gs *GenesisState) *genaccounts.GenesisAccount {
 	return nil
 }
 
-func startAppWithOneValidator(acc auth.BaseAccount, addr sdk.AccAddress, pk crypto.PubKey, sk crypto.PrivKey, t *testing.T) (*CetChainApp, sdk.Context) {
+func startAppWithOneValidator(acc auth.BaseAccount, addr sdk.AccAddress, pk crypto.PubKey, sk crypto.PrivKey, t *testing.T) *CetChainApp {
 	app := initApp(func(genState *GenesisState) {
 		addGenesisAccounts(genState, acc)
 		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1e8)
@@ -198,7 +198,7 @@ func startAppWithOneValidator(acc auth.BaseAccount, addr sdk.AccAddress, pk cryp
 	app.EndBlock(abci.RequestEndBlock{Height: 1})
 	app.Commit()
 
-	return app, ctx
+	return app
 }
 
 func prepareCreateValidatorTx(addr sdk.AccAddress, app *CetChainApp, ctx sdk.Context, pk crypto.PubKey, sk crypto.PrivKey) auth.StdTx {
@@ -220,11 +220,11 @@ func TestExportValidatorsUpdateRestore(t *testing.T) {
 	amount := cetToken().GetTotalSupply()
 
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
-	app1, ctx := startAppWithOneValidator(acc, addr, pk, sk, t)
+	app1 := startAppWithOneValidator(acc, addr, pk, sk, t)
 
 	//next block
 	app1.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: app1.LastBlockHeight() + 1}})
-	ctx = app1.NewContext(false, abci.Header{Height: app1.LastBlockHeight() + 1})
+	ctx := app1.NewContext(false, abci.Header{Height: app1.LastBlockHeight() + 1})
 
 	exportState1 := app1.ExportGenesisState(ctx)
 

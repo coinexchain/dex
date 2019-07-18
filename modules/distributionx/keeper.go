@@ -27,12 +27,12 @@ func (keeper Keeper) AddCoinsToFeePool(ctx sdk.Context, coins sdk.Coins) {
 
 }
 
-func (k Keeper) DonateToCommunityPool(ctx sdk.Context, fromAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	err := k.bxk.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, distribution.ModuleName, amt)
+func (keeper Keeper) DonateToCommunityPool(ctx sdk.Context, fromAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	err := keeper.bxk.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, distribution.ModuleName, amt)
 	if err != nil {
 		return err
 	}
 
-	k.AddCoinsToFeePool(ctx, amt)
+	keeper.AddCoinsToFeePool(ctx, amt)
 	return nil
 }

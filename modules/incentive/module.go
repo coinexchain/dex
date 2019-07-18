@@ -50,9 +50,7 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 }
 
 // register rest routes
-func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	return
-}
+func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {}
 
 // get the root tx command of this module
 func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {

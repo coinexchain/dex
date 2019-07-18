@@ -320,7 +320,6 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	//begin block at height 1
 	//note: context need to be updated after beginblock
 	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
-	ctx := app.NewContext(false, abci.Header{Height: 1})
 
 	// create validator & self delegate 1 CET
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
@@ -345,7 +344,7 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 
 	//begin block at height 2 with evidences
 	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 2}, ByzantineValidators: evidences})
-	ctx = app.NewContext(false, abci.Header{Height: 2})
+	ctx := app.NewContext(false, abci.Header{Height: 2})
 	app.EndBlock(abci.RequestEndBlock{Height: 2})
 	app.Commit()
 
