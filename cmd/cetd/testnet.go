@@ -308,8 +308,8 @@ func initGenFiles(cdc *codec.Codec, mbm module.BasicManager, chainID string,
 	// set the accounts in the genesis state
 	appGenState = genaccounts.SetGenesisStateInAppState(cdc, appGenState, accs)
 
-	//appGenState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(testnetMinSelfDelegation)
 	addCetTokenForTesting(cdc, appGenState, testnetTokenSupply, accs[0].Address)
+	modifyGenStateForTesting(cdc, appGenState, testnetMinSelfDelegation)
 
 	accs = assureTokenDistributionInGenesis(accs, testnetTokenSupply)
 	//appGenState.Accounts = accs
@@ -351,7 +351,15 @@ func assureTokenDistributionInGenesis(accs []genaccounts.GenesisAccount, testnet
 	}
 	return accs
 }
+func modifyGenStateForTesting(cdc *codec.Codec, appGenState map[string]json.RawMessage, testnetMinSelfDelegation int64) {
 
+	var stakingxData stakingx.GenesisState
+	cdc.MustUnmarshalJSON(appGenState[stakingx.ModuleName], &stakingxData)
+
+	stakingxData.Params.MinSelfDelegation = sdk.NewInt(testnetMinSelfDelegation)
+
+	appGenState[stakingx.ModuleName] = cdc.MustMarshalJSON(stakingxData)
+}
 func addCetTokenForTesting(cdc *codec.Codec,
 	appGenState map[string]json.RawMessage, tokenTotalSupply int64, cetOwner sdk.AccAddress) {
 
