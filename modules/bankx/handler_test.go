@@ -2,8 +2,12 @@ package bankx
 
 import (
 	types2 "github.com/coinexchain/dex/modules/authx/types"
-	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/tendermint/tendermint/crypto"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -24,14 +28,73 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
+type fakeAssetStatusKeeper struct{}
+
+func (k fakeAssetStatusKeeper) IsTokenForbidden(ctx sdk.Context, symbol string) bool {
+	return false
+}
+func (k fakeAssetStatusKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool {
+	return false
+}
+
+var myaddr = testutil.ToAccAddress("myaddr")
+var feeAddr = sdk.AccAddress(crypto.AddressHash([]byte("FeeCollector")))
+
+func defaultContext() (sdk.Context, *codec.Codec, Keeper) {
+	cdc := codec.New()
+	auth.RegisterCodec(cdc)
+	supply.RegisterCodec(cdc)
+	codec.RegisterCrypto(cdc)
+	bank.RegisterCodec(cdc)
+	bx.RegisterCodec(cdc)
+
+	skey := sdk.NewKVStoreKey("test")
+	tkey := sdk.NewTransientStoreKey("transient_test")
+
+	keySupply := sdk.NewKVStoreKey("supply")
+	keyAuth := sdk.NewKVStoreKey("auth")
+	keyAuthX := sdk.NewKVStoreKey("authx")
+	keyBank := sdk.NewKVStoreKey("bank")
+	keyBankx := sdk.NewKVStoreKey("bankx")
+
+	db := dbm.NewMemDB()
+	cms := store.NewCommitMultiStore(db)
+	cms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
+	cms.MountStoreWithDB(keySupply, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(keyAuth, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(keyAuthX, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(keyBank, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(keyBankx, sdk.StoreTypeIAVL, db)
+	_ = cms.LoadLatestVersion()
+
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     {supply.Basic},
+		distribution.ModuleName:   {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		authx.ModuleName:          {supply.Basic},
+		bank.ModuleName:           {supply.Basic},
+		"bankx":                   {supply.Basic},
+	}
+
+	ask := fakeAssetStatusKeeper{}
+
+	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
+	ak := auth.NewAccountKeeper(cdc, keyAuth, paramsKeeper.Subspace("auth"), auth.ProtoBaseAccount)
+	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace("bank"), "bank")
+	sk := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
+	axk := authx.NewKeeper(cdc, keyAuthX, paramsKeeper.Subspace("authx"), sk, ak)
+	bxK := NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, sk, msgqueue.NewProducer())
+
+	return ctx, cdc, bxK
+}
+
 type testInput struct {
 	ctx     sdk.Context
-	ak      auth.AccountKeeper
-	pk      params.Keeper
-	bk      bank.Keeper
 	bxk     Keeper
-	axk     authx.AccountXKeeper
-	ask     types.ExpectedAssetStatusKeeper
 	handler sdk.Handler
 }
 
@@ -40,100 +103,72 @@ func (input testInput) handle(msg sdk.Msg) sdk.Result {
 }
 
 func setupTestInput() testInput {
-	db := dbm.NewMemDB()
-	cdc := codec.New()
-	auth.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
 
-	authKey := sdk.NewKVStoreKey(auth.StoreKey)
-	skey := sdk.NewKVStoreKey("test")
-	tkey := sdk.NewTransientStoreKey("transient_test")
-	authxKey := sdk.NewKVStoreKey(authx.StoreKey)
-	fckKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
-	paramKey := sdk.NewKVStoreKey(params.StoreKey)
+	ctx, _, bxk := defaultContext()
+	bxk.Bk.SetSendEnabled(ctx, true)
+	bxk.SetParam(ctx, bx.DefaultParams())
 
-	ms := store.NewCommitMultiStore(db)
-	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
-	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(authxKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(fckKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(paramKey, sdk.StoreTypeIAVL, db)
-
-	_ = ms.LoadLatestVersion()
-
-	producer := msgqueue.NewProducer()
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
-	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
-	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
-	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(types2.DefaultParamspace))
-	bxkKeeper := keeper.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, fck, keeper.fakeAssetStatusKeeper{}, producer)
-
-	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-	bk.SetSendEnabled(ctx, true)
-	bxkKeeper.SetParam(ctx, types.DefaultParams())
-
-	handler := NewHandler(bxkKeeper)
-	return testInput{ctx: ctx, ak: ak, pk: paramsKeeper, bk: bk, bxk: bxkKeeper, axk: axk, ask: keeper.fakeAssetStatusKeeper{}, handler: handler}
+	handler := NewHandler(bxk)
+	return testInput{ctx: ctx, bxk: bxk, handler: handler}
 }
 
 func TestHandlerMsgSend(t *testing.T) {
+
 	input := setupTestInput()
 
 	fromAddr := []byte("fromaddr")
 	toAddr := []byte("toaddr")
 
-	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
+	fromAccount := input.bxk.Ak.NewAccountWithAddress(input.ctx, fromAddr)
 	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(100000000)
 	_ = fromAccount.SetCoins(oneCoins)
 
-	input.ak.SetAccount(input.ctx, fromAccount)
-	input.axk.SetAccountX(input.ctx, fromAccountX)
+	input.bxk.Ak.SetAccount(input.ctx, fromAccount)
+	input.bxk.Axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
+	msgSend := bx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
 	input.handle(msgSend)
 
 	//send 0 to toaddr results toAccount to be created
 	//to be consistent with cosmos-sdk
-	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	_, found := input.axk.GetAccountX(input.ctx, toAddr)
+	require.Equal(t, sdk.NewInt(0), input.bxk.Ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), input.bxk.Ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	_, found := input.bxk.Axk.GetAccountX(input.ctx, toAddr)
 	require.Equal(t, false, found)
-	require.Equal(t, sdk.NewInt(100000000), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000), input.bxk.Ak.GetAccount(input.ctx, feeAddr).GetCoins().AmountOf("cet"))
 
 	fee := input.bxk.GetParam(input.ctx).LockCoinsFee
 	_ = fromAccount.SetCoins(dex.NewCetCoins(1000000000 + fee*2))
-	input.ak.SetAccount(input.ctx, fromAccount)
+	input.bxk.Ak.SetAccount(input.ctx, fromAccount)
 
 	input.handle(msgSend)
-	require.Equal(t, sdk.NewInt(900000000+fee*2), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(100000000), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(100000000), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(900000000+fee*2), input.bxk.Ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000), input.bxk.Ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000), input.bxk.Ak.GetAccount(input.ctx, feeAddr).GetCoins().AmountOf("cet"))
 
 	input.handle(msgSend)
-	require.Equal(t, sdk.NewInt(800000000+fee*2), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(200000000), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(100000000), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(800000000+fee*2), input.bxk.Ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(200000000), input.bxk.Ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000), input.bxk.Ak.GetAccount(input.ctx, feeAddr).GetCoins().AmountOf("cet"))
 
-	newMsg := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 1}
+	newMsg := bx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 1}
 	input.handle(newMsg)
-	aux, _ := input.axk.GetAccountX(input.ctx, toAddr)
+	aux, _ := input.bxk.Axk.GetAccountX(input.ctx, toAddr)
 	require.Equal(t, sdk.NewInt(100000000), aux.LockedCoins[0].Coin.Amount)
-	require.Equal(t, sdk.NewInt(700000000+fee), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(200000000), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(100000000+fee), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(700000000+fee), input.bxk.Ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(200000000), input.bxk.Ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000+fee), input.bxk.Ak.GetAccount(input.ctx, feeAddr).GetCoins().AmountOf("cet"))
 	require.Equal(t, int64(1), aux.LockedCoins[0].UnlockTime)
 
-	newMsg2 := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	newMsg2 := bx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
 	input.handle(newMsg2)
-	aux, _ = input.axk.GetAccountX(input.ctx, toAddr)
+	aux, _ = input.bxk.Axk.GetAccountX(input.ctx, toAddr)
 	require.Equal(t, sdk.NewInt(100000000), aux.LockedCoins[0].Coin.Amount)
-	require.Equal(t, sdk.NewInt(600000000), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(200000000), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(100000000+fee*2), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(600000000), input.bxk.Ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(200000000), input.bxk.Ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000+fee*2), input.bxk.Ak.GetAccount(input.ctx, feeAddr).GetCoins().AmountOf("cet"))
 	require.Equal(t, int64(1), aux.LockedCoins[0].UnlockTime)
 	require.Equal(t, sdk.NewInt(100000000), aux.LockedCoins[1].Coin.Amount)
 	require.Equal(t, int64(2), aux.LockedCoins[1].UnlockTime)
@@ -145,22 +180,22 @@ func TestHandlerMsgSendFail(t *testing.T) {
 	fromAddr := []byte("fromaddr")
 	toAddr := []byte("toaddr")
 
-	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
+	fromAccount := input.bxk.Ak.NewAccountWithAddress(input.ctx, fromAddr)
 	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(100000000)
 	_ = fromAccount.SetCoins(oneCoins)
 
-	input.ak.SetAccount(input.ctx, fromAccount)
-	input.axk.SetAccountX(input.ctx, fromAccountX)
+	input.bxk.Ak.SetAccount(input.ctx, fromAccount)
+	input.bxk.Axk.SetAccountX(input.ctx, fromAccountX)
 
-	input.bk.SetSendEnabled(input.ctx, false)
-	msgSend := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
+	input.bxk.Bk.SetSendEnabled(input.ctx, false)
+	msgSend := bx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
 	res := input.handle(msgSend)
 	require.Equal(t, bank.CodeSendDisabled, res.Code)
 
-	input.bk.SetSendEnabled(input.ctx, true)
-	msgSend = types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(200000000), UnlockTime: 0}
+	input.bxk.Bk.SetSendEnabled(input.ctx, true)
+	msgSend = bx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(200000000), UnlockTime: 0}
 	res = input.handle(msgSend)
 	require.Equal(t, sdk.CodeInsufficientCoins, res.Code)
 
@@ -171,35 +206,35 @@ func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 
 	fromAddr := []byte("fromaddr")
 	toAddr := []byte("toaddr")
-	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
+	fromAccount := input.bxk.Ak.NewAccountWithAddress(input.ctx, fromAddr)
 	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
 	fee := input.bxk.GetParam(input.ctx).LockCoinsFee
 	Coins := dex.NewCetCoins(1000000000 + fee*2)
 	_ = fromAccount.SetCoins(Coins)
-	input.ak.SetAccount(input.ctx, fromAccount)
-	input.axk.SetAccountX(input.ctx, fromAccountX)
+	input.bxk.Ak.SetAccount(input.ctx, fromAccount)
+	input.bxk.Axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	msgSend := bx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
 	input.handle(msgSend)
-	require.Equal(t, sdk.NewInt(900000000+fee), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	_, found := input.axk.GetAccountX(input.ctx, toAddr)
+	require.Equal(t, sdk.NewInt(900000000+fee), input.bxk.Ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), input.bxk.Ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	_, found := input.bxk.Axk.GetAccountX(input.ctx, toAddr)
 	require.Equal(t, true, found)
-	require.Equal(t, sdk.NewInt(100000000+fee), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000+fee), input.bxk.Ak.GetAccount(input.ctx, feeAddr).GetCoins().AmountOf("cet"))
 
-	msgSend2 := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	msgSend2 := bx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
 	input.handle(msgSend2)
-	require.Equal(t, sdk.NewInt(800000000), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-	_, found2 := input.axk.GetAccountX(input.ctx, toAddr)
+	require.Equal(t, sdk.NewInt(800000000), input.bxk.Ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), input.bxk.Ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
+	_, found2 := input.bxk.Axk.GetAccountX(input.ctx, toAddr)
 	require.Equal(t, true, found2)
-	require.Equal(t, sdk.NewInt(100000000+fee*2), input.bxk.fck.GetCollectedFees(input.ctx).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000+fee*2), input.bxk.Ak.GetAccount(input.ctx, feeAddr).GetCoins().AmountOf("cet"))
 }
 
 func TestHandleMsgSetMemoRequiredAccountNotExisted(t *testing.T) {
 	input := setupTestInput()
 
-	msg := types.NewMsgSetTransferMemoRequired(testutil.ToAccAddress("xxx"), true)
+	msg := bx.NewMsgSetTransferMemoRequired(testutil.ToAccAddress("xxx"), true)
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodespaceRoot, result.Codespace)
 	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
@@ -209,10 +244,8 @@ func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
 	input := setupTestInput()
 
 	addr := testutil.ToAccAddress("myaddr")
-	//accX := authx.NewAccountXWithAddress(addr)
-	//input.axk.SetAccountX(input.ctx, accX)
 
-	msg := types.NewMsgSetTransferMemoRequired(addr, true)
+	msg := bx.NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodespaceRoot, result.Codespace)
 	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
@@ -223,43 +256,36 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 
 	addr := testutil.ToAccAddress("myaddr")
 	acc := auth.NewBaseAccountWithAddress(addr)
-	input.ak.SetAccount(input.ctx, &acc)
+	input.bxk.Ak.SetAccount(input.ctx, &acc)
 
-	//accX, _ = input.axk.GetAccountX(input.ctx, addr)
-	//require.Equal(t, false, accX.MemoRequired)
-
-	msg := types.NewMsgSetTransferMemoRequired(addr, true)
+	msg := bx.NewMsgSetTransferMemoRequired(addr, true)
 	result := input.handle(msg)
 	require.Equal(t, sdk.CodeOK, result.Code)
 
-	accX, _ := input.axk.GetAccountX(input.ctx, addr)
+	accX, _ := input.bxk.Axk.GetAccountX(input.ctx, addr)
 	require.Equal(t, true, accX.MemoRequired)
 }
+
 func TestUnlockQueueNotAppend(t *testing.T) {
 	input := setupTestInput()
 
 	fromAddr := []byte("fromaddr")
 	toAddr := []byte("toaddr")
 
-	fromAccount := input.ak.NewAccountWithAddress(input.ctx, fromAddr)
+	fromAccount := input.bxk.Ak.NewAccountWithAddress(input.ctx, fromAddr)
 	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(10100000000)
 	_ = fromAccount.SetCoins(oneCoins)
 
-	input.ak.SetAccount(input.ctx, fromAccount)
-	input.axk.SetAccountX(input.ctx, fromAccountX)
+	input.bxk.Ak.SetAccount(input.ctx, fromAccount)
+	input.bxk.Axk.SetAccountX(input.ctx, fromAccountX)
 
-	msgSend := types.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 10000}
+	msgSend := bx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 10000}
 	input.handle(msgSend)
 
 	//send 0 to toaddr results toAccount to be created
 	//to be consistent with cosmos-sdk
-	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(0), input.ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
-
-	//when lockedcoin is nil, it should not be inserted to the UnlockedCoinsQueue
-	iter := input.axk.UnlockedCoinsQueueIterator(input.ctx, 10000)
-	require.False(t, iter.Valid())
-
+	require.Equal(t, sdk.NewInt(0), input.bxk.Ak.GetAccount(input.ctx, fromAddr).GetCoins().AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), input.bxk.Ak.GetAccount(input.ctx, toAddr).GetCoins().AmountOf("cet"))
 }
