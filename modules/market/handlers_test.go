@@ -608,7 +608,7 @@ func TestCancelMarketFailed(t *testing.T) {
 }
 
 func TestCancelMarketSuccess(t *testing.T) {
-	input := prepareMockInput(t, false, false)
+	input := prepareMockInput(t, false, true)
 	createCetMarket(input, stock)
 
 	msgCancelMarket := types.MsgCancelTradingPair{
