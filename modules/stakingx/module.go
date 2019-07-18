@@ -91,7 +91,6 @@ func (AppModule) Name() string {
 
 // register invariants
 func (am AppModule) RegisterInvariants(invReg sdk.InvariantRegistry) {
-	invReg.RegisterRoute(ModuleName, "total-supply", TotalSupplyInvariants(am.stakingXKeeper))
 	invReg.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(am.stakingXKeeper))
 }
 

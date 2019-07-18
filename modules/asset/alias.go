@@ -55,12 +55,13 @@ var (
 )
 
 type (
-	Keeper         = keeper.BaseKeeper
-	TokenKeeper    = keeper.TokenKeeper
-	Params         = types.Params
-	GenesisState   = types.GenesisState
-	Token          = types.Token
-	BaseToken      = types.BaseToken
-	MsgForbidToken = types.MsgForbidToken
-	MsgForbidAddr  = types.MsgForbidAddr
+	Keeper          = keeper.BaseKeeper
+	BaseTokenKeeper = keeper.BaseTokenKeeper
+	TokenKeeper     = keeper.TokenKeeper
+	Params          = types.Params
+	GenesisState    = types.GenesisState
+	Token           = types.Token
+	BaseToken       = types.BaseToken
+	MsgForbidToken  = types.MsgForbidToken
+	MsgForbidAddr   = types.MsgForbidAddr
 )

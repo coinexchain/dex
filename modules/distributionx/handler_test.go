@@ -1,15 +1,9 @@
 package distributionx
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
-	types3 "github.com/coinexchain/dex/modules/authx/types"
-	"github.com/coinexchain/dex/modules/bankx"
-	types2 "github.com/coinexchain/dex/modules/distributionx/types"
-
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -20,12 +14,21 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	types2 "github.com/coinexchain/dex/modules/distributionx/types"
 	"github.com/coinexchain/dex/modules/msgqueue"
-	"github.com/coinexchain/dex/types"
+	dex "github.com/coinexchain/dex/types"
 )
+
+var validCoins = dex.NewCetCoins(10e8)
 
 type testInput struct {
 	k   Keeper
@@ -37,6 +40,7 @@ func setupTestInput() testInput {
 	db := dbm.NewMemDB()
 	cdc := codec.New()
 	auth.RegisterCodec(cdc)
+	supply.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 
 	authKey := sdk.NewKVStoreKey(auth.StoreKey)
@@ -44,6 +48,7 @@ func setupTestInput() testInput {
 	tkey := sdk.NewTransientStoreKey("transient_test")
 	authxKey := sdk.NewKVStoreKey(authx.StoreKey)
 	distrKey := sdk.NewKVStoreKey(distribution.StoreKey)
+	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
@@ -54,12 +59,27 @@ func setupTestInput() testInput {
 
 	_ = ms.LoadLatestVersion()
 
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
-	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(types3.DefaultParamspace))
-	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, msgqueue.Producer{})
-	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace), bk, staking.Keeper{}, auth.FeeCollectionKeeper{}, distribution.DefaultCodespace)
+
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     {supply.Basic},
+		authx.ModuleName:          {supply.Basic},
+		distribution.ModuleName:   {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		asset.ModuleName:          {supply.Minter},
+	}
+	sk := supply.NewKeeper(cdc, supplyKey, ak, bk, supply.DefaultCodespace, maccPerms)
+	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
+	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
+
+	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak)
+	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, sk, msgqueue.Producer{})
+	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace),
+		staking.Keeper{}, sk, distribution.DefaultCodespace, auth.FeeCollectorName)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
@@ -79,7 +99,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 
 	addr := sdk.AccAddress([]byte("addr"))
 	acc := auth.NewBaseAccountWithAddress(addr)
-	acc.SetCoins(types2.validCoins)
+	acc.SetCoins(validCoins)
 	input.ak.SetAccount(input.ctx, &acc)
 
 	fromAcc := input.ak.GetAccount(input.ctx, addr)
@@ -88,7 +108,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 	feePool := input.k.dk.GetFeePool(input.ctx)
 	require.Nil(t, feePool.CommunityPool)
 
-	Coins := types.NewCetCoins(1e8)
+	Coins := dex.NewCetCoins(1e8)
 	msg := types2.NewMsgDonateToCommunityPool(addr, Coins)
 	res := handleMsgDonateToCommunityPool(input.ctx, input.k, msg)
 
@@ -106,7 +126,7 @@ func TestDonateToCommunityPoolFailed(t *testing.T) {
 
 	addr := sdk.AccAddress([]byte("addr"))
 	acc := auth.NewBaseAccountWithAddress(addr)
-	acc.SetCoins(types2.validCoins)
+	acc.SetCoins(validCoins)
 	input.ak.SetAccount(input.ctx, &acc)
 
 	fromAcc := input.ak.GetAccount(input.ctx, addr)
@@ -115,7 +135,7 @@ func TestDonateToCommunityPoolFailed(t *testing.T) {
 	feePool := input.k.dk.GetFeePool(input.ctx)
 	require.Nil(t, feePool.CommunityPool)
 
-	Coins := types.NewCetCoins(11e8)
+	Coins := dex.NewCetCoins(11e8)
 	msg := types2.NewMsgDonateToCommunityPool(addr, Coins)
 	res := handleMsgDonateToCommunityPool(input.ctx, input.k, msg)
 

@@ -163,7 +163,7 @@ func TestExportAppStateAndValidators(t *testing.T) {
 	minSelfDelegate := app.stakingXKeeper.GetParams(ctx).MinSelfDelegation
 	require.Equal(t, cetToken().GetTotalSupply()-minSelfDelegate.Int64()-100, valAcc.GetCoins().AmountOf("cet").Int64())
 
-	//DistributionAccount including OutStanding rewards and
+	//DistributionAccount including OutStanding rewards and CommunityPool
 	feeCollectAccount := getDistributionAccount(&appState)
 	require.NotNil(t, feeCollectAccount)
 	require.Equal(t, sdk.NewInt(100).Int64(), feeCollectAccount.Coins.AmountOf(dex.DefaultBondDenom).Int64())

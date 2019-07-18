@@ -11,21 +11,21 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
-var validCoins = types.NewCetCoins(10e8)
+var validCoins = dex.NewCetCoins(10e8)
 
 func TestMain(m *testing.M) {
-	types.InitSdkConfig()
+	dex.InitSdkConfig()
 	os.Exit(m.Run())
 }
 
 func TestDonateToCommunityPoolRoute(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
-	msg := NewMsgDonateToCommunityPool(addr, types.NewCetCoins(1e8))
-	require.Equal(t, Route(), "distrx")
-	require.Equal(t, Type(), "donate_to_community_pool")
+	msg := NewMsgDonateToCommunityPool(addr, dex.NewCetCoins(1e8))
+	require.Equal(t, msg.Route(), "distrx")
+	require.Equal(t, msg.Type(), "donate_to_community_pool")
 }
 
 func TestDonateToCommunityPoolValidation(t *testing.T) {
@@ -33,7 +33,7 @@ func TestDonateToCommunityPoolValidation(t *testing.T) {
 	var emptyAddr sdk.AccAddress
 
 	var invalidDenomCoins = sdk.NewCoins(sdk.NewCoin("abc", sdk.NewInt(1e8)))
-	var invalidLenCoins = append(validCoins, types.NewCetCoin(1e8))
+	var invalidLenCoins = append(validCoins, dex.NewCetCoin(1e8))
 	var invalidAmount = sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(10)))
 	invalidAmount[0].Amount = sdk.ZeroInt()
 
@@ -49,7 +49,7 @@ func TestDonateToCommunityPoolValidation(t *testing.T) {
 func TestDonateToCommunityPoolGetSignBytes(t *testing.T) {
 	addr := sdk.AccAddress(crypto.AddressHash([]byte("addr")))
 	msg := NewMsgDonateToCommunityPool(addr, validCoins)
-	sign := GetSignBytes()
+	sign := msg.GetSignBytes()
 
 	expected := `{"type":"distrx/MsgDonateToCommunityPool","value":{"amount":[{"amount":"1000000000","denom":"cet"}],"from_addr":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"}}`
 	require.Equal(t, expected, string(sign))
@@ -58,7 +58,7 @@ func TestDonateToCommunityPoolGetSignBytes(t *testing.T) {
 func TestDonateToCommunityPoolGetSigners(t *testing.T) {
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgDonateToCommunityPool(addr, validCoins)
-	signers := GetSigners()
+	signers := msg.GetSigners()
 	require.Equal(t, 1, len(signers))
 	require.Equal(t, addr, signers[0])
 }
