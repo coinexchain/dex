@@ -40,7 +40,6 @@ func TestGenesisState_Validate(t *testing.T) {
 }
 
 func TestDefaultGenesisState(t *testing.T) {
-
 	defautGenesisState := DefaultGenesisState()
 	require.Equal(t, DefaultParams(), defautGenesisState.Params)
 }

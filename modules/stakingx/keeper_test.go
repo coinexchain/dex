@@ -15,7 +15,6 @@ import (
 )
 
 func TestInitExportGenesis(t *testing.T) {
-
 	sxk, ctx, _ := setUpInput()
 
 	_, _, addr := testutil.KeyPubAddr()
@@ -52,7 +51,7 @@ func TestCalcBondPoolStatus(t *testing.T) {
 		BondedTokens:    sdk.NewInt(10e8),
 		NotBondedTokens: sdk.NewInt(500e8),
 	}
-	sxk.sk.SetPool(ctx, pool)
+	//sxk.sk.SetPool(ctx, pool)
 
 	feePool := types.FeePool{
 		CommunityPool: sdk.NewDecCoins(dex.NewCetCoins(1000)),
@@ -74,7 +73,6 @@ func TestCalcBondPoolStatus(t *testing.T) {
 }
 
 func TestCalcBondedRatio(t *testing.T) {
-
 	bondPool := BondPool{
 		BondedTokens:      sdk.NewInt(10e8),
 		NotBondedTokens:   sdk.NewInt(500e8),
@@ -86,7 +84,6 @@ func TestCalcBondedRatio(t *testing.T) {
 }
 
 func TestCalcBondedRatioNegative(t *testing.T) {
-
 	bondPool := BondPool{
 		BondedTokens:      sdk.NewInt(-10e8),
 		NotBondedTokens:   sdk.NewInt(500e8),

@@ -36,7 +36,6 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 	tkey := sdk.NewTransientStoreKey("transient_test")
 	distKey := sdk.NewKVStoreKey(distribution.StoreKey)
 	authKey := sdk.NewKVStoreKey(auth.StoreKey)
-	fckKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
@@ -44,23 +43,21 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 	ms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
 	ms.MountStoreWithDB(keyStaking, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(distKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(fckKey, sdk.StoreTypeIAVL, db)
 
 	ms.LoadLatestVersion()
 
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
 
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
-	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	sk := staking.NewKeeper(
 		cdc,
-		keyStaking, tkey,
-		bk, paramsKeeper.Subspace(staking.DefaultParamspace),
+		keyStaking, tkey, nil, // TODO
+		paramsKeeper.Subspace(staking.DefaultParamspace),
 		staking.DefaultCodespace,
 	)
-	dk := distribution.NewKeeper(cdc, distKey, paramsKeeper.Subspace(distribution.StoreKey), bk, sk, fck, types.DefaultCodespace)
-	sxk := NewKeeper(paramsKeeper.Subspace(DefaultParamspace), &sk, dk, ak)
+	dk := distribution.NewKeeper(cdc, distKey, paramsKeeper.Subspace(distribution.StoreKey), sk, nil, types.DefaultCodespace, auth.FeeCollectorName) // TODO
+	sxk := NewKeeper(paramsKeeper.Subspace(DefaultParamspace), nil, &sk, dk, ak, nil, nil, auth.FeeCollectorName) // TODO
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
@@ -70,7 +67,6 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 }
 
 func initStates(ctx sdk.Context, sxk Keeper) {
-
 	//intialize params & states needed
 	params := staking.DefaultParams()
 	params.BondDenom = "cet"
@@ -87,8 +83,7 @@ func initStates(ctx sdk.Context, sxk Keeper) {
 		NotBondedTokens: sdk.NewInt(1000e8),
 		BondedTokens:    sdk.NewInt(0),
 	}
-	sxk.sk.SetPool(ctx, pool)
-
+	pool.String()//sxk.sk.SetPool(ctx, pool)
 }
 
 func TestSlashTokensToCommunityPool(t *testing.T) {
@@ -121,7 +116,6 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	require.Equal(t, sdk.NewInt(95e6), validator.GetTokens())
 	//slash tokens have been added to communityPool
 	require.Equal(t, sdk.NewDec(5e6), sxk.dk.GetFeePool(ctx).CommunityPool.AmountOf("cet"))
-
 }
 
 func TestDelegatorSlash(t *testing.T) {
@@ -194,5 +188,4 @@ func TestDelegatorSlash(t *testing.T) {
 	require.False(t, found)
 	delegatorAcc := ak.GetAccount(ctx, addr2)
 	require.Equal(t, dex.NewCetCoins(95e6), delegatorAcc.GetCoins())
-
 }

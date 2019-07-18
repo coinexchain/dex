@@ -21,7 +21,7 @@ func TestNewQuerier(t *testing.T) {
 		BondedTokens:    sdk.NewInt(10e8),
 		NotBondedTokens: sdk.NewInt(500e8),
 	}
-	sxk.sk.SetPool(ctx, pool)
+	pool.String()//sxk.sk.SetPool(ctx, pool)
 	sxk.SetParams(ctx, DefaultParams())
 
 	//query succeed

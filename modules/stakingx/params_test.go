@@ -38,7 +38,7 @@ func defaultContext() (sdk.Context, params.Keeper) {
 
 	_ = cms.LoadLatestVersion()
 	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
 
 	return ctx, paramsKeeper
 }
@@ -46,7 +46,7 @@ func defaultContext() (sdk.Context, params.Keeper) {
 func TestParamGetSet(t *testing.T) {
 	ctx, paramsKeeper := defaultContext()
 	subspace := paramsKeeper.Subspace(DefaultParamspace)
-	sxk := NewKeeper(subspace, &staking.Keeper{}, distribution.Keeper{}, auth.AccountKeeper{})
+	sxk := NewKeeper(subspace, nil, &staking.Keeper{}, distribution.Keeper{}, auth.AccountKeeper{}, nil, nil, "")
 
 	_, _, addr := testutil.KeyPubAddr()
 	testParam := Params{
@@ -59,5 +59,4 @@ func TestParamGetSet(t *testing.T) {
 
 	//expect GetParam equals defaultParam
 	require.Equal(t, testParam, sxk.GetParams(ctx))
-
 }
