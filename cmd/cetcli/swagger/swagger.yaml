@@ -21,6 +21,9 @@ tags:
     description: Slashing module APIs
   - name: Distribution
     description: Fee distribution module APIs
+  - name: Supply
+    description: Supply module APIs
+  - name: version
   - name: Misc
     description: Query app version
   - name: Asset
@@ -230,7 +233,7 @@ paths:
           description: Tx hash
           required: true
           type: string
-          x-example: 88D6B85EAB87D43CDF50F39C22FC2237A37FEDC4CE723200AD0AF48CBEDBC317
+          x-example: BCBE20E8D46758B96AE5883B792858296AC06E51435490FBDCAE25A72B3CC76B
       responses:
         200:
           description: Tx with the provided hash
@@ -243,7 +246,7 @@ paths:
       tags:
         - Transactions
       summary: Search transactions
-      description: Search transactions by tag(s).
+      description: Search transactions by events.
       produces:
         - application/json
       parameters:
@@ -947,9 +950,7 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/UnbondingDelegation"
+            $ref: "#/definitions/UnbondingDelegationPair"
         400:
           description: Invalid delegator address or validator address
         500:
@@ -1538,7 +1539,7 @@ paths:
           name: proposalId
           required: true
           in: path
-          x-example: '1'
+          x-example: "2"
       responses:
         200:
           description: OK
@@ -1566,7 +1567,7 @@ paths:
           name: proposalId
           required: true
           in: path
-          x-example: '1'
+          x-example: "2"
         - description: ""
           name: post_deposit_body
           in: body
@@ -1608,7 +1609,7 @@ paths:
           name: proposalId
           required: true
           in: path
-          x-example: '1'
+          x-example: "2"
         - type: string
           description: Bech32 depositor address
           name: depositor
@@ -1641,7 +1642,7 @@ paths:
           name: proposalId
           required: true
           in: path
-          x-example: '1'
+          x-example: "2"
       responses:
         200:
           description: OK
@@ -1669,7 +1670,7 @@ paths:
           name: proposalId
           required: true
           in: path
-          x-example: '1'
+          x-example: "2"
         - description: valid value of `"option"` field can be `"yes"`, `"no"`, `"no_with_veto"` and `"abstain"`
           name: post_vote_body
           in: body
@@ -1710,7 +1711,7 @@ paths:
           name: proposalId
           required: true
           in: path
-          x-example: '1'
+          x-example: "2"
         - type: string
           description: Bech32 voter address
           name: voter
@@ -1853,9 +1854,7 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Coin"
+            $ref: "#/definitions/DelegatorTotalRewards"
         400:
           description: Invalid delegator address
         500:
@@ -2884,16 +2883,6 @@ definitions:
     type: string
     description: bech32 encoded address
     example: coinex1depk54cuajgkzea6zpgkq36tnjwdzv4afc3d27
-  PublicKey:
-    type: object
-    description: public key information
-    properties:
-      'type':
-        type: string
-        example: "tendermint/PubKeySecp256k1"
-      value:
-        type: string
-        example: "Alxik1yEXYJn3Q+vhUn+Da8X/u+aSUfLCY1CuprlHZzB"
   ValidatorAddress:
     type: string
     description: bech32 encoded address
@@ -3118,6 +3107,26 @@ definitions:
             $ref: "#/definitions/BlockID"
       block:
         $ref: "#/definitions/Block"
+  DelegationDelegatorReward:
+    type: object
+    properties:
+      validator_address:
+        $ref: "#/definitions/ValidatorAddress"
+      reward:
+        type: array
+        items:
+          $ref: "#/definitions/Coin"
+  DelegatorTotalRewards:
+    type: object
+    properties:
+      rewards:
+        type: array
+        items:
+          $ref: "#/definitions/DelegationDelegatorReward"
+      total:
+        type: array
+        items:
+          $ref: "#/definitions/Coin"
   BaseReq:
     type: object
     properties:
@@ -3295,6 +3304,28 @@ definitions:
         type: string
       height:
         type: integer
+  UnbondingDelegationPair:
+    type: object
+    properties:
+      delegator_address:
+        type: string
+      validator_address:
+        type: string
+      entries:
+        type: array
+        items:
+          $ref: "#/definitions/UnbondingEntries"
+  UnbondingEntries:
+    type: object
+    properties:
+      initial_balance:
+        type: string
+      balance:
+        type: string
+      creation_height:
+        type: string
+      min_time:
+        type: string
   UnbondingDelegation:
     type: object
     properties:
@@ -3319,15 +3350,20 @@ definitions:
         type: string
       validator_dst_address:
         type: string
+      entries:
+        type: array
+        items:
+          $ref: "#/definitions/Redelegation"
+  RedelegationEntry:
+    type: object
+    properties:
       creation_height:
         type: integer
-      min_time:
+      completion_time:
         type: integer
       initial_balance:
         type: string
       balance:
-        type: string
-      shares_src:
         type: string
       shares_dst:
         type: string
@@ -3344,6 +3380,13 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Coin"
+  PublicKey:
+    type: object
+    properties:
+      type:
+        type: string
+      value:
+        type: string
   SigningInfo:
     type: object
     properties:
