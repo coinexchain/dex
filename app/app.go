@@ -57,11 +57,11 @@ var (
 	// The ModuleBasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
 	// and genesis verification.
-	ModuleBasics module.BasicManager
+	ModuleBasics OrderedBasicManager
 )
 
 func init() {
-	ModuleBasics = module.NewBasicManager(
+	modules := []module.AppModuleBasic{
 		genaccounts.AppModuleBasic{},
 		genutil.AppModuleBasic{},
 		params.AppModuleBasic{},
@@ -80,7 +80,9 @@ func init() {
 		incentive.AppModuleBasic{},
 		asset.AppModuleBasic{},
 		market.AppModuleBasic{},
-	)
+	}
+
+	ModuleBasics = NewOrderedBasicManager(modules)
 }
 
 // custom tx codec

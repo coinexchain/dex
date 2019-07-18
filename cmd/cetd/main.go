@@ -73,18 +73,20 @@ func createCetdCmd() *cobra.Command {
 }
 
 func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Command) {
-	initCmd := genutilcli.InitCmd(ctx, cdc, app.ModuleBasics, app.DefaultNodeHome)
+	rawBasicManager := app.ModuleBasics.RawBasicManager()
+
+	initCmd := genutilcli.InitCmd(ctx, cdc, rawBasicManager, app.DefaultNodeHome)
 	initCmd.PreRun = func(cmd *cobra.Command, args []string) {
 		adjustBlockCommitSpeed(ctx.Config)
 	}
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(genutilcli.CollectGenTxsCmd(ctx, cdc, genaccounts.AppModuleBasic{}, app.DefaultNodeHome))
-	rootCmd.AddCommand(genutilcli.GenTxCmd(ctx, cdc, app.ModuleBasics, staking.AppModuleBasic{},
+	rootCmd.AddCommand(genutilcli.GenTxCmd(ctx, cdc, rawBasicManager, staking.AppModuleBasic{},
 		genaccounts.AppModuleBasic{}, app.DefaultNodeHome, app.DefaultCLIHome))
-	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
+	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, rawBasicManager))
 	rootCmd.AddCommand(genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(assetcli.AddGenesisTokenCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
-	rootCmd.AddCommand(testnetCmd(ctx, cdc, app.ModuleBasics, genaccounts.AppModuleBasic{}))
+	rootCmd.AddCommand(testnetCmd(ctx, cdc, rawBasicManager, genaccounts.AppModuleBasic{}))
 }
 
 func adjustBlockCommitSpeed(config *tmconfig.Config) {
