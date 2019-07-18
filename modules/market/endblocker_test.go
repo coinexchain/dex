@@ -24,6 +24,8 @@ import (
 
 var msgCdc = types.ModuleCdc
 
+var unitTestChainID = "coinex-test"
+
 // TODO: duplicated code, copied from order_keeper_test.go
 func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int, h int64) *types.Order {
 	addr, _ := simpleAddr(sender)
@@ -70,16 +72,6 @@ func sameTO(a, order *types.Order) bool {
 		order.TradingPair == order.TradingPair && order.OrderType == order.OrderType && a.Price.Equal(order.Price) &&
 		order.Quantity == order.Quantity && order.Side == order.Side && order.TimeInForce == order.TimeInForce &&
 		order.Height == order.Height
-	//if !res {
-	//	fmt.Printf("seq: %d %d\n", a.Sequence, b.Sequence)
-	//	fmt.Printf("symbol: %s %s\n", a.Symbol, b.Symbol)
-	//	fmt.Printf("ordertype: %d %d\n", a.OrderType, b.OrderType)
-	//	fmt.Printf("price: %s %s\n", a.Price, b.Price)
-	//	fmt.Printf("quantity: %d %d\n", a.Quantity, b.Quantity)
-	//	fmt.Printf("side: %d %d\n", a.Side, b.Side)
-	//	fmt.Printf("tif: %d %d\n", a.TimeInForce, b.TimeInForce)
-	//	fmt.Printf("height: %d %d\n", a.Height, b.Height)
-	//}
 	return res
 }
 
@@ -161,7 +153,7 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 	order.Freeze = 50
 	order.FrozenFee = 10
 	order.DealStock = 20
-	ctx, _ := newContextAndMarketKey(testNetSubString)
+	ctx, _ := newContextAndMarketKey(unitTestChainID)
 	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, mockFeeK)
 	refout := "unfreeze 50 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
 	if refout != bxKeeper.records[0] {
@@ -179,7 +171,7 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 func TestRemoveOrders(t *testing.T) {
 	axk := &mocAssertStatusKeeper{}
 	bnk := &mocBankxKeeper{}
-	ctx, keys := newContextAndMarketKey(testNetSubString)
+	ctx, keys := newContextAndMarketKey(unitTestChainID)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(types.StoreKey)
 	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace)
 	keeper.SetUnixTime(ctx, time.Now().Unix())
@@ -244,7 +236,7 @@ func TestDelist(t *testing.T) {
 	addr01, _ := simpleAddr("00001")
 	axk.forbiddenAddrList = []sdk.AccAddress{addr01}
 	bnk := &mocBankxKeeper{}
-	ctx, keys := newContextAndMarketKey(testNetSubString)
+	ctx, keys := newContextAndMarketKey(unitTestChainID)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(types.StoreKey)
 	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace)
 	delistKeeper := keepers.NewDelistKeeper(keys.marketKey)
@@ -327,9 +319,7 @@ func TestDelist(t *testing.T) {
 			t.Errorf("Incorrect remain orders.")
 		}
 	}
-	for _, order := range allOrders {
-		fmt.Printf("Remain: %s\n", order.OrderID())
-	}
+
 	records := []string{
 		"unfreeze 60 btc at cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf",
 		"send 60 btc from cosmos1qy352eufqy352eufqy352eufqy35qqpqe926wf to cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
@@ -353,9 +343,6 @@ func TestDelist(t *testing.T) {
 		"unfreeze 120 btc at cosmos1qy352eufqy352eufqy352eufqy35qqq9yynnh8",
 		"unfreeze 1 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz",
 		"unfreeze 1 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqszrgzaze",
-	}
-	for i, rec := range bnk.records {
-		fmt.Printf("bnk.records[%d] %s\n", i, rec)
 	}
 	for i, rec := range records {
 		if rec != bnk.records[i] {

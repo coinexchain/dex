@@ -134,7 +134,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
-
+	sk.SetSupply(ctx, supply.Supply{Total: sdk.Coins{}})
 	axk := authx.NewKeeper(
 		cdc,
 		keys.authxCapKey,
@@ -468,7 +468,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, frozenMoney), "The amount is error")
 
 	glk := keepers.NewGlobalOrderKeeper(input.keys.marketKey, input.cdc)
-	order := glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 1, param.ChainIDVersion))
+	order := glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 1))
 	require.Equal(t, true, isSameOrderAndMsg(order, msgGteOrder), "order should equal msg")
 
 	msgIOCOrder := types.MsgCreateOrder{
@@ -492,12 +492,12 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, totalFrozen), "The amount is error")
 
-	order = glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 2, param.ChainIDVersion))
+	order = glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 2))
 	require.Equal(t, true, isSameOrderAndMsg(order, msgIOCOrder), "order should equal msg")
 }
 
-func assemblyOrderID(addr sdk.AccAddress, seq uint64, chainIDVersion int64) string {
-	return fmt.Sprintf("%s-%d-%d", addr, seq, chainIDVersion)
+func assemblyOrderID(addr sdk.AccAddress, seq uint64) string {
+	return fmt.Sprintf("%s-%d", addr, seq)
 }
 
 func isSameOrderAndMsg(order *types.Order, msg types.MsgCreateOrder) bool {
@@ -519,10 +519,9 @@ func getAddr(input string) sdk.AccAddress {
 func TestCancelOrderFailed(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	createCetMarket(input, stock)
-	chainIDVersion := input.mk.GetParams(input.ctx).ChainIDVersion
 	cancelOrder := types.MsgCancelOrder{
 		Sender:  haveCetAddress,
-		OrderID: assemblyOrderID(haveCetAddress, 1, chainIDVersion),
+		OrderID: assemblyOrderID(haveCetAddress, 1),
 	}
 
 	failedOrderNotExist := cancelOrder
@@ -545,7 +544,7 @@ func TestCancelOrderFailed(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 
 	failedNotOrderSender := cancelOrder
-	failedNotOrderSender.OrderID = assemblyOrderID(notHaveCetAddress, 2, chainIDVersion)
+	failedNotOrderSender.OrderID = assemblyOrderID(notHaveCetAddress, 2)
 	ret = input.handler(input.ctx, failedNotOrderSender)
 	require.Equal(t, types.CodeNotFindOrder, ret.Code, "cancel order should failed by not match order sender")
 }
@@ -553,7 +552,6 @@ func TestCancelOrderFailed(t *testing.T) {
 func TestCancelOrderSuccess(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	createCetMarket(input, stock)
-	chainIDVersion := input.mk.GetParams(input.ctx).ChainIDVersion
 
 	// create order
 	msgIOCOrder := types.MsgCreateOrder{
@@ -572,7 +570,7 @@ func TestCancelOrderSuccess(t *testing.T) {
 
 	cancelOrder := types.MsgCancelOrder{
 		Sender:  haveCetAddress,
-		OrderID: assemblyOrderID(haveCetAddress, 2, chainIDVersion),
+		OrderID: assemblyOrderID(haveCetAddress, 2),
 	}
 	ret = input.handler(input.ctx, cancelOrder)
 	require.Equal(t, true, ret.IsOK(), "cancel order should succeed ; ", ret.Log)
