@@ -102,7 +102,6 @@ func calcBondedRatio(p *BondPool) sdk.Dec {
 
 	return p.BondedTokens.ToDec().QuoInt(bondableTokens)
 
-	return sdk.ZeroDec()
 }
 
 func calcNonBondableTokens(ctx sdk.Context, k *Keeper) sdk.Int {

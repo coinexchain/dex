@@ -9,7 +9,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 )
 
 func TestNewQuerier(t *testing.T) {
@@ -17,11 +16,6 @@ func TestNewQuerier(t *testing.T) {
 	sxk, ctx, _ := setUpInput()
 	cdc := codec.New()
 
-	pool := staking.Pool{
-		BondedTokens:    sdk.NewInt(10e8),
-		NotBondedTokens: sdk.NewInt(500e8),
-	}
-	pool.String() //sxk.sk.SetPool(ctx, pool)
 	sxk.SetParams(ctx, DefaultParams())
 
 	//query succeed
