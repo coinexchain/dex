@@ -65,6 +65,8 @@ func init() {
 		genaccounts.AppModuleBasic{},
 		genutil.AppModuleBasic{},
 		params.AppModuleBasic{},
+		authx.AppModuleBasic{}, //before `bank` to override `/bank/balances/{address}`
+		bankx.AppModuleBasic{},
 		bank.AppModuleBasic{},
 		distr.AppModuleBasic{},
 		supply.AppModuleBasic{},
@@ -74,8 +76,6 @@ func init() {
 		SlashingModuleBasic{},
 		CrisisModuleBasic{},
 		GovModuleBasic{gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler)},
-		authx.AppModuleBasic{},
-		bankx.AppModuleBasic{},
 		distributionx.AppModuleBasic{},
 		incentive.AppModuleBasic{},
 		asset.AppModuleBasic{},
