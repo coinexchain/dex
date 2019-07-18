@@ -300,7 +300,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 	currTime := ctx.BlockHeader().Time.Unix()
 
 	var needRemove bool
-	if strings.Contains(chainID, mainNetSubString) || strings.Contains(chainID, testNetSubString) {
+	if !strings.Contains(chainID, IntegrationNetSubString) {
 		if time.Unix(recordTime, 0).Day() != time.Unix(currTime, 0).Day() {
 			needRemove = true
 		}

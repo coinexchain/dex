@@ -47,6 +47,8 @@ var (
 
 	testnetTokenSupply       = int64(588788547005740000)
 	testnetMinSelfDelegation = int64(10000e8)
+
+	integrationTestChainID = "coinex-integrationtest"
 )
 
 type testnetNodeInfo struct {
@@ -119,7 +121,7 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 	nodeCLIHome, startingIPAddress string, numValidators int) error {
 
 	if chainID == "" {
-		chainID = "chain-" + cmn.RandStr(6)
+		chainID = integrationTestChainID + cmn.RandStr(6)
 	}
 
 	nodeIDs := make([]string, numValidators)

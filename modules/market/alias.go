@@ -12,8 +12,7 @@ const (
 )
 
 const (
-	testNetSubString = types.TestNetSubString
-	mainNetSubString = types.MainNetSubString
+	IntegrationNetSubString = types.IntegrationNetSubString
 )
 
 var (

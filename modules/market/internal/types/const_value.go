@@ -27,6 +27,5 @@ const (
 )
 
 const (
-	TestNetSubString = "coinexdex-test"
-	MainNetSubString = "coinexdex-main"
+	IntegrationNetSubString = "coinex-integrationtest"
 )
