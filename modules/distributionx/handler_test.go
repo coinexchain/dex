@@ -1,15 +1,9 @@
 package distributionx
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
-	types3 "github.com/coinexchain/dex/modules/authx/types"
-	"github.com/coinexchain/dex/modules/bankx"
-	types2 "github.com/coinexchain/dex/modules/distributionx/types"
-
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -20,11 +14,17 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
+	types3 "github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/bankx"
+	types2 "github.com/coinexchain/dex/modules/distributionx/types"
 	"github.com/coinexchain/dex/modules/msgqueue"
-	"github.com/coinexchain/dex/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 type testInput struct {
@@ -88,7 +88,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 	feePool := input.k.dk.GetFeePool(input.ctx)
 	require.Nil(t, feePool.CommunityPool)
 
-	Coins := types.NewCetCoins(1e8)
+	Coins := dex.NewCetCoins(1e8)
 	msg := types2.NewMsgDonateToCommunityPool(addr, Coins)
 	res := handleMsgDonateToCommunityPool(input.ctx, input.k, msg)
 
@@ -115,7 +115,7 @@ func TestDonateToCommunityPoolFailed(t *testing.T) {
 	feePool := input.k.dk.GetFeePool(input.ctx)
 	require.Nil(t, feePool.CommunityPool)
 
-	Coins := types.NewCetCoins(11e8)
+	Coins := dex.NewCetCoins(11e8)
 	msg := types2.NewMsgDonateToCommunityPool(addr, Coins)
 	res := handleMsgDonateToCommunityPool(input.ctx, input.k, msg)
 
