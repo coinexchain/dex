@@ -17,8 +17,10 @@ func TestValidate(t *testing.T) {
 }
 
 func TestExport(t *testing.T) {
+	accx := NewAccountX(sdk.AccAddress([]byte("addr")), false, nil, nil)
+
 	testInput := setupTestInput()
-	genState1 := NewGenesisState(NewParams(sdk.NewDec(50)), []AccountX{})
+	genState1 := NewGenesisState(NewParams(sdk.NewDec(50)), []AccountX{accx})
 	InitGenesis(testInput.ctx, testInput.axk, genState1)
 	genState2 := ExportGenesis(testInput.ctx, testInput.axk)
 	require.Equal(t, genState1, genState2)

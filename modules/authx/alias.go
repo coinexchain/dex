@@ -10,6 +10,9 @@ const (
 	ModuleName    = types.ModuleName
 	QueryAccountX = types.QueryAccountX
 
+	CodeSpaceAuthX     = types.CodeSpaceAuthX
+	CodeGasPriceTooLow = types.CodeGasPriceTooLow
+
 	DefaultParamspace       = types.DefaultParamspace
 	DefaultMinGasPriceLimit = types.DefaultMinGasPriceLimit
 )
@@ -19,6 +22,7 @@ var (
 	ErrGasPriceTooLow          = types.ErrGasPriceTooLow
 	NewLockedCoin              = types.NewLockedCoin
 	NewParams                  = types.NewParams
+	NewAccountX                = types.NewAccountX
 )
 
 type (

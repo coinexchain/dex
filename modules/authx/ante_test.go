@@ -1,7 +1,6 @@
 package authx
 
 import (
-	"github.com/coinexchain/dex/modules/authx/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -33,8 +32,8 @@ func TestGasPriceTooLowError(t *testing.T) {
 	tx := auth.StdTx{Fee: auth.StdFee{Amount: sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(1))), Gas: 10000000}}
 	_, res, abort := ah2(ctx, tx, false)
 	require.True(t, abort)
-	require.Equal(t, types.CodeSpaceAuthX, res.Codespace)
-	require.Equal(t, types.CodeGasPriceTooLow, res.Code)
+	require.Equal(t, CodeSpaceAuthX, res.Codespace)
+	require.Equal(t, CodeGasPriceTooLow, res.Code)
 }
 
 type testAnteHelper struct {
