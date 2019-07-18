@@ -22,7 +22,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
@@ -60,7 +59,7 @@ type testnetNodeInfo struct {
 
 // get cmd to initialize all files for tendermint testnet and application
 func testnetCmd(ctx *server.Context, cdc *codec.Codec,
-	mbm module.BasicManager, genAccIterator genutil.GenesisAccountsIterator) *cobra.Command {
+	mbm app.OrderedBasicManager, genAccIterator genutil.GenesisAccountsIterator) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "testnet",
@@ -116,7 +115,7 @@ func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 }
 
 func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
-	mbm module.BasicManager, genAccIterator genutil.GenesisAccountsIterator,
+	mbm app.OrderedBasicManager, genAccIterator genutil.GenesisAccountsIterator,
 	outputDir, chainID, minGasPrices, nodeDirPrefix, nodeDaemonHome,
 	nodeCLIHome, startingIPAddress string, numValidators int) error {
 
@@ -300,7 +299,7 @@ func mkNodeHomeDirs(outputDir, nodeDir, clientDir string) error {
 	return nil
 }
 
-func initGenFiles(cdc *codec.Codec, mbm module.BasicManager, chainID string,
+func initGenFiles(cdc *codec.Codec, mbm app.OrderedBasicManager, chainID string,
 	accs []genaccounts.GenesisAccount, genFiles []string, numValidators int) error {
 
 	appGenState := mbm.DefaultGenesis()

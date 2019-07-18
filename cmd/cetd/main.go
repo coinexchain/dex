@@ -86,7 +86,7 @@ func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Comma
 	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, rawBasicManager))
 	rootCmd.AddCommand(genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(assetcli.AddGenesisTokenCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
-	rootCmd.AddCommand(testnetCmd(ctx, cdc, rawBasicManager, genaccounts.AppModuleBasic{}))
+	rootCmd.AddCommand(testnetCmd(ctx, cdc, app.ModuleBasics, genaccounts.AppModuleBasic{}))
 }
 
 func adjustBlockCommitSpeed(config *tmconfig.Config) {
