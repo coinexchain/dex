@@ -9,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/asset/internal/types"
@@ -193,12 +192,6 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 	if err := token.SetTotalSupply(token.GetTotalSupply() - amount); err != nil {
 		return err
 	}
-	//do not need anymore since notbondedAccount can not burn tokens
-	//if token.GetSymbol() == dex.CET {
-	//	if err := updateNotBondPool(amount, keeper, ctx); err != nil {
-	//		return err
-	//	}
-	//}
 
 	if err := keeper.SetToken(ctx, token); err != nil {
 		return err
@@ -206,14 +199,6 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 
 	return keeper.sk.BurnCoins(ctx, types.ModuleName, types.NewTokenCoins(symbol, amount))
 
-}
-
-func updateNotBondPool(amount int64, keeper BaseKeeper, ctx sdk.Context) sdk.Error {
-	coins := dex.NewCetCoins(amount)
-	if err := keeper.sk.BurnCoins(ctx, staking.NotBondedPoolName, coins); err != nil {
-		return err
-	}
-	return nil
 }
 
 //ForbidToken - forbid token
