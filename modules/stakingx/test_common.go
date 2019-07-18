@@ -63,8 +63,6 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 		asset.ModuleName:          {supply.Minter},
 	}
 	splk := supply.NewKeeper(cdc, supplyKey, ak, bk, supply.DefaultCodespace, maccPerms)
-	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
-	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
 
 	sk := staking.NewKeeper(
 		cdc,
@@ -77,13 +75,13 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
-	splk.SetSupply(ctx, supply.Supply{Total: sdk.Coins{sdk.NewInt64Coin("cet", 1000000000)}}) // TODO
 
-	initStates(ctx, sxk)
+	initStates(ctx, sxk, ak, splk)
+
 	return sxk, ctx, ak
 }
 
-func initStates(ctx sdk.Context, sxk Keeper) {
+func initStates(ctx sdk.Context, sxk Keeper, ak auth.AccountKeeper, splk supply.Keeper) {
 	//intialize params & states needed
 	params := staking.DefaultParams()
 	params.BondDenom = "cet"
@@ -95,12 +93,13 @@ func initStates(ctx sdk.Context, sxk Keeper) {
 	}
 	sxk.dk.SetFeePool(ctx, feePool)
 
-	//intialize staking Pool
-	pool := staking.Pool{
-		NotBondedTokens: sdk.NewInt(1000e8),
-		BondedTokens:    sdk.NewInt(0),
-	}
-	pool.String() //sxk.sk.SetPool(ctx, pool)
+	//initialize staking Pool
+	bondedAcc := supply.NewEmptyModuleAccount(staking.BondedPoolName, supply.Burner, supply.Staking)
+	notBondedAcc := supply.NewEmptyModuleAccount(staking.NotBondedPoolName, supply.Burner, supply.Staking)
+	ak.SetAccount(ctx, bondedAcc)
+	ak.SetAccount(ctx, notBondedAcc)
+
+	//initialize total supply
+	splk.SetSupply(ctx, supply.Supply{Total: sdk.Coins{sdk.NewInt64Coin("cet", 10e8)}})
+
 }
-
-

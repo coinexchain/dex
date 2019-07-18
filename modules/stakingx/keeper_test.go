@@ -47,29 +47,29 @@ func TestCalcBondPoolStatus(t *testing.T) {
 	}
 	sxk.ak.SetAccount(ctx, &acc)
 
-	pool := staking.Pool{
-		BondedTokens:    sdk.NewInt(10e8),
-		NotBondedTokens: sdk.NewInt(500e8),
-	}
-	//sxk.sk.SetPool(ctx, pool)
-
 	feePool := types.FeePool{
 		CommunityPool: sdk.NewDecCoins(dex.NewCetCoins(1000)),
 	}
 	sxk.dk.SetFeePool(ctx, feePool)
 
-	//test
-	expectedNonBondableTokens := feePool.CommunityPool.AmountOf("cet").Add(acc.Coins.AmountOf("cet").ToDec())
-	expectedTotalSupply := pool.BondedTokens.Add(pool.NotBondedTokens)
-	expectedBondRatio := pool.BondedTokens.ToDec().QuoInt(expectedTotalSupply.Sub(expectedNonBondableTokens.RoundInt()))
+	bondedAcc := sxk.supplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName)
+	bondedAcc.SetCoins(dex.NewCetCoins(1000))
+	sxk.ak.SetAccount(ctx, bondedAcc)
 
+	bondedAcc = sxk.supplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName)
+	notBondedAcc := sxk.supplyKeeper.GetModuleAccount(ctx, staking.NotBondedPoolName)
+	expectedNonBondableTokens := feePool.CommunityPool.AmountOf("cet").Add(acc.Coins.AmountOf("cet").ToDec())
+	expectedTotalSupply := sxk.supplyKeeper.GetSupply(ctx).Total.AmountOf("cet")
+	expectedBondRatio := bondedAcc.GetCoins().AmountOf("cet").ToDec().QuoInt(expectedTotalSupply.Sub(expectedNonBondableTokens.RoundInt()))
+
+	//test
 	bondPool := sxk.CalcBondPoolStatus(ctx)
-	require.Equal(t, pool.NotBondedTokens, bondPool.NotBondedTokens)
-	require.Equal(t, pool.BondedTokens, bondPool.BondedTokens)
+
 	require.Equal(t, expectedNonBondableTokens, bondPool.NonBondableTokens.ToDec())
 	require.Equal(t, expectedTotalSupply, bondPool.TotalSupply)
 	require.Equal(t, expectedBondRatio, bondPool.BondRatio)
-
+	require.Equal(t, bondedAcc.GetCoins().AmountOf("cet"), bondPool.BondedTokens)
+	require.Equal(t, notBondedAcc.GetCoins().AmountOf("cet"), bondPool.NotBondedTokens)
 }
 
 func TestCalcBondedRatio(t *testing.T) {

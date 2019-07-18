@@ -76,30 +76,32 @@ func (k Keeper) GetNonBondableAddresses(ctx sdk.Context) []sdk.AccAddress {
 }
 
 func (k Keeper) CalcBondPoolStatus(ctx sdk.Context) BondPool {
-	//pool := k.sk.GetPool(ctx)
 
+	total := k.supplyKeeper.GetSupply(ctx).Total.AmountOf(types.CET)
 	var bondPool BondPool
-	//bondPool.NotBondedTokens = pool.NotBondedTokens
-	//bondPool.BondedTokens = pool.BondedTokens
-	//bondPool.NonBondableTokens = calcNonBondableTokens(ctx, &k)
-	//bondPool.TotalSupply = pool.NotBondedTokens.Add(pool.BondedTokens)
+
+	bondPool.TotalSupply = total
+	bondPool.BondedTokens = k.supplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName).GetCoins().AmountOf(types.CET)
+	bondPool.NotBondedTokens = k.supplyKeeper.GetModuleAccount(ctx, staking.NotBondedPoolName).GetCoins().AmountOf(types.CET)
+	bondPool.NonBondableTokens = calcNonBondableTokens(ctx, &k)
+
 	bondPool.BondRatio = calcBondedRatio(&bondPool)
 
 	return bondPool
 }
 
 func calcBondedRatio(p *BondPool) sdk.Dec {
-	//if p.BondedTokens.IsNegative() || p.NonBondableTokens.IsNegative() {
-	//	return sdk.ZeroDec()
-	//}
-	//
-	//bondableTokens := p.TotalSupply.Sub(p.NonBondableTokens)
-	//if !bondableTokens.IsPositive() {
-	//	return sdk.ZeroDec()
-	//}
-	//
-	//return p.BondedTokens.ToDec().QuoInt(bondableTokens)
-	//TODO:
+	if p.BondedTokens.IsNegative() || p.NonBondableTokens.IsNegative() {
+		return sdk.ZeroDec()
+	}
+
+	bondableTokens := p.TotalSupply.Sub(p.NonBondableTokens)
+	if !bondableTokens.IsPositive() {
+		return sdk.ZeroDec()
+	}
+
+	return p.BondedTokens.ToDec().QuoInt(bondableTokens)
+
 	return sdk.ZeroDec()
 }
 
