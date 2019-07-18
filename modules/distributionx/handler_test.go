@@ -15,8 +15,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
@@ -45,6 +47,7 @@ func setupTestInput() testInput {
 	tkey := sdk.NewTransientStoreKey("transient_test")
 	authxKey := sdk.NewKVStoreKey(authx.StoreKey)
 	distrKey := sdk.NewKVStoreKey(distribution.StoreKey)
+	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
@@ -55,12 +58,27 @@ func setupTestInput() testInput {
 
 	_ = ms.LoadLatestVersion()
 
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
-	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
-	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, msgqueue.Producer{})
-	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace), bk, staking.Keeper{}, auth.FeeCollectionKeeper{}, distribution.DefaultCodespace)
+
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     {supply.Basic},
+		authx.ModuleName:          {supply.Basic},
+		distribution.ModuleName:          {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		asset.ModuleName:          {supply.Minter},
+	}
+	sk := supply.NewKeeper(cdc, supplyKey, ak, bk, supply.DefaultCodespace, maccPerms)
+	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
+	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
+
+	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak)
+	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, sk, msgqueue.Producer{})
+	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace),
+		staking.Keeper{}, sk, distribution.DefaultCodespace, auth.FeeCollectorName)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
