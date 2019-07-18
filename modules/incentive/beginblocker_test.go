@@ -2,12 +2,18 @@ package incentive
 
 import (
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -18,46 +24,81 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
+type fakeAssetStatusKeeper struct{}
+
+func (k fakeAssetStatusKeeper) IsTokenForbidden(ctx sdk.Context, symbol string) bool {
+	return false
+}
+func (k fakeAssetStatusKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool {
+	return false
+}
+
+func defaultContext() (sdk.Context, *codec.Codec, Keeper, auth.AccountKeeper) {
+	cdc := codec.New()
+	auth.RegisterCodec(cdc)
+	supply.RegisterCodec(cdc)
+	codec.RegisterCrypto(cdc)
+	bank.RegisterCodec(cdc)
+	bankx.RegisterCodec(cdc)
+	RegisterCodec(cdc)
+
+	skey := sdk.NewKVStoreKey("test")
+	tkey := sdk.NewTransientStoreKey("transient_test")
+
+	keySupply := sdk.NewKVStoreKey("supply")
+	keyAuth := sdk.NewKVStoreKey("auth")
+	keyAuthX := sdk.NewKVStoreKey("authx")
+	keyBank := sdk.NewKVStoreKey("bank")
+	keyBankx := sdk.NewKVStoreKey("bankx")
+	KeyIncentive := sdk.NewKVStoreKey(StoreKey)
+
+	db := dbm.NewMemDB()
+	cms := store.NewCommitMultiStore(db)
+	cms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
+	cms.MountStoreWithDB(keySupply, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(keyAuth, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(keyAuthX, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(keyBank, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(keyBankx, sdk.StoreTypeIAVL, db)
+	cms.MountStoreWithDB(KeyIncentive, sdk.StoreTypeIAVL, db)
+	_ = cms.LoadLatestVersion()
+
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     {supply.Basic},
+		distribution.ModuleName:   {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		authx.ModuleName:          {supply.Basic},
+		bank.ModuleName:           {supply.Basic},
+		bankx.ModuleName:          {supply.Basic},
+		ModuleName:                {supply.Basic},
+	}
+
+	ask := fakeAssetStatusKeeper{}
+
+	ctx := sdk.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
+	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
+	ak := auth.NewAccountKeeper(cdc, keyAuth, paramsKeeper.Subspace("auth"), auth.ProtoBaseAccount)
+	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace("bank"), "bank")
+	sk := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
+	axk := authx.NewKeeper(cdc, keyAuthX, paramsKeeper.Subspace("authx"), sk, ak)
+	_ = bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, sk, msgqueue.NewProducer())
+	keeper := NewKeeper(cdc, KeyIncentive, paramsKeeper.Subspace(ModuleName), bk, sk, "FeeCollector")
+	return ctx, cdc, keeper, ak
+}
+
 type TestInput struct {
-	ctx           sdk.Context
-	cdc           *codec.Codec
-	paramKeeper   params.Keeper
-	accountKeeper auth.AccountKeeper
-	keeper        Keeper
+	ctx    sdk.Context
+	cdc    *codec.Codec
+	keeper Keeper
+	ak     auth.AccountKeeper
 }
 
 func SetupTestInput() TestInput {
-	db := dbm.NewMemDB()
-	cdc := codec.New()
-	auth.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-	RegisterCodec(cdc)
-
-	authKey := sdk.NewKVStoreKey(auth.StoreKey)
-	skey := sdk.NewKVStoreKey("test")
-	tkey := sdk.NewTransientStoreKey("transient_test")
-	authxKey := sdk.NewKVStoreKey(authx.StoreKey)
-	fckKey := sdk.NewKVStoreKey(auth.FeeStoreKey)
-	incentiveKey := sdk.NewKVStoreKey(StoreKey)
-
-	ms := store.NewCommitMultiStore(db)
-	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
-	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(authxKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(fckKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(incentiveKey, sdk.StoreTypeIAVL, db)
-
-	_ = ms.LoadLatestVersion()
-
-	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
-	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
-	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 10}, false, log.NewNopLogger())
-	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
-	fck := auth.NewFeeCollectionKeeper(cdc, fckKey)
-	keeper := NewKeeper(cdc, incentiveKey, paramsKeeper.Subspace(DefaultParamspace), fck, bk)
-
-	return TestInput{ctx, cdc, paramsKeeper, ak, keeper}
+	ctx, cdc, Keep, ak := defaultContext()
+	return TestInput{ctx: ctx, cdc: cdc, keeper: Keep, ak: ak}
 }
 
 func TestMain(m *testing.M) {
@@ -83,9 +124,9 @@ func TestBeginBlocker(t *testing.T) {
 	input := SetupTestInput()
 	_ = input.keeper.SetState(input.ctx, State{10})
 	input.keeper.SetParam(input.ctx, DefaultParams())
-	acc := input.accountKeeper.NewAccountWithAddress(input.ctx, PoolAddr)
+	acc := input.ak.NewAccountWithAddress(input.ctx, PoolAddr)
 	_ = acc.SetCoins(dex.NewCetCoins(10000 * 1e8))
-	input.accountKeeper.SetAccount(input.ctx, acc)
+	input.ak.SetAccount(input.ctx, acc)
 	err := BeginBlocker(input.ctx, input.keeper)
 	require.Equal(t, nil, err)
 }
