@@ -99,6 +99,7 @@ type storeKeys struct {
 	authxKey    *sdk.KVStoreKey
 	keyStaking  *sdk.KVStoreKey
 	tkeyStaking *sdk.TransientStoreKey
+	keySupply   *sdk.KVStoreKey
 }
 
 func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) types.ExpectedAssetStatusKeeper {
@@ -128,9 +129,11 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
 		types.ModuleName:          {supply.Basic},
+		asset.ModuleName:          {supply.Minter},
 	}
-	sk := supply.NewKeeper(cdc, keys.keyParams, ak, bk, supply.DefaultCodespace, maccPerms)
+	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
+	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
 
 	axk := authx.NewKeeper(
 		cdc,
@@ -225,9 +228,11 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) types
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
 		types.ModuleName:          {supply.Basic},
+		asset.ModuleName:          {supply.Minter},
 	}
-	sk := supply.NewKeeper(cdc, keys.keyParams, ak, bk, supply.DefaultCodespace, maccPerms)
+	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
+	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
 
 	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak)
 	ask := asset.NewBaseTokenKeeper(cdc, keys.assetCapKey)
@@ -253,6 +258,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	keys.authxKey = sdk.NewKVStoreKey(authx.StoreKey)
 	keys.keyStaking = sdk.NewKVStoreKey(staking.StoreKey)
 	keys.tkeyStaking = sdk.NewTransientStoreKey(staking.TStoreKey)
+	keys.keySupply = sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms.MountStoreWithDB(keys.assetCapKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.authCapKey, sdk.StoreTypeIAVL, db)
@@ -260,6 +266,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	ms.MountStoreWithDB(keys.tkeyParams, sdk.StoreTypeTransient, db)
 	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.authxKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.keySupply, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
