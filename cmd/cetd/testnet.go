@@ -310,8 +310,7 @@ func initGenFiles(cdc *codec.Codec, mbm app.OrderedBasicManager, chainID string,
 	addCetTokenForTesting(cdc, appGenState, testnetTokenSupply, accs[0].Address)
 	modifyGenStateForTesting(cdc, appGenState, testnetMinSelfDelegation)
 
-	accs = assureTokenDistributionInGenesis(accs, testnetTokenSupply)
-	//appGenState.Accounts = accs
+	assureTokenDistributionInGenesis(accs, testnetTokenSupply)
 
 	appGenStateJSON, err := codec.MarshalJSONIndent(cdc, appGenState)
 	if err != nil {

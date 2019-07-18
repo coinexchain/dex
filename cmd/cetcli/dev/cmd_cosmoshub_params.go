@@ -40,12 +40,7 @@ func CosmosHubParamsCmd() *cobra.Command {
 				return err
 			}
 
-			body = fixAddresses(body)
-			//genDoc := genesisDoc{}
-			//err = gaia_app.MakeCodec().UnmarshalJSON(body, &genDoc)
-			if err != nil {
-				return err
-			}
+			fixAddresses(body)
 
 			//printParams(genDoc.AppState)
 			return nil
