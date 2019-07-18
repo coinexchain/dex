@@ -20,12 +20,13 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
-	types3 "github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/modules/bankx"
 	types2 "github.com/coinexchain/dex/modules/distributionx/types"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	dex "github.com/coinexchain/dex/types"
 )
+
+var validCoins = dex.NewCetCoins(10e8)
 
 type testInput struct {
 	k   Keeper
@@ -57,7 +58,7 @@ func setupTestInput() testInput {
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey)
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
-	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(types3.DefaultParamspace))
+	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace))
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, msgqueue.Producer{})
 	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace), bk, staking.Keeper{}, auth.FeeCollectionKeeper{}, distribution.DefaultCodespace)
 
@@ -79,7 +80,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 
 	addr := sdk.AccAddress([]byte("addr"))
 	acc := auth.NewBaseAccountWithAddress(addr)
-	acc.SetCoins(types2.validCoins)
+	acc.SetCoins(validCoins)
 	input.ak.SetAccount(input.ctx, &acc)
 
 	fromAcc := input.ak.GetAccount(input.ctx, addr)
@@ -106,7 +107,7 @@ func TestDonateToCommunityPoolFailed(t *testing.T) {
 
 	addr := sdk.AccAddress([]byte("addr"))
 	acc := auth.NewBaseAccountWithAddress(addr)
-	acc.SetCoins(types2.validCoins)
+	acc.SetCoins(validCoins)
 	input.ak.SetAccount(input.ctx, &acc)
 
 	fromAcc := input.ak.GetAccount(input.ctx, addr)
