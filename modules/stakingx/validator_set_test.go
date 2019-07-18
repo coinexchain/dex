@@ -34,6 +34,7 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 	auth.RegisterCodec(cdc)
 	distribution.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	supply.RegisterCodec(cdc)
 
 	keyStaking := sdk.NewKVStoreKey(staking.StoreKey)
 	skey := sdk.NewKVStoreKey("test")
@@ -48,6 +49,7 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 	ms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
 	ms.MountStoreWithDB(keyStaking, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(distKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(supplyKey, sdk.StoreTypeIAVL, db)
 
 	ms.LoadLatestVersion()
 
@@ -80,6 +82,7 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)
+	splk.SetSupply(ctx, supply.Supply{Total: sdk.Coins{sdk.NewInt64Coin("cet", 1000000000)}}) // TODO
 
 	initStates(ctx, sxk)
 	return sxk, ctx, ak
