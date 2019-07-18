@@ -121,7 +121,7 @@ Example :
 			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			orderID := args[0]
-			if len(strings.Split(orderID, types.OrderIDSeparator)) != 3 {
+			if len(strings.Split(orderID, types.OrderIDSeparator)) != types.OrderIDPartsNum {
 				return fmt.Errorf("order-id is incorrect")
 			}
 

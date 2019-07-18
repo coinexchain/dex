@@ -13,6 +13,7 @@ const (
 
 const (
 	IntegrationNetSubString = types.IntegrationNetSubString
+	OrderIDPartsNum         = types.OrderIDPartsNum
 )
 
 var (

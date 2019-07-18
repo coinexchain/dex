@@ -60,12 +60,12 @@ func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 		vars := mux.Vars(r)
 		orderID := vars["order-id"]
 
-		if len(strings.Split(orderID, "-")) != 3 {
+		if len(strings.Split(orderID, types.OrderIDSeparator)) != types.OrderIDPartsNum {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return
 		}
 
-		addr := strings.Split(orderID, "-")[0]
+		addr := strings.Split(orderID, types.OrderIDSeparator)[0]
 		if _, err := sdk.AccAddressFromBech32(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return

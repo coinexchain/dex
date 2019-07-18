@@ -28,7 +28,7 @@ type Order struct {
 
 func (or *Order) OrderID() string {
 	// TODO. will remove the third param, ChainIDVersion
-	return fmt.Sprintf("%s-%d-%d", or.Sender, or.Sequence, 1)
+	return fmt.Sprintf("%s-%d", or.Sender, or.Sequence)
 }
 
 func (or *Order) CalOrderFee(feeForZeroDeal int64) sdk.Dec {

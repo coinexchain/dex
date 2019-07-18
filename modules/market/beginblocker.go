@@ -7,8 +7,6 @@ import (
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
-var ChainIDVersion int64
-
 func BeginBlocker(ctx sdk.Context, k keepers.Keeper) {
 	msg := types.NewHeightInfo{
 		Height:    ctx.BlockHeight(),
@@ -16,5 +14,4 @@ func BeginBlocker(ctx sdk.Context, k keepers.Keeper) {
 	}
 
 	k.SendMsg(types.HeightInfoKey, msg)
-	ChainIDVersion = k.GetParams(ctx).ChainIDVersion
 }

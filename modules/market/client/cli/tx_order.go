@@ -203,8 +203,8 @@ func CheckSenderAndOrderID(sender []byte, orderID string) (types.MsgCancelOrder,
 		msg  types.MsgCancelOrder
 	)
 
-	contents := strings.Split(orderID, "-")
-	if len(contents) != 3 {
+	contents := strings.Split(orderID, types.OrderIDSeparator)
+	if len(contents) != types.OrderIDPartsNum {
 		return msg, errors.Errorf(" illegal order-id")
 	}
 

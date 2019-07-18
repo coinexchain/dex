@@ -9,6 +9,7 @@ const (
 	SymbolSeparator                  = "/"
 	OrderIDSeparator                 = "-"
 	ExtraFrozenMoney                 = 0 // 100
+	OrderIDPartsNum                  = 2
 )
 
 const (

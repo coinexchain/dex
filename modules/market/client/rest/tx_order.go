@@ -121,7 +121,6 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		TimeInForce:    force,
 		ExistBlocks:    req.ExistBlocks,
 	}
-
 	if err := msg.ValidateBasic(); err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
