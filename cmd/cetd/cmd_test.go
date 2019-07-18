@@ -29,7 +29,7 @@ func TestNewApp(t *testing.T) {
 	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
 	cet := newApp(logger, db, log.NewSyncWriter(os.Stdout))
 	value := reflect.ValueOf(cet).Interface().(*app.CetChainApp)
-	require.Equal(t, "CetChainApp", value.Name())
+	require.Equal(t, "CoinExChainApp", value.Name())
 }
 
 func TestInitCmd(t *testing.T) {
