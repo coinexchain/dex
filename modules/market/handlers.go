@@ -76,6 +76,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg mtype.MsgCreateTradingPair,
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyStock, msg.Stock),
 			sdk.NewAttribute(AttributeKeyMoney, msg.Money),
 			sdk.NewAttribute(AttributeKeyPricePrecision, strconv.Itoa(int(info.PricePrecision))),
@@ -268,6 +269,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keep
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
 			AttributeKeyOrder, order.OrderID())),
 		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyTradingPair, order.TradingPair),
 			sdk.NewAttribute(AttributeKeyHeight, strconv.FormatInt(order.Height, 10)),
 			sdk.NewAttribute(AttributeKeySequence, strconv.FormatInt(int64(order.Sequence), 10)),
@@ -357,6 +359,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg mtype.MsgCancelOrder, keeper keep
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
 			AttributeKeyOrder, order.OrderID())),
 		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyDelOrderReason, mtype.CancelOrderByManual),
 			sdk.NewAttribute(AttributeKeyDelOrderHeight, strconv.Itoa(int(ctx.BlockHeight()))),
 			sdk.NewAttribute(AttributeKeyUsedCommission, order.CalOrderFee(marketParams.FeeForZeroDeal).String()),
@@ -413,6 +416,7 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg mtype.MsgCancelTradingPair,
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
 			AttributeKeyTradingPair, msg.TradingPair)),
 		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyEffectiveTime, strconv.Itoa(int(msg.EffectiveTime)))),
 	})
 
@@ -487,6 +491,7 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg mtype.MsgModifyPricePrec
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
 			AttributeKeyTradingPair, msg.TradingPair)),
 		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyOldPricePrecision, strconv.Itoa(int(oldInfo.PricePrecision))),
 			sdk.NewAttribute(AttributeKeyNewPricePrecision, strconv.Itoa(int(info.PricePrecision)))),
 	})
