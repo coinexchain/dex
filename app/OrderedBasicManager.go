@@ -1,9 +1,12 @@
 package app
 
 import (
+	"encoding/json"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 )
@@ -44,4 +47,21 @@ func (bm OrderedBasicManager) AddQueryCommands(rootQueryCmd *cobra.Command, cdc 
 
 func (bm OrderedBasicManager) RawBasicManager() module.BasicManager {
 	return bm.BasicManager
+}
+
+func (bm OrderedBasicManager) ValidateGenesis(genesis map[string]json.RawMessage) error {
+	for _, m := range bm.modules {
+		if isEmptyDataForGenutil(genesis, m) {
+			continue
+		}
+
+		if err := m.ValidateGenesis(genesis[m.Name()]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func isEmptyDataForGenutil(genesis map[string]json.RawMessage, m module.AppModuleBasic) bool {
+	return m.Name() == genutil.ModuleName && len(genesis[m.Name()]) == 0
 }
