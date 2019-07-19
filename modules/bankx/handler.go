@@ -16,6 +16,8 @@ import (
 
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+		ctx.WithEventManager(sdk.NewEventManager())
+
 		switch msg := msg.(type) {
 		case types.MsgSend:
 			return handleMsgSend(ctx, k, msg)
@@ -55,6 +57,12 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 			return err.Result()
 		}
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		),
+	})
 
 	time := msg.UnlockTime
 	if time != 0 {
@@ -111,12 +119,10 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		k.Axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 	}
 
-	e := k.MsgProducer.SendMsg(types.Topic, "send_lock_coins", types.NewMsgSend(fromAddr, toAddr, amt, unlockTime))
-	if e != nil {
-		//record fail sendMsg log
-	}
+	fillMsgQueue(ctx, k, "send_lock_coins", types.NewMsgSend(fromAddr, toAddr, amt, unlockTime))
+
 	return sdk.Result{
-		//Tags: tag,
+		Events: ctx.EventManager().Events(),
 	}
 }
 
@@ -128,12 +134,6 @@ func normalSend(ctx sdk.Context, k Keeper,
 		return err.Result()
 	}
 	fillMsgQueue(ctx, k, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-		),
-	})
 
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
