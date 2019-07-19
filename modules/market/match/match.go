@@ -128,18 +128,18 @@ func ExecuteOrder(price sdk.Dec, currOrder OrderForTrade, orderList []OrderForTr
 
 type PricePoint struct {
 	price                sdk.Dec
-	accumulatedAskAmount int64
-	askAmount            int64
-	accumulatedBidAmount int64
-	bidAmount            int64
-	executionAmount      int64
-	imbalance            int64
-	absImbalance         int64
+	accumulatedAskAmount sdk.Int
+	askAmount            sdk.Int
+	accumulatedBidAmount sdk.Int
+	bidAmount            sdk.Int
+	executionAmount      sdk.Int
+	imbalance            sdk.Int
+	absImbalance         sdk.Int
 }
 
 func (pp *PricePoint) String() string {
-	return fmt.Sprintf("aS:%d\tS:%d\t%s\tB:%d\taB:%d\te:%d\ti:%d", pp.accumulatedAskAmount, pp.askAmount,
-		pp.price.String(), pp.bidAmount, pp.accumulatedBidAmount, pp.executionAmount, pp.imbalance)
+	return fmt.Sprintf("aS:%s\tS:%s\t%s\tB:%s\taB:%s\te:%s\ti:%s", pp.accumulatedAskAmount.String(), pp.askAmount.String(),
+		pp.price.String(), pp.bidAmount.String(), pp.accumulatedBidAmount.String(), pp.executionAmount.String(), pp.imbalance.String())
 }
 
 func GetExecutionPrice(highPrice, midPrice, lowPrice sdk.Dec, orders []OrderForTrade) sdk.Dec {
@@ -166,17 +166,17 @@ func createPricePointList(orders []OrderForTrade) []PricePoint {
 			ppMap[s] = offset
 			ppList = append(ppList, PricePoint{
 				price:                order.GetPrice(),
-				accumulatedAskAmount: 0,
-				askAmount:            0,
-				accumulatedBidAmount: 0,
-				bidAmount:            0,
+				accumulatedAskAmount: sdk.ZeroInt(),
+				askAmount:            sdk.ZeroInt(),
+				accumulatedBidAmount: sdk.ZeroInt(),
+				bidAmount:            sdk.ZeroInt(),
 			})
 		}
 		//fmt.Printf("ppList[%d]: %s\n", offset, ppList[offset].String())
 		if order.GetSide() == types.ASK {
-			ppList[offset].askAmount += order.GetAmount()
+			ppList[offset].askAmount = ppList[offset].askAmount.AddRaw(order.GetAmount())
 		} else if order.GetSide() == types.BID {
-			ppList[offset].bidAmount += order.GetAmount()
+			ppList[offset].bidAmount = ppList[offset].bidAmount.AddRaw(order.GetAmount())
 		}
 	}
 	return ppList
@@ -189,38 +189,38 @@ func accumulateForPricePointList(ppList []PricePoint) {
 		// order with higher price come first
 		return ppList[i].price.GT(ppList[j].price)
 	})
-	accumulatedBidAmount := int64(0)
+	accumulatedBidAmount := sdk.ZeroInt()
 	for i := 0; i < len(ppList); i++ { // buy, scan from top to bottom
-		accumulatedBidAmount += ppList[i].bidAmount
+		accumulatedBidAmount = accumulatedBidAmount.Add(ppList[i].bidAmount)
 		ppList[i].accumulatedBidAmount = accumulatedBidAmount
 	}
-	accumulatedAskAmount := int64(0)
+	accumulatedAskAmount := sdk.ZeroInt()
 	for i := len(ppList) - 1; i >= 0; i-- { //sell, scan from bottom to top
-		accumulatedAskAmount += ppList[i].askAmount
+		accumulatedAskAmount = accumulatedAskAmount.Add(ppList[i].askAmount)
 		ppList[i].accumulatedAskAmount = accumulatedAskAmount
 	}
 	for i := 0; i < len(ppList); i++ {
 		ppList[i].executionAmount = ppList[i].accumulatedAskAmount
-		if ppList[i].accumulatedBidAmount < ppList[i].accumulatedAskAmount {
+		if ppList[i].accumulatedBidAmount.LT(ppList[i].accumulatedAskAmount) {
 			ppList[i].executionAmount = ppList[i].accumulatedBidAmount
 		}
-		ppList[i].imbalance = ppList[i].accumulatedBidAmount - ppList[i].accumulatedAskAmount
+		ppList[i].imbalance = ppList[i].accumulatedBidAmount.Sub(ppList[i].accumulatedAskAmount)
 		ppList[i].absImbalance = ppList[i].imbalance
-		if ppList[i].absImbalance < 0 {
-			ppList[i].absImbalance = -ppList[i].imbalance
+		if ppList[i].absImbalance.IsNegative() {
+			ppList[i].absImbalance = ppList[i].imbalance.Neg()
 		}
 	}
 }
 
 // return true if a should precede b in a sorted list, i.e. index of a is smaller
 func (pp PricePoint) precede(b PricePoint) bool {
-	if pp.executionAmount > b.executionAmount {
+	if pp.executionAmount.GT(b.executionAmount) {
 		return true
-	} else if pp.executionAmount < b.executionAmount {
+	} else if pp.executionAmount.LT(b.executionAmount) {
 		return false
-	} else if pp.absImbalance < b.absImbalance {
+	} else if pp.absImbalance.LT(b.absImbalance) {
 		return true
-	} else if pp.absImbalance > b.absImbalance {
+	} else if pp.absImbalance.GT(b.absImbalance) {
 		return false
 	} else {
 		return pp.price.GT(b.price)
@@ -235,7 +235,7 @@ func calculateExecutionPrice(highPrice, midPrice, lowPrice sdk.Dec, ppList []Pri
 	// create a PricePoint list whose every member has the same largest executionAmount
 	ppListSameEA := []*PricePoint{&ppList[0]}
 	for i := 1; i < len(ppList); i++ {
-		if ppList[i].executionAmount == ppList[0].executionAmount {
+		if ppList[i].executionAmount.Equal(ppList[0].executionAmount) {
 			ppListSameEA = append(ppListSameEA, &ppList[i])
 		} else {
 			break
@@ -247,13 +247,13 @@ func calculateExecutionPrice(highPrice, midPrice, lowPrice sdk.Dec, ppList []Pri
 	}
 
 	sort.Slice(ppListSameEA, func(i, j int) bool {
-		return ppListSameEA[i].absImbalance < ppListSameEA[j].absImbalance
+		return ppListSameEA[i].absImbalance.LT(ppListSameEA[j].absImbalance)
 	})
 
 	// create a PricePoint list whose every member has the same smallest absImbalance
 	ppListSameImbalance := []*PricePoint{ppListSameEA[0]}
 	for i := 1; i < len(ppListSameEA); i++ {
-		if ppListSameEA[i].absImbalance == ppListSameEA[0].absImbalance {
+		if ppListSameEA[i].absImbalance.Equal(ppListSameEA[0].absImbalance) {
 			ppListSameImbalance = append(ppListSameImbalance, ppListSameEA[i])
 		} else {
 			break
@@ -284,10 +284,10 @@ func calculateExecutionPriceWithRef(highPrice, midPrice, lowPrice sdk.Dec, ppLis
 		return ppWithMiddlePrice.price
 	}
 	for _, pp := range ppListSameImbalance {
-		if pp.imbalance < 0 {
+		if pp.imbalance.IsNegative() {
 			allImbalanceIsPositive = false
 		}
-		if pp.imbalance > 0 {
+		if pp.imbalance.IsPositive() {
 			allImbalanceIsNegative = false
 		}
 	}
