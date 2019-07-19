@@ -439,6 +439,25 @@ func TestCreateOrderFailed(t *testing.T) {
 	require.Equal(t, types.CodeAddressForbidByIssuer, ret.Code, "create GTE order should failed by token forbidden by issuer")
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 
+	failedMaxAmount := msgOrder
+	failedMaxAmount.Side = SELL
+	failedMaxAmount.Quantity = 1e18 * 5
+	ret = input.handler(input.ctx, failedMaxAmount)
+	require.Equal(t, types.CodeInvalidOrderAmount, ret.Code, "create GTE order should failed by token forbidden by issuer")
+	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
+
+}
+
+func TestCalculateAmount(t *testing.T) {
+	// price quantity price-precision
+	items := [][]int64{{100, 10000, 2}, {300, 2000, 3}, {500, 4500, 2}}
+	results := []int64{10000, 600, 22500}
+	for i, item := range items {
+		ret := calculateAmount(item[0], item[1], byte(item[2]))
+		if ret.RoundInt64() != results[i] {
+			t.Errorf("amount is error, actual : %d, expect : %d", ret.RoundInt64(), results[i])
+		}
+	}
 }
 
 func TestCreateOrderSuccess(t *testing.T) {

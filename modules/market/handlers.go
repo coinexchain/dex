@@ -225,6 +225,9 @@ func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keep
 		denom = money
 		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
 	}
+	if amount > mtype.MaxOrderAmount {
+		return sdk.NewError(mtype.CodeSpaceMarket, mtype.CodeInvalidOrderAmount, "The order amount is too large").Result()
+	}
 
 	marketParams := keeper.GetParams(ctx)
 	frozenFee, err := calFrozenFeeInOrder(ctx, marketParams, keeper, msg)
@@ -254,9 +257,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keep
 		DealMoney:   0,
 		DealStock:   0,
 	}
-	if order.Freeze > mtype.MaxOrderAmount {
-		return sdk.NewError(mtype.CodeSpaceMarket, mtype.CodeInvalidOrderAmount, "The order amount is too large").Result()
-	}
+
 	ork := keepers.NewOrderKeeper(keeper.GetMarketKey(), order.TradingPair, mtype.ModuleCdc)
 	if err := ork.Add(ctx, &order); err != nil {
 		return err.Result()
