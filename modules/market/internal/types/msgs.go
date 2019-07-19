@@ -313,6 +313,7 @@ type FillOrderInfo struct {
 	DealStock int64  `json:"deal_stock"`
 	DealMoney int64  `json:"deal_money"`
 	CurrStock int64  `json:"curr_stock"`
+	CurrMoney int64  `json:"curr_money"`
 	Price     string `json:"price"`
 }
 

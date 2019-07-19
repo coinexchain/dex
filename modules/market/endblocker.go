@@ -177,8 +177,10 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 	orderCandidates := orderKeeper.GetMatchingCandidates(ctx)
 	orderCandidates = filterCandidates(ctx, asKeeper, orderCandidates, stock, money)
 	orderOldDeals := make(map[string]int64, len(orderCandidates))
+	orderOldMoneys := make(map[string]int64, len(orderCandidates))
 	for _, order := range orderCandidates {
 		orderOldDeals[order.OrderID()] = order.DealStock
+		orderOldMoneys[order.OrderID()] = order.DealMoney
 	}
 
 	// fill bidList and askList with wrapped orders
@@ -210,17 +212,18 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 		}
 	}
 
-	sendFillMsg(orderOldDeals, ordersForUpdate, ctx.BlockHeight(), infoForDeal.lastPrice, keeper)
+	sendFillMsg(orderOldDeals, orderOldMoneys, ordersForUpdate, ctx.BlockHeight(), infoForDeal.lastPrice, keeper)
 	return ordersForUpdate, infoForDeal.lastPrice
 }
 
-func sendFillMsg(orderOldDeal map[string]int64, ordersForUpdate map[string]*mtype.Order, height int64, price sdk.Dec, keeper keepers.Keeper) {
+func sendFillMsg(orderOldDeal, orderOldMoneys map[string]int64, ordersForUpdate map[string]*mtype.Order, height int64, price sdk.Dec, keeper keepers.Keeper) {
 	if len(ordersForUpdate) == 0 {
 		return
 	}
 
 	for id, order := range ordersForUpdate {
 		oldDeal := orderOldDeal[id]
+		oldMoney := orderOldMoneys[id]
 		msgInfo := mtype.FillOrderInfo{
 			OrderID:   id,
 			Height:    height,
@@ -229,7 +232,8 @@ func sendFillMsg(orderOldDeal map[string]int64, ordersForUpdate map[string]*mtyp
 			DealStock: order.DealStock,
 			DealMoney: order.DealMoney,
 			CurrStock: order.DealStock - oldDeal,
-			Price:     price.String(),
+			CurrMoney: order.DealMoney - oldMoney,
+			Price:     order.Price.String(),
 		}
 		keeper.SendMsg(mtype.FillOrderInfoKey, msgInfo)
 	}
@@ -355,7 +359,6 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 		}
 	}
 
-	//return nil
 }
 
 func sendOrderMsg(order *mtype.Order, height int64, feeForZeroDeal int64, keeper keepers.Keeper) {
