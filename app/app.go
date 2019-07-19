@@ -58,6 +58,17 @@ var (
 	// non-dependant module elements, such as codec registration
 	// and genesis verification.
 	ModuleBasics OrderedBasicManager
+
+	// account permissions
+	maccPerms = map[string][]string{
+		auth.FeeCollectorName:     {supply.Basic},
+		distr.ModuleName:          {supply.Basic},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		authx.ModuleName:          {supply.Basic},
+		asset.ModuleName:          {supply.Burner, supply.Minter},
+	}
 )
 
 func init() {
@@ -214,17 +225,6 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.paramsKeeper.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
 	)
-
-	// account permissions
-	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     {supply.Basic},
-		distr.ModuleName:          {supply.Basic},
-		staking.BondedPoolName:    {supply.Burner, supply.Staking},
-		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
-		gov.ModuleName:            {supply.Burner},
-		authx.ModuleName:          {supply.Basic},
-		asset.ModuleName:          {supply.Burner, supply.Minter},
-	}
 
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
 		app.bankKeeper, supply.DefaultCodespace, maccPerms)
