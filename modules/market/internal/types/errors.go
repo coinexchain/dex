@@ -29,6 +29,7 @@ const (
 	CodeStockNoHaveCetTrade   sdk.CodeType = 621
 	CodeRepeatTrade           sdk.CodeType = 622
 	CodeNotAllowedOffline     sdk.CodeType = 623
+	CodeInvalidOrderAmount    sdk.CodeType = 624
 )
 
 func ErrTokenNoExist() sdk.Error {

@@ -254,7 +254,9 @@ func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keep
 		DealMoney:   0,
 		DealStock:   0,
 	}
-
+	if order.Freeze > mtype.MaxOrderAmount {
+		return sdk.NewError(mtype.CodeSpaceMarket, mtype.CodeInvalidOrderAmount, "The order amount is too large").Result()
+	}
 	ork := keepers.NewOrderKeeper(keeper.GetMarketKey(), order.TradingPair, mtype.ModuleCdc)
 	if err := ork.Add(ctx, &order); err != nil {
 		return err.Result()

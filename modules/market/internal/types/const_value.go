@@ -30,3 +30,7 @@ const (
 const (
 	IntegrationNetSubString = "coinex-integrationtest"
 )
+
+var (
+	MaxOrderAmount int64 = 1e18
+)
