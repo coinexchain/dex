@@ -26,6 +26,7 @@ import (
 	"github.com/coinexchain/dex/cmd/cetcli/dev"
 	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
+	distrxcmd "github.com/coinexchain/dex/modules/distributionx/client/cli"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -141,6 +142,8 @@ func txCmd(cdc *amino.Codec) *cobra.Command {
 
 	txCmd.AddCommand(
 		bankxcmd.SendTxCmd(cdc),
+		bankxcmd.RequireMemoCmd(cdc),
+		distrxcmd.DonateTxCmd(cdc),
 		client.LineBreak,
 		authcmd.GetSignCommand(cdc),
 		authcmd.GetMultiSignCommand(cdc),
