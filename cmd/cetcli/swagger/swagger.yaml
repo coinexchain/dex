@@ -470,9 +470,9 @@ paths:
                     $ref: "#/definitions/BaseReq"
                   exist_blocks:
                     type: string
-                    example: 10000      
+                    example: 10000
               - $ref: "#/definitions/Order"
-              
+
       responses:
         200:
           description: Tx was succesfully generated
@@ -526,7 +526,7 @@ paths:
       parameters:
         - in: body
           name: info
-          description: Create trading-pair 
+          description: Create trading-pair
           required: true
           schema:
             type: object
@@ -579,7 +579,7 @@ paths:
         400:
           description: Invalid request
         500:
-          description: Server internal error  
+          description: Server internal error
   /market/trading-pairs/{stock}/{money}:
     get:
       summary: Query trading-pair info
@@ -595,7 +595,7 @@ paths:
           required: true
           type: string
           x-example: btc
-        - in: path  
+        - in: path
           name: money
           description: money symbol
           required: true
