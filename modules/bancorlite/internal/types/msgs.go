@@ -21,7 +21,7 @@ var _ sdk.Msg = MsgBancorInit{}
 var _ sdk.Msg = MsgBancorTrade{}
 
 type MsgBancorInit struct {
-	Owner     sdk.AccAddress `json:"sender"`
+	Owner     sdk.AccAddress `json:"owner"`
 	Token     string         `json:"token"`
 	MaxSupply sdk.Int        `json:"max_supply"`
 	MaxPrice  sdk.Dec        `json:"max_price"`
