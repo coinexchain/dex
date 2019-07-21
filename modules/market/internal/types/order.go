@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"sort"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -51,42 +50,29 @@ type DepthGraph struct {
 }
 
 func CalDepthGraph(orderList []*Order) *DepthGraph {
-	bidMap := make(map[string]*PricePoint)
-	askMap := make(map[string]*PricePoint)
+	bidMap := make(map[string]int)
+	askMap := make(map[string]int)
+	bidList := make([]*PricePoint, 0, 100)
+	askList := make([]*PricePoint, 0, 100)
 	for _, order := range orderList {
+		p := string(DecToBigEndianBytes(order.Price))
 		if order.Side == BID {
-			p := order.Price.String()
-			if _, ok := bidMap[p]; ok {
-				bidMap[p].LeftStock = bidMap[p].LeftStock.AddRaw(order.LeftStock)
+			if offset, ok := bidMap[p]; ok {
+				bidList[offset].LeftStock = bidList[offset].LeftStock.AddRaw(order.LeftStock)
 			} else {
-				bidMap[p] = &PricePoint{Price: order.Price, LeftStock: sdk.NewInt(order.LeftStock)}
+				bidList = append(bidList, &PricePoint{Price: order.Price, LeftStock: sdk.NewInt(order.LeftStock)})
+				bidMap[p] = len(bidList)
 			}
 		} else {
-			p := order.Price.String()
-			if _, ok := askMap[p]; ok {
-				askMap[p].LeftStock = askMap[p].LeftStock.AddRaw(order.LeftStock)
+			if offset, ok := askMap[p]; ok {
+				askList[offset].LeftStock = askList[offset].LeftStock.AddRaw(order.LeftStock)
 			} else {
-				askMap[p] = &PricePoint{Price: order.Price, LeftStock: sdk.NewInt(order.LeftStock)}
+				askList = append(askList, &PricePoint{Price: order.Price, LeftStock: sdk.NewInt(order.LeftStock)})
+				askMap[p] = len(askList)
 			}
 		}
 	}
-	dg := &DepthGraph{
-		Bids: make([]*PricePoint, 0, len(bidMap)),
-		Asks: make([]*PricePoint, 0, len(askMap)),
-	}
-	for _, pp := range bidMap {
-		dg.Bids = append(dg.Bids, pp)
-	}
-	for _, pp := range askMap {
-		dg.Asks = append(dg.Asks, pp)
-	}
-	sort.Slice(dg.Bids, func(i, j int) bool {
-		return dg.Bids[i].Price.GT(dg.Bids[j].Price)
-	})
-	sort.Slice(dg.Asks, func(i, j int) bool {
-		return dg.Asks[i].Price.LT(dg.Asks[j].Price)
-	})
-	return dg
+	return &DepthGraph{Bids: bidList, Asks: askList}
 }
 
 func DecToBigEndianBytes(d sdk.Dec) []byte {
