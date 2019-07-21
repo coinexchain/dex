@@ -159,7 +159,7 @@ func createPricePointList(orders []OrderForTrade) []PricePoint {
 	ppList := make([]PricePoint, 0, 100)
 	ppMap := make(map[string]int)
 	for _, order := range orders {
-		s := order.GetPrice().String()
+		s := string(types.DecToBigEndianBytes(order.GetPrice()))
 		offset, ok := ppMap[s]
 		if !ok {
 			offset = len(ppList)

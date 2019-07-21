@@ -88,3 +88,12 @@ func CalDepthGraph(orderList []*Order) *DepthGraph {
 	})
 	return dg
 }
+
+func DecToBigEndianBytes(d sdk.Dec) []byte {
+	var result [DecByteCount]byte
+	bytes := d.Int.Bytes() //  returns the absolute value of d as a big-endian byte slice.
+	for i := 1; i <= len(bytes); i++ {
+		result[DecByteCount-i] = bytes[len(bytes)-i]
+	}
+	return result[:]
+}

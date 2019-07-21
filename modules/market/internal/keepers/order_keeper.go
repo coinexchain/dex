@@ -98,7 +98,7 @@ func (keeper *PersistentOrderKeeper) bidListKey(order *types.Order) []byte {
 		BidListKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		decToBigEndianBytes(order.Price),
+		types.DecToBigEndianBytes(order.Price),
 		[]byte(order.OrderID()),
 	})
 }
@@ -109,7 +109,7 @@ func (keeper *PersistentOrderKeeper) askListKey(order *types.Order) []byte {
 		AskListKeyPrefix,
 		[]byte(keeper.symbol),
 		{0x0},
-		decToBigEndianBytes(order.Price),
+		types.DecToBigEndianBytes(order.Price),
 		[]byte(order.OrderID()),
 	})
 }
@@ -131,15 +131,6 @@ func NewOrderKeeper(key sdk.StoreKey, symbol string, codec *codec.Codec) OrderKe
 		symbol:    symbol,
 		codec:     codec,
 	}
-}
-
-func decToBigEndianBytes(d sdk.Dec) []byte {
-	var result [types.DecByteCount]byte
-	bytes := d.Int.Bytes() //  returns the absolute value of d as a big-endian byte slice.
-	for i := 1; i <= len(bytes); i++ {
-		result[types.DecByteCount-i] = bytes[len(bytes)-i]
-	}
-	return result[:]
 }
 
 func int64ToBigEndianBytes(n int64) []byte {
