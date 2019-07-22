@@ -37,25 +37,25 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	assTxCmd.AddCommand(client.PostCommands(
-		IssueTokenCmd(types.QuerierRoute, cdc),
-		TransferOwnershipCmd(cdc),
-		MintTokenCmd(cdc),
-		BurnTokenCmd(cdc),
-		ForbidTokenCmd(cdc),
-		UnForbidTokenCmd(cdc),
-		AddTokenWhitelistCmd(cdc),
-		RemoveTokenWhitelistCmd(cdc),
-		ForbidAddrCmd(cdc),
-		UnForbidAddrCmd(cdc),
-		ModifyTokenURLCmd(cdc),
-		ModifyTokenDescriptionCmd(cdc),
+		GetCmdIssueToken(types.QuerierRoute, cdc),
+		GetCmdTransferOwnership(cdc),
+		GetCmdMintToken(cdc),
+		GetCmdBurnToken(cdc),
+		GetCmdForbidToken(cdc),
+		GetCmdUnForbidToken(cdc),
+		GetCmdAddTokenWhitelist(cdc),
+		GetCmdRemoveTokenWhitelist(cdc),
+		GetCmdForbidAddr(cdc),
+		GetCmdUnForbidAddr(cdc),
+		GetCmdModifyTokenURL(cdc),
+		GetCmdModifyTokenDescription(cdc),
 	)...)
 
 	return assTxCmd
 }
 
-// IssueTokenCmd will create a issue token tx and sign.
-func IssueTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+// GetCmdIssueToken will create a issue token tx and sign.
+func GetCmdIssueToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "issue-token",
 		Short: "Create and sign a issue-token tx",
@@ -138,8 +138,8 @@ var transferOwnershipFlags = []string{
 	flagNewOwner,
 }
 
-// TransferOwnershipCmd will create a transfer token  owner tx and sign.
-func TransferOwnershipCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdTransferOwnership will create a transfer token  owner tx and sign.
+func GetCmdTransferOwnership(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "transfer-ownership",
 		Short: "Create and sign a transfer-ownership tx",
@@ -189,8 +189,8 @@ var mintTokenFlags = []string{
 	flagAmount,
 }
 
-// MintTokenCmd will create a mint token tx and sign.
-func MintTokenCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdMintToken will create a mint token tx and sign.
+func GetCmdMintToken(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "mint-token",
 		Short: "Create and sign a mint token tx",
@@ -240,8 +240,8 @@ var burnTokenFlags = []string{
 	flagAmount,
 }
 
-// BurnTokenCmd will create a burn token tx and sign.
-func BurnTokenCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdBurnToken will create a burn token tx and sign.
+func GetCmdBurnToken(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "burn-token",
 		Short: "Create and sign a burn token tx",
@@ -290,8 +290,8 @@ var symbolFlags = []string{
 	flagSymbol,
 }
 
-// ForbidTokenCmd will create a Forbid token tx and sign.
-func ForbidTokenCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdForbidToken will create a Forbid token tx and sign.
+func GetCmdForbidToken(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "forbid-token",
 		Short: "Create and sign a forbid token tx",
@@ -334,8 +334,8 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 	return cmd
 }
 
-// UnForbidTokenCmd will create a UnForbid token tx and sign.
-func UnForbidTokenCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdUnForbidToken will create a UnForbid token tx and sign.
+func GetCmdUnForbidToken(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unforbid-token",
 		Short: "Create and sign a unforbid token tx",
@@ -383,8 +383,8 @@ var whitelistFlags = []string{
 	flagWhitelist,
 }
 
-// AddTokenWhitelistCmd will create a add token whitelist tx and sign.
-func AddTokenWhitelistCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdAddTokenWhitelist will create a add token whitelist tx and sign.
+func GetCmdAddTokenWhitelist(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-whitelist",
 		Short: "Create and sign a add-whitelist tx",
@@ -430,8 +430,8 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 	return cmd
 }
 
-// RemoveTokenWhitelistCmd will create a remove token whitelist tx and sign.
-func RemoveTokenWhitelistCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdRemoveTokenWhitelist will create a remove token whitelist tx and sign.
+func GetCmdRemoveTokenWhitelist(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove-whitelist",
 		Short: "Create and sign a remove-whitelist tx",
@@ -482,8 +482,8 @@ var addressesFlags = []string{
 	flagAddresses,
 }
 
-// ForbidAddrCmd will create forbid address tx and sign.
-func ForbidAddrCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdForbidAddr will create forbid address tx and sign.
+func GetCmdForbidAddr(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "forbid-addr",
 		Short: "Create and sign a forbid-addr tx",
@@ -529,8 +529,8 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 	return cmd
 }
 
-// UnForbidAddrCmd will create unforbid address tx and sign.
-func UnForbidAddrCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdUnForbidAddr will create unforbid address tx and sign.
+func GetCmdUnForbidAddr(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unforbid-addr",
 		Short: "Create and sign a unforbid-addr tx",
@@ -581,8 +581,8 @@ var modifyTokenURLFlags = []string{
 	flagTokenURL,
 }
 
-// ModifyTokenURLCmd will create a modify token url tx and sign.
-func ModifyTokenURLCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdModifyTokenURL will create a modify token url tx and sign.
+func GetCmdModifyTokenURL(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "modify-token-url",
 		Short: "Modify token url",
@@ -632,8 +632,8 @@ var modifyTokenDescriptionFlags = []string{
 	flagTokenDescription,
 }
 
-// ModifyTokenDescriptionCmd will create a modify token description tx and sign.
-func ModifyTokenDescriptionCmd(cdc *codec.Codec) *cobra.Command {
+// GetCmdModifyTokenDescription will create a modify token description tx and sign.
+func GetCmdModifyTokenDescription(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "modify-token-description",
 		Short: "Modify token description",

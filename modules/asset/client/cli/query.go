@@ -22,19 +22,19 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	assQueryCmd.AddCommand(client.GetCommands(
-		GetTokenCmd(types.QuerierRoute, cdc),
-		GetTokenListCmd(types.QuerierRoute, cdc),
-		GetWhitelistCmd(types.QuerierRoute, cdc),
-		GetForbiddenAddrCmd(types.QuerierRoute, cdc),
-		GetReservedSymbolsCmd(types.QuerierRoute, cdc),
+		GetCmdQueryToken(types.QuerierRoute, cdc),
+		GetCmdQueryTokenList(types.QuerierRoute, cdc),
+		GetCmdQueryTokenWhitelist(types.QuerierRoute, cdc),
+		GetCmdQueryTokenForbiddenAddr(types.QuerierRoute, cdc),
+		GetCmdQueryTokenReservedSymbols(types.QuerierRoute, cdc),
 	)...)
 
 	return assQueryCmd
 }
 
-// GetTokenCmd returns a query token that will display the info of the
+// GetCmdQueryToken returns a query token that will display the info of the
 // token at a given token symbol
-func GetTokenCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func GetCmdQueryToken(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "token [symbol]",
 		Short: "Query token info",
@@ -70,8 +70,8 @@ $ cetcli query asset token abc
 	return cmd
 }
 
-// GetTokenListCmd returns all token that will display
-func GetTokenListCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+// GetCmdQueryTokenList returns all token that will display
+func GetCmdQueryTokenList(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tokens ",
 		Short: "Query all token",
@@ -98,8 +98,8 @@ $ cetcli query asset tokens
 	return cmd
 }
 
-// GetWhitelistCmd returns whitelist
-func GetWhitelistCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+// GetCmdQueryTokenWhitelist returns whitelist
+func GetCmdQueryTokenWhitelist(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "whitelist [symbol]",
 		Short: "Query whitelist",
@@ -135,8 +135,8 @@ $ cetcli query asset whitelist abc
 	return cmd
 }
 
-// GetForbiddenAddrCmd returns forbidden addr
-func GetForbiddenAddrCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+// GetCmdQueryTokenForbiddenAddr returns forbidden addr
+func GetCmdQueryTokenForbiddenAddr(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "forbidden-addresses [symbol]",
 		Short: "Query forbidden addresses",
@@ -172,8 +172,8 @@ $ cetcli query asset forbidden-addresses abc
 	return cmd
 }
 
-// GetReservedSymbolsCmd returns reserved symbol list
-func GetReservedSymbolsCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+// GetCmdQueryTokenReservedSymbols returns reserved symbol list
+func GetCmdQueryTokenReservedSymbols(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "reserved-symbols",
 		Short: "Query reserved symbols",
