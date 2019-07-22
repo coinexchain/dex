@@ -71,14 +71,14 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 		{
 			"case-url",
 			NewMsgIssueToken("name", "coin", 2100, testAddr,
-				false, false, false, false, string(make([]byte, 100+1)), ""),
-			ErrInvalidTokenURL(string(make([]byte, 100+1))),
+				false, false, false, false, string(make([]byte, MaxTokenURLLength+1)), ""),
+			ErrInvalidTokenURL(string(make([]byte, MaxTokenURLLength+1))),
 		},
 		{
 			"case-description",
 			NewMsgIssueToken("name", "coin", 2100, testAddr,
-				false, false, false, false, "", string(make([]byte, 1024+1))),
-			ErrInvalidTokenDescription(string(make([]byte, 1024+1))),
+				false, false, false, false, "", string(make([]byte, MaxTokenDescriptionLength+1))),
+			ErrInvalidTokenDescription(string(make([]byte, MaxTokenDescriptionLength+1))),
 		},
 	}
 
@@ -457,8 +457,8 @@ func TestMsgModifyTokenURL_ValidateBasic(t *testing.T) {
 		},
 		{
 			"case-invalidURL",
-			NewMsgModifyTokenURL("abc", string(make([]byte, 100+1)), testAddr),
-			ErrInvalidTokenURL(string(make([]byte, 100+1))),
+			NewMsgModifyTokenURL("abc", string(make([]byte, MaxTokenURLLength+1)), testAddr),
+			ErrInvalidTokenURL(string(make([]byte, MaxTokenURLLength+1))),
 		},
 	}
 
@@ -493,8 +493,8 @@ func TestMsgModifyTokenDescription_ValidateBasic(t *testing.T) {
 		},
 		{
 			"case-invalidDescription",
-			NewMsgModifyTokenDescription("abc", string(make([]byte, 1024+1)), testAddr),
-			ErrInvalidTokenDescription(string(make([]byte, 1024+1))),
+			NewMsgModifyTokenDescription("abc", string(make([]byte, MaxTokenDescriptionLength+1)), testAddr),
+			ErrInvalidTokenDescription(string(make([]byte, MaxTokenDescriptionLength+1))),
 		},
 	}
 

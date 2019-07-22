@@ -557,7 +557,7 @@ func (msg MsgModifyTokenURL) ValidateBasic() sdk.Error {
 		return ErrNilTokenOwner()
 	}
 
-	if utf8.RuneCountInString(msg.URL) > 100 {
+	if utf8.RuneCountInString(msg.URL) > MaxTokenURLLength {
 		return ErrInvalidTokenURL(msg.URL)
 	}
 	return nil
@@ -608,7 +608,7 @@ func (msg MsgModifyTokenDescription) ValidateBasic() sdk.Error {
 		return ErrNilTokenOwner()
 	}
 
-	if len(msg.Description) > 1024 {
+	if len(msg.Description) > MaxTokenDescriptionLength {
 		return ErrInvalidTokenDescription(msg.Description)
 	}
 	return nil

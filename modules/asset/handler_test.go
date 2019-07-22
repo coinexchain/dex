@@ -1,11 +1,12 @@
 package asset
 
 import (
+	"github.com/coinexchain/dex/modules/asset/internal/types"
+	dex "github.com/coinexchain/dex/types"
 	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +25,7 @@ func Test_handleMsg(t *testing.T) {
 	h := NewHandler(input.tk)
 	owner, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
-	err := input.tk.AddToken(input.ctx, testAddr, types.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -141,7 +142,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"modify_token_url_invalid",
-			NewMsgModifyTokenURL("abc", string(make([]byte, 100+1)), owner),
+			NewMsgModifyTokenURL("abc", string(make([]byte, types.MaxTokenURLLength+1)), owner),
 			false,
 		},
 		{
@@ -151,7 +152,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"modify_token_description_invalid",
-			NewMsgModifyTokenDescription("abc", string(make([]byte, 1024+1)), owner),
+			NewMsgModifyTokenDescription("abc", string(make([]byte, types.MaxTokenDescriptionLength+1)), owner),
 			false,
 		},
 	}
@@ -176,7 +177,7 @@ func Test_IssueToken_DeductFee(t *testing.T) {
 	require.False(t, res.IsOK())
 
 	// issue token deduct fee
-	err := input.tk.AddToken(input.ctx, testAddr, types.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
 	require.NoError(t, err)
 	res = h(input.ctx, msg)
 	require.True(t, res.IsOK())
@@ -195,7 +196,7 @@ func Test_BurnToken_SubtractCoins(t *testing.T) {
 	// issue token
 	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, testAddr,
 		true, true, false, false, "", "")
-	err := input.tk.AddToken(input.ctx, testAddr, types.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
 	require.NoError(t, err)
 	res := h(input.ctx, msgIssue)
 	require.True(t, res.IsOK())
@@ -217,7 +218,7 @@ func Test_MintToken_AddCoins(t *testing.T) {
 	// issue token
 	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, testAddr,
 		true, true, false, false, "", "")
-	err := input.tk.AddToken(input.ctx, testAddr, types.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
 	require.NoError(t, err)
 	res := h(input.ctx, msgIssue)
 	require.True(t, res.IsOK())

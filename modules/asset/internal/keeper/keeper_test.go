@@ -586,7 +586,7 @@ func TestTokenKeeper_ModifyTokenURL(t *testing.T) {
 	require.Equal(t, "www.abc.com", url)
 
 	//case 2: invalid url
-	err = input.tk.ModifyTokenURL(input.ctx, symbol, testAddr, string(make([]byte, 100+1)))
+	err = input.tk.ModifyTokenURL(input.ctx, symbol, testAddr, string(make([]byte, types.MaxTokenURLLength+1)))
 	require.Error(t, err)
 	token = input.tk.GetToken(input.ctx, symbol)
 	require.Equal(t, "www.abc.com", url)
@@ -617,7 +617,7 @@ func TestTokenKeeper_ModifyTokenDescription(t *testing.T) {
 	require.Equal(t, "abc example description", description)
 
 	//case 2: invalid url
-	err = input.tk.ModifyTokenDescription(input.ctx, symbol, testAddr, string(make([]byte, 1024+1)))
+	err = input.tk.ModifyTokenDescription(input.ctx, symbol, testAddr, string(make([]byte, types.MaxTokenDescriptionLength+1)))
 	require.Error(t, err)
 	token = input.tk.GetToken(input.ctx, symbol)
 	require.Equal(t, "abc example description", description)

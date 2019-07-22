@@ -8,6 +8,12 @@ import (
 	"unicode/utf8"
 )
 
+const (
+	MaxTokenIdentityLength    = 3000
+	MaxTokenURLLength         = 100
+	MaxTokenDescriptionLength = 1024
+)
+
 // Token is an interface used to store asset at a given token within state.
 // Many complex conditions can be used in the concrete struct which implements Token.
 type Token interface {
@@ -235,7 +241,7 @@ func (t BaseToken) GetURL() string {
 }
 
 func (t *BaseToken) SetURL(url string) sdk.Error {
-	if utf8.RuneCountInString(url) > 100 {
+	if utf8.RuneCountInString(url) > MaxTokenURLLength {
 		return ErrInvalidTokenURL(url)
 	}
 	t.URL = url
@@ -247,7 +253,7 @@ func (t BaseToken) GetDescription() string {
 }
 
 func (t *BaseToken) SetDescription(description string) sdk.Error {
-	if len(description) > 1024 {
+	if len(description) > MaxTokenDescriptionLength {
 		return ErrInvalidTokenDescription(description)
 	}
 	t.Description = description

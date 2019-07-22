@@ -77,11 +77,11 @@ func ErrInvalidForbiddenAddress() sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidForbiddenAddress, msg)
 }
 func ErrInvalidTokenURL(url string) sdk.Error {
-	msg := fmt.Sprintf("invalid url %s : token url is limited to 100 unicode characters", url)
+	msg := fmt.Sprintf("invalid url %s : token url is limited to %d unicode characters", url, MaxTokenURLLength)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenURL, msg)
 }
 func ErrInvalidTokenDescription(description string) sdk.Error {
-	msg := fmt.Sprintf("invalid description %s : token description is limited to 1k size", description)
+	msg := fmt.Sprintf("invalid description %s : token description is limited to %d bytes size", description, MaxTokenDescriptionLength)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenDescription, msg)
 }
 
