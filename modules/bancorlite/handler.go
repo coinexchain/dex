@@ -45,7 +45,22 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		MoneyInPool: sdk.ZeroInt(),
 	}
 	k.Bik.Save(ctx, bi)
-	return sdk.Result{} //TODO
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			EventTypeBancorlite,
+			sdk.NewAttribute(AttributeKeyCreateFor, bi.Token),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(AttributeOwner, bi.Owner.String()),
+			sdk.NewAttribute(AttributeMaxSupply, bi.MaxSupply.String()),
+		),
+	})
+
+	return sdk.Result{
+		Events: ctx.EventManager().Events(),
+	}
 }
 
 func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) sdk.Result {
@@ -95,5 +110,31 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	if err := k.Bxk.SendCoins(ctx, bi.Owner, msg.Sender, coinsFromPool); err != nil {
 		return err.Result()
 	}
-	return sdk.Result{} //TODO
+	k.Bik.Save(ctx, &biNew)
+
+	side := "Sell"
+	if msg.IsBuy {
+		side = "Buy"
+	}
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			EventTypeBancorlite,
+			sdk.NewAttribute(AttributeKeyTradeFor, bi.Token),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(AttributeNewStockInPool, biNew.StockInPool.String()),
+			sdk.NewAttribute(AttributeNewMoneyInPool, biNew.MoneyInPool.String()),
+			sdk.NewAttribute(AttributeNewPrice, biNew.Price.String()),
+			sdk.NewAttribute(AttributeNewPrice, biNew.Price.String()),
+			sdk.NewAttribute(AttributeTradeSide, side),
+			sdk.NewAttribute(AttributeCoinsFromPool, coinsFromPool.String()),
+			sdk.NewAttribute(AttributeCoinsToPool, coinsToPool.String()),
+		),
+	})
+
+	return sdk.Result{
+		Events: ctx.EventManager().Events(),
+	}
 }

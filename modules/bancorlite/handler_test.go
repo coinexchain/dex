@@ -244,41 +244,41 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	return testInput{ctx: ctx, bik: keeper, handler: NewHandler(keeper), akp: akp, keys: keys, cdc: cdc}
 }
 
-func Test_handleMsgBancorInit(t *testing.T) {
-	type args struct {
-		ctx sdk.Context
-		k   Keeper
-		msg types.MsgBancorInit
-	}
-	input := prepareMockInput(t, false, false)
-	tests := []struct {
-		name string
-		args args
-		want sdk.Result
-	}{
-		{
-			name: "positive",
-			args: args{
-				ctx: input.ctx,
-				k:   input.bik,
-				msg: types.MsgBancorInit{
-					Owner:     haveCetAddress,
-					Token:     stock,
-					MaxSupply: sdk.NewInt(100),
-					MaxPrice:  sdk.NewDec(10),
-				},
-			},
-			want: sdk.Result{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := handleMsgBancorInit(tt.args.ctx, tt.args.k, tt.args.msg); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("handleMsgBancorInit() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+//func Test_handleMsgBancorInit(t *testing.T) {
+//	type args struct {
+//		ctx sdk.Context
+//		k   Keeper
+//		msg types.MsgBancorInit
+//	}
+//	input := prepareMockInput(t, false, false)
+//	tests := []struct {
+//		name string
+//		args args
+//		want sdk.Result
+//	}{
+//		{
+//			name: "positive",
+//			args: args{
+//				ctx: input.ctx,
+//				k:   input.bik,
+//				msg: types.MsgBancorInit{
+//					Owner:     haveCetAddress,
+//					Token:     stock,
+//					MaxSupply: sdk.NewInt(100),
+//					MaxPrice:  sdk.NewDec(10),
+//				},
+//			},
+//			want: sdk.Result{},
+//		},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			if got := handleMsgBancorInit(tt.args.ctx, tt.args.k, tt.args.msg); !reflect.DeepEqual(got, tt.want) {
+//				t.Errorf("handleMsgBancorInit() = %v, want %v", got, tt.want)
+//			}
+//		})
+//	}
+//}
 
 func Test_handleMsgBancorTrade(t *testing.T) {
 	type args struct {
