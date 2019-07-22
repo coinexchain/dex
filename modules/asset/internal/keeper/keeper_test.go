@@ -568,64 +568,44 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	input.tk.removeToken(input.ctx, token)
 }
 
-func TestTokenKeeper_ModifyTokenURL(t *testing.T) {
+func TestTokenKeeper_ModifyTokenInfo(t *testing.T) {
 	input := createTestInput()
 	symbol := "abc"
 	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+	url := "www.abc.com"
+	description := "token abc is a example token"
 
 	//case 1: base-case ok
 	// set token
 	err := input.tk.IssueToken(input.ctx, "ABC token", symbol, 2100, testAddr,
-		true, false, false, false, "www.abc.org", "")
+		true, false, false, false, "www.abc.org", "abc example description")
 	require.NoError(t, err)
 
-	err = input.tk.ModifyTokenURL(input.ctx, symbol, testAddr, "www.abc.com")
-	require.NoError(t, err)
-	token := input.tk.GetToken(input.ctx, symbol)
-	url := token.GetURL()
-	require.Equal(t, "www.abc.com", url)
-
-	//case 2: invalid url
-	err = input.tk.ModifyTokenURL(input.ctx, symbol, testAddr, string(make([]byte, types.MaxTokenURLLength+1)))
-	require.Error(t, err)
-	token = input.tk.GetToken(input.ctx, symbol)
-	require.Equal(t, "www.abc.com", url)
-
-	//case 3: only token owner can modify token url
-	err = input.tk.ModifyTokenURL(input.ctx, symbol, addr, "www.abc.org")
-	require.Error(t, err)
-	token = input.tk.GetToken(input.ctx, symbol)
-	require.Equal(t, "www.abc.com", url)
-
-}
-
-func TestTokenKeeper_ModifyTokenDescription(t *testing.T) {
-	input := createTestInput()
-	symbol := "abc"
-	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
-
-	//case 1: base-case ok
-	// set token
-	err := input.tk.IssueToken(input.ctx, "ABC token", symbol, 2100, testAddr,
-		true, false, false, false, "", "token abc is a example token")
-	require.NoError(t, err)
-
-	err = input.tk.ModifyTokenDescription(input.ctx, symbol, testAddr, "abc example description")
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, url, description)
 	require.NoError(t, err)
 	token := input.tk.GetToken(input.ctx, symbol)
-	description := token.GetDescription()
-	require.Equal(t, "abc example description", description)
+	require.Equal(t, url, token.GetURL())
+	require.Equal(t, description, token.GetDescription())
 
-	//case 2: invalid url
-	err = input.tk.ModifyTokenDescription(input.ctx, symbol, testAddr, string(make([]byte, types.MaxTokenDescriptionLength+1)))
+	//case 2: only token owner can modify token info
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, addr, "www.abc.org", "token abc is a example token")
 	require.Error(t, err)
 	token = input.tk.GetToken(input.ctx, symbol)
-	require.Equal(t, "abc example description", description)
+	require.Equal(t, url, token.GetURL())
+	require.Equal(t, description, token.GetDescription())
 
-	//case 3: only token owner can modify token url
-	err = input.tk.ModifyTokenDescription(input.ctx, symbol, addr, "abc example description")
+	//case 3: invalid url
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, string(make([]byte, types.MaxTokenURLLength+1)), types.DoNotModifyTokenInfo)
 	require.Error(t, err)
 	token = input.tk.GetToken(input.ctx, symbol)
-	require.Equal(t, "abc example description", description)
+	require.Equal(t, url, token.GetURL())
+	require.Equal(t, description, token.GetDescription())
+
+	//case 4: invalid description
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, types.DoNotModifyTokenInfo, string(make([]byte, types.MaxTokenDescriptionLength+1)))
+	require.Error(t, err)
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, url, token.GetURL())
+	require.Equal(t, description, token.GetDescription())
 
 }

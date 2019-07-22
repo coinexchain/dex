@@ -136,23 +136,18 @@ func Test_handleMsg(t *testing.T) {
 			false,
 		},
 		{
-			"modify_token_url",
-			NewMsgModifyTokenURL("abc", "www.abc.com", owner),
+			"modify_token_info",
+			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", owner),
 			true,
 		},
 		{
 			"modify_token_url_invalid",
-			NewMsgModifyTokenURL("abc", string(make([]byte, types.MaxTokenURLLength+1)), owner),
+			NewMsgModifyTokenInfo("abc", string(make([]byte, types.MaxTokenURLLength+1)), "abc example description", owner),
 			false,
 		},
 		{
-			"modify_token_description",
-			NewMsgModifyTokenDescription("abc", "abc example description", owner),
-			true,
-		},
-		{
 			"modify_token_description_invalid",
-			NewMsgModifyTokenDescription("abc", string(make([]byte, types.MaxTokenDescriptionLength+1)), owner),
+			NewMsgModifyTokenInfo("abc", "www.abc.com", string(make([]byte, types.MaxTokenDescriptionLength+1)), owner),
 			false,
 		},
 	}

@@ -437,28 +437,33 @@ func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
 func TestMsgModifyTokenURL_ValidateBasic(t *testing.T) {
 	tests := []struct {
 		name string
-		msg  MsgModifyTokenURL
+		msg  MsgModifyTokenInfo
 		want sdk.Error
 	}{
 		{
 			"base-case",
-			NewMsgModifyTokenURL("abc", "www.abc.org", testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", testAddr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgModifyTokenURL("a😃", "www.abc.org", testAddr),
+			NewMsgModifyTokenInfo("a😃", "www.abc.org", "abc example description", testAddr),
 			ErrInvalidTokenSymbol("a😃"),
 		},
 		{
 			"case-invalidOwner",
-			NewMsgModifyTokenURL("abc", "www.abc.org", sdk.AccAddress{}),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", sdk.AccAddress{}),
 			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidURL",
-			NewMsgModifyTokenURL("abc", string(make([]byte, MaxTokenURLLength+1)), testAddr),
+			NewMsgModifyTokenInfo("abc", string(make([]byte, MaxTokenURLLength+1)), "abc example description", testAddr),
 			ErrInvalidTokenURL(string(make([]byte, MaxTokenURLLength+1))),
+		},
+		{
+			"case-invalidDescription",
+			NewMsgModifyTokenInfo("abc", "www.abc.org", string(make([]byte, MaxTokenDescriptionLength+1)), testAddr),
+			ErrInvalidTokenDescription(string(make([]byte, MaxTokenDescriptionLength+1))),
 		},
 	}
 
@@ -470,42 +475,7 @@ func TestMsgModifyTokenURL_ValidateBasic(t *testing.T) {
 		})
 	}
 }
-func TestMsgModifyTokenDescription_ValidateBasic(t *testing.T) {
-	tests := []struct {
-		name string
-		msg  MsgModifyTokenDescription
-		want sdk.Error
-	}{
-		{
-			"base-case",
-			NewMsgModifyTokenDescription("abc", "abc example description", testAddr),
-			nil,
-		},
-		{
-			"case-invalidSymbol",
-			NewMsgModifyTokenDescription("a❡", "abc example description", testAddr),
-			ErrInvalidTokenSymbol("a❡"),
-		},
-		{
-			"case-invalidOwner",
-			NewMsgModifyTokenDescription("abc", "abc example description", sdk.AccAddress{}),
-			ErrNilTokenOwner(),
-		},
-		{
-			"case-invalidDescription",
-			NewMsgModifyTokenDescription("abc", string(make([]byte, MaxTokenDescriptionLength+1)), testAddr),
-			ErrInvalidTokenDescription(string(make([]byte, MaxTokenDescriptionLength+1))),
-		},
-	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewMsgModifyTokenDescription.ValidateBasic() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 func TestMsg_Route(t *testing.T) {
 	want := RouterKey
 	tests := []struct {
@@ -553,12 +523,8 @@ func TestMsg_Route(t *testing.T) {
 			MsgUnForbidAddr{},
 		},
 		{
-			"modify-token-url",
-			MsgModifyTokenURL{},
-		},
-		{
-			"modify-token-description",
-			MsgModifyTokenDescription{},
+			"modify-token-info",
+			MsgModifyTokenInfo{},
 		},
 	}
 
@@ -628,14 +594,9 @@ func TestMsg_Type(t *testing.T) {
 			"unforbid_addr",
 		},
 		{
-			"modify-token-url",
-			MsgModifyTokenURL{},
-			"modify_token_url",
-		},
-		{
-			"modify-token-description",
-			MsgModifyTokenDescription{},
-			"modify_token_description",
+			"modify-token-info",
+			MsgModifyTokenInfo{},
+			"modify_token_info",
 		},
 	}
 
@@ -707,12 +668,7 @@ func TestMsg_GetSigners(t *testing.T) {
 		},
 		{
 			"modify-token-url",
-			NewMsgModifyTokenURL("abc", "www.abc.com", testAddr),
-			[]sdk.AccAddress{testAddr},
-		},
-		{
-			"modify-token-description",
-			NewMsgModifyTokenDescription("abc", "abc example description", testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", testAddr),
 			[]sdk.AccAddress{testAddr},
 		},
 	}
@@ -791,14 +747,9 @@ func TestMsg_GetSignBytes(t *testing.T) {
 			`{"type":"asset/MsgUnForbidAddr","value":{"addresses":["coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke","coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h"],"owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc"}}`,
 		},
 		{
-			"modify-token-url",
-			NewMsgModifyTokenURL("abc", "www.abc.com", owner),
-			`{"type":"asset/MsgModifyTokenURL","value":{"owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","url":"www.abc.com"}}`,
-		},
-		{
-			"modify-token-description",
-			NewMsgModifyTokenDescription("abc", "abc example description", owner),
-			`{"type":"asset/MsgModifyTokenDescription","value":{"description":"abc example description","owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc"}}`,
+			"modify-token-info",
+			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", owner),
+			`{"type":"asset/MsgModifyTokenInfo","value":{"description":"abc example description","owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","url":"www.abc.com"}}`,
 		},
 	}
 
