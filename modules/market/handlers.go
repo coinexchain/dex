@@ -91,13 +91,17 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg mtype.MsgCreateTradingPair,
 
 func fillMsgQueue(ctx sdk.Context, keeper keepers.Keeper, key string, msg interface{}) {
 	if keeper.IsSubScribe(mtype.Topic) {
-		bytes, err := json.Marshal(msg)
-		if err != nil {
-			return
-		}
-		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
-			sdk.NewAttribute(key, string(bytes))))
+		fillMsgs(ctx, key, msg)
 	}
+}
+
+func fillMsgs(ctx sdk.Context, key string, msg interface{}) {
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		return
+	}
+	ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
+		sdk.NewAttribute(key, string(bytes))))
 }
 
 func checkMsgCreateTradingPair(ctx sdk.Context, msg mtype.MsgCreateTradingPair, keeper keepers.Keeper) sdk.Result {

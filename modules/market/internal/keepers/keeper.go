@@ -165,10 +165,6 @@ func (k Keeper) GetMarketKey() sdk.StoreKey {
 	return k.marketKey
 }
 
-func (k Keeper) SendMsg(key string, val interface{}) {
-	k.msgProducer.SendMsg(types.Topic, key, val)
-}
-
 // -----------------------------------------------------------------------------
 // Params
 

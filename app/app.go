@@ -428,13 +428,35 @@ func (app *CetChainApp) mountStores() {
 
 // application updates every end block
 func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	return app.mm.BeginBlock(ctx, req)
+	PubMsgs = make([]PubMsg, 0, 10000)
+	ret := app.mm.BeginBlock(ctx, req)
+	ret.Events = FilterMsgsOnlyKafka(ret.Events)
+	return ret
+}
+
+func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx {
+	ret := app.BaseApp.DeliverTx(req)
+	if ret.Code == uint32(sdk.CodeOK) {
+		ret.Events = FilterMsgsOnlyKafka(ret.Events)
+	} else {
+		ret.Events = RemoveMsgsOnlyKafka(ret.Events)
+	}
+	return ret
 }
 
 // application updates every end block
 // nolint: unparam
 func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.mm.EndBlock(ctx, req)
+	ret := app.mm.EndBlock(ctx, req)
+	ret.Events = FilterMsgsOnlyKafka(ret.Events)
+	return ret
+}
+
+func (app *CetChainApp) Commit() abci.ResponseCommit {
+	for _, msg := range PubMsgs {
+		app.msgQueProducer.SendMsg(msg.Key, msg.Value)
+	}
+	return app.BaseApp.Commit()
 }
 
 // custom logic for coindex initialization

@@ -2,7 +2,6 @@ package msgqueue
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"strings"
 
@@ -11,18 +10,19 @@ import (
 )
 
 const (
-	brokers = "brokers"
-	topics  = "topics"
+	brokers  = "brokers"
+	topics   = "topics"
+	PubTopic = "coinex-dex"
 )
 
 type MsgSender interface {
-	SendMsg(topic string, key string, v interface{}) error
+	SendMsg(key []byte, v []byte)
 	IsSubScribe(topic string) bool
 }
 
 type Producer struct {
-	topicWrites map[string]*kafka.Writer
-	brokers     []string
+	subTopics map[string]struct{}
+	*kafka.Writer
 }
 
 type config struct {
@@ -32,15 +32,13 @@ type config struct {
 
 func NewProducer() Producer {
 	p := Producer{
-		topicWrites: make(map[string]*kafka.Writer),
+		subTopics: make(map[string]struct{}),
 	}
 
-	data := config{
+	p.setParam(config{
 		Brokers: viper.GetString(brokers),
 		Topics:  viper.GetString(topics),
-	}
-	p.setParam(data)
-
+	})
 	return p
 }
 
@@ -48,43 +46,33 @@ func (k *Producer) setParam(data config) {
 	if len(data.Brokers) == 0 || len(data.Topics) == 0 {
 		return
 	}
-	k.brokers = strings.Split(data.Brokers, ",")
+	brokers := strings.Split(data.Brokers, ",")
 	topics := strings.Split(data.Topics, ",")
 
 	for _, topic := range topics {
-		k.topicWrites[topic] = kafka.NewWriter(kafka.WriterConfig{
-			Brokers: k.brokers,
-			Topic:   topic,
-			Async:   true,
-		})
+		k.subTopics[topic] = struct{}{}
 	}
+	k.Writer = kafka.NewWriter(kafka.WriterConfig{
+		Brokers: brokers,
+		Topic:   PubTopic,
+		Async:   true,
+	})
 }
 
 func (k Producer) close() {
-	for _, w := range k.topicWrites {
-		if err := w.Close(); err != nil {
-			log.Fatalln(err)
-		}
+	if err := k.Close(); err != nil {
+		log.Fatalln(err)
 	}
 }
 
-func (k Producer) SendMsg(topic string, key string, v interface{}) error {
-	if w, ok := k.topicWrites[topic]; ok {
-		bytes, err := json.Marshal(v)
-		if err != nil {
-			return err
-		}
-
-		w.WriteMessages(context.Background(), kafka.Message{
-			Key:   []byte(key),
-			Value: bytes,
-		})
-	}
-
-	return nil
+func (k Producer) SendMsg(key []byte, v []byte) {
+	k.WriteMessages(context.Background(), kafka.Message{
+		Key:   key,
+		Value: v,
+	})
 }
 
 func (k Producer) IsSubScribe(topic string) bool {
-	_, ok := k.topicWrites[topic]
+	_, ok := k.subTopics[topic]
 	return ok
 }

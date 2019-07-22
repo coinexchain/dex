@@ -212,11 +212,13 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 		}
 	}
 
-	sendFillMsg(orderOldDeals, orderOldMoneys, ordersForUpdate, ctx.BlockHeight(), infoForDeal.lastPrice, keeper)
+	if keeper.IsSubScribe(mtype.Topic) {
+		sendFillMsg(ctx, orderOldDeals, orderOldMoneys, ordersForUpdate, ctx.BlockHeight())
+	}
 	return ordersForUpdate, infoForDeal.lastPrice
 }
 
-func sendFillMsg(orderOldDeal, orderOldMoneys map[string]int64, ordersForUpdate map[string]*mtype.Order, height int64, price sdk.Dec, keeper keepers.Keeper) {
+func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64, ordersForUpdate map[string]*mtype.Order, height int64) {
 	if len(ordersForUpdate) == 0 {
 		return
 	}
@@ -235,7 +237,7 @@ func sendFillMsg(orderOldDeal, orderOldMoneys map[string]int64, ordersForUpdate 
 			CurrMoney: order.DealMoney - oldMoney,
 			Price:     order.Price.String(),
 		}
-		keeper.SendMsg(mtype.FillOrderInfoKey, msgInfo)
+		fillMsgs(ctx, mtype.FillOrderInfoKey, msgInfo)
 	}
 }
 
@@ -262,18 +264,19 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 
 		for _, order := range filterOrders {
 			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
-
-			msgInfo := mtype.CancelOrderInfo{
-				OrderID:        order.OrderID(),
-				DelReason:      mtype.CancelOrderByGteTimeOut,
-				DelHeight:      ctx.BlockHeight(),
-				UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
-				LeftStock:      order.LeftStock,
-				RemainAmount:   order.Freeze,
-				DealStock:      order.DealStock,
-				DealMoney:      order.DealMoney,
+			if keeper.IsSubScribe(mtype.Topic) {
+				msgInfo := mtype.CancelOrderInfo{
+					OrderID:        order.OrderID(),
+					DelReason:      mtype.CancelOrderByGteTimeOut,
+					DelHeight:      ctx.BlockHeight(),
+					UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+					LeftStock:      order.LeftStock,
+					RemainAmount:   order.Freeze,
+					DealStock:      order.DealStock,
+					DealMoney:      order.DealMoney,
+				}
+				fillMsgs(ctx, mtype.CancelOrderInfoKey, msgInfo)
 			}
-			keeper.SendMsg(mtype.CancelOrderInfoKey, msgInfo)
 		}
 	}
 }
@@ -348,7 +351,9 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 		for _, order := range ordersForUpdateList[idx] {
 			orderKeeper.Add(ctx, order)
 			if order.TimeInForce == mtype.IOC || order.LeftStock == 0 || notEnoughMoney(order) {
-				sendOrderMsg(order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, keeper)
+				if keeper.IsSubScribe(mtype.Topic) {
+					sendOrderMsg(ctx, order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, keeper)
+				}
 				removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
 			}
 		}
@@ -361,7 +366,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 
 }
 
-func sendOrderMsg(order *mtype.Order, height int64, feeForZeroDeal int64, keeper keepers.Keeper) {
+func sendOrderMsg(ctx sdk.Context, order *mtype.Order, height int64, feeForZeroDeal int64, keeper keepers.Keeper) {
 	msgInfo := mtype.CancelOrderInfo{
 		OrderID:        order.OrderID(),
 		DelHeight:      height,
@@ -381,5 +386,5 @@ func sendOrderMsg(order *mtype.Order, height int64, feeForZeroDeal int64, keeper
 		msgInfo.DelReason = mtype.CancelOrderByNotKnow
 	}
 
-	keeper.SendMsg(mtype.CancelOrderInfoKey, msgInfo)
+	fillMsgs(ctx, mtype.CancelOrderInfoKey, msgInfo)
 }

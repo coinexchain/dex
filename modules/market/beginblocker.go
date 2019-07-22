@@ -8,10 +8,11 @@ import (
 )
 
 func BeginBlocker(ctx sdk.Context, k keepers.Keeper) {
-	msg := types.NewHeightInfo{
-		Height:    ctx.BlockHeight(),
-		TimeStamp: ctx.BlockHeader().Time.Unix(),
+	if k.IsSubScribe(types.Topic) {
+		msg := types.NewHeightInfo{
+			Height:    ctx.BlockHeight(),
+			TimeStamp: ctx.BlockHeader().Time.Unix(),
+		}
+		fillMsgs(ctx, types.HeightInfoKey, msg)
 	}
-
-	k.SendMsg(types.HeightInfoKey, msg)
 }
