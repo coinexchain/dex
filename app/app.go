@@ -2,9 +2,10 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/coinexchain/dex/modules/bancorlite"
 	"io"
 	"os"
+
+	"github.com/coinexchain/dex/modules/bancorlite"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -430,6 +431,7 @@ func (app *CetChainApp) mountStores() {
 		app.keySlashing, app.keyGov, app.keyParams,
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
 		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,
+		app.keyBancor,
 	)
 }
 
