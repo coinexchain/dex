@@ -31,6 +31,7 @@ var tokenFlags = []string{
 	flagIsForbidden,
 	flagTokenURL,
 	flagTokenDescription,
+	flagTokenIdentity,
 }
 
 // AddGenesisTokenCmd returns add-genesis-token cobra Command.
@@ -54,7 +55,8 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	--total-mint=0 \
 	--is-forbidden=false \
 	--url="www.coinex.org" \
-	--description="A public chain built for the decentralized exchange"
+	--description="A public chain built for the decentralized exchange" \ 
+	--identity="552A83BA62F9B1F8"
 `),
 		RunE: func(_ *cobra.Command, args []string) error {
 			config := ctx.Config
@@ -114,6 +116,7 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	cmd.Flags().Bool(flagIsForbidden, false, "whether the token is forbidden")
 	cmd.Flags().String(flagTokenURL, "", "url of token website")
 	cmd.Flags().String(flagTokenDescription, "", "description of token info")
+	cmd.Flags().String(flagTokenIdentity, "", "identity of token")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	for _, flag := range tokenFlags {
@@ -148,6 +151,15 @@ func parseTokenInfo() (types.Token, error) {
 		return nil, err
 	}
 	if err = token.SetTotalMint(viper.GetInt64(flagTotalMint)); err != nil {
+		return nil, err
+	}
+	if err = token.SetURL(viper.GetString(flagTokenURL)); err != nil {
+		return nil, err
+	}
+	if err = token.SetDescription(viper.GetString(flagTokenDescription)); err != nil {
+		return nil, err
+	}
+	if err = token.SetIdentity(viper.GetString(flagTokenIdentity)); err != nil {
 		return nil, err
 	}
 

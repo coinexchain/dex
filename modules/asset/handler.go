@@ -56,7 +56,7 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken
 	}
 
 	err := keeper.IssueToken(ctx, msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
-		msg.Mintable, msg.Burnable, msg.AddrForbiddable, msg.TokenForbiddable, msg.URL, msg.Description)
+		msg.Mintable, msg.Burnable, msg.AddrForbiddable, msg.TokenForbiddable, msg.URL, msg.Description, msg.Identity)
 
 	if err != nil {
 		return err.Result()

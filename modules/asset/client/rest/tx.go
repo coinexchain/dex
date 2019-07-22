@@ -46,6 +46,7 @@ type (
 		TokenForbiddable bool         `json:"token_forbiddable" yaml:"token_forbiddable"`
 		URL              string       `json:"url" yaml:"url"`
 		Description      string       `json:"description" yaml:"description"`
+		Identity         string       `json:"identity" yaml:"identity"`
 	}
 
 	// transferOwnerReq defines the properties of a transfer ownership request's body.
@@ -107,7 +108,7 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 
 		msg := types.NewMsgIssueToken(req.Name, req.Symbol, req.TotalSupply, owner,
-			req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable, req.URL, req.Description)
+			req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable, req.URL, req.Description, req.Identity)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

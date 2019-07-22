@@ -27,6 +27,7 @@ var issueTokenFlags = []string{
 	flagTokenForbiddable,
 	flagTokenURL,
 	flagTokenDescription,
+	flagTokenIdentity,
 }
 
 // get the root tx command of this module
@@ -71,6 +72,7 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	--token-forbiddable=false \
 	--url="www.abc.org" \
 	--description="token abc is a example token" \
+	--identity="552A83BA62F9B1F8" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -124,6 +126,7 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	cmd.Flags().Bool(flagTokenForbiddable, false, "whether the token can be forbidden")
 	cmd.Flags().String(flagTokenURL, "", "url of token website")
 	cmd.Flags().String(flagTokenDescription, "", "description of token info")
+	cmd.Flags().String(flagTokenIdentity, "", "identity of token")
 
 	for _, flag := range issueTokenFlags {
 		_ = cmd.MarkFlagRequired(flag)

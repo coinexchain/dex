@@ -375,6 +375,7 @@ func addCetTokenForTesting(cdc *codec.Codec,
 		false,
 		"www.coinex.org",
 		"A public chain built for the decentralized exchange",
+		"",
 	)
 
 	var token asset.Token = baseToken

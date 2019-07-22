@@ -58,6 +58,9 @@ type Token interface {
 	GetDescription() string
 	SetDescription(string) sdk.Error
 
+	GetIdentity() string
+	SetIdentity(string) sdk.Error
+
 	Validate() sdk.Error
 	// Ensure that token implements stringer
 	String() string
@@ -81,6 +84,7 @@ type BaseToken struct {
 	IsForbidden      bool           `json:"is_forbidden" yaml:"is_forbidden"`           // Whether token being forbidden currently
 	URL              string         `json:"url" yaml:"url"`                             //URL of token website
 	Description      string         `json:"description" yaml:"description"`             //Description of token info
+	Identity         string         `json:"identity" yaml:"identity"`                   //Identity of token
 }
 
 var (
@@ -91,7 +95,7 @@ var (
 // NewToken - new base token
 func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
-	url string, description string) (*BaseToken, sdk.Error) {
+	url string, description string, identity string) (*BaseToken, sdk.Error) {
 
 	t := &BaseToken{}
 	var err sdk.Error
@@ -113,6 +117,9 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	if err = t.SetDescription(description); err != nil {
 		return nil, err
 	}
+	if err = t.SetIdentity(identity); err != nil {
+		return nil, err
+	}
 
 	t.SetMintable(mintable)
 	t.SetBurnable(burnable)
@@ -132,7 +139,7 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 
 func (t *BaseToken) Validate() sdk.Error {
 	_, err := NewToken(t.Name, t.Symbol, t.TotalSupply, t.Owner,
-		t.Mintable, t.Burnable, t.AddrForbiddable, t.TokenForbiddable, t.URL, t.Description)
+		t.Mintable, t.Burnable, t.AddrForbiddable, t.TokenForbiddable, t.URL, t.Description, t.Identity)
 
 	if err != nil {
 		return err
@@ -263,6 +270,18 @@ func (t *BaseToken) SetDescription(description string) sdk.Error {
 	return nil
 }
 
+func (t BaseToken) GetIdentity() string {
+	return t.Identity
+}
+
+func (t *BaseToken) SetIdentity(identity string) sdk.Error {
+	if len(identity) > MaxTokenIdentityLength {
+		return ErrInvalidTokenIdentity(identity)
+	}
+	t.Identity = identity
+	return nil
+}
+
 func (t BaseToken) GetTotalBurn() int64 {
 	return t.TotalBurn
 }
@@ -311,9 +330,11 @@ func (t BaseToken) String() string {
   IsForbidden:      %t
   URL:              %s
   Description:      %s
+  Identity:			%s
 ]`,
 		t.Name, t.Symbol, t.TotalSupply, t.Owner.String(), t.Mintable, t.Burnable,
-		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsForbidden, t.URL, t.Description,
+		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsForbidden,
+		t.URL, t.Description, t.Identity,
 	)
 }
 

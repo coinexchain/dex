@@ -33,11 +33,13 @@ type MsgIssueToken struct {
 	TokenForbiddable bool           `json:"token_forbiddable" yaml:"token_forbiddable"` // whether token could be global forbid
 	URL              string         `json:"url" yaml:"url"`                             //URL of token website
 	Description      string         `json:"description" yaml:"description"`             //Description of token info
+	Identity         string         `json:"identity" yaml:"identity"`                   //Identity of token
 }
 
 // NewMsgIssueToken
 func NewMsgIssueToken(name string, symbol string, amt int64, owner sdk.AccAddress,
-	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool, url string, description string) MsgIssueToken {
+	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
+	url string, description string, identity string) MsgIssueToken {
 
 	return MsgIssueToken{
 		name,
@@ -50,6 +52,7 @@ func NewMsgIssueToken(name string, symbol string, amt int64, owner sdk.AccAddres
 		tokenForbiddable,
 		url,
 		description,
+		identity,
 	}
 }
 
@@ -66,7 +69,7 @@ func (msg MsgIssueToken) Type() string {
 // ValidateBasic Implements Msg.
 func (msg MsgIssueToken) ValidateBasic() sdk.Error {
 	_, err := NewToken(msg.Name, msg.Symbol, msg.TotalSupply, msg.Owner,
-		msg.Mintable, msg.Burnable, msg.AddrForbiddable, msg.TokenForbiddable, msg.URL, msg.Description)
+		msg.Mintable, msg.Burnable, msg.AddrForbiddable, msg.TokenForbiddable, msg.URL, msg.Description, msg.Identity)
 	return err
 }
 

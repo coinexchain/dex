@@ -22,7 +22,8 @@ type Keeper interface {
 	TokenKeeper
 
 	IssueToken(ctx sdk.Context, name string, symbol string, totalSupply int64, owner sdk.AccAddress,
-		mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool, url string, description string) sdk.Error
+		mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
+		url string, description string, identity string) sdk.Error
 	TransferOwnership(ctx sdk.Context, symbol string, originalOwner sdk.AccAddress, newOwner sdk.AccAddress) sdk.Error
 	MintToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount int64) sdk.Error
 	BurnToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount int64) sdk.Error
@@ -95,7 +96,8 @@ func (keeper BaseKeeper) SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt
 
 //IssueToken - new token and store it
 func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string, totalSupply int64, owner sdk.AccAddress,
-	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool, url string, description string) sdk.Error {
+	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
+	url string, description string, identity string) sdk.Error {
 
 	if keeper.IsTokenExists(ctx, symbol) {
 		return types.ErrDuplicateTokenSymbol(symbol)
@@ -120,6 +122,7 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 		tokenForbiddable,
 		url,
 		description,
+		identity,
 	)
 
 	if err != nil {

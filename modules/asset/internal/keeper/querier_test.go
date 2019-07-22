@@ -28,7 +28,7 @@ func Test_queryToken(t *testing.T) {
 
 	// set token
 	token, err := types.NewToken("ABC Token", "abc", 2100, testAddr,
-		false, false, false, false, "", "")
+		false, false, false, false, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token)
 	require.NoError(t, err)
@@ -73,13 +73,13 @@ func Test_queryAllTokenList(t *testing.T) {
 	require.Equal(t, []byte("[]"), res)
 
 	token1, err := types.NewToken("ABC Token", "abc", 2100, testAddr,
-		false, false, false, false, "", "")
+		false, false, false, false, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token1)
 	require.NoError(t, err)
 
 	token2, err := types.NewToken("XYZ Token", "xyz", 2100, testAddr,
-		false, false, false, false, "", "")
+		false, false, false, false, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token2)
 	require.NoError(t, err)
@@ -113,7 +113,7 @@ func Test_queryWhitelist(t *testing.T) {
 
 	// set token
 	token, err := types.NewToken("ABC Token", symbol, 2100, testAddr,
-		false, false, false, true, "", "")
+		false, false, false, true, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token)
 	require.NoError(t, err)
@@ -156,7 +156,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 
 	// set token
 	token, err := types.NewToken("ABC Token", symbol, 2100, testAddr,
-		false, false, true, true, "", "")
+		false, false, true, true, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token)
 	require.NoError(t, err)

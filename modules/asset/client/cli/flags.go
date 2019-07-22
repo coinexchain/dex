@@ -10,6 +10,7 @@ const (
 	flagTokenForbiddable = "token-forbiddable"
 	flagTokenURL         = "url"
 	flagTokenDescription = "description"
+	flagTokenIdentity    = "identity"
 
 	flagClientHome  = "home-client"
 	flagOwner       = "owner"

@@ -34,6 +34,7 @@ const (
 	CodeNilTokenWhitelist            sdk.CodeType = 523
 	CodeNilForbiddenAddress          sdk.CodeType = 524
 	CodeBurnUnboundCET               sdk.CodeType = 525
+	CodeInvalidTokenIdentity         sdk.CodeType = 526
 )
 
 func ErrInvalidTokenName(name string) sdk.Error {
@@ -83,6 +84,10 @@ func ErrInvalidTokenURL(url string) sdk.Error {
 func ErrInvalidTokenDescription(description string) sdk.Error {
 	msg := fmt.Sprintf("invalid description %s : token description is limited to %d bytes size", description, MaxTokenDescriptionLength)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenDescription, msg)
+}
+func ErrInvalidTokenIdentity(identity string) sdk.Error {
+	msg := fmt.Sprintf("invalid identity %s : token identity is limited to %d", identity, MaxTokenIdentityLength)
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenIdentity, msg)
 }
 
 // -----------------------------------------------------------------------------

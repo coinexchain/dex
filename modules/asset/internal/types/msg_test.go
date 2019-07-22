@@ -17,68 +17,74 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 		{
 			"base-case",
 			NewMsgIssueToken("ABC Token", "abc", 100000, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			nil,
 		},
 		{
 			"case-name",
 			NewMsgIssueToken(string(make([]byte, 32+1)), "abc", 100000, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			ErrInvalidTokenName(string(make([]byte, 32+1))),
 		},
 		{
 			"case-owner",
 			NewMsgIssueToken("ABC Token", "abc", 100000, sdk.AccAddress{},
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			ErrNilTokenOwner(),
 		},
 		{
 			"case-symbol1",
 			NewMsgIssueToken("ABC Token", "1aa", 100000, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			ErrInvalidTokenSymbol("1aa"),
 		},
 		{
 			"case-symbol2",
 			NewMsgIssueToken("ABC Token", "A999", 100000, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			ErrInvalidTokenSymbol("A999"),
 		},
 		{
 			"case-symbol3",
 			NewMsgIssueToken("ABC Token", "aa1234567", 100000, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			ErrInvalidTokenSymbol("aa1234567"),
 		},
 		{
 			"case-symbol4",
 			NewMsgIssueToken("ABC Token", "a*aa", 100000, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			ErrInvalidTokenSymbol("a*aa"),
 		},
 		{
 			"case-totalSupply1",
 			NewMsgIssueToken("ABC Token", "abc", 9E18+1, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			ErrInvalidTokenSupply(9E18 + 1),
 		},
 		{
 			"case-totalSupply2",
 			NewMsgIssueToken("ABC Token", "abc", -1, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			ErrInvalidTokenSupply(-1),
 		},
 		{
 			"case-url",
 			NewMsgIssueToken("name", "coin", 2100, testAddr,
-				false, false, false, false, string(make([]byte, MaxTokenURLLength+1)), ""),
+				false, false, false, false, string(make([]byte, MaxTokenURLLength+1)), "", ""),
 			ErrInvalidTokenURL(string(make([]byte, MaxTokenURLLength+1))),
 		},
 		{
 			"case-description",
 			NewMsgIssueToken("name", "coin", 2100, testAddr,
-				false, false, false, false, "", string(make([]byte, MaxTokenDescriptionLength+1))),
+				false, false, false, false, "", string(make([]byte, MaxTokenDescriptionLength+1)), ""),
 			ErrInvalidTokenDescription(string(make([]byte, MaxTokenDescriptionLength+1))),
+		},
+		{
+			"case-identity",
+			NewMsgIssueToken("name", "coin", 2100, testAddr,
+				false, false, false, false, "", "", string(make([]byte, MaxTokenIdentityLength+1))),
+			ErrInvalidTokenIdentity(string(make([]byte, MaxTokenIdentityLength+1))),
 		},
 	}
 
@@ -618,7 +624,7 @@ func TestMsg_GetSigners(t *testing.T) {
 		{
 			"issue-token",
 			NewMsgIssueToken("ABC Token", "abc", 100000, testAddr,
-				false, false, false, false, "", ""),
+				false, false, false, false, "", "", ""),
 			[]sdk.AccAddress{testAddr},
 		},
 		{
@@ -698,8 +704,8 @@ func TestMsg_GetSignBytes(t *testing.T) {
 		{
 			"issue-token",
 			NewMsgIssueToken("ABC Token", "abc", 100000, owner,
-				false, false, false, false, "", ""),
-			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"description":"","mintable":false,"name":"ABC Token","owner":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","token_forbiddable":false,"total_supply":"100000","url":""}}`,
+				false, false, false, false, "", "", ""),
+			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"description":"","identity":"","mintable":false,"name":"ABC Token","owner":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","token_forbiddable":false,"total_supply":"100000","url":""}}`,
 		},
 		{
 			"transfer-ownership",

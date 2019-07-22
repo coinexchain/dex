@@ -36,6 +36,7 @@ func parseIssueFlags(owner sdk.AccAddress) (*types.MsgIssueToken, error) {
 		viper.GetBool(flagTokenForbiddable),
 		viper.GetString(flagTokenURL),
 		viper.GetString(flagTokenDescription),
+		viper.GetString(flagTokenIdentity),
 	)
 
 	return &msg, nil

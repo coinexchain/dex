@@ -142,7 +142,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 
 	// issue tokens
 	msgStock := asset.NewMsgIssueToken(stock, stock, issueAmount, acc.Address,
-		false, false, false, false, "", "")
+		false, false, false, false, "", "", "")
 	tx := newStdTxBuilder().
 		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
 	res := app.Deliver(tx)
@@ -201,7 +201,7 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 
 	// issue tokens
 	msgStock := asset.NewMsgIssueToken(stock, stock, issueAmount, acc.Address,
-		false, false, false, false, "", "")
+		false, false, false, false, "", "", "")
 	tx := newStdTxBuilder().
 		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
 	res := app.Deliver(tx)
