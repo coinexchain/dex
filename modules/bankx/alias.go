@@ -33,7 +33,7 @@ var (
 )
 
 type (
-	Keeper = keeper.Keeper
-	MsgSend = types.MsgSend
+	Keeper             = keeper.Keeper
+	MsgSend            = types.MsgSend
 	MsgSetMemoRequired = types.MsgSetMemoRequired
 )

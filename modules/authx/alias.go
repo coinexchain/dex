@@ -26,7 +26,7 @@ var (
 )
 
 type (
-	AccountX = types.AccountX
-	LockedCoin = types.LockedCoin
+	AccountX    = types.AccountX
+	LockedCoin  = types.LockedCoin
 	LockedCoins = types.LockedCoins
 )

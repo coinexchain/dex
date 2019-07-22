@@ -35,7 +35,7 @@ func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 }
 
 func (data GenesisState) Validate() error {
-	for alias, _ := range data.AliasInfoMap {
+	for alias := range data.AliasInfoMap {
 		if !types.IsValidAlias(alias) {
 			return errors.New("Invalid Alias")
 		}

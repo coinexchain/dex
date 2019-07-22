@@ -59,19 +59,19 @@ var _ Token = (*BaseToken)(nil)
 
 // BaseToken - a base Token structure.
 type BaseToken struct {
-	Name             string         `json:"name" yaml:"name"`              //  Name of the newly issued asset, limited to 32 unicode characters.
-	Symbol           string         `json:"symbol" yaml:"symbol"`            //  token symbol, [a-z][a-z0-9]{1,7}
-	TotalSupply      int64          `json:"total_supply" yaml:"total_supply"`      //  The total supply for this token [0]
-	Owner            sdk.AccAddress `json:"owner" yaml:"owner"`           // The initial issuer of this token
-	Mintable         bool           `json:"mintable" yaml:"mintable"`          // Whether this token could be minted after the issuing
-	Burnable         bool           `json:"burnable" yaml:"burnable"`          // Whether this token could be burned
-	AddrForbiddable  bool           `json:"addr_forbiddable" yaml:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
+	Name             string         `json:"name" yaml:"name"`                           //  Name of the newly issued asset, limited to 32 unicode characters.
+	Symbol           string         `json:"symbol" yaml:"symbol"`                       //  token symbol, [a-z][a-z0-9]{1,7}
+	TotalSupply      int64          `json:"total_supply" yaml:"total_supply"`           //  The total supply for this token [0]
+	Owner            sdk.AccAddress `json:"owner" yaml:"owner"`                         // The initial issuer of this token
+	Mintable         bool           `json:"mintable" yaml:"mintable"`                   // Whether this token could be minted after the issuing
+	Burnable         bool           `json:"burnable" yaml:"burnable"`                   // Whether this token could be burned
+	AddrForbiddable  bool           `json:"addr_forbiddable" yaml:"addr_forbiddable"`   // whether could forbid some addresses to forbid transaction
 	TokenForbiddable bool           `json:"token_forbiddable" yaml:"token_forbiddable"` // whether token could be global forbid
-	TotalBurn        int64          `json:"total_burn" yaml:"total_burn"`       // Total amount of burn
-	TotalMint        int64          `json:"total_mint" yaml:"total_mint"`        // Total amount of mint
-	IsForbidden      bool           `json:"is_forbidden" yaml:"is_forbidden"`     // Whether token being forbidden currently
-	URL              string         `json:"url" yaml:"url"`               //URL of token website
-	Description      string         `json:"description" yaml:"description"`       //Description of token info
+	TotalBurn        int64          `json:"total_burn" yaml:"total_burn"`               // Total amount of burn
+	TotalMint        int64          `json:"total_mint" yaml:"total_mint"`               // Total amount of mint
+	IsForbidden      bool           `json:"is_forbidden" yaml:"is_forbidden"`           // Whether token being forbidden currently
+	URL              string         `json:"url" yaml:"url"`                             //URL of token website
+	Description      string         `json:"description" yaml:"description"`             //Description of token info
 }
 
 var (

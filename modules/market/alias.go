@@ -26,9 +26,9 @@ var (
 )
 
 type (
-	Keeper = keepers.Keeper
-	Order = types.Order
-	MarketInfo = types.MarketInfo
-	MsgCreateOrder = types.MsgCreateOrder
+	Keeper               = keepers.Keeper
+	Order                = types.Order
+	MarketInfo           = types.MarketInfo
+	MsgCreateOrder       = types.MsgCreateOrder
 	MsgCreateTradingPair = types.MsgCreateTradingPair
 )
