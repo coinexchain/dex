@@ -1154,6 +1154,7 @@ paths:
         x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
       summary: Query the information from a single validator
+      operationId: getValidator
       tags:
         - Staking
       produces:
