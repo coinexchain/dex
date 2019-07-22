@@ -246,7 +246,7 @@ func initTestnetNode(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Cod
 		valPubKey,
 		sdk.NewCoin(dex.DefaultBondDenom, minSelfDel),
 		staking.NewDescription(nodeDirName, "", "", ""),
-		staking.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
+		staking.NewCommissionRates(sdk.ZeroDec(), sdk.OneDec(), sdk.NewDecWithPrec(1, 2)),
 		minSelfDel,
 	)
 	kb, err := keys.NewKeyBaseFromDir(clientDir)
