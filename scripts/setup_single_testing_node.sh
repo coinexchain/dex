@@ -32,7 +32,8 @@ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	--total-mint=0 \
 	--is-forbidden=false \
 	--url="www.coinex.org" \
-	--description="A public chain built for the decentralized exchange"
+	--description="A public chain built for the decentralized exchange" \
+    --identity=""
 cetd gentx --amount=100000000000000cet --min-self-delegation=100000000000000 --name bob <<<$'12345678\n12345678\n'
 cetd collect-gentxs
 
