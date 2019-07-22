@@ -37,8 +37,10 @@ func (keeper *Keeper) GetAliasListOfAccount(ctx sdk.Context, addr sdk.AccAddress
 	iter := store.Iterator(keyStart, keyEnd)
 	defer iter.Close()
 	res := make([]string, 0, 10)
+	start := len(keyStart) - 1
 	for ; iter.Valid(); iter.Next() {
-		res = append(res, string(iter.Value()))
+		alias := iter.Key()[start:]
+		res = append(res, string(alias))
 	}
 	return res
 }
@@ -60,7 +62,7 @@ func (keeper *Keeper) AddAlias(ctx sdk.Context, alias string, addr sdk.AccAddres
 	key := append(AliasToAccountKey, []byte(alias)...)
 	store.Set(key, addr)
 	key = getAccountToAliasKey(addr, []byte(alias))
-	store.Set(key, nil)
+	store.Set(key, []byte{})
 }
 
 func (keeper *Keeper) RemoveAlias(ctx sdk.Context, alias string, addr sdk.AccAddress) {

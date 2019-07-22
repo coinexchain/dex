@@ -26,7 +26,8 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 		}
 		k.AddAlias(ctx, msg.Alias, msg.Owner)
 	} else {
-		if addr := k.GetAddressFromAlias(ctx, msg.Alias); bytes.Equal(addr, msg.Owner) {
+		if addr := k.GetAddressFromAlias(ctx, msg.Alias); !bytes.Equal(addr, msg.Owner) {
+			//fmt.Printf("%x vs %x\n", addr, []byte(msg.Owner))
 			return types.ErrNoSuchAlias().Result()
 		}
 		k.RemoveAlias(ctx, msg.Alias, msg.Owner)
