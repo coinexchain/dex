@@ -58,21 +58,3 @@ func TestParseTokenInfo(t *testing.T) {
 	token, _ := parseTokenInfo()
 	require.Equal(t, "aaa", token.GetSymbol())
 }
-
-func TestAddGenesisTokenCmd(t *testing.T) {
-	//ctx := server.NewDefaultContext()
-	//cdc := app.MakeCodec()
-	//ctx.Config.Genesis = "genesis.json"
-	//
-	//viper.Set(flagOwner, "coinex1paehyhx9sxdfwc3rjf85vwn6kjnmzjemtedpnl")
-	//viper.Set(flagSymbol, "abbbc")
-	//viper.Set(flagTotalSupply, int64(100))
-	//viper.Set(flagTotalBurn, int64(100))
-	//viper.Set(flagTotalMint, int64(100))
-	//viper.Set("home", "./")
-	//
-	//defer os.Remove("./genesis.json")
-	//_, _, _ = initializeGenesisFile(cdc, "./genesis.json")
-	//cmd := AddGenesisTokenCmd(ctx, cdc)
-	//require.Equal(t, nil, cmd.RunE(nil, []string{}))
-}
