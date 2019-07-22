@@ -56,6 +56,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	if bytes.Equal(bi.Owner, msg.Sender) {
 		return types.ErrOwnerIsProhibited().Result()
 	}
+
 	stockInPool := bi.StockInPool.AddRaw(msg.Amount)
 	if msg.IsBuy {
 		stockInPool = bi.StockInPool.SubRaw(msg.Amount)

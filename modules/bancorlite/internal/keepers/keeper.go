@@ -67,9 +67,10 @@ type BancorInfoKeeper struct {
 	codec *codec.Codec
 }
 
-func NewBancorInfoKeeper(key sdk.StoreKey) *BancorInfoKeeper {
+func NewBancorInfoKeeper(key sdk.StoreKey, cdc *codec.Codec) *BancorInfoKeeper {
 	return &BancorInfoKeeper{
 		biKey: key,
+		codec: cdc,
 	}
 }
 
@@ -77,7 +78,7 @@ func (keeper *BancorInfoKeeper) Save(ctx sdk.Context, bi *BancorInfo) {
 	store := ctx.KVStore(keeper.biKey)
 	value := keeper.codec.MustMarshalBinaryBare(bi)
 	key := append(BancorInfoKey, []byte(bi.Token)...)
-	store.Set(key, value[:])
+	store.Set(key, value)
 }
 
 func (keeper *BancorInfoKeeper) Load(ctx sdk.Context, token string) *BancorInfo {
@@ -85,6 +86,9 @@ func (keeper *BancorInfoKeeper) Load(ctx sdk.Context, token string) *BancorInfo 
 	bi := &BancorInfo{}
 	key := append(BancorInfoKey, []byte(token)...)
 	biBytes := store.Get(key)
+	if biBytes == nil {
+		return nil
+	}
 	keeper.codec.MustUnmarshalBinaryBare(biBytes, bi)
 	return bi
 }
