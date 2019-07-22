@@ -28,8 +28,8 @@ var _ params.ParamSet = &Params{}
 // Params defines the parameters for the asset module.
 type Params struct {
 	// FeeParams define the rules according to which fee are charged.
-	IssueTokenFee     sdk.Coins `json:"issue_token_fee"`
-	IssueRareTokenFee sdk.Coins `json:"issue_rare_token_fee"`
+	IssueTokenFee     sdk.Coins `json:"issue_token_fee" yaml:"issue_token_fee"`
+	IssueRareTokenFee sdk.Coins `json:"issue_rare_token_fee" yaml:"issue_rare_token_fee"`
 }
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs

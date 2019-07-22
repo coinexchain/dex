@@ -2,10 +2,10 @@ package types
 
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
-	Params             Params   `json:"params"`
-	Tokens             []Token  `json:"tokens"`
-	Whitelist          []string `json:"whitelist"`
-	ForbiddenAddresses []string `json:"forbidden_addresses"`
+	Params             Params   `json:"params" yaml:"params"`
+	Tokens             []Token  `json:"tokens" yaml:"tokens"`
+	Whitelist          []string `json:"whitelist" yaml:"whitelist"`
+	ForbiddenAddresses []string `json:"forbidden_addresses" yaml:"forbidden_addresses"`
 }
 
 // NewGenesisState - Create a new genesis state

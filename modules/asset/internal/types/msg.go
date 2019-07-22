@@ -24,16 +24,16 @@ var (
 
 // MsgIssueToken
 type MsgIssueToken struct {
-	Name             string         `json:"name"`              // Name of the newly issued asset, limited to 32 unicode characters
-	Symbol           string         `json:"symbol"`            // token symbol, [a-z][a-z0-9]{1,7}
-	TotalSupply      int64          `json:"total_supply"`      // The total supply for this token [0]
-	Owner            sdk.AccAddress `json:"owner"`             // The initial issuer of this token [1]
-	Mintable         bool           `json:"mintable"`          // Whether this token could be minted after the issuing
-	Burnable         bool           `json:"burnable"`          // Whether this token could be burned
-	AddrForbiddable  bool           `json:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
-	TokenForbiddable bool           `json:"token_forbiddable"` // whether token could be global forbid
-	URL              string         `json:"url"`               //URL of token website
-	Description      string         `json:"description"`       //Description of token info
+	Name             string         `json:"name" yaml:"name"`              // Name of the newly issued asset, limited to 32 unicode characters
+	Symbol           string         `json:"symbol" yaml:"symbol"`            // token symbol, [a-z][a-z0-9]{1,7}
+	TotalSupply      int64          `json:"total_supply" yaml:"total_supply"`      // The total supply for this token [0]
+	Owner            sdk.AccAddress `json:"owner" yaml:"owner"`             // The initial issuer of this token [1]
+	Mintable         bool           `json:"mintable" yaml:"mintable"`          // Whether this token could be minted after the issuing
+	Burnable         bool           `json:"burnable" yaml:"burnable"`          // Whether this token could be burned
+	AddrForbiddable  bool           `json:"addr_forbiddable" yaml:"addr_forbiddable"`  // whether could forbid some addresses to forbid transaction
+	TokenForbiddable bool           `json:"token_forbiddable" yaml:"token_forbiddable"` // whether token could be global forbid
+	URL              string         `json:"url" yaml:"url"`               //URL of token website
+	Description      string         `json:"description" yaml:"description"`       //Description of token info
 }
 
 // NewMsgIssueToken
@@ -83,9 +83,9 @@ func (msg MsgIssueToken) GetSigners() []sdk.AccAddress {
 
 // MsgTransferOwnership
 type MsgTransferOwnership struct {
-	Symbol        string         `json:"symbol"`
-	OriginalOwner sdk.AccAddress `json:"original_owner"`
-	NewOwner      sdk.AccAddress `json:"new_owner"`
+	Symbol        string         `json:"symbol" yaml:"symbol"`
+	OriginalOwner sdk.AccAddress `json:"original_owner" yaml:"original_owner"`
+	NewOwner      sdk.AccAddress `json:"new_owner" yaml:"new_owner"`
 }
 
 func NewMsgTransferOwnership(symbol string, originalOwner sdk.AccAddress, newOwner sdk.AccAddress) MsgTransferOwnership {
@@ -134,9 +134,9 @@ func (msg MsgTransferOwnership) GetSigners() []sdk.AccAddress {
 
 // MsgMintToken
 type MsgMintToken struct {
-	Symbol       string         `json:"symbol"`
-	Amount       int64          `json:"amount"`
-	OwnerAddress sdk.AccAddress `json:"owner_address"`
+	Symbol       string         `json:"symbol" yaml:"symbol"`
+	Amount       int64          `json:"amount" yaml:"amount"`
+	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"`
 }
 
 func NewMsgMintToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToken {
@@ -187,9 +187,9 @@ func (msg MsgMintToken) GetSigners() []sdk.AccAddress {
 
 // MsgBurnToken
 type MsgBurnToken struct {
-	Symbol       string         `json:"symbol"`
-	Amount       int64          `json:"amount"`
-	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
+	Symbol       string         `json:"symbol" yaml:"symbol"`
+	Amount       int64          `json:"amount" yaml:"amount"`
+	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"` //token owner address
 }
 
 func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgBurnToken {
@@ -240,8 +240,8 @@ func (msg MsgBurnToken) GetSigners() []sdk.AccAddress {
 
 // MsgForbidToken
 type MsgForbidToken struct {
-	Symbol       string         `json:"symbol"`
-	OwnerAddress sdk.AccAddress `json:"owner_address"`
+	Symbol       string         `json:"symbol" yaml:"symbol"`
+	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"`
 }
 
 func NewMsgForbidToken(symbol string, owner sdk.AccAddress) MsgForbidToken {
@@ -284,8 +284,8 @@ func (msg MsgForbidToken) GetSigners() []sdk.AccAddress {
 
 // MsgUnForbidToken
 type MsgUnForbidToken struct {
-	Symbol       string         `json:"symbol"`
-	OwnerAddress sdk.AccAddress `json:"owner_address"`
+	Symbol       string         `json:"symbol" yaml:"symbol"`
+	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"`
 }
 
 func NewMsgUnForbidToken(symbol string, owner sdk.AccAddress) MsgUnForbidToken {
@@ -328,9 +328,9 @@ func (msg MsgUnForbidToken) GetSigners() []sdk.AccAddress {
 
 // MsgAddWhitelist
 type MsgAddTokenWhitelist struct {
-	Symbol       string           `json:"symbol"`
-	OwnerAddress sdk.AccAddress   `json:"owner_address"`
-	Whitelist    []sdk.AccAddress `json:"whitelist"`
+	Symbol       string           `json:"symbol" yaml:"symbol"`
+	OwnerAddress sdk.AccAddress   `json:"owner_address" yaml:"owner_address"`
+	Whitelist    []sdk.AccAddress `json:"whitelist" yaml:"whitelist"`
 }
 
 func NewMsgAddTokenWhitelist(symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) MsgAddTokenWhitelist {
@@ -377,9 +377,9 @@ func (msg MsgAddTokenWhitelist) GetSigners() []sdk.AccAddress {
 
 // MsgRemoveWhitelist
 type MsgRemoveTokenWhitelist struct {
-	Symbol       string           `json:"symbol"`
-	OwnerAddress sdk.AccAddress   `json:"owner_address"`
-	Whitelist    []sdk.AccAddress `json:"whitelist"`
+	Symbol       string           `json:"symbol" yaml:"symbol"`
+	OwnerAddress sdk.AccAddress   `json:"owner_address" yaml:"owner_address"`
+	Whitelist    []sdk.AccAddress `json:"whitelist" yaml:"whitelist"`
 }
 
 func NewMsgRemoveTokenWhitelist(symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) MsgRemoveTokenWhitelist {
@@ -426,9 +426,9 @@ func (msg MsgRemoveTokenWhitelist) GetSigners() []sdk.AccAddress {
 
 // MsgForbidAddr
 type MsgForbidAddr struct {
-	Symbol    string           `json:"symbol"`
-	OwnerAddr sdk.AccAddress   `json:"owner_address"`
-	Addresses []sdk.AccAddress `json:"addresses"`
+	Symbol    string           `json:"symbol" yaml:"symbol"`
+	OwnerAddr sdk.AccAddress   `json:"owner_address" yaml:"owner_address"`
+	Addresses []sdk.AccAddress `json:"addresses" yaml:"addresses"`
 }
 
 func NewMsgForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) MsgForbidAddr {
@@ -475,9 +475,9 @@ func (msg MsgForbidAddr) GetSigners() []sdk.AccAddress {
 
 // MsgUnForbidAddr
 type MsgUnForbidAddr struct {
-	Symbol    string           `json:"symbol"`
-	OwnerAddr sdk.AccAddress   `json:"owner_address"`
-	Addresses []sdk.AccAddress `json:"addresses"`
+	Symbol    string           `json:"symbol" yaml:"symbol"`
+	OwnerAddr sdk.AccAddress   `json:"owner_address" yaml:"owner_address"`
+	Addresses []sdk.AccAddress `json:"addresses" yaml:"addresses"`
 }
 
 func NewMsgUnForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) MsgUnForbidAddr {
@@ -524,9 +524,9 @@ func (msg MsgUnForbidAddr) GetSigners() []sdk.AccAddress {
 
 // MsgModifyURL
 type MsgModifyTokenURL struct {
-	Symbol       string         `json:"symbol"`
-	URL          string         `json:"url"`
-	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
+	Symbol       string         `json:"symbol" yaml:"symbol"`
+	URL          string         `json:"url" yaml:"url"`
+	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"` //token owner address
 }
 
 func NewMsgModifyTokenURL(symbol string, url string, owner sdk.AccAddress) MsgModifyTokenURL {
@@ -575,9 +575,9 @@ func (msg MsgModifyTokenURL) GetSigners() []sdk.AccAddress {
 
 // MsgModifyTokenDescription
 type MsgModifyTokenDescription struct {
-	Symbol       string         `json:"symbol"`
-	Description  string         `json:"description"`
-	OwnerAddress sdk.AccAddress `json:"owner_address"` //token owner address
+	Symbol       string         `json:"symbol" yaml:"symbol"`
+	Description  string         `json:"description" yaml:"description"`
+	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"` //token owner address
 }
 
 func NewMsgModifyTokenDescription(symbol string, description string, owner sdk.AccAddress) MsgModifyTokenDescription {

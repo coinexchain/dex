@@ -34,19 +34,63 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 	r.HandleFunc("/asset/tokens/{symbol}/descriptions", modifyTokenDescriptionHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
-// issueReq defines the properties of a issue token request's body.
-type issueReq struct {
-	BaseReq          rest.BaseReq `json:"base_req"`
-	Name             string       `json:"name"`
-	Symbol           string       `json:"symbol"`
-	TotalSupply      int64        `json:"total_supply"`
-	Mintable         bool         `json:"mintable"`
-	Burnable         bool         `json:"burnable"`
-	AddrForbiddable  bool         `json:"addr_forbiddable"`
-	TokenForbiddable bool         `json:"token_forbiddable"`
-	URL              string       `json:"url"`
-	Description      string       `json:"description"`
-}
+type (
+	// issueReq defines the properties of a issue token request's body
+	issueReq struct {
+		BaseReq          rest.BaseReq `json:"base_req" yaml:"base_req"`
+		Name             string       `json:"name" yaml:"name"`
+		Symbol           string       `json:"symbol" yaml:"symbol"`
+		TotalSupply      int64        `json:"total_supply" yaml:"total_supply"`
+		Mintable         bool         `json:"mintable" yaml:"mintable"`
+		Burnable         bool         `json:"burnable" yaml:"burnable"`
+		AddrForbiddable  bool         `json:"addr_forbiddable" yaml:"addr_forbiddable"`
+		TokenForbiddable bool         `json:"token_forbiddable" yaml:"token_forbiddable"`
+		URL              string       `json:"url" yaml:"url"`
+		Description      string       `json:"description" yaml:"description"`
+	}
+
+	// transferOwnerReq defines the properties of a transfer ownership request's body.
+	transferOwnerReq struct {
+		BaseReq  rest.BaseReq   `json:"base_req" yaml:"base_req"`
+		NewOwner sdk.AccAddress `json:"new_owner" yaml:"new_owner"`
+	}
+
+	// mintTokenReq defines the properties of a mint token request's body.
+	mintTokenReq struct {
+		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+		Amount  int64        `json:"amount" yaml:"amount"`
+	}
+
+	// burnTokenReq defines the properties of a burn token request's body.
+	burnTokenReq struct {
+		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+		Amount  int64        `json:"amount" yaml:"amount"`
+	}
+
+	// forbidTokenReq defines the properties of a forbid token request's body.
+	forbidTokenReq struct {
+		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+	}
+	// unforbidTokenReq defines the properties of a unforbid token request's body.
+	unForbidTokenReq struct {
+		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+	}
+	// addrListReq defines the properties of a whitelist or forbidden addr request's body.
+	addrListReq struct {
+		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
+		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
+	}
+	// modifyTokenURLReq defines the properties of a modify token url request's body.
+	modifyTokenURLReq struct {
+		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+		URL     string       `json:"url" yaml:"url"`
+	}
+	// modifyTokenDescriptionReq defines the properties of a modify token description request's body.
+	modifyTokenDescriptionReq struct {
+		BaseReq     rest.BaseReq `json:"base_req" yaml:"base_req"`
+		Description string       `json:"description" yaml:"description"`
+	}
+)
 
 // issueRequestHandlerFn - http request handler to issue new token.
 func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -76,12 +120,6 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
-}
-
-// transferOwnerReq defines the properties of a transfer ownership request's body.
-type transferOwnerReq struct {
-	BaseReq  rest.BaseReq   `json:"base_req"`
-	NewOwner sdk.AccAddress `json:"new_owner"`
 }
 
 // transferOwnershipRequestHandlerFn - http request handler to transfer token owner ship.
@@ -115,12 +153,6 @@ func transferOwnerRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 	}
 }
 
-// mintTokenReq defines the properties of a mint token request's body.
-type mintTokenReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	Amount  int64        `json:"amount"`
-}
-
 // mintTokenHandlerFn - http request handler to mint token.
 func mintTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -150,12 +182,6 @@ func mintTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 
 		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
-}
-
-// burnTokenReq defines the properties of a burn token request's body.
-type burnTokenReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	Amount  int64        `json:"amount"`
 }
 
 // burnTokenHandlerFn - http request handler to burn token.
@@ -189,11 +215,6 @@ func burnTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 	}
 }
 
-// forbidTokenReq defines the properties of a forbid token request's body.
-type forbidTokenReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-}
-
 // forbidTokenHandlerFn - http request handler to forbid token.
 func forbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -225,11 +246,6 @@ func forbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 	}
 }
 
-// unforbidTokenReq defines the properties of a unforbid token request's body.
-type unForbidTokenReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-}
-
 // unForbidTokenHandlerFn - http request handler to unforbid token.
 func unForbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -259,12 +275,6 @@ func unForbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 
 		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
-}
-
-// addrListReq defines the properties of a whitelist or forbidden addr request's body.
-type addrListReq struct {
-	BaseReq  rest.BaseReq     `json:"base_req"`
-	AddrList []sdk.AccAddress `json:"addr_list"`
 }
 
 // addWhitelistHandlerFn - http request handler to add whitelist.
@@ -391,12 +401,6 @@ func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 	}
 }
 
-// modifyTokenURLReq defines the properties of a modify token url request's body.
-type modifyTokenURLReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	URL     string       `json:"url"`
-}
-
 // modifyTokenURLHandlerFn - http request handler to modify token url.
 func modifyTokenURLHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -426,12 +430,6 @@ func modifyTokenURLHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 
 		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
-}
-
-// modifyTokenDescriptionReq defines the properties of a modify token description request's body.
-type modifyTokenDescriptionReq struct {
-	BaseReq     rest.BaseReq `json:"base_req"`
-	Description string       `json:"description"`
 }
 
 // modifyTokenDescriptionHandlerFn - http request handler to modify token description.
