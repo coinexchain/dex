@@ -214,27 +214,11 @@ func parseUnForbidAddrFlags(owner sdk.AccAddress) (*types.MsgUnForbidAddr, error
 	return &msg, nil
 }
 
-func parseModifyTokenURLFlags(owner sdk.AccAddress) (*types.MsgModifyTokenURL, error) {
-	if err := checkFlags(modifyTokenURLFlags, "$ cetcli tx asset modify-token-url -h"); err != nil {
-		return nil, err
-	}
+func parseModifyTokenInfoFlags(owner sdk.AccAddress) (*types.MsgModifyTokenInfo, error) {
 
-	msg := types.NewMsgModifyTokenURL(
+	msg := types.NewMsgModifyTokenInfo(
 		viper.GetString(flagSymbol),
 		viper.GetString(flagTokenURL),
-		owner,
-	)
-
-	return &msg, nil
-}
-
-func parseModifyTokenDescriptionFlags(owner sdk.AccAddress) (*types.MsgModifyTokenDescription, error) {
-	if err := checkFlags(modifyTokenDescriptionFlags, "$ cetcli tx asset modify-token-description -h"); err != nil {
-		return nil, err
-	}
-
-	msg := types.NewMsgModifyTokenDescription(
-		viper.GetString(flagSymbol),
 		viper.GetString(flagTokenDescription),
 		owner,
 	)

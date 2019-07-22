@@ -30,8 +30,7 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 	r.HandleFunc("/asset/tokens/{symbol}/unforbidden/whitelist", removeWhitelistHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc("/asset/tokens/{symbol}/forbidden/addresses", forbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc("/asset/tokens/{symbol}/unforbidden/addresses", unForbidAddrHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc("/asset/tokens/{symbol}/urls", modifyTokenURLHandlerFn(cdc, cliCtx)).Methods("POST")
-	r.HandleFunc("/asset/tokens/{symbol}/descriptions", modifyTokenDescriptionHandlerFn(cdc, cliCtx)).Methods("POST")
+	r.HandleFunc("/asset/tokens/{symbol}/infos", modifyTokenInfoHandlerFn(cdc, cliCtx)).Methods("POST")
 }
 
 type (
@@ -80,14 +79,10 @@ type (
 		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
 		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
 	}
-	// modifyTokenURLReq defines the properties of a modify token url request's body.
-	modifyTokenURLReq struct {
-		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
-		URL     string       `json:"url" yaml:"url"`
-	}
-	// modifyTokenDescriptionReq defines the properties of a modify token description request's body.
-	modifyTokenDescriptionReq struct {
+	// modifyTokenInfoReq defines the properties of a modify token info request's body.
+	modifyTokenInfoReq struct {
 		BaseReq     rest.BaseReq `json:"base_req" yaml:"base_req"`
+		URL         string       `json:"url" yaml:"url"`
 		Description string       `json:"description" yaml:"description"`
 	}
 )
@@ -401,10 +396,10 @@ func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 	}
 }
 
-// modifyTokenURLHandlerFn - http request handler to modify token url.
-func modifyTokenURLHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+// modifyTokenInfoHandlerFn - http request handler to modify token url.
+func modifyTokenInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req modifyTokenURLReq
+		var req modifyTokenInfoReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
@@ -422,38 +417,7 @@ func modifyTokenURLHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 
 		symbol := getSymbol(r)
 
-		msg := types.NewMsgModifyTokenURL(symbol, req.URL, owner)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
-}
-
-// modifyTokenDescriptionHandlerFn - http request handler to modify token description.
-func modifyTokenDescriptionHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req modifyTokenDescriptionReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-
-		msg := types.NewMsgModifyTokenDescription(symbol, req.Description, owner)
+		msg := types.NewMsgModifyTokenInfo(symbol, req.URL, req.Description, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

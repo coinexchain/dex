@@ -12,6 +12,9 @@ const (
 	MaxTokenIdentityLength    = 3000
 	MaxTokenURLLength         = 100
 	MaxTokenDescriptionLength = 1024
+
+	// constant used in flags to indicate that token info field should not be updated
+	DoNotModifyTokenInfo = "[do-not-modify]"
 )
 
 // Token is an interface used to store asset at a given token within state.

@@ -19,8 +19,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgRemoveTokenWhitelist{}, "asset/MsgRemoveTokenWhitelist", nil)
 	cdc.RegisterConcrete(MsgForbidAddr{}, "asset/MsgForbidAddr", nil)
 	cdc.RegisterConcrete(MsgUnForbidAddr{}, "asset/MsgUnForbidAddr", nil)
-	cdc.RegisterConcrete(MsgModifyTokenURL{}, "asset/MsgModifyTokenURL", nil)
-	cdc.RegisterConcrete(MsgModifyTokenDescription{}, "asset/MsgModifyTokenDescription", nil)
+	cdc.RegisterConcrete(MsgModifyTokenInfo{}, "asset/MsgModifyTokenInfo", nil)
 }
 
 // ModuleCdc wide codec

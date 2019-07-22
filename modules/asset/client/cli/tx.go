@@ -47,8 +47,7 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 		GetCmdRemoveTokenWhitelist(cdc),
 		GetCmdForbidAddr(cdc),
 		GetCmdUnForbidAddr(cdc),
-		GetCmdModifyTokenURL(cdc),
-		GetCmdModifyTokenDescription(cdc),
+		GetCmdModifyTokenInfo(cdc),
 	)...)
 
 	return assTxCmd
@@ -579,76 +578,27 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 var modifyTokenURLFlags = []string{
 	flagSymbol,
 	flagTokenURL,
-}
-
-// GetCmdModifyTokenURL will create a modify token url tx and sign.
-func GetCmdModifyTokenURL(cdc *codec.Codec) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "modify-token-url",
-		Short: "Modify token url",
-		Long: strings.TrimSpace(
-			`Create and sign a modify token url msg, broadcast to nodes.
-
-Example:
-$ cetcli tx asset modify-token-url --symbol="abc" \
-	--url="www.abc.com" \
-	--from mykey
-`),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseModifyTokenURLFlags(owner)
-			if err != nil {
-				return err
-			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
-		},
-	}
-
-	cmd.Flags().String(flagSymbol, "", "which token will be modify")
-	cmd.Flags().String(flagTokenURL, "", "the url of token")
-
-	_ = cmd.MarkFlagRequired(client.FlagFrom)
-	for _, flag := range modifyTokenURLFlags {
-		_ = cmd.MarkFlagRequired(flag)
-	}
-
-	return cmd
-}
-
-var modifyTokenDescriptionFlags = []string{
-	flagSymbol,
 	flagTokenDescription,
 }
 
-// GetCmdModifyTokenDescription will create a modify token description tx and sign.
-func GetCmdModifyTokenDescription(cdc *codec.Codec) *cobra.Command {
+// GetCmdModifyTokenInfo will create a modify token info tx and sign.
+func GetCmdModifyTokenInfo(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "modify-token-description",
-		Short: "Modify token description",
+		Use:   "modify-token-info",
+		Short: "Modify token info",
 		Long: strings.TrimSpace(
-			`Create and sign a modify token description msg, broadcast to nodes.
+			`Create and sign a modify token info msg, broadcast to nodes.
 
 Example:
-$ cetcli tx asset modify-token-description --symbol="abc" \
+$ cetcli tx asset modify-token-info --symbol="abc" \
+	--url="www.abc.com" \
 	--description="abc example description" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			owner := cliCtx.GetFromAddress()
-			msg, err := parseModifyTokenDescriptionFlags(owner)
+			msg, err := parseModifyTokenInfoFlags(owner)
 			if err != nil {
 				return err
 			}
@@ -668,12 +618,10 @@ $ cetcli tx asset modify-token-description --symbol="abc" \
 	}
 
 	cmd.Flags().String(flagSymbol, "", "which token will be modify")
-	cmd.Flags().String(flagTokenDescription, "", "the description of token")
+	cmd.Flags().String(flagTokenURL, types.DoNotModifyTokenInfo, "the url of token")
+	cmd.Flags().String(flagTokenDescription, types.DoNotModifyTokenInfo, "the description of token")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
-	for _, flag := range modifyTokenDescriptionFlags {
-		_ = cmd.MarkFlagRequired(flag)
-	}
 
 	return cmd
 }

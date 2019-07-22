@@ -18,8 +18,7 @@ var (
 	_ sdk.Msg = &MsgRemoveTokenWhitelist{}
 	_ sdk.Msg = &MsgForbidAddr{}
 	_ sdk.Msg = &MsgUnForbidAddr{}
-	_ sdk.Msg = &MsgModifyTokenDescription{}
-	_ sdk.Msg = &MsgModifyTokenURL{}
+	_ sdk.Msg = &MsgModifyTokenInfo{}
 )
 
 // MsgIssueToken
@@ -522,33 +521,35 @@ func (msg MsgUnForbidAddr) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddr}
 }
 
-// MsgModifyURL
-type MsgModifyTokenURL struct {
+// MsgModifyTokenInfo
+type MsgModifyTokenInfo struct {
 	Symbol       string         `json:"symbol" yaml:"symbol"`
 	URL          string         `json:"url" yaml:"url"`
+	Description  string         `json:"description" yaml:"description"`
 	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"` //token owner address
 }
 
-func NewMsgModifyTokenURL(symbol string, url string, owner sdk.AccAddress) MsgModifyTokenURL {
-	return MsgModifyTokenURL{
+func NewMsgModifyTokenInfo(symbol string, url string, description string, owner sdk.AccAddress) MsgModifyTokenInfo {
+	return MsgModifyTokenInfo{
 		symbol,
 		url,
+		description,
 		owner,
 	}
 }
 
 // Route Implements Msg.
-func (msg MsgModifyTokenURL) Route() string {
+func (msg MsgModifyTokenInfo) Route() string {
 	return RouterKey
 }
 
 // Type Implements Msg.
-func (msg MsgModifyTokenURL) Type() string {
-	return "modify_token_url"
+func (msg MsgModifyTokenInfo) Type() string {
+	return "modify_token_info"
 }
 
 // ValidateBasic Implements Msg.
-func (msg MsgModifyTokenURL) ValidateBasic() sdk.Error {
+func (msg MsgModifyTokenInfo) ValidateBasic() sdk.Error {
 	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
 		return err
 	}
@@ -560,53 +561,6 @@ func (msg MsgModifyTokenURL) ValidateBasic() sdk.Error {
 	if utf8.RuneCountInString(msg.URL) > MaxTokenURLLength {
 		return ErrInvalidTokenURL(msg.URL)
 	}
-	return nil
-}
-
-// GetSignBytes Implements Msg.
-func (msg MsgModifyTokenURL) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
-}
-
-// GetSigners Implements Msg.
-func (msg MsgModifyTokenURL) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.OwnerAddress}
-}
-
-// MsgModifyTokenDescription
-type MsgModifyTokenDescription struct {
-	Symbol       string         `json:"symbol" yaml:"symbol"`
-	Description  string         `json:"description" yaml:"description"`
-	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"` //token owner address
-}
-
-func NewMsgModifyTokenDescription(symbol string, description string, owner sdk.AccAddress) MsgModifyTokenDescription {
-	return MsgModifyTokenDescription{
-		symbol,
-		description,
-		owner,
-	}
-}
-
-// Route Implements Msg.
-func (msg MsgModifyTokenDescription) Route() string {
-	return RouterKey
-}
-
-// Type Implements Msg.
-func (msg MsgModifyTokenDescription) Type() string {
-	return "modify_token_description"
-}
-
-// ValidateBasic Implements Msg.
-func (msg MsgModifyTokenDescription) ValidateBasic() sdk.Error {
-	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
-		return err
-	}
-
-	if msg.OwnerAddress.Empty() {
-		return ErrNilTokenOwner()
-	}
 
 	if len(msg.Description) > MaxTokenDescriptionLength {
 		return ErrInvalidTokenDescription(msg.Description)
@@ -615,11 +569,11 @@ func (msg MsgModifyTokenDescription) ValidateBasic() sdk.Error {
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgModifyTokenDescription) GetSignBytes() []byte {
+func (msg MsgModifyTokenInfo) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // GetSigners Implements Msg.
-func (msg MsgModifyTokenDescription) GetSigners() []sdk.AccAddress {
+func (msg MsgModifyTokenInfo) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.OwnerAddress}
 }

@@ -32,8 +32,7 @@ type Keeper interface {
 	RemoveTokenWhitelist(ctx sdk.Context, symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) sdk.Error
 	ForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
 	UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
-	ModifyTokenURL(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string) sdk.Error
-	ModifyTokenDescription(ctx sdk.Context, symbol string, owner sdk.AccAddress, description string) sdk.Error
+	ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string) sdk.Error
 
 	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
@@ -301,29 +300,23 @@ func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner s
 	return nil
 }
 
-//ModifyTokenURL - modify token url property
-func (keeper BaseKeeper) ModifyTokenURL(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string) sdk.Error {
+//ModifyTokenInfo - modify token info property
+func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
 		return err
 	}
 
-	if err := token.SetURL(url); err != nil {
-		return err
+	if url != types.DoNotModifyTokenInfo {
+		if err := token.SetURL(url); err != nil {
+			return err
+		}
 	}
 
-	return keeper.SetToken(ctx, token)
-}
-
-//ModifyTokenURL - modify token url property
-func (keeper BaseKeeper) ModifyTokenDescription(ctx sdk.Context, symbol string, owner sdk.AccAddress, description string) sdk.Error {
-	token, err := keeper.checkPrecondition(ctx, symbol, owner)
-	if err != nil {
-		return err
-	}
-
-	if err := token.SetDescription(description); err != nil {
-		return err
+	if description != types.DoNotModifyTokenInfo {
+		if err := token.SetDescription(description); err != nil {
+			return err
+		}
 	}
 
 	return keeper.SetToken(ctx, token)

@@ -34,10 +34,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgForbidAddr(ctx, keeper, msg)
 		case types.MsgUnForbidAddr:
 			return handleMsgUnForbidAddr(ctx, keeper, msg)
-		case types.MsgModifyTokenURL:
-			return handleMsgModifyTokenURL(ctx, keeper, msg)
-		case types.MsgModifyTokenDescription:
-			return handleMsgModifyTokenDescription(ctx, keeper, msg)
+		case types.MsgModifyTokenInfo:
+			return handleMsgModifyTokenInfo(ctx, keeper, msg)
 
 		default:
 			errMsg := "Unrecognized asset Msg type: %s" + msg.Type()
@@ -333,13 +331,13 @@ func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbid
 	}
 }
 
-// handleMsgModifyTokenURL - Handle MsgModifyTokenURL
-func handleMsgModifyTokenURL(ctx sdk.Context, keeper Keeper, msg types.MsgModifyTokenURL) sdk.Result {
+// handleMsgModifyTokenInfo - Handle MsgModifyTokenInfo
+func handleMsgModifyTokenInfo(ctx sdk.Context, keeper Keeper, msg types.MsgModifyTokenInfo) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
 
-	if err := keeper.ModifyTokenURL(ctx, msg.Symbol, msg.OwnerAddress, msg.URL); err != nil {
+	if err := keeper.ModifyTokenInfo(ctx, msg.Symbol, msg.OwnerAddress, msg.URL, msg.Description); err != nil {
 		return err.Result()
 	}
 
@@ -350,25 +348,6 @@ func handleMsgModifyTokenURL(ctx sdk.Context, keeper Keeper, msg types.MsgModify
 			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
 			sdk.NewAttribute(types.AttributeKeyURL, msg.URL),
 		),
-	})
-	return sdk.Result{
-		Events: ctx.EventManager().Events(),
-	}
-}
-
-// handleMsgModifyTokenDescription - Handle MsgModifyTokenDescription
-func handleMsgModifyTokenDescription(ctx sdk.Context, keeper Keeper, msg types.MsgModifyTokenDescription) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
-	if err := keeper.ModifyTokenDescription(ctx, msg.Symbol, msg.OwnerAddress, msg.Description); err != nil {
-		return err.Result()
-	}
-
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
 			sdk.NewAttribute(types.AttributeKeyDescription, msg.Description),
