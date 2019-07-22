@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/coinexchain/dex/modules/bancorlite"
 	"io"
 	"os"
 
@@ -91,6 +92,7 @@ func init() {
 		incentive.AppModuleBasic{},
 		asset.AppModuleBasic{},
 		market.AppModuleBasic{},
+		bancorlite.AppModuleBasic{},
 	}
 
 	ModuleBasics = NewOrderedBasicManager(modules)
@@ -127,6 +129,7 @@ type CetChainApp struct {
 	tkeyParams   *sdk.TransientStoreKey
 	keyAsset     *sdk.KVStoreKey
 	keyMarket    *sdk.KVStoreKey
+	keyBancor    *sdk.KVStoreKey
 	keyIncentive *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
@@ -147,6 +150,7 @@ type CetChainApp struct {
 	tokenKeeper     asset.TokenKeeper
 	paramsKeeper    params.Keeper
 	marketKeeper    market.Keeper
+	bancorKeeper    bancorlite.Keeper
 	msgQueProducer  msgqueue.Producer
 
 	// the module manager
@@ -205,6 +209,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 		tkeyParams:     sdk.NewTransientStoreKey(params.TStoreKey),
 		keyAsset:       sdk.NewKVStoreKey(asset.StoreKey),
 		keyMarket:      sdk.NewKVStoreKey(market.StoreKey),
+		keyBancor:      sdk.NewKVStoreKey(bancorlite.StoreKey),
 		keyIncentive:   sdk.NewKVStoreKey(incentive.StoreKey),
 	}
 }
@@ -338,7 +343,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.msgQueProducer,
 		app.paramsKeeper.Subspace(market.StoreKey),
 	)
-
+	app.bancorKeeper = bancorlite.NewBaseKeeper(bancorlite.NewBancorInfoKeeper(app.keyBancor, app.cdc), app.bankxKeeper, app.assetKeeper)
 	// register the staking hooks
 	// NOTE: The stakingKeeper above is passed by reference, so that it can be
 	// modified like below:
@@ -364,6 +369,7 @@ func (app *CetChainApp) InitModules() {
 		stakingx.NewAppModule(app.stakingXKeeper),
 		asset.NewAppModule(app.assetKeeper),
 		market.NewAppModule(app.marketKeeper),
+		bancorlite.NewAppModule(app.bancorKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 	}
 
@@ -392,6 +398,7 @@ func (app *CetChainApp) InitModules() {
 		stakingx.ModuleName,
 		asset.ModuleName,
 		market.ModuleName,
+		bancorlite.ModuleName,
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
 	}
 

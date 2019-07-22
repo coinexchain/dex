@@ -11,7 +11,8 @@ const (
 )
 
 var (
-	NewBaseKeeper = keepers.NewKeeper
+	NewBaseKeeper       = keepers.NewKeeper
+	NewBancorInfoKeeper = keepers.NewBancorInfoKeeper
 )
 
 type (

@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/coinexchain/dex/modules/bancorlite"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -39,6 +40,7 @@ type GenesisState struct {
 	SlashingData slashing.GenesisState     `json:"slashing"`
 	AssetData    asset.GenesisState        `json:"asset"`
 	MarketData   market.GenesisState       `json:"market"`
+	BancorData   bancorlite.GenesisState   `json:"bancorlite"`
 	Incentive    incentive.GenesisState    `json:"incentive"`
 	Supply       supply.GenesisState       `json:"supply"`
 	GenUtil      genutil.GenesisState      `json:"genutil"`
@@ -59,6 +61,7 @@ func NewDefaultGenesisState() GenesisState {
 		SlashingData: slashing.DefaultGenesisState(),
 		AssetData:    asset.DefaultGenesisState(),
 		MarketData:   market.DefaultGenesisState(),
+		BancorData:   bancorlite.DefaultGenesisState(),
 		Incentive:    incentive.DefaultGenesisState(),
 		Supply:       supply.DefaultGenesisState(),
 		GenUtil:      genutil.GenesisState{},
@@ -86,6 +89,7 @@ func FromMap(cdc *codec.Codec, g map[string]json.RawMessage) GenesisState {
 	unmarshalField(cdc, g[slashing.ModuleName], &gs.SlashingData)
 	unmarshalField(cdc, g[asset.ModuleName], &gs.AssetData)
 	unmarshalField(cdc, g[market.ModuleName], &gs.MarketData)
+	unmarshalField(cdc, g[bancorlite.ModuleName], &gs.BancorData)
 	unmarshalField(cdc, g[incentive.ModuleName], &gs.Incentive)
 	unmarshalField(cdc, g[supply.ModuleName], &gs.Supply)
 	unmarshalField(cdc, g[genutil.ModuleName], &gs.GenUtil)

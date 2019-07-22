@@ -28,7 +28,7 @@ import (
 
 type testInput struct {
 	ctx     sdk.Context
-	bik     *keepers.Keeper
+	bik     keepers.Keeper
 	handler sdk.Handler
 	akp     auth.AccountKeeper
 	keys    storeKeys
@@ -241,7 +241,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	keeper := keepers.NewKeeper(bik, bk, ak)
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 
-	return testInput{ctx: ctx, bik: keeper, handler: NewHandler(*keeper), akp: akp, keys: keys, cdc: cdc}
+	return testInput{ctx: ctx, bik: keeper, handler: NewHandler(keeper), akp: akp, keys: keys, cdc: cdc}
 }
 
 func Test_handleMsgBancorInit(t *testing.T) {
@@ -260,7 +260,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 			name: "positive",
 			args: args{
 				ctx: input.ctx,
-				k:   *input.bik,
+				k:   input.bik,
 				msg: types.MsgBancorInit{
 					Owner:     haveCetAddress,
 					Token:     stock,
@@ -296,7 +296,7 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 			name: "negative token",
 			args: args{
 				ctx: input.ctx,
-				k:   *input.bik,
+				k:   input.bik,
 				msg: types.MsgBancorTrade{
 					Sender:     haveCetAddress,
 					Token:      stock,

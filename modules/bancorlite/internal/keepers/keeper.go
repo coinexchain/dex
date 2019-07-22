@@ -112,8 +112,8 @@ type Keeper struct {
 
 func NewKeeper(bik *BancorInfoKeeper,
 	bxk types.ExpectedBankxKeeper,
-	axk types.ExpectedAssetStatusKeeper) *Keeper {
-	return &Keeper{
+	axk types.ExpectedAssetStatusKeeper) Keeper {
+	return Keeper{
 		Bik: bik,
 		Bxk: bxk,
 		Axk: axk,
