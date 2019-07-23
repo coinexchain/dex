@@ -1,9 +1,8 @@
 package keeper
 
 import (
-	ax "github.com/coinexchain/dex/modules/authx/types"
-	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
-	"github.com/coinexchain/dex/types"
+	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -26,8 +25,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/coinexchain/dex/modules/authx"
+	ax "github.com/coinexchain/dex/modules/authx/types"
+	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/testutil"
+	"github.com/coinexchain/dex/types"
 )
 
 type fakeAssetStatusKeeper struct{}
@@ -177,7 +179,7 @@ func TestFreezeUnFreezeInvalidAccount(t *testing.T) {
 	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds;  < 500000000cet"), err)
 
 	err = keeper.UnFreezeCoins(ctx, myaddr, freezeCoins)
-	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds;  < 500000000cet"), err)
+	require.Equal(t, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", myaddr)), err)
 }
 
 func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {
@@ -194,7 +196,7 @@ func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {
 	require.Nil(t, err)
 
 	err = keeper.UnFreezeCoins(ctx, myaddr, InvalidFreezeCoins)
-	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds; 5cet < 50cet"), err)
+	require.Equal(t, sdk.ErrInsufficientCoins("account has insufficient coins to unfreeze"), err)
 }
 
 func TestGetTotalCoins(t *testing.T) {

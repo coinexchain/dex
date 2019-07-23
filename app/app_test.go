@@ -88,7 +88,7 @@ func addModuleAccounts(genState *GenesisState) {
 func addAccountForDanglingCET(amount int64, genState *GenesisState) {
 	accAmount := cetToken().GetTotalSupply() - amount
 	if accAmount > 0 {
-		_, acc := testutil.NewBaseAccount(accAmount, 0, 0)
+		_, acc := testutil.NewBaseAccount(accAmount, 1, 0)
 		genAcc := genaccounts.NewGenesisAccount(&acc)
 		genState.Accounts = append(genState.Accounts, genAcc)
 	}
@@ -390,6 +390,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 	communityPool := app.distrKeeper.GetFeePool(ctx).CommunityPool
 	require.True(t, communityPool.AmountOf("cet").Equal(sdk.NewDec(1e8)))
 }
+
 func TestLockedSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
@@ -414,8 +415,8 @@ func TestLockedSend(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeType(0), result.Code)
 
-	//authxMacc := app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
-	//require.True(t, authxMacc.GetCoins().Empty())
+	authxMacc := app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
+	require.True(t, authxMacc.GetCoins().Empty())
 
 	msgInv := crisis.NewMsgVerifyInvariant(fromAddr, supply.ModuleName, "total-supply")
 	tx = newStdTxBuilder().
@@ -424,7 +425,6 @@ func TestLockedSend(t *testing.T) {
 	result = app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 
-	//authxMacc = app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
-	//require.False(t, authxMacc.GetCoins().Empty())
-
+	authxMacc = app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
+	require.False(t, authxMacc.GetCoins().Empty())
 }

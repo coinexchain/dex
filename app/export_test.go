@@ -23,6 +23,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -82,12 +83,13 @@ func findAccount(t *testing.T, state GenesisState) *genaccounts.GenesisAccount {
 		return state.Accounts[i].ModuleName < state.Accounts[j].ModuleName
 	})
 
-	require.Equal(t, 5, len(state.Accounts))
+	require.Equal(t, 6, len(state.Accounts))
 	require.Equal(t, "", state.Accounts[0].ModuleName)
 	require.Equal(t, staking.BondedPoolName, state.Accounts[1].ModuleName)
 	require.Equal(t, staking.NotBondedPoolName, state.Accounts[2].ModuleName)
-	require.Equal(t, distribution.ModuleName, state.Accounts[3].ModuleName)
-	require.Equal(t, gov.ModuleName, state.Accounts[4].ModuleName)
+	require.Equal(t, authx.ModuleName, state.Accounts[3].ModuleName)
+	require.Equal(t, distribution.ModuleName, state.Accounts[4].ModuleName)
+	require.Equal(t, gov.ModuleName, state.Accounts[5].ModuleName)
 
 	return &state.Accounts[0]
 }
