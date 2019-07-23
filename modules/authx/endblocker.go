@@ -25,22 +25,22 @@ func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeepe
 }
 
 func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
-	var coins = sdk.Coins{}
-	var temp types.LockedCoins
+	var unlocked = sdk.Coins{}
+	var stillLocked types.LockedCoins
 	for _, c := range accx.LockedCoins {
 		if c.UnlockTime <= time {
-			coins = coins.Add(sdk.Coins{c.Coin})
+			unlocked = unlocked.Add(sdk.Coins{c.Coin})
 		} else {
-			temp = append(temp, c)
+			stillLocked = append(stillLocked, c)
 		}
 	}
-	coins = coins.Sort()
+	unlocked = unlocked.Sort()
 
 	acc := keeper.GetAccount(ctx, accx.Address)
-	newCoins := acc.GetCoins().Add(coins)
+	newCoins := acc.GetCoins().Add(unlocked)
 	_ = acc.SetCoins(newCoins)
 	keeper.SetAccount(ctx, acc)
 
-	accx.LockedCoins = temp
+	accx.LockedCoins = stillLocked
 	kx.SetAccountX(ctx, *accx)
 }
