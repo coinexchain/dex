@@ -28,18 +28,18 @@ func TestBancorInfo_UpdateStockInPool(t *testing.T) {
 		want   bool
 	}{
 		{
-			name:"positive",
-			fields:fields{
-				Owner:owner,
-				Token:"bch",
-				MaxSupply: sdk.NewInt(100),
-				MaxPrice:sdk.NewDec(10),
-				StockInPool:sdk.NewInt(10),
+			name: "positive",
+			fields: fields{
+				Owner:       owner,
+				Token:       "bch",
+				MaxSupply:   sdk.NewInt(100),
+				MaxPrice:    sdk.NewDec(10),
+				StockInPool: sdk.NewInt(10),
 			},
-			args:args{
-				stockInPool:sdk.NewInt(20),
+			args: args{
+				stockInPool: sdk.NewInt(20),
 			},
-			want:true,
+			want: true,
 		},
 	}
 	for _, tt := range tests {
@@ -76,17 +76,17 @@ func TestBancorInfo_IsConsistent(t *testing.T) {
 		want   bool
 	}{
 		{
-			name:"positive",
-			fields:fields{
-				Owner:owner,
-				Token:"bch",
-				MaxSupply: sdk.NewInt(100),
-				MaxPrice:sdk.NewDec(10),
-				Price:sdk.NewDec(1),
-				StockInPool:sdk.NewInt(90),
-				MoneyInPool:sdk.NewInt(5),
+			name: "positive",
+			fields: fields{
+				Owner:       owner,
+				Token:       "bch",
+				MaxSupply:   sdk.NewInt(100),
+				MaxPrice:    sdk.NewDec(10),
+				Price:       sdk.NewDec(1),
+				StockInPool: sdk.NewInt(90),
+				MoneyInPool: sdk.NewInt(5),
 			},
-			want:true,
+			want: true,
 		},
 	}
 	for _, tt := range tests {

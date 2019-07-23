@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-
 func TestAppModuleBasic_ValidateGenesis(t *testing.T) {
 	type args struct {
 		data json.RawMessage
@@ -17,12 +16,12 @@ func TestAppModuleBasic_ValidateGenesis(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:"positive",
-			a:AppModuleBasic{},
-			args:args{
+			name: "positive",
+			a:    AppModuleBasic{},
+			args: args{
 				data: AppModuleBasic{}.DefaultGenesis(),
 			},
-			wantErr:false,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
