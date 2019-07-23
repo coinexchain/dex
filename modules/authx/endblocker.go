@@ -18,13 +18,13 @@ func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeepe
 				//always account exist
 				continue
 			}
-			TransferUnlockedCoins(&acc, currentTime, ctx, aux, keeper)
+			transferUnlockedCoins(&acc, currentTime, ctx, aux, keeper)
 			aux.RemoveFromUnlockedCoinsQueueByKey(ctx, iterator.Key())
 		}
 	}
 }
 
-func TransferUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
+func transferUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
 	var coins = sdk.Coins{}
 	var temp types.LockedCoins
 	for _, c := range accx.LockedCoins {
