@@ -4,6 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/crisis"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	dex "github.com/coinexchain/dex/types"
 )
@@ -37,6 +39,16 @@ func wrapAnteHandler(ah sdk.AnteHandler,
 		if err := doAdditionalCheck(ctx, stdTx, simulate, axk, anteHelper); err != nil {
 			res = err.Result()
 			abort = true
+		}
+
+		//finally, check msg type to call PreTotalSupply conditionally
+		for _, msg := range stdTx.Msgs {
+			switch msg := msg.(type) {
+			case crisis.MsgVerifyInvariant:
+				if msg.InvariantModuleName == supply.ModuleName {
+					_ = axk.PreTotalSupply(ctx)
+				}
+			}
 		}
 
 		return

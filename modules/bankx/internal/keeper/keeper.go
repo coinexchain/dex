@@ -85,11 +85,7 @@ func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 	k.Axk.SetAccountX(ctx, accx)
 
 	_, err := k.Bk.AddCoins(ctx, addr, amt)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (k Keeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
