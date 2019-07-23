@@ -45,22 +45,23 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		MoneyInPool: sdk.ZeroInt(),
 	}
 	k.Bik.Save(ctx, bi)
-	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(
-			EventTypeBancorlite,
-			sdk.NewAttribute(AttributeKeyCreateFor, bi.Token),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(AttributeOwner, bi.Owner.String()),
-			sdk.NewAttribute(AttributeMaxSupply, bi.MaxSupply.String()),
-		),
-	})
-
-	return sdk.Result{
-		Events: ctx.EventManager().Events(),
-	}
+	//ctx.EventManager().EmitEvents(sdk.Events{
+	//	sdk.NewEvent(
+	//		EventTypeBancorlite,
+	//		sdk.NewAttribute(AttributeKeyCreateFor, bi.Token),
+	//	),
+	//	sdk.NewEvent(
+	//		sdk.EventTypeMessage,
+	//		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+	//		sdk.NewAttribute(AttributeOwner, bi.Owner.String()),
+	//		sdk.NewAttribute(AttributeMaxSupply, bi.MaxSupply.String()),
+	//	),
+	//})
+	//
+	//return sdk.Result{
+	//	Events: ctx.EventManager().Events(),
+	//}
+	return sdk.Result{}
 }
 
 func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) sdk.Result {
