@@ -90,9 +90,7 @@ func (AppModule) Name() string {
 }
 
 // register invariants
-func (am AppModule) RegisterInvariants(invReg sdk.InvariantRegistry) {
-	invReg.RegisterRoute(ModuleName, "cet-invariant", SupplyCETInvariant(am.stakingXKeeper))
-}
+func (am AppModule) RegisterInvariants(invReg sdk.InvariantRegistry) {}
 
 // module message route name
 func (AppModule) Route() string { return "" }
