@@ -5,8 +5,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/coinexchain/dex/modules/bancorlite"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -33,6 +31,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bancorlite"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
