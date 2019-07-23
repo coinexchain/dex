@@ -1,12 +1,10 @@
 package app
 
 import (
-	"github.com/coinexchain/dex/modules/authx/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/coinexchain/dex/modules/authx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -14,6 +12,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/authx/types"
 )
 
 func TestFromMap(t *testing.T) {

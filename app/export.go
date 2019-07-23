@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/coinexchain/dex/modules/incentive"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 
@@ -13,6 +11,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+
+	"github.com/coinexchain/dex/modules/incentive"
 )
 
 // export the state of CoinEx chain for a genesis file
