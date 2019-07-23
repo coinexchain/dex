@@ -997,6 +997,7 @@ paths:
         x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     post:
       summary: Submit a redelegation
+      operationId: submitRedelegation
       parameters:
         - in: body
           name: delegation
