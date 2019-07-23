@@ -391,7 +391,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 	require.True(t, communityPool.AmountOf("cet").Equal(sdk.NewDec(1e8)))
 }
 
-func TestLockedSend(t *testing.T) {
+func TestTotalSupplyInvariant(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
 	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
