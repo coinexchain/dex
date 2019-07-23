@@ -33,7 +33,7 @@ const (
 	CodeAddressForbiddenNotSupported sdk.CodeType = 522
 	CodeNilTokenWhitelist            sdk.CodeType = 523
 	CodeNilForbiddenAddress          sdk.CodeType = 524
-	CodeBurnUnboundCET               sdk.CodeType = 525
+	CodeInvalidUsualSymbol           sdk.CodeType = 525
 	CodeInvalidTokenIdentity         sdk.CodeType = 526
 )
 
@@ -150,7 +150,7 @@ func ErrNilForbiddenAddress() sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeNilForbiddenAddress, msg)
 }
 
-func ErrBurnUnboundCET(amt int64, err error) sdk.Error {
-	msg := fmt.Sprintf("failed to burn %d cet unbound : %s", amt, err)
-	return sdk.NewError(CodeSpaceAsset, CodeBurnUnboundCET, msg)
+func ErrInvalidUsualSymbol(symbol string) sdk.Error {
+	msg := fmt.Sprintf("invalid usual symbol %s : usual token symbol not match with [a-z][a-z0-9]{1,7}", symbol)
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidUsualSymbol, msg)
 }

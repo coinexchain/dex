@@ -103,11 +103,20 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 		return types.ErrDuplicateTokenSymbol(symbol)
 	}
 
+	var cetToken types.Token
 	// only cet owner can issue reserved token
 	if types.IsReservedSymbol(symbol) && symbol != dex.CET {
-		cetToken := keeper.GetToken(ctx, dex.CET)
+		cetToken = keeper.GetToken(ctx, dex.CET)
 		if cetToken == nil || !owner.Equals(cetToken.GetOwner()) {
 			return types.ErrInvalidIssueOwner()
+		}
+	}
+
+	// only cet owner can issue .T token
+	if !types.IsUsualSymbol(symbol) {
+		cetToken = keeper.GetToken(ctx, dex.CET)
+		if cetToken == nil || !owner.Equals(cetToken.GetOwner()) {
+			return types.ErrInvalidTokenSymbol(symbol)
 		}
 	}
 
