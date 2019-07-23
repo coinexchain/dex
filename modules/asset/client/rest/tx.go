@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -98,6 +99,17 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		req.BaseReq = req.BaseReq.Sanitize()
 		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(req.Symbol))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		route := fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryToken)
+		if res, _, _ := cliCtx.QueryWithData(route, bz); res != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("token symbol already exists，please query tokens and issue another symbol"))
 			return
 		}
 
