@@ -1009,7 +1009,7 @@ paths:
                 $ref: "#/definitions/BaseReq"
               delegator_address:
                 $ref: "#/definitions/Address"
-              validator_src_addressess:
+              validator_src_address:
                 $ref: "#/definitions/ValidatorAddress"
               validator_dst_address:
                 $ref: "#/definitions/ValidatorAddress"
