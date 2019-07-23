@@ -104,7 +104,7 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		return err.Result()
 	}
 
-	err := k.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, authx.ModuleName, amt)
+	_, err := k.Bk.SubtractCoins(ctx, fromAddr, amt)
 	if err != nil {
 		return err.Result()
 	}

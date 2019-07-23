@@ -24,10 +24,10 @@ func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeepe
 	}
 }
 
-func TransferUnlockedCoins(acc *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
+func TransferUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
 	var coins = sdk.Coins{}
 	var temp types.LockedCoins
-	for _, c := range acc.LockedCoins {
+	for _, c := range accx.LockedCoins {
 		if c.UnlockTime <= time {
 			coins = coins.Add(sdk.Coins{c.Coin})
 		} else {
@@ -35,8 +35,12 @@ func TransferUnlockedCoins(acc *types.AccountX, time int64, ctx sdk.Context, kx 
 		}
 	}
 	coins = coins.Sort()
-	kx.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, acc.Address, coins)
 
-	acc.LockedCoins = temp
-	kx.SetAccountX(ctx, *acc)
+	acc := keeper.GetAccount(ctx, accx.Address)
+	newCoins := acc.GetCoins().Add(coins)
+	_ = acc.SetCoins(newCoins)
+	keeper.SetAccount(ctx, acc)
+
+	accx.LockedCoins = temp
+	kx.SetAccountX(ctx, *accx)
 }

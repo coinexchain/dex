@@ -3,7 +3,9 @@ package app
 import (
 	"github.com/coinexchain/dex/modules/bankx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/incentive"
@@ -34,6 +36,15 @@ func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Err
 		return ah.checkMemo(ctx, msg.ToAddress, memo)
 	case staking.MsgCreateValidator:
 		return ah.checkMinSelfDelegation(ctx, msg.MinSelfDelegation)
+	case crisis.MsgVerifyInvariant:
+		return ah.checkTotalSupply(ctx, msg.InvariantModuleName)
+	}
+	return nil
+}
+
+func (ah anteHelper) checkTotalSupply(ctx sdk.Context, invariantModuleName string) sdk.Error {
+	if invariantModuleName == supply.ModuleName {
+		_ = ah.accountXKeeper.PreTotalSupply(ctx)
 	}
 	return nil
 }

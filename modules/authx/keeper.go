@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/authx/types"
 )
@@ -147,6 +148,29 @@ func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax types.AccountX) {
 		panic(err)
 	}
 	return
+}
+
+// -----------------------------------------------------------------------------
+// PreTotalSupply sets the Authx Module Account
+func (axk AccountXKeeper) PreTotalSupply(ctx sdk.Context) error {
+	var expectedTotal sdk.Coins
+
+	axk.IterateAccounts(ctx, func(acc AccountX) bool {
+		expectedTotal = expectedTotal.Add(acc.GetAllCoins())
+		return false
+	})
+
+	authxMacc := axk.ak.GetAccount(ctx, axk.supplyKeeper.GetModuleAddress(ModuleName))
+	if authxMacc != nil {
+		_ = authxMacc.SetCoins(expectedTotal)
+	} else {
+		authxMacc = supply.NewEmptyModuleAccount(ModuleName, supply.Basic)
+		authxMacc.SetCoins(expectedTotal)
+	}
+
+	axk.ak.SetAccount(ctx, authxMacc)
+
+	return nil
 }
 
 // -----------------------------------------------------------------------------

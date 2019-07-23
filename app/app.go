@@ -410,6 +410,7 @@ func (app *CetChainApp) InitModules() {
 	exportGenesisOrder := initGenesisOrder
 	app.mm.SetOrderExportGenesis(exportGenesisOrder...)
 
+	app.crisisKeeper.RegisterRoute(authx.ModuleName, "pre-total-supply", authx.PreTotalSupplyInvariant(app.accountXKeeper))
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 
 	//crisis module should be reset since invariants has been registered to crisis keeper
