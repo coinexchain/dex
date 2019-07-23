@@ -3397,6 +3397,8 @@ definitions:
       description:
         type: string
         example: "token abc is a example token"
+      identity:
+        type: string
   Token:
     type: object
     allOf:
