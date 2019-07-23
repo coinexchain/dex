@@ -1013,9 +1013,8 @@ paths:
                 $ref: "#/definitions/ValidatorAddress"
               validator_dst_address:
                 $ref: "#/definitions/ValidatorAddress"
-              shares:
-                type: string
-                example: "100"
+              amount:
+                $ref: "#/definitions/Coin"
       tags:
         - Staking
       consumes:
