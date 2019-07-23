@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"os"
 	"testing"
 	"time"
@@ -388,4 +389,42 @@ func TestDonateToCommunityPool(t *testing.T) {
 	//check communityPool
 	communityPool := app.distrKeeper.GetFeePool(ctx).CommunityPool
 	require.True(t, communityPool.AmountOf("cet").Equal(sdk.NewDec(1e8)))
+}
+func TestLockedSend(t *testing.T) {
+	toAddr := sdk.AccAddress([]byte("addr"))
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	// app
+	app := initAppWithBaseAccounts(acc0)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	ctx := app.NewContext(false, header)
+	app.crisisKeeper.SetConstantFee(ctx, sdk.NewCoin("cet", sdk.NewInt(1e8)))
+
+	// deliver tx
+	coins = dex.NewCetCoins(1000000000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeType(0), result.Code)
+
+	//authxMacc := app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
+	//require.True(t, authxMacc.GetCoins().Empty())
+
+	msgInv := crisis.NewMsgVerifyInvariant(fromAddr, supply.ModuleName, "total-supply")
+	tx = newStdTxBuilder().
+		Msgs(msgInv).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
+
+	result = app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+
+	//authxMacc = app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
+	//require.False(t, authxMacc.GetCoins().Empty())
+
 }

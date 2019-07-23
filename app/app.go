@@ -353,6 +353,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 }
 
 func (app *CetChainApp) InitModules() {
+
 	modules := []module.AppModule{
 		genaccounts.NewAppModule(app.accountKeeper),
 		auth.NewAppModule(app.accountKeeper),
@@ -375,7 +376,6 @@ func (app *CetChainApp) InitModules() {
 	}
 
 	app.mm = module.NewManager(modules...)
-
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
@@ -392,7 +392,6 @@ func (app *CetChainApp) InitModules() {
 		slashing.ModuleName,
 		gov.ModuleName,
 		supply.ModuleName,
-		crisis.ModuleName,
 		authx.ModuleName,
 		bankx.ModuleName,
 		incentive.ModuleName,
@@ -400,6 +399,7 @@ func (app *CetChainApp) InitModules() {
 		asset.ModuleName,
 		market.ModuleName,
 		bancorlite.ModuleName,
+		crisis.ModuleName,
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
 	}
 
@@ -411,18 +411,10 @@ func (app *CetChainApp) InitModules() {
 	app.mm.SetOrderExportGenesis(exportGenesisOrder...)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
-	registerRoutes(&modules, app.Router(), app.QueryRouter())
-}
 
-func registerRoutes(modules *[]module.AppModule, router sdk.Router, queryRouter sdk.QueryRouter) {
-	for _, module := range *modules {
-		if module.Route() != "" {
-			router.AddRoute(module.Route(), module.NewHandler())
-		}
-		if module.QuerierRoute() != "" {
-			queryRouter.AddRoute(module.QuerierRoute(), module.NewQuerierHandler())
-		}
-	}
+	//crisis module should be reset since invariants has been registered to crisis keeper
+	app.mm.Modules[crisis.ModuleName] = crisis.NewAppModule(app.crisisKeeper)
+	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
 }
 
 // initialize BaseApp
