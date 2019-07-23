@@ -1484,6 +1484,7 @@ paths:
     post:
       summary: Generate a parameter change proposal transaction
       description: Generate a parameter change proposal transaction
+      operationId: submitParameterChangeProposal
       consumes:
         - application/json
       produces:
@@ -1563,7 +1564,7 @@ paths:
           name: proposalId
           required: true
           in: path
-          x-example: '1'
+          x-example: "2"
       responses:
         200:
           description: OK
@@ -1792,7 +1793,7 @@ paths:
           name: proposalId
           required: true
           in: path
-          x-example: '1'
+          x-example: "2"
       responses:
         200:
           description: OK
