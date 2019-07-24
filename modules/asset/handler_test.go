@@ -35,13 +35,13 @@ func Test_handleMsg(t *testing.T) {
 	}{
 		{
 			"issue_token",
-			NewMsgIssueToken("ABC Token", "abc", 210000000000, testAddr,
+			NewMsgIssueToken("ABC Token", "abc", sdk.NewInt(2100), testAddr,
 				true, true, true, true, "", "", ""),
 			true,
 		},
 		{
 			"issue_token_invalid",
-			NewMsgIssueToken("999 Token", "999", 210000000000, testAddr,
+			NewMsgIssueToken("999 Token", "999", sdk.NewInt(2100), testAddr,
 				true, true, true, true, "", "", ""),
 			false,
 		},
@@ -57,22 +57,22 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"mint_token",
-			NewMsgMintToken("abc", 1000, owner),
+			NewMsgMintToken("abc", sdk.NewInt(1000), owner),
 			true,
 		},
 		{
 			"mint_token_invalid",
-			NewMsgMintToken("abc", -1000, owner),
+			NewMsgMintToken("abc", sdk.NewInt(-1000), owner),
 			false,
 		},
 		{
 			"burn_token",
-			NewMsgBurnToken("abc", 1000, owner),
+			NewMsgBurnToken("abc", sdk.NewInt(1000), owner),
 			true,
 		},
 		{
 			"burn_token_invalid",
-			NewMsgBurnToken("abc", 9E18+1000, owner),
+			NewMsgBurnToken("abc", sdk.NewInt(9E18+1000), owner),
 			false,
 		},
 		{
@@ -166,7 +166,7 @@ func Test_IssueToken_DeductFee(t *testing.T) {
 	h := NewHandler(input.tk)
 
 	// invalid account issue token
-	msg := NewMsgIssueToken("ABC Token", symbol, 210000000000, testAddr,
+	msg := NewMsgIssueToken("ABC Token", symbol, sdk.NewInt(2100), testAddr,
 		false, false, false, false, "", "", "")
 	res := h(input.ctx, msg)
 	require.False(t, res.IsOK())
@@ -178,7 +178,7 @@ func Test_IssueToken_DeductFee(t *testing.T) {
 	require.True(t, res.IsOK())
 
 	coins := input.tk.GetTotalCoins(input.ctx, testAddr)
-	require.Equal(t, sdk.NewInt(210000000000), coins.AmountOf(symbol))
+	require.Equal(t, sdk.NewInt(2100), coins.AmountOf(symbol))
 	require.Equal(t, sdk.NewInt(1E18-1E12), coins.AmountOf("cet"))
 
 }
@@ -189,7 +189,7 @@ func Test_BurnToken_SubtractCoins(t *testing.T) {
 	h := NewHandler(input.tk)
 
 	// issue token
-	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, testAddr,
+	msgIssue := NewMsgIssueToken("ABC Token", symbol, sdk.NewInt(2100), testAddr,
 		true, true, false, false, "", "", "")
 	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
 	require.NoError(t, err)
@@ -197,7 +197,7 @@ func Test_BurnToken_SubtractCoins(t *testing.T) {
 	require.True(t, res.IsOK())
 
 	// burn token
-	msgBurn := NewMsgBurnToken(symbol, 100, testAddr)
+	msgBurn := NewMsgBurnToken(symbol, sdk.NewInt(100), testAddr)
 	res = h(input.ctx, msgBurn)
 	require.True(t, res.IsOK())
 
@@ -211,7 +211,7 @@ func Test_MintToken_AddCoins(t *testing.T) {
 	h := NewHandler(input.tk)
 
 	// issue token
-	msgIssue := NewMsgIssueToken("ABC Token", symbol, 2100, testAddr,
+	msgIssue := NewMsgIssueToken("ABC Token", symbol, sdk.NewInt(2100), testAddr,
 		true, true, false, false, "", "", "")
 	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
 	require.NoError(t, err)
@@ -219,7 +219,7 @@ func Test_MintToken_AddCoins(t *testing.T) {
 	require.True(t, res.IsOK())
 
 	// mint token
-	msgMint := NewMsgMintToken(symbol, 100, testAddr)
+	msgMint := NewMsgMintToken(symbol, sdk.NewInt(100), testAddr)
 	res = h(input.ctx, msgMint)
 	require.True(t, res.IsOK())
 

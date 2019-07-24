@@ -57,7 +57,7 @@ func startAppWithOneAccountThenExport() (*CetChainApp, GenesisState) {
 }
 
 func TestExportGenesisState(t *testing.T) {
-	amount := cetToken().GetTotalSupply()
+	amount := cetToken().GetTotalSupply().Int64()
 	state := startAppWithAccountX(amount)
 
 	account := findAccount(t, state)
@@ -110,7 +110,7 @@ func startAppWithAccountX(amount int64) GenesisState {
 
 func TestExportDefaultAccountXState(t *testing.T) {
 	_, _, addr := testutil.KeyPubAddr()
-	amount := cetToken().GetTotalSupply()
+	amount := cetToken().GetTotalSupply().Int64()
 
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
 
@@ -130,7 +130,7 @@ func TestExportDefaultAccountXState(t *testing.T) {
 }
 
 func TestExportAppStateAndValidators(t *testing.T) {
-	amount := cetToken().GetTotalSupply()
+	amount := cetToken().GetTotalSupply().Int64()
 
 	sk, pk, addr := testutil.KeyPubAddr()
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
@@ -158,7 +158,7 @@ func TestExportAppStateAndValidators(t *testing.T) {
 	valAcc := app.accountKeeper.GetAccount(ctx, addr)
 	require.Equal(t, sdk.NewDec(100), appState.DistrData.FeePool.CommunityPool.AmountOf("cet"))
 	minSelfDelegate := app.stakingXKeeper.GetParams(ctx).MinSelfDelegation
-	require.Equal(t, cetToken().GetTotalSupply()-minSelfDelegate.Int64()-100, valAcc.GetCoins().AmountOf("cet").Int64())
+	require.Equal(t, cetToken().GetTotalSupply().Sub(minSelfDelegate).SubRaw(100), valAcc.GetCoins().AmountOf("cet"))
 
 	//DistributionAccount including OutStanding rewards and CommunityPool
 	feeCollectAccount := getDistributionAccount(&appState)
@@ -214,7 +214,7 @@ func prepareCreateValidatorTx(addr sdk.AccAddress, app *CetChainApp, ctx sdk.Con
 
 func TestExportValidatorsUpdateRestore(t *testing.T) {
 	sk, pk, addr := testutil.KeyPubAddr()
-	amount := cetToken().GetTotalSupply()
+	amount := cetToken().GetTotalSupply().Int64()
 
 	acc := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(amount)}
 	app1 := startAppWithOneValidator(acc, addr, pk, sk, t)

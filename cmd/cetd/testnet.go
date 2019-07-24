@@ -44,7 +44,7 @@ var (
 	flagNodeCLIHome       = "node-cli-home"
 	flagStartingIPAddress = "starting-ip-address"
 
-	testnetTokenSupply       = int64(588788547005740000)
+	testnetTokenSupply       = sdk.NewInt(588788547005740000)
 	testnetMinSelfDelegation = int64(10000e8)
 
 	integrationTestChainID = "coinex-integrationtest"
@@ -334,17 +334,17 @@ func initGenFiles(cdc *codec.Codec, mbm app.OrderedBasicManager, chainID string,
 	return nil
 }
 
-func assureTokenDistributionInGenesis(accs []genaccounts.GenesisAccount, testnetSupply int64) []genaccounts.GenesisAccount {
-	var distributedTokens int64
+func assureTokenDistributionInGenesis(accs []genaccounts.GenesisAccount, testnetSupply sdk.Int) []genaccounts.GenesisAccount {
+	var distributedTokens sdk.Int
 	for _, acc := range accs {
-		distributedTokens += acc.Coins[0].Amount.Int64()
+		distributedTokens = acc.Coins[0].Amount.Add(distributedTokens)
 	}
 
-	if testnetSupply > distributedTokens {
+	if testnetSupply.GT(distributedTokens) {
 		accs = append(accs, genaccounts.GenesisAccount{
 			Address: sdk.AccAddress(crypto.AddressHash([]byte("left_tokens"))),
 			Coins: sdk.Coins{
-				sdk.NewCoin(dex.DefaultBondDenom, sdk.NewInt(testnetSupply-distributedTokens)),
+				sdk.NewCoin(dex.DefaultBondDenom, testnetSupply.Sub(distributedTokens)),
 			},
 		})
 	}
@@ -360,7 +360,7 @@ func modifyGenStateForTesting(cdc *codec.Codec, appGenState map[string]json.RawM
 	appGenState[stakingx.ModuleName] = cdc.MustMarshalJSON(stakingxData)
 }
 func addCetTokenForTesting(cdc *codec.Codec,
-	appGenState map[string]json.RawMessage, tokenTotalSupply int64, cetOwner sdk.AccAddress) {
+	appGenState map[string]json.RawMessage, tokenTotalSupply sdk.Int, cetOwner sdk.AccAddress) {
 
 	var assetData asset.GenesisState
 	cdc.MustUnmarshalJSON(appGenState[asset.ModuleName], &assetData)

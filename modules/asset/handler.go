@@ -1,8 +1,6 @@
 package asset
 
 import (
-	"strconv"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/asset/internal/types"
@@ -130,7 +128,7 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg types.MsgMintToken) 
 			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
-			sdk.NewAttribute(types.AttributeKeyMintAmount, strconv.FormatInt(msg.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyMintAmount, msg.Amount.String()),
 		),
 	})
 
@@ -161,7 +159,7 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg types.MsgBurnToken) 
 			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
-			sdk.NewAttribute(types.AttributeKeyMintAmount, strconv.FormatInt(msg.Amount, 10)),
+			sdk.NewAttribute(types.AttributeKeyMintAmount, msg.Amount.String()),
 		),
 	})
 

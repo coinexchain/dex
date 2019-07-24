@@ -40,7 +40,7 @@ type (
 		BaseReq          rest.BaseReq `json:"base_req" yaml:"base_req"`
 		Name             string       `json:"name" yaml:"name"`
 		Symbol           string       `json:"symbol" yaml:"symbol"`
-		TotalSupply      int64        `json:"total_supply" yaml:"total_supply"`
+		TotalSupply      string       `json:"total_supply" yaml:"total_supply"`
 		Mintable         bool         `json:"mintable" yaml:"mintable"`
 		Burnable         bool         `json:"burnable" yaml:"burnable"`
 		AddrForbiddable  bool         `json:"addr_forbiddable" yaml:"addr_forbiddable"`
@@ -59,13 +59,13 @@ type (
 	// mintTokenReq defines the properties of a mint token request's body.
 	mintTokenReq struct {
 		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
-		Amount  int64        `json:"amount" yaml:"amount"`
+		Amount  string       `json:"amount" yaml:"amount"`
 	}
 
 	// burnTokenReq defines the properties of a burn token request's body.
 	burnTokenReq struct {
 		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
-		Amount  int64        `json:"amount" yaml:"amount"`
+		Amount  string       `json:"amount" yaml:"amount"`
 	}
 
 	// forbidTokenReq defines the properties of a forbid token request's body.
@@ -109,7 +109,7 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		}
 		route := fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryToken)
 		if res, _, _ := cliCtx.QueryWithData(route, bz); res != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("token symbol already exists，please query tokens and issue another symbol"))
+			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrDuplicateTokenSymbol(symbol).Error())
 			return
 		}
 
@@ -119,7 +119,12 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
-		msg := types.NewMsgIssueToken(req.Name, req.Symbol, req.TotalSupply, owner,
+		amt, ok := sdk.NewIntFromString(req.TotalSupply)
+		if !ok {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrInvalidTokenSupply(req.TotalSupply).Error())
+			return
+		}
+		msg := types.NewMsgIssueToken(req.Name, req.Symbol, amt, owner,
 			req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable, req.URL, req.Description, req.Identity)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -181,8 +186,12 @@ func mintTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 		}
 
 		symbol := getSymbol(r)
-
-		msg := types.NewMsgMintToken(symbol, req.Amount, owner)
+		amt, ok := sdk.NewIntFromString(req.Amount)
+		if !ok {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrInvalidTokenMintAmt(req.Amount).Error())
+			return
+		}
+		msg := types.NewMsgMintToken(symbol, amt, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -212,8 +221,12 @@ func burnTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 		}
 
 		symbol := getSymbol(r)
-
-		msg := types.NewMsgBurnToken(symbol, req.Amount, owner)
+		amt, ok := sdk.NewIntFromString(req.Amount)
+		if !ok {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrInvalidTokenBurnAmt(req.Amount).Error())
+			return
+		}
+		msg := types.NewMsgBurnToken(symbol, amt, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

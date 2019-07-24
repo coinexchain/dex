@@ -87,7 +87,7 @@ func TestSmallAccountGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 90000, int(result.GasWanted))
-	require.Equal(t, 57770, int(result.GasUsed))
+	require.Equal(t, 57839, int(result.GasUsed))
 }
 
 func TestBigAccountGasCost(t *testing.T) {
@@ -114,7 +114,7 @@ func TestBigAccountGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 3569600, int(result.GasUsed))
+	require.Equal(t, 3569669, int(result.GasUsed))
 }
 
 func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
@@ -140,7 +140,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 	)
 
 	// issue tokens
-	msgStock := asset.NewMsgIssueToken(stock, stock, issueAmount, acc.Address,
+	msgStock := asset.NewMsgIssueToken(stock, stock, sdk.NewInt(issueAmount), acc.Address,
 		false, false, false, false, "", "", "")
 	tx := newStdTxBuilder().
 		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
@@ -178,7 +178,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 83404, int(result.GasUsed))
+	require.Equal(t, 83620, int(result.GasUsed))
 
 }
 
@@ -199,7 +199,7 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 	)
 
 	// issue tokens
-	msgStock := asset.NewMsgIssueToken(stock, stock, issueAmount, acc.Address,
+	msgStock := asset.NewMsgIssueToken(stock, stock, sdk.NewInt(issueAmount), acc.Address,
 		false, false, false, false, "", "", "")
 	tx := newStdTxBuilder().
 		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
@@ -232,6 +232,6 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 83404, int(result.GasUsed))
+	require.Equal(t, 83620, int(result.GasUsed))
 
 }

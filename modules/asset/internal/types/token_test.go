@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"reflect"
 	"testing"
 )
@@ -16,14 +17,14 @@ func TestBaseToken_Validate(t *testing.T) {
 			&BaseToken{
 				"ABC Token",
 				"abc",
-				210000000000,
+				sdk.NewInt(2100),
 				testAddr,
 				false,
 				false,
 				false,
 				false,
-				0,
-				0,
+				sdk.ZeroInt(),
+				sdk.ZeroInt(),
 				false,
 				"",
 				"",
@@ -36,14 +37,14 @@ func TestBaseToken_Validate(t *testing.T) {
 			&BaseToken{
 				"ABC Token",
 				"abc",
-				210000000000,
+				sdk.NewInt(2100),
 				testAddr,
 				false,
 				false,
 				false,
 				false,
-				0,
-				2100,
+				sdk.ZeroInt(),
+				sdk.NewInt(2100),
 				false,
 				"",
 				"",
@@ -56,14 +57,14 @@ func TestBaseToken_Validate(t *testing.T) {
 			&BaseToken{
 				"ABC Token",
 				"abc",
-				210000000000,
+				sdk.NewInt(2100),
 				testAddr,
 				false,
 				false,
 				false,
 				false,
-				2100,
-				0,
+				sdk.NewInt(2100),
+				sdk.ZeroInt(),
 				false,
 				"",
 				"",
@@ -76,14 +77,14 @@ func TestBaseToken_Validate(t *testing.T) {
 			&BaseToken{
 				"ABC Token",
 				"abc",
-				210000000000,
+				sdk.NewInt(2100),
 				testAddr,
 				false,
 				false,
 				false,
 				false,
-				0,
-				0,
+				sdk.ZeroInt(),
+				sdk.ZeroInt(),
 				true,
 				"",
 				"",

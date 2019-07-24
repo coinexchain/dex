@@ -45,20 +45,20 @@ func ErrInvalidTokenSymbol(symbol string) sdk.Error {
 	msg := fmt.Sprintf("invalid symbol %s : token symbol not match with [a-z][a-z0-9]{1,7}", symbol)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenSymbol, msg)
 }
-func ErrInvalidTokenSupply(amt int64) sdk.Error {
-	msg := fmt.Sprintf("invalid supply %d : token total supply before 1e8 boosting should be less than 90 billion and supply amount must be positive", amt)
+func ErrInvalidTokenSupply(amt string) sdk.Error {
+	msg := fmt.Sprintf("invalid supply %s : token total supply before 1e8 boosting should be less than 90 billion and supply amount must be positive", amt)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenSupply, msg)
 }
 func ErrInvalidTokenOwner(addr sdk.Address) sdk.Error {
 	msg := fmt.Sprintf("invalid owner %s : token owner is invalid", addr.String())
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenOwner, msg)
 }
-func ErrInvalidTokenMintAmt(amt int64) sdk.Error {
-	msg := fmt.Sprintf("invalid mint amount %d : token total supply before 1e8 boosting should be less than 90 billion and mint amount should be positive", amt)
+func ErrInvalidTokenMintAmt(amt string) sdk.Error {
+	msg := fmt.Sprintf("invalid mint amount %s : token total supply before 1e8 boosting should be less than 90 billion and mint amount should be positive", amt)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenMintAmt, msg)
 }
-func ErrInvalidTokenBurnAmt(amt int64) sdk.Error {
-	msg := fmt.Sprintf("invalid burn amount %d : token total supply before 1e8 boosting should be less than 90 billion and burn amount should be positive", amt)
+func ErrInvalidTokenBurnAmt(amt string) sdk.Error {
+	msg := fmt.Sprintf("invalid burn amount %s : token total supply before 1e8 boosting should be less than 90 billion and burn amount should be positive", amt)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenBurnAmt, msg)
 }
 func ErrInvalidTokenForbidden(symbol string) sdk.Error {

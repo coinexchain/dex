@@ -24,11 +24,14 @@ func parseIssueFlags(owner sdk.AccAddress) (*types.MsgIssueToken, error) {
 	if err := checkFlags(issueTokenFlags, "$ cetcli tx asset issue-token -h"); err != nil {
 		return nil, err
 	}
-
+	amt, ok := sdk.NewIntFromString(viper.GetString(flagTotalSupply))
+	if !ok {
+		return nil, types.ErrInvalidTokenSupply(flagTotalSupply)
+	}
 	msg := types.NewMsgIssueToken(
 		viper.GetString(flagName),
 		viper.GetString(flagSymbol),
-		viper.GetInt64(flagTotalSupply),
+		amt,
 		owner,
 		viper.GetBool(flagMintable),
 		viper.GetBool(flagBurnable),
@@ -61,10 +64,13 @@ func parseMintTokenFlags(owner sdk.AccAddress) (*types.MsgMintToken, error) {
 	if err := checkFlags(mintTokenFlags, "$ cetcli tx asset mint-token -h"); err != nil {
 		return nil, err
 	}
-
+	amt, ok := sdk.NewIntFromString(viper.GetString(flagAmount))
+	if !ok {
+		return nil, types.ErrInvalidTokenMintAmt(flagAmount)
+	}
 	msg := types.NewMsgMintToken(
 		viper.GetString(flagSymbol),
-		viper.GetInt64(flagAmount),
+		amt,
 		owner,
 	)
 
@@ -75,10 +81,13 @@ func parseBurnTokenFlags(owner sdk.AccAddress) (*types.MsgBurnToken, error) {
 	if err := checkFlags(burnTokenFlags, "$ cetcli tx asset burn-token -h"); err != nil {
 		return nil, err
 	}
-
+	amt, ok := sdk.NewIntFromString(viper.GetString(flagAmount))
+	if !ok {
+		return nil, types.ErrInvalidTokenBurnAmt(flagAmount)
+	}
 	msg := types.NewMsgBurnToken(
 		viper.GetString(flagSymbol),
-		viper.GetInt64(flagAmount),
+		amt,
 		owner,
 	)
 

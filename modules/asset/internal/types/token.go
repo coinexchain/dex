@@ -25,8 +25,8 @@ type Token interface {
 	GetSymbol() string
 	SetSymbol(string) sdk.Error
 
-	GetTotalSupply() int64
-	SetTotalSupply(int64) sdk.Error
+	GetTotalSupply() sdk.Int
+	SetTotalSupply(sdk.Int) sdk.Error
 
 	GetOwner() sdk.AccAddress
 	SetOwner(sdk.AccAddress) sdk.Error
@@ -43,11 +43,11 @@ type Token interface {
 	GetTokenForbiddable() bool
 	SetTokenForbiddable(bool)
 
-	GetTotalBurn() int64
-	SetTotalBurn(int64) sdk.Error
+	GetTotalBurn() sdk.Int
+	SetTotalBurn(sdk.Int) sdk.Error
 
-	GetTotalMint() int64
-	SetTotalMint(int64) sdk.Error
+	GetTotalMint() sdk.Int
+	SetTotalMint(sdk.Int) sdk.Error
 
 	GetIsForbidden() bool
 	SetIsForbidden(bool)
@@ -73,14 +73,14 @@ var _ Token = (*BaseToken)(nil)
 type BaseToken struct {
 	Name             string         `json:"name" yaml:"name"`                           //  Name of the newly issued asset, limited to 32 unicode characters.
 	Symbol           string         `json:"symbol" yaml:"symbol"`                       //  token symbol, [a-z][a-z0-9]{1,7}
-	TotalSupply      int64          `json:"total_supply" yaml:"total_supply"`           //  The total supply for this token [0]
+	TotalSupply      sdk.Int        `json:"total_supply" yaml:"total_supply"`           //  The total supply for this token [0]
 	Owner            sdk.AccAddress `json:"owner" yaml:"owner"`                         // The initial issuer of this token
 	Mintable         bool           `json:"mintable" yaml:"mintable"`                   // Whether this token could be minted after the issuing
 	Burnable         bool           `json:"burnable" yaml:"burnable"`                   // Whether this token could be burned
 	AddrForbiddable  bool           `json:"addr_forbiddable" yaml:"addr_forbiddable"`   // whether could forbid some addresses to forbid transaction
 	TokenForbiddable bool           `json:"token_forbiddable" yaml:"token_forbiddable"` // whether token could be global forbid
-	TotalBurn        int64          `json:"total_burn" yaml:"total_burn"`               // Total amount of burn
-	TotalMint        int64          `json:"total_mint" yaml:"total_mint"`               // Total amount of mint
+	TotalBurn        sdk.Int        `json:"total_burn" yaml:"total_burn"`               // Total amount of burn
+	TotalMint        sdk.Int        `json:"total_mint" yaml:"total_mint"`               // Total amount of mint
 	IsForbidden      bool           `json:"is_forbidden" yaml:"is_forbidden"`           // Whether token being forbidden currently
 	URL              string         `json:"url" yaml:"url"`                             //URL of token website
 	Description      string         `json:"description" yaml:"description"`             //Description of token info
@@ -89,7 +89,6 @@ type BaseToken struct {
 
 //nolint
 var (
-
 	// suffixSymbolRegex : Only CET owner can issue .suffix token
 	suffixSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}\\.[a-z]$")
 
@@ -98,7 +97,7 @@ var (
 )
 
 // NewToken - new base token
-func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddress,
+func NewToken(name string, symbol string, totalSupply sdk.Int, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
 	url string, description string, identity string) (*BaseToken, sdk.Error) {
 
@@ -131,10 +130,10 @@ func NewToken(name string, symbol string, totalSupply int64, owner sdk.AccAddres
 	t.SetAddrForbiddable(addrForbiddable)
 	t.SetTokenForbiddable(tokenForbiddable)
 
-	if err = t.SetTotalMint(0); err != nil {
+	if err = t.SetTotalMint(sdk.ZeroInt()); err != nil {
 		return nil, err
 	}
-	if err = t.SetTotalBurn(0); err != nil {
+	if err = t.SetTotalBurn(sdk.ZeroInt()); err != nil {
 		return nil, err
 	}
 	t.SetIsForbidden(false)
@@ -154,11 +153,11 @@ func (t *BaseToken) Validate() sdk.Error {
 		return ErrTokenForbiddenNotSupported(t.GetSymbol())
 	}
 
-	if !t.Mintable && t.TotalMint > 0 {
+	if !t.Mintable && t.TotalMint.IsPositive() {
 		return ErrTokenMintNotSupported(t.GetSymbol())
 	}
 
-	if !t.Burnable && t.TotalBurn > 0 {
+	if !t.Burnable && t.TotalBurn.IsPositive() {
 		return ErrTokenBurnNotSupported(t.GetSymbol())
 	}
 
@@ -198,13 +197,13 @@ func (t *BaseToken) SetSymbol(symbol string) sdk.Error {
 	return nil
 }
 
-func (t BaseToken) GetTotalSupply() int64 {
+func (t BaseToken) GetTotalSupply() sdk.Int {
 	return t.TotalSupply
 }
 
-func (t *BaseToken) SetTotalSupply(amt int64) sdk.Error {
-	if amt > MaxTokenAmount || amt <= 0 {
-		return ErrInvalidTokenSupply(amt)
+func (t *BaseToken) SetTotalSupply(amt sdk.Int) sdk.Error {
+	if amt.GT(sdk.NewInt(MaxTokenAmount)) || !amt.IsPositive() {
+		return ErrInvalidTokenSupply(amt.String())
 	}
 	t.TotalSupply = amt
 	return nil
@@ -291,25 +290,25 @@ func (t *BaseToken) SetIdentity(identity string) sdk.Error {
 	return nil
 }
 
-func (t BaseToken) GetTotalBurn() int64 {
+func (t BaseToken) GetTotalBurn() sdk.Int {
 	return t.TotalBurn
 }
 
-func (t *BaseToken) SetTotalBurn(amt int64) sdk.Error {
-	if amt > MaxTokenAmount || amt < 0 {
-		return ErrInvalidTokenBurnAmt(amt)
+func (t *BaseToken) SetTotalBurn(amt sdk.Int) sdk.Error {
+	if amt.GT(sdk.NewInt(MaxTokenAmount)) || amt.IsNegative() {
+		return ErrInvalidTokenBurnAmt(amt.String())
 	}
 	t.TotalBurn = amt
 	return nil
 }
 
-func (t BaseToken) GetTotalMint() int64 {
+func (t BaseToken) GetTotalMint() sdk.Int {
 	return t.TotalMint
 }
 
-func (t *BaseToken) SetTotalMint(amt int64) sdk.Error {
-	if amt > MaxTokenAmount || amt < 0 {
-		return ErrInvalidTokenMintAmt(amt)
+func (t *BaseToken) SetTotalMint(amt sdk.Int) sdk.Error {
+	if amt.GT(sdk.NewInt(MaxTokenAmount)) || amt.IsNegative() {
+		return ErrInvalidTokenMintAmt(amt.String())
 	}
 	t.TotalMint = amt
 	return nil
@@ -364,6 +363,6 @@ func UnmarshalToken(cdc *codec.Codec, value []byte) (token Token, err error) {
 	return token, err
 }
 
-func NewTokenCoins(denom string, amount int64) sdk.Coins {
-	return sdk.NewCoins(sdk.NewInt64Coin(denom, amount))
+func NewTokenCoins(denom string, amount sdk.Int) sdk.Coins {
+	return sdk.NewCoins(sdk.NewCoin(denom, amount))
 }

@@ -54,14 +54,14 @@ func createAbcToken() asset.Token {
 	token := &asset.BaseToken{
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
-		TotalSupply:      588788547005740000,
+		TotalSupply:      sdk.NewInt(588788547005740000),
 		Owner:            accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Mintable:         false,
 		Burnable:         true,
 		AddrForbiddable:  false,
 		TokenForbiddable: false,
-		TotalBurn:        411211452994260000,
-		TotalMint:        0,
+		TotalBurn:        sdk.NewInt(411211452994260000),
+		TotalMint:        sdk.ZeroInt(),
 		IsForbidden:      false,
 	}
 	if err := token.Validate(); err != nil {

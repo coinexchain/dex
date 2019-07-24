@@ -104,15 +104,13 @@ $ cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	cmd.Flags().String(flagName, "", "token name is limited to 32 unicode characters")
 	cmd.Flags().String(flagSymbol, "", "token symbol is limited to [a-z][a-z0-9]{1,7}")
 	cmd.Flags().String(flagOwner, "", "token owner")
-	cmd.Flags().Int64(flagTotalSupply, 0, "the total supply for token can have a maximum of "+
-		"8 digits of decimal and is boosted by 1e8 in order to store as int64. "+
-		"The amount before boosting should not exceed 90 billion.")
+	cmd.Flags().String(flagTotalSupply, "0", "The amount before boosting should not exceed 90 billion.")
 	cmd.Flags().Bool(flagMintable, false, "whether the token could be minted")
 	cmd.Flags().Bool(flagBurnable, true, "whether hte token could be burned")
 	cmd.Flags().Bool(flagAddrForbiddable, false, "whether the token holder address can be forbidden by token owner")
 	cmd.Flags().Bool(flagTokenForbiddable, false, "whether the token can be forbidden")
-	cmd.Flags().Int64(flagTotalBurn, 0, "the total burn amount")
-	cmd.Flags().Int64(flagTotalMint, 0, "the total mint amount")
+	cmd.Flags().String(flagTotalBurn, "0", "the total burn amount")
+	cmd.Flags().String(flagTotalMint, "0", "the total mint amount")
 	cmd.Flags().Bool(flagIsForbidden, false, "whether the token is forbidden")
 	cmd.Flags().String(flagTokenURL, "", "url of token website")
 	cmd.Flags().String(flagTokenDescription, "", "description of token info")
@@ -144,15 +142,31 @@ func parseTokenInfo() (types.Token, error) {
 	if err = token.SetOwner(owner); err != nil {
 		return nil, err
 	}
-	if err = token.SetTotalSupply(viper.GetInt64(flagTotalSupply)); err != nil {
+
+	amt, ok := sdk.NewIntFromString(viper.GetString(flagTotalSupply))
+	if !ok {
+		return nil, types.ErrInvalidTokenSupply(flagTotalSupply)
+	}
+	if err = token.SetTotalSupply(amt); err != nil {
 		return nil, err
 	}
-	if err = token.SetTotalBurn(viper.GetInt64(flagTotalBurn)); err != nil {
+
+	amt, ok = sdk.NewIntFromString(viper.GetString(flagTotalBurn))
+	if !ok {
+		return nil, types.ErrInvalidTokenBurnAmt(flagTotalBurn)
+	}
+	if err = token.SetTotalBurn(amt); err != nil {
 		return nil, err
 	}
-	if err = token.SetTotalMint(viper.GetInt64(flagTotalMint)); err != nil {
+
+	amt, ok = sdk.NewIntFromString(viper.GetString(flagTotalMint))
+	if !ok {
+		return nil, types.ErrInvalidTokenMintAmt(flagTotalMint)
+	}
+	if err = token.SetTotalMint(amt); err != nil {
 		return nil, err
 	}
+
 	if err = token.SetURL(viper.GetString(flagTokenURL)); err != nil {
 		return nil, err
 	}

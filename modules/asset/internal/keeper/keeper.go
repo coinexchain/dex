@@ -21,12 +21,12 @@ import (
 type Keeper interface {
 	TokenKeeper
 
-	IssueToken(ctx sdk.Context, name string, symbol string, totalSupply int64, owner sdk.AccAddress,
+	IssueToken(ctx sdk.Context, name string, symbol string, totalSupply sdk.Int, owner sdk.AccAddress,
 		mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
 		url string, description string, identity string) sdk.Error
 	TransferOwnership(ctx sdk.Context, symbol string, originalOwner sdk.AccAddress, newOwner sdk.AccAddress) sdk.Error
-	MintToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount int64) sdk.Error
-	BurnToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount int64) sdk.Error
+	MintToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount sdk.Int) sdk.Error
+	BurnToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount sdk.Int) sdk.Error
 	ForbidToken(ctx sdk.Context, symbol string, owner sdk.AccAddress) sdk.Error
 	UnForbidToken(ctx sdk.Context, symbol string, owner sdk.AccAddress) sdk.Error
 	AddTokenWhitelist(ctx sdk.Context, symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) sdk.Error
@@ -95,7 +95,7 @@ func (keeper BaseKeeper) SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt
 }
 
 //IssueToken - new token and store it
-func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string, totalSupply int64, owner sdk.AccAddress,
+func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string, totalSupply sdk.Int, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
 	url string, description string, identity string) sdk.Error {
 
@@ -160,7 +160,7 @@ func (keeper BaseKeeper) TransferOwnership(ctx sdk.Context, symbol string, origi
 }
 
 //MintToken - mint token
-func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount int64) sdk.Error {
+func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount sdk.Int) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
 		return err
@@ -170,11 +170,11 @@ func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.Acc
 		return types.ErrTokenMintNotSupported(symbol)
 	}
 
-	if err := token.SetTotalMint(amount + token.GetTotalMint()); err != nil {
+	if err := token.SetTotalMint(token.GetTotalMint().Add(amount)); err != nil {
 		return err
 	}
 
-	if err := token.SetTotalSupply(amount + token.GetTotalSupply()); err != nil {
+	if err := token.SetTotalSupply(token.GetTotalSupply().Add(amount)); err != nil {
 		return err
 	}
 
@@ -186,7 +186,7 @@ func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.Acc
 }
 
 //BurnToken - burn token
-func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount int64) sdk.Error {
+func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount sdk.Int) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
 		return err
@@ -196,11 +196,11 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 		return types.ErrTokenBurnNotSupported(symbol)
 	}
 
-	if err := token.SetTotalBurn(amount + token.GetTotalBurn()); err != nil {
+	if err := token.SetTotalBurn(token.GetTotalBurn().Add(amount)); err != nil {
 		return err
 	}
 
-	if err := token.SetTotalSupply(token.GetTotalSupply() - amount); err != nil {
+	if err := token.SetTotalSupply(token.GetTotalSupply().Sub(amount)); err != nil {
 		return err
 	}
 

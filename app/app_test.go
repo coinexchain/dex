@@ -86,7 +86,7 @@ func addModuleAccounts(genState *GenesisState) {
 }
 
 func addAccountForDanglingCET(amount int64, genState *GenesisState) {
-	accAmount := cetToken().GetTotalSupply() - amount
+	accAmount := cetToken().GetTotalSupply().Int64() - amount
 	if accAmount > 0 {
 		_, acc := testutil.NewBaseAccount(accAmount, 1, 0)
 		genAcc := genaccounts.NewGenesisAccount(&acc)
@@ -127,14 +127,14 @@ func cetToken() asset.Token {
 	return &asset.BaseToken{
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",
-		TotalSupply:      588788547005740000,
+		TotalSupply:      sdk.NewInt(588788547005740000),
 		Owner:            cetOwnerAddr,
 		Mintable:         false,
 		Burnable:         true,
 		AddrForbiddable:  false,
 		TokenForbiddable: false,
-		TotalBurn:        411211452994260000,
-		TotalMint:        0,
+		TotalBurn:        sdk.NewInt(411211452994260000),
+		TotalMint:        sdk.ZeroInt(),
 		IsForbidden:      false,
 	}
 }
@@ -252,7 +252,7 @@ func TestMinSelfDelegation(t *testing.T) {
 
 func TestDelegatorShares(t *testing.T) {
 	// prepare accounts
-	amountVal := cetToken().GetTotalSupply() - 20000
+	amountVal := cetToken().GetTotalSupply().Int64() - 20000
 	valKey, valAcc := testutil.NewBaseAccount(amountVal, 0, 0)
 	valAddr := sdk.ValAddress(valAcc.Address)
 	del1Key, del1Acc := testutil.NewBaseAccount(10000, 1, 0)

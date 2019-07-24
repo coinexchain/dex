@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -27,7 +28,7 @@ func Test_queryToken(t *testing.T) {
 	require.Nil(t, res)
 
 	// set token
-	token, err := types.NewToken("ABC Token", "abc", 2100, testAddr,
+	token, err := types.NewToken("ABC Token", "abc", sdk.NewInt(2100), testAddr,
 		false, false, false, false, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token)
@@ -72,13 +73,13 @@ func Test_queryAllTokenList(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, []byte("[]"), res)
 
-	token1, err := types.NewToken("ABC Token", "abc", 2100, testAddr,
+	token1, err := types.NewToken("ABC Token", "abc", sdk.NewInt(2100), testAddr,
 		false, false, false, false, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token1)
 	require.NoError(t, err)
 
-	token2, err := types.NewToken("XYZ Token", "xyz", 2100, testAddr,
+	token2, err := types.NewToken("XYZ Token", "xyz", sdk.NewInt(2100), testAddr,
 		false, false, false, false, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token2)
@@ -112,7 +113,7 @@ func Test_queryWhitelist(t *testing.T) {
 	require.Nil(t, res)
 
 	// set token
-	token, err := types.NewToken("ABC Token", symbol, 2100, testAddr,
+	token, err := types.NewToken("ABC Token", symbol, sdk.NewInt(2100), testAddr,
 		false, false, false, true, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token)
@@ -155,7 +156,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 	require.Nil(t, res)
 
 	// set token
-	token, err := types.NewToken("ABC Token", symbol, 2100, testAddr,
+	token, err := types.NewToken("ABC Token", symbol, sdk.NewInt(2100), testAddr,
 		false, false, true, true, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.SetToken(input.ctx, token)

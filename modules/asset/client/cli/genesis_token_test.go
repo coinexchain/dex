@@ -52,9 +52,9 @@ func TestParseTokenInfo(t *testing.T) {
 	assert.Error(t, err)
 
 	viper.Set(flagSymbol, "aaa")
-	viper.Set(flagTotalSupply, int64(100))
-	viper.Set(flagTotalBurn, int64(100))
-	viper.Set(flagTotalMint, int64(100))
+	viper.Set(flagTotalSupply, "100")
+	viper.Set(flagTotalBurn, "100")
+	viper.Set(flagTotalMint, "100")
 	token, _ := parseTokenInfo()
 	require.Equal(t, "aaa", token.GetSymbol())
 }

@@ -141,11 +141,11 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	ak.SetAccount(ctx, onlyIssueToken)
 
 	// issue tokens
-	msgStock := asset.NewMsgIssueToken(stock, stock, issueAmount, haveCetAddress,
+	msgStock := asset.NewMsgIssueToken(stock, stock, sdk.NewInt(issueAmount), haveCetAddress,
 		false, false, addrForbid, tokenForbid, "", "", "")
-	msgMoney := asset.NewMsgIssueToken(money, money, issueAmount, notHaveCetAddress,
+	msgMoney := asset.NewMsgIssueToken(money, money, sdk.NewInt(issueAmount), notHaveCetAddress,
 		false, false, addrForbid, tokenForbid, "", "", "")
-	msgCet := asset.NewMsgIssueToken("cet", "cet", issueAmount, haveCetAddress,
+	msgCet := asset.NewMsgIssueToken("cet", "cet", sdk.NewInt(issueAmount), haveCetAddress,
 		false, false, addrForbid, tokenForbid, "", "", "")
 	handler := asset.NewHandler(tk)
 	ret := handler(ctx, msgStock)

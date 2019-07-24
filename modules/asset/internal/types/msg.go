@@ -25,7 +25,7 @@ var (
 type MsgIssueToken struct {
 	Name             string         `json:"name" yaml:"name"`                           // Name of the newly issued asset, limited to 32 unicode characters
 	Symbol           string         `json:"symbol" yaml:"symbol"`                       // token symbol, [a-z][a-z0-9]{1,7}
-	TotalSupply      int64          `json:"total_supply" yaml:"total_supply"`           // The total supply for this token [0]
+	TotalSupply      sdk.Int        `json:"total_supply" yaml:"total_supply"`           // The total supply for this token [0]
 	Owner            sdk.AccAddress `json:"owner" yaml:"owner"`                         // The initial issuer of this token [1]
 	Mintable         bool           `json:"mintable" yaml:"mintable"`                   // Whether this token could be minted after the issuing
 	Burnable         bool           `json:"burnable" yaml:"burnable"`                   // Whether this token could be burned
@@ -37,7 +37,7 @@ type MsgIssueToken struct {
 }
 
 // NewMsgIssueToken
-func NewMsgIssueToken(name string, symbol string, amt int64, owner sdk.AccAddress,
+func NewMsgIssueToken(name string, symbol string, amt sdk.Int, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
 	url string, description string, identity string) MsgIssueToken {
 
@@ -137,11 +137,11 @@ func (msg MsgTransferOwnership) GetSigners() []sdk.AccAddress {
 // MsgMintToken
 type MsgMintToken struct {
 	Symbol       string         `json:"symbol" yaml:"symbol"`
-	Amount       int64          `json:"amount" yaml:"amount"`
+	Amount       sdk.Int        `json:"amount" yaml:"amount"`
 	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"`
 }
 
-func NewMsgMintToken(symbol string, amt int64, owner sdk.AccAddress) MsgMintToken {
+func NewMsgMintToken(symbol string, amt sdk.Int, owner sdk.AccAddress) MsgMintToken {
 	return MsgMintToken{
 		symbol,
 		amt,
@@ -170,8 +170,8 @@ func (msg MsgMintToken) ValidateBasic() sdk.Error {
 	}
 
 	amt := msg.Amount
-	if amt > MaxTokenAmount || amt <= 0 {
-		return ErrInvalidTokenMintAmt(amt)
+	if amt.GT(sdk.NewInt(MaxTokenAmount)) || !amt.IsPositive() {
+		return ErrInvalidTokenMintAmt(amt.String())
 	}
 
 	return nil
@@ -190,11 +190,11 @@ func (msg MsgMintToken) GetSigners() []sdk.AccAddress {
 // MsgBurnToken
 type MsgBurnToken struct {
 	Symbol       string         `json:"symbol" yaml:"symbol"`
-	Amount       int64          `json:"amount" yaml:"amount"`
+	Amount       sdk.Int        `json:"amount" yaml:"amount"`
 	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"` //token owner address
 }
 
-func NewMsgBurnToken(symbol string, amt int64, owner sdk.AccAddress) MsgBurnToken {
+func NewMsgBurnToken(symbol string, amt sdk.Int, owner sdk.AccAddress) MsgBurnToken {
 	return MsgBurnToken{
 		symbol,
 		amt,
@@ -223,8 +223,8 @@ func (msg MsgBurnToken) ValidateBasic() sdk.Error {
 	}
 
 	amt := msg.Amount
-	if amt > MaxTokenAmount || amt <= 0 {
-		return ErrInvalidTokenBurnAmt(amt)
+	if amt.GT(sdk.NewInt(MaxTokenAmount)) || !amt.IsPositive() {
+		return ErrInvalidTokenBurnAmt(amt.String())
 	}
 
 	return nil
