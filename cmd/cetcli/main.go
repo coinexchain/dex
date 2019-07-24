@@ -22,8 +22,6 @@ import (
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	staking_cli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
-
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/cmd/cetcli/dev"
 	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
@@ -168,16 +166,8 @@ func txCmd(cdc *amino.Codec) *cobra.Command {
 	}
 
 	txCmd.RemoveCommand(cmdsToRemove...)
-	FixUnknownFlagIssue(txCmd)
 
 	return txCmd
-}
-
-func FixUnknownFlagIssue(txCmd *cobra.Command) {
-	cmd, _, err := txCmd.Find([]string{"staking", "edit-validator"})
-	if err == nil {
-		cmd.Flags().AddFlagSet(staking_cli.FsMinSelfDelegation)
-	}
 }
 
 // registerRoutes registers the routes from the different modules for the LCD.
