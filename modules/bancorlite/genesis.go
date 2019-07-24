@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"strings"
 )
 
 type GenesisState struct {
@@ -33,36 +34,52 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	m := make(map[string]keepers.BancorInfo)
 	k.Bik.Iterate(ctx, func(bi *keepers.BancorInfo) {
-		m[bi.Token] = *bi
+		m[bi.Stock+keepers.SymbolSeparator+bi.Money] = *bi
 	})
 	return NewGenesisState(m)
 }
 
 func (data GenesisState) Validate() error {
-	for token, bi := range data.BancorInfoMap {
-		if token != bi.Token {
-			return errors.New("Token symbol mismatch")
+	for symbol, bi := range data.BancorInfoMap {
+		s := strings.Split(symbol, "/")
+		if len(s) != 2 {
+			return errors.New("invalid symbol")
 		}
-		if token == "cet" {
-			return errors.New("Token symbol can not be cet")
+		if s[0] != bi.Stock {
+			return errors.New("stock mismatch")
+		}
+		if s[1] != bi.Money {
+			return errors.New("money mismatch")
+		}
+		if s[0] == "cet" {
+			return errors.New("stock can not be cet")
 		}
 		if len(bi.Owner) == 0 {
-			return errors.New("Token owner is empty")
+			return errors.New("token owner is empty")
 		}
-		if len(bi.Token) == 0 {
-			return errors.New("Token symbol is empty")
+		if len(bi.Stock) == 0 {
+			return errors.New("stock is empty")
+		}
+		if len(bi.Money) == 0 {
+			return errors.New("money is empty")
+		}
+		if bi.InitPrice.IsNegative() {
+			return errors.New("init price is negative")
 		}
 		if !bi.MaxSupply.IsPositive() {
-			return errors.New("Max Supply is not positive")
+			return errors.New("max Supply is not positive")
 		}
 		if !bi.MaxPrice.IsPositive() {
-			return errors.New("Max Price is not positive")
+			return errors.New("max Price is not positive")
 		}
 		if bi.StockInPool.IsNegative() {
 			return errors.New("StockInPool is negative")
 		}
 		if bi.MoneyInPool.IsNegative() {
 			return errors.New("MoneyInPool is negative")
+		}
+		if bi.EnableCancelTime < 0 {
+			return errors.New("EnableCancelTime cannot be negative")
 		}
 		if !bi.IsConsistent() {
 			return errors.New("BancorInfo is not consistent")

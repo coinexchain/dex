@@ -343,7 +343,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.msgQueProducer,
 		app.paramsKeeper.Subspace(market.StoreKey),
 	)
-	app.bancorKeeper = bancorlite.NewBaseKeeper(bancorlite.NewBancorInfoKeeper(app.keyBancor, app.cdc), app.bankxKeeper, app.assetKeeper)
+	app.bancorKeeper = bancorlite.NewBaseKeeper(bancorlite.NewBancorInfoKeeper(app.keyBancor, app.cdc), app.bankxKeeper, app.assetKeeper, app.marketKeeper)
 	// register the staking hooks
 	// NOTE: The stakingKeeper above is passed by reference, so that it can be
 	// modified like below:

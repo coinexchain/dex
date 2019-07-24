@@ -25,9 +25,6 @@ type ExpectedAssetStatusKeeper interface {
 	GetToken(ctx sdk.Context, symbol string) asset.Token
 }
 
-type ExpectFeeKeeper interface {
-	AddCollectedFees(ctx sdk.Context, coins sdk.Coins) sdk.Coins
-}
 
 type ExpectedChargeFeeKeeper interface {
 	SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error

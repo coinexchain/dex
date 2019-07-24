@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -15,16 +16,20 @@ import (
 )
 
 const (
-	FlagMaxSupply  = "max-supply"
-	FlagMaxPrice   = "max-price"
-	FlagSide       = "side"
-	FlagAmount     = "amount"
-	FlagMoneyLimit = "money-limit"
+	FlagMaxSupply        = "max-supply"
+	FlagMaxPrice         = "max-price"
+	FlagSide             = "side"
+	FlagAmount           = "amount"
+	FlagMoneyLimit       = "money-limit"
+	FlagInitPrice        = "init-price"
+	FlagEnableCancelTime = "enable-cancel-time"
 )
 
 var bancorInitFlags = []string{
 	FlagMaxSupply,
 	FlagMaxPrice,
+	FlagEnableCancelTime,
+	FlagInitPrice,
 }
 
 var bancorTradeFlags = []string{
@@ -40,9 +45,9 @@ func BancorInitCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Initialize a bancor pool for a token, specifying the maximum supply of this pool and the maximum reachable price when all the supply are sold out.
 
 Example: 
-	 cetcli tx bancorlite init cetdac --max-supply=10000000000000 --max-price=5 
+	 cetcli tx bancorlite init stock money --max-supply=10000000000000 --max-price=5 --init-price=1 --enable-cancel-time=1563954165
 `,
-		Args: cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
@@ -52,15 +57,30 @@ Example:
 			if maxPrice.IsZero() {
 				return errors.New("Max Price is Invalid or Zero")
 			}
+			var initPrice sdk.Dec
+			types.FillDec(viper.GetString(FlagInitPrice), &initPrice)
+			if initPrice.IsNegative() {
+				return errors.New("init price is negative")
+			}
 			maxSupply, ok := sdk.NewIntFromString(viper.GetString(FlagMaxSupply))
 			if !ok {
 				return errors.New("Max Supply is Invalid")
 			}
+			time, err := strconv.ParseInt(viper.GetString(FlagEnableCancelTime), 10, 64)
+			if err != nil {
+				return errors.New("bancor enable-cancel-time is invalid")
+			}
+			if time < 0 {
+				return errors.New("bancor enable-cancel-time is negative")
+			}
 			msg := &types.MsgBancorInit{
-				Owner:     sender,
-				Token:     args[0],
-				MaxSupply: maxSupply,
-				MaxPrice:  maxPrice,
+				Owner:            sender,
+				Stock:            args[0],
+				Money:            args[1],
+				InitPrice:        initPrice,
+				MaxSupply:        maxSupply,
+				MaxPrice:         maxPrice,
+				EnableCancelTime: time,
 			}
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -70,8 +90,9 @@ Example:
 	}
 
 	cmd.Flags().String(FlagMaxSupply, "0", "The maximum supply of this pool.")
-	cmd.Flags().String(FlagMaxPrice, "0", "the maximum reachable price when all the supply are sold out")
-
+	cmd.Flags().String(FlagMaxPrice, "0", "The maximum reachable price when all the supply are sold out")
+	cmd.Flags().String(FlagEnableCancelTime, "0", "The time that bancor can be canceled")
+	cmd.Flags().String(FlagInitPrice, "0", "The init price of this bancor")
 	for _, flag := range bancorInitFlags {
 		cmd.MarkFlagRequired(flag)
 	}
@@ -85,10 +106,10 @@ func BancorTradeCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Sell tokens to a bancor pool or buy tokens from a bancor pool.
 
 Example: 
-	 cetcli tx bancorlite trade cetdac --side buy --amount=100 --money-limit=120
-	 cetcli tx bancorlite trade cetdac --side sell --amount=100 --money-limit=80
+	 cetcli tx bancorlite trade stock money --side buy --amount=100 --money-limit=120
+	 cetcli tx bancorlite trade stock money --side sell --amount=100 --money-limit=80
 `,
-		Args: cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
@@ -104,7 +125,8 @@ Example:
 			}
 			msg := &types.MsgBancorTrade{
 				Sender:     sender,
-				Token:      args[0],
+				Stock:      args[0],
+				Money:      args[1],
 				Amount:     viper.GetInt64(FlagAmount),
 				IsBuy:      isBuy,
 				MoneyLimit: viper.GetInt64(FlagMoneyLimit),

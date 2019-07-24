@@ -15,4 +15,5 @@ func init() {
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgBancorInit{}, "bancorlite/MsgBancorInit", nil)
 	cdc.RegisterConcrete(MsgBancorTrade{}, "bancorlite/MsgBancorTrade", nil)
+	cdc.RegisterConcrete(MsgBancorCancel{}, "bancorlite/MsgBancorCancel", nil)
 }

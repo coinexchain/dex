@@ -218,6 +218,19 @@ func (k Keeper) MarketOwner(ctx sdk.Context, info types.MarketInfo) sdk.AccAddre
 	return k.axk.GetToken(ctx, info.Stock).GetOwner()
 }
 
+func (k Keeper) GetMarketLastExePrice(ctx sdk.Context, symbol string) (error, sdk.Dec) {
+	mi, err := k.GetMarketInfo(ctx, symbol)
+	if err != nil {
+		return err, sdk.ZeroDec()
+	}
+	return err, mi.LastExecutedPrice
+}
+
+func (k Keeper) IsMarketExist(ctx sdk.Context, symbol string) bool {
+	_, err := k.GetMarketInfo(ctx, symbol)
+	return err == nil
+}
+
 // -----------------------------------------------------------------------------
 
 type GlobalMarketInfoKeeper interface {

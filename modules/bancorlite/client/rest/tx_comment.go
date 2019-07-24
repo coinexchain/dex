@@ -16,7 +16,9 @@ import (
 
 type BancorInitReq struct {
 	BaseReq   rest.BaseReq `json:"base_req"`
-	Token     string       `json:"token"`
+	Stock     string       `json:"stock"`
+	Money     string       `json:"money"`
+	InitPrice string       `json:"init_price"`
 	MaxSupply string       `json:"max_supply"`
 	MaxPrice  string       `json:"max_price"`
 }
@@ -55,6 +57,11 @@ func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Max Price is Invalid or Zero")
 			return
 		}
+		var initPrice sdk.Dec
+		types.FillDec(req.InitPrice, &initPrice)
+		if initPrice.IsNegative() {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Negative init price")
+		}
 		maxSupply, ok := sdk.NewIntFromString(req.MaxSupply)
 		if !ok {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Max Supply is Invalid")
@@ -62,7 +69,9 @@ func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 		}
 		msg := &types.MsgBancorInit{
 			Owner:     sender,
-			Token:     req.Token,
+			Stock:     req.Stock,
+			Money:     req.Money,
+			InitPrice: initPrice,
 			MaxSupply: maxSupply,
 			MaxPrice:  maxPrice,
 		}
@@ -73,7 +82,8 @@ func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 
 type BancorTradeReq struct {
 	BaseReq    rest.BaseReq `json:"base_req"`
-	Token      string       `json:"token"`
+	Stock      string       `json:"stock"`
+	Money      string       `json:"money"`
 	Amount     string       `json:"amount"`
 	IsBuy      bool         `json:"is_buy"`
 	MoneyLimit string       `json:"money_limit"`
@@ -121,7 +131,8 @@ func bancorTradeHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 
 		msg := &types.MsgBancorTrade{
 			Sender:     sender,
-			Token:      req.Token,
+			Stock:      req.Stock,
+			Money:      req.Money,
 			Amount:     amount,
 			IsBuy:      req.IsBuy,
 			MoneyLimit: moneyLimit,

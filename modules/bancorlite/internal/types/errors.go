@@ -18,10 +18,14 @@ const (
 	CodeNonOwnerIsProhibited  sdk.CodeType = 1008
 	CodeNoBancorExists        sdk.CodeType = 1009
 	CodeOwnerIsProhibited     sdk.CodeType = 1010
-	CodeStockInPoolOutofBound sdk.CodeType = 1011
+	CodeStockInPoolOutOfBound sdk.CodeType = 1011
 	CodeMoneyCrossLimit       sdk.CodeType = 1012
 	CodeUnMarshalFailed       sdk.CodeType = 1013
 	CodeMarshalFailed         sdk.CodeType = 1014
+	CodeNegativeInitPrice     sdk.CodeType = 1015
+	CodeNonMarketExist        sdk.CodeType = 1016
+	CodeNotBancorOwner        sdk.CodeType = 1017
+	CodeCancelTimeNotArrived  sdk.CodeType = 1018
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -34,6 +38,10 @@ func ErrNonPositiveSupply() sdk.Error {
 
 func ErrNonPositivePrice() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeNonPositivePrice, "Non-positive price is invalid")
+}
+
+func ErrNegativePrice() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeNegativeInitPrice, "Negative init price is invalid")
 }
 
 func ErrNonPositiveAmount() sdk.Error {
@@ -56,6 +64,10 @@ func ErrNonOwnerIsProhibited() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeNonOwnerIsProhibited, "Non-owner of this token can not create Bancor pool for it.")
 }
 
+func ErrNonMarketExist() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeNonMarketExist, "Non corresponding market exist")
+}
+
 func ErrNoBancorExists() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeNoBancorExists, "The Bancor pool for this token does not exist")
 }
@@ -64,8 +76,16 @@ func ErrOwnerIsProhibited() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeOwnerIsProhibited, "The token's owner can not trade with the token's Bancor pool.")
 }
 
+func ErrNotBancorOwner() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeNotBancorOwner, "The sender is not the bancor owner")
+}
+
+func ErrEnableCancelTimeNotArrive() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeCancelTimeNotArrived, "The time which bancor can be canceled has not arrived")
+}
+
 func ErrStockInPoolOutofBound() sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite, CodeStockInPoolOutofBound, "The stock in Bancor pool will be out of bound.")
+	return sdk.NewError(CodeSpaceBancorlite, CodeStockInPoolOutOfBound, "The stock in Bancor pool will be out of bound.")
 }
 
 func ErrMoneyCrossLimit(moneyErr string) sdk.Error {

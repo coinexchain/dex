@@ -15,6 +15,8 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handleMsgBancorTrade(ctx, k, msg)
 		case types.MsgBancorInit:
 			return handleMsgBancorInit(ctx, k, msg)
+		case types.MsgBancorCancel:
+			return handleMsgBancorCancel(ctx, k, msg)
 		default:
 			errMsg := "Unrecognized bancorlite Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -23,26 +25,35 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk.Result {
-	if bi := k.Bik.Load(ctx, msg.Token); bi != nil {
+	if bi := k.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money); bi != nil {
 		return types.ErrBancorAlreadyExists().Result()
 	}
-	if !k.Axk.IsTokenExists(ctx, msg.Token) {
+	if !k.Axk.IsTokenExists(ctx, msg.Stock) || !k.Axk.IsTokenExists(ctx, msg.Money) {
 		return types.ErrNoSuchToken().Result()
 	}
-	if !k.Axk.IsTokenIssuer(ctx, msg.Token, msg.Owner) {
+	if !k.Axk.IsTokenIssuer(ctx, msg.Stock, msg.Owner) {
 		return types.ErrNonOwnerIsProhibited().Result()
 	}
-	coins := sdk.Coins{sdk.Coin{Denom: msg.Token, Amount: msg.MaxSupply}}
+	if msg.Money != "cet" &&
+		!k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") &&
+		!k.Mk.IsMarketExist(ctx, msg.Money+keepers.SymbolSeparator+"cet") {
+		return types.ErrNonMarketExist().Result()
+	}
+	coins := sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: msg.MaxSupply}}
 	if err := k.Bxk.FreezeCoins(ctx, msg.Owner, coins); err != nil {
 		return err.Result()
 	}
 	bi := &keepers.BancorInfo{
-		Owner:       msg.Owner,
-		Token:       msg.Token,
-		MaxSupply:   msg.MaxSupply,
-		MaxPrice:    msg.MaxPrice,
-		StockInPool: msg.MaxSupply,
-		MoneyInPool: sdk.ZeroInt(),
+		Owner:            msg.Owner,
+		Stock:            msg.Stock,
+		Money:            msg.Money,
+		InitPrice:        msg.InitPrice,
+		MaxSupply:        msg.MaxSupply,
+		MaxPrice:         msg.MaxPrice,
+		Price:            sdk.ZeroDec(),
+		StockInPool:      msg.MaxSupply,
+		MoneyInPool:      sdk.ZeroInt(),
+		EnableCancelTime: msg.EnableCancelTime,
 	}
 	k.Bik.Save(ctx, bi)
 	//ctx.EventManager().EmitEvents(sdk.Events{
@@ -64,8 +75,27 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	return sdk.Result{}
 }
 
+func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel) sdk.Result {
+	bi := k.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	if bi == nil {
+		return types.ErrNoBancorExists().Result()
+	}
+	if !bytes.Equal(bi.Owner, msg.Owner) {
+		return types.ErrNotBancorOwner().Result()
+	}
+	if ctx.BlockHeader().Time.Unix() < bi.EnableCancelTime {
+		return types.ErrEnableCancelTimeNotArrive().Result()
+	}
+	if !k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") &&
+		!k.Mk.IsMarketExist(ctx, msg.Money+keepers.SymbolSeparator+"cet") {
+		return types.ErrNonMarketExist().Result()
+	}
+	k.Bik.Remove(ctx, bi)
+	return sdk.Result{}
+}
+
 func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) sdk.Result {
-	bi := k.Bik.Load(ctx, msg.Token)
+	bi := k.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
 	if bi == nil {
 		return types.ErrNoBancorExists().Result()
 	}
@@ -83,14 +113,14 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	}
 
 	diff := bi.MoneyInPool.Sub(biNew.MoneyInPool)
-	coinsFromPool := sdk.Coins{sdk.Coin{Denom: "cet", Amount: diff}}
-	coinsToPool := sdk.Coins{sdk.Coin{Denom: msg.Token, Amount: sdk.NewInt(msg.Amount)}}
+	coinsFromPool := sdk.Coins{sdk.Coin{Denom: msg.Money, Amount: diff}}
+	coinsToPool := sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: sdk.NewInt(msg.Amount)}}
 	moneyCrossLimit := msg.MoneyLimit > 0 && diff.LT(sdk.NewInt(msg.MoneyLimit))
 	moneyErr := "less than"
 	if msg.IsBuy {
 		diff = biNew.MoneyInPool.Sub(bi.MoneyInPool)
-		coinsToPool = sdk.Coins{sdk.Coin{Denom: "cet", Amount: diff}}
-		coinsFromPool = sdk.Coins{sdk.Coin{Denom: msg.Token, Amount: sdk.NewInt(msg.Amount)}}
+		coinsToPool = sdk.Coins{sdk.Coin{Denom: msg.Money, Amount: diff}}
+		coinsFromPool = sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: sdk.NewInt(msg.Amount)}}
 		moneyCrossLimit = msg.MoneyLimit > 0 && diff.GT(sdk.NewInt(msg.MoneyLimit))
 		moneyErr = "more than"
 	}
@@ -111,6 +141,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	if err := k.Bxk.SendCoins(ctx, bi.Owner, msg.Sender, coinsFromPool); err != nil {
 		return err.Result()
 	}
+
 	k.Bik.Save(ctx, &biNew)
 
 	side := "Sell"
@@ -120,7 +151,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			EventTypeBancorlite,
-			sdk.NewAttribute(AttributeKeyTradeFor, bi.Token),
+			sdk.NewAttribute(AttributeKeyTradeFor, bi.Stock+keepers.SymbolSeparator+bi.Money),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,

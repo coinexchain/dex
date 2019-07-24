@@ -16,3 +16,9 @@ type ExpectedAssetStatusKeeper interface {
 	IsTokenExists(ctx sdk.Context, denom string) bool // check whether there is a coin named "denom"
 	IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool
 }
+
+// market keeper will implement the interface
+type ExpectedMarketKeeper interface {
+	GetMarketLastExePrice(ctx sdk.Context, symbol string) (error, sdk.Dec)
+	IsMarketExist(ctx sdk.Context, symbol string) bool
+}
