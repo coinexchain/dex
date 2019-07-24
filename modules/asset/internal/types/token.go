@@ -87,12 +87,14 @@ type BaseToken struct {
 	Identity         string         `json:"identity" yaml:"identity"`                   //Identity of token
 }
 
+//nolint
 var (
-	// usualSymbolRegex : Token symbol can be 2 ~ 8 characters long.
-	usualSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}$")
-	// tokenSymbolRegex : Only CET owner can issue .T
-	//nolint
-	tokenSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}\\.t$")
+
+	// tokenSymbolRegex : Only CET owner can issue .suffix token
+	unusualSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}\\.[a-z]$")
+
+	// tokenSymbolRegex : Token symbol can be 2 ~ 8 characters long.
+	tokenSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}(\\.[a-z])?$")
 )
 
 // NewToken - new base token
@@ -177,14 +179,14 @@ func (t BaseToken) GetSymbol() string {
 }
 
 func ValidateTokenSymbol(symbol string) sdk.Error {
-	if !usualSymbolRegex.MatchString(symbol) && !tokenSymbolRegex.MatchString(symbol) {
+	if !tokenSymbolRegex.MatchString(symbol) {
 		return ErrInvalidTokenSymbol(symbol)
 	}
 	return nil
 }
 
-func IsUsualSymbol(symbol string) bool {
-	return usualSymbolRegex.MatchString(symbol)
+func IsUnusualSymbol(symbol string) bool {
+	return unusualSymbolRegex.MatchString(symbol)
 }
 
 func (t *BaseToken) SetSymbol(symbol string) sdk.Error {
