@@ -335,9 +335,9 @@ func initGenFiles(cdc *codec.Codec, mbm app.OrderedBasicManager, chainID string,
 }
 
 func assureTokenDistributionInGenesis(accs []genaccounts.GenesisAccount, testnetSupply sdk.Int) []genaccounts.GenesisAccount {
-	var distributedTokens sdk.Int
+	distributedTokens := sdk.ZeroInt()
 	for _, acc := range accs {
-		distributedTokens = acc.Coins[0].Amount.Add(distributedTokens)
+		distributedTokens = distributedTokens.Add(acc.Coins[0].Amount)
 	}
 
 	if testnetSupply.GT(distributedTokens) {
