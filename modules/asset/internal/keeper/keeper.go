@@ -112,8 +112,8 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 		}
 	}
 
-	// only cet owner can issue .T token
-	if types.IsUnusualSymbol(symbol) {
+	// only cet owner can issue .suffix token
+	if types.IsSuffixSymbol(symbol) {
 		cetToken = keeper.GetToken(ctx, dex.CET)
 		if cetToken == nil || !owner.Equals(cetToken.GetOwner()) {
 			return types.ErrInvalidTokenSymbol(symbol)
