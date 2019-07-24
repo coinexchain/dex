@@ -2,27 +2,39 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"unicode"
-	"unicode/utf8"
+	"strings"
 )
 
-const AliasMaxLength = 20
+func IsOnlyForCoinEx(alias string) bool {
+	if strings.HasPrefix(alias, "coinex") || strings.HasSuffix(alias, "coinex") {
+		return true
+	}
+	if alias == "cet" || alias == "viabtc" || alias == "cetdac" || alias == "www.coinex.com" ||
+		alias == "www.coinex.org" {
+		return true
+	}
+	return false
+}
+
+func IsValidChar(c rune) bool {
+	if '0' <= c && c <= '9' {
+		return true
+	}
+	if 'a' <= c && c <= 'z' {
+		return true
+	}
+	if c == '-' || c == '_' || c == '.' || c == '@' {
+		return true
+	}
+	return false
+}
 
 func IsValidAlias(alias string) bool {
-	if len(alias) == 0 {
+	if len(alias) < 2 || len(alias) > 100 {
 		return false
 	}
-	if !utf8.ValidString(alias) {
-		return false
-	}
-	for i, c := range alias {
-		if i == 0 && '0' <= c && c <= '9' {
-			return false
-		}
-		if unicode.IsSpace(c) || unicode.IsControl(c) {
-			return false
-		}
-		if i >= AliasMaxLength {
+	for _, c := range alias {
+		if !IsValidChar(c) {
 			return false
 		}
 	}
@@ -34,9 +46,10 @@ func IsValidAlias(alias string) bool {
 var _ sdk.Msg = MsgAliasUpdate{}
 
 type MsgAliasUpdate struct {
-	Owner sdk.AccAddress `json:"owner"`
-	Alias string         `json:"alias"`
-	IsAdd bool           `json:"is_add"`
+	Owner     sdk.AccAddress `json:"owner"`
+	Alias     string         `json:"alias"`
+	IsAdd     bool           `json:"is_add"`
+	AsDefault bool           `json:"as_default"`
 }
 
 // --------------------------------------------------------

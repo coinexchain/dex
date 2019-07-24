@@ -2,18 +2,19 @@ package alias
 
 import (
 	"errors"
+	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type GenesisState struct {
-	AliasInfoMap map[string]sdk.AccAddress `json:"alias_info_map"`
+	AliasEntryList []keepers.AliasEntry `json:"alias_entry_list"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(AliasInfoMap map[string]sdk.AccAddress) GenesisState {
+func NewGenesisState(AliasEntryList []keepers.AliasEntry) GenesisState {
 	return GenesisState{
-		AliasInfoMap: AliasInfoMap,
+		AliasEntryList: AliasEntryList,
 	}
 }
 
@@ -24,19 +25,19 @@ func DefaultGenesisState() GenesisState {
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
-	for alias, acc := range data.AliasInfoMap {
-		keeper.AddAlias(ctx, alias, acc)
+	for _, entry := range data.AliasEntryList {
+		keeper.AliasKeeper.AddAlias(ctx, entry.Alias, entry.Addr, entry.AsDefault, 0)
 	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
-	return NewGenesisState(k.GetAllAlias(ctx))
+	return NewGenesisState(k.AliasKeeper.GetAllAlias(ctx))
 }
 
 func (data GenesisState) Validate() error {
-	for alias := range data.AliasInfoMap {
-		if !types.IsValidAlias(alias) {
+	for _, entry := range data.AliasEntryList {
+		if !types.IsValidAlias(entry.Alias) {
 			return errors.New("Invalid Alias")
 		}
 	}

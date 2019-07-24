@@ -13,9 +13,10 @@ import (
 )
 
 type AliasUpdateReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	Alias   string       `json:"alias"`
-	IsAdd   bool         `json:"is_add"`
+	BaseReq   rest.BaseReq `json:"base_req"`
+	Alias     string       `json:"alias"`
+	IsAdd     bool         `json:"is_add"`
+	AsDefault bool         `json:"as_default"`
 }
 
 func aliasUpdateHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -47,9 +48,10 @@ func aliasUpdateHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 		req.BaseReq.Sequence = sequence
 
 		msg := &types.MsgAliasUpdate{
-			Owner: sender,
-			Alias: req.Alias,
-			IsAdd: req.IsAdd,
+			Owner:     sender,
+			Alias:     req.Alias,
+			IsAdd:     req.IsAdd,
+			AsDefault: req.AsDefault,
 		}
 
 		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
