@@ -3,8 +3,9 @@ package types
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestAddressPrefixes(t *testing.T) {
@@ -16,11 +17,9 @@ func TestAddressPrefixes(t *testing.T) {
 }
 
 func TestInitSdkConfig(t *testing.T) {
-
 	InitSdkConfig()
 	config := sdk.GetConfig()
-	require.Equal(t, config.GetBech32AccountAddrPrefix(), "coinex")
-	require.Equal(t, config.GetBech32ValidatorAddrPrefix(), "coinexvaloper")
-	require.Equal(t, config.GetBech32ValidatorAddrPrefix(), "coinexvaloper")
-
+	require.Equal(t, "coinex", config.GetBech32AccountAddrPrefix())
+	require.Equal(t, "coinexvaloper", config.GetBech32ValidatorAddrPrefix())
+	require.Equal(t, "coinexvalcons", config.GetBech32ConsensusAddrPrefix())
 }
