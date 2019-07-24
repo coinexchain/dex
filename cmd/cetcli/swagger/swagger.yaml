@@ -3448,8 +3448,7 @@ definitions:
       subkey:
         type: string
         example: ""
-      value:
-        type: object
+      value: {}
   Supply:
     type: object
     properties:
