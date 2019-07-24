@@ -413,8 +413,32 @@ func (app *CetChainApp) InitModules() {
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 
 	//crisis module should be reset since invariants has been registered to crisis keeper
-	app.mm.Modules[crisis.ModuleName] = crisis.NewAppModule(app.crisisKeeper)
-	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
+	app.replaceEmptyCrisisModule(&modules)
+
+	registerRoutesWithOrder(modules, app.Router(), app.QueryRouter())
+}
+
+func (app *CetChainApp) replaceEmptyCrisisModule(modules *[]module.AppModule) {
+	crisisWithInvariants := crisis.NewAppModule(app.crisisKeeper)
+
+	app.mm.Modules[crisis.ModuleName] = crisisWithInvariants
+
+	for i, module := range *modules {
+		if module.Name() == crisis.ModuleName {
+			(*modules)[i] = crisisWithInvariants
+		}
+	}
+}
+
+func registerRoutesWithOrder(modules []module.AppModule, router sdk.Router, queryRouter sdk.QueryRouter) {
+	for _, module := range modules {
+		if module.Route() != "" {
+			router.AddRoute(module.Route(), module.NewHandler())
+		}
+		if module.QuerierRoute() != "" {
+			queryRouter.AddRoute(module.QuerierRoute(), module.NewQuerierHandler())
+		}
+	}
 }
 
 // initialize BaseApp
