@@ -13,7 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 )
 
-type MmeoReq struct {
+type MemoReq struct {
 	BaseReq  rest.BaseReq `json:"base_req"`
 	Required bool         `json:"memo_required"`
 }
@@ -27,7 +27,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router) {
 // SendRequestHandlerFn - http request handler to send coins to a address.
 func SendRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req MmeoReq
+		var req MemoReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			return
 		}
