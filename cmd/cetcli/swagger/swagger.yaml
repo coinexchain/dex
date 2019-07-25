@@ -1226,6 +1226,7 @@ paths:
             type: array
             items:
               $ref: "#/definitions/UnbondingDelegation"
+            x-nullable: true
         400:
           description: Invalid validator address
         500:
