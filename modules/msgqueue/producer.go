@@ -10,17 +10,20 @@ import (
 )
 
 const (
-	brokers  = "brokers"
-	topics   = "topics"
-	PubTopic = "coinex-dex"
+	brokers       = "brokers"
+	topics        = "subscribe-modules"
+	PubTopic      = "coinex-dex"
+	FeatureToggle = "feature-toggle"
 )
 
 type MsgSender interface {
 	SendMsg(key []byte, v []byte)
 	IsSubScribe(topic string) bool
+	IsOpenToggle() bool
 }
 
 type Producer struct {
+	toggle    bool
 	subTopics map[string]struct{}
 	*kafka.Writer
 }
@@ -42,7 +45,7 @@ func NewProducer() Producer {
 	return p
 }
 
-func (k *Producer) setParam(data config) {
+func (p *Producer) setParam(data config) {
 	if len(data.Brokers) == 0 || len(data.Topics) == 0 {
 		return
 	}
@@ -50,29 +53,35 @@ func (k *Producer) setParam(data config) {
 	topics := strings.Split(data.Topics, ",")
 
 	for _, topic := range topics {
-		k.subTopics[topic] = struct{}{}
+		p.subTopics[topic] = struct{}{}
 	}
-	k.Writer = kafka.NewWriter(kafka.WriterConfig{
+	p.Writer = kafka.NewWriter(kafka.WriterConfig{
 		Brokers: brokers,
 		Topic:   PubTopic,
 		Async:   true,
 	})
+
+	p.toggle = viper.GetBool(FeatureToggle)
 }
 
-func (k Producer) close() {
-	if err := k.Close(); err != nil {
+func (p Producer) close() {
+	if err := p.Close(); err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func (k Producer) SendMsg(key []byte, v []byte) {
-	k.WriteMessages(context.Background(), kafka.Message{
+func (p Producer) SendMsg(key []byte, v []byte) {
+	p.WriteMessages(context.Background(), kafka.Message{
 		Key:   key,
 		Value: v,
 	})
 }
 
-func (k Producer) IsSubScribe(topic string) bool {
-	_, ok := k.subTopics[topic]
+func (p Producer) IsSubScribe(topic string) bool {
+	_, ok := p.subTopics[topic]
 	return ok
+}
+
+func (p Producer) IsOpenToggle() bool {
+	return p.toggle
 }
