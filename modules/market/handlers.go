@@ -461,6 +461,11 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg mtype.MsgCancelTrading
 		}
 	}
 
+	if keeper.IsBancorExist(ctx, info.Stock) {
+		return sdk.NewError(mtype.CodeSpaceMarket, mtype.CodeInvalidBancorExist,
+			"When stock has bancor contracts, you can't delete the trading-pair")
+	}
+
 	return nil
 }
 

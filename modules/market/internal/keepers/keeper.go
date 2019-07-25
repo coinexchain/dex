@@ -91,12 +91,14 @@ type Keeper struct {
 	ock           *OrderCleanUpDayKeeper
 	gmk           GlobalMarketInfoKeeper
 	msgProducer   msgqueue.MsgSender
+	bancorK       types.ExpectedBancorKeeper
 }
 
 func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
-	bnkVal types.ExpectedBankxKeeper,
-	cdcVal *codec.Codec, msgKeeperVal msgqueue.MsgSender,
-	paramstore params.Subspace) Keeper {
+	bnkVal types.ExpectedBankxKeeper, cdcVal *codec.Codec,
+	msgKeeperVal msgqueue.MsgSender,
+	paramstore params.Subspace,
+	bancor types.ExpectedBancorKeeper) Keeper {
 
 	return Keeper{
 		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
@@ -107,7 +109,12 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 		ock:           NewOrderCleanUpDayKeeper(key),
 		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
 		msgProducer:   msgKeeperVal,
+		bancorK:       bancor,
 	}
+}
+
+func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
+	return k.bancorK.IsBancorExist(ctx, stock)
 }
 
 func (k Keeper) SetUnixTime(ctx sdk.Context, unixTime int64) {

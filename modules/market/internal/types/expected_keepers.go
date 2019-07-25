@@ -28,3 +28,7 @@ type ExpectedAssetStatusKeeper interface {
 type ExpectedChargeFeeKeeper interface {
 	SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 }
+
+type ExpectedBancorKeeper interface {
+	IsBancorExist(ctx sdk.Context, stock string) bool
+}

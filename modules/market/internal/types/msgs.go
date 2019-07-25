@@ -291,7 +291,7 @@ type CancelMarketInfo struct {
 type CreateOrderInfo struct {
 	OrderID     string `json:"order_id"`
 	Sender      string `json:"sender"`
-	TradingPair string `json:"TradingPair"`
+	TradingPair string `json:"trading_pair"`
 	OrderType   byte   `json:"order_type"`
 	Price       string `json:"price"`
 	Quantity    int64  `json:"quantity"`

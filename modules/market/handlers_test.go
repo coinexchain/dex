@@ -102,6 +102,12 @@ type storeKeys struct {
 	keySupply   *sdk.KVStoreKey
 }
 
+type mockBancorKeeper struct{}
+
+func (mbk mockBancorKeeper) IsBancorExist(ctx sdk.Context, stock string) bool {
+	return false
+}
+
 func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) types.ExpectedAssetStatusKeeper {
 	asset.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
@@ -275,7 +281,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	mk := keepers.NewKeeper(keys.marketKey, ak, bk, cdc,
-		msgqueue.NewProducer(), paramsKeeper.Subspace(types.StoreKey))
+		msgqueue.NewProducer(), paramsKeeper.Subspace(types.StoreKey), mockBancorKeeper{})
 	types.RegisterCodec(cdc)
 
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)

@@ -142,3 +142,7 @@ func NewKeeper(bik *BancorInfoKeeper,
 		Mk:  mk,
 	}
 }
+
+func (keeper Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
+	return keeper.Bik.Load(ctx, stock) != nil
+}
