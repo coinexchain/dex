@@ -243,6 +243,8 @@ paths:
           description: Tx with the provided hash
           schema:
             $ref: "#/definitions/TxQuery"
+        404:
+          description: Tx not found
         500:
           description: Internal Server Error
   /txs:
