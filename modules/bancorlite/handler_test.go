@@ -15,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
@@ -295,6 +296,7 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 		msg types.MsgBancorTrade
 	}
 	input := prepareMockInput(t, false, false)
+
 	tests := []struct {
 		name string
 		args args
@@ -324,4 +326,32 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestKeeper(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	ctx := input.ctx
+	k := input.bik.Bik
+	e := k.IsBancorExist(ctx, "ccc")
+	assert.False(t, e)
+
+	k.Save(ctx, &keepers.BancorInfo{
+		Stock: "ccc",
+		Money: "cet",
+	})
+	e = k.IsBancorExist(ctx, "ccc")
+	assert.True(t, e)
+
+	e = k.IsBancorExist(ctx, "ccb")
+	assert.False(t, e)
+
+	bi := k.Load(ctx, "ccc/abc")
+	assert.Nil(t, bi)
+
+	bi = k.Load(ctx, "ccc/cet")
+	assert.Equal(t, "ccc", bi.Stock)
+
+	k.Remove(ctx, bi)
+	e = k.IsBancorExist(ctx, "ccc")
+	assert.False(t, e)
 }

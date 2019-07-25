@@ -139,7 +139,7 @@ func (keeper *BancorInfoKeeper) Iterate(ctx sdk.Context, biProc func(bi *BancorI
 func (keeper *BancorInfoKeeper) IsBancorExist(ctx sdk.Context, stock string) bool {
 	store := ctx.KVStore(keeper.biKey)
 	key := append(BancorInfoKey, []byte(stock+SymbolSeparator)...)
-	iter := store.Iterator(key, key)
+	iter := store.Iterator(key, append(key, 0xff))
 	defer iter.Close()
 	iter.Domain()
 	for iter.Valid() {
