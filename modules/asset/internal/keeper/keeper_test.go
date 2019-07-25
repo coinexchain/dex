@@ -225,22 +225,6 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	// remove token
 	input.tk.removeToken(input.ctx, token)
 
-	//case 5: token total mint amt is invalid
-	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), testAddr,
-		true, false, false, false, "", "", "")
-	require.NoError(t, err)
-	err = input.tk.MintToken(input.ctx, symbol, testAddr, sdk.NewInt(9E18+1))
-	require.Error(t, err)
-
-	// remove token
-	input.tk.removeToken(input.ctx, token)
-
-	//case 6: token total supply before 1e8 boosting should be less than 90 billion
-	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), testAddr,
-		true, false, false, false, "", "", "")
-	require.NoError(t, err)
-	err = input.tk.MintToken(input.ctx, symbol, testAddr, sdk.NewInt(9E18))
-	require.Error(t, err)
 }
 
 func TestTokenKeeper_BurnToken(t *testing.T) {
@@ -302,21 +286,13 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	// remove token
 	input.tk.removeToken(input.ctx, token)
 
-	//case 5: token total burn amt is invalid
-	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), testAddr,
-		true, false, false, false, "", "", "")
-	require.NoError(t, err)
-	err = input.tk.BurnToken(input.ctx, symbol, testAddr, sdk.NewInt(9E18+1))
-	require.Error(t, err)
-
-	// remove token
-	input.tk.removeToken(input.ctx, token)
-
-	//case 6: token total supply limited to > 0
+	//case 5: token total supply limited to > 0
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), testAddr,
 		true, false, false, false, "", "", "")
 	require.NoError(t, err)
 	err = input.tk.BurnToken(input.ctx, symbol, testAddr, sdk.NewInt(2100))
+	require.Error(t, err)
+	err = input.tk.BurnToken(input.ctx, symbol, testAddr, sdk.NewInt(2200))
 	require.Error(t, err)
 }
 

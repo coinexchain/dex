@@ -170,7 +170,7 @@ func (msg MsgMintToken) ValidateBasic() sdk.Error {
 	}
 
 	amt := msg.Amount
-	if amt.GT(sdk.NewInt(MaxTokenAmount)) || !amt.IsPositive() {
+	if !amt.IsPositive() {
 		return ErrInvalidTokenMintAmt(amt.String())
 	}
 
@@ -223,7 +223,7 @@ func (msg MsgBurnToken) ValidateBasic() sdk.Error {
 	}
 
 	amt := msg.Amount
-	if amt.GT(sdk.NewInt(MaxTokenAmount)) || !amt.IsPositive() {
+	if !amt.IsPositive() {
 		return ErrInvalidTokenBurnAmt(amt.String())
 	}
 

@@ -72,7 +72,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"burn_token_invalid",
-			NewMsgBurnToken("abc", sdk.NewInt(9E18+1000), owner),
+			NewMsgBurnToken("abc", sdk.NewInt(-1000), owner),
 			false,
 		},
 		{

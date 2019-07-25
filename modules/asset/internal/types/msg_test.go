@@ -57,13 +57,7 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 			ErrInvalidTokenSymbol("a*aa"),
 		},
 		{
-			"case-totalSupply1",
-			NewMsgIssueToken("ABC Token", "abc", sdk.NewInt(9E18+1), testAddr,
-				false, false, false, false, "", "", ""),
-			ErrInvalidTokenSupply(sdk.NewInt(9E18 + 1).String()),
-		},
-		{
-			"case-totalSupply2",
+			"case-totalSupply",
 			NewMsgIssueToken("ABC Token", "abc", sdk.NewInt(-1), testAddr,
 				false, false, false, false, "", "", ""),
 			ErrInvalidTokenSupply(sdk.NewInt(-1).String()),
@@ -162,12 +156,7 @@ func TestMsgMintToken_ValidateBasic(t *testing.T) {
 			ErrNilTokenOwner(),
 		},
 		{
-			"case-invalidAmt1",
-			NewMsgMintToken("abc", sdk.NewInt(9E18+1), testAddr),
-			ErrInvalidTokenMintAmt(sdk.NewInt(9E18 + 1).String()),
-		},
-		{
-			"case-invalidAmt2",
+			"case-invalidAmt",
 			NewMsgMintToken("abc", sdk.NewInt(-1), testAddr),
 			ErrInvalidTokenMintAmt(sdk.NewInt(-1).String()),
 		},
@@ -204,12 +193,7 @@ func TestMsgBurnToken_ValidateBasic(t *testing.T) {
 			ErrNilTokenOwner(),
 		},
 		{
-			"case-invalidAmt1",
-			NewMsgBurnToken("abc", sdk.NewInt(9E18+1), testAddr),
-			ErrInvalidTokenBurnAmt(sdk.NewInt(9E18 + 1).String()),
-		},
-		{
-			"case-invalidAmt2",
+			"case-invalidAmt",
 			NewMsgBurnToken("abc", sdk.NewInt(-1), testAddr),
 			ErrInvalidTokenBurnAmt(sdk.NewInt(-1).String()),
 		},
