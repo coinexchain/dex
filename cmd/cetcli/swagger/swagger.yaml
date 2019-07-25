@@ -192,7 +192,7 @@ paths:
           description: Server internal error
   /validatorsets/{height}:
     get:
-      operationId: getValidatorSet
+      operationId: getValidatorSets
       summary: Get a validator set a certain height
       tags:
         - Tendermint
