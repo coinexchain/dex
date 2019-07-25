@@ -75,20 +75,20 @@ func NewBancorInfoDisplay(bi *BancorInfo) BancorInfoDisplay {
 }
 
 type BancorInfoKeeper struct {
-	biKey sdk.StoreKey
-	codec *codec.Codec
+	biKey         sdk.StoreKey
+	codec         *codec.Codec
 	paramSubspace params.Subspace
 }
 
 func NewBancorInfoKeeper(key sdk.StoreKey, cdc *codec.Codec, paramSubspace params.Subspace) *BancorInfoKeeper {
 	return &BancorInfoKeeper{
-		biKey: key,
-		codec: cdc,
-		paramSubspace:paramSubspace,
+		biKey:         key,
+		codec:         cdc,
+		paramSubspace: paramSubspace,
 	}
 }
 
-func (keeper *BancorInfoKeeper) SetParam(ctx sdk.Context, params types.Params){
+func (keeper *BancorInfoKeeper) SetParam(ctx sdk.Context, params types.Params) {
 	keeper.paramSubspace.SetParamSet(ctx, &params)
 }
 
@@ -142,7 +142,7 @@ func (keeper *BancorInfoKeeper) IsBancorExist(ctx sdk.Context, stock string) boo
 	iter := store.Iterator(key, key)
 	defer iter.Close()
 	iter.Domain()
-	for ; iter.Valid(); {
+	for iter.Valid() {
 		return true
 	}
 	return false

@@ -3,24 +3,27 @@ package bancorlite
 import (
 	"errors"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
+	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strings"
 )
 
 type GenesisState struct {
+	Params        types.Params                  `json:"params"`
 	BancorInfoMap map[string]keepers.BancorInfo `json:"bancor_info_map"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(BancorInfoMap map[string]keepers.BancorInfo) GenesisState {
+func NewGenesisState(params types.Params, BancorInfoMap map[string]keepers.BancorInfo) GenesisState {
 	return GenesisState{
+		Params:        params,
 		BancorInfoMap: BancorInfoMap,
 	}
 }
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(nil)
+	return NewGenesisState(types.DefaultParams(), nil)
 }
 
 // InitGenesis - Init store state from genesis data
@@ -28,6 +31,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, bi := range data.BancorInfoMap {
 		keeper.Bik.Save(ctx, &bi)
 	}
+	keeper.Bik.SetParam(ctx, data.Params)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
@@ -36,7 +40,7 @@ func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	k.Bik.Iterate(ctx, func(bi *keepers.BancorInfo) {
 		m[bi.Stock+keepers.SymbolSeparator+bi.Money] = *bi
 	})
-	return NewGenesisState(m)
+	return NewGenesisState(k.Bik.GetParam(ctx), m)
 }
 
 func (data GenesisState) Validate() error {
@@ -85,5 +89,5 @@ func (data GenesisState) Validate() error {
 			return errors.New("BancorInfo is not consistent")
 		}
 	}
-	return nil
+	return data.Params.ValidateGenesis()
 }

@@ -57,7 +57,7 @@ func (p *Params) ValidateGenesis() error {
 	if p.CreateBancorFee <= 0 || p.CancelBancorFee <= 0 {
 		return fmt.Errorf("%s must be a positive number, is %d", KeyCreateBancorFee, p.CreateBancorFee)
 	}
-	if p.TradeFeeRate <0 || p.TradeFeeRate >= int64(math.Pow10(TradeFeeRatePrecision)) {
+	if p.TradeFeeRate < 0 || p.TradeFeeRate >= int64(math.Pow10(TradeFeeRatePrecision)) {
 		return fmt.Errorf("TradeFeeRate is invalid")
 	}
 	return nil

@@ -2,6 +2,7 @@ package dev
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/bancorlite"
 	"github.com/coinexchain/dex/modules/market"
 	"os"
 	"reflect"
@@ -49,6 +50,7 @@ func getParamSets() []moduleParamSet {
 		toParamSet("stakingx", stakingx.DefaultParams()),
 		toParamSet("asset", asset.DefaultParams()),
 		toParamSet("market", market.DefaultParams()),
+		toParamSet("bancorlite", bancorlite.DefaultParams()),
 	}
 	if viper.GetBool("include-sdk") {
 		set = append(set,
