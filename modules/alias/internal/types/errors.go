@@ -16,7 +16,8 @@ const (
 	CodeUnMarshalFailed         sdk.CodeType = 1105
 	CodeAliasAlreadyExists      sdk.CodeType = 1106
 	CodeNoSuchAlias             sdk.CodeType = 1107
-	CodeCanOnlyBeUsedByCetOwner sdk.CodeType = 1107
+	CodeCanOnlyBeUsedByCetOwner sdk.CodeType = 1108
+	CodeMaxAliasCountReached    sdk.CodeType = 1109
 )
 
 func ErrEmptyAlias() sdk.Error {
@@ -37,4 +38,8 @@ func ErrNoSuchAlias() sdk.Error {
 
 func ErrCanOnlyBeUsedByCetOwner(a string) sdk.Error {
 	return sdk.NewError(CodeSpaceAlias, CodeCanOnlyBeUsedByCetOwner, fmt.Sprintf("This alias '%s' can only be used by CET's owner", a))
+}
+
+func ErrMaxAliasCountReached() sdk.Error {
+	return sdk.NewError(CodeSpaceAlias, CodeMaxAliasCountReached, "Have reached the maximum alias count and can not add new aliases")
 }

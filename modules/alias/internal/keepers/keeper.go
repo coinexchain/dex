@@ -92,7 +92,7 @@ func (keeper *AliasKeeper) AddAlias(ctx sdk.Context, alias string, addr sdk.AccA
 		}
 	}
 	if addNewAlias && len(aliasList) >= maxCount && maxCount > 0 {
-		return false, false
+		return false, addNewAlias
 	}
 	if asDefault && hasDefault {
 		keeper.setAlias(ctx, aliasList[0], addr, false)

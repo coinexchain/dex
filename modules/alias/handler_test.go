@@ -28,15 +28,7 @@ import (
 //	IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool
 //}
 
-var logStrList = make([]string, 0, 100)
-
-func logStrClear() {
-	logStrList = logStrList[:0]
-}
-
-func logStrAppend(s string) {
-	logStrList = append(logStrList, s)
-}
+var logStr string
 
 type mocBankxKeeper struct {
 	maxAmount sdk.Int
@@ -50,8 +42,7 @@ func (k *mocBankxKeeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk
 		}
 		coinStrList[i] = coin.Amount.String() + coin.Denom
 	}
-	s := "Deduct " + strings.Join(coinStrList, ",") + " from " + addr.String()
-	logStrAppend(s)
+	logStr = "Deduct " + strings.Join(coinStrList, ",") + " from " + addr.String()
 	return nil
 }
 
@@ -80,7 +71,7 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	paramsKeeper := params.NewKeeper(types.ModuleCdc, keyParams, tkeyParams, params.DefaultCodespace)
 	keeper := keepers.NewKeeper(key,
 		&mocBankxKeeper{
-			maxAmount: sdk.NewInt(1000),
+			maxAmount: sdk.NewInt(1000000),
 		},
 		&mocAssetKeeper{
 			tokenIssuer: map[string]sdk.AccAddress{"cet": simpleAddr("00000")},
@@ -112,66 +103,22 @@ func Test1(t *testing.T) {
 	aliasEntryList := keeper.AliasKeeper.GetAllAlias(ctx)
 	require.Equal(t, 0, len(aliasEntryList))
 
-	genS := NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
-		{Alias: "alice", Addr: alice, AsDefault: false},
-		{Alias: "tom", Addr: tom, AsDefault: false},
-	})
-	InitGenesis(ctx, *keeper, genS)
-
-	ak := keeper.AliasKeeper
-	maxCount := 5
-	ak.AddAlias(ctx, "goodgirl", alice, false, maxCount)
-	ak.AddAlias(ctx, "tom@gmail.com", tom, false, maxCount)
-	ak.AddAlias(ctx, "bob", bob, false, maxCount)
-	addr, isDefault := ak.GetAddressFromAlias(ctx, "alice")
-	require.Equal(t, alice, sdk.AccAddress(addr))
-	require.Equal(t, false, isDefault)
-	addr, isDefault = ak.GetAddressFromAlias(ctx, "goodgirl")
-	require.Equal(t, alice, sdk.AccAddress(addr))
-	require.Equal(t, false, isDefault)
-	addr, isDefault = ak.GetAddressFromAlias(ctx, "tom")
-	require.Equal(t, tom, sdk.AccAddress(addr))
-	require.Equal(t, false, isDefault)
-	addr, isDefault = ak.GetAddressFromAlias(ctx, "tom@gmail.com")
-	require.Equal(t, tom, sdk.AccAddress(addr))
-	require.Equal(t, false, isDefault)
-	addr, isDefault = ak.GetAddressFromAlias(ctx, "bob")
-	require.Equal(t, bob, sdk.AccAddress(addr))
-	require.Equal(t, false, isDefault)
-
-	aliasList := ak.GetAliasListOfAccount(ctx, alice)
-	require.Equal(t, []string{"", "alice", "goodgirl"}, aliasList)
-	aliasList = ak.GetAliasListOfAccount(ctx, tom)
-	require.Equal(t, []string{"", "tom", "tom@gmail.com"}, aliasList)
-	aliasList = ak.GetAliasListOfAccount(ctx, bob)
-	require.Equal(t, []string{"", "bob"}, aliasList)
-
-	aliasEntryList = ak.GetAllAlias(ctx)
 	refList := []keepers.AliasEntry{
 		{Alias: "alice", Addr: alice, AsDefault: false},
-		{Alias: "bob", Addr: bob, AsDefault: false},
-		{Alias: "goodgirl", Addr: alice, AsDefault: false},
 		{Alias: "tom", Addr: tom, AsDefault: false},
 		{Alias: "tom@gmail.com", Addr: tom, AsDefault: false},
 	}
-	require.Equal(t, refList, aliasEntryList)
-
-	ak.RemoveAlias(ctx, "goodgirl", alice)
-	ak.RemoveAlias(ctx, "bob", bob)
-	aliasList = ak.GetAliasListOfAccount(ctx, alice)
-	require.Equal(t, []string{"", "alice"}, aliasList)
-	aliasList = ak.GetAliasListOfAccount(ctx, bob)
-	require.Equal(t, []string{""}, aliasList)
+	genS := NewGenesisState(keepers.DefaultParams(), refList)
+	InitGenesis(ctx, *keeper, genS)
 
 	aliasEntryList = ExportGenesis(ctx, *keeper).AliasEntryList
-	refList = []keepers.AliasEntry{
-		{Alias: "alice", Addr: alice, AsDefault: false},
-		{Alias: "tom", Addr: tom, AsDefault: false},
-		{Alias: "tom@gmail.com", Addr: tom, AsDefault: false},
-	}
 	require.Equal(t, refList, aliasEntryList)
 
 	err := NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
+		{Alias: "alice", Addr: alice, AsDefault: false},
+	}).Validate()
+	require.Equal(t, nil, err)
+	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
 		{Alias: "爱丽丝", Addr: alice, AsDefault: false},
 	}).Validate()
 	refErr := errors.New("Invalid Alias")
@@ -193,10 +140,22 @@ func Test1(t *testing.T) {
 	}).Validate()
 	require.Equal(t, refErr, err)
 
+	params := keepers.DefaultParams()
+	params.MaxAliasCount = 0
+	err = NewGenesisState(params, []keepers.AliasEntry{
+		{Alias: string([]byte{255, 255}), Addr: alice, AsDefault: false},
+	}).Validate()
+	refErr = fmt.Errorf("%s must be a positive number, is %d", keepers.KeyMaxAliasCount, 0)
+	require.Equal(t, refErr, err)
+
 	handlerFunc := NewHandler(*keeper)
 
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "supergirl", IsAdd: true, AsDefault: false})
+	refLog := "Deduct 70cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
+	require.Equal(t, refLog, logStr)
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: bob, Alias: "superman", IsAdd: true, AsDefault: false})
+	refLog = "Deduct 70cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
+	require.Equal(t, refLog, logStr)
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: tom, Alias: "tom", IsAdd: false, AsDefault: false})
 
 	aliasEntryList = ExportGenesis(ctx, *keeper).AliasEntryList
@@ -214,6 +173,38 @@ func Test1(t *testing.T) {
 	require.Equal(t, types.ErrNoSuchAlias().Result(), res)
 	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: tom, Alias: "superman", IsAdd: true})
 	require.Equal(t, types.ErrAliasAlreadyExists().Result(), res)
+	aliasCet := "coinex-usdt.t"
+	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: tom, Alias: aliasCet, IsAdd: true})
+	require.Equal(t, types.ErrCanOnlyBeUsedByCetOwner(aliasCet).Result(), res)
+
+	cetOwner := simpleAddr("00000")
+	refLog = "Deduct 70cet from cosmos1qy352eufqy352eufqy352eufqy35qqqqkc9q90"
+	handlerFunc(ctx, types.MsgAliasUpdate{Owner: cetOwner, Alias: aliasCet, IsAdd: true, AsDefault: true})
+	addr, isDefault := keeper.AliasKeeper.GetAddressFromAlias(ctx, aliasCet)
+	require.Equal(t, cetOwner, sdk.AccAddress(addr))
+	require.Equal(t, true, isDefault)
+	require.Equal(t, refLog, logStr)
+
+	handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "sup", IsAdd: true, AsDefault: false})
+	refLog = "Deduct 300000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
+	require.Equal(t, refLog, logStr)
+	handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "supe", IsAdd: true, AsDefault: false})
+	refLog = "Deduct 40000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
+	require.Equal(t, refLog, logStr)
+	handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "super", IsAdd: true, AsDefault: false})
+	refLog = "Deduct 5000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
+	require.Equal(t, refLog, logStr)
+	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "superg", IsAdd: true, AsDefault: false})
+	require.Equal(t, types.ErrMaxAliasCountReached().Result(), res)
+
+	handlerFunc(ctx, types.MsgAliasUpdate{Owner: bob, Alias: "12345", IsAdd: true, AsDefault: false})
+	refLog = "Deduct 5000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
+	require.Equal(t, refLog, logStr)
+	handlerFunc(ctx, types.MsgAliasUpdate{Owner: bob, Alias: "123456", IsAdd: true, AsDefault: false})
+	refLog = "Deduct 600cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
+	require.Equal(t, refLog, logStr)
+	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: bob, Alias: "12", IsAdd: true, AsDefault: false})
+	require.Equal(t, sdk.NewError(types.CodeSpaceAlias, 1199, "Not enough coins").Result(), res)
 
 	msg := types.MsgAliasUpdate{Owner: []byte{}, Alias: "supergirl", IsAdd: true}
 	err = msg.ValidateBasic()
