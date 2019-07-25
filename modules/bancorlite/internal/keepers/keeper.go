@@ -84,7 +84,7 @@ func NewBancorInfoKeeper(key sdk.StoreKey, cdc *codec.Codec, paramSubspace param
 	return &BancorInfoKeeper{
 		biKey:         key,
 		codec:         cdc,
-		paramSubspace: paramSubspace,
+		paramSubspace: paramSubspace.WithKeyTable(types.ParamKeyTable()),
 	}
 }
 

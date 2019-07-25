@@ -25,9 +25,9 @@ type MsgBancorInit struct {
 	Owner            sdk.AccAddress `json:"owner"`
 	Stock            string         `json:"stock"`
 	Money            string         `json:"money"`
+	InitPrice        sdk.Dec        `json:"init_price"`
 	MaxSupply        sdk.Int        `json:"max_supply"`
 	MaxPrice         sdk.Dec        `json:"max_price"`
-	InitPrice        sdk.Dec        `json:"init_price"`
 	EnableCancelTime int64          `json:"enable_cancel_time"`
 }
 
