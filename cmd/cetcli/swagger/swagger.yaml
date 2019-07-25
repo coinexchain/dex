@@ -40,6 +40,7 @@ securityDefinitions:
 paths:
   /version:
     get:
+      operationId: getVersion
       summary: Version of CET-lite
       tags:
         - Misc
@@ -49,11 +50,11 @@ paths:
           description: Plaintext version i.e. "v0.25.0"
   /node_version:
     get:
+      operationId: getNodeVersion
       summary: Version of the connected node
       tags:
         - Misc
       description: Get the version of the SDK running on the connected node to compare against expected
-      operationId: nodeVersion
       responses:
         200:
           description: Plaintext version i.e. "v0.25.0"
@@ -116,6 +117,7 @@ paths:
           description: Failed to query node status
   /syncing:
     get:
+      operationId: getSyncing
       summary: Syncing state of node
       tags:
         - Tendermint
@@ -142,6 +144,7 @@ paths:
           description: Server internal error
   /blocks/{height}:
     get:
+      operationId: getBlock
       summary: Get a block at a certain height
       tags:
         - Tendermint
@@ -189,6 +192,7 @@ paths:
           description: Server internal error
   /validatorsets/{height}:
     get:
+      operationId: getValidatorSet
       summary: Get a validator set a certain height
       tags:
         - Tendermint
@@ -243,6 +247,7 @@ paths:
           description: Internal Server Error
   /txs:
     get:
+      operationId: searchTx
       tags:
         - Transactions
       summary: Search transactions
