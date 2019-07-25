@@ -72,6 +72,18 @@ var (
 	}
 )
 
+type impKeeper struct {
+	*CetChainApp
+}
+
+func (ik impKeeper) GetMarketLastExePrice(ctx sdk.Context, symbol string) (sdk.Dec, error) {
+	return ik.marketKeeper.GetMarketLastExePrice(ctx, symbol)
+}
+
+func (ik impKeeper) IsMarketExist(ctx sdk.Context, symbol string) bool {
+	return ik.IsMarketExist(ctx, symbol)
+}
+
 func init() {
 	modules := []module.AppModuleBasic{
 		genaccounts.AppModuleBasic{},
@@ -335,6 +347,13 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.supplyKeeper,
 		auth.FeeCollectorName,
 	)
+
+	ik := impKeeper{app}
+	app.bancorKeeper = bancorlite.NewBaseKeeper(
+		bancorlite.NewBancorInfoKeeper(app.keyBancor, app.cdc, app.paramsKeeper.Subspace(bancorlite.StoreKey)),
+		app.bankxKeeper,
+		app.assetKeeper,
+		ik)
 	app.marketKeeper = market.NewBaseKeeper(
 		app.keyMarket,
 		app.tokenKeeper,
@@ -344,12 +363,6 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.paramsKeeper.Subspace(market.StoreKey),
 		app.bancorKeeper,
 	)
-
-	app.bancorKeeper = bancorlite.NewBaseKeeper(
-		bancorlite.NewBancorInfoKeeper(app.keyBancor, app.cdc, app.paramsKeeper.Subspace(bancorlite.StoreKey)),
-		app.bankxKeeper,
-		app.assetKeeper,
-		app.marketKeeper)
 	// register the staking hooks
 	// NOTE: The stakingKeeper above is passed by reference, so that it can be
 	// modified like below:
