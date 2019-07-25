@@ -2,6 +2,7 @@ vendor/
 .idea/
 .DS_Store
 *.iml
+coverage.html
 
 *.out
 
