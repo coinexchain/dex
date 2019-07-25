@@ -71,7 +71,7 @@ func (keeper *AliasKeeper) GetAllAlias(ctx sdk.Context) []AliasEntry {
 	res := make([]AliasEntry, 0, 1000)
 	for ; iter.Valid(); iter.Next() {
 		res = append(res, AliasEntry{
-			Alias:     string(iter.Key()),
+			Alias:     string(iter.Key()[1:]),
 			Addr:      sdk.AccAddress(iter.Value()[1:]),
 			AsDefault: iter.Value()[0] != 0,
 		})
@@ -92,12 +92,10 @@ func (keeper *AliasKeeper) AddAlias(ctx sdk.Context, alias string, addr sdk.AccA
 		}
 	}
 	if addNewAlias && len(aliasList) >= maxCount && maxCount > 0 {
-		return false, false
+		return false, addNewAlias
 	}
 	if asDefault && hasDefault {
-		for _, a := range aliasList {
-			keeper.setAlias(ctx, a, addr, false)
-		}
+		keeper.setAlias(ctx, aliasList[0], addr, false)
 	}
 	keeper.setAlias(ctx, alias, addr, asDefault)
 	return true, addNewAlias

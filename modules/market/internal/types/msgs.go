@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/coinexchain/dex/modules/asset"
 )
 
 // RouterKey is the name of the market module
@@ -129,7 +127,8 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidSymbol()
 	}
 
-	if msg.Price <= 0 || msg.Price > asset.MaxTokenAmount {
+	//todo: const 1E18
+	if msg.Price <= 0 || msg.Price > 1E18 {
 		return ErrInvalidPrice(msg.Price)
 	}
 

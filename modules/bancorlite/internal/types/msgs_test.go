@@ -13,10 +13,13 @@ var addrUser = sdk.AccAddress("user")
 
 func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 	type fields struct {
-		Owner     sdk.AccAddress
-		Token     string
-		MaxSupply sdk.Int
-		MaxPrice  sdk.Dec
+		Owner            sdk.AccAddress
+		Stock            string
+		Money            string
+		InitPrice        sdk.Dec
+		MaxSupply        sdk.Int
+		MaxPrice         sdk.Dec
+		EnableCancelTime int64
 	}
 	tests := []struct {
 		name   string
@@ -28,8 +31,11 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 			fields{
 				addrOwner,
 				"abc",
+				"cet",
+				sdk.NewDec(0),
 				sdk.NewInt(100),
-				sdk.NewDec(10)},
+				sdk.NewDec(10),
+				100},
 			nil,
 		},
 		{
@@ -37,8 +43,12 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 			fields{
 				addrNull,
 				"abc",
+				"cet",
+				sdk.NewDec(0),
 				sdk.NewInt(100),
-				sdk.NewDec(10)},
+				sdk.NewDec(10),
+				1000,
+			},
 			sdk.ErrInvalidAddress("missing owner address"),
 		},
 		{
@@ -46,8 +56,12 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 			fields{
 				addrOwner,
 				"cet",
+				"abc",
+				sdk.NewDec(0),
 				sdk.NewInt(100),
-				sdk.NewDec(10)},
+				sdk.NewDec(10),
+				1000,
+			},
 			ErrInvalidSymbol(),
 		},
 		{
@@ -55,8 +69,12 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 			fields{
 				addrOwner,
 				"abc",
+				"cet",
+				sdk.NewDec(0),
 				sdk.NewInt(0),
-				sdk.NewDec(10)},
+				sdk.NewDec(10),
+				1000,
+			},
 			ErrNonPositiveSupply(),
 		},
 		{
@@ -64,18 +82,25 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 			fields{
 				addrOwner,
 				"abc",
+				"cet",
+				sdk.NewDec(0),
 				sdk.NewInt(100),
-				sdk.NewDec(0)},
+				sdk.NewDec(0),
+				1000,
+			},
 			ErrNonPositivePrice(),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBancorInit{
-				Owner:     tt.fields.Owner,
-				Token:     tt.fields.Token,
-				MaxSupply: tt.fields.MaxSupply,
-				MaxPrice:  tt.fields.MaxPrice,
+				Owner:            tt.fields.Owner,
+				Stock:            tt.fields.Stock,
+				Money:            tt.fields.Money,
+				InitPrice:        tt.fields.InitPrice,
+				MaxSupply:        tt.fields.MaxSupply,
+				MaxPrice:         tt.fields.MaxPrice,
+				EnableCancelTime: tt.fields.EnableCancelTime,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MsgBancorInit.ValidateBasic() = %v, want %v", got, tt.want)
@@ -87,7 +112,8 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 func TestMsgBancorTrade_ValidateBasic(t *testing.T) {
 	type fields struct {
 		Sender     sdk.AccAddress
-		Token      string
+		Stock      string
+		Money      string
 		Amount     int64
 		IsBuy      bool
 		MoneyLimit int64
@@ -101,7 +127,8 @@ func TestMsgBancorTrade_ValidateBasic(t *testing.T) {
 			name: "positive",
 			fields: fields{
 				Sender:     addrUser,
-				Token:      "abc",
+				Stock:      "abc",
+				Money:      "cet",
 				Amount:     10,
 				IsBuy:      true,
 				MoneyLimit: 10,
@@ -112,7 +139,8 @@ func TestMsgBancorTrade_ValidateBasic(t *testing.T) {
 			name: "negative sender",
 			fields: fields{
 				Sender:     addrNull,
-				Token:      "abc",
+				Stock:      "abc",
+				Money:      "cet",
 				Amount:     10,
 				IsBuy:      true,
 				MoneyLimit: 10,
@@ -123,7 +151,8 @@ func TestMsgBancorTrade_ValidateBasic(t *testing.T) {
 			name: "negative token",
 			fields: fields{
 				Sender:     addrUser,
-				Token:      "cet",
+				Stock:      "cet",
+				Money:      "abc",
 				Amount:     10,
 				IsBuy:      true,
 				MoneyLimit: 10,
@@ -134,7 +163,8 @@ func TestMsgBancorTrade_ValidateBasic(t *testing.T) {
 			name: "negative amount",
 			fields: fields{
 				Sender:     addrUser,
-				Token:      "abc",
+				Stock:      "abc",
+				Money:      "cet",
 				Amount:     0,
 				IsBuy:      true,
 				MoneyLimit: 10,
@@ -145,7 +175,8 @@ func TestMsgBancorTrade_ValidateBasic(t *testing.T) {
 			name: "negative amount exceed max",
 			fields: fields{
 				Sender:     addrUser,
-				Token:      "abc",
+				Stock:      "abc",
+				Money:      "cet",
 				Amount:     MaxTradeAmount + 1,
 				IsBuy:      true,
 				MoneyLimit: 10,
@@ -157,7 +188,8 @@ func TestMsgBancorTrade_ValidateBasic(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBancorTrade{
 				Sender:     tt.fields.Sender,
-				Token:      tt.fields.Token,
+				Stock:      tt.fields.Stock,
+				Money:      tt.fields.Money,
 				Amount:     tt.fields.Amount,
 				IsBuy:      tt.fields.IsBuy,
 				MoneyLimit: tt.fields.MoneyLimit,

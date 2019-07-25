@@ -8,24 +8,25 @@ const (
 	CodeSpaceBancorlite sdk.CodespaceType = "bancorlite"
 
 	// 1001 ~ 1099
-	CodeInvalidSymbol         sdk.CodeType = 1001
-	CodeNonPositiveSupply     sdk.CodeType = 1002
-	CodeNonPositivePrice      sdk.CodeType = 1003
-	CodeNonPositiveAmount     sdk.CodeType = 1004
-	CodeTradeAmountIsTooLarge sdk.CodeType = 1005
-	CodeBancorAlreadyExists   sdk.CodeType = 1006
-	CodeNoSuchToken           sdk.CodeType = 1007
-	CodeNonOwnerIsProhibited  sdk.CodeType = 1008
-	CodeNoBancorExists        sdk.CodeType = 1009
-	CodeOwnerIsProhibited     sdk.CodeType = 1010
-	CodeStockInPoolOutOfBound sdk.CodeType = 1011
-	CodeMoneyCrossLimit       sdk.CodeType = 1012
-	CodeUnMarshalFailed       sdk.CodeType = 1013
-	CodeMarshalFailed         sdk.CodeType = 1014
-	CodeNegativeInitPrice     sdk.CodeType = 1015
-	CodeNonMarketExist        sdk.CodeType = 1016
-	CodeNotBancorOwner        sdk.CodeType = 1017
-	CodeCancelTimeNotArrived  sdk.CodeType = 1018
+	CodeInvalidSymbol           sdk.CodeType = 1001
+	CodeNonPositiveSupply       sdk.CodeType = 1002
+	CodeNonPositivePrice        sdk.CodeType = 1003
+	CodeNonPositiveAmount       sdk.CodeType = 1004
+	CodeTradeAmountIsTooLarge   sdk.CodeType = 1005
+	CodeBancorAlreadyExists     sdk.CodeType = 1006
+	CodeNoSuchToken             sdk.CodeType = 1007
+	CodeNonOwnerIsProhibited    sdk.CodeType = 1008
+	CodeNoBancorExists          sdk.CodeType = 1009
+	CodeOwnerIsProhibited       sdk.CodeType = 1010
+	CodeStockInPoolOutOfBound   sdk.CodeType = 1011
+	CodeMoneyCrossLimit         sdk.CodeType = 1012
+	CodeUnMarshalFailed         sdk.CodeType = 1013
+	CodeMarshalFailed           sdk.CodeType = 1014
+	CodeNegativeInitPrice       sdk.CodeType = 1015
+	CodeNonMarketExist          sdk.CodeType = 1016
+	CodeNotBancorOwner          sdk.CodeType = 1017
+	CodeCancelTimeNotArrived    sdk.CodeType = 1018
+	CodeGetMarketExePriceFailed sdk.CodeType = 1019
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -90,4 +91,8 @@ func ErrStockInPoolOutofBound() sdk.Error {
 
 func ErrMoneyCrossLimit(moneyErr string) sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeMoneyCrossLimit, "The money amount in this trade is "+moneyErr+" the limited value.")
+}
+
+func ErrGetMarketPrice(err string) sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeGetMarketExePriceFailed, err)
 }

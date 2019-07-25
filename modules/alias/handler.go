@@ -32,7 +32,7 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 		aliasParams := k.GetParams(ctx)
 		ok, addNewAlias := k.AliasKeeper.AddAlias(ctx, msg.Alias, msg.Owner, msg.AsDefault, aliasParams.MaxAliasCount)
 		if !ok {
-			return types.ErrAliasAlreadyExists().Result()
+			return types.ErrMaxAliasCountReached().Result()
 		} else if addNewAlias {
 			var coins sdk.Coins
 			if len(msg.Alias) == 2 {
@@ -48,7 +48,11 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 			} else {
 				coins = dexsdk.NewCetCoins(aliasParams.FeeForAliasLength7OrHigher)
 			}
-			return k.BankKeeper.DeductFee(ctx, msg.Owner, coins).Result()
+			err := k.BankKeeper.DeductFee(ctx, msg.Owner, coins)
+			if err != nil {
+				return err.Result()
+			}
+
 		}
 	} else {
 		addr, _ := k.AliasKeeper.GetAddressFromAlias(ctx, msg.Alias)

@@ -202,7 +202,7 @@ func (t BaseToken) GetTotalSupply() sdk.Int {
 }
 
 func (t *BaseToken) SetTotalSupply(amt sdk.Int) sdk.Error {
-	if amt.GT(sdk.NewInt(MaxTokenAmount)) || !amt.IsPositive() {
+	if !amt.IsPositive() {
 		return ErrInvalidTokenSupply(amt.String())
 	}
 	t.TotalSupply = amt
@@ -295,7 +295,7 @@ func (t BaseToken) GetTotalBurn() sdk.Int {
 }
 
 func (t *BaseToken) SetTotalBurn(amt sdk.Int) sdk.Error {
-	if amt.GT(sdk.NewInt(MaxTokenAmount)) || amt.IsNegative() {
+	if amt.IsNegative() {
 		return ErrInvalidTokenBurnAmt(amt.String())
 	}
 	t.TotalBurn = amt
@@ -307,7 +307,7 @@ func (t BaseToken) GetTotalMint() sdk.Int {
 }
 
 func (t *BaseToken) SetTotalMint(amt sdk.Int) sdk.Error {
-	if amt.GT(sdk.NewInt(MaxTokenAmount)) || amt.IsNegative() {
+	if amt.IsNegative() {
 		return ErrInvalidTokenMintAmt(amt.String())
 	}
 	t.TotalMint = amt

@@ -5,6 +5,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -14,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
@@ -67,7 +69,7 @@ func getAddr(input string) sdk.AccAddress {
 	return addr
 }
 
-func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) types.ExpectedAssetStatusKeeper {
+func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) asset.Keeper {
 	asset.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
@@ -178,7 +180,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	return tk
 }
 
-func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) types.ExpectedBankxKeeper {
+func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) bankx.Keeper {
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	producer := msgqueue.NewProducer()
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
@@ -220,6 +222,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	keys.keyStaking = sdk.NewKVStoreKey(staking.StoreKey)
 	keys.tkeyStaking = sdk.NewTransientStoreKey(staking.TStoreKey)
 	keys.keySupply = sdk.NewKVStoreKey(supply.StoreKey)
+	keys.marketKey = sdk.NewKVStoreKey(market.StoreKey)
 	keys.keyBancor = sdk.NewKVStoreKey(StoreKey)
 
 	ms.MountStoreWithDB(keys.assetCapKey, sdk.StoreTypeIAVL, db)
@@ -229,16 +232,19 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	ms.MountStoreWithDB(keys.authxKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.keySupply, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keys.keyBancor, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keys.marketKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	ak := prepareAssetKeeper(t, keys, cdc, ctx, addrForbid, tokenForbid)
 	bk := prepareBankxKeeper(keys, cdc, ctx)
-
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	types.RegisterCodec(cdc)
-	bik := keepers.NewBancorInfoKeeper(keys.keyBancor, cdc)
-	keeper := keepers.NewKeeper(bik, bk, ak)
+	mk := market.NewBaseKeeper(keys.marketKey, ak, bk, cdc,
+		msgqueue.NewProducer(), paramsKeeper.Subspace(market.StoreKey))
+	bik := keepers.NewBancorInfoKeeper(keys.keyBancor, cdc, paramsKeeper.Subspace(StoreKey))
+	keeper := keepers.NewKeeper(bik, bk, ak, mk)
+	keeper.Bik.SetParam(ctx, DefaultParams())
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 
 	return testInput{ctx: ctx, bik: keeper, handler: NewHandler(keeper), akp: akp, keys: keys, cdc: cdc}
@@ -262,10 +268,13 @@ func Test_handleMsgBancorInit(t *testing.T) {
 				ctx: input.ctx,
 				k:   input.bik,
 				msg: types.MsgBancorInit{
-					Owner:     haveCetAddress,
-					Token:     stock,
-					MaxSupply: sdk.NewInt(100),
-					MaxPrice:  sdk.NewDec(10),
+					Owner:            haveCetAddress,
+					Stock:            stock,
+					Money:            money,
+					InitPrice:        sdk.NewDec(0),
+					MaxSupply:        sdk.NewInt(100),
+					MaxPrice:         sdk.NewDec(10),
+					EnableCancelTime: 0,
 				},
 			},
 			want: sdk.Result{},
@@ -287,6 +296,7 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 		msg types.MsgBancorTrade
 	}
 	input := prepareMockInput(t, false, false)
+
 	tests := []struct {
 		name string
 		args args
@@ -299,7 +309,8 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 				k:   input.bik,
 				msg: types.MsgBancorTrade{
 					Sender:     haveCetAddress,
-					Token:      stock,
+					Stock:      stock,
+					Money:      money,
 					Amount:     10,
 					IsBuy:      true,
 					MoneyLimit: 100,
@@ -315,4 +326,32 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestKeeper(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	ctx := input.ctx
+	k := input.bik.Bik
+	e := k.IsBancorExist(ctx, "ccc")
+	assert.False(t, e)
+
+	k.Save(ctx, &keepers.BancorInfo{
+		Stock: "ccc",
+		Money: "cet",
+	})
+	e = k.IsBancorExist(ctx, "ccc")
+	assert.True(t, e)
+
+	e = k.IsBancorExist(ctx, "ccb")
+	assert.False(t, e)
+
+	bi := k.Load(ctx, "ccc/abc")
+	assert.Nil(t, bi)
+
+	bi = k.Load(ctx, "ccc/cet")
+	assert.Equal(t, "ccc", bi.Stock)
+
+	k.Remove(ctx, bi)
+	e = k.IsBancorExist(ctx, "ccc")
+	assert.False(t, e)
 }

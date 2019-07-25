@@ -13,6 +13,7 @@ const (
 var (
 	NewBaseKeeper       = keepers.NewKeeper
 	NewBancorInfoKeeper = keepers.NewBancorInfoKeeper
+	DefaultParams       = types.DefaultParams
 )
 
 type (

@@ -8,23 +8,26 @@ import (
 )
 
 type GenesisState struct {
+	Params         keepers.Params       `json:"params"`
 	AliasEntryList []keepers.AliasEntry `json:"alias_entry_list"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(AliasEntryList []keepers.AliasEntry) GenesisState {
+func NewGenesisState(params keepers.Params, AliasEntryList []keepers.AliasEntry) GenesisState {
 	return GenesisState{
+		Params:         params,
 		AliasEntryList: AliasEntryList,
 	}
 }
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(nil)
+	return NewGenesisState(keepers.DefaultParams(), nil)
 }
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+	keeper.SetParams(ctx, data.Params)
 	for _, entry := range data.AliasEntryList {
 		keeper.AliasKeeper.AddAlias(ctx, entry.Alias, entry.Addr, entry.AsDefault, 0)
 	}
@@ -32,10 +35,14 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
-	return NewGenesisState(k.AliasKeeper.GetAllAlias(ctx))
+	return NewGenesisState(k.GetParams(ctx), k.AliasKeeper.GetAllAlias(ctx))
 }
 
 func (data GenesisState) Validate() error {
+	if err := data.Params.ValidateGenesis(); err != nil {
+		return err
+	}
+
 	for _, entry := range data.AliasEntryList {
 		if !types.IsValidAlias(entry.Alias) {
 			return errors.New("Invalid Alias")

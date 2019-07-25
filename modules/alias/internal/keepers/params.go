@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	DefaultFeeForAliasLength2         = 1000000
-	DefaultFeeForAliasLength3         = 1000000
-	DefaultFeeForAliasLength4         = 1000000
-	DefaultFeeForAliasLength5         = 1000000
-	DefaultFeeForAliasLength6         = 1000000
-	DefaultFeeForAliasLength7OrHigher = 1000000
+	DefaultFeeForAliasLength2         = 2000000
+	DefaultFeeForAliasLength3         = 300000
+	DefaultFeeForAliasLength4         = 40000
+	DefaultFeeForAliasLength5         = 5000
+	DefaultFeeForAliasLength6         = 600
+	DefaultFeeForAliasLength7OrHigher = 70
 	DefaultMaxAliasCount              = 5
 )
 
