@@ -772,6 +772,7 @@ paths:
         type: string
         x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
+      operationId: getValidatorsOfDelegator
       summary: Query all validators that a delegator is bonded to
       tags:
         - Staking
