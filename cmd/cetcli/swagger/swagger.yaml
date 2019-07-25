@@ -581,6 +581,7 @@ paths:
         type: string
         x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
+      operationId: getDelegationsToValidator
       summary: Query the current delegation between a delegator and a validator
       tags:
         - Staking
@@ -705,7 +706,7 @@ paths:
         type: string
     get:
       summary: Get all redelegations (filter by query params)
-      operationId: queryRedelegation
+      operationId: getRedelegations
       tags:
         - Staking
       produces:
