@@ -8,14 +8,14 @@ import (
 )
 
 type GenesisState struct {
-	Params      keepers.Params     `json:"params"`
+	Params         keepers.Params       `json:"params"`
 	AliasEntryList []keepers.AliasEntry `json:"alias_entry_list"`
 }
 
 // NewGenesisState - Create a new genesis state
 func NewGenesisState(params keepers.Params, AliasEntryList []keepers.AliasEntry) GenesisState {
 	return GenesisState{
-		Params:  params,
+		Params:         params,
 		AliasEntryList: AliasEntryList,
 	}
 }

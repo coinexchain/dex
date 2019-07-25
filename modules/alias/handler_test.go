@@ -1,19 +1,19 @@
 package alias
 
 import (
-	"errors"
-	"strings"
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/stretchr/testify/require"
+	"strings"
 	"testing"
 
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
-	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
@@ -83,7 +83,7 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 			maxAmount: sdk.NewInt(1000),
 		},
 		&mocAssetKeeper{
-			tokenIssuer: map[string]sdk.AccAddress{"cet":simpleAddr("00000")},
+			tokenIssuer: map[string]sdk.AccAddress{"cet": simpleAddr("00000")},
 		},
 		paramsKeeper.Subspace(types.StoreKey),
 	)
@@ -113,29 +113,29 @@ func Test1(t *testing.T) {
 	require.Equal(t, 0, len(aliasEntryList))
 
 	genS := NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:"alice", Addr:alice, AsDefault: false},
-		keepers.AliasEntry{Alias:"tom", Addr:tom, AsDefault: false},
+		{Alias: "alice", Addr: alice, AsDefault: false},
+		{Alias: "tom", Addr: tom, AsDefault: false},
 	})
 	InitGenesis(ctx, *keeper, genS)
 
-	ak:=keeper.AliasKeeper
-	maxCount:=5
+	ak := keeper.AliasKeeper
+	maxCount := 5
 	ak.AddAlias(ctx, "goodgirl", alice, false, maxCount)
 	ak.AddAlias(ctx, "tom@gmail.com", tom, false, maxCount)
 	ak.AddAlias(ctx, "bob", bob, false, maxCount)
-	addr,isDefault := ak.GetAddressFromAlias(ctx, "alice")
+	addr, isDefault := ak.GetAddressFromAlias(ctx, "alice")
 	require.Equal(t, alice, sdk.AccAddress(addr))
 	require.Equal(t, false, isDefault)
-	addr,isDefault = ak.GetAddressFromAlias(ctx, "goodgirl")
+	addr, isDefault = ak.GetAddressFromAlias(ctx, "goodgirl")
 	require.Equal(t, alice, sdk.AccAddress(addr))
 	require.Equal(t, false, isDefault)
-	addr,isDefault = ak.GetAddressFromAlias(ctx, "tom")
+	addr, isDefault = ak.GetAddressFromAlias(ctx, "tom")
 	require.Equal(t, tom, sdk.AccAddress(addr))
 	require.Equal(t, false, isDefault)
-	addr,isDefault = ak.GetAddressFromAlias(ctx, "tom@gmail.com")
+	addr, isDefault = ak.GetAddressFromAlias(ctx, "tom@gmail.com")
 	require.Equal(t, tom, sdk.AccAddress(addr))
 	require.Equal(t, false, isDefault)
-	addr,isDefault = ak.GetAddressFromAlias(ctx, "bob")
+	addr, isDefault = ak.GetAddressFromAlias(ctx, "bob")
 	require.Equal(t, bob, sdk.AccAddress(addr))
 	require.Equal(t, false, isDefault)
 
@@ -148,11 +148,11 @@ func Test1(t *testing.T) {
 
 	aliasEntryList = ak.GetAllAlias(ctx)
 	refList := []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:"alice",    Addr: alice, AsDefault:false},
-		keepers.AliasEntry{Alias:"bob",      Addr: bob,   AsDefault:false},
-		keepers.AliasEntry{Alias:"goodgirl", Addr: alice, AsDefault:false},
-		keepers.AliasEntry{Alias:"tom",      Addr: tom,   AsDefault:false},
-		keepers.AliasEntry{Alias:"tom@gmail.com",     Addr: tom,   AsDefault:false},
+		{Alias: "alice", Addr: alice, AsDefault: false},
+		{Alias: "bob", Addr: bob, AsDefault: false},
+		{Alias: "goodgirl", Addr: alice, AsDefault: false},
+		{Alias: "tom", Addr: tom, AsDefault: false},
+		{Alias: "tom@gmail.com", Addr: tom, AsDefault: false},
 	}
 	require.Equal(t, refList, aliasEntryList)
 
@@ -165,31 +165,31 @@ func Test1(t *testing.T) {
 
 	aliasEntryList = ExportGenesis(ctx, *keeper).AliasEntryList
 	refList = []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:"alice",    Addr: alice, AsDefault:false},
-		keepers.AliasEntry{Alias:"tom",      Addr: tom,   AsDefault:false},
-		keepers.AliasEntry{Alias:"tom@gmail.com",     Addr: tom,   AsDefault:false},
+		{Alias: "alice", Addr: alice, AsDefault: false},
+		{Alias: "tom", Addr: tom, AsDefault: false},
+		{Alias: "tom@gmail.com", Addr: tom, AsDefault: false},
 	}
 	require.Equal(t, refList, aliasEntryList)
 
 	err := NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:"爱丽丝", Addr:alice, AsDefault:false},
+		{Alias: "爱丽丝", Addr: alice, AsDefault: false},
 	}).Validate()
 	refErr := errors.New("Invalid Alias")
 	require.Equal(t, refErr, err)
 	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:string([]byte{255, 255}), Addr:alice, AsDefault:false},
+		{Alias: string([]byte{255, 255}), Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, refErr, err)
 	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:"", Addr:alice, AsDefault:false},
+		{Alias: "", Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, refErr, err)
 	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:"a", Addr:alice, AsDefault:false},
+		{Alias: "a", Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, refErr, err)
 	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:"abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyzzzabcdefghijklmnopqrstuvwxyz", Addr:alice, AsDefault:false},
+		{Alias: "abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyzzzabcdefghijklmnopqrstuvwxyz", Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, refErr, err)
 
@@ -201,10 +201,10 @@ func Test1(t *testing.T) {
 
 	aliasEntryList = ExportGenesis(ctx, *keeper).AliasEntryList
 	refList = []keepers.AliasEntry{
-		keepers.AliasEntry{Alias:"alice",     Addr:alice, AsDefault:false},
-		keepers.AliasEntry{Alias:"supergirl", Addr:alice, AsDefault:false},
-		keepers.AliasEntry{Alias:"superman",  Addr:bob,  AsDefault:false},
-		keepers.AliasEntry{Alias:"tom@gmail.com",      Addr:tom, AsDefault:false},
+		{Alias: "alice", Addr: alice, AsDefault: false},
+		{Alias: "supergirl", Addr: alice, AsDefault: false},
+		{Alias: "superman", Addr: bob, AsDefault: false},
+		{Alias: "tom@gmail.com", Addr: tom, AsDefault: false},
 	}
 	require.Equal(t, refList, aliasEntryList)
 
@@ -225,4 +225,3 @@ func Test1(t *testing.T) {
 	err = msg.ValidateBasic()
 	require.Equal(t, types.ErrInvalidAlias(), err)
 }
-
