@@ -617,7 +617,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/UnbondingDelegation"
+              $ref: "#/definitions/UnbondingDelegationPair"
         400:
           description: Invalid delegator address
         500:
@@ -949,7 +949,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/UnbondingDelegation"
+              $ref: "#/definitions/UnbondingDelegationPair"
             x-nullable: true
         400:
           description: Invalid validator address
@@ -3371,23 +3371,8 @@ definitions:
         type: string
       creation_height:
         type: string
-      min_time:
+      completion_time:
         type: string
-  UnbondingDelegation:
-    type: object
-    properties:
-      delegator_address:
-        type: string
-      validator_address:
-        type: string
-      initial_balance:
-        type: string
-      balance:
-        type: string
-      creation_height:
-        type: integer
-      min_time:
-        type: integer
   Redelegation:
     type: object
     properties:
