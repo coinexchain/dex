@@ -3309,12 +3309,6 @@ definitions:
             type: string
           details:
             type: string
-      bond_height:
-        type: string
-        example: "0"
-      bond_intra_tx_counter:
-        type: integer
-        example: 0
       unbonding_height:
         type: string
         example: "0"
@@ -3324,18 +3318,23 @@ definitions:
       commission:
         type: object
         properties:
-          rate:
-            type: string
-            example: "0"
-          max_rate:
-            type: string
-            example: "0"
-          max_change_rate:
-            type: string
-            example: "0"
+          CommissionRates:
+            type: object
+            properties:
+              rate:
+                type: string
+                example: "0"
+              max_rate:
+                type: string
+                example: "0"
+              max_change_rate:
+                type: string
+                example: "0"
           update_time:
             type: string
             example: "1970-01-01T00:00:00Z"
+      min_self_delegation:
+        type: string
   Delegation:
     type: object
     properties:
