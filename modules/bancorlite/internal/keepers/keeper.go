@@ -4,6 +4,7 @@ import (
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	"time"
 )
 
@@ -76,13 +77,24 @@ func NewBancorInfoDisplay(bi *BancorInfo) BancorInfoDisplay {
 type BancorInfoKeeper struct {
 	biKey sdk.StoreKey
 	codec *codec.Codec
+	paramSubspace params.Subspace
 }
 
-func NewBancorInfoKeeper(key sdk.StoreKey, cdc *codec.Codec) *BancorInfoKeeper {
+func NewBancorInfoKeeper(key sdk.StoreKey, cdc *codec.Codec, paramSubspace params.Subspace) *BancorInfoKeeper {
 	return &BancorInfoKeeper{
 		biKey: key,
 		codec: cdc,
+		paramSubspace:paramSubspace,
 	}
+}
+
+func (keeper *BancorInfoKeeper) SetParam(ctx sdk.Context, params types.Params){
+	keeper.paramSubspace.SetParamSet(ctx, &params)
+}
+
+func (keeper *BancorInfoKeeper) GetParam(ctx sdk.Context) (param types.Params) {
+	keeper.paramSubspace.GetParamSet(ctx, &param)
+	return
 }
 
 func (keeper *BancorInfoKeeper) Save(ctx sdk.Context, bi *BancorInfo) {
@@ -124,6 +136,18 @@ func (keeper *BancorInfoKeeper) Iterate(ctx sdk.Context, biProc func(bi *BancorI
 	}
 }
 
+func (keeper *BancorInfoKeeper) IsBancorExist(ctx sdk.Context, stock string) bool {
+	store := ctx.KVStore(keeper.biKey)
+	key := append(BancorInfoKey, []byte(stock+SymbolSeparator)...)
+	iter := store.Iterator(key, key)
+	defer iter.Close()
+	iter.Domain()
+	for ; iter.Valid(); {
+		return true
+	}
+	return false
+}
+
 type Keeper struct {
 	Bik *BancorInfoKeeper
 	Bxk types.ExpectedBankxKeeper
@@ -141,4 +165,8 @@ func NewKeeper(bik *BancorInfoKeeper,
 		Axk: axk,
 		Mk:  mk,
 	}
+}
+
+func (k *Keeper) SubtractAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return k.Bxk.DeductFee(ctx, addr, amt)
 }

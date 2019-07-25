@@ -35,12 +35,15 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		return types.ErrNonOwnerIsProhibited().Result()
 	}
 	if msg.Money != "cet" &&
-		!k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") &&
-		!k.Mk.IsMarketExist(ctx, msg.Money+keepers.SymbolSeparator+"cet") {
+		!k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
 		return types.ErrNonMarketExist().Result()
 	}
 	coins := sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: msg.MaxSupply}}
 	if err := k.Bxk.FreezeCoins(ctx, msg.Owner, coins); err != nil {
+		return err.Result()
+	}
+	if err := k.Bxk.DeductFee(ctx, msg.Owner,
+		sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(k.Bik.GetParam(ctx).CreateBancorFee)))); err != nil {
 		return err.Result()
 	}
 	bi := &keepers.BancorInfo{
@@ -86,11 +89,20 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if ctx.BlockHeader().Time.Unix() < bi.EnableCancelTime {
 		return types.ErrEnableCancelTimeNotArrive().Result()
 	}
-	if !k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") &&
-		!k.Mk.IsMarketExist(ctx, msg.Money+keepers.SymbolSeparator+"cet") {
+	if !k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
 		return types.ErrNonMarketExist().Result()
 	}
+	if err := k.Bxk.DeductFee(ctx, msg.Owner,
+		sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(k.Bik.GetParam(ctx).CancelBancorFee)))); err != nil {
+		return err.Result()
+	}
 	k.Bik.Remove(ctx, bi)
+	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Stock, bi.StockInPool))); err != nil {
+		return err.Result()
+	}
+	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
+		return err.Result()
+	}
 	return sdk.Result{}
 }
 
@@ -129,6 +141,14 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return types.ErrMoneyCrossLimit(moneyErr).Result()
 	}
 
+	price, err := k.Mk.GetMarketLastExePrice(ctx, msg.Stock+keepers.SymbolSeparator+"cet")
+	if err != nil {
+		return types.ErrGetMarketPrice(err.Error()).Result()
+	}
+	commission := price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParam(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
+	if err := k.Bxk.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin("cet", commission))); err != nil {
+		return err.Result()
+	}
 	if err := k.Bxk.SendCoins(ctx, msg.Sender, bi.Owner, coinsToPool); err != nil {
 		return err.Result()
 	}
@@ -141,7 +161,6 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	if err := k.Bxk.SendCoins(ctx, bi.Owner, msg.Sender, coinsFromPool); err != nil {
 		return err.Result()
 	}
-
 	k.Bik.Save(ctx, &biNew)
 
 	side := "Sell"
