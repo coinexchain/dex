@@ -456,6 +456,284 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /market/gte-orders:
+    post:
+      summary: Create GTE order in blockchain
+      tags:
+        - Market
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: createGteOrder
+      parameters:
+        - in: body
+          name: orderInfo
+          description: create order tx
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  exist_blocks:
+                    type: string
+                    example: 10000
+              - $ref: "#/definitions/Order"
+
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /market/ioc-orders:
+    post:
+      summary: Create IOC order in blockchain
+      tags:
+        - Market
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: createIocOrder
+      parameters:
+        - in: body
+          name: orderInfo
+          description: create order tx
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/Order"
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /market/trading-pairs:
+    post:
+      summary: Create trading-pair in blockchain
+      tags:
+        - Market
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: createTradingPair
+      parameters:
+        - in: body
+          name: info
+          description: Create trading-pair
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+              - $ref: "#/definitions/BaseMarket"
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /market/price-precision:
+    post:
+      summary: Modify the price precision of the trading pair in the dex
+      tags:
+        - Market
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: modifyPricePrecision
+      parameters:
+        - in: body
+          name: info
+          description: trading-pair, price-precision as params
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  price_precision:
+                    type: string
+                    example: 10
+                  trading_pair:
+                    type: string
+                    example: etc/cet
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /market/trading-pairs/{stock}/{money}:
+    get:
+      summary: Query trading-pair info
+      tags:
+        - Market
+      produces:
+        - application/json
+      operationId: getTradingPair
+      parameters:
+        - in: path
+          name: stock
+          description: stock symbol
+          required: true
+          type: string
+          x-example: btc
+        - in: path
+          name: money
+          description: money symbol
+          required: true
+          type: string
+          x-example: cet
+      responses:
+        200:
+          description: trading-pair info of the specified symbol
+          schema:
+            $ref: "#/definitions/MarketInfo"
+        400:
+          description: Invalid symbol
+        500:
+          description: Server internal error
+  /market/orders/{order-id}:
+    get:
+      summary: Query order info
+      tags:
+        - Market
+      produces:
+        - application/json
+      operationId: getOrder
+      parameters:
+        - in: path
+          name: order-id
+          description: The order id
+          required: true
+          type: string
+          x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+      responses:
+        200:
+          description: Order info of the specified id
+          schema:
+            $ref: "#/definitions/OrderInfo"
+        400:
+          description: Invalid order-id
+        500:
+          description: Server internal error
+  /market/orders/account/{address}:
+    get:
+      summary: Query user order-id list
+      tags:
+        - Market
+      produces:
+        - application/json
+      operationId: getOrders
+      parameters:
+        - in: path
+          name: address
+          description: The user address
+          required: true
+          type: string
+          x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Order-Ids"
+        400:
+          description: Invalid address
+        500:
+          description: Server internal error
+  /market/cancel-order:
+    post:
+      summary: Cancel the order
+      tags:
+        - Market
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: cancelOrder
+      parameters:
+        - in: body
+          name: orderInfo
+          description: cancel order tx
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              order_id:
+                type: string
+                example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj-1
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /market/cancel-trading-pair:
+    post:
+      summary: Cancel the trading-pair
+      tags:
+        - Market
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: cancelTradingPair
+      parameters:
+        - in: body
+          name: info
+          description: cancel trading-pair in dex
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              trading_pair:
+                type: string
+                example: abc/cet
+              time:
+                type: string
+                example: 7
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
   /auth/accounts/{address}:
     get:
       summary: Get the account information on blockchain
@@ -2465,284 +2743,6 @@ paths:
           description: Invalid Request
         500:
           description: Internal Server Error
-  /market/gte-orders:
-    post:
-      summary: Create GTE order in blockchain
-      tags:
-        - Market
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      operationId: createGteOrder
-      parameters:
-        - in: body
-          name: orderInfo
-          description: create order tx
-          required: true
-          schema:
-            type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  exist_blocks:
-                    type: string
-                    example: 10000
-              - $ref: "#/definitions/Order"
-
-      responses:
-        200:
-          description: Tx was succesfully generated
-          schema:
-            $ref: "#/definitions/StdTx"
-        400:
-          description: Invalid request
-        500:
-          description: Server internal error
-    /market/ioc-orders:
-      post:
-        summary: Create IOC order in blockchain
-        tags:
-          - Market
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        operationId: createIocOrder
-        parameters:
-          - in: body
-            name: orderInfo
-            description: create order tx
-            required: true
-            schema:
-              type: object
-              allOf:
-                - properties:
-                    base_req:
-                      $ref: "#/definitions/BaseReq"
-                - $ref: "#/definitions/Order"
-        responses:
-          200:
-            description: Tx was succesfully generated
-            schema:
-              $ref: "#/definitions/StdTx"
-          400:
-            description: Invalid request
-          500:
-            description: Server internal error
-    /market/trading-pairs:
-      post:
-        summary: Create trading-pair in blockchain
-        tags:
-          - Market
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        operationId: createTradingPair
-        parameters:
-          - in: body
-            name: info
-            description: Create trading-pair
-            required: true
-            schema:
-              type: object
-              allOf:
-                - properties:
-                    base_req:
-                      $ref: "#/definitions/BaseReq"
-                - $ref: "#/definitions/BaseMarket"
-        responses:
-          200:
-            description: Tx was succesfully generated
-            schema:
-              $ref: "#/definitions/StdTx"
-          400:
-            description: Invalid request
-          500:
-            description: Server internal error
-    /market/price-precision:
-      post:
-        summary: Modify the price precision of the trading pair in the dex
-        tags:
-          - Market
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        operationId: modifyPricePrecision
-        parameters:
-          - in: body
-            name: info
-            description: trading-pair, price-precision as params
-            required: true
-            schema:
-              type: object
-              allOf:
-                - properties:
-                    base_req:
-                      $ref: "#/definitions/BaseReq"
-                    price_precision:
-                      type: string
-                      example: 10
-                    trading_pair:
-                      type: string
-                      example: etc/cet
-        responses:
-          200:
-            description: Tx was succesfully generated
-            schema:
-              $ref: "#/definitions/StdTx"
-          400:
-            description: Invalid request
-          500:
-            description: Server internal error
-    /market/trading-pairs/{stock}/{money}:
-      get:
-        summary: Query trading-pair info
-        tags:
-          - Market
-        produces:
-          - application/json
-        operationId: getTradingPair
-        parameters:
-          - in: path
-            name: stock
-            description: stock symbol
-            required: true
-            type: string
-            x-example: btc
-          - in: path
-            name: money
-            description: money symbol
-            required: true
-            type: string
-            x-example: cet
-        responses:
-          200:
-            description: trading-pair info of the specified symbol
-            schema:
-              $ref: "#/definitions/MarketInfo"
-          400:
-            description: Invalid symbol
-          500:
-            description: Server internal error
-    /market/orders/{order-id}:
-      get:
-        summary: Query order info
-        tags:
-          - Market
-        produces:
-          - application/json
-        operationId: getOrder
-        parameters:
-          - in: path
-            name: order-id
-            description: The order id
-            required: true
-            type: string
-            x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
-        responses:
-          200:
-            description: Order info of the specified id
-            schema:
-              $ref: "#/definitions/OrderInfo"
-          400:
-            description: Invalid order-id
-          500:
-            description: Server internal error
-    /market/orders/account/{address}:
-      get:
-        summary: Query user order-id list
-        tags:
-          - Market
-        produces:
-          - application/json
-        operationId: getOrders
-        parameters:
-          - in: path
-            name: address
-            description: The user address
-            required: true
-            type: string
-            x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
-        responses:
-          200:
-            description: OK
-            schema:
-              $ref: "#/definitions/Order-Ids"
-          400:
-            description: Invalid address
-          500:
-            description: Server internal error
-    /market/cancel-order:
-      post:
-        summary: Cancel the order
-        tags:
-          - Market
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        operationId: cancelOrder
-        parameters:
-          - in: body
-            name: orderInfo
-            description: cancel order tx
-            required: true
-            schema:
-              type: object
-              properties:
-                base_req:
-                  $ref: "#/definitions/BaseReq"
-                order_id:
-                  type: string
-                  example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj-1
-        responses:
-          200:
-            description: Tx was succesfully generated
-            schema:
-              $ref: "#/definitions/StdTx"
-          400:
-            description: Invalid request
-          500:
-            description: Server internal error
-    /market/cancel-trading-pair:
-      post:
-        summary: Cancel the trading-pair
-        tags:
-          - Market
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        operationId: cancelTradingPair
-        parameters:
-          - in: body
-            name: info
-            description: cancel trading-pair in dex
-            required: true
-            schema:
-              type: object
-              properties:
-                base_req:
-                  $ref: "#/definitions/BaseReq"
-                trading_pair:
-                  type: string
-                  example: abc/cet
-                time:
-                  type: string
-                  example: 7
-        responses:
-          200:
-            description: Tx was succesfully generated
-            schema:
-              $ref: "#/definitions/StdTx"
-          400:
-            description: Invalid request
-          500:
-            description: Server internal error
 definitions:
   BaseMarket:
     type: object
