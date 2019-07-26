@@ -1,6 +1,9 @@
 package bancorlite
 
 import (
+	"reflect"
+	"testing"
+
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
@@ -17,8 +20,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"reflect"
-	"testing"
 
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	dex "github.com/coinexchain/dex/types"
@@ -240,9 +241,9 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	bk := prepareBankxKeeper(keys, cdc, ctx)
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	types.RegisterCodec(cdc)
-	mk := market.NewBaseKeeper(keys.marketKey, ak, bk, cdc,
-		msgqueue.NewProducer(), paramsKeeper.Subspace(market.StoreKey))
 	bik := keepers.NewBancorInfoKeeper(keys.keyBancor, cdc, paramsKeeper.Subspace(StoreKey))
+	mk := market.NewBaseKeeper(keys.marketKey, ak, bk, cdc,
+		msgqueue.NewProducer(), paramsKeeper.Subspace(market.StoreKey), bik)
 	keeper := keepers.NewKeeper(bik, bk, ak, mk)
 	keeper.Bik.SetParam(ctx, DefaultParams())
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
