@@ -1739,6 +1739,7 @@ paths:
         type: string
         x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
+      operationId: getWithdrawAddress
       summary: Get the rewards withdrawal address
       description: Get the delegations' rewards withdrawal address. This is the address in which the user will receive the reward funds
       tags:
@@ -1943,6 +1944,7 @@ paths:
           description: Internal Server Error
   /distribution/parameters:
     get:
+      operationId: getParameters
       summary: Fee distribution parameters
       tags:
         - Distribution
