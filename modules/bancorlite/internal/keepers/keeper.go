@@ -136,18 +136,6 @@ func (keeper *BancorInfoKeeper) Iterate(ctx sdk.Context, biProc func(bi *BancorI
 	}
 }
 
-func (keeper *BancorInfoKeeper) IsBancorExist(ctx sdk.Context, stock string) bool {
-	store := ctx.KVStore(keeper.biKey)
-	key := append(BancorInfoKey, []byte(stock+SymbolSeparator)...)
-	iter := store.Iterator(key, append(key, 0xff))
-	defer iter.Close()
-	iter.Domain()
-	for iter.Valid() {
-		return true
-	}
-	return false
-}
-
 type Keeper struct {
 	Bik *BancorInfoKeeper
 	Bxk types.ExpectedBankxKeeper
@@ -168,9 +156,13 @@ func NewKeeper(bik *BancorInfoKeeper,
 }
 
 func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
-	return k.Bik.Load(ctx, stock) != nil
-}
-
-func (k *Keeper) SubtractAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	return k.Bxk.DeductFee(ctx, addr, amt)
+	store := ctx.KVStore(k.Bik.biKey)
+	key := append(BancorInfoKey, []byte(stock+SymbolSeparator)...)
+	iter := store.Iterator(key, append(key, 0xff))
+	defer iter.Close()
+	iter.Domain()
+	for iter.Valid() {
+		return true
+	}
+	return false
 }

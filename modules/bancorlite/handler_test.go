@@ -241,9 +241,9 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	bk := prepareBankxKeeper(keys, cdc, ctx)
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	types.RegisterCodec(cdc)
-	bik := keepers.NewBancorInfoKeeper(keys.keyBancor, cdc, paramsKeeper.Subspace(StoreKey))
 	mk := market.NewBaseKeeper(keys.marketKey, ak, bk, cdc,
-		msgqueue.NewProducer(), paramsKeeper.Subspace(market.StoreKey), bik)
+		msgqueue.NewProducer(), paramsKeeper.Subspace(market.StoreKey), Keeper{})
+	bik := keepers.NewBancorInfoKeeper(keys.keyBancor, cdc, paramsKeeper.Subspace(StoreKey))
 	keeper := keepers.NewKeeper(bik, bk, ak, mk)
 	keeper.Bik.SetParam(ctx, DefaultParams())
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
@@ -332,11 +332,11 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 func TestKeeper(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	ctx := input.ctx
-	k := input.bik.Bik
+	k := input.bik
 	e := k.IsBancorExist(ctx, "ccc")
 	assert.False(t, e)
 
-	k.Save(ctx, &keepers.BancorInfo{
+	k.Bik.Save(ctx, &keepers.BancorInfo{
 		Stock: "ccc",
 		Money: "cet",
 	})
@@ -346,13 +346,13 @@ func TestKeeper(t *testing.T) {
 	e = k.IsBancorExist(ctx, "ccb")
 	assert.False(t, e)
 
-	bi := k.Load(ctx, "ccc/abc")
+	bi := k.Bik.Load(ctx, "ccc/abc")
 	assert.Nil(t, bi)
 
-	bi = k.Load(ctx, "ccc/cet")
+	bi = k.Bik.Load(ctx, "ccc/cet")
 	assert.Equal(t, "ccc", bi.Stock)
 
-	k.Remove(ctx, bi)
+	k.Bik.Remove(ctx, bi)
 	e = k.IsBancorExist(ctx, "ccc")
 	assert.False(t, e)
 }
