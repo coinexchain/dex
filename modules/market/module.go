@@ -96,7 +96,6 @@ func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
 
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	EndBlocker(ctx, am.marketKeeper)
-	// TODO. will check the return val
 	return nil
 }
 
@@ -105,7 +104,6 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 	types2.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.marketKeeper, genesisState)
 
-	// TODO. will check the return value
 	return []abci.ValidatorUpdate{}
 }
 

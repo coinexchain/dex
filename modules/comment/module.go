@@ -101,7 +101,6 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 	var genesisState GenesisState
 	types2.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.commentKeeper, genesisState)
-	// TODO. will check the return value
 	return nil
 }
 
