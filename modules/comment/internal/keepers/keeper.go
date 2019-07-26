@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	CommentCountKey = []byte{0x10}
+	CommentCountKey    = []byte{0x10}
+	CommentCountKeyEnd = []byte{0x11}
 )
 
 type CommentCountKeeper struct {
@@ -21,28 +22,53 @@ func NewCommentCountKeeper(key sdk.StoreKey) *CommentCountKeeper {
 	}
 }
 
-func (keeper *CommentCountKeeper) IncrCommentCount(ctx sdk.Context) {
+func (keeper *CommentCountKeeper) IncrCommentCount(ctx sdk.Context, denorm string) uint64 {
 	store := ctx.KVStore(keeper.commentKey)
-	a := store.Get(CommentCountKey)
-	count := binary.LittleEndian.Uint64(a[:])
+	ccKey := append(CommentCountKey, []byte(denorm)...)
+	a := store.Get(ccKey)
+	count := uint64(0)
+	if len(a) != 0 {
+		count = binary.LittleEndian.Uint64(a[:])
+	}
+	lastCount := count
 	count++
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b[:], count)
-	store.Set(CommentCountKey, b[:])
+	store.Set(ccKey, b[:])
+	return lastCount
 }
 
-func (keeper *CommentCountKeeper) GetCommentCount(ctx sdk.Context) uint64 {
+func (keeper *CommentCountKeeper) GetAllCommentCount(ctx sdk.Context) map[string]uint64 {
+	res := make(map[string]uint64)
 	store := ctx.KVStore(keeper.commentKey)
-	a := store.Get(CommentCountKey)
-	count := binary.LittleEndian.Uint64(a[:])
+	iter := store.Iterator(CommentCountKey, CommentCountKeyEnd)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		denorm := iter.Key()[1:]
+		a := iter.Value()
+		count := binary.LittleEndian.Uint64(a[:])
+		res[string(denorm)] = count
+	}
+	return res
+}
+
+func (keeper *CommentCountKeeper) GetCommentCount(ctx sdk.Context, denorm string) uint64 {
+	store := ctx.KVStore(keeper.commentKey)
+	ccKey := append(CommentCountKey, []byte(denorm)...)
+	a := store.Get(ccKey)
+	count := uint64(0)
+	if len(a) != 0 {
+		count = binary.LittleEndian.Uint64(a[:])
+	}
 	return count
 }
 
-func (keeper *CommentCountKeeper) SetCommentCount(ctx sdk.Context, count uint64) {
+func (keeper *CommentCountKeeper) SetCommentCount(ctx sdk.Context, denorm string, count uint64) {
 	store := ctx.KVStore(keeper.commentKey)
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b[:], count)
-	store.Set(CommentCountKey, b[:])
+	ccKey := append(CommentCountKey, []byte(denorm)...)
+	store.Set(ccKey, b[:])
 }
 
 type Keeper struct {

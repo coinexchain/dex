@@ -9,7 +9,6 @@ import (
 
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
 	registerTXRoutes(cliCtx, r, cdc)
-	registerQueryRoutes(cliCtx, r, cdc)
 }
 
 func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {

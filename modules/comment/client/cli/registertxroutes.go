@@ -10,14 +10,7 @@ import (
 
 // GetQueryCmd returns the cli query commands for this module
 func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
-	// Group asset queries under a subcommand
-	commentQueryCmd := &cobra.Command{
-		Use:   types.StoreKey,
-		Short: "Querying command to get the total comment count",
-	}
-	commentQueryCmd.AddCommand(client.GetCommands(
-		QueryCommentCountCmd(cdc))...)
-	return commentQueryCmd
+	return nil
 }
 
 // GetTxCmd returns the transaction commands for this module

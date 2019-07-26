@@ -8,6 +8,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/comment/internal/keepers"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
+	"github.com/stretchr/testify/require"
 
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -123,19 +124,16 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	return ctx, k
 }
 
-func testGenesis(ctx sdk.Context, keeper *Keeper) {
+func testGenesis(t *testing.T, ctx sdk.Context, keeper *Keeper) {
 	InitGenesis(ctx, *keeper, DefaultGenesisState())
 	gns := ExportGenesis(ctx, *keeper)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", gns.CommentCount))
-	gns = NewGenesisState(100)
+	require.Equal(t, "map[]", fmt.Sprintf("%v", gns.CommentCount))
+	gns = NewGenesisState(map[string]uint64{"cet": 100})
 	InitGenesis(ctx, *keeper, gns)
-	if err := gns.Validate(); err != nil {
-		logStrAppend("Genesis state is invalid")
-	} else {
-		logStrAppend("Genesis state is valid")
-	}
+	err := gns.Validate()
+	require.Equal(t, nil, err)
 	gns = ExportGenesis(ctx, *keeper)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", gns.CommentCount))
+	require.Equal(t, "map[cet:100]", fmt.Sprintf("%v", gns.CommentCount))
 }
 
 type MsgCreateTradingPair struct {
@@ -157,8 +155,9 @@ func (msg MsgCreateTradingPair) GetSigners() []sdk.AccAddress { return nil }
 
 func Test1(t *testing.T) {
 	ctx, keeper := newContextAndKeeper("test-1")
+	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
 	logStrClear()
-	testGenesis(ctx, keeper)
+	testGenesis(t, ctx, keeper)
 
 	msgHandler := NewHandler(*keeper)
 	msgCTP := &MsgCreateTradingPair{
@@ -167,54 +166,50 @@ func Test1(t *testing.T) {
 		Creator:        simpleAddr("00200"),
 		PricePrecision: 10,
 	}
-	res := msgHandler(ctx, msgCTP)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
-	if res.IsOK() {
-		t.Errorf("This should be a failed Result!")
-	} else {
-		logStrList = append(logStrList, res.Log)
-	}
 
-	s := "http://google.com"
+	res := msgHandler(ctx, msgCTP)
+	require.Equal(t, uint64(100), keeper.Cck.GetCommentCount(ctx, "cet"))
+	require.Equal(t, false, res.IsOK())
+	s := `{"codespace":"sdk","code":6,"message":"Unrecognized comment Msg type: %!s(MISSING)create_market_info"}`
+	require.Equal(t, s, res.Log)
+
+	s = "http://google.com"
 	refs := getRefs()
 	msg := types.NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, types.HTTP, refs)
 
 	res = msgHandler(ctx, *msg)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
-	logStrList = append(logStrList, res.Log)
-	if res.IsOK() {
-		t.Errorf("This should be a fail result! " + res.Log)
-	}
+	require.Equal(t, `Add 1cet to comPool`, logStrList[0])
+	require.Equal(t, uint64(100), keeper.Cck.GetCommentCount(ctx, "cet"))
+	s = `{"codespace":"comment","code":999,"message":"Not enough coins"}`
+	require.Equal(t, s, res.Log)
+	require.Equal(t, false, res.IsOK())
+	logStrClear()
 
 	msg.References[0].RewardAmount = 0
 	res = msgHandler(ctx, *msg)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
-	logStrList = append(logStrList, res.Log)
-	if !res.IsOK() {
-		t.Errorf("This should be a OK result! " + res.Log)
-	}
+	s = `Add 1cet to comPool`
+	require.Equal(t, s, logStrList[0])
+	s = `Send 10usdt from coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj to coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj`
+	require.Equal(t, s, logStrList[1])
+	s = `Msg(token_comment): {"id":100,"sender":"coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj","token":"cet","donation":1,"title":"First Comment","content":"http://google.com","content_type":2,"references":[{"id":900,"reward_target":"coinex1qy352eufqy352eufqy352eufqy35qqqzw64xkq","reward_token":"cet","reward_amount":0,"attitudes":[50,59]},{"id":901,"reward_target":"coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj","reward_token":"usdt","reward_amount":10,"attitudes":[52,59]}]}`
+	require.Equal(t, s, logStrList[2])
+	require.Equal(t, uint64(101), keeper.Cck.GetCommentCount(ctx, "cet"))
+	require.Equal(t, "", res.Log)
+	require.Equal(t, true, res.IsOK())
+	logStrClear()
 
 	msg.Donation = 1000
 	res = msgHandler(ctx, *msg)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
-	logStrList = append(logStrList, res.Log)
-	if res.IsOK() {
-		t.Errorf("This should be a fail result! " + res.Log)
-	}
+	require.Equal(t, uint64(101), keeper.Cck.GetCommentCount(ctx, "cet"))
+	s = `{"codespace":"comment","code":999,"message":"Not enough coins"}`
+	require.Equal(t, s, res.Log)
 
 	msg.Donation = 10
 	msg.Token = "bnb"
 	res = msgHandler(ctx, *msg)
-	logStrAppend(fmt.Sprintf("Now comment count is: %d", keeper.Cck.GetCommentCount(ctx)))
-	logStrList = append(logStrList, res.Log)
-	if res.IsOK() {
-		t.Errorf("This should be a fail result! " + res.Log)
-	}
+	require.Equal(t, uint64(101), keeper.Cck.GetCommentCount(ctx, "cet"))
+	s = `{"codespace":"comment","code":909,"message":"No such asset"}`
+	require.Equal(t, s, res.Log)
+	require.Equal(t, false, res.IsOK())
 
-	for _, s := range logStrList {
-		//if refLogs[i]!=s {
-		//	t.Errorf("Log String Mismatch!")
-		//}
-		fmt.Println(s)
-	}
 }

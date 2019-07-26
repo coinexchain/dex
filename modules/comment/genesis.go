@@ -5,11 +5,11 @@ import (
 )
 
 type GenesisState struct {
-	CommentCount uint64 `json:"comment_count"`
+	CommentCount map[string]uint64 `json:"comment_count"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(c uint64) GenesisState {
+func NewGenesisState(c map[string]uint64) GenesisState {
 	return GenesisState{
 		CommentCount: c,
 	}
@@ -17,17 +17,19 @@ func NewGenesisState(c uint64) GenesisState {
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(0)
+	return NewGenesisState(nil)
 }
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
-	keeper.Cck.SetCommentCount(ctx, data.CommentCount)
+	for denorm, count := range data.CommentCount {
+		keeper.Cck.SetCommentCount(ctx, denorm, count)
+	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
-	return NewGenesisState(k.Cck.GetCommentCount(ctx))
+	return NewGenesisState(k.Cck.GetAllCommentCount(ctx))
 }
 
 func (data GenesisState) Validate() error {

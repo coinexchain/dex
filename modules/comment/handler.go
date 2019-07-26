@@ -40,12 +40,12 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 		}
 	}
 
+	lastCount := k.Cck.IncrCommentCount(ctx, msg.Token)
+
 	if k.MsgSendFunc != nil {
-		tokenComment := types.NewTokenComment(&msg, k.Cck.GetCommentCount(ctx))
+		tokenComment := types.NewTokenComment(&msg, lastCount)
 		k.MsgSendFunc(types.TokenCommentKey, tokenComment)
 	}
-
-	k.Cck.IncrCommentCount(ctx)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
