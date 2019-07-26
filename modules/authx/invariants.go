@@ -5,7 +5,11 @@ import (
 )
 
 func PreTotalSupplyInvariant(k AccountXKeeper) sdk.Invariant {
-	return func(ctx sdk.Context) error {
-		return k.PreTotalSupply(ctx)
+	return func(ctx sdk.Context) (string, bool) {
+		k.PreTotalSupply(ctx)
+
+		// TODO
+		return sdk.FormatInvariant(ModuleName, "total supply",
+			"ok", false)
 	}
 }

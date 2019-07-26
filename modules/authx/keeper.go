@@ -151,7 +151,7 @@ func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax types.AccountX) {
 
 // -----------------------------------------------------------------------------
 // PreTotalSupply sets the Authx Module Account
-func (axk AccountXKeeper) PreTotalSupply(ctx sdk.Context) error {
+func (axk AccountXKeeper) PreTotalSupply(ctx sdk.Context) {
 	var expectedTotal sdk.Coins
 
 	axk.IterateAccounts(ctx, func(acc AccountX) bool {
@@ -162,8 +162,6 @@ func (axk AccountXKeeper) PreTotalSupply(ctx sdk.Context) error {
 	authxMacc := axk.supplyKeeper.GetModuleAccount(ctx, ModuleName)
 	_ = authxMacc.SetCoins(expectedTotal)
 	axk.supplyKeeper.SetModuleAccount(ctx, authxMacc)
-
-	return nil
 }
 
 // -----------------------------------------------------------------------------
