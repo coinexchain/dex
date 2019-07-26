@@ -353,7 +353,9 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		bancorlite.NewBancorInfoKeeper(app.keyBancor, app.cdc, app.paramsKeeper.Subspace(bancorlite.StoreKey)),
 		app.bankxKeeper,
 		app.assetKeeper,
-		ik)
+		ik,
+		app.msgQueProducer)
+
 	app.marketKeeper = market.NewBaseKeeper(
 		app.keyMarket,
 		app.tokenKeeper,

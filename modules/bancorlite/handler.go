@@ -2,8 +2,10 @@ package bancorlite
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -59,6 +61,20 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		EnableCancelTime: msg.EnableCancelTime,
 	}
 	k.Bik.Save(ctx, bi)
+
+	m := keepers.MsgBancorCreateForKafka{
+		Owner:            msg.Owner,
+		Stock:            msg.Stock,
+		Money:            msg.Money,
+		InitPrice:        msg.InitPrice,
+		MaxSupply:        msg.MaxSupply,
+		MaxPrice:         msg.MaxPrice,
+		EnableCancelTime: msg.EnableCancelTime,
+		BlockHeight:      ctx.BlockHeight(),
+	}
+
+	fillMsgQueue(ctx, k, KafkaBancorCreate, m)
+	fillMsgQueue(ctx, k, KafkaBancorInfo, *bi)
 	//ctx.EventManager().EmitEvents(sdk.Events{
 	//	sdk.NewEvent(
 	//		EventTypeBancorlite,
@@ -103,6 +119,13 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
 		return err.Result()
 	}
+	m := keepers.MsgBancorCancelForKafka{
+		Owner:       msg.Owner,
+		Stock:       msg.Stock,
+		Money:       msg.Money,
+		BlockHeight: ctx.BlockHeight(),
+	}
+	fillMsgQueue(ctx, k, KafkaBancorCancel, m)
 	return sdk.Result{}
 }
 
@@ -163,10 +186,24 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	}
 	k.Bik.Save(ctx, &biNew)
 
-	side := "Sell"
+	side := "sell"
 	if msg.IsBuy {
-		side = "Buy"
+		side = "buy"
 	}
+
+	m := keepers.MsgBancorTradeInfoForKafka{
+		Sender:      msg.Sender,
+		Stock:       msg.Stock,
+		Money:       msg.Money,
+		Amount:      msg.Amount,
+		Side:        side,
+		MoneyLimit:  msg.MoneyLimit,
+		TxPrice:     price,
+		BlockHeight: ctx.BlockHeight(),
+	}
+	fillMsgQueue(ctx, k, KafkaBancorTrade, m)
+	fillMsgQueue(ctx, k, KafkaBancorInfo, biNew)
+
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			EventTypeBancorlite,
@@ -187,5 +224,16 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
+	}
+}
+
+func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
+	if keeper.MsgProducer.IsSubScribe(types.Topic) {
+		b, err := json.Marshal(msg)
+		if err != nil {
+			return
+		}
+		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
+			sdk.NewAttribute(key, string(b))))
 	}
 }

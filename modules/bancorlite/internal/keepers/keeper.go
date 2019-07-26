@@ -2,6 +2,7 @@ package keepers
 
 import (
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
+	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -137,21 +138,24 @@ func (keeper *BancorInfoKeeper) Iterate(ctx sdk.Context, biProc func(bi *BancorI
 }
 
 type Keeper struct {
-	Bik *BancorInfoKeeper
-	Bxk types.ExpectedBankxKeeper
-	Axk types.ExpectedAssetStatusKeeper
-	Mk  types.ExpectedMarketKeeper
+	Bik         *BancorInfoKeeper
+	Bxk         types.ExpectedBankxKeeper
+	Axk         types.ExpectedAssetStatusKeeper
+	Mk          types.ExpectedMarketKeeper
+	MsgProducer msgqueue.Producer
 }
 
 func NewKeeper(bik *BancorInfoKeeper,
 	bxk types.ExpectedBankxKeeper,
 	axk types.ExpectedAssetStatusKeeper,
-	mk types.ExpectedMarketKeeper) Keeper {
+	mk types.ExpectedMarketKeeper,
+	mq msgqueue.Producer) Keeper {
 	return Keeper{
-		Bik: bik,
-		Bxk: bxk,
-		Axk: axk,
-		Mk:  mk,
+		Bik:         bik,
+		Bxk:         bxk,
+		Axk:         axk,
+		Mk:          mk,
+		MsgProducer: mq,
 	}
 }
 
@@ -165,4 +169,48 @@ func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
 		return true
 	}
 	return false
+}
+
+//kafka msg
+type MsgBancorCreateForKafka struct {
+	Owner            sdk.AccAddress `json:"owner"`
+	Stock            string         `json:"stock"`
+	Money            string         `json:"money"`
+	InitPrice        sdk.Dec        `json:"init_price"`
+	MaxSupply        sdk.Int        `json:"max_supply"`
+	MaxPrice         sdk.Dec        `json:"max_price"`
+	EnableCancelTime int64          `json:"enable_cancel_time"`
+	BlockHeight      int64          `json:"block_height"`
+}
+
+type MsgBancorInfoForKafka struct {
+	Owner            sdk.AccAddress `json:"sender"`
+	Stock            string         `json:"stock"`
+	Money            string         `json:"money"`
+	InitPrice        sdk.Dec        `json:"init_price"`
+	MaxSupply        sdk.Int        `json:"max_supply"`
+	MaxPrice         sdk.Dec        `json:"max_price"`
+	Price            sdk.Dec        `json:"price"`
+	StockInPool      sdk.Int        `json:"stock_in_pool"`
+	MoneyInPool      sdk.Int        `json:"money_in_pool"`
+	EnableCancelTime int64          `json:"enable_cancel_time"`
+	BlockHeight      int64          `json:"block_height"`
+}
+
+type MsgBancorTradeInfoForKafka struct {
+	Sender      sdk.AccAddress `json:"sender"`
+	Stock       string         `json:"stock"`
+	Money       string         `json:"money"`
+	Amount      int64          `json:"amount"`
+	Side        string         `json:"side"`
+	MoneyLimit  int64          `json:"money_limit"`
+	TxPrice     sdk.Dec        `json:"transaction_price"`
+	BlockHeight int64          `json:"block_height"`
+}
+
+type MsgBancorCancelForKafka struct {
+	Owner       sdk.AccAddress `json:"owner"`
+	Stock       string         `json:"stock"`
+	Money       string         `json:"money"`
+	BlockHeight int64          `json:"block_height"`
 }

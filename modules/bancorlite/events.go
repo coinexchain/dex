@@ -15,4 +15,9 @@ var (
 	AttributeCoinsFromPool  = "bancor-coins-from-pool"
 	AttributeCoinsToPool    = "bancor-coins-to-pool"
 	AttributeTradeSide      = "bancor-trade-side"
+
+	KafkaBancorTrade  = "bancor_trade"
+	KafkaBancorCreate = "bancor_create"
+	KafkaBancorCancel = "bancor_cancel"
+	KafkaBancorInfo   = "bancor_info"
 )

@@ -69,6 +69,9 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 	if msg.InitPrice.IsNegative() {
 		return ErrNegativePrice()
 	}
+	if msg.InitPrice.GT(msg.MaxPrice) {
+		return ErrPriceConfiguration()
+	}
 	return nil
 }
 
