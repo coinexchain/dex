@@ -39,7 +39,7 @@ func (k fakeAssetStatusKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol 
 }
 
 var myaddr = testutil.ToAccAddress("myaddr")
-var feeAddr = sdk.AccAddress(crypto.AddressHash([]byte("FeeCollector")))
+var feeAddr = sdk.AccAddress(crypto.AddressHash([]byte(auth.FeeCollectorName)))
 
 func defaultContext() (sdk.Context, *codec.Codec, Keeper) {
 	cdc := codec.New()
