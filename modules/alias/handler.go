@@ -2,6 +2,7 @@ package alias
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
 	dexsdk "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -62,5 +63,32 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 		}
 		k.AliasKeeper.RemoveAlias(ctx, msg.Alias, msg.Owner)
 	}
-	return sdk.Result{} //TODO
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
+		),
+	)
+	if msg.IsAdd {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeAddAlias,
+				sdk.NewAttribute(types.AttributeKeyAlias, msg.Alias),
+				sdk.NewAttribute(types.AttributeKeyAsDefault, fmt.Sprintf("%t", msg.AsDefault)),
+			),
+		)
+	} else {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeRemoveAlias,
+				sdk.NewAttribute(types.AttributeKeyAlias, msg.Alias),
+			),
+		)
+	}
+
+	return sdk.Result{
+		Events: ctx.EventManager().Events(),
+	}
 }
