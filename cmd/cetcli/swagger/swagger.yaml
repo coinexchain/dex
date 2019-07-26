@@ -827,6 +827,7 @@ paths:
         type: string
         x-example: coinex167w96tdvmazakdwkw2u57227eduula2cy572lf
     get:
+      operationId: getDelegatorTxs
       summary: Get all staking txs (i.e msgs) from a delegator
       tags:
         - Staking
@@ -1039,6 +1040,7 @@ paths:
           description: Internal Server Error
   /slashing/signing_infos:
     get:
+      operationId: getSigningInfos
       summary: Get sign info of given all validators
       description: Get sign info of all validators
       produces:
@@ -1065,8 +1067,6 @@ paths:
             type: array
             items:
               $ref: "#/definitions/SigningInfo"
-        204:
-          description: No validators with sign info
         400:
           description: Invalid validator public key for one of the validators
         500:
@@ -1108,6 +1108,7 @@ paths:
           description: Internal Server Error
   /slashing/parameters:
     get:
+      operationId: getParameters
       summary: Get the current slashing parameters
       tags:
         - Slashing
