@@ -65,15 +65,15 @@ func defaultContext() (sdk.Context, *codec.Codec, Keeper, auth.AccountKeeper) {
 	_ = cms.LoadLatestVersion()
 
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     {supply.Basic},
-		distribution.ModuleName:   {supply.Basic},
+		auth.FeeCollectorName:     nil,
+		distribution.ModuleName:   nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
-		authx.ModuleName:          {supply.Basic},
-		bank.ModuleName:           {supply.Basic},
-		bankx.ModuleName:          {supply.Basic},
-		ModuleName:                {supply.Basic},
+		authx.ModuleName:          nil,
+		bank.ModuleName:           nil,
+		bankx.ModuleName:          nil,
+		ModuleName:                nil,
 	}
 
 	ask := fakeAssetStatusKeeper{}

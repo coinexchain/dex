@@ -90,13 +90,13 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 
 	// account permissions
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     {supply.Basic},
-		authx.ModuleName:          {supply.Basic},
+		auth.FeeCollectorName:     nil,
+		authx.ModuleName:          nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
 		asset.ModuleName:          {supply.Minter},
-		ModuleName:                {supply.Basic},
+		ModuleName:                nil,
 	}
 	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
@@ -188,12 +188,12 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) bankx
 
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     {supply.Basic},
-		authx.ModuleName:          {supply.Basic},
+		auth.FeeCollectorName:     nil,
+		authx.ModuleName:          nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
-		types.ModuleName:          {supply.Basic},
+		types.ModuleName:          nil,
 		asset.ModuleName:          {supply.Minter},
 	}
 	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, supply.DefaultCodespace, maccPerms)

@@ -52,7 +52,7 @@ func setupTestInput() testInput {
 	ms.LoadLatestVersion()
 
 	maccPerms := map[string][]string{
-		types.ModuleName: {supply.Basic},
+		types.ModuleName: nil,
 	}
 
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)

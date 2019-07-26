@@ -54,9 +54,9 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     {supply.Basic},
-		authx.ModuleName:          {supply.Basic},
-		distribution.ModuleName:   {supply.Basic},
+		auth.FeeCollectorName:     nil,
+		authx.ModuleName:          nil,
+		distribution.ModuleName:   nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
