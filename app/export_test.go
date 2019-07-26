@@ -80,11 +80,11 @@ func findAccount(t *testing.T, state GenesisState) *genaccounts.GenesisAccount {
 
 	require.Equal(t, 6, len(state.Accounts))
 	require.Equal(t, "", state.Accounts[0].ModuleName)
-	require.Equal(t, staking.BondedPoolName, state.Accounts[1].ModuleName)
-	require.Equal(t, staking.NotBondedPoolName, state.Accounts[2].ModuleName)
-	require.Equal(t, authx.ModuleName, state.Accounts[3].ModuleName)
-	require.Equal(t, distribution.ModuleName, state.Accounts[4].ModuleName)
-	require.Equal(t, gov.ModuleName, state.Accounts[5].ModuleName)
+	require.Equal(t, authx.ModuleName, state.Accounts[1].ModuleName)
+	require.Equal(t, staking.BondedPoolName, state.Accounts[2].ModuleName)
+	require.Equal(t, distribution.ModuleName, state.Accounts[3].ModuleName)
+	require.Equal(t, gov.ModuleName, state.Accounts[4].ModuleName)
+	require.Equal(t, staking.NotBondedPoolName, state.Accounts[5].ModuleName)
 
 	return &state.Accounts[0]
 }

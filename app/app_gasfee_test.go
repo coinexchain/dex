@@ -87,7 +87,7 @@ func TestSmallAccountGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 90000, int(result.GasWanted))
-	require.Equal(t, 57839, int(result.GasUsed))
+	require.Equal(t, 57371, int(result.GasUsed))
 }
 
 func TestBigAccountGasCost(t *testing.T) {
@@ -114,7 +114,7 @@ func TestBigAccountGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 3569669, int(result.GasUsed))
+	require.Equal(t, 3569201, int(result.GasUsed))
 }
 
 func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
@@ -178,8 +178,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 83620, int(result.GasUsed))
-
+	require.Equal(t, 83386, int(result.GasUsed))
 }
 
 func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
@@ -232,6 +231,5 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 83620, int(result.GasUsed))
-
+	require.Equal(t, 83386, int(result.GasUsed))
 }
