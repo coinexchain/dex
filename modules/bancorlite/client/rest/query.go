@@ -3,6 +3,7 @@ package rest
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 
@@ -15,14 +16,17 @@ import (
 )
 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
-	r.HandleFunc("/bancorlite/info/{token}", queryBancorInfoHandlerFn(cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/bancorlite/pools/{symbol}", queryBancorInfoHandlerFn(cdc, cliCtx)).Methods("GET")
 }
 
+// format: barcorlite/pools/btc-cet
 func queryBancorInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryBancorInfo)
-		param := &keepers.QueryBancorInfoParam{Token: vars["token"]}
+		symbol := strings.Replace(vars["symbol"], "-", "/", 1)
+		param := &keepers.QueryBancorInfoParam{Symbol: symbol}
+
 		bz, err := cdc.MarshalJSON(param)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

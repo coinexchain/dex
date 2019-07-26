@@ -15,12 +15,13 @@ import (
 )
 
 type BancorInitReq struct {
-	BaseReq   rest.BaseReq `json:"base_req"`
-	Stock     string       `json:"stock"`
-	Money     string       `json:"money"`
-	InitPrice string       `json:"init_price"`
-	MaxSupply string       `json:"max_supply"`
-	MaxPrice  string       `json:"max_price"`
+	BaseReq          rest.BaseReq `json:"base_req"`
+	Stock            string       `json:"stock"`
+	Money            string       `json:"money"`
+	InitPrice        string       `json:"init_price"`
+	MaxSupply        string       `json:"max_supply"`
+	MaxPrice         string       `json:"max_price"`
+	EnableCancelTime string       `json:"enable_cancel_time"`
 }
 
 func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -67,13 +68,24 @@ func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Max Supply is Invalid")
 			return
 		}
+		time, err := strconv.ParseInt(req.EnableCancelTime, 10, 64)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid enable cancel time")
+		}
+
 		msg := &types.MsgBancorInit{
-			Owner:     sender,
-			Stock:     req.Stock,
-			Money:     req.Money,
-			InitPrice: initPrice,
-			MaxSupply: maxSupply,
-			MaxPrice:  maxPrice,
+			Owner:            sender,
+			Stock:            req.Stock,
+			Money:            req.Money,
+			InitPrice:        initPrice,
+			MaxSupply:        maxSupply,
+			MaxPrice:         maxPrice,
+			EnableCancelTime: time,
+		}
+
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
 		}
 
 		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
@@ -117,13 +129,13 @@ func bancorTradeHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 		}
 		req.BaseReq.Sequence = sequence
 
-		amount, err := strconv.ParseInt(req.Amount, 10, 63)
+		amount, err := strconv.ParseInt(req.Amount, 10, 64)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Amount.")
 			return
 		}
 
-		moneyLimit, err := strconv.ParseInt(req.MoneyLimit, 10, 63)
+		moneyLimit, err := strconv.ParseInt(req.MoneyLimit, 10, 64)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Money Limit.")
 			return
@@ -137,6 +149,55 @@ func bancorTradeHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			IsBuy:      req.IsBuy,
 			MoneyLimit: moneyLimit,
 		}
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+type BancorCancelReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	Stock   string       `json:"stock"`
+	Money   string       `json:"money"`
+}
+
+func bancorCancelHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req BancorCancelReq
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		sender, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		sequence := req.BaseReq.Sequence
+		if sequence == 0 {
+			_, sequence, err = auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(sender)
+			if err != nil {
+				rest.WriteErrorResponse(w, http.StatusBadRequest, "Can not get sequence from blockchain.")
+				return
+			}
+		}
+		req.BaseReq.Sequence = sequence
+
+		msg := &types.MsgBancorCancel{
+			Owner: sender,
+			Stock: req.Stock,
+			Money: req.Money,
+		}
+
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

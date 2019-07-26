@@ -57,6 +57,7 @@ type BancorInfoDisplay struct {
 	InitPrice        string `json:"init_price"`
 	MaxSupply        string `json:"max_supply"`
 	MaxPrice         string `json:"max_price"`
+	CurrentPrice     string `json:"current_price"`
 	StockInPool      string `json:"stock_in_pool"`
 	MoneyInPool      string `json:"money_in_pool"`
 	EnableCancelTime string `json:"enable_cancel_time"`
@@ -69,6 +70,7 @@ func NewBancorInfoDisplay(bi *BancorInfo) BancorInfoDisplay {
 		InitPrice:        bi.InitPrice.String(),
 		MaxSupply:        bi.MaxSupply.String(),
 		MaxPrice:         bi.MaxPrice.String(),
+		CurrentPrice:     bi.Price.String(),
 		StockInPool:      bi.StockInPool.String(),
 		MoneyInPool:      bi.MoneyInPool.String(),
 		EnableCancelTime: time.Unix(bi.EnableCancelTime, 0).Format(time.RFC3339),
@@ -114,6 +116,7 @@ func (keeper *BancorInfoKeeper) Remove(ctx sdk.Context, bi *BancorInfo) {
 	}
 }
 
+//key: stock/money pair
 func (keeper *BancorInfoKeeper) Load(ctx sdk.Context, symbol string) *BancorInfo {
 	store := ctx.KVStore(keeper.biKey)
 	bi := &BancorInfo{}

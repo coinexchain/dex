@@ -72,6 +72,9 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 	if msg.InitPrice.GT(msg.MaxPrice) {
 		return ErrPriceConfiguration()
 	}
+	if msg.EnableCancelTime < 0 {
+		return ErrEnableCancelTimeIsNegative()
+	}
 	return nil
 }
 

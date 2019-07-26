@@ -25,7 +25,7 @@ func NewQuerier(keeper Keeper, cdc *codec.Codec) sdk.Querier {
 }
 
 type QueryBancorInfoParam struct {
-	Token string `json:"token"`
+	Symbol string `json:"symbol"`
 }
 
 func queryBancorInfo(ctx sdk.Context, req abcitypes.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
@@ -33,7 +33,7 @@ func queryBancorInfo(ctx sdk.Context, req abcitypes.RequestQuery, keeper Keeper)
 	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &param); err != nil {
 		return nil, sdk.NewError(types.CodeSpaceBancorlite, types.CodeUnMarshalFailed, "failed to parse param")
 	}
-	bi := keeper.Bik.Load(ctx, param.Token)
+	bi := keeper.Bik.Load(ctx, param.Symbol)
 
 	biD := NewBancorInfoDisplay(bi)
 

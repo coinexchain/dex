@@ -13,7 +13,7 @@ func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	bancorliteQueryCmd := &cobra.Command{
 		Use:   types.StoreKey,
-		Short: "Querying command to get the information of a token's bancor pool",
+		Short: "Querying command to get the information of a symbol pair's bancor pool",
 	}
 	bancorliteQueryCmd.AddCommand(client.GetCommands(
 		QueryBancorInfoCmd(cdc))...)
@@ -30,6 +30,7 @@ func GetTxCmd(cdc *amino.Codec) *cobra.Command {
 	bancorliteTxCmd.AddCommand(client.PostCommands(
 		BancorInitCmd(cdc),
 		BancorTradeCmd(cdc),
+		BancorCancelCmd(cdc),
 	)...)
 
 	return bancorliteTxCmd

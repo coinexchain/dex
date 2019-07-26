@@ -28,6 +28,7 @@ const (
 	CodeCancelTimeNotArrived     sdk.CodeType = 1018
 	CodeGetMarketExePriceFailed  sdk.CodeType = 1019
 	CodeInitPriceBigThanMaxPrice sdk.CodeType = 1020
+	CodeCancelEnableTimeNegative sdk.CodeType = 1021
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -100,4 +101,8 @@ func ErrGetMarketPrice(err string) sdk.Error {
 
 func ErrPriceConfiguration() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeInitPriceBigThanMaxPrice, "The init price is big than max price")
+}
+
+func ErrEnableCancelTimeIsNegative() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeCancelEnableTimeNegative, "The cancellation enable time is negative")
 }

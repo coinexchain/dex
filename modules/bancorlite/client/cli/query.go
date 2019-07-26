@@ -15,16 +15,17 @@ import (
 func QueryBancorInfoCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "info",
-		Short: "query the banor pool's information about a token",
-		Long: `query the banor pool's information about a token. 
+		Short: "query the banor pool's information about a symbol pair",
+		Long: `query the banor pool's information about a symbol pair. 
 
 Example : 
-	cetcli query bancorlite info cetdac --trust-node=true --chain-id=coinexdex`,
-		Args: cobra.ExactArgs(1),
+	cetcli query bancorlite info stock money --trust-node=true --chain-id=coinexdex`,
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryBancorInfo)
-			param := &keepers.QueryBancorInfoParam{Token: args[0]}
+			symbol := args[0] + "/" + args[1]
+			param := &keepers.QueryBancorInfoParam{Symbol: symbol}
 			bz, err := cdc.MarshalJSON(param)
 			if err != nil {
 				return err

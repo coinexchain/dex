@@ -41,8 +41,8 @@ var bancorTradeFlags = []string{
 func BancorInitCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initialize a bancor pool for a token",
-		Long: `Initialize a bancor pool for a token, specifying the maximum supply of this pool and the maximum reachable price when all the supply are sold out.
+		Short: "Initialize a bancor pool for a stock/money pair",
+		Long: `Initialize a bancor pool for a stock/money pair, specifying the maximum supply of this pool and the maximum reachable price when all the supply are sold out, specifying the init price, and specifying the time before which no cancellation is allowed.
 
 Example: 
 	 cetcli tx bancorlite init stock money --max-supply=10000000000000 --max-price=5 --init-price=1 --enable-cancel-time=1563954165
@@ -55,7 +55,7 @@ Example:
 			var maxPrice sdk.Dec
 			types.FillDec(viper.GetString(FlagMaxPrice), &maxPrice)
 			if maxPrice.IsZero() {
-				return errors.New("Max Price is Invalid or Zero")
+				return errors.New("max Price is Invalid or Zero")
 			}
 			var initPrice sdk.Dec
 			types.FillDec(viper.GetString(FlagInitPrice), &initPrice)
@@ -64,14 +64,11 @@ Example:
 			}
 			maxSupply, ok := sdk.NewIntFromString(viper.GetString(FlagMaxSupply))
 			if !ok {
-				return errors.New("Max Supply is Invalid")
+				return errors.New("max Supply is Invalid")
 			}
 			time, err := strconv.ParseInt(viper.GetString(FlagEnableCancelTime), 10, 64)
 			if err != nil {
 				return errors.New("bancor enable-cancel-time is invalid")
-			}
-			if time < 0 {
-				return errors.New("bancor enable-cancel-time is negative")
 			}
 			msg := &types.MsgBancorInit{
 				Owner:            sender,
@@ -103,7 +100,7 @@ func BancorTradeCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "trade",
 		Short: "Trade with a bancor pool",
-		Long: `Sell tokens to a bancor pool or buy tokens from a bancor pool.
+		Long: `Sell Stocks to a bancor pool or buy Stocks from a bancor pool.
 
 Example: 
 	 cetcli tx bancorlite trade stock money --side buy --amount=100 --money-limit=120
@@ -121,7 +118,7 @@ Example:
 			case "sell":
 				isBuy = false
 			default:
-				return errors.New("Unknown Side. Please specify 'buy' or 'sell'")
+				return errors.New("unknown Side. Please specify 'buy' or 'sell'")
 			}
 			msg := &types.MsgBancorTrade{
 				Sender:     sender,
@@ -144,6 +141,35 @@ Example:
 
 	for _, flag := range bancorTradeFlags {
 		cmd.MarkFlagRequired(flag)
+	}
+	return cmd
+}
+
+func BancorCancelCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "cancel",
+		Short: "Cancel a bancor pool for a stock/money pair",
+		Long: `Cancel a bancor pool for a stock/money pair, sender must be this stock owner
+
+Example: 
+	 cetcli tx bancorlite cancel stock money
+`,
+		Args: cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			sender := cliCtx.GetFromAddress()
+
+			msg := &types.MsgBancorCancel{
+				Owner: sender,
+				Stock: args[0],
+				Money: args[1],
+			}
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
 	}
 	return cmd
 }
