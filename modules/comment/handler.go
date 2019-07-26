@@ -47,10 +47,16 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 
 	k.Cck.IncrCommentCount(ctx)
 
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
+		),
+	)
+
 	return sdk.Result{
 		Codespace: types.CodeSpaceComment,
-		//Tags: sdk.NewTags(
-		//	distributionx.TagKeyDonator, msg.Sender.String(),
-		//),
+		Events:    ctx.EventManager().Events(),
 	}
 }

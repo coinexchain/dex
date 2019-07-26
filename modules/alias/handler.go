@@ -89,6 +89,7 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 	}
 
 	return sdk.Result{
-		Events: ctx.EventManager().Events(),
+		Codespace: types.CodeSpaceAlias,
+		Events:    ctx.EventManager().Events(),
 	}
 }
