@@ -1075,6 +1075,7 @@ paths:
     post:
       summary: Unjail a jailed validator
       description: Send transaction to unjail a jailed validator
+      operationId: unjailValidator
       consumes:
         - application/json
       produces:
