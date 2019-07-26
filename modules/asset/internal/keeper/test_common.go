@@ -55,13 +55,13 @@ func createTestInput() testInput {
 
 	// account permissions
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     {supply.Basic},
-		distribution.ModuleName:   {supply.Basic},
+		auth.FeeCollectorName:     nil,
+		distribution.ModuleName:   nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
 		types.ModuleName:          {supply.Burner, supply.Minter},
-		authx.ModuleName:          {supply.Basic},
+		authx.ModuleName:          nil,
 	}
 	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
 	ak := auth.NewAccountKeeper(cdc, keyAuth, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)

@@ -62,12 +62,12 @@ var (
 
 	// account permissions
 	maccPerms = map[string][]string{
-		auth.FeeCollectorName:     {supply.Basic},
-		distr.ModuleName:          {supply.Basic},
+		auth.FeeCollectorName:     nil,
+		distr.ModuleName:          nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
-		authx.ModuleName:          {supply.Basic},
+		authx.ModuleName:          nil,
 		asset.ModuleName:          {supply.Burner, supply.Minter},
 	}
 )

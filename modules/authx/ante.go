@@ -46,7 +46,7 @@ func wrapAnteHandler(ah sdk.AnteHandler,
 			switch msg := msg.(type) {
 			case crisis.MsgVerifyInvariant:
 				if msg.InvariantModuleName == supply.ModuleName {
-					_ = axk.PreTotalSupply(ctx)
+					axk.PreTotalSupply(ctx)
 				}
 			}
 		}

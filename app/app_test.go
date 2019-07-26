@@ -69,12 +69,12 @@ func addGenesisAccounts(genState *GenesisState, accs ...auth.BaseAccount) {
 }
 func addModuleAccounts(genState *GenesisState) {
 	maccs := []*supply.ModuleAccount{
-		supply.NewEmptyModuleAccount(auth.FeeCollectorName, supply.Basic),
-		supply.NewEmptyModuleAccount(distribution.ModuleName, supply.Basic),
+		supply.NewEmptyModuleAccount(auth.FeeCollectorName),
+		supply.NewEmptyModuleAccount(distribution.ModuleName),
 		supply.NewEmptyModuleAccount(staking.BondedPoolName, supply.Burner, supply.Staking),
 		supply.NewEmptyModuleAccount(staking.NotBondedPoolName, supply.Burner, supply.Staking),
 		supply.NewEmptyModuleAccount(gov.ModuleName, supply.Burner),
-		supply.NewEmptyModuleAccount(authx.ModuleName, supply.Basic),
+		supply.NewEmptyModuleAccount(authx.ModuleName),
 		supply.NewEmptyModuleAccount(asset.ModuleName, supply.Burner, supply.Minter),
 	}
 	for _, macc := range maccs {
