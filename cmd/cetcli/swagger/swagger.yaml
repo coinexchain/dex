@@ -171,7 +171,7 @@ paths:
   /validatorsets/latest:
     get:
       summary: Get the latest validator set
-      operationId: getLatestValidatorSets
+      operationId: getLatestValidatorSet
       tags:
         - Tendermint
       produces:
@@ -192,7 +192,7 @@ paths:
           description: Server internal error
   /validatorsets/{height}:
     get:
-      operationId: getValidatorSets
+      operationId: getValidatorSet
       summary: Get a validator set a certain height
       tags:
         - Tendermint
