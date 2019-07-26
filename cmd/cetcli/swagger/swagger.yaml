@@ -1261,6 +1261,54 @@ paths:
           description: Invalid proposal body
         500:
           description: Internal Server Error
+  /gov/proposals/community_pool_spend:
+    post:
+      summary: Generate a community pool spend proposal transaction
+      description: Generate a community pool spend proposal transaction
+      operationId: submitCommunityPoolSpendProposal
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - Governance
+      parameters:
+        - description: The community pool spend proposal body contains coin amount to be spent
+          name: post_proposal_body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              title:
+                type: string
+                x-example: "Community Pool Spend"
+              description:
+                type: string
+                x-example: "Pay me some coins"
+              proposer:
+                $ref: "#/definitions/Address"
+              recipient:
+                $ref: "#/definitions/Address"
+              deposit:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
+              amount:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
+      responses:
+        200:
+          description: The transaction was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid proposal body
+        500:
+          description: Internal Server Error
   /gov/proposals/{proposalId}:
     get:
       summary: Query a proposal
