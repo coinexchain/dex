@@ -1,17 +1,12 @@
 package bankx
 
 import (
-	types2 "github.com/coinexchain/dex/modules/authx/types"
-	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/supply"
-	"github.com/tendermint/tendermint/crypto"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -20,9 +15,15 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/authx"
+	types2 "github.com/coinexchain/dex/modules/authx/types"
+	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
