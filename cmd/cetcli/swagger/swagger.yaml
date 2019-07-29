@@ -30,6 +30,10 @@ tags:
     description: Asset module APIs
   - name: Market
     description: Market module APIs
+  - name: Comment
+    description: Post comments about tokens
+  - name: Alias
+    description: Add and remove aliases for accounts
 schemes:
   - https
   - http
@@ -2802,6 +2806,242 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /alias/address-of-alias/{alias}:
+    get:
+      summary: Given an alias, query the corresponding address
+      operationId: getAddressFromAlias
+      tags:
+        - Alias
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: alias
+          description: The alias to be queried
+          required: true
+          type: string
+          x-example: superman
+      responses:
+        200:
+          description: The corresponding address. Emtpy string means no corresponding address was found.
+          schema:
+            type: string
+            x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /alias/aliases-of-address/{address}:
+    get:
+      summary: Given an account's address, query all the corresponding aliases
+      operationId: getAliasesFromAddress
+      tags:
+        - Alias
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: address
+          description: The account's address to be queried
+          required: true
+          type: string
+          x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+      responses:
+        200:
+          description: An array of corresponding aliases. If there is a default alias, it will be the first item in the array; If there is no default alias, empty string will be the first item; If there is not any alias at all, the array will contain only an empty string.
+          schema:
+            type: array
+            items:
+              type: string
+              example: superman
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /alias/update:
+    post:
+      summary: Add or remove alias for an address
+      tags:
+        - Alias
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: updateAlias
+      parameters:
+        - in: body
+          name: aliasUpdateReq
+          description: update an address's aliases
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  alias:
+                    type: string
+                    example: superman
+                  is_add:
+                    type: boolean
+                  as_default:
+                    type: boolean
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /comment/new-thread:
+    post:
+      summary: Post a new comment to open a new thread
+      tags:
+        - Comment
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: newThread
+      parameters:
+        - in: body
+          name: newThreadReq
+          description: open a new thread
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  token:
+                    type: string
+                    example: cetdac
+                  donation:
+                    type: string
+                    example: 100000000
+                  title:
+                    type: string
+                    example: I love cetdac
+                  content:
+                    type: string
+                    example: This is the content. The end.
+                  content_type:
+                    type: integer
+                    example: 3
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /comment/followup-comment:
+    post:
+      summary: Post a follow-up comment under some thread
+      tags:
+        - Comment
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: followupComment
+      parameters:
+        - in: body
+          name: followupCommentReq
+          description: Post a follow-up comment
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  token:
+                    type: string
+                    example: cetdac
+                  donation:
+                    type: string
+                    example: 100000000
+                  title:
+                    type: string
+                    example: I love cetdac too
+                  content:
+                    type: string
+                    example: This is the content. The end.
+                  content_type:
+                    type: integer
+                    example: 3
+                  id_rewarded:
+                    type: string
+                    example: 9883409
+                  reward_target:
+                    type: string
+                    example: coinex1qwl879nx9t6kef4supyazayf7vjhennyjqwjgr
+                  reward_token:
+                    type: string
+                    example: cet
+                  reward_amount:
+                    type: string
+                    example: 200000000
+                  attitudes:
+                    type: array
+                    items:
+                      type: integer
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /comment/reward-comments:
+    post:
+      summary: reward some comments with coins
+      tags:
+        - Comment
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: rewardComments
+      parameters:
+        - in: body
+          name: rewardCommentsReq
+          description: reward some comments
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  token:
+                    type: string
+                    example: cetdac
+                  references:
+                    type: array
+                    items:
+                      $ref: "#/definitions/CommentRef"
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
 definitions:
   BaseMarket:
     type: object
@@ -3564,3 +3804,22 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Address"
+  CommentRef:
+    type: object
+    properties:
+     id:
+       type: string
+       example: 9883409
+     reward_target:
+       type: string
+       example: coinex1qwl879nx9t6kef4supyazayf7vjhennyjqwjgr
+     reward_token:
+       type: string
+       example: cet
+     reward_amount:
+       type: string
+       example: 200000000
+     attitudes:
+       type: array
+       items:
+         type: integer
