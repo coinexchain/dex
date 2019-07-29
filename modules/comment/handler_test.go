@@ -1,7 +1,6 @@
 package comment
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -95,15 +94,15 @@ func (k *mocDistributionxKeeper) DonateToCommunityPool(ctx sdk.Context, sender s
 	return nil
 }
 
-func msgSend(key string, v interface{}) error {
-	bytes, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-	s := "Msg(" + key + "): " + string(bytes)
-	logStrAppend(s)
-	return nil
-}
+//func msgSend(key string, v interface{}) error {
+//	bytes, err := json.Marshal(v)
+//	if err != nil {
+//		return err
+//	}
+//	s := "Msg(" + key + "): " + string(bytes)
+//	logStrAppend(s)
+//	return nil
+//}
 
 func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	db := dbm.NewMemDB()
@@ -119,7 +118,7 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 		&mocBankxKeeper{maxAmount: sdk.NewInt(100)},
 		&mocAssetStatusKeeper{assets: map[string]bool{"usdt": true, "btc": true, "cet": true}},
 		&mocDistributionxKeeper{poolName: "comPool", maxAmount: sdk.NewInt(100)},
-		msgSend,
+		"",
 	)
 	return ctx, k
 }
@@ -191,8 +190,8 @@ func Test1(t *testing.T) {
 	require.Equal(t, s, logStrList[0])
 	s = `Send 10usdt from coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj to coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj`
 	require.Equal(t, s, logStrList[1])
-	s = `Msg(token_comment): {"id":100,"sender":"coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj","token":"cet","donation":1,"title":"First Comment","content":"http://google.com","content_type":2,"references":[{"id":900,"reward_target":"coinex1qy352eufqy352eufqy352eufqy35qqqzw64xkq","reward_token":"cet","reward_amount":0,"attitudes":[50,59]},{"id":901,"reward_target":"coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj","reward_token":"usdt","reward_amount":10,"attitudes":[52,59]}]}`
-	require.Equal(t, s, logStrList[2])
+	//s = `Msg(token_comment): {"id":100,"sender":"coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj","token":"cet","donation":1,"title":"First Comment","content":"http://google.com","content_type":2,"references":[{"id":900,"reward_target":"coinex1qy352eufqy352eufqy352eufqy35qqqzw64xkq","reward_token":"cet","reward_amount":0,"attitudes":[50,59]},{"id":901,"reward_target":"coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj","reward_token":"usdt","reward_amount":10,"attitudes":[52,59]}]}`
+	//require.Equal(t, s, logStrList[2])
 	require.Equal(t, uint64(101), keeper.Cck.GetCommentCount(ctx, "cet"))
 	require.Equal(t, "", res.Log)
 	require.Equal(t, true, res.IsOK())

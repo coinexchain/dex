@@ -1,6 +1,7 @@
 package comment
 
 import (
+	"encoding/json"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -42,9 +43,18 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 
 	lastCount := k.Cck.IncrCommentCount(ctx, msg.Token)
 
-	if k.MsgSendFunc != nil {
+	if len(k.EventTypeMsgQueue) != 0 {
 		tokenComment := types.NewTokenComment(&msg, lastCount)
-		k.MsgSendFunc(types.TokenCommentKey, tokenComment)
+		bytes, err := json.Marshal(tokenComment)
+		if err != nil {
+			bytes = []byte{}
+		}
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				k.EventTypeMsgQueue,
+				sdk.NewAttribute(types.TokenCommentKey, string(bytes)),
+			),
+		)
 	}
 
 	ctx.EventManager().EmitEvent(

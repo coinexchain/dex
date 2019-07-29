@@ -72,23 +72,23 @@ func (keeper *CommentCountKeeper) SetCommentCount(ctx sdk.Context, denorm string
 }
 
 type Keeper struct {
-	Cck         *CommentCountKeeper
-	Bxk         types.ExpectedBankxKeeper
-	Axk         types.ExpectedAssetStatusKeeper
-	Dk          types.ExpectedDistributionxKeeper
-	MsgSendFunc func(key string, v interface{}) error
+	Cck               *CommentCountKeeper
+	Bxk               types.ExpectedBankxKeeper
+	Axk               types.ExpectedAssetStatusKeeper
+	Dk                types.ExpectedDistributionxKeeper
+	EventTypeMsgQueue string
 }
 
 func NewKeeper(cck *CommentCountKeeper,
 	bxk types.ExpectedBankxKeeper,
 	axk types.ExpectedAssetStatusKeeper,
 	dk types.ExpectedDistributionxKeeper,
-	msgSendFunc func(key string, v interface{}) error) *Keeper {
+	et string) *Keeper {
 	return &Keeper{
-		Cck:         cck,
-		Bxk:         bxk,
-		Axk:         axk,
-		Dk:          dk,
-		MsgSendFunc: msgSendFunc,
+		Cck:               cck,
+		Bxk:               bxk,
+		Axk:               axk,
+		Dk:                dk,
+		EventTypeMsgQueue: et,
 	}
 }
