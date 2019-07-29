@@ -15,12 +15,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
-	r.HandleFunc("/market/trading-pair/{stock}/{money}", queryMarketHandlerFn(cdc, cliCtx)).Methods("GET")
-	r.HandleFunc("/market/order-info/{order-id}", queryOrderInfoHandlerFn(cdc, cliCtx)).Methods("GET")
-	r.HandleFunc("/market/user-order-list/{address}", queryUserOrderListHandlerFn(cdc, cliCtx)).Methods("GET")
-}
-
 func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
