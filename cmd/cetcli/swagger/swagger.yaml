@@ -1115,7 +1115,7 @@ paths:
           description: Internal Server Error
   /slashing/parameters:
     get:
-      operationId: getParameters
+      operationId: getSlashingParams
       summary: Get the current slashing parameters
       tags:
         - Slashing
@@ -2001,7 +2001,7 @@ paths:
           description: Internal Server Error
   /distribution/parameters:
     get:
-      operationId: getParameters
+      operationId: getDistributionParams
       summary: Fee distribution parameters
       tags:
         - Distribution
