@@ -804,6 +804,7 @@ paths:
         type: string
         x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
+      operationId: getValidatorOfDelegator
       summary: Query a validator that a delegator is bonded to
       tags:
         - Staking
@@ -1014,6 +1015,7 @@ paths:
           description: Internal Server Error
   /slashing/validators/{validatorPubKey}/signing_info:
     get:
+      operationId: getSigningInfo
       summary: Get sign info of given validator
       description: Get sign info of given validator
       produces:
@@ -1734,6 +1736,7 @@ paths:
         type: string
         x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
+      operationId: getRewardByValidator
       summary: Query a delegation reward
       description: Query a single delegation reward by a delegator
       tags:
@@ -1841,6 +1844,7 @@ paths:
         type: string
         x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
+      operationId: getDistributionInfo
       summary: Validator distribution information
       description: Query the distribution information of a single validator
       tags:
@@ -1889,6 +1893,7 @@ paths:
         type: string
         x-example: coinexvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys
     get:
+      operationId: getValidatorRewards
       summary: Commission and self-delegation rewards of a single validator
       description: Query the commission and self-delegation rewards of validator.
       tags:
