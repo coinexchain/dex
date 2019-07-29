@@ -113,8 +113,7 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: chainid, Height: 1000}, false, log.NewNopLogger())
-	cck := keepers.NewCommentCountKeeper(key)
-	k := keepers.NewKeeper(cck,
+	k := keepers.NewKeeper(key,
 		&mocBankxKeeper{maxAmount: sdk.NewInt(100)},
 		&mocAssetStatusKeeper{assets: map[string]bool{"usdt": true, "btc": true, "cet": true}},
 		&mocDistributionxKeeper{poolName: "comPool", maxAmount: sdk.NewInt(100)},

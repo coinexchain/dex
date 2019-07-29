@@ -79,13 +79,13 @@ type Keeper struct {
 	EventTypeMsgQueue string
 }
 
-func NewKeeper(cck *CommentCountKeeper,
+func NewKeeper(key sdk.StoreKey,
 	bxk types.ExpectedBankxKeeper,
 	axk types.ExpectedAssetStatusKeeper,
 	dk types.ExpectedDistributionxKeeper,
 	et string) *Keeper {
 	return &Keeper{
-		Cck:               cck,
+		Cck:               NewCommentCountKeeper(key),
 		Bxk:               bxk,
 		Axk:               axk,
 		Dk:                dk,
