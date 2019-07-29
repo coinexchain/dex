@@ -16,10 +16,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	"github.com/coinexchain/dex/modules/alias"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bancorlite"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/comment"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
@@ -41,6 +43,8 @@ type GenesisState struct {
 	AssetData    asset.GenesisState        `json:"asset"`
 	MarketData   market.GenesisState       `json:"market"`
 	BancorData   bancorlite.GenesisState   `json:"bancorlite"`
+	CommentData  comment.GenesisState      `json:"comment"`
+	AliasData    alias.GenesisState        `json:"alias"`
 	Incentive    incentive.GenesisState    `json:"incentive"`
 	Supply       supply.GenesisState       `json:"supply"`
 	GenUtil      genutil.GenesisState      `json:"genutil"`
@@ -62,6 +66,8 @@ func NewDefaultGenesisState() GenesisState {
 		AssetData:    asset.DefaultGenesisState(),
 		MarketData:   market.DefaultGenesisState(),
 		BancorData:   bancorlite.DefaultGenesisState(),
+		CommentData:  comment.DefaultGenesisState(),
+		AliasData:    alias.DefaultGenesisState(),
 		Incentive:    incentive.DefaultGenesisState(),
 		Supply:       supply.DefaultGenesisState(),
 		GenUtil:      genutil.GenesisState{},
@@ -90,6 +96,8 @@ func FromMap(cdc *codec.Codec, g map[string]json.RawMessage) GenesisState {
 	unmarshalField(cdc, g[asset.ModuleName], &gs.AssetData)
 	unmarshalField(cdc, g[market.ModuleName], &gs.MarketData)
 	unmarshalField(cdc, g[bancorlite.ModuleName], &gs.BancorData)
+	unmarshalField(cdc, g[comment.ModuleName], &gs.CommentData)
+	unmarshalField(cdc, g[alias.ModuleName], &gs.AliasData)
 	unmarshalField(cdc, g[incentive.ModuleName], &gs.Incentive)
 	unmarshalField(cdc, g[supply.ModuleName], &gs.Supply)
 	unmarshalField(cdc, g[genutil.ModuleName], &gs.GenUtil)

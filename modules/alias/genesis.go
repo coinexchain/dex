@@ -22,7 +22,7 @@ func NewGenesisState(params keepers.Params, AliasEntryList []keepers.AliasEntry)
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(keepers.DefaultParams(), nil)
+	return NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{})
 }
 
 // InitGenesis - Init store state from genesis data

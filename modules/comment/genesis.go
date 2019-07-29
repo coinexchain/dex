@@ -17,7 +17,7 @@ func NewGenesisState(c map[string]uint64) GenesisState {
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(nil)
+	return NewGenesisState(make(map[string]uint64))
 }
 
 // InitGenesis - Init store state from genesis data

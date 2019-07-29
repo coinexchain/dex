@@ -29,10 +29,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	"github.com/coinexchain/dex/modules/alias"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bancorlite"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/comment"
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
@@ -105,6 +107,8 @@ func init() {
 		asset.AppModuleBasic{},
 		market.AppModuleBasic{},
 		bancorlite.AppModuleBasic{},
+		alias.AppModuleBasic{},
+		comment.AppModuleBasic{},
 	}
 
 	ModuleBasics = NewOrderedBasicManager(modules)
@@ -143,6 +147,8 @@ type CetChainApp struct {
 	keyMarket    *sdk.KVStoreKey
 	keyBancor    *sdk.KVStoreKey
 	keyIncentive *sdk.KVStoreKey
+	keyAlias     *sdk.KVStoreKey
+	keyComment   *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
 	accountKeeper   auth.AccountKeeper
@@ -164,6 +170,8 @@ type CetChainApp struct {
 	marketKeeper    market.Keeper
 	bancorKeeper    bancorlite.Keeper
 	msgQueProducer  msgqueue.Producer
+	aliasKeeper     alias.Keeper
+	commentKeeper   comment.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -223,6 +231,8 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *C
 		keyMarket:      sdk.NewKVStoreKey(market.StoreKey),
 		keyBancor:      sdk.NewKVStoreKey(bancorlite.StoreKey),
 		keyIncentive:   sdk.NewKVStoreKey(incentive.StoreKey),
+		keyAlias:       sdk.NewKVStoreKey(alias.StoreKey),
+		keyComment:     sdk.NewKVStoreKey(comment.StoreKey),
 	}
 }
 
@@ -370,6 +380,20 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	// modified like below:
 	app.stakingKeeper = *stakingKeeper.SetHooks(
 		staking.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()))
+
+	app.commentKeeper = *comment.NewBaseKeeper(
+		app.keyComment,
+		app.bankxKeeper,
+		app.assetKeeper,
+		app.distrxKeeper,
+		msgqueue.EventTypeMsgQueue,
+	)
+	app.aliasKeeper = alias.NewBaseKeeper(
+		app.keyAlias,
+		app.bankxKeeper,
+		app.assetKeeper,
+		app.paramsKeeper.Subspace(alias.StoreKey),
+	)
 }
 
 func (app *CetChainApp) InitModules() {
@@ -393,6 +417,8 @@ func (app *CetChainApp) InitModules() {
 		market.NewAppModule(app.marketKeeper),
 		bancorlite.NewAppModule(app.bancorKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
+		alias.NewAppModule(app.aliasKeeper),
+		comment.NewAppModule(app.commentKeeper),
 	}
 
 	app.mm = module.NewManager(modules...)
@@ -421,6 +447,8 @@ func (app *CetChainApp) InitModules() {
 		bancorlite.ModuleName,
 		crisis.ModuleName,
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
+		alias.ModuleName,
+		comment.ModuleName,
 	}
 
 	// genutils must occur after staking so that pools are properly
@@ -468,7 +496,7 @@ func (app *CetChainApp) mountStores() {
 		app.keySlashing, app.keyGov, app.keyParams,
 		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
 		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,
-		app.keyBancor,
+		app.keyBancor, app.keyAlias, app.keyComment,
 	)
 }
 
