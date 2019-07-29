@@ -81,7 +81,7 @@ func (ik impKeeper) GetMarketLastExePrice(ctx sdk.Context, symbol string) (sdk.D
 }
 
 func (ik impKeeper) IsMarketExist(ctx sdk.Context, symbol string) bool {
-	return ik.IsMarketExist(ctx, symbol)
+	return ik.marketKeeper.IsMarketExist(ctx, symbol)
 }
 
 func init() {
