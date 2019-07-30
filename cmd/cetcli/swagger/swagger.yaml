@@ -3043,6 +3043,172 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /bancorlite/bancor-init:
+    post:
+      summary: create bancor
+      tags:
+        - Bancorlite
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: bancorInit
+      parameters:
+        - in: body
+          name: bancorInit
+          description: create bancor
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  stock:
+                    type: string
+                    example: btc
+                  money:
+                    type: string
+                    example: cet
+                  init_price:
+                    type: string
+                    example: "10"
+                  max_supply:
+                    type: string
+                    example: "100000"
+                  max_price:
+                    type: string
+                    example: "100"
+                  enable_cancel_time:
+                      type: string
+                      example: "1564479501"
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /bancorlite/bancor-trade:
+    post:
+      summary: trade with bancor
+      tags:
+        - Bancorlite
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: bancorTrade
+      parameters:
+        - in: body
+          name: bancorTrade
+          description: trade with bancor
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  stock:
+                    type: string
+                    example: btc
+                  money:
+                    type: string
+                    example: cet
+                  amount:
+                    type: string
+                    example: "100"
+                  is_buy:
+                    type: boolean
+                    example: true
+                  money_limit:
+                    type: string
+                    example: "1000"
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /bancorlite/bancor-cancel:
+    post:
+      summary: cancel bancor
+      tags:
+        - Bancorlite
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: bancorCancel
+      parameters:
+        - in: body
+          name: bancorCancel
+          description: cancel bancor
+          required: true
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  base_req:
+                    $ref: "#/definitions/BaseReq"
+                  stock:
+                    type: string
+                    example: btc
+                  money:
+                    type: string
+                    example: cet
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+  /bancorlite/pools/{symbol}:
+    get:
+      summary: get the bancor pool info
+      operationId: getBancorInfo
+      tags:
+        - Bancorlite
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: symbol
+          description: stock and money pair
+          required: true
+          type: string
+          x-example: btc-cet
+      responses:
+        200:
+          description: bancor pool info
+          schema:
+            type: object
+            properties:
+              stock:
+                type: string
+              money:
+                type: string
+              init_price:
+                type: string
+              max_supply:
+                type: string
+              max_price:
+                type: string
+              enable_cancel_time:
+                type: string
+        404:
+          description: There is no corresponding bancor info
+        500:
+          description: Server internal error
 definitions:
   BaseMarket:
     type: object

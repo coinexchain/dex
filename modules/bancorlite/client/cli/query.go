@@ -26,10 +26,13 @@ Example :
 			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryBancorInfo)
 			symbol := args[0] + "/" + args[1]
 			param := &keepers.QueryBancorInfoParam{Symbol: symbol}
+
 			bz, err := cdc.MarshalJSON(param)
+
 			if err != nil {
 				return err
 			}
+
 			res, _, err := cliCtx.QueryWithData(query, bz)
 			if err != nil {
 				return err

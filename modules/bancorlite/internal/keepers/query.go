@@ -34,9 +34,10 @@ func queryBancorInfo(ctx sdk.Context, req abcitypes.RequestQuery, keeper Keeper)
 		return nil, sdk.NewError(types.CodeSpaceBancorlite, types.CodeUnMarshalFailed, "failed to parse param")
 	}
 	bi := keeper.Bik.Load(ctx, param.Symbol)
-
-	biD := NewBancorInfoDisplay(bi)
-
+	var biD BancorInfoDisplay
+	if bi != nil {
+		biD = NewBancorInfoDisplay(bi)
+	}
 	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, biD)
 	if err != nil {
 		return nil, sdk.NewError(types.CodeSpaceBancorlite, types.CodeMarshalFailed, "could not marshal result to JSON")
