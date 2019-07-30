@@ -24,6 +24,10 @@ func NewOrderedBasicManager(modules []module.AppModuleBasic) OrderedBasicManager
 	}
 }
 
+func (bm OrderedBasicManager) RawBasicManager() module.BasicManager {
+	return bm.BasicManager
+}
+
 func (bm OrderedBasicManager) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
 	for _, m := range bm.modules {
 		m.RegisterRESTRoutes(ctx, rtr)
@@ -44,10 +48,6 @@ func (bm OrderedBasicManager) AddQueryCommands(rootQueryCmd *cobra.Command, cdc 
 			rootQueryCmd.AddCommand(cmd)
 		}
 	}
-}
-
-func (bm OrderedBasicManager) RawBasicManager() module.BasicManager {
-	return bm.BasicManager
 }
 
 func (bm OrderedBasicManager) ValidateGenesis(genesis map[string]json.RawMessage) error {
