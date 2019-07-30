@@ -1,13 +1,9 @@
-package dev
+package main
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/bancorlite"
-	"github.com/coinexchain/dex/modules/market"
 	"os"
 	"reflect"
-
-	"github.com/coinexchain/dex/modules/authx/types"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -20,7 +16,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/bancorlite"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
 )
 

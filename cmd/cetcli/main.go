@@ -21,11 +21,9 @@ import (
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-
 	staking_cli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 
 	"github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/cmd/cetcli/dev"
 	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
 	distrxcmd "github.com/coinexchain/dex/modules/distributionx/client/cli"
@@ -78,7 +76,6 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 		client.LineBreak,
 		version.Cmd,
 		client.NewCompletionCmd(rootCmd, true),
-		dev.DevCmd(cdc, registerRoutes),
 	)
 
 	return rootCmd
@@ -105,12 +102,6 @@ func initConfig(cmd *cobra.Command) error {
 		return err
 	}
 	return viper.BindPFlag(cli.OutputFlag, cmd.PersistentFlags().Lookup(cli.OutputFlag))
-}
-
-func configCmd() *cobra.Command {
-	cmd := client.ConfigCmd(app.DefaultCLIHome)
-	cmd.Short = "Create or query a CoinEx Chain CLI configuration file"
-	return cmd
 }
 
 func queryCmd(cdc *amino.Codec) *cobra.Command {
