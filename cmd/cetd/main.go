@@ -20,7 +20,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/store"
-	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	genaccscli "github.com/cosmos/cosmos-sdk/x/genaccounts/client/cli"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
@@ -64,7 +63,6 @@ func createCetdCmd() *cobra.Command {
 	addInitCommands(ctx, cdc, rootCmd)
 	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
-	rootCmd.AddCommand(version.Cmd)
 
 	rootCmd.PersistentFlags().UintVar(&invCheckPeriod, flagInvCheckPeriod,
 		0, "Assert registered invariants every N blocks")

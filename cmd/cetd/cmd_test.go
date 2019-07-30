@@ -21,7 +21,7 @@ func init() {
 
 func TestCreateRootCmd(t *testing.T) {
 	rootCmd := createCetdCmd()
-	require.Equal(t, 16, len(rootCmd.Commands()))
+	require.Equal(t, 15, len(rootCmd.Commands()))
 }
 
 func TestNewApp(t *testing.T) {
