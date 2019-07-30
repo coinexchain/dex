@@ -51,7 +51,7 @@ Example:
 	}
 
 	cmd.Flags().String(FlagAsDefault, "yes", "This alias will be used as a default alias or not")
-	cmd.MarkFlagRequired(FlagAsDefault)
+	//cmd.MarkFlagRequired(FlagAsDefault)
 	return cmd
 }
 
