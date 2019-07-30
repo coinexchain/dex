@@ -15,7 +15,7 @@ import (
 
 func QueryAddressCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "address-of-alias",
+		Use:   "address-of-alias [alias]",
 		Short: "query the corresponding address of an alias",
 		Long: `query the corresponding address of an alias. 
 
@@ -42,7 +42,7 @@ Example :
 
 func QueryAliasCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "aliases-of-address",
+		Use:   "aliases-of-address [address]",
 		Short: "query the aliases of an address",
 		Long: `query the aliases of an address. 
 

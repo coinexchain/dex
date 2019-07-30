@@ -18,12 +18,12 @@ const FlagAsDefault = "as-default"
 
 func AliasAddCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add",
+		Use:   "add [alias]",
 		Short: "Add an alias for current account",
 		Long: `Add an alias for current account.
 
 Example: 
-	 cetcli tx alias add --as-default yes super_super_boy 
+	 cetcli tx alias add super_super_boy --from local_user_1 --as-default yes
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,7 +57,7 @@ Example:
 
 func AliasRemoveCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "remove",
+		Use:   "remove [alias]",
 		Short: "Remove an alias for current account",
 		Long: `Remove an alias for current account.
 

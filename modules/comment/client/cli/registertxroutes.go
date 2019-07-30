@@ -21,9 +21,9 @@ func GetTxCmd(cdc *amino.Codec) *cobra.Command {
 	}
 
 	commentTxCmd.AddCommand(client.PostCommands(
-		RewardCommentsCmd(cdc),
 		CreateNewThreadCmd(cdc),
 		CreateFollowupCommentCmd(cdc),
+		RewardCommentsCmd(cdc),
 	)...)
 
 	return commentTxCmd
