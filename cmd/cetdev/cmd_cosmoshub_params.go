@@ -12,6 +12,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
+	"github.com/tendermint/go-amino"
+
 	"github.com/coinexchain/dex/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -20,7 +22,7 @@ type genesisDoc struct {
 	AppState app.GenesisState `json:"app_state"`
 }
 
-func CosmosHubParamsCmd() *cobra.Command {
+func CosmosHubParamsCmd(cdc *amino.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cosmos-hub-params",
 		Short: "Print default params",
@@ -42,7 +44,7 @@ func CosmosHubParamsCmd() *cobra.Command {
 
 			body = fixAddresses(body)
 			genDoc := genesisDoc{}
-			err = app.MakeCodec().UnmarshalJSON(body, &genDoc)
+			err = cdc.UnmarshalJSON(body, &genDoc)
 			if err != nil {
 				return err
 			}

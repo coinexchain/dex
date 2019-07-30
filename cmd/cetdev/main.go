@@ -28,9 +28,7 @@ func main() {
 
 	rootCmd := createRootCmd(cdc)
 
-	// Add flags and prefix all env exposed with GA
-	executor := cli.PrepareMainCmd(rootCmd, "GA", app.DefaultCLIHome)
-
+	executor := cli.Executor{Command: rootCmd, Exit: os.Exit}
 	err := executor.Execute()
 	if err != nil {
 		fmt.Printf("Failed executing CLI command: %s, exiting...\n", err)
@@ -47,10 +45,10 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 	rootCmd.AddCommand(
 		ExampleGenesisCmd(cdc),
 		TestnetGenesisCmd(cdc),
-		DefaultParamsCmd(cdc),
-		CosmosHubParamsCmd(),
-		ShowCommandTreeCmd(),
+		DefaultParamsCmd(),
+		CosmosHubParamsCmd(cdc),
 		RestEndpointsCmd(registerRoutes),
+		//ShowCommandTreeCmd(),
 	)
 
 	return rootCmd

@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
@@ -28,7 +27,7 @@ type moduleParamSet struct {
 	paramSet   params.ParamSet
 }
 
-func DefaultParamsCmd(cdc *codec.Codec) *cobra.Command {
+func DefaultParamsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "default-params",
 		Short: "Print default params",
