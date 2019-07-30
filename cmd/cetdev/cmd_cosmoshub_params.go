@@ -12,12 +12,12 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
-	//gaia_app "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
+	"github.com/coinexchain/dex/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type genesisDoc struct {
-	//AppState gaia_app.GenesisState `json:"app_state"`
+	AppState app.GenesisState `json:"app_state"`
 }
 
 func CosmosHubParamsCmd() *cobra.Command {
@@ -40,9 +40,14 @@ func CosmosHubParamsCmd() *cobra.Command {
 				return err
 			}
 
-			fixAddresses(body)
+			body = fixAddresses(body)
+			genDoc := genesisDoc{}
+			err = app.MakeCodec().UnmarshalJSON(body, &genDoc)
+			if err != nil {
+				return err
+			}
 
-			//printParams(genDoc.AppState)
+			printParams(genDoc.AppState)
 			return nil
 		},
 	}

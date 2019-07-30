@@ -9,8 +9,10 @@ coverage.html
 # ignore cetd & cetcli executables
 cetd
 cetcli
+cetdev
 !cetd/
 !cetcli/
+!cetdev/
 testhome/
 
 build/
