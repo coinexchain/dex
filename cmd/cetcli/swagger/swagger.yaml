@@ -3203,6 +3203,12 @@ paths:
                 type: string
               max_price:
                 type: string
+              current_Price:
+                type: string
+              stock_in_pool:
+                type: string
+              money_in_pool:
+                type: string
               enable_cancel_time:
                 type: string
         404:

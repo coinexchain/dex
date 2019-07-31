@@ -56,7 +56,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		InitPrice:        msg.InitPrice,
 		MaxSupply:        msg.MaxSupply,
 		MaxPrice:         msg.MaxPrice,
-		Price:            sdk.ZeroDec(),
+		Price:            msg.InitPrice,
 		StockInPool:      msg.MaxSupply,
 		MoneyInPool:      sdk.ZeroInt(),
 		EnableCancelTime: msg.EnableCancelTime,
