@@ -14,7 +14,7 @@ import (
 
 func QueryBancorInfoCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "info",
+		Use:   "info [stock] [money]",
 		Short: "query the banor pool's information about a symbol pair",
 		Long: `query the banor pool's information about a symbol pair. 
 
