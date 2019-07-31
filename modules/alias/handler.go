@@ -10,7 +10,8 @@ import (
 
 func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
-		ctx.WithEventManager(sdk.NewEventManager())
+		ctx = ctx.WithEventManager(sdk.NewEventManager())
+
 		switch msg := msg.(type) {
 		case types.MsgAliasUpdate:
 			return handleMsgAliasUpdate(ctx, k, msg)

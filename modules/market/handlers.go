@@ -18,7 +18,7 @@ import (
 
 func NewHandler(k keepers.Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
-		ctx.WithEventManager(sdk.NewEventManager())
+		ctx = ctx.WithEventManager(sdk.NewEventManager())
 
 		switch msg := msg.(type) {
 		case mtype.MsgCreateTradingPair:
