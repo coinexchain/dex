@@ -40,7 +40,7 @@ var bancorTradeFlags = []string{
 
 func BancorInitCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "init",
+		Use:   "init [stock] [money]",
 		Short: "Initialize a bancor pool for a stock/money pair",
 		Long: `Initialize a bancor pool for a stock/money pair, specifying the maximum supply of this pool and the maximum reachable price when all the supply are sold out, specifying the init price, and specifying the time before which no cancellation is allowed.
 
@@ -98,7 +98,7 @@ Example:
 
 func BancorTradeCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "trade",
+		Use:   "trade [stock] [money]",
 		Short: "Trade with a bancor pool",
 		Long: `Sell Stocks to a bancor pool or buy Stocks from a bancor pool.
 
@@ -147,7 +147,7 @@ Example:
 
 func BancorCancelCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "cancel",
+		Use:   "cancel [stock] [money]",
 		Short: "Cancel a bancor pool for a stock/money pair",
 		Long: `Cancel a bancor pool for a stock/money pair, sender must be this stock owner
 
