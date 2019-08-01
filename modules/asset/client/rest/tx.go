@@ -84,8 +84,8 @@ type (
 	// modifyTokenInfoReq defines the properties of a modify token info request's body.
 	modifyTokenInfoReq struct {
 		BaseReq     rest.BaseReq `json:"base_req" yaml:"base_req"`
-		URL         string       `json:"url" yaml:"url"`
-		Description string       `json:"description" yaml:"description"`
+		URL         *string      `json:"url,omitempty" yaml:"url,omitempty"`
+		Description *string      `json:"description,omitempty" yaml:"description,omitempty"`
 	}
 )
 
@@ -442,8 +442,16 @@ func modifyTokenInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 		}
 
 		symbol := getSymbol(r)
+		url := types.DoNotModifyTokenInfo
+		description := types.DoNotModifyTokenInfo
+		if req.URL != nil {
+			url = *req.URL
+		}
+		if req.Description != nil {
+			description = *req.Description
+		}
 
-		msg := types.NewMsgModifyTokenInfo(symbol, req.URL, req.Description, owner)
+		msg := types.NewMsgModifyTokenInfo(symbol, url, description, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
