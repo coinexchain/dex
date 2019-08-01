@@ -1811,6 +1811,7 @@ paths:
         500:
           description: Internal Server Error
     post:
+      operationId: setWithdrawAddress
       summary: Replace the rewards withdrawal address
       description: Replace the delegations' rewards withdrawal address for a new one.
       tags:
@@ -3080,8 +3081,8 @@ paths:
                     type: string
                     example: "100"
                   enable_cancel_time:
-                      type: string
-                      example: "1564479501"
+                    type: string
+                    example: "1564479501"
       responses:
         200:
           description: Tx was succesfully generated
@@ -3980,19 +3981,19 @@ definitions:
   CommentRef:
     type: object
     properties:
-     id:
-       type: string
-       example: 9883409
-     reward_target:
-       type: string
-       example: coinex1qwl879nx9t6kef4supyazayf7vjhennyjqwjgr
-     reward_token:
-       type: string
-       example: cet
-     reward_amount:
-       type: string
-       example: 200000000
-     attitudes:
-       type: array
-       items:
-         type: integer
+      id:
+        type: string
+        example: 9883409
+      reward_target:
+        type: string
+        example: coinex1qwl879nx9t6kef4supyazayf7vjhennyjqwjgr
+      reward_token:
+        type: string
+        example: cet
+      reward_amount:
+        type: string
+        example: 200000000
+      attitudes:
+        type: array
+        items:
+          type: integer
