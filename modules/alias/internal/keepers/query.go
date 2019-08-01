@@ -51,7 +51,7 @@ func queryAliasInfo(ctx sdk.Context, req abcitypes.RequestQuery, keeper Keeper) 
 	} else if param.QueryOp == ListAliasOfAccount {
 		res = keeper.AliasKeeper.GetAliasListOfAccount(ctx, param.Owner)
 	} else {
-		return nil, sdk.NewError(types.CodeSpaceAlias, types.CodeUnknowOperation, "Unknown Operation")
+		return nil, sdk.NewError(types.CodeSpaceAlias, types.CodeUnknownOperation, "Unknown Operation")
 	}
 
 	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, res)

@@ -11,7 +11,7 @@ const (
 	// 1101 ~ 1199
 	CodeEmptyAlias              sdk.CodeType = 1101
 	CodeInvalidAlias            sdk.CodeType = 1102
-	CodeUnknowOperation         sdk.CodeType = 1103
+	CodeUnknownOperation        sdk.CodeType = 1103
 	CodeMarshalFailed           sdk.CodeType = 1104
 	CodeUnMarshalFailed         sdk.CodeType = 1105
 	CodeAliasAlreadyExists      sdk.CodeType = 1106
