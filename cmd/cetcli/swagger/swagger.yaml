@@ -2829,8 +2829,10 @@ paths:
         200:
           description: The corresponding address. Emtpy string means no corresponding address was found.
           schema:
-            type: string
-            x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+            type: array
+            items:
+              type: string
+              x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
         400:
           description: Invalid request
         500:

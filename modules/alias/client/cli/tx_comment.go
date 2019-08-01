@@ -62,7 +62,7 @@ func AliasRemoveCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Remove an alias for current account.
 
 Example: 
-	 cetcli tx alias remove super_super_boy 
+	 cetcli tx alias remove super_super_boy  --from local_user_1
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

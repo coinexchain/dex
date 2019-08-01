@@ -41,7 +41,7 @@ func queryAliasInfo(ctx sdk.Context, req abcitypes.RequestQuery, keeper Keeper) 
 		return nil, sdk.NewError(types.CodeSpaceAlias, types.CodeUnMarshalFailed, "failed to parse param")
 	}
 
-	var res []string
+	res := []string{}
 	if param.QueryOp == GetAddressFromAlias {
 		addr, _ := keeper.AliasKeeper.GetAddressFromAlias(ctx, param.Alias)
 		acc := sdk.AccAddress(addr)
