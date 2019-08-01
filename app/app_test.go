@@ -15,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
@@ -427,4 +428,52 @@ func TestTotalSupplyInvariant(t *testing.T) {
 
 	authxMacc = app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
 	require.False(t, authxMacc.GetCoins().Empty())
+}
+func TestMultiSend(t *testing.T) {
+	key1, _, fromAddr1 := testutil.KeyPubAddr()
+	key2, _, fromAddr2 := testutil.KeyPubAddr()
+	_, _, toAddr1 := testutil.KeyPubAddr()
+	_, _, toAddr2 := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr1, Coins: coins}
+	acc1 := auth.BaseAccount{Address: fromAddr2, Coins: coins}
+
+	// app
+	app := initAppWithBaseAccounts(acc0, acc1)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	ctx := app.NewContext(false, header)
+
+	// deliver tx
+	coins = dex.NewCetCoins(1000000000)
+	msg := bank.MsgMultiSend{
+		Inputs: []bank.Input{
+			bank.NewInput(fromAddr1, coins),
+			bank.NewInput(fromAddr2, coins),
+		},
+		Outputs: []bank.Output{
+			bank.NewOutput(toAddr1, coins),
+			bank.NewOutput(toAddr2, coins),
+		},
+	}
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).
+		AccNumSeqKey(0, 0, key1).AccNumSeqKey(1, 0, key2).Build()
+
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeType(0), result.Code)
+
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	header = abci.Header{Height: 2}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	ctx = app.NewContext(false, header)
+
+	toAcc1 := app.accountKeeper.GetAccount(ctx, toAddr1)
+	toAcc2 := app.accountKeeper.GetAccount(ctx, toAddr2)
+	require.Equal(t, coins, toAcc1.GetCoins())
+	require.Equal(t, coins, toAcc2.GetCoins())
 }
