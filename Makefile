@@ -33,6 +33,7 @@ ifeq ($(LEDGER_ENABLED),true)
   endif
 endif
 
+build_tags += libsecp256k1
 ifeq ($(WITH_CLEVELDB),yes)
   build_tags += gcc
 endif
@@ -60,7 +61,7 @@ endif
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
 
-BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)' -gcflags "all=-N -l"
+BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)' -gcflags "all=-N -l" 
 
 # The below include contains the tools target.
 include contrib/devtools/Makefile
