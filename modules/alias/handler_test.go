@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -215,4 +216,37 @@ func Test1(t *testing.T) {
 	msg = types.MsgAliasUpdate{Owner: tom, Alias: "I Love U", IsAdd: true}
 	err = msg.ValidateBasic()
 	require.Equal(t, types.ErrInvalidAlias(), err)
+}
+
+func TestReservedAliases(t *testing.T) {
+	ctx, keeper := newContextAndKeeper("test-1")
+	handlerFunc := NewHandler(*keeper)
+	tom := simpleAddr("00001")
+
+	reservedAliases := []string{
+		"coinex",
+		"cet",
+		"viabtc",
+		"cetdac",
+		"coinex-usdt.t",
+		"usdt.t-coinex",
+		"usdt-coinex",
+		"cet.coinex",
+		"coinex.cet",
+		"coinex__",
+		"__coinex",
+		"www.coinex.com",
+		"www.coinex.org",
+		"coinex.com",
+		"coinex.org",
+		"cetdac@coinex.org",
+		"bob@coinex.com",
+		"btc@coinex.com",
+		"bob.mail@coinex.com",
+	}
+
+	for _, alias := range reservedAliases {
+		res := handlerFunc(ctx, types.MsgAliasUpdate{Owner: tom, Alias: alias, IsAdd: true})
+		require.Equal(t, types.ErrCanOnlyBeUsedByCetOwner(alias).Result(), res)
+	}
 }

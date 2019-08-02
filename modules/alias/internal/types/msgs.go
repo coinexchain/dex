@@ -1,19 +1,20 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strings"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func IsOnlyForCoinEx(alias string) bool {
-	if strings.HasPrefix(alias, "coinex") || strings.HasSuffix(alias, "coinex") {
+	if strings.HasPrefix(alias, "coinex") ||
+		strings.HasSuffix(alias, "coinex") ||
+		strings.HasSuffix(alias, "coinex.org") ||
+		strings.HasSuffix(alias, "coinex.com") {
 		return true
 	}
-	if alias == "cet" || alias == "viabtc" || alias == "cetdac" || alias == "www.coinex.com" ||
-		alias == "www.coinex.org" {
-		return true
-	}
-	return false
+
+	return alias == "cet" || alias == "viabtc" || alias == "cetdac"
 }
 
 func IsValidChar(c rune) bool {
