@@ -91,10 +91,10 @@ func (p *Producer) setParam(data config) {
 }
 
 func (p *Producer) setStdIO(ioString string) error {
-	if !strings.Contains(ioString, "stdin") {
+	if !strings.Contains(ioString, "stdout") {
 		return fmt.Errorf("Unknow output identifier ")
 	}
-	p.WriteCloser = os.Stdin
+	p.WriteCloser = os.Stdout
 	p.mode = sMode
 	return nil
 }
