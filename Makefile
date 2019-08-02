@@ -33,7 +33,6 @@ ifeq ($(LEDGER_ENABLED),true)
   endif
 endif
 
-build_tags += libsecp256k1
 ifeq ($(WITH_CLEVELDB),yes)
   build_tags += gcc
 endif
