@@ -327,21 +327,21 @@ func (t BaseToken) String() string {
 [
   Name:             %s
   Symbol:           %s
-  TotalSupply:      %d
+  TotalSupply:      %s
   Owner:            %s
   Mintable:         %t
   Burnable:         %t
   AddrForbiddable:  %t
   TokenForbiddable: %t
-  TotalBurn:        %d
-  TotalMint:        %d
+  TotalBurn:        %s
+  TotalMint:        %s
   IsForbidden:      %t
   URL:              %s
   Description:      %s
   Identity:			%s
 ]`,
-		t.Name, t.Symbol, t.TotalSupply, t.Owner.String(), t.Mintable, t.Burnable,
-		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn, t.TotalMint, t.IsForbidden,
+		t.Name, t.Symbol, t.TotalSupply.String(), t.Owner.String(), t.Mintable, t.Burnable,
+		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn.String(), t.TotalMint.String(), t.IsForbidden,
 		t.URL, t.Description, t.Identity,
 	)
 }

@@ -444,8 +444,7 @@ func TestMultiSend(t *testing.T) {
 	// begin block
 	header := abci.Header{Height: 1}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
-	ctx := app.NewContext(false, header)
-	_ = ctx
+
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
 	msg := bank.MsgMultiSend{
@@ -470,6 +469,7 @@ func TestMultiSend(t *testing.T) {
 
 	header = abci.Header{Height: 2}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	ctx := app.NewContext(false, header)
 
 	toAcc1 := app.accountKeeper.GetAccount(ctx, toAddr1)
 	toAcc2 := app.accountKeeper.GetAccount(ctx, toAddr2)
