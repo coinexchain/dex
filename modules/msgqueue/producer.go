@@ -161,6 +161,9 @@ func (p Producer) SendMsg(key []byte, v []byte) {
 }
 
 func (p Producer) IsSubScribe(topic string) bool {
+	if !p.toggle {
+		return false
+	}
 	_, ok := p.subTopics[topic]
 	return ok
 }

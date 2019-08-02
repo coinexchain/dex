@@ -510,10 +510,12 @@ func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 
 func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx {
 	ret := app.BaseApp.DeliverTx(req)
-	if ret.Code == uint32(sdk.CodeOK) {
-		ret.Events = FilterMsgsOnlyKafka(ret.Events)
-	} else {
-		ret.Events = RemoveMsgsOnlyKafka(ret.Events)
+	if app.msgQueProducer.IsOpenToggle() {
+		if ret.Code == uint32(sdk.CodeOK) {
+			ret.Events = FilterMsgsOnlyKafka(ret.Events)
+		} else {
+			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
+		}
 	}
 	return ret
 }
