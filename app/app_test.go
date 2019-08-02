@@ -470,7 +470,6 @@ func TestMultiSend(t *testing.T) {
 
 	header = abci.Header{Height: 2}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
-	ctx = app.NewContext(false, header)
 
 	toAcc1 := app.accountKeeper.GetAccount(ctx, toAddr1)
 	toAcc2 := app.accountKeeper.GetAccount(ctx, toAddr2)
