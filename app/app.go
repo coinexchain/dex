@@ -381,12 +381,16 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.stakingKeeper = *stakingKeeper.SetHooks(
 		staking.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()))
 
+	eventTypeMsgQueue := ""
+	if app.msgQueProducer.IsOpenToggle() && app.msgQueProducer.IsSubScribe(comment.ModuleName) {
+		eventTypeMsgQueue = msgqueue.EventTypeMsgQueue
+	}
 	app.commentKeeper = *comment.NewBaseKeeper(
 		app.keyComment,
 		app.bankxKeeper,
 		app.assetKeeper,
 		app.distrxKeeper,
-		msgqueue.EventTypeMsgQueue,
+		eventTypeMsgQueue,
 	)
 	app.aliasKeeper = alias.NewBaseKeeper(
 		app.keyAlias,
