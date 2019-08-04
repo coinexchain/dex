@@ -143,9 +143,18 @@ func createAndBroadcastComment(cdc *codec.Codec, subcmd string, rewardsArrayPtr 
 
 	msg, err := parseFlags(sender, rewardsArrayPtr)
 	if err != nil {
-		return errors.Errorf("tx flag is error, please see help : " +
-			"$ cetcli tx comment " + subcmd + " -h")
+		return errors.Errorf("tx flag is error (%v), please see help : "+
+			"$ cetcli tx comment %s -h", err, subcmd)
 	}
+
+	if len(msg.References) <= 1 && len(msg.Title) == 0 {
+		msg.Title = "reward-comments"
+	}
+
+	if len(msg.Content) == 0 {
+		msg.Content = []byte("No-Content")
+	}
+
 	if err = msg.ValidateBasic(); err != nil {
 		return err
 	}
@@ -169,7 +178,7 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 		return nil, errors.Errorf("Not a valid address: " + symbols[1])
 	}
 
-	amt, err := strconv.ParseInt(symbols[3], 10, 63)
+	amt, err := strconv.ParseInt(symbols[2], 10, 63)
 	if err != nil {
 		return nil, errors.Errorf("Not a valid amount: " + symbols[3])
 	}
@@ -186,7 +195,7 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 	cref := &types.CommentRef{
 		ID:           uint64(id),
 		RewardTarget: target,
-		RewardToken:  symbols[2],
+		RewardToken:  symbols[3],
 		RewardAmount: amt,
 		Attitudes:    attList,
 	}
@@ -208,7 +217,7 @@ func parseFlags(sender sdk.AccAddress, rewardsArrayPtr *[]string) (*types.MsgCom
 			return nil, err
 		}
 		references = []types.CommentRef{*cref}
-	} else {
+	} else if rewardsArrayPtr != nil {
 		references = make([]types.CommentRef, 0, len(*rewardsArrayPtr))
 		for _, line := range *rewardsArrayPtr {
 			cref, err := parseRewardLine(line)

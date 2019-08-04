@@ -223,6 +223,15 @@ func createRewardCommentsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 		}
 
 		msg := types.NewMsgCommentToken(sender, req.Token, 0, "", "", types.UTF8Text, crefs)
+
+		if len(msg.References) <= 1 && len(msg.Title) == 0 {
+			msg.Title = "reward-comments"
+		}
+
+		if len(msg.Content) == 0 {
+			msg.Content = []byte("No-Content")
+		}
+
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

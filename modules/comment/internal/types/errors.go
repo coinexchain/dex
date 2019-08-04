@@ -30,7 +30,7 @@ func ErrNegativeDonation() sdk.Error {
 }
 
 func ErrNoTitle() sdk.Error {
-	return sdk.NewError(CodeSpaceComment, CodeNoTitle, "No summary is provided")
+	return sdk.NewError(CodeSpaceComment, CodeNoTitle, "No title is provided")
 }
 
 func ErrInvalidContentType(t int8) sdk.Error {

@@ -57,6 +57,8 @@ func ParseContentType(t string) int8 {
 		return ShortHanzi
 	case "rawbytes":
 		return RawBytes
+	case "":
+		return UTF8Text
 	default:
 		return -1
 	}
@@ -196,7 +198,7 @@ func (msg MsgCommentToken) ValidateBasic() sdk.Error {
 	if msg.Donation < 0 {
 		return ErrNegativeDonation()
 	}
-	if len(msg.Title) == 0 || len(msg.References) <= 1 {
+	if len(msg.Title) == 0 && len(msg.References) <= 1 {
 		return ErrNoTitle()
 	}
 	if msg.ContentType < IPFS || msg.ContentType > ShortHanziLZ4 {

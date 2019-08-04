@@ -144,9 +144,8 @@ func Test1(t *testing.T) {
 	} else {
 		logStrList = append(logStrList, res.ABCILog())
 	}
-	//if len(msg.Title) == 0 || len(msg.References) <= 1 { return ErrNoTitle() }
-	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
-	msg.Title = ""
+	//if len(msg.Title) == 0 && len(msg.References) <= 1 { return ErrNoTitle() }
+	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "", s, HTTP, []CommentRef{refs[0]})
 	if res := msg.ValidateBasic(); res == nil {
 		t.Errorf("This should be an invalid Msg!")
 	} else {
@@ -202,7 +201,7 @@ func Test1(t *testing.T) {
 		`{"codespace":"sdk","code":7,"message":"missing sender address"}`,
 		`{"codespace":"comment","code":901,"message":"Invalid Symbol"}`,
 		`{"codespace":"comment","code":902,"message":"Donation can not be negative"}`,
-		`{"codespace":"comment","code":903,"message":"No summary is provided"}`,
+		`{"codespace":"comment","code":903,"message":"No title is provided"}`,
 		`{"codespace":"comment","code":904,"message":"'100' is not a valid content type"}`,
 		`{"codespace":"comment","code":905,"message":"Content has invalid format"}`,
 		`{"codespace":"comment","code":906,"message":"Content is larger than 16384 bytes"}`,
