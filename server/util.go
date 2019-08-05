@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/coinexchain/dex/modules/authx/types"
+	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -22,7 +23,22 @@ func PersistentPreRunEFn(context *sdkserver.Context) func(*cobra.Command, []stri
 		if err := fn(cmd, args); err != nil {
 			return err
 		}
-		return adjustAppConfig()
+
+		tmpConf := cfg.DefaultConfig()
+		err := viper.Unmarshal(tmpConf)
+		if err != nil {
+			// TODO: Handle with #870
+			panic(err)
+		}
+		appConfigFilePath := filepath.Join(tmpConf.RootDir, "config/app.toml")
+		if state, err := os.Stat(appConfigFilePath); os.IsNotExist(err) {
+			err = adjustAppConfig()
+		} else {
+			if state.IsDir() {
+				return fmt.Errorf("he specified path is a directory, not a file")
+			}
+		}
+		return err
 	}
 }
 
