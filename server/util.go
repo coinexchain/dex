@@ -32,7 +32,7 @@ func PersistentPreRunEFn(context *sdkserver.Context) func(*cobra.Command, []stri
 		}
 		appConfigFilePath := filepath.Join(tmpConf.RootDir, "config/app.toml")
 		if state, err := os.Stat(appConfigFilePath); os.IsNotExist(err) {
-			err = adjustAppConfig()
+			_ = adjustAppConfig()
 		} else {
 			if state.IsDir() {
 				return fmt.Errorf("he specified path is a directory, not a file")
