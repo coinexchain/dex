@@ -508,7 +508,9 @@ func (app *CetChainApp) mountStores() {
 func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	PubMsgs = make([]PubMsg, 0, 10000)
 	ret := app.mm.BeginBlock(ctx, req)
-	ret.Events = FilterMsgsOnlyKafka(ret.Events)
+	if app.msgQueProducer.IsOpenToggle() {
+		ret.Events = FilterMsgsOnlyKafka(ret.Events)
+	}
 	return ret
 }
 
@@ -528,7 +530,9 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 // nolint: unparam
 func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	ret := app.mm.EndBlock(ctx, req)
-	ret.Events = FilterMsgsOnlyKafka(ret.Events)
+	if app.msgQueProducer.IsOpenToggle() {
+		ret.Events = FilterMsgsOnlyKafka(ret.Events)
+	}
 	return ret
 }
 
