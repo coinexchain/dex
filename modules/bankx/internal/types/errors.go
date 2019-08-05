@@ -12,6 +12,9 @@ const (
 	CodeInvalidUnlockTime               sdk.CodeType = 304
 	CodeTokenForbiddenByOwner           sdk.CodeType = 305
 	CodeInvalidLockCoinsFee             sdk.CodeType = 306
+	CodeNoInputs                        sdk.CodeType = 307
+	CodeNoOutputs                       sdk.CodeType = 308
+	CodeInputOutputMismatch             sdk.CodeType = 309
 )
 
 func ErrMemoMissing() sdk.Error {
@@ -28,4 +31,13 @@ func ErrUnlockTime(msg string) sdk.Error {
 
 func ErrTokenForbiddenByOwner(msg string) sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeTokenForbiddenByOwner, msg)
+}
+func ErrNoInputs(msg string) sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeNoInputs, msg)
+}
+func ErrNoOutputs(msg string) sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeNoOutputs, msg)
+}
+func ErrInputOutputMismatch(msg string) sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeInputOutputMismatch, msg)
 }

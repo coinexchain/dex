@@ -23,6 +23,7 @@ var (
 	NewKeeper                            = keeper.NewKeeper
 	NewMsgSend                           = types.NewMsgSend
 	NewMsgSetTransferMemoRequired        = types.NewMsgSetTransferMemoRequired
+	NewMsgMultiSend                      = types.NewMsgMultiSend
 	ErrMemoMissing                       = types.ErrMemoMissing
 	ErrorInsufficientCETForActivatingFee = types.ErrorInsufficientCETForActivatingFee
 
@@ -36,4 +37,5 @@ type (
 	Keeper             = keeper.Keeper
 	MsgSend            = types.MsgSend
 	MsgSetMemoRequired = types.MsgSetMemoRequired
+	MsgMultiSend       = types.MsgMultiSend
 )

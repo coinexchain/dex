@@ -15,4 +15,5 @@ func init() {
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgSetMemoRequired{}, "bankx/MsgSetMemoRequired", nil)
 	cdc.RegisterConcrete(MsgSend{}, "bankx/MsgSend", nil)
+	cdc.RegisterConcrete(MsgMultiSend{}, "bankx/MsgMultiSend", nil)
 }

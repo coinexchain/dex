@@ -2,6 +2,7 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
 // RouterKey is the name of the bankx module
@@ -90,4 +91,78 @@ func (msg MsgSend) GetSignBytes() []byte {
 
 func (msg MsgSend) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.FromAddress}
+}
+
+// MsgMultiSend - high level transaction of the coin module
+type MsgMultiSend struct {
+	Inputs  []bank.Input  `json:"inputs" yaml:"inputs"`
+	Outputs []bank.Output `json:"outputs" yaml:"outputs"`
+}
+
+var _ sdk.Msg = MsgMultiSend{}
+
+// NewMsgMultiSend - construct arbitrary multi-in, multi-out send msg.
+func NewMsgMultiSend(in []bank.Input, out []bank.Output) MsgMultiSend {
+	return MsgMultiSend{Inputs: in, Outputs: out}
+}
+
+// Route Implements Msg
+func (msg MsgMultiSend) Route() string { return RouterKey }
+
+// Type Implements Msg
+func (msg MsgMultiSend) Type() string { return "multisend" }
+
+// ValidateBasic Implements Msg.
+func (msg MsgMultiSend) ValidateBasic() sdk.Error {
+	// this just makes sure all the inputs and outputs are properly formatted,
+	// not that they actually have the money inside
+	if len(msg.Inputs) == 0 {
+		return ErrNoInputs("no inputs in multisend")
+	}
+	if len(msg.Outputs) == 0 {
+		return ErrNoOutputs("no outputs in multisend")
+	}
+
+	return ValidateInputsOutputs(msg.Inputs, msg.Outputs)
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgMultiSend) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgMultiSend) GetSigners() []sdk.AccAddress {
+	addrs := make([]sdk.AccAddress, len(msg.Inputs))
+	for i, in := range msg.Inputs {
+		addrs[i] = in.Address
+	}
+	return addrs
+}
+
+// ValidateInputsOutputs validates that each respective input and output is
+// valid and that the sum of inputs is equal to the sum of outputs.
+func ValidateInputsOutputs(inputs []bank.Input, outputs []bank.Output) sdk.Error {
+	var totalIn, totalOut sdk.Coins
+
+	for _, in := range inputs {
+		if err := in.ValidateBasic(); err != nil {
+			return err.TraceSDK("")
+		}
+		totalIn = totalIn.Add(in.Coins)
+	}
+
+	for _, out := range outputs {
+		if err := out.ValidateBasic(); err != nil {
+			return err.TraceSDK("")
+		}
+		totalOut = totalOut.Add(out.Coins)
+	}
+
+	// make sure inputs and outputs match
+	if !totalIn.IsEqual(totalOut) {
+		return ErrInputOutputMismatch("inputs outputs mismatch")
+	}
+
+	return nil
 }

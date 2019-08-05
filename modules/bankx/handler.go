@@ -23,6 +23,8 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handleMsgSend(ctx, k, msg)
 		case types.MsgSetMemoRequired:
 			return handleMsgSetMemoRequired(ctx, k, msg)
+		case types.MsgMultiSend:
+			return handleMsgMultiSend(ctx, k, msg)
 		default:
 			errMsg := "Unrecognized bank Msg type: %s" + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -30,6 +32,32 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
+func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.Result {
+	if !k.Bk.GetSendEnabled(ctx) {
+		return bank.ErrSendDisabled(k.Bk.Codespace()).Result()
+	}
+
+	if err := checkInputs(ctx, k, msg.Inputs); err != nil {
+		return err.Result()
+	}
+
+	addrs := precheckFreshAccounts(ctx, k, msg.Outputs)
+
+	if err := k.Bk.InputOutputCoins(ctx, msg.Inputs, msg.Outputs); err != nil {
+		return err.Result()
+	}
+
+	if err := deductActivationFeeForFreshAccount(ctx, k, addrs); err != nil {
+		return err.Result()
+	}
+
+	fillMsgQueue(ctx, k, "multi_send", msg)
+
+	return sdk.Result{
+		Events: ctx.EventManager().Events(),
+	}
+
+}
 func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	if !k.Bk.GetSendEnabled(ctx) {
 		return bank.ErrSendDisabled(k.Bk.Codespace()).Result()
@@ -176,4 +204,44 @@ func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
 			sdk.NewAttribute(key, string(bytes))))
 	}
+}
+
+func checkInputs(ctx sdk.Context, k Keeper, inputs []bank.Input) sdk.Error {
+	for _, input := range inputs {
+		if k.IsSendForbidden(ctx, input.Coins, input.Address) {
+			return types.ErrTokenForbiddenByOwner("transfer has been forbidden by token owner")
+		}
+
+		fromAccount := k.Ak.GetAccount(ctx, input.Address)
+		if !fromAccount.GetCoins().IsAllGTE(input.Coins) {
+			return sdk.ErrInsufficientCoins("sender has insufficient coins for the transfer")
+		}
+
+	}
+	return nil
+
+}
+
+func precheckFreshAccounts(ctx sdk.Context, k Keeper, outputs []bank.Output) []sdk.AccAddress {
+	addrs := make([]sdk.AccAddress, 0)
+	for _, output := range outputs {
+		toAccount := k.Ak.GetAccount(ctx, output.Address)
+
+		//toAccount doesn't exist yet
+		if toAccount == nil {
+			addrs = append(addrs, output.Address)
+		}
+	}
+	return addrs
+}
+func deductActivationFeeForFreshAccount(ctx sdk.Context, k Keeper, addrs []sdk.AccAddress) sdk.Error {
+	for _, addr := range addrs {
+		activationFee := k.GetParam(ctx).ActivationFee
+		err := k.DeductFee(ctx, addr, dex.NewCetCoins(activationFee))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

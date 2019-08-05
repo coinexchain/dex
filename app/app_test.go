@@ -169,7 +169,35 @@ func TestSend(t *testing.T) {
 	result = app.Deliver(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
 }
+func TestBankSend(t *testing.T) {
+	toAddr := sdk.AccAddress([]byte("addr"))
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
+	// app
+	app := initAppWithBaseAccounts(acc0)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	ctx := app.NewContext(false, header)
+	// deliver tx
+	coins = dex.NewCetCoins(1000000000)
+	msg := bank.MsgSend{
+		FromAddress: fromAddr,
+		ToAddress:   toAddr,
+		Amount:      coins,
+	}
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeType(0), result.Code)
+	toAcc := app.accountKeeper.GetAccount(ctx, toAddr)
+	require.Equal(t, coins, toAcc.GetCoins())
+
+}
 func TestMemo(t *testing.T) {
 	key, _, addr := testutil.KeyPubAddr()
 	acc0 := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
@@ -429,7 +457,8 @@ func TestTotalSupplyInvariant(t *testing.T) {
 	authxMacc = app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
 	require.False(t, authxMacc.GetCoins().Empty())
 }
-func TestMultiSend(t *testing.T) {
+
+func TestBankMultiSend(t *testing.T) {
 	key1, _, fromAddr1 := testutil.KeyPubAddr()
 	key2, _, fromAddr2 := testutil.KeyPubAddr()
 	_, _, toAddr1 := testutil.KeyPubAddr()
@@ -447,6 +476,7 @@ func TestMultiSend(t *testing.T) {
 
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
+
 	msg := bank.MsgMultiSend{
 		Inputs: []bank.Input{
 			bank.NewInput(fromAddr1, coins),
@@ -457,6 +487,7 @@ func TestMultiSend(t *testing.T) {
 			bank.NewOutput(toAddr2, coins),
 		},
 	}
+
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).
 		AccNumSeqKey(0, 0, key1).AccNumSeqKey(1, 0, key2).Build()
@@ -475,4 +506,50 @@ func TestMultiSend(t *testing.T) {
 	toAcc2 := app.accountKeeper.GetAccount(ctx, toAddr2)
 	require.Equal(t, coins, toAcc1.GetCoins())
 	require.Equal(t, coins, toAcc2.GetCoins())
+}
+
+func TestMultiSend(t *testing.T) {
+	key1, _, fromAddr1 := testutil.KeyPubAddr()
+	key2, _, fromAddr2 := testutil.KeyPubAddr()
+	_, _, toAddr1 := testutil.KeyPubAddr()
+	_, _, toAddr2 := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr1, Coins: coins}
+	acc1 := auth.BaseAccount{Address: fromAddr2, Coins: coins}
+	acc2 := auth.BaseAccount{Address: toAddr1, Coins: dex.NewCetCoins(0)}
+
+	// app
+	app := initAppWithBaseAccounts(acc0, acc1, acc2)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	// deliver tx
+	coins = dex.NewCetCoins(1000000000)
+
+	in := []bank.Input{bank.NewInput(fromAddr1, coins), bank.NewInput(fromAddr2, coins)}
+	out := []bank.Output{bank.NewOutput(toAddr1, coins), bank.NewOutput(toAddr2, coins)}
+
+	msg := bankx.NewMsgMultiSend(in, out)
+
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).
+		AccNumSeqKey(0, 0, key1).AccNumSeqKey(1, 0, key2).Build()
+
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeType(0), result.Code)
+
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	header = abci.Header{Height: 2}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	ctx := app.NewContext(false, header)
+
+	expectedCoins := dex.NewCetCoins(9e8)
+	toAcc1 := app.accountKeeper.GetAccount(ctx, toAddr1)
+	toAcc2 := app.accountKeeper.GetAccount(ctx, toAddr2)
+	require.Equal(t, coins, toAcc1.GetCoins())
+	require.Equal(t, expectedCoins, toAcc2.GetCoins())
 }
