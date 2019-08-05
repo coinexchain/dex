@@ -116,9 +116,9 @@ func appStateRandomizedFn(
 		numInitiallyBonded int64
 	)
 
-	appParams.GetOrGenerate(cdc, StakePerAccount, &amount, r,
+	appParams.GetOrGenerate(cdc, simapp.StakePerAccount, &amount, r,
 		func(r *rand.Rand) { amount = int64(r.Intn(1e12)) })
-	appParams.GetOrGenerate(cdc, InitiallyBondedValidators, &amount, r,
+	appParams.GetOrGenerate(cdc, simapp.InitiallyBondedValidators, &amount, r,
 		func(r *rand.Rand) { numInitiallyBonded = int64(r.Intn(250)) })
 
 	numAccs := int64(len(accs))
@@ -171,7 +171,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightDeductFee, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightDeductFee, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -182,7 +182,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgSend, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgSend, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -193,7 +193,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightSingleInputMsgMultiSend, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightSingleInputMsgMultiSend, &v, nil,
 					func(_ *rand.Rand) {
 						v = 10
 					})
@@ -204,7 +204,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgSetWithdrawAddress, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgSetWithdrawAddress, &v, nil,
 					func(_ *rand.Rand) {
 						v = 50
 					})
@@ -215,7 +215,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgWithdrawDelegationReward, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgWithdrawDelegationReward, &v, nil,
 					func(_ *rand.Rand) {
 						v = 50
 					})
@@ -226,7 +226,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgWithdrawValidatorCommission, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgWithdrawValidatorCommission, &v, nil,
 					func(_ *rand.Rand) {
 						v = 50
 					})
@@ -237,7 +237,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightSubmitVotingSlashingTextProposal, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingTextProposal, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -248,7 +248,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightSubmitVotingSlashingCommunitySpendProposal, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingCommunitySpendProposal, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -259,7 +259,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightSubmitVotingSlashingParamChangeProposal, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingParamChangeProposal, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -270,7 +270,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgDeposit, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgDeposit, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -281,7 +281,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgCreateValidator, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgCreateValidator, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -292,7 +292,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgEditValidator, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgEditValidator, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -303,7 +303,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgDelegate, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgDelegate, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -314,7 +314,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgUndelegate, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgUndelegate, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -325,7 +325,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgBeginRedelegate, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgBeginRedelegate, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -336,7 +336,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgUnjail, &v, nil,
+				ap.GetOrGenerate(cdc, simapp.OpWeightMsgUnjail, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
