@@ -85,7 +85,6 @@ func (p *Producer) setParam(data config) {
 
 	ts := strings.Split(data.Topics, ",")
 	for _, topic := range ts {
-		fmt.Printf("------------------- topic:%s --------------\n",topic)
 		p.subTopics[topic] = struct{}{}
 	}
 	p.toggle = viper.GetBool(FeatureToggle)

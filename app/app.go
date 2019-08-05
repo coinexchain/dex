@@ -126,9 +126,9 @@ func MakeCodec() *codec.Codec {
 // Extended ABCI application
 type CetChainApp struct {
 	*bam.BaseApp
-	cdc *codec.Codec
-	txDecoder   sdk.TxDecoder        // unmarshal []byte into sdk.Tx
-	txCount  int64
+	cdc       *codec.Codec
+	txDecoder sdk.TxDecoder // unmarshal []byte into sdk.Tx
+	txCount   int64
 
 	invCheckPeriod uint
 
@@ -513,7 +513,7 @@ func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 	PubMsgs = make([]PubMsg, 0, 10000)
 	ret := app.mm.BeginBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
-		app.txCount=req.Header.TotalTxs-req.Header.NumTxs
+		app.txCount = req.Header.TotalTxs - req.Header.NumTxs
 		ret.Events = FilterMsgsOnlyKafka(ret.Events)
 	}
 	return ret
@@ -533,9 +533,9 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 }
 
 type NotificationForSigners struct {
-	Signers []sdk.AccAddress `json:"signers"`
-	SerialNumber int64 `json:"serial_number"`
-	Tx *auth.StdTx  `json:"tx"`
+	Signers      []sdk.AccAddress `json:"signers"`
+	SerialNumber int64            `json:"serial_number"`
+	Tx           *auth.StdTx      `json:"tx"`
 }
 
 func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx) {
@@ -553,17 +553,17 @@ func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx) {
 	}
 
 	n4s := &NotificationForSigners{
-		Signers : stdTx.GetSigners(),
+		Signers:      stdTx.GetSigners(),
 		SerialNumber: app.txCount,
-		Tx: &stdTx,
+		Tx:           &stdTx,
 	}
 
-	bytes, errJson := json.Marshal(n4s)
-	if errJson != nil {
+	bytes, errJSON := json.Marshal(n4s)
+	if errJSON != nil {
 		return
 	}
 
-	PubMsgs=append(PubMsgs, PubMsg{Key:[]byte("notify_signers"), Value:bytes})
+	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_signers"), Value: bytes})
 }
 
 // application updates every end block
