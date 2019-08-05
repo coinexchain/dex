@@ -2644,16 +2644,15 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  price_precision:
-                    type: string
-                    example: 10
-                  trading_pair:
-                    type: string
-                    example: etc/cet
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              price_precision:
+                type: string
+                example: 10
+              trading_pair:
+                type: string
+                example: etc/cet
       responses:
         200:
           description: Tx was succesfully generated
