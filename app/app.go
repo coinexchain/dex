@@ -559,3 +559,13 @@ func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 func (app *CetChainApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height, app.keyMain)
 }
+
+// ModuleAccountAddrs returns all the app's module account addresses.
+func (app *CetChainApp) ModuleAccountAddrs() map[string]bool {
+	modAccAddrs := make(map[string]bool)
+	for acc := range maccPerms {
+		modAccAddrs[app.supplyKeeper.GetModuleAddress(acc).String()] = true
+	}
+
+	return modAccAddrs
+}
