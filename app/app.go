@@ -485,7 +485,7 @@ func (app *CetChainApp) replaceEmptyCrisisModule(modules *[]module.AppModule) {
 
 func registerRoutesWithOrder(modules []module.AppModule, router sdk.Router, queryRouter sdk.QueryRouter) {
 	for _, module := range modules {
-		if module.Route() != "" {
+		if module.Route() != "" && module.Route() != "bank" {
 			router.AddRoute(module.Route(), module.NewHandler())
 		}
 		if module.QuerierRoute() != "" {

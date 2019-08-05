@@ -181,7 +181,7 @@ func TestBankSend(t *testing.T) {
 	// begin block
 	header := abci.Header{Height: 1}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
-	ctx := app.NewContext(false, header)
+
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
 	msg := bank.MsgSend{
@@ -193,9 +193,7 @@ func TestBankSend(t *testing.T) {
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
-	require.Equal(t, sdk.CodeType(0), result.Code)
-	toAcc := app.accountKeeper.GetAccount(ctx, toAddr)
-	require.Equal(t, coins, toAcc.GetCoins())
+	require.Equal(t, sdk.CodeUnknownRequest, result.Code)
 
 }
 func TestMemo(t *testing.T) {
@@ -493,19 +491,7 @@ func TestBankMultiSend(t *testing.T) {
 		AccNumSeqKey(0, 0, key1).AccNumSeqKey(1, 0, key2).Build()
 
 	result := app.Deliver(tx)
-	require.Equal(t, sdk.CodeType(0), result.Code)
-
-	app.EndBlock(abci.RequestEndBlock{Height: 1})
-	app.Commit()
-
-	header = abci.Header{Height: 2}
-	app.BeginBlock(abci.RequestBeginBlock{Header: header})
-	ctx := app.NewContext(false, header)
-
-	toAcc1 := app.accountKeeper.GetAccount(ctx, toAddr1)
-	toAcc2 := app.accountKeeper.GetAccount(ctx, toAddr2)
-	require.Equal(t, coins, toAcc1.GetCoins())
-	require.Equal(t, coins, toAcc2.GetCoins())
+	require.Equal(t, sdk.CodeUnknownRequest, result.Code)
 }
 
 func TestMultiSend(t *testing.T) {
