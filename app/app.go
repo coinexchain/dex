@@ -127,6 +127,8 @@ func MakeCodec() *codec.Codec {
 type CetChainApp struct {
 	*bam.BaseApp
 	cdc *codec.Codec
+	txDecoder   sdk.TxDecoder        // unmarshal []byte into sdk.Tx
+	txCount  int64
 
 	invCheckPeriod uint
 
@@ -183,11 +185,12 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 
 	cdc := MakeCodec()
 
-	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
+	txDecoder := auth.DefaultTxDecoder(cdc)
+	bApp := bam.NewBaseApp(appName, logger, db, txDecoder, baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
 	bApp.SetAppVersion(version.Version)
 
-	app := newCetChainApp(bApp, cdc, invCheckPeriod)
+	app := newCetChainApp(bApp, cdc, invCheckPeriod, txDecoder)
 	app.initKeepers(invCheckPeriod)
 	app.InitModules()
 	app.mountStores()
@@ -210,9 +213,10 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	return app
 }
 
-func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint) *CetChainApp {
+func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint, txDecoder sdk.TxDecoder) *CetChainApp {
 	return &CetChainApp{
 		BaseApp:        bApp,
+		txDecoder:      txDecoder,
 		cdc:            cdc,
 		invCheckPeriod: invCheckPeriod,
 		keyMain:        sdk.NewKVStoreKey(bam.MainStoreKey),
@@ -509,6 +513,7 @@ func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 	PubMsgs = make([]PubMsg, 0, 10000)
 	ret := app.mm.BeginBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
+		app.txCount=req.Header.TotalTxs-req.Header.NumTxs
 		ret.Events = FilterMsgsOnlyKafka(ret.Events)
 	}
 	return ret
@@ -519,11 +524,46 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 	if app.msgQueProducer.IsOpenToggle() {
 		if ret.Code == uint32(sdk.CodeOK) {
 			ret.Events = FilterMsgsOnlyKafka(ret.Events)
+			app.notifySigners(req)
 		} else {
 			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
 		}
 	}
 	return ret
+}
+
+type NotificationForSigners struct {
+	Signers []sdk.AccAddress `json:"signers"`
+	SerialNumber int64 `json:"serial_number"`
+	Tx *auth.StdTx  `json:"tx"`
+}
+
+func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx) {
+	defer func() {
+		app.txCount++
+	}()
+	tx, err := app.txDecoder(req.Tx)
+	if err != nil {
+		return
+	}
+
+	stdTx, ok := tx.(auth.StdTx)
+	if !ok {
+		return
+	}
+
+	n4s := &NotificationForSigners{
+		Signers : stdTx.GetSigners(),
+		SerialNumber: app.txCount,
+		Tx: &stdTx,
+	}
+
+	bytes, errJson := json.Marshal(n4s)
+	if errJson != nil {
+		return
+	}
+
+	PubMsgs=append(PubMsgs, PubMsg{Key:[]byte("notify_signers"), Value:bytes})
 }
 
 // application updates every end block
