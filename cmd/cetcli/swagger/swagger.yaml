@@ -246,7 +246,7 @@ paths:
         200:
           description: Tx with the provided hash
           schema:
-            $ref: "#/definitions/TxQuery"
+            $ref: "#/definitions/BroadcastTxCommitResult"
         404:
           description: Tx not found
         500:
@@ -3357,17 +3357,59 @@ definitions:
       tags:
         - ""
         - ""
+
   BroadcastTxCommitResult:
     type: object
     properties:
-      check_tx:
-        $ref: "#/definitions/CheckTxResult"
-      deliver_tx:
-        $ref: "#/definitions/DeliverTxResult"
-      hash:
-        $ref: "#/definitions/Hash"
       height:
-        type: integer
+        type: string
+      txhash:
+        $ref: "#/definitions/Hash"
+      code:
+        type: string
+      data:
+        type: string
+      raw_log:
+        type: string
+      logs:
+        type: array
+        items:
+          type: object
+          properties:
+            msg_index:
+              type: integer
+            success:
+              type: boolean
+            log:
+              type: string
+      info:
+        type: string
+      gas_wanted:
+        type: string
+      gas_used:
+        type: string
+      events:
+        type: array
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+            attributes:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+      codespace:
+        type: string
+      tx:
+        type: object
+      timestamp:
+        type: string
   KVPair:
     type: object
     properties:
@@ -3376,7 +3418,7 @@ definitions:
       value:
         type: string
   Msg:
-    type: string
+    type: object
   Address:
     type: string
     description: bech32 encoded address
@@ -3411,7 +3453,7 @@ definitions:
       hash:
         type: string
       height:
-        type: number
+        type: string
       tx:
         $ref: "#/definitions/StdTx"
       result:
@@ -3469,27 +3511,23 @@ definitions:
               $ref: "#/definitions/Coin"
       memo:
         type: string
-      signature:
-        type: object
-        properties:
-          signature:
-            type: string
-            example: MEUCIQD02fsDPra8MtbRsyB1w7bqTM55Wu138zQbFcWx4+CFyAIge5WNPfKIuvzBZ69MyqHsqD8S1IwiEp+iUb6VSdtlpgY=
-          pub_key:
-            type: object
-            properties:
-              type:
-                type: string
-                example: "tendermint/PubKeySecp256k1"
-              value:
-                type: string
-                example: "Avz04VhtKJh8ACCVzlI8aTosGy0ikFXKIVHQ3jKMrosH"
-          account_number:
-            type: string
-            example: "0"
-          sequence:
-            type: string
-            example: "0"
+      signatures:
+        type: array
+        items:
+          type: object
+          properties:
+            signature:
+              type: string
+              example: MEUCIQD02fsDPra8MtbRsyB1w7bqTM55Wu138zQbFcWx4+CFyAIge5WNPfKIuvzBZ69MyqHsqD8S1IwiEp+iUb6VSdtlpgY=
+            pub_key:
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: "tendermint/PubKeySecp256k1"
+                value:
+                  type: string
+                  example: "Avz04VhtKJh8ACCVzlI8aTosGy0ikFXKIVHQ3jKMrosH"
   KeyOutput:
     type: object
     properties:
