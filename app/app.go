@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	"reflect"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -531,65 +530,6 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 		}
 	}
 	return ret
-}
-
-type NotificationForSigners struct {
-	Signers      []sdk.AccAddress `json:"signers"`
-	Recipients   []string         `json:"recipients"`
-	SerialNumber int64            `json:"serial_number"`
-	MsgTypes     []string         `json:"msg_types"`
-	Tx           *auth.StdTx      `json:"tx"`
-}
-
-func getType(myvar interface{}) string {
-	t := reflect.TypeOf(myvar)
-	if t.Kind() == reflect.Ptr {
-		return "*" + t.Elem().Name()
-	}
-	return t.Name()
-}
-
-func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx, events []abci.Event) {
-	recipients := make([]string, 0, 10)
-	for _, event := range events {
-		for _, attr := range event.Attributes {
-			if string(attr.Key) == "recipient" {
-				recipients = append(recipients, string(attr.Value))
-			}
-		}
-	}
-
-	defer func() {
-		app.txCount++
-	}()
-	tx, err := app.txDecoder(req.Tx)
-	if err != nil {
-		return
-	}
-
-	stdTx, ok := tx.(auth.StdTx)
-	if !ok {
-		return
-	}
-	msgTypes := make([]string, len(stdTx.Msgs))
-	for i, msg := range stdTx.Msgs {
-		msgTypes[i] = getType(msg)
-	}
-
-	n4s := &NotificationForSigners{
-		Signers:      stdTx.GetSigners(),
-		Recipients:   recipients,
-		SerialNumber: app.txCount,
-		Tx:           &stdTx,
-		MsgTypes:     msgTypes,
-	}
-
-	bytes, errJSON := json.Marshal(n4s)
-	if errJSON != nil {
-		return
-	}
-
-	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_signers"), Value: bytes})
 }
 
 // application updates every end block
