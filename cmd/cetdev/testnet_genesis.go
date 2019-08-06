@@ -68,7 +68,11 @@ func createTestnetGenesisAssetData() asset.GenesisState {
 func createGenesisAccounts() (accs []genaccounts.GenesisAccount) {
 	accs = append(accs,
 		newBaseGenesisAccount(incentive.PoolAddr.String(), 31536000000000000),
-		newBaseGenesisAccount(viper.GetString(flagAddrCirculation), 288788547005740000),
+
+		//https://etherscan.io/token/0x081f67afa0ccf8c7b17540767bbe95df2ba8d97f
+		//date: 2019/08/06 total:5,877,675,270.61317189
+		//5,877,675,270.61317189 - 300000000000000000 = 287767527061317189
+		newBaseGenesisAccount(viper.GetString(flagAddrCirculation), 287767527061317189),
 		newBaseGenesisAccount(viper.GetString(flagAddrCoinExFoundation), 88464000000000000),
 		newVestingGenesisAccount(viper.GetString(flagAddrVesting2020), 36000000000000000, 1577836800),
 		newVestingGenesisAccount(viper.GetString(flagAddrVesting2021), 36000000000000000, 1609459200),
