@@ -305,6 +305,7 @@ type CreateOrderInfo struct {
 type FillOrderInfo struct {
 	OrderID string `json:"order_id"`
 	Height  int64  `json:"height"`
+	Side    byte   `json:"side"`
 
 	// These fields will change when order was filled/canceled.
 	LeftStock int64  `json:"left_stock"`
@@ -318,6 +319,7 @@ type FillOrderInfo struct {
 
 type CancelOrderInfo struct {
 	OrderID string `json:"order_id"`
+	Side    byte   `json:"side"`
 
 	// Del infos
 	DelReason string `json:"del_reason"`

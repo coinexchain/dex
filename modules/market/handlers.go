@@ -352,6 +352,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg mtype.MsgCancelOrder, keeper keep
 	// send msg to kafka
 	msgInfo := mtype.CancelOrderInfo{
 		OrderID:        msg.OrderID,
+		Side:           order.Side,
 		DelReason:      mtype.CancelOrderByManual,
 		DelHeight:      ctx.BlockHeight(),
 		UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),

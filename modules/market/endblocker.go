@@ -229,6 +229,7 @@ func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64,
 		msgInfo := mtype.FillOrderInfo{
 			OrderID:   id,
 			Height:    height,
+			Side:      order.Side,
 			LeftStock: order.LeftStock,
 			Freeze:    order.Freeze,
 			DealStock: order.DealStock,
@@ -267,6 +268,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 			if keeper.IsSubScribe(mtype.Topic) {
 				msgInfo := mtype.CancelOrderInfo{
 					OrderID:        order.OrderID(),
+					Side:           order.Side,
 					DelReason:      mtype.CancelOrderByGteTimeOut,
 					DelHeight:      ctx.BlockHeight(),
 					UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
@@ -369,6 +371,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 func sendOrderMsg(ctx sdk.Context, order *mtype.Order, height int64, feeForZeroDeal int64, keeper keepers.Keeper) {
 	msgInfo := mtype.CancelOrderInfo{
 		OrderID:        order.OrderID(),
+		Side:           order.Side,
 		DelHeight:      height,
 		UsedCommission: order.CalOrderFee(feeForZeroDeal).RoundInt64(),
 		LeftStock:      order.LeftStock,
