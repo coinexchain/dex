@@ -15,6 +15,11 @@ import (
 	"github.com/coinexchain/dex/modules/incentive"
 )
 
+func (app *CetChainApp) ExportGenesisState(ctx sdk.Context) GenesisState {
+	g := app.mm.ExportGenesis(ctx)
+	return FromMap(app.cdc, g)
+}
+
 // export the state of CoinEx chain for a genesis file
 func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhiteList []string) (
 	appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {

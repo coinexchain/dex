@@ -74,11 +74,6 @@ func NewDefaultGenesisState() GenesisState {
 	}
 }
 
-func (app *CetChainApp) ExportGenesisState(ctx sdk.Context) GenesisState {
-	g := app.mm.ExportGenesis(ctx)
-	return FromMap(app.cdc, g)
-}
-
 func FromMap(cdc *codec.Codec, g map[string]json.RawMessage) GenesisState {
 	gs := GenesisState{}
 
