@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -104,4 +103,28 @@ func unmarshalField(cdc *codec.Codec, bz []byte, ptr interface{}) {
 	if bz != nil {
 		cdc.MustUnmarshalJSON(bz, ptr)
 	}
+}
+
+func (gs GenesisState) toMap(cdc *codec.Codec) map[string]json.RawMessage {
+	m := make(map[string]json.RawMessage)
+	m[genaccounts.ModuleName] = cdc.MustMarshalJSON(gs.Accounts)
+	m[auth.ModuleName] = cdc.MustMarshalJSON(gs.AuthData)
+	m[authx.ModuleName] = cdc.MustMarshalJSON(gs.AuthXData)
+	m[bank.ModuleName] = cdc.MustMarshalJSON(gs.BankData)
+	m[bankx.ModuleName] = cdc.MustMarshalJSON(gs.BankXData)
+	m[staking.ModuleName] = cdc.MustMarshalJSON(gs.StakingData)
+	m[stakingx.ModuleName] = cdc.MustMarshalJSON(gs.StakingXData)
+	m[distribution.ModuleName] = cdc.MustMarshalJSON(gs.DistrData)
+	m[gov.ModuleName] = cdc.MustMarshalJSON(gs.GovData)
+	m[crisis.ModuleName] = cdc.MustMarshalJSON(gs.CrisisData)
+	m[slashing.ModuleName] = cdc.MustMarshalJSON(gs.SlashingData)
+	m[asset.ModuleName] = cdc.MustMarshalJSON(gs.AssetData)
+	m[market.ModuleName] = cdc.MustMarshalJSON(gs.MarketData)
+	m[bancorlite.ModuleName] = cdc.MustMarshalJSON(gs.BancorData)
+	m[comment.ModuleName] = cdc.MustMarshalJSON(gs.CommentData)
+	m[alias.ModuleName] = cdc.MustMarshalJSON(gs.AliasData)
+	m[incentive.ModuleName] = cdc.MustMarshalJSON(gs.Incentive)
+	m[supply.ModuleName] = cdc.MustMarshalJSON(gs.Supply)
+	m[genutil.ModuleName] = cdc.MustMarshalJSON(gs.GenUtil)
+	return m
 }

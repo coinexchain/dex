@@ -109,7 +109,7 @@ func appStateRandomizedFn(
 ) (json.RawMessage, []simulation.Account, string) {
 
 	cdc := MakeCodec()
-	genesisState := simapp.NewDefaultGenesisState()
+	genesisState := NewDefaultGenesisState().toMap(cdc)
 
 	var (
 		amount             int64
@@ -137,15 +137,15 @@ func appStateRandomizedFn(
 
 	simapp.GenGenesisAccounts(cdc, r, accs, genesisTimestamp, amount, numInitiallyBonded, genesisState)
 	simapp.GenAuthGenesisState(cdc, r, appParams, genesisState)
-	simapp.GenBankGenesisState(cdc, r, appParams, genesisState)
-	simapp.GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState)
+	//simapp.GenBankGenesisState(cdc, r, appParams, genesisState)
+	simapp.GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState) // TODO
 	simapp.GenGovGenesisState(cdc, r, appParams, genesisState)
-	simapp.GenMintGenesisState(cdc, r, appParams, genesisState)
+	//simapp.GenMintGenesisState(cdc, r, appParams, genesisState)
 	simapp.GenDistrGenesisState(cdc, r, appParams, genesisState)
-	stakingGen := simapp.GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState)
+	stakingGen := simapp.GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState) // TODO
 	simapp.GenSlashingGenesisState(cdc, r, stakingGen, appParams, genesisState)
 
-	appState, err := MakeCodec().MarshalJSON(genesisState)
+	appState, err := cdc.MarshalJSON(genesisState)
 	if err != nil {
 		panic(err)
 	}

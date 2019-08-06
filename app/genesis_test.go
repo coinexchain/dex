@@ -17,9 +17,11 @@ import (
 	"github.com/coinexchain/dex/modules/authx/types"
 )
 
-func TestFromMap(t *testing.T) {
+func TestFromToMap(t *testing.T) {
 	gsMap := ModuleBasics.DefaultGenesis()
-	_ = FromMap(MakeCodec(), gsMap)
+	cdc := MakeCodec()
+	m := FromMap(cdc, gsMap)
+	m.toMap(cdc)
 }
 
 func TestDefaultGenesisState(t *testing.T) {
