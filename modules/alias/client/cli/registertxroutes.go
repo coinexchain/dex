@@ -13,7 +13,7 @@ func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	aliasQueryCmd := &cobra.Command{
 		Use:   types.StoreKey,
-		Short: "Querying command to get the information of aliases",
+		Short: "Querying commands to get the information of aliases",
 	}
 	aliasQueryCmd.AddCommand(client.GetCommands(
 		QueryAliasCmd(cdc),
