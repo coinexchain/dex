@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"reflect"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -524,7 +525,7 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 	if app.msgQueProducer.IsOpenToggle() {
 		if ret.Code == uint32(sdk.CodeOK) {
 			ret.Events = FilterMsgsOnlyKafka(ret.Events)
-			app.notifySigners(req)
+			app.notifySigners(req, ret.Events)
 		} else {
 			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
 		}
@@ -534,11 +535,30 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 
 type NotificationForSigners struct {
 	Signers      []sdk.AccAddress `json:"signers"`
+	Recipients   []string         `json:"recipients"`
 	SerialNumber int64            `json:"serial_number"`
+	MsgTypes     []string         `json:"msg_types"`
 	Tx           *auth.StdTx      `json:"tx"`
 }
 
-func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx) {
+func getType(myvar interface{}) string {
+	t := reflect.TypeOf(myvar)
+	if t.Kind() == reflect.Ptr {
+		return "*" + t.Elem().Name()
+	}
+	return t.Name()
+}
+
+func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx, events []abci.Event) {
+	recipients := make([]string, 0, 10)
+	for _, event := range events {
+		for _, attr := range event.Attributes {
+			if string(attr.Key) == "recipient" {
+				recipients = append(recipients, string(attr.Value))
+			}
+		}
+	}
+
 	defer func() {
 		app.txCount++
 	}()
@@ -551,11 +571,17 @@ func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx) {
 	if !ok {
 		return
 	}
+	msgTypes := make([]string, len(stdTx.Msgs))
+	for i, msg := range stdTx.Msgs {
+		msgTypes[i] = getType(msg)
+	}
 
 	n4s := &NotificationForSigners{
 		Signers:      stdTx.GetSigners(),
+		Recipients:   recipients,
 		SerialNumber: app.txCount,
 		Tx:           &stdTx,
+		MsgTypes:     msgTypes,
 	}
 
 	bytes, errJSON := json.Marshal(n4s)
