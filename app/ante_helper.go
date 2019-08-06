@@ -32,6 +32,13 @@ func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Err
 	switch msg := msg.(type) {
 	case bankx.MsgSend:
 		return ah.checkMemo(ctx, msg.ToAddress, memo)
+	case bankx.MsgMultiSend:
+		for _, out := range msg.Outputs {
+			if err := ah.checkMemo(ctx, out.Address, memo); err != nil {
+				return err
+			}
+		}
+		return nil
 	case staking.MsgCreateValidator:
 		return ah.checkMinSelfDelegation(ctx, msg.MinSelfDelegation)
 	}

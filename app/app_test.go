@@ -539,3 +539,40 @@ func TestMultiSend(t *testing.T) {
 	require.Equal(t, coins, toAcc1.GetCoins())
 	require.Equal(t, expectedCoins, toAcc2.GetCoins())
 }
+
+func TestMultiSendMemoRequired(t *testing.T) {
+	key1, _, fromAddr1 := testutil.KeyPubAddr()
+	key2, _, fromAddr2 := testutil.KeyPubAddr()
+	key3, _, toAddr1 := testutil.KeyPubAddr()
+	_, _, toAddr2 := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr1, Coins: coins}
+	acc1 := auth.BaseAccount{Address: fromAddr2, Coins: coins}
+	acc2 := auth.BaseAccount{Address: toAddr1, Coins: dex.NewCetCoins(1e8)}
+
+	// app
+	app := initAppWithBaseAccounts(acc0, acc1, acc2)
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	//deliver tx
+	msgSetMemoRequired := bankx.NewMsgSetTransferMemoRequired(toAddr1, true)
+	tx1 := newStdTxBuilder().
+		Msgs(msgSetMemoRequired).GasAndFee(1000000, 100).AccNumSeqKey(2, 0, key3).Build()
+	result1 := app.Deliver(tx1)
+	require.Equal(t, errors.CodeOK, result1.Code)
+
+	// deliver tx
+	coins = dex.NewCetCoins(1000000000)
+	in := []bank.Input{bank.NewInput(fromAddr1, coins), bank.NewInput(fromAddr2, coins)}
+	out := []bank.Output{bank.NewOutput(toAddr1, coins), bank.NewOutput(toAddr2, coins)}
+	msg := bankx.NewMsgMultiSend(in, out)
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).
+		AccNumSeqKey(0, 0, key1).AccNumSeqKey(1, 0, key2).Build()
+	result := app.Deliver(tx)
+	require.Equal(t, bankx.CodeMemoMissing, result.Code)
+
+}
