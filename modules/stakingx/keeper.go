@@ -69,10 +69,14 @@ func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
 	return
 }
 
-func (k Keeper) GetNonBondableAddresses(ctx sdk.Context) []sdk.AccAddress {
-	var addrs []sdk.AccAddress
+func (k Keeper) GetNonBondableAddresses(ctx sdk.Context) (addrs []sdk.AccAddress) {
 	k.paramSubspace.Get(ctx, KeyNonBondableAddresses, &addrs)
-	return addrs
+	return
+}
+
+func (k Keeper) GetMinMandatoryCommissionRate(ctx sdk.Context) (rate sdk.Dec) {
+	k.paramSubspace.Get(ctx, KeyMinMandatoryCommissionRate, &rate)
+	return
 }
 
 func (k Keeper) CalcBondPoolStatus(ctx sdk.Context) BondPool {

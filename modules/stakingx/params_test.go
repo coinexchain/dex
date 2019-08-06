@@ -50,8 +50,9 @@ func TestParamGetSet(t *testing.T) {
 
 	_, _, addr := testutil.KeyPubAddr()
 	testParam := Params{
-		MinSelfDelegation:    sdk.ZeroInt(),
-		NonBondableAddresses: []sdk.AccAddress{addr},
+		MinSelfDelegation:          sdk.ZeroInt(),
+		NonBondableAddresses:       []sdk.AccAddress{addr},
+		MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
 	}
 
 	//expect SetParam don't panic

@@ -350,15 +350,18 @@ func assureTokenDistributionInGenesis(accs []genaccounts.GenesisAccount, testnet
 	}
 	return accs
 }
+
 func modifyGenStateForTesting(cdc *codec.Codec, appGenState map[string]json.RawMessage, testnetMinSelfDelegation int64) {
 
 	var stakingxData stakingx.GenesisState
 	cdc.MustUnmarshalJSON(appGenState[stakingx.ModuleName], &stakingxData)
 
 	stakingxData.Params.MinSelfDelegation = sdk.NewInt(testnetMinSelfDelegation)
+	stakingxData.Params.MinMandatoryCommissionRate = sdk.NewDecWithPrec(2, 2)
 
 	appGenState[stakingx.ModuleName] = cdc.MustMarshalJSON(stakingxData)
 }
+
 func addCetTokenForTesting(cdc *codec.Codec,
 	appGenState map[string]json.RawMessage, tokenTotalSupply sdk.Int, cetOwner sdk.AccAddress) {
 

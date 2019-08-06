@@ -40,9 +40,29 @@ func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Err
 		}
 		return nil
 	case staking.MsgCreateValidator:
-		return ah.checkMinSelfDelegation(ctx, msg.MinSelfDelegation)
+		return ah.checkMsgCreateValidator(ctx, msg)
+
+	case staking.MsgEditValidator:
+		return ah.checkMsgEditValidator(ctx, msg.CommissionRate)
 	}
+
 	return nil
+}
+
+func (ah anteHelper) checkMsgEditValidator(ctx sdk.Context, newRate *sdk.Dec) sdk.Error {
+	if newRate == nil {
+		return nil
+	}
+
+	return ah.checkMinMandatoryCommissionRate(ctx, *newRate)
+}
+
+func (ah anteHelper) checkMsgCreateValidator(ctx sdk.Context, msg staking.MsgCreateValidator) sdk.Error {
+	if err := ah.checkMinSelfDelegation(ctx, msg.MinSelfDelegation); err != nil {
+		return err
+	}
+
+	return ah.checkMinMandatoryCommissionRate(ctx, msg.Commission.Rate)
 }
 
 func (ah anteHelper) checkMemo(ctx sdk.Context, addr sdk.AccAddress, memo string) sdk.Error {
@@ -59,6 +79,15 @@ func (ah anteHelper) checkMinSelfDelegation(ctx sdk.Context, actual sdk.Int) sdk
 	if actual.LT(expected) {
 		return stakingx.ErrMinSelfDelegationBelowRequired(expected, actual)
 	}
+	return nil
+}
+
+func (ah anteHelper) checkMinMandatoryCommissionRate(ctx sdk.Context, actualRate sdk.Dec) sdk.Error {
+	minMandatoryRate := ah.stakingXKeeper.GetMinMandatoryCommissionRate(ctx)
+	if actualRate.LT(minMandatoryRate) {
+		return stakingx.ErrRateBelowMinMandatoryCommissionRate(minMandatoryRate, actualRate)
+	}
+
 	return nil
 }
 

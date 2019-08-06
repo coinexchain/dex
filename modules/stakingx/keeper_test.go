@@ -20,8 +20,9 @@ func TestInitExportGenesis(t *testing.T) {
 	_, _, addr := testutil.KeyPubAddr()
 	genesisState := GenesisState{
 		Params: Params{
-			MinSelfDelegation:    sdk.NewInt(DefaultMinSelfDelegation),
-			NonBondableAddresses: []sdk.AccAddress{addr},
+			MinSelfDelegation:          sdk.NewInt(DefaultMinSelfDelegation),
+			NonBondableAddresses:       []sdk.AccAddress{addr},
+			MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
 		},
 	}
 

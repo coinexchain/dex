@@ -21,3 +21,8 @@ func ErrMinSelfDelegationBelowRequired(expected, actual sdk.Int) sdk.Error {
 	return sdk.NewError(CodeSpaceStakingX, CodeMinSelfDelegationBelowRequired,
 		"minimum self-delegation is %v, less than %v", actual, expected)
 }
+
+func ErrRateBelowMinMandatoryCommissionRate(expected, actual sdk.Dec) sdk.Error {
+	return sdk.NewError(CodeSpaceStakingX, CodeMinSelfDelegationBelowRequired,
+		"commission rate is %v, less than min mandatory commission rate %v", actual, expected)
+}

@@ -12,16 +12,20 @@ const (
 
 // Parameter keys
 var (
-	KeyMinSelfDelegation    = []byte("MinSelfDelegation")
-	KeyNonBondableAddresses = []byte("NonBondableAddresses")
+	KeyMinSelfDelegation          = []byte("MinSelfDelegation")
+	KeyNonBondableAddresses       = []byte("NonBondableAddresses")
+	KeyMinMandatoryCommissionRate = []byte("MinMandatoryCommissionRate")
+
+	DefaultMinMandatoryCommissionRate = sdk.NewDecWithPrec(5, 2)
 )
 
 var _ params.ParamSet = &Params{}
 
 // Params defines the parameters for the stakingx module.
 type Params struct {
-	MinSelfDelegation    sdk.Int          `json:"min_self_delegation"`
-	NonBondableAddresses []sdk.AccAddress `json:"non_bondable_addresses"`
+	MinSelfDelegation          sdk.Int          `json:"min_self_delegation"`
+	NonBondableAddresses       []sdk.AccAddress `json:"non_bondable_addresses"`
+	MinMandatoryCommissionRate sdk.Dec          `json:"min_mandatory_commission_rate"`
 }
 
 // ParamKeyTable for stakingx module
@@ -35,13 +39,15 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyMinSelfDelegation, Value: &p.MinSelfDelegation},
 		{Key: KeyNonBondableAddresses, Value: &p.NonBondableAddresses},
+		{Key: KeyMinMandatoryCommissionRate, Value: &p.MinMandatoryCommissionRate},
 	}
 }
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		MinSelfDelegation:    sdk.NewInt(DefaultMinSelfDelegation),
-		NonBondableAddresses: make([]sdk.AccAddress, 0),
+		MinSelfDelegation:          sdk.NewInt(DefaultMinSelfDelegation),
+		NonBondableAddresses:       make([]sdk.AccAddress, 0),
+		MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
 	}
 }
