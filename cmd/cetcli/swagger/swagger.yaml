@@ -3366,7 +3366,7 @@ definitions:
       txhash:
         $ref: "#/definitions/Hash"
       code:
-        type: string
+        type: integer
       data:
         type: string
       raw_log:
