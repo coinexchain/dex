@@ -441,16 +441,17 @@ func modifyTokenInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			return
 		}
 
-		symbol := getSymbol(r)
 		url := types.DoNotModifyTokenInfo
-		description := types.DoNotModifyTokenInfo
 		if req.URL != nil {
 			url = *req.URL
 		}
+
+		description := types.DoNotModifyTokenInfo
 		if req.Description != nil {
 			description = *req.Description
 		}
 
+		symbol := getSymbol(r)
 		msg := types.NewMsgModifyTokenInfo(symbol, url, description, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
