@@ -67,7 +67,7 @@ func createTestInput() testInput {
 	ak := auth.NewAccountKeeper(cdc, keyAuth, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
 	sk := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
-	axk := authx.NewKeeper(cdc, keyAuthx, pk.Subspace(authx.DefaultParamspace), sk, ak)
+	axk := authx.NewKeeper(cdc, keyAuthx, pk.Subspace(authx.DefaultParamspace), sk, ak, "")
 	ask := NewBaseTokenKeeper(cdc, keyAsset)
 	bkx := bankx.NewKeeper(pk.Subspace(bankx.DefaultParamspace), axk, bk, ak, ask, sk, msgqueue.NewProducer())
 	tk := NewBaseKeeper(cdc, keyAsset, pk.Subspace(types.DefaultParamspace), bkx, sk)

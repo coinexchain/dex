@@ -108,6 +108,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(authx.DefaultParamspace),
 		sk,
 		ak,
+		"",
 	)
 
 	ask := asset.NewBaseTokenKeeper(
@@ -200,7 +201,7 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) bankx
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
 
-	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak)
+	axk := authx.NewKeeper(cdc, keys.authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak, "")
 	ask := asset.NewBaseTokenKeeper(cdc, keys.assetCapKey)
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, sk, producer)
 	bk.SetSendEnabled(ctx, true)

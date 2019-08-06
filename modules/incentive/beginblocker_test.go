@@ -83,7 +83,7 @@ func defaultContext() (sdk.Context, *codec.Codec, Keeper, auth.AccountKeeper) {
 	ak := auth.NewAccountKeeper(cdc, keyAuth, paramsKeeper.Subspace("auth"), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace("bank"), "bank")
 	sk := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
-	axk := authx.NewKeeper(cdc, keyAuthX, paramsKeeper.Subspace("authx"), sk, ak)
+	axk := authx.NewKeeper(cdc, keyAuthX, paramsKeeper.Subspace("authx"), sk, ak, "")
 	_ = bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, sk, msgqueue.NewProducer())
 	keeper := NewKeeper(cdc, KeyIncentive, paramsKeeper.Subspace(ModuleName), bk, sk, "FeeCollector")
 	return ctx, cdc, keeper, ak

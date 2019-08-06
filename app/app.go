@@ -307,12 +307,17 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	)
 
 	// cet keepers
+	eventTypeMsgQueue := ""
+	if app.msgQueProducer.IsSubScribe(authx.ModuleName) {
+		eventTypeMsgQueue = msgqueue.EventTypeMsgQueue
+	}
 	app.accountXKeeper = authx.NewKeeper(
 		app.cdc,
 		app.keyAccountX,
 		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 		app.supplyKeeper,
 		app.accountKeeper,
+		eventTypeMsgQueue,
 	)
 
 	app.slashingKeeper = slashing.NewKeeper(
@@ -385,8 +390,8 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.stakingKeeper = *stakingKeeper.SetHooks(
 		staking.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()))
 
-	eventTypeMsgQueue := ""
-	if app.msgQueProducer.IsOpenToggle() && app.msgQueProducer.IsSubScribe(comment.ModuleName) {
+	eventTypeMsgQueue = ""
+	if app.msgQueProducer.IsSubScribe(comment.ModuleName) {
 		eventTypeMsgQueue = msgqueue.EventTypeMsgQueue
 	}
 	app.commentKeeper = *comment.NewBaseKeeper(

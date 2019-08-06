@@ -1,6 +1,7 @@
 package authx
 
 import (
+	"encoding/json"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/authx/types"
@@ -24,6 +25,14 @@ func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeepe
 	}
 }
 
+type NotifyUnlock struct {
+	Address     sdk.AccAddress    `json:"address" yaml:"address"`
+	Unlocked    sdk.Coins         `json:"unlocked"`
+	LockedCoins types.LockedCoins `json:"locked_coins"`
+	FrozenCoins sdk.Coins         `json:"frozen_coins"`
+	Coins       sdk.Coins         `json:"coins" yaml:"coins"`
+}
+
 func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
 	var unlocked = sdk.Coins{}
 	var stillLocked types.LockedCoins
@@ -43,4 +52,24 @@ func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx
 
 	accx.LockedCoins = stillLocked
 	kx.SetAccountX(ctx, *accx)
+
+	if len(kx.EventTypeMsgQueue) != 0 {
+		notifyUnlock := NotifyUnlock{
+			Address:     accx.Address,
+			Unlocked:    unlocked,
+			LockedCoins: accx.LockedCoins,
+			FrozenCoins: accx.FrozenCoins,
+			Coins:       newCoins,
+		}
+		bytes, err := json.Marshal(notifyUnlock)
+		if err != nil {
+			bytes = []byte{}
+		}
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				kx.EventTypeMsgQueue,
+				sdk.NewAttribute("notify_unlock", string(bytes)),
+			),
+		)
+	}
 }

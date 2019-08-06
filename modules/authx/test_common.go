@@ -59,7 +59,7 @@ func setupTestInput() testInput {
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), bank.DefaultCodespace)
 	supplyKeeper := supply.NewKeeper(cdc, keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
 
-	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(DefaultParamspace), supplyKeeper, ak)
+	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(DefaultParamspace), supplyKeeper, ak, "")
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Time: time.Unix(1560334620, 0)}, false, log.NewNopLogger())
 
 	return testInput{ctx: ctx, axk: axk, ak: ak, sk: supplyKeeper, cdc: cdc}
