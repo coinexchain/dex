@@ -2,13 +2,13 @@ package app
 
 import (
 	"encoding/json"
+	"reflect"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	stypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"reflect"
 )
-
-//	sktypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 type NotificationForSigners struct {
 	Signers      []sdk.AccAddress `json:"signers"`
@@ -39,6 +39,7 @@ func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx, events []abci.E
 	defer func() {
 		app.txCount++
 	}()
+
 	tx, err := app.txDecoder(req.Tx)
 	if err != nil {
 		return
@@ -69,64 +70,175 @@ func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx, events []abci.E
 	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_signers"), Value: bytes})
 }
 
-//type NotificationCompleteRedelegation struct {
-//	Delegator    string `json:"delegator"`
-//	ValidatorSrc string `json:"src"`
-//	ValidatorDst string `json:"dst"`
-//}
-//
-//type NotificationCompleteUnbonding struct {
-//	Delegator    string `json:"delegator"`
-//	Validator    string `json:"validator"`
-//}
-//
-//func (app *CetChainApp) notifyDelegators(req abci.RequestDeliverTx, events []abci.Event) {
-//sktypes.EventTypeCompleteRedelegation,
-//sktypes.EventTypeCompleteUnbonding,
-//EventTypeUnbond,
-//EventTypeRedelegate,
-//
-//// UnbondingDelegation stores all of a single delegator's unbonding bonds
-//// for a single validator in an time-ordered list
-//type UnbondingDelegation struct {
-//	DelegatorAddress sdk.AccAddress             `json:"delegator_address" yaml:"delegator_address"` // delegator
-//	ValidatorAddress sdk.ValAddress             `json:"validator_address" yaml:"validator_address"` // validator unbonding from operator addr
-//	Entries          []UnbondingDelegationEntry `json:"entries" yaml:"entries"`                     // unbonding delegation entries
-//}
-//
-//// UnbondingDelegationEntry - entry to an UnbondingDelegation
-//type UnbondingDelegationEntry struct {
-//	CreationHeight int64     `json:"creation_height" yaml:"creation_height"` // height which the unbonding took place
-//	CompletionTime time.Time `json:"completion_time" yaml:"completion_time"` // time at which the unbonding delegation will complete
-//	InitialBalance sdk.Int   `json:"initial_balance" yaml:"initial_balance"` // atoms initially scheduled to receive at completion
-//	Balance        sdk.Int   `json:"balance" yaml:"balance"`                 // atoms to receive at completion
-//}
-//
-//// Redelegation contains the list of a particular delegator's
-//// redelegating bonds from a particular source validator to a
-//// particular destination validator
-//type Redelegation struct {
-//	DelegatorAddress    sdk.AccAddress      `json:"delegator_address" yaml:"delegator_address"`         // delegator
-//	ValidatorSrcAddress sdk.ValAddress      `json:"validator_src_address" yaml:"validator_src_address"` // validator redelegation source operator addr
-//	ValidatorDstAddress sdk.ValAddress      `json:"validator_dst_address" yaml:"validator_dst_address"` // validator redelegation destination operator addr
-//	Entries             []RedelegationEntry `json:"entries" yaml:"entries"`                             // redelegation entries
-//}
-//
-//// RedelegationEntry - entry to a Redelegation
-//type RedelegationEntry struct {
-//	CreationHeight int64     `json:"creation_height" yaml:"creation_height"` // height at which the redelegation took place
-//	CompletionTime time.Time `json:"completion_time" yaml:"completion_time"` // time at which the redelegation will complete
-//	InitialBalance sdk.Int   `json:"initial_balance" yaml:"initial_balance"` // initial balance when redelegation started
-//	SharesDst      sdk.Dec   `json:"shares_dst" yaml:"shares_dst"`           // amount of destination-validator shares created by redelegation
-//}
-//
-//
-//// return a given amount of all the delegator unbonding-delegations
-//func (k Keeper) GetUnbondingDelegations(ctx sdk.Context, delegator sdk.AccAddress,
-//	maxRetrieve uint16) (unbondingDelegations []types.UnbondingDelegation) {
-//// return a given amount of all the delegator redelegations
-//func (k Keeper) GetRedelegations(ctx sdk.Context, delegator sdk.AccAddress,
-//	maxRetrieve uint16) (redelegations []types.Redelegation) {
-//
-//}
-//
+type NotificationBeginRedelegation struct {
+	Delegator      string `json:"delegator"`
+	ValidatorSrc   string `json:"src"`
+	ValidatorDst   string `json:"dst"`
+	Amount         string `json:"amount"`
+	CompletionTime string `json:"completion_time"`
+}
+
+func getNotificationBeginRedelegation(dualEvent []abci.Event) []byte {
+	var res NotificationBeginRedelegation
+	for _, attr := range dualEvent[0].Attributes {
+		if string(attr.Key) == stypes.AttributeKeySrcValidator {
+			res.ValidatorSrc = string(attr.Value)
+		} else if string(attr.Key) == stypes.AttributeKeyDstValidator {
+			res.ValidatorDst = string(attr.Value)
+		} else if string(attr.Key) == stypes.AttributeKeyAmount {
+			res.Amount = string(attr.Value)
+		} else if string(attr.Key) == stypes.AttributeKeyCompletionTime {
+			res.CompletionTime = string(attr.Value)
+		}
+	}
+	for _, attr := range dualEvent[1].Attributes {
+		if string(attr.Key) == sdk.AttributeKeySender {
+			res.Delegator = string(attr.Value)
+		}
+	}
+	bytes, errJSON := json.Marshal(res)
+	if errJSON != nil {
+		return []byte{}
+	}
+	return bytes
+}
+
+type NotificationBeginUnbonding struct {
+	Delegator      string `json:"delegator"`
+	Validator      string `json:"validator"`
+	Amount         string `json:"amount"`
+	CompletionTime string `json:"completion_time"`
+}
+
+func getNotificationBeginUnbonding(dualEvent []abci.Event) []byte {
+	var res NotificationBeginUnbonding
+	for _, attr := range dualEvent[0].Attributes {
+		if string(attr.Key) == stypes.AttributeKeyValidator {
+			res.Validator = string(attr.Value)
+		} else if string(attr.Key) == stypes.AttributeKeyAmount {
+			res.Amount = string(attr.Value)
+		} else if string(attr.Key) == stypes.AttributeKeyCompletionTime {
+			res.CompletionTime = string(attr.Value)
+		}
+	}
+	for _, attr := range dualEvent[1].Attributes {
+		if string(attr.Key) == sdk.AttributeKeySender {
+			res.Delegator = string(attr.Value)
+		}
+	}
+	bytes, errJSON := json.Marshal(res)
+	if errJSON != nil {
+		return []byte{}
+	}
+	return bytes
+}
+
+type NotificationCompleteRedelegation struct {
+	Delegator    string `json:"delegator"`
+	ValidatorSrc string `json:"src"`
+	ValidatorDst string `json:"dst"`
+}
+
+func getNotificationCompleteRedelegation(event abci.Event) []byte {
+	var res NotificationCompleteRedelegation
+	for _, attr := range event.Attributes {
+		if string(attr.Key) == stypes.AttributeKeyDstValidator {
+			res.ValidatorDst = string(attr.Value)
+		} else if string(attr.Key) == stypes.AttributeKeySrcValidator {
+			res.ValidatorSrc = string(attr.Value)
+		} else if string(attr.Key) == stypes.AttributeKeyDelegator {
+			res.Delegator = string(attr.Value)
+		}
+	}
+	bytes, errJSON := json.Marshal(res)
+	if errJSON != nil {
+		return []byte{}
+	}
+	return bytes
+}
+
+type NotificationCompleteUnbonding struct {
+	Delegator string `json:"delegator"`
+	Validator string `json:"validator"`
+}
+
+func getNotificationCompleteUnbonding(event abci.Event) []byte {
+	var res NotificationCompleteUnbonding
+	for _, attr := range event.Attributes {
+		if string(attr.Key) == stypes.AttributeKeyValidator {
+			res.Validator = string(attr.Value)
+		} else if string(attr.Key) == stypes.AttributeKeyDelegator {
+			res.Delegator = string(attr.Value)
+		}
+	}
+	bytes, errJSON := json.Marshal(res)
+	if errJSON != nil {
+		return []byte{}
+	}
+	return bytes
+}
+
+func (app *CetChainApp) notifyBegin(events []abci.Event) {
+	for i := 0; i < len(events); i++ {
+		if events[i].Type == stypes.EventTypeUnbond {
+			if i+1 <= len(events) {
+				val := getNotificationBeginUnbonding(events[i : i+2])
+				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_unbonding"), Value: val})
+				i++
+			}
+		} else if events[i].Type == stypes.EventTypeRedelegate {
+			if i+1 <= len(events) {
+				val := getNotificationBeginRedelegation(events[i : i+2])
+				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_redelegation"), Value: val})
+				i++
+			}
+		}
+	}
+}
+
+func (app *CetChainApp) notifyComplete(events []abci.Event) {
+	for _, event := range events {
+		if event.Type == stypes.EventTypeCompleteUnbonding {
+			val := getNotificationCompleteUnbonding(event)
+			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_unbonding"), Value: val})
+		} else if event.Type == stypes.EventTypeCompleteRedelegation {
+			val := getNotificationCompleteRedelegation(event)
+			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_redelegation"), Value: val})
+		}
+	}
+}
+
+//		sdk.NewEvent(
+//			stypes.EventTypeUnbond,
+//			sdk.NewAttribute(stypes.AttributeKeyValidator, msg.ValidatorAddress.String()),
+//			sdk.NewAttribute(stypes.AttributeKeyAmount, msg.Amount.Amount.String()),
+//			sdk.NewAttribute(stypes.AttributeKeyCompletionTime, completionTime.Format(time.RFC3339)),
+//		),
+//		sdk.NewEvent(
+//			sdk.EventTypeMessage,
+//			sdk.NewAttribute(sdk.AttributeKeyModule, stypes.AttributeValueCategory),
+//			sdk.NewAttribute(sdk.AttributeKeySender, msg.DelegatorAddress.String()),
+//		),
+//		sdk.NewEvent(
+//			stypes.EventTypeRedelegate,
+//			sdk.NewAttribute(stypes.AttributeKeySrcValidator, msg.ValidatorSrcAddress.String()),
+//			sdk.NewAttribute(stypes.AttributeKeyDstValidator, msg.ValidatorDstAddress.String()),
+//			sdk.NewAttribute(stypes.AttributeKeyAmount, msg.Amount.Amount.String()),
+//			sdk.NewAttribute(stypes.AttributeKeyCompletionTime, completionTime.Format(time.RFC3339)),
+//		),
+//		sdk.NewEvent(
+//			sdk.EventTypeMessage,
+//			sdk.NewAttribute(sdk.AttributeKeyModule, stypes.AttributeValueCategory),
+//			sdk.NewAttribute(sdk.AttributeKeySender, msg.DelegatorAddress.String()),
+//		),
+//			sdk.NewEvent(
+//				stypes.EventTypeCompleteUnbonding,
+//				sdk.NewAttribute(stypes.AttributeKeyValidator, dvPair.ValidatorAddress.String()),
+//				sdk.NewAttribute(stypes.AttributeKeyDelegator, dvPair.DelegatorAddress.String()),
+//			),
+//			sdk.NewEvent(
+//				stypes.EventTypeCompleteRedelegation,
+//				sdk.NewAttribute(stypes.AttributeKeyDelegator, dvvTriplet.DelegatorAddress.String()),
+//				sdk.NewAttribute(stypes.AttributeKeySrcValidator, dvvTriplet.ValidatorSrcAddress.String()),
+//				sdk.NewAttribute(stypes.AttributeKeyDstValidator, dvvTriplet.ValidatorDstAddress.String()),
+//			),

@@ -525,6 +525,7 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 		if ret.Code == uint32(sdk.CodeOK) {
 			ret.Events = FilterMsgsOnlyKafka(ret.Events)
 			app.notifySigners(req, ret.Events)
+			app.notifyBegin(ret.Events)
 		} else {
 			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
 		}
@@ -538,6 +539,7 @@ func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) ab
 	ret := app.mm.EndBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
 		ret.Events = FilterMsgsOnlyKafka(ret.Events)
+		app.notifyComplete(ret.Events)
 	}
 	return ret
 }
