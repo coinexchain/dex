@@ -412,7 +412,7 @@ func TestFullAppSimulation(t *testing.T) {
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", app.Name())
+	require.Equal(t, appName, app.Name())
 
 	// Run randomized simulation
 	_, err := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
