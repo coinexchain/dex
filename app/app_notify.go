@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	dtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -68,6 +69,33 @@ func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx, events []abci.E
 	}
 
 	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_signers"), Value: bytes})
+}
+
+type WithdrawRewardInfo struct {
+	Delegator string `json:"delegator"`
+	Validator string `json:"validator"`
+	Amount    string `json:"amount"`
+}
+
+func getWithdrawRewardInfo(dualEvent []abci.Event) []byte {
+	var res WithdrawRewardInfo
+	for _, attr := range dualEvent[0].Attributes {
+		if string(attr.Key) == dtypes.AttributeKeyValidator {
+			res.Validator = string(attr.Value)
+		} else if string(attr.Key) == dtypes.AttributeKeyAmount {
+			res.Amount = string(attr.Value)
+		}
+	}
+	for _, attr := range dualEvent[1].Attributes {
+		if string(attr.Key) == sdk.AttributeKeySender {
+			res.Delegator = string(attr.Value)
+		}
+	}
+	bytes, errJSON := json.Marshal(res)
+	if errJSON != nil {
+		return []byte{}
+	}
+	return bytes
 }
 
 type NotificationBeginRedelegation struct {
@@ -178,7 +206,7 @@ func getNotificationCompleteUnbonding(event abci.Event) []byte {
 	return bytes
 }
 
-func (app *CetChainApp) notifyBegin(events []abci.Event) {
+func (app *CetChainApp) notifyInTx(events []abci.Event) {
 	for i := 0; i < len(events); i++ {
 		if events[i].Type == stypes.EventTypeUnbond {
 			if i+1 <= len(events) {
@@ -190,6 +218,12 @@ func (app *CetChainApp) notifyBegin(events []abci.Event) {
 			if i+1 <= len(events) {
 				val := getNotificationBeginRedelegation(events[i : i+2])
 				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_redelegation"), Value: val})
+				i++
+			}
+		} else if events[i].Type == dtypes.EventTypeWithdrawRewards {
+			if i+1 <= len(events) {
+				val := getWithdrawRewardInfo(events[i : i+2])
+				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("withdraw_reward"), Value: val})
 				i++
 			}
 		}
@@ -208,6 +242,16 @@ func (app *CetChainApp) notifyComplete(events []abci.Event) {
 	}
 }
 
+//		sdk.NewEvent(
+//			types.EventTypeWithdrawRewards,
+//			sdk.NewAttribute(types.AttributeKeyAmount, rewards.String()),
+//			sdk.NewAttribute(types.AttributeKeyValidator, valAddr.String()),
+//		),
+//		sdk.NewEvent(
+//			sdk.EventTypeMessage,
+//			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+//			sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddress.String()),
+//		),
 //		sdk.NewEvent(
 //			stypes.EventTypeUnbond,
 //			sdk.NewAttribute(stypes.AttributeKeyValidator, msg.ValidatorAddress.String()),

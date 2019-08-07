@@ -530,7 +530,7 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 		if ret.Code == uint32(sdk.CodeOK) {
 			ret.Events = FilterMsgsOnlyKafka(ret.Events)
 			app.notifySigners(req, ret.Events)
-			app.notifyBegin(ret.Events)
+			app.notifyInTx(ret.Events)
 		} else {
 			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
 		}
