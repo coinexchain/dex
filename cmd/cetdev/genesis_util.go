@@ -47,6 +47,7 @@ func createCetToken(ownerAddr string) asset.Token {
 		Symbol:           "cet",
 		TotalSupply:      sdk.NewInt(587767527061317189),
 		Owner:            accAddressFromBech32(ownerAddr),
+		SendLock:         sdk.ZeroInt(),
 		Mintable:         false,
 		Burnable:         true,
 		AddrForbiddable:  false,

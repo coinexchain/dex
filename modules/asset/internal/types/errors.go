@@ -33,8 +33,8 @@ const (
 	CodeAddressForbiddenNotSupported sdk.CodeType = 522
 	CodeNilTokenWhitelist            sdk.CodeType = 523
 	CodeNilForbiddenAddress          sdk.CodeType = 524
-	CodeInvalidUsualSymbol           sdk.CodeType = 525
 	CodeInvalidTokenIdentity         sdk.CodeType = 526
+	CodeInvalidSendLockAmt           sdk.CodeType = 527
 )
 
 func ErrInvalidTokenName(name string) sdk.Error {
@@ -48,6 +48,10 @@ func ErrInvalidTokenSymbol(symbol string) sdk.Error {
 func ErrInvalidTokenSupply(amt string) sdk.Error {
 	msg := fmt.Sprintf("invalid supply %s : token total supply before 1e8 boosting should be less than 90 billion and supply amount must be positive", amt)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenSupply, msg)
+}
+func ErrInvalidSendLockAmt(amt string) sdk.Error {
+	msg := fmt.Sprintf("invalid send lock %s : token send lock amount must be positive", amt)
+	return sdk.NewError(CodeSpaceAsset, CodeInvalidSendLockAmt, msg)
 }
 func ErrInvalidTokenOwner(addr sdk.Address) sdk.Error {
 	msg := fmt.Sprintf("invalid owner %s : token owner is invalid", addr.String())
@@ -148,9 +152,4 @@ func ErrNilTokenWhitelist() sdk.Error {
 func ErrNilForbiddenAddress() sdk.Error {
 	msg := fmt.Sprintf("forbidden address is nil")
 	return sdk.NewError(CodeSpaceAsset, CodeNilForbiddenAddress, msg)
-}
-
-func ErrInvalidUsualSymbol(symbol string) sdk.Error {
-	msg := fmt.Sprintf("invalid usual symbol %s : usual token symbol not match with [a-z][a-z0-9]{1,7}", symbol)
-	return sdk.NewError(CodeSpaceAsset, CodeInvalidUsualSymbol, msg)
 }

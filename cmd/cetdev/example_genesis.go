@@ -55,6 +55,7 @@ func createAbcToken() asset.Token {
 		Name:             "ABC Chain Native Token",
 		Symbol:           "abc",
 		TotalSupply:      sdk.NewInt(588788547005740000),
+		SendLock:         sdk.ZeroInt(),
 		Owner:            accAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"),
 		Mintable:         false,
 		Burnable:         true,

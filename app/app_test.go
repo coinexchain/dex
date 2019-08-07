@@ -129,6 +129,7 @@ func cetToken() asset.Token {
 		Name:             "CoinEx Chain Native Token",
 		Symbol:           "cet",
 		TotalSupply:      sdk.NewInt(588788547005740000),
+		SendLock:         sdk.ZeroInt(),
 		Owner:            cetOwnerAddr,
 		Mintable:         false,
 		Burnable:         true,

@@ -28,6 +28,9 @@ type Token interface {
 	GetTotalSupply() sdk.Int
 	SetTotalSupply(sdk.Int) sdk.Error
 
+	GetSendLock() sdk.Int
+	SetSendLock(sdk.Int) sdk.Error
+
 	GetOwner() sdk.AccAddress
 	SetOwner(sdk.AccAddress) sdk.Error
 
@@ -74,6 +77,7 @@ type BaseToken struct {
 	Name             string         `json:"name" yaml:"name"`                           //  Name of the newly issued asset, limited to 32 unicode characters.
 	Symbol           string         `json:"symbol" yaml:"symbol"`                       //  token symbol, [a-z][a-z0-9]{1,7}
 	TotalSupply      sdk.Int        `json:"total_supply" yaml:"total_supply"`           //  The total supply for this token [0]
+	SendLock         sdk.Int        `json:"send_lock" yaml:"send_lock"`                 // The send lock amount
 	Owner            sdk.AccAddress `json:"owner" yaml:"owner"`                         // The initial issuer of this token
 	Mintable         bool           `json:"mintable" yaml:"mintable"`                   // Whether this token could be minted after the issuing
 	Burnable         bool           `json:"burnable" yaml:"burnable"`                   // Whether this token could be burned
@@ -136,6 +140,9 @@ func NewToken(name string, symbol string, totalSupply sdk.Int, owner sdk.AccAddr
 	if err = t.SetTotalBurn(sdk.ZeroInt()); err != nil {
 		return nil, err
 	}
+	if err = t.SetSendLock(sdk.ZeroInt()); err != nil {
+		return nil, err
+	}
 	t.SetIsForbidden(false)
 
 	return t, nil
@@ -150,15 +157,27 @@ func (t *BaseToken) Validate() sdk.Error {
 	}
 
 	if !t.TokenForbiddable && t.IsForbidden {
-		return ErrTokenForbiddenNotSupported(t.GetSymbol())
+		return ErrTokenForbiddenNotSupported(t.Symbol)
 	}
 
 	if !t.Mintable && t.TotalMint.IsPositive() {
-		return ErrTokenMintNotSupported(t.GetSymbol())
+		return ErrTokenMintNotSupported(t.Symbol)
 	}
 
 	if !t.Burnable && t.TotalBurn.IsPositive() {
-		return ErrTokenBurnNotSupported(t.GetSymbol())
+		return ErrTokenBurnNotSupported(t.Symbol)
+	}
+
+	if t.TotalBurn.IsNegative() {
+		return ErrInvalidTokenBurnAmt(t.TotalBurn.String())
+	}
+
+	if t.TotalMint.IsNegative() {
+		return ErrInvalidTokenMintAmt(t.TotalMint.String())
+	}
+
+	if t.SendLock.IsNegative() {
+		return ErrInvalidSendLockAmt(t.SendLock.String())
 	}
 
 	return nil
@@ -206,6 +225,18 @@ func (t *BaseToken) SetTotalSupply(amt sdk.Int) sdk.Error {
 		return ErrInvalidTokenSupply(amt.String())
 	}
 	t.TotalSupply = amt
+	return nil
+}
+
+func (t BaseToken) GetSendLock() sdk.Int {
+	return t.SendLock
+}
+
+func (t *BaseToken) SetSendLock(amt sdk.Int) sdk.Error {
+	if amt.IsNegative() {
+		return ErrInvalidSendLockAmt(amt.String())
+	}
+	t.SendLock = amt
 	return nil
 }
 
@@ -328,6 +359,7 @@ func (t BaseToken) String() string {
   Name:             %s
   Symbol:           %s
   TotalSupply:      %s
+  SendLock			%s
   Owner:            %s
   Mintable:         %t
   Burnable:         %t
@@ -340,7 +372,7 @@ func (t BaseToken) String() string {
   Description:      %s
   Identity:			%s
 ]`,
-		t.Name, t.Symbol, t.TotalSupply.String(), t.Owner.String(), t.Mintable, t.Burnable,
+		t.Name, t.Symbol, t.TotalSupply.String(), t.SendLock.String(), t.Owner.String(), t.Mintable, t.Burnable,
 		t.AddrForbiddable, t.TokenForbiddable, t.TotalBurn.String(), t.TotalMint.String(), t.IsForbidden,
 		t.URL, t.Description, t.Identity,
 	)
