@@ -3,6 +3,13 @@
 
 set -ex
 
+function cleanup {
+    rc=$?
+    [ $rc -ne 0 ] && echo "==============script/check.sh failed=================="
+    exit $rc
+}
+trap cleanup EXIT
+
 if [ ! -x "$(type -p glide)" ]; then
     echo "glide not installed ?"
     exit 1
