@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-07-17T07:34:08.398857Z",
+  "genesis_time": "2019-08-07T02:22:51.097809Z",
   "chain_id": "coinexdex-1",
   "consensus_params": {
     "block": {
@@ -231,7 +231,8 @@
     "stakingx": {
       "params": {
         "min_self_delegation": "100000000000000",
-        "non_bondable_addresses": null
+        "non_bondable_addresses": null,
+        "min_mandatory_commission_rate": "0.050000000000000000"
       }
     },
     "distribution": {
@@ -313,17 +314,18 @@
           "value": {
             "name": "CoinEx Chain Native Token",
             "symbol": "cet",
-            "total_supply": "588788547005740000",
+            "total_supply": "587767527061317189",
             "owner": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
             "mintable": false,
             "burnable": true,
             "addr_forbiddable": false,
             "token_forbiddable": false,
-            "total_burn": "411211452994260000",
+            "total_burn": "412232472938682811",
             "total_mint": "0",
             "is_forbidden": false,
             "url": "https://www.coinex.org",
-            "description": "Decentralized public chain ecosystem, Born for financial liberalization"
+            "description": "Decentralized public chain ecosystem, Born for financial liberalization",
+            "identity": ""
           }
         },
         {
@@ -341,7 +343,8 @@
             "total_mint": "0",
             "is_forbidden": false,
             "url": "",
-            "description": ""
+            "description": "",
+            "identity": ""
           }
         }
       ],
@@ -358,8 +361,7 @@
         "max_executed_price_change_ratio": "25",
         "market_fee_rate": "10",
         "market_fee_min": "1000000",
-        "fee_for_zero_deal": "1000000",
-        "chain_id_version": "0"
+        "fee_for_zero_deal": "1000000"
       },
       "orders": [
         {
@@ -406,6 +408,29 @@
         }
       ]
     },
+    "bancorlite": {
+      "params": {
+        "create_bancor_fee": "10000000000",
+        "cancel_bancor_fee": "10000000000",
+        "trade_fee_rate": "10"
+      },
+      "bancor_info_map": {}
+    },
+    "comment": {
+      "comment_count": {}
+    },
+    "alias": {
+      "params": {
+        "fee_for_alias_length_2": "2000000",
+        "fee_for_alias_length_3": "300000",
+        "fee_for_alias_length_4": "40000",
+        "fee_for_alias_length_5": "5000",
+        "fee_for_alias_length_6": "600",
+        "fee_for_alias_length_7_or_higher": "70",
+        "max_alias_count": "5"
+      },
+      "alias_entry_list": null
+    },
     "incentive": {
       "state": {
         "height_adjustment": "0"
@@ -448,7 +473,7 @@
     },
     "supply": {
       "supply": {
-        "total_supply": []
+        "total": []
       }
     },
     "genutil": {
@@ -472,9 +497,9 @@
                     "max_change_rate": "0.010000000000000000"
                   },
                   "min_self_delegation": "10000000000000000",
-                  "delegator_address": "coinex1q4fkvvgecy9kfcat2kuua050ghcrpa3s8x47tc",
-                  "validator_address": "coinexvaloper1q4fkvvgecy9kfcat2kuua050ghcrpa3sufkk9v",
-                  "pubkey": "coinexvalconspub1addwnpepqw86eaqvh4fdgvkg898dz0r5kpuehr5k2g0xzms3zjckmy3whvp7yvwtvdu",
+                  "delegator_address": "coinex14x5xeqkgc8sy7hkjnjad53z5qujumkhgjhvlaa",
+                  "validator_address": "coinexvaloper14x5xeqkgc8sy7hkjnjad53z5qujumkhgfc0hnf",
+                  "pubkey": "coinexvalconspub1addwnpepqwtqxlgr22uq39gv66kl8jlglyr3nqve353yh3ajwgf8x42qgg2kxwj39xt",
                   "value": {
                     "denom": "cet",
                     "amount": "10000000000000000"
@@ -495,9 +520,9 @@
               {
                 "pub_key": {
                   "type": "tendermint/PubKeySecp256k1",
-                  "value": "A4+s9Ay9UtQyyDlO0Tx0sHmbjpZSHmFuERSxbZIuuwPi"
+                  "value": "A5YDfQNSuAiVDNat88vo+QcZgZmNIkvHsnISc1VAQhVj"
                 },
-                "signature": "y+iOxODftg/wObIB3sjCx+Oj2sCitoKK+wGwBFIaLrA24Q0pivm4jNjcYBORbbc4yKx6g6ydORGJmU8id9i1KQ=="
+                "signature": "/0zYbASQ0JBDMVH2i2EQBVthuluTbFTkI1c6w5HICzs04UcVPr6Ie2bjEpe02SdNll9JqdiUAFf7HYO93khflw=="
               }
             ],
             "memo": ""
