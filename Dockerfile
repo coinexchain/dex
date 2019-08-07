@@ -3,7 +3,7 @@ LABEL maintainer="dev@coinex.org"
 
 ADD . $GOPATH/src/github.com/coinexchain/dex
 
-RUN cd $GOPATH/src/github.com/coinexchain/dex && \
+RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
     export GO111MODULE=on && \
     go mod tidy && \
     go mod vendor && \
