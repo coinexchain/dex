@@ -3999,9 +3999,12 @@ definitions:
     allOf:
       - $ref: "#/definitions/TokenBasicInfo"
       - properties:
+          send_lock:
+            type: string
+            example: "0"
           total_burn:
             type: string
-            example: "100000000000000"
+            example: "0"
           total_mint:
             type: string
             example: "0"
