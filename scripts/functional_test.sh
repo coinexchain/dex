@@ -21,6 +21,6 @@ bash script/init.sh
 
 echo "Test begin"
 
-pipenv run behave ./features/ --tags=~@wip
+pipenv run behave ./features/ --tags=~@wip -D TEST_KAFKA
 
 echo "Test end"
