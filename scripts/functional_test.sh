@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+image_check=$(docker images | grep coinexchain/cetdtest)
+if [[ ! ${image_check} ]]
+then
+    echo "Docker image does NOT exist."
+    exit 1
+fi
+
 set -e
 
 mkdir func_test
