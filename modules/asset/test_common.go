@@ -11,8 +11,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
@@ -55,13 +53,9 @@ func createTestInput() testInput {
 
 	// account permissions
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     nil,
-		distribution.ModuleName:   nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
-		gov.ModuleName:            {supply.Burner},
 		types.ModuleName:          {supply.Burner, supply.Minter},
-		authx.ModuleName:          nil,
 	}
 	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
 	ak := auth.NewAccountKeeper(cdc, keyAuth, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
