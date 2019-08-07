@@ -295,6 +295,7 @@ func TestDelegatorShares(t *testing.T) {
 	// create validator & self delegate 100 CET
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
 		MinSelfDelegation(1).SelfDelegation(100).
+		Commission("0.05", "0.1", "0.01").
 		Build()
 	createValTx := newStdTxBuilder().
 		Msgs(createValMsg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, valKey).Build()
@@ -352,6 +353,7 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	// create validator & self delegate 1 CET
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, valAcc.PubKey).
 		MinSelfDelegation(1e8).SelfDelegation(1e8).
+		Commission("0.05", "0.1", "0.01").
 		Build()
 	createValTx := newStdTxBuilder().
 		Msgs(createValMsg).GasAndFee(1000000, 1).AccNumSeqKey(0, 0, valKey).Build()
