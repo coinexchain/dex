@@ -310,19 +310,6 @@ func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner s
 	return keeper.SetToken(ctx, token)
 }
 
-// SetToken - set token to store
-func (keeper BaseKeeper) SetToken(ctx sdk.Context, token types.Token) sdk.Error {
-	symbol := token.GetSymbol()
-	store := ctx.KVStore(keeper.storeKey)
-
-	bz, err := keeper.cdc.MarshalBinaryBare(token)
-	if err != nil {
-		return sdk.ErrInternal(err.Error())
-	}
-	store.Set(types.GetTokenStoreKey(symbol), bz)
-	return nil
-}
-
 func (keeper BaseKeeper) SendCoinsFromAssetModuleToAccount(ctx sdk.Context, addresses sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	return keeper.sk.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addresses, amt)
 }
@@ -414,6 +401,7 @@ type TokenKeeper interface {
 	IsTokenExists(ctx sdk.Context, symbol string) bool
 	IsTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool
 	IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool
+	SetTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error
 }
 
 var _ TokenKeeper = (*BaseTokenKeeper)(nil)
@@ -536,6 +524,42 @@ func (keeper BaseTokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol s
 	}
 
 	return true
+}
+
+// SetTokenSendLock - set token SendLock amount
+func (keeper BaseTokenKeeper) SetTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error {
+	token := keeper.GetToken(ctx, symbol)
+	if token == nil {
+		return types.ErrTokenNotFound(symbol)
+	}
+	if lock {
+		if err := token.SetSendLock(token.GetSendLock().Add(amount)); err != nil {
+			return err
+		}
+	} else {
+		if err := token.SetSendLock(token.GetSendLock().Sub(amount)); err != nil {
+			return err
+		}
+	}
+
+	if err := keeper.SetToken(ctx, token); err != nil {
+		return err
+	}
+	return nil
+
+}
+
+// SetToken - set token to store
+func (keeper BaseTokenKeeper) SetToken(ctx sdk.Context, token types.Token) sdk.Error {
+	symbol := token.GetSymbol()
+	store := ctx.KVStore(keeper.storeKey)
+
+	bz, err := keeper.cdc.MarshalBinaryBare(token)
+	if err != nil {
+		return sdk.ErrInternal(err.Error())
+	}
+	store.Set(types.GetTokenStoreKey(symbol), bz)
+	return nil
 }
 
 // ImportGenesisAddrKeys - import all whitelists or forbidden addresses string from genesis.json
