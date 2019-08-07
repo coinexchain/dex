@@ -49,7 +49,7 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken
 		issueFee = keeper.GetParams(ctx).IssueRareTokenFee
 	}
 
-	if err := keeper.DeductFee(ctx, msg.Owner, issueFee); err != nil {
+	if err := keeper.DeductIssueFee(ctx, msg.Owner, issueFee); err != nil {
 		return err.Result()
 	}
 
@@ -63,10 +63,6 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken
 	if err := keeper.SendCoinsFromAssetModuleToAccount(ctx, msg.Owner, types.NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
 		return err.Result()
 	}
-
-	//if err := keeper.AddToken(ctx, msg.Owner, types.NewTokenCoins(msg.Symbol, msg.TotalSupply)); err != nil {
-	//	return err.Result()
-	//}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(types.EventTypeAsset,
@@ -119,10 +115,6 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg types.MsgMintToken) 
 		return err.Result()
 	}
 
-	//if err := keeper.AddToken(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
-	//	return err.Result()
-	//}
-
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(types.EventTypeAsset,
 			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
@@ -149,10 +141,6 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg types.MsgBurnToken) 
 	if err := keeper.BurnToken(ctx, msg.Symbol, msg.OwnerAddress, msg.Amount); err != nil {
 		return err.Result()
 	}
-
-	//if err := keeper.SubtractToken(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
-	//	return err.Result()
-	//}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(types.EventTypeAsset,

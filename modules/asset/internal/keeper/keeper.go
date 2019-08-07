@@ -35,14 +35,8 @@ type Keeper interface {
 	UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
 	ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string) sdk.Error
 
-	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
-	AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
-	SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	SetParams(ctx sdk.Context, params types.Params)
 	GetParams(ctx sdk.Context) (params types.Params)
-
-	SendCoinsFromAssetModuleToAccount(ctx sdk.Context, addresses sdk.AccAddress, amt sdk.Coins) sdk.Error
-	SendCoinsFromAccountToAssetModule(ctx sdk.Context, addresses sdk.AccAddress, amt sdk.Coins) sdk.Error
 }
 
 var _ Keeper = (*BaseKeeper)(nil)
@@ -59,7 +53,7 @@ type BaseKeeper struct {
 	paramSubspace params.Subspace
 
 	bkx types.ExpectedBankxKeeper
-	sk  supply.Keeper
+	sk  types.ExpectedSupplyKeeper
 }
 
 // NewBaseKeeper returns a new BaseKeeper that uses go-amino to (binary) encode and decode concrete Token.
@@ -76,25 +70,7 @@ func NewBaseKeeper(cdc *codec.Codec, key sdk.StoreKey,
 	}
 }
 
-// DeductFee - deduct asset func fee like issueFee
-func (keeper BaseKeeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-
-	return keeper.bkx.DeductFee(ctx, addr, amt)
-}
-
-// AddToken - add token to addr when issue token and mint token etc.
-func (keeper BaseKeeper) AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-
-	return keeper.bkx.AddCoins(ctx, addr, amt)
-}
-
-// SubtractToken - sub token to addr when burn token etc.
-func (keeper BaseKeeper) SubtractToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-
-	return keeper.bkx.SubtractCoins(ctx, addr, amt)
-}
-
-//IssueToken - new token and store it
+// IssueToken - new token and store it
 func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string, totalSupply sdk.Int, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
 	url string, description string, identity string) sdk.Error {
@@ -145,7 +121,7 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 	return keeper.sk.MintCoins(ctx, types.ModuleName, types.NewTokenCoins(symbol, totalSupply))
 }
 
-//TransferOwnership - transfer token owner
+// TransferOwnership - transfer token owner
 func (keeper BaseKeeper) TransferOwnership(ctx sdk.Context, symbol string, originalOwner sdk.AccAddress, newOwner sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, originalOwner)
 	if err != nil {
@@ -159,7 +135,7 @@ func (keeper BaseKeeper) TransferOwnership(ctx sdk.Context, symbol string, origi
 	return keeper.SetToken(ctx, token)
 }
 
-//MintToken - mint token
+// MintToken - mint token
 func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount sdk.Int) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -185,7 +161,7 @@ func (keeper BaseKeeper) MintToken(ctx sdk.Context, symbol string, owner sdk.Acc
 	return keeper.sk.MintCoins(ctx, types.ModuleName, types.NewTokenCoins(symbol, amount))
 }
 
-//BurnToken - burn token
+// BurnToken - burn token
 func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.AccAddress, amount sdk.Int) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -212,7 +188,7 @@ func (keeper BaseKeeper) BurnToken(ctx sdk.Context, symbol string, owner sdk.Acc
 
 }
 
-//ForbidToken - forbid token
+// ForbidToken - forbid token
 func (keeper BaseKeeper) ForbidToken(ctx sdk.Context, symbol string, owner sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -230,7 +206,7 @@ func (keeper BaseKeeper) ForbidToken(ctx sdk.Context, symbol string, owner sdk.A
 	return keeper.SetToken(ctx, token)
 }
 
-//UnForbidToken - unforbid token
+// UnForbidToken - unforbid token
 func (keeper BaseKeeper) UnForbidToken(ctx sdk.Context, symbol string, owner sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -248,7 +224,7 @@ func (keeper BaseKeeper) UnForbidToken(ctx sdk.Context, symbol string, owner sdk
 	return keeper.SetToken(ctx, token)
 }
 
-//AddTokenWhitelist - add token forbidden whitelist
+// AddTokenWhitelist - add token forbidden whitelist
 func (keeper BaseKeeper) AddTokenWhitelist(ctx sdk.Context, symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -264,7 +240,7 @@ func (keeper BaseKeeper) AddTokenWhitelist(ctx sdk.Context, symbol string, owner
 	return nil
 }
 
-//RemoveTokenWhitelist - remove token forbidden whitelist
+// RemoveTokenWhitelist - remove token forbidden whitelist
 func (keeper BaseKeeper) RemoveTokenWhitelist(ctx sdk.Context, symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -280,7 +256,7 @@ func (keeper BaseKeeper) RemoveTokenWhitelist(ctx sdk.Context, symbol string, ow
 	return nil
 }
 
-//ForbidAddress - add forbidden addresses
+// ForbidAddress - add forbidden addresses
 func (keeper BaseKeeper) ForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -296,7 +272,7 @@ func (keeper BaseKeeper) ForbidAddress(ctx sdk.Context, symbol string, owner sdk
 	return nil
 }
 
-//UnForbidAddress - remove forbidden addresses
+// UnForbidAddress - remove forbidden addresses
 func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -312,7 +288,7 @@ func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner s
 	return nil
 }
 
-//ModifyTokenInfo - modify token info property
+// ModifyTokenInfo - modify token info property
 func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
@@ -334,6 +310,7 @@ func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner s
 	return keeper.SetToken(ctx, token)
 }
 
+// SetToken - set token to store
 func (keeper BaseKeeper) SetToken(ctx sdk.Context, token types.Token) sdk.Error {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(keeper.storeKey)
@@ -352,6 +329,21 @@ func (keeper BaseKeeper) SendCoinsFromAssetModuleToAccount(ctx sdk.Context, addr
 
 func (keeper BaseKeeper) SendCoinsFromAccountToAssetModule(ctx sdk.Context, addresses sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	return keeper.sk.SendCoinsFromAccountToModule(ctx, addresses, types.ModuleName, amt)
+}
+
+// DeductIssueFee - deduct issue token fee
+func (keeper BaseKeeper) DeductIssueFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return keeper.bkx.DeductFee(ctx, addr, amt)
+}
+
+// AddToken - used for unit test
+func (keeper BaseKeeper) AddToken(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return keeper.bkx.AddCoins(ctx, addr, amt)
+}
+
+// GetAccTotalToken - used for unit test
+func (keeper BaseKeeper) GetAccTotalToken(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+	return keeper.bkx.GetTotalCoins(ctx, addr)
 }
 
 func (keeper BaseKeeper) checkPrecondition(ctx sdk.Context, symbol string, owner sdk.AccAddress) (types.Token, sdk.Error) {
@@ -407,10 +399,6 @@ func (keeper BaseKeeper) removeForbiddenAddress(ctx sdk.Context, symbol string, 
 	}
 
 	return nil
-}
-
-func (keeper BaseKeeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
-	return keeper.bkx.GetTotalCoins(ctx, addr)
 }
 
 // -----------------------------------------------------------------------------

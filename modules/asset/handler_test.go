@@ -177,7 +177,7 @@ func Test_IssueToken_DeductFee(t *testing.T) {
 	res = h(input.ctx, msg)
 	require.True(t, res.IsOK())
 
-	coins := input.tk.GetTotalCoins(input.ctx, testAddr)
+	coins := input.tk.GetAccTotalToken(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(2100), coins.AmountOf(symbol))
 	require.Equal(t, sdk.NewInt(1E18-1E12), coins.AmountOf("cet"))
 
@@ -201,7 +201,7 @@ func Test_BurnToken_SubtractCoins(t *testing.T) {
 	res = h(input.ctx, msgBurn)
 	require.True(t, res.IsOK())
 
-	coins := input.tk.GetTotalCoins(input.ctx, testAddr)
+	coins := input.tk.GetAccTotalToken(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(2000), coins.AmountOf(symbol))
 }
 
@@ -223,7 +223,7 @@ func Test_MintToken_AddCoins(t *testing.T) {
 	res = h(input.ctx, msgMint)
 	require.True(t, res.IsOK())
 
-	coins := input.tk.GetTotalCoins(input.ctx, testAddr)
+	coins := input.tk.GetAccTotalToken(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(2200), coins.AmountOf(symbol))
 
 }
