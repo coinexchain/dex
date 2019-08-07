@@ -25,7 +25,7 @@ func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeepe
 	}
 }
 
-type NotifyUnlock struct {
+type NotificationUnlock struct {
 	Address     sdk.AccAddress    `json:"address" yaml:"address"`
 	Unlocked    sdk.Coins         `json:"unlocked"`
 	LockedCoins types.LockedCoins `json:"locked_coins"`
@@ -54,7 +54,7 @@ func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx
 	kx.SetAccountX(ctx, *accx)
 
 	if len(kx.EventTypeMsgQueue) != 0 {
-		notifyUnlock := NotifyUnlock{
+		notifyUnlock := NotificationUnlock{
 			Address:     accx.Address,
 			Unlocked:    unlocked,
 			LockedCoins: accx.LockedCoins,
