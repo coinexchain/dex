@@ -1,6 +1,7 @@
-package asset
+package asset_test
 
 import (
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -25,7 +26,7 @@ import (
 type testInput struct {
 	cdc *codec.Codec
 	ctx sdk.Context
-	tk  Keeper
+	tk  asset.Keeper
 }
 
 func createTestInput() testInput {
@@ -61,12 +62,12 @@ func createTestInput() testInput {
 	}
 	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
 	ak := auth.NewAccountKeeper(cdc, keyAuth, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot, map[string]bool{})
+	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, map[string]bool{})
 	sk := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
 	axk := authx.NewKeeper(cdc, keyAuthx, pk.Subspace(authx.DefaultParamspace), sk, ak, "")
-	ask := NewBaseTokenKeeper(cdc, keyAsset)
+	ask := asset.NewBaseTokenKeeper(cdc, keyAsset)
 	bkx := bankx.NewKeeper(pk.Subspace(bankx.DefaultParamspace), axk, bk, ak, ask, sk, msgqueue.NewProducer())
-	tk := NewBaseKeeper(cdc, keyAsset, pk.Subspace(types.DefaultParamspace), bkx, sk)
+	tk := asset.NewBaseKeeper(cdc, keyAsset, pk.Subspace(types.DefaultParamspace), bkx, sk)
 
 	tk.SetParams(ctx, types.DefaultParams())
 

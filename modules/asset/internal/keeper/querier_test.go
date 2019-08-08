@@ -1,7 +1,8 @@
-package keeper
+package keeper_test
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset/internal/keeper"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"testing"
 
@@ -20,7 +21,7 @@ func Test_queryToken(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryToken}
-	query := NewQuerier(input.tk)
+	query := keeper.NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, []string{types.QueryToken}, req)
@@ -67,7 +68,7 @@ func Test_queryAllTokenList(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryTokenList}
-	query := NewQuerier(input.tk)
+	query := keeper.NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.NoError(t, err)
@@ -105,7 +106,7 @@ func Test_queryWhitelist(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryWhitelist}
-	query := NewQuerier(input.tk)
+	query := keeper.NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, path0, req)
@@ -126,12 +127,12 @@ func Test_queryWhitelist(t *testing.T) {
 	require.Equal(t, []byte("[]"), res)
 
 	//case 2: base-case ok
-	err = input.tk.addWhitelist(input.ctx, symbol, whitelist)
+	err = input.tk.AddTokenWhitelist(input.ctx, symbol, testAddr, whitelist)
 	require.NoError(t, err)
 	_, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 
-	err = input.tk.removeWhitelist(input.ctx, symbol, whitelist)
+	err = input.tk.RemoveTokenWhitelist(input.ctx, symbol, testAddr, whitelist)
 	require.NoError(t, err)
 	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
@@ -148,7 +149,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryForbiddenAddr}
-	query := NewQuerier(input.tk)
+	query := keeper.NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, path0, req)
@@ -169,12 +170,12 @@ func Test_queryForbiddenAddr(t *testing.T) {
 	require.Equal(t, []byte("[]"), res)
 
 	//case 2: base-case ok
-	err = input.tk.addForbiddenAddress(input.ctx, symbol, mock)
+	err = input.tk.ForbidAddress(input.ctx, symbol, testAddr, mock)
 	require.NoError(t, err)
 	_, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
 
-	err = input.tk.removeForbiddenAddress(input.ctx, symbol, mock)
+	err = input.tk.UnForbidAddress(input.ctx, symbol, testAddr, mock)
 	require.NoError(t, err)
 	res, err = query(input.ctx, path0, req)
 	require.NoError(t, err)
@@ -189,7 +190,7 @@ func Test_queryReservedSymbols(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryReservedSymbols}
-	query := NewQuerier(input.tk)
+	query := keeper.NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.NoError(t, err)
@@ -206,7 +207,7 @@ func Test_queryDefault(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{"unknown"}
-	query := NewQuerier(input.tk)
+	query := keeper.NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.Error(t, err)

@@ -346,7 +346,7 @@ func (keeper BaseKeeper) checkPrecondition(ctx sdk.Context, symbol string, owner
 	return token, nil
 }
 
-func (keeper BaseKeeper) removeToken(ctx sdk.Context, token types.Token) {
+func (keeper BaseKeeper) RemoveToken(ctx sdk.Context, token types.Token) {
 	symbol := token.GetSymbol()
 	store := ctx.KVStore(keeper.storeKey)
 	store.Delete(types.GetTokenStoreKey(symbol))

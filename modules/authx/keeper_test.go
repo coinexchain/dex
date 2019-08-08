@@ -1,6 +1,7 @@
-package authx
+package authx_test
 
 import (
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/authx/types"
 	"testing"
 
@@ -44,7 +45,7 @@ func TestAccountXGetSet(t *testing.T) {
 
 func TestAddressStoreKey(t *testing.T) {
 	addr := sdk.AccAddress([]byte("some-address1"))
-	addrStoreKey := AddressStoreKey(addr)
+	addrStoreKey := authx.AddressStoreKey(addr)
 	expectedOutput := []byte{0x1, 0x73, 0x6f, 0x6d, 0x65, 0x2d, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x31}
 	require.Equal(t, expectedOutput, addrStoreKey)
 }

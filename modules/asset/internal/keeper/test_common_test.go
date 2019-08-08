@@ -1,6 +1,7 @@
-package keeper
+package keeper_test
 
 import (
+	"github.com/coinexchain/dex/modules/asset/internal/keeper"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -18,14 +19,14 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	dbm "github.com/tendermint/tm-db"
 	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 )
 
 type testInput struct {
 	cdc *codec.Codec
 	ctx sdk.Context
-	tk  BaseKeeper
+	tk  keeper.BaseKeeper
 }
 
 func createTestInput() testInput {
@@ -61,12 +62,12 @@ func createTestInput() testInput {
 	}
 	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
 	ak := auth.NewAccountKeeper(cdc, keyAuth, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot, map[string]bool{})
+	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, map[string]bool{})
 	sk := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
 	axk := authx.NewKeeper(cdc, keyAuthx, pk.Subspace(authx.DefaultParamspace), sk, ak, "")
-	ask := NewBaseTokenKeeper(cdc, keyAsset)
+	ask := keeper.NewBaseTokenKeeper(cdc, keyAsset)
 	bkx := bankx.NewKeeper(pk.Subspace(bankx.DefaultParamspace), axk, bk, ak, ask, sk, msgqueue.NewProducer())
-	tk := NewBaseKeeper(cdc, keyAsset, pk.Subspace(types.DefaultParamspace), bkx, sk)
+	tk := keeper.NewBaseKeeper(cdc, keyAsset, pk.Subspace(types.DefaultParamspace), bkx, sk)
 
 	tk.SetParams(ctx, types.DefaultParams())
 

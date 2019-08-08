@@ -1,4 +1,4 @@
-package keeper
+package keeper_test
 
 import (
 	"github.com/coinexchain/dex/modules/asset/internal/types"
@@ -95,7 +95,7 @@ func TestTokenKeeper_TokenStore(t *testing.T) {
 	require.Contains(t, []string{"abc", "xyz"}, tokens[1].GetSymbol())
 
 	// remove token
-	input.tk.removeToken(input.ctx, token1)
+	input.tk.RemoveToken(input.ctx, token1)
 
 	// get token
 	res := input.tk.GetToken(input.ctx, token1.GetSymbol())
@@ -191,7 +191,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Equal(t, sdk.NewInt(2000), token.GetTotalMint())
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: un mintable token
 	// set token mintable: false
@@ -203,7 +203,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 3: mint invalid token
 	err = input.tk.IssueToken(input.ctx, "ABC token", "xyz", sdk.NewInt(2100), testAddr,
@@ -213,7 +213,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 4: only token owner can mint token
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), addr,
@@ -223,7 +223,7 @@ func TestTokenKeeper_MintToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 }
 
@@ -252,7 +252,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Equal(t, sdk.NewInt(2000), token.GetTotalBurn())
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: un burnable token
 	// set token burnable: false
@@ -264,7 +264,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 3: burn invalid token
 	err = input.tk.IssueToken(input.ctx, "ABC token", "xyz", sdk.NewInt(2100), testAddr,
@@ -274,7 +274,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 4: only token owner can burn token
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), addr,
@@ -284,7 +284,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 5: token total supply limited to > 0
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), testAddr,
@@ -314,7 +314,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 	require.Equal(t, true, token.GetIsForbidden())
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: un forbiddable token
 	// set token forbiddable: false
@@ -326,7 +326,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 3: duplicate forbid token
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), testAddr,
@@ -339,7 +339,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 4: only token owner can forbid token
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), addr,
@@ -349,7 +349,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 }
 
@@ -376,7 +376,7 @@ func TestTokenKeeper_UnForbidToken(t *testing.T) {
 	require.Equal(t, false, token.GetIsForbidden())
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: unforbid token before forbid token
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), testAddr,
@@ -386,7 +386,7 @@ func TestTokenKeeper_UnForbidToken(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 }
 
 func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
@@ -410,7 +410,7 @@ func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
 	require.Equal(t, len(whitelist), len(addresses))
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: un forbiddable token
 	// set token
@@ -422,7 +422,7 @@ func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 }
 
 func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
@@ -452,7 +452,7 @@ func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 	require.NotContains(t, addresses, whitelist[0])
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: un-forbiddable token
 	// set token
@@ -464,7 +464,7 @@ func TestTokenKeeper_RemoveTokenWhitelist(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 }
 
 func TestTokenKeeper_ForbidAddress(t *testing.T) {
@@ -488,7 +488,7 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 	require.Equal(t, len(mock), len(forbidden))
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: addr un-forbiddable token
 	// set token
@@ -500,7 +500,7 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 }
 
 func TestTokenKeeper_UnForbidAddress(t *testing.T) {
@@ -530,7 +530,7 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	require.NotContains(t, forbidden, mock[0])
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: addr un-forbiddable token
 	// set token
@@ -542,7 +542,7 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	require.Error(t, err)
 
 	// remove token
-	input.tk.removeToken(input.ctx, token)
+	input.tk.RemoveToken(input.ctx, token)
 }
 
 func TestTokenKeeper_ModifyTokenInfo(t *testing.T) {
