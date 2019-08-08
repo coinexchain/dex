@@ -31,7 +31,7 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		rest.PostProcessResponse(w, cliCtx, queryInfo)
+		rest.PostProcessResponseBare(w, cliCtx, queryInfo)
 	}
 }
 
@@ -78,7 +78,7 @@ func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 			return
 		}
 
-		rest.PostProcessResponse(w, cliCtx, res)
+		rest.PostProcessResponseBare(w, cliCtx, res)
 	}
 }
 
@@ -106,6 +106,6 @@ func queryUserOrderListHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) ht
 			return
 		}
 
-		rest.PostProcessResponse(w, cliCtx, res)
+		rest.PostProcessResponseBare(w, cliCtx, res)
 	}
 }

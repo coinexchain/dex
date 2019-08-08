@@ -35,7 +35,7 @@ func queryAddressHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		rest.PostProcessResponse(w, cliCtx, res)
+		rest.PostProcessResponseBare(w, cliCtx, res)
 	}
 }
 
@@ -59,6 +59,6 @@ func queryAliasesHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		rest.PostProcessResponse(w, cliCtx, res)
+		rest.PostProcessResponseBare(w, cliCtx, res)
 	}
 }
