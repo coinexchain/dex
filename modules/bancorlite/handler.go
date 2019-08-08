@@ -229,7 +229,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 }
 
 func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
-	if keeper.MsgProducer.IsSubScribe(types.Topic) {
+	if keeper.MsgProducer.IsSubscribed(types.Topic) {
 		b, err := json.Marshal(msg)
 		if err != nil {
 			return

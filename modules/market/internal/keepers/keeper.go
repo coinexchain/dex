@@ -142,7 +142,7 @@ func (k Keeper) IsTokenExists(ctx sdk.Context, symbol string) bool {
 }
 
 func (k Keeper) IsSubScribe(topic string) bool {
-	return k.msgProducer.IsSubScribe(topic)
+	return k.msgProducer.IsSubscribed(topic)
 }
 
 func (k Keeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {

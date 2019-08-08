@@ -35,7 +35,7 @@ const (
 
 type MsgSender interface {
 	SendMsg(key []byte, v []byte)
-	IsSubScribe(topic string) bool
+	IsSubscribed(topic string) bool
 	IsOpenToggle() bool
 }
 
@@ -160,7 +160,7 @@ func (p Producer) SendMsg(key []byte, v []byte) {
 
 }
 
-func (p Producer) IsSubScribe(topic string) bool {
+func (p Producer) IsSubscribed(topic string) bool {
 	if !p.toggle {
 		return false
 	}
