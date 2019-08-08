@@ -18,8 +18,8 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	dbm "github.com/tendermint/tm-db"
 	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 )
 
 type testInput struct {
@@ -89,6 +89,8 @@ func makeTestCodec() *codec.Codec {
 	cdc.RegisterInterface((*exported.ModuleAccountI)(nil), nil)
 	cdc.RegisterConcrete(&supply.ModuleAccount{}, "test/staking/ModuleAccount", nil)
 	codec.RegisterCrypto(cdc)
+	cdc.RegisterInterface((*exported.SupplyI)(nil), nil)
+	cdc.RegisterConcrete(&supply.Supply{}, "test/supply/supply", nil)
 
 	return cdc
 }

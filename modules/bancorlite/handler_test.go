@@ -85,7 +85,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 	bk := bank.NewBaseKeeper(
 		ak,
 		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(bank.DefaultParamspace),
-		sdk.CodespaceRoot,
+		sdk.CodespaceRoot, map[string]bool{},
 	)
 
 	// account permissions
@@ -98,7 +98,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		asset.ModuleName:          {supply.Minter},
 		ModuleName:                nil,
 	}
-	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
+	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, maccPerms)
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
 	sk.SetSupply(ctx, supply.Supply{Total: sdk.Coins{}})
@@ -187,7 +187,7 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) bankx
 	producer := msgqueue.NewProducer()
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 
-	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
+	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot, map[string]bool{})
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:     nil,
 		authx.ModuleName:          nil,
@@ -197,7 +197,7 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) bankx
 		types.ModuleName:          nil,
 		asset.ModuleName:          {supply.Minter},
 	}
-	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, supply.DefaultCodespace, maccPerms)
+	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, maccPerms)
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
 

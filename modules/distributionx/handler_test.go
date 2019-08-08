@@ -61,7 +61,7 @@ func setupTestInput() testInput {
 
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
+	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot, map[string]bool{})
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:     nil,
@@ -72,14 +72,14 @@ func setupTestInput() testInput {
 		gov.ModuleName:            {supply.Burner},
 		asset.ModuleName:          {supply.Minter},
 	}
-	sk := supply.NewKeeper(cdc, supplyKey, ak, bk, supply.DefaultCodespace, maccPerms)
+	sk := supply.NewKeeper(cdc, supplyKey, ak, bk, maccPerms)
 	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
 	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
 
 	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak, "")
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, sk, msgqueue.Producer{})
 	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace),
-		staking.Keeper{}, sk, distribution.DefaultCodespace, auth.FeeCollectorName)
+		staking.Keeper{}, sk, distribution.DefaultCodespace, auth.FeeCollectorName, map[string]bool{})
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)

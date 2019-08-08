@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	abci "github.com/tendermint/tendermint/abci/types"
-	dbm "github.com/tendermint/tm-db"
 	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/simapp"
@@ -32,51 +32,89 @@ import (
 )
 
 var (
-	genesisFile   string
-	paramsFile    string
-	seed          int64
-	numBlocks     int
-	blockSize     int
-	enabled       bool
-	verbose       bool
-	lean          bool
-	commit        bool
-	period        int
-	onOperation   bool // TODO Remove in favor of binary search for invariant violation
-	allInvariants bool
+	genesisFile        string
+	paramsFile         string
+	exportParamsPath   string
+	exportParamsHeight int
+	exportStatePath    string
+	seed               int64
+	numBlocks          int
+	blockSize          int
+	enabled            bool
+	verbose            bool
+	lean               bool
+	commit             bool
+	period             int
+	onOperation        bool // TODO Remove in favor of binary search for invariant violation
+	allInvariants      bool
+	genesisTime        int64
+)
+
+const (
+	StakePerAccount                                    = "stake_per_account"
+	InitiallyBondedValidators                          = "initially_bonded_validators"
+	OpWeightDeductFee                                  = "op_weight_deduct_fee"
+	OpWeightMsgSend                                    = "op_weight_msg_send"
+	OpWeightSingleInputMsgMultiSend                    = "op_weight_single_input_msg_multisend"
+	OpWeightMsgSetWithdrawAddress                      = "op_weight_msg_set_withdraw_address"
+	OpWeightMsgWithdrawDelegationReward                = "op_weight_msg_withdraw_delegation_reward"
+	OpWeightMsgWithdrawValidatorCommission             = "op_weight_msg_withdraw_validator_commission"
+	OpWeightSubmitVotingSlashingTextProposal           = "op_weight_submit_voting_slashing_text_proposal"
+	OpWeightSubmitVotingSlashingCommunitySpendProposal = "op_weight_submit_voting_slashing_community_spend_proposal"
+	OpWeightSubmitVotingSlashingParamChangeProposal    = "op_weight_submit_voting_slashing_param_change_proposal"
+	OpWeightMsgDeposit                                 = "op_weight_msg_deposit"
+	OpWeightMsgCreateValidator                         = "op_weight_msg_create_validator"
+	OpWeightMsgEditValidator                           = "op_weight_msg_edit_validator"
+	OpWeightMsgDelegate                                = "op_weight_msg_delegate"
+	OpWeightMsgUndelegate                              = "op_weight_msg_undelegate"
+	OpWeightMsgBeginRedelegate                         = "op_weight_msg_begin_redelegate"
+	OpWeightMsgUnjail                                  = "op_weight_msg_unjail"
 )
 
 func init() {
-	flag.StringVar(&genesisFile, "SimulationGenesis", "", "custom simulation genesis file; cannot be used with params file")
-	flag.StringVar(&paramsFile, "SimulationParams", "", "custom simulation params file which overrides any random params; cannot be used with genesis")
-	flag.Int64Var(&seed, "SimulationSeed", 42, "simulation random seed")
-	flag.IntVar(&numBlocks, "SimulationNumBlocks", 500, "number of blocks")
-	flag.IntVar(&blockSize, "SimulationBlockSize", 200, "operations per block")
-	flag.BoolVar(&enabled, "SimulationEnabled", false, "enable the simulation")
-	flag.BoolVar(&verbose, "SimulationVerbose", false, "verbose log output")
-	flag.BoolVar(&lean, "SimulationLean", false, "lean simulation log output")
-	flag.BoolVar(&commit, "SimulationCommit", false, "have the simulation commit")
-	flag.IntVar(&period, "SimulationPeriod", 1, "run slow invariants only once every period assertions")
+	flag.StringVar(&genesisFile, "Genesis", "", "custom simulation genesis file; cannot be used with params file")
+	flag.StringVar(&paramsFile, "Params", "", "custom simulation params file which overrides any random params; cannot be used with genesis")
+	flag.StringVar(&exportParamsPath, "ExportParamsPath", "", "custom file path to save the exported params JSON")
+	flag.IntVar(&exportParamsHeight, "ExportParamsHeight", 0, "height to which export the randomly generated params")
+	flag.StringVar(&exportStatePath, "ExportStatePath", "", "custom file path to save the exported app state JSON")
+	flag.Int64Var(&seed, "Seed", 42, "simulation random seed")
+	flag.IntVar(&numBlocks, "NumBlocks", 500, "number of blocks")
+	flag.IntVar(&blockSize, "BlockSize", 200, "operations per block")
+	flag.BoolVar(&enabled, "Enabled", false, "enable the simulation")
+	flag.BoolVar(&verbose, "Verbose", false, "verbose log output")
+	flag.BoolVar(&lean, "Lean", false, "lean simulation log output")
+	flag.BoolVar(&commit, "Commit", false, "have the simulation commit")
+	flag.IntVar(&period, "Period", 1, "run slow invariants only once every period assertions")
 	flag.BoolVar(&onOperation, "SimulateEveryOperation", false, "run slow invariants every operation")
 	flag.BoolVar(&allInvariants, "PrintAllInvariants", false, "print all invariants if a broken invariant is found")
+	flag.Int64Var(&genesisTime, "GenesisTime", 0, "override genesis UNIX time instead of using a random UNIX time")
 }
 
 // helper function for populating input for SimulateFromSeed
 func getSimulateFromSeedInput(tb testing.TB, w io.Writer, app *CetChainApp) (
 	testing.TB, io.Writer, *baseapp.BaseApp, simulation.AppStateFn, int64,
-	simulation.WeightedOperations, sdk.Invariants, int, int, bool, bool, bool, bool, map[string]bool,
-) {
+	simulation.WeightedOperations, sdk.Invariants, int, int, int,
+	bool, bool, bool, bool, bool, map[string]bool) {
+
+	exportParams := exportParamsPath != ""
 
 	return tb, w, app.BaseApp, appStateFn, seed,
-		testAndRunTxs(app), invariants(app), numBlocks, blockSize, commit,
-		lean, onOperation, allInvariants, app.ModuleAccountAddrs()
+		testAndRunTxs(app), invariants(app),
+		numBlocks, exportParamsHeight, blockSize,
+		exportParams, commit, lean, onOperation, allInvariants, app.ModuleAccountAddrs()
 }
 
 func appStateFn(
-	r *rand.Rand, accs []simulation.Account, genesisTimestamp time.Time,
-) (appState json.RawMessage, simAccs []simulation.Account, chainID string) {
+	r *rand.Rand, accs []simulation.Account,
+) (appState json.RawMessage, simAccs []simulation.Account, chainID string, genesisTimestamp time.Time) {
 
 	cdc := MakeCodec()
+
+	if genesisTime == 0 {
+		genesisTimestamp = simulation.RandTimestamp(r)
+	} else {
+		genesisTimestamp = time.Unix(genesisTime, 0)
+	}
 
 	switch {
 	case paramsFile != "" && genesisFile != "":
@@ -100,7 +138,7 @@ func appStateFn(
 		appState, simAccs, chainID = appStateRandomizedFn(r, accs, genesisTimestamp, appParams)
 	}
 
-	return appState, simAccs, chainID
+	return appState, simAccs, chainID, genesisTimestamp
 }
 
 // TODO refactor out random initialization code to the modules
@@ -109,16 +147,16 @@ func appStateRandomizedFn(
 ) (json.RawMessage, []simulation.Account, string) {
 
 	cdc := MakeCodec()
-	genesisState := NewDefaultGenesisState().toMap(cdc)
+	genesisState := ModuleBasics.DefaultGenesis()
 
 	var (
 		amount             int64
 		numInitiallyBonded int64
 	)
 
-	appParams.GetOrGenerate(cdc, simapp.StakePerAccount, &amount, r,
+	appParams.GetOrGenerate(cdc, StakePerAccount, &amount, r,
 		func(r *rand.Rand) { amount = int64(r.Intn(1e12)) })
-	appParams.GetOrGenerate(cdc, simapp.InitiallyBondedValidators, &amount, r,
+	appParams.GetOrGenerate(cdc, InitiallyBondedValidators, &amount, r,
 		func(r *rand.Rand) { numInitiallyBonded = int64(r.Intn(250)) })
 
 	numAccs := int64(len(accs))
@@ -137,15 +175,15 @@ func appStateRandomizedFn(
 
 	simapp.GenGenesisAccounts(cdc, r, accs, genesisTimestamp, amount, numInitiallyBonded, genesisState)
 	simapp.GenAuthGenesisState(cdc, r, appParams, genesisState)
-	//simapp.GenBankGenesisState(cdc, r, appParams, genesisState)
-	simapp.GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState) // TODO
+	simapp.GenBankGenesisState(cdc, r, appParams, genesisState)
+	simapp.GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState)
 	simapp.GenGovGenesisState(cdc, r, appParams, genesisState)
-	//simapp.GenMintGenesisState(cdc, r, appParams, genesisState)
+	simapp.GenMintGenesisState(cdc, r, appParams, genesisState)
 	simapp.GenDistrGenesisState(cdc, r, appParams, genesisState)
-	stakingGen := simapp.GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState) // TODO
+	stakingGen := simapp.GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState)
 	simapp.GenSlashingGenesisState(cdc, r, stakingGen, appParams, genesisState)
 
-	appState, err := cdc.MarshalJSON(genesisState)
+	appState, err := MakeCodec().MarshalJSON(genesisState)
 	if err != nil {
 		panic(err)
 	}
@@ -153,6 +191,7 @@ func appStateRandomizedFn(
 	return appState, accs, "simulation"
 }
 
+// TODO: add description
 func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 	cdc := MakeCodec()
 	ap := make(simulation.AppParams)
@@ -166,12 +205,11 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		cdc.MustUnmarshalJSON(bz, &ap)
 	}
 
-	// nolint
 	return []simulation.WeightedOperation{
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightDeductFee, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightDeductFee, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -182,7 +220,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgSend, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgSend, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -193,7 +231,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightSingleInputMsgMultiSend, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightSingleInputMsgMultiSend, &v, nil,
 					func(_ *rand.Rand) {
 						v = 10
 					})
@@ -204,7 +242,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgSetWithdrawAddress, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgSetWithdrawAddress, &v, nil,
 					func(_ *rand.Rand) {
 						v = 50
 					})
@@ -215,7 +253,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgWithdrawDelegationReward, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgWithdrawDelegationReward, &v, nil,
 					func(_ *rand.Rand) {
 						v = 50
 					})
@@ -226,7 +264,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgWithdrawValidatorCommission, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgWithdrawValidatorCommission, &v, nil,
 					func(_ *rand.Rand) {
 						v = 50
 					})
@@ -237,7 +275,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingTextProposal, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightSubmitVotingSlashingTextProposal, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -248,7 +286,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingCommunitySpendProposal, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightSubmitVotingSlashingCommunitySpendProposal, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -259,7 +297,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingParamChangeProposal, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightSubmitVotingSlashingParamChangeProposal, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -270,7 +308,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgDeposit, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgDeposit, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -281,7 +319,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgCreateValidator, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgCreateValidator, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -292,7 +330,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgEditValidator, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgEditValidator, &v, nil,
 					func(_ *rand.Rand) {
 						v = 5
 					})
@@ -303,7 +341,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgDelegate, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgDelegate, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -314,7 +352,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgUndelegate, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgUndelegate, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -325,7 +363,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgBeginRedelegate, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgBeginRedelegate, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -336,7 +374,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			func(_ *rand.Rand) int {
 				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgUnjail, &v, nil,
+				ap.GetOrGenerate(cdc, OpWeightMsgUnjail, &v, nil,
 					func(_ *rand.Rand) {
 						v = 100
 					})
@@ -362,7 +400,7 @@ func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
 }
 
 // Profile with:
-// /usr/local/go/bin/go test -benchmem -run=^$ github.com/cosmos/cosmos-sdk/CetChainApp -bench ^BenchmarkFullAppSimulation$ -SimulationCommit=true -cpuprofile cpu.out
+// /usr/local/go/bin/go test -benchmem -run=^$ github.com/cosmos/cosmos-sdk/simapp -bench ^BenchmarkFullAppSimulation$ -Commit=true -cpuprofile cpu.out
 func BenchmarkFullAppSimulation(b *testing.B) {
 	logger := log.NewNopLogger()
 
@@ -376,12 +414,44 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 	app := NewCetChainApp(logger, db, nil, true, 0)
 
 	// Run randomized simulation
-	// TODO parameterize numbers, save for a later PR
-	_, err := simulation.SimulateFromSeed(getSimulateFromSeedInput(b, os.Stdout, app))
-	if err != nil {
-		fmt.Println(err)
-		b.Fail()
+	// TODO: parameterize numbers, save for a later PR
+	_, params, simErr := simulation.SimulateFromSeed(getSimulateFromSeedInput(b, os.Stdout, app))
+
+	// export state and params before the simulation error is checked
+	if exportStatePath != "" {
+		fmt.Println("Exporting app state...")
+		appState, _, err := app.ExportAppStateAndValidators(false, nil)
+		if err != nil {
+			fmt.Println(err)
+			b.Fail()
+		}
+		err = ioutil.WriteFile(exportStatePath, []byte(appState), 0644)
+		if err != nil {
+			fmt.Println(err)
+			b.Fail()
+		}
 	}
+
+	if exportParamsPath != "" {
+		fmt.Println("Exporting simulation params...")
+		paramsBz, err := json.MarshalIndent(params, "", " ")
+		if err != nil {
+			fmt.Println(err)
+			b.Fail()
+		}
+
+		err = ioutil.WriteFile(exportParamsPath, paramsBz, 0644)
+		if err != nil {
+			fmt.Println(err)
+			b.Fail()
+		}
+	}
+
+	if simErr != nil {
+		fmt.Println(simErr)
+		b.FailNow()
+	}
+
 	if commit {
 		fmt.Println("GoLevelDB Stats")
 		fmt.Println(db.Stats()["leveldb.stats"])
@@ -412,10 +482,33 @@ func TestFullAppSimulation(t *testing.T) {
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, appName, app.Name())
+	require.Equal(t, "SimApp", app.Name())
 
 	// Run randomized simulation
-	_, err := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
+	_, params, simErr := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
+
+	// export state and params before the simulation error is checked
+	if exportStatePath != "" {
+		fmt.Println("Exporting app state...")
+		appState, _, err := app.ExportAppStateAndValidators(false, nil)
+		require.NoError(t, err)
+
+		err = ioutil.WriteFile(exportStatePath, []byte(appState), 0644)
+		require.NoError(t, err)
+	}
+
+	if exportParamsPath != "" {
+		fmt.Println("Exporting simulation params...")
+		fmt.Println(params)
+		paramsBz, err := json.MarshalIndent(params, "", " ")
+		require.NoError(t, err)
+
+		err = ioutil.WriteFile(exportParamsPath, paramsBz, 0644)
+		require.NoError(t, err)
+	}
+
+	require.NoError(t, simErr)
+
 	if commit {
 		// for memdb:
 		// fmt.Println("Database Size", db.Stats()["database.size"])
@@ -423,8 +516,6 @@ func TestFullAppSimulation(t *testing.T) {
 		fmt.Println(db.Stats()["leveldb.stats"])
 		fmt.Println("GoLevelDB cached block size", db.Stats()["leveldb.cachedblock"])
 	}
-
-	require.Nil(t, err)
 }
 
 func TestAppImportExport(t *testing.T) {
@@ -449,10 +540,31 @@ func TestAppImportExport(t *testing.T) {
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", app.Name())
+	require.Equal(t, "SimApp", app.Name())
 
 	// Run randomized simulation
-	_, err := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
+	_, simParams, simErr := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
+
+	// export state and simParams before the simulation error is checked
+	if exportStatePath != "" {
+		fmt.Println("Exporting app state...")
+		appState, _, err := app.ExportAppStateAndValidators(false, nil)
+		require.NoError(t, err)
+
+		err = ioutil.WriteFile(exportStatePath, []byte(appState), 0644)
+		require.NoError(t, err)
+	}
+
+	if exportParamsPath != "" {
+		fmt.Println("Exporting simulation params...")
+		simParamsBz, err := json.MarshalIndent(simParams, "", " ")
+		require.NoError(t, err)
+
+		err = ioutil.WriteFile(exportParamsPath, simParamsBz, 0644)
+		require.NoError(t, err)
+	}
+
+	require.NoError(t, simErr)
 
 	if commit {
 		// for memdb:
@@ -462,7 +574,6 @@ func TestAppImportExport(t *testing.T) {
 		fmt.Println("GoLevelDB cached block size", db.Stats()["leveldb.cachedblock"])
 	}
 
-	require.Nil(t, err)
 	fmt.Printf("Exporting genesis...\n")
 
 	appState, _, err := app.ExportAppStateAndValidators(false, []string{})
@@ -474,11 +585,11 @@ func TestAppImportExport(t *testing.T) {
 
 	defer func() {
 		newDB.Close()
-		os.RemoveAll(newDir)
+		_ = os.RemoveAll(newDir)
 	}()
 
 	newApp := NewCetChainApp(log.NewNopLogger(), newDB, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", newApp.Name())
+	require.Equal(t, "SimApp", newApp.Name())
 
 	var genesisState simapp.GenesisState
 	err = app.cdc.UnmarshalJSON(appState, &genesisState)
@@ -486,11 +597,11 @@ func TestAppImportExport(t *testing.T) {
 		panic(err)
 	}
 
-	ctxB := newApp.NewContext(true, abci.Header{})
+	ctxB := newApp.NewContext(true, abci.Header{Height: app.LastBlockHeight()})
 	newApp.mm.InitGenesis(ctxB, genesisState)
 
 	fmt.Printf("Comparing stores...\n")
-	ctxA := app.NewContext(true, abci.Header{})
+	ctxA := app.NewContext(true, abci.Header{Height: app.LastBlockHeight()})
 
 	type StoreKeysPrefixes struct {
 		A        sdk.StoreKey
@@ -501,8 +612,10 @@ func TestAppImportExport(t *testing.T) {
 	storeKeysPrefixes := []StoreKeysPrefixes{
 		{app.keyMain, newApp.keyMain, [][]byte{}},
 		{app.keyAccount, newApp.keyAccount, [][]byte{}},
-		{app.keyStaking, newApp.keyStaking, [][]byte{staking.UnbondingQueueKey,
-			staking.RedelegationQueueKey, staking.ValidatorQueueKey}}, // ordering may change but it doesn't matter
+		{app.keyStaking, newApp.keyStaking,
+			[][]byte{
+				staking.UnbondingQueueKey, staking.RedelegationQueueKey, staking.ValidatorQueueKey,
+			}}, // ordering may change but it doesn't matter
 		{app.keySlashing, newApp.keySlashing, [][]byte{}},
 		//{app.keyMint, newApp.keyMint, [][]byte{}},
 		{app.keyDistr, newApp.keyDistr, [][]byte{}},
@@ -545,10 +658,31 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", app.Name())
+	require.Equal(t, "SimApp", app.Name())
 
 	// Run randomized simulation
-	stopEarly, err := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
+	stopEarly, params, simErr := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
+
+	// export state and params before the simulation error is checked
+	if exportStatePath != "" {
+		fmt.Println("Exporting app state...")
+		appState, _, err := app.ExportAppStateAndValidators(false, nil)
+		require.NoError(t, err)
+
+		err = ioutil.WriteFile(exportStatePath, []byte(appState), 0644)
+		require.NoError(t, err)
+	}
+
+	if exportParamsPath != "" {
+		fmt.Println("Exporting simulation params...")
+		paramsBz, err := json.MarshalIndent(params, "", " ")
+		require.NoError(t, err)
+
+		err = ioutil.WriteFile(exportParamsPath, paramsBz, 0644)
+		require.NoError(t, err)
+	}
+
+	require.NoError(t, simErr)
 
 	if commit {
 		// for memdb:
@@ -557,8 +691,6 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		fmt.Println(db.Stats()["leveldb.stats"])
 		fmt.Println("GoLevelDB cached block size", db.Stats()["leveldb.cachedblock"])
 	}
-
-	require.Nil(t, err)
 
 	if stopEarly {
 		// we can't export or import a zero-validator genesis
@@ -584,13 +716,13 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}()
 
 	newApp := NewCetChainApp(log.NewNopLogger(), newDB, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", newApp.Name())
+	require.Equal(t, "SimApp", newApp.Name())
 	newApp.InitChain(abci.RequestInitChain{
 		AppStateBytes: appState,
 	})
 
 	// Run randomized simulation on imported app
-	_, err = simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, newApp))
+	_, _, err = simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, newApp))
 	require.Nil(t, err)
 }
 
@@ -612,24 +744,16 @@ func TestAppStateDeterminism(t *testing.T) {
 			db := dbm.NewMemDB()
 			app := NewCetChainApp(logger, db, nil, true, 0)
 
-			// run randomized simulation
+			// Run randomized simulation
 			simulation.SimulateFromSeed(
 				t, os.Stdout, app.BaseApp, appStateFn, seed,
-				testAndRunTxs(app),
-				[]sdk.Invariant{},
-				50,
-				100,
-				true,
-				false,
-				false,
-				false,
-				app.ModuleAccountAddrs(),
+				testAndRunTxs(app), []sdk.Invariant{},
+				50, 100, 0,
+				false, true, false, false, false, app.ModuleAccountAddrs(),
 			)
-
 			appHash := app.LastCommitID().Hash
 			appHashList[j] = appHash
 		}
-
 		for k := 1; k < numTimesToRunPerSeed; k++ {
 			require.Equal(t, appHashList[0], appHashList[k], "appHash list: %v", appHashList)
 		}
@@ -647,15 +771,47 @@ func BenchmarkInvariants(b *testing.B) {
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0)
+	exportParams := exportParamsPath != ""
 
 	// 2. Run parameterized simulation (w/o invariants)
-	_, err := simulation.SimulateFromSeed(
+	_, params, simErr := simulation.SimulateFromSeed(
 		b, ioutil.Discard, app.BaseApp, appStateFn, seed, testAndRunTxs(app),
-		[]sdk.Invariant{}, numBlocks, blockSize, commit, lean, onOperation, false,
-		app.ModuleAccountAddrs(),
+		[]sdk.Invariant{}, numBlocks, exportParamsHeight, blockSize,
+		exportParams, commit, lean, onOperation, false, app.ModuleAccountAddrs(),
 	)
-	if err != nil {
-		fmt.Println(err)
+
+	// export state and params before the simulation error is checked
+	if exportStatePath != "" {
+		fmt.Println("Exporting app state...")
+		appState, _, err := app.ExportAppStateAndValidators(false, nil)
+		if err != nil {
+			fmt.Println(err)
+			b.Fail()
+		}
+		err = ioutil.WriteFile(exportStatePath, []byte(appState), 0644)
+		if err != nil {
+			fmt.Println(err)
+			b.Fail()
+		}
+	}
+
+	if exportParamsPath != "" {
+		fmt.Println("Exporting simulation params...")
+		paramsBz, err := json.MarshalIndent(params, "", " ")
+		if err != nil {
+			fmt.Println(err)
+			b.Fail()
+		}
+
+		err = ioutil.WriteFile(exportParamsPath, paramsBz, 0644)
+		if err != nil {
+			fmt.Println(err)
+			b.Fail()
+		}
+	}
+
+	if simErr != nil {
+		fmt.Println(simErr)
 		b.FailNow()
 	}
 

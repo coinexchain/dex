@@ -88,6 +88,8 @@ func makeTestCodec() *codec.Codec {
 	cdc.RegisterConcrete(&auth.BaseAccount{}, "test/staking/BaseAccount", nil)
 	cdc.RegisterInterface((*exported.ModuleAccountI)(nil), nil)
 	cdc.RegisterConcrete(&supply.ModuleAccount{}, "test/staking/ModuleAccount", nil)
+	cdc.RegisterInterface((*exported.SupplyI)(nil), nil)
+	cdc.RegisterConcrete(&supply.Supply{}, "test/supply/supply", nil)
 	codec.RegisterCrypto(cdc)
 
 	return cdc
