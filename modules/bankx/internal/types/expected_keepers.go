@@ -17,7 +17,7 @@ type ExpectedAccountXKeeper interface {
 type ExpectedAssetStatusKeeper interface {
 	IsTokenForbidden(ctx sdk.Context, symbol string) bool
 	IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool
-	SetTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error
+	UpdateTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error
 }
 
 // SupplyKeeper defines the expected supply keeper

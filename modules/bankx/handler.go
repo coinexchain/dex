@@ -146,7 +146,7 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 	ax := k.Axk.GetOrCreateAccountX(ctx, toAddr)
 	for _, coin := range amt {
 		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
-		if err := k.Tk.SetTokenSendLock(ctx, coin.Denom, coin.Amount, true); err != nil {
+		if err := k.Tk.UpdateTokenSendLock(ctx, coin.Denom, coin.Amount, true); err != nil {
 			return err.Result()
 		}
 	}

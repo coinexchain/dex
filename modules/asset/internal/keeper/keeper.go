@@ -401,7 +401,7 @@ type TokenKeeper interface {
 	IsTokenExists(ctx sdk.Context, symbol string) bool
 	IsTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool
 	IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool
-	SetTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error
+	UpdateTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error
 }
 
 var _ TokenKeeper = (*BaseTokenKeeper)(nil)
@@ -526,8 +526,8 @@ func (keeper BaseTokenKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol s
 	return true
 }
 
-// SetTokenSendLock - set token SendLock amount
-func (keeper BaseTokenKeeper) SetTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error {
+// UpdateTokenSendLock - set token SendLock amount
+func (keeper BaseTokenKeeper) UpdateTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error {
 	token := keeper.GetToken(ctx, symbol)
 	if token == nil {
 		return types.ErrTokenNotFound(symbol)
