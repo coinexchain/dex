@@ -9,7 +9,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+
+	"github.com/coinexchain/dex/modules/authx"
+	distrx "github.com/coinexchain/dex/modules/distributionx/types"
 )
 
 type OrderedBasicManager struct {
@@ -37,17 +43,35 @@ func (bm OrderedBasicManager) RegisterRESTRoutes(ctx context.CLIContext, rtr *mu
 func (bm OrderedBasicManager) AddTxCommands(rootTxCmd *cobra.Command, cdc *codec.Codec) {
 	for _, m := range bm.modules {
 		if cmd := m.GetTxCmd(cdc); cmd != nil {
-			rootTxCmd.AddCommand(cmd)
+			if !isDuplicatedTxCmd(m.Name()) {
+				rootTxCmd.AddCommand(cmd)
+			}
 		}
 	}
+}
+
+func isDuplicatedTxCmd(module string) bool {
+	return module == auth.ModuleName || //mounted
+		module == distrx.ModuleName || //mounted
+		module == bank.ModuleName || //overwritten
+		module == staking.ModuleName //overwritten
+
 }
 
 func (bm OrderedBasicManager) AddQueryCommands(rootQueryCmd *cobra.Command, cdc *codec.Codec) {
 	for _, m := range bm.modules {
 		if cmd := m.GetQueryCmd(cdc); cmd != nil {
-			rootQueryCmd.AddCommand(cmd)
+			if !isDuplicatedQueryCmd(m.Name()) {
+				rootQueryCmd.AddCommand(cmd)
+			}
 		}
 	}
+}
+
+func isDuplicatedQueryCmd(module string) bool {
+	return module == auth.ModuleName || //overwritten
+		module == staking.ModuleName || //overwritten
+		module == authx.ModuleName //mounted
 }
 
 func (bm OrderedBasicManager) ValidateGenesis(genesis map[string]json.RawMessage) error {

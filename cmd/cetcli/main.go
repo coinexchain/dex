@@ -17,14 +17,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	staking_cli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 
 	"github.com/coinexchain/dex/app"
 	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
+	authxcmd "github.com/coinexchain/dex/modules/authx/client/cli"
 	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
 	distrxcmd "github.com/coinexchain/dex/modules/distributionx/client/cli"
 	dex "github.com/coinexchain/dex/types"
@@ -112,7 +111,7 @@ func queryCmd(cdc *amino.Codec) *cobra.Command {
 	}
 
 	queryCmd.AddCommand(
-		authcmd.GetAccountCmd(cdc),
+		authxcmd.GetAccountXCmd(cdc),
 		client.LineBreak,
 		rpc.ValidatorCommand(cdc),
 		rpc.BlockCommand(),
@@ -149,16 +148,6 @@ func txCmd(cdc *amino.Codec) *cobra.Command {
 	// add modules' tx commands
 	app.ModuleBasics.AddTxCommands(txCmd, cdc)
 
-	// remove auth and bank commands as they're mounted under the root tx command
-	var cmdsToRemove []*cobra.Command
-
-	for _, cmd := range txCmd.Commands() {
-		if cmd.Use == auth.ModuleName || cmd.Use == bank.ModuleName {
-			cmdsToRemove = append(cmdsToRemove, cmd)
-		}
-	}
-
-	txCmd.RemoveCommand(cmdsToRemove...)
 	FixUnknownFlagIssue(txCmd)
 
 	return txCmd

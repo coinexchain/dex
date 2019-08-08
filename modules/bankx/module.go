@@ -2,7 +2,6 @@ package bankx
 
 import (
 	"encoding/json"
-	"github.com/coinexchain/dex/modules/bankx/client/cli"
 	"github.com/coinexchain/dex/modules/bankx/client/rest"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -58,7 +57,7 @@ func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Ro
 
 // get the root tx command of this module
 func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetTxCmd(cdc)
+	return nil
 }
 
 // get the root query command of this module

@@ -88,27 +88,32 @@ func (ik impKeeper) IsMarketExist(ctx sdk.Context, symbol string) bool {
 
 func init() {
 	modules := []module.AppModuleBasic{
-		genaccounts.AppModuleBasic{},
-		genutil.AppModuleBasic{},
-		params.AppModuleBasic{},
+		// modules added additionally
+		alias.AppModuleBasic{},
+		asset.AppModuleBasic{},
+		bancorlite.AppModuleBasic{},
+		comment.AppModuleBasic{},
+		incentive.AppModuleBasic{},
+		market.AppModuleBasic{},
+
+		//modules wraps those of cosmos
 		authx.AppModuleBasic{}, //before `bank` to override `/bank/balances/{address}`
 		bankx.AppModuleBasic{},
-		bank.AppModuleBasic{},
-		distr.AppModuleBasic{},
-		supply.AppModuleBasic{},
-		AuthModuleBasic{},
-		stakingx.AppModuleBasic{}, //before `staking` to override `cetcli q staking pool` command
-		StakingModuleBasic{},
-		SlashingModuleBasic{},
-		CrisisModuleBasic{},
-		GovModuleBasic{gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler)},
 		distributionx.AppModuleBasic{},
-		incentive.AppModuleBasic{},
-		asset.AppModuleBasic{},
-		market.AppModuleBasic{},
-		bancorlite.AppModuleBasic{},
-		alias.AppModuleBasic{},
-		comment.AppModuleBasic{},
+		stakingx.AppModuleBasic{}, //before `staking` to override `cetcli q staking pool` command
+
+		//modules of cosmos
+		AuthModuleBasic{},
+		bank.AppModuleBasic{},
+		CrisisModuleBasic{},
+		distr.AppModuleBasic{},
+		genaccounts.AppModuleBasic{},
+		genutil.AppModuleBasic{},
+		GovModuleBasic{gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler)},
+		params.AppModuleBasic{},
+		SlashingModuleBasic{},
+		StakingModuleBasic{},
+		supply.AppModuleBasic{},
 	}
 
 	ModuleBasics = NewOrderedBasicManager(modules)

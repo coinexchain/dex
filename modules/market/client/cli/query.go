@@ -141,7 +141,6 @@ Example :
 		},
 	}
 
-	markQueryOrDelCmd(cmd)
 	return cmd
 }
 
