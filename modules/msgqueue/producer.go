@@ -39,7 +39,7 @@ type MsgSender interface {
 	IsOpenToggle() bool
 }
 
-type Producer struct {
+type producer struct {
 	toggle    bool
 	subTopics map[string]struct{}
 	*kafka.Writer
@@ -52,8 +52,8 @@ type config struct {
 	Topics  string
 }
 
-func NewProducer() Producer {
-	p := Producer{
+func NewProducer() MsgSender {
+	p := producer{
 		subTopics: make(map[string]struct{}),
 	}
 
@@ -64,7 +64,7 @@ func NewProducer() Producer {
 	return p
 }
 
-func (p *Producer) setParam(data config) {
+func (p *producer) setParam(data config) {
 	if len(data.Brokers) == 0 || len(data.Topics) == 0 {
 		return
 	}
@@ -90,7 +90,7 @@ func (p *Producer) setParam(data config) {
 	p.toggle = viper.GetBool(FeatureToggle)
 }
 
-func (p *Producer) setStdIO(ioString string) error {
+func (p *producer) setStdIO(ioString string) error {
 	if !strings.Contains(ioString, "stdout") {
 		return fmt.Errorf("Unknow output identifier ")
 	}
@@ -99,7 +99,7 @@ func (p *Producer) setStdIO(ioString string) error {
 	return nil
 }
 
-func (p *Producer) setFileWrite(filePath string) error {
+func (p *producer) setFileWrite(filePath string) error {
 	if s, err := os.Stat(filePath); !os.IsExist(err) {
 		file, err := os.Create(filePath)
 		if err != nil {
@@ -120,7 +120,7 @@ func (p *Producer) setFileWrite(filePath string) error {
 	return nil
 }
 
-func (p *Producer) setKafka(brokers string) {
+func (p *producer) setKafka(brokers string) {
 	bs := strings.Split(brokers, ",")
 	p.Writer = kafka.NewWriter(kafka.WriterConfig{
 		Brokers: bs,
@@ -130,7 +130,7 @@ func (p *Producer) setKafka(brokers string) {
 	p.mode = kaMode
 }
 
-func (p *Producer) close() {
+func (p *producer) close() {
 	switch p.mode {
 	case kaMode:
 		if err := p.Writer.Close(); err != nil {
@@ -145,7 +145,7 @@ func (p *Producer) close() {
 	}
 }
 
-func (p Producer) SendMsg(key []byte, v []byte) {
+func (p producer) SendMsg(key []byte, v []byte) {
 	switch p.mode {
 	case kaMode:
 		p.WriteMessages(context.Background(), kafka.Message{
@@ -160,7 +160,7 @@ func (p Producer) SendMsg(key []byte, v []byte) {
 
 }
 
-func (p Producer) IsSubscribed(topic string) bool {
+func (p producer) IsSubscribed(topic string) bool {
 	if !p.toggle {
 		return false
 	}
@@ -168,6 +168,6 @@ func (p Producer) IsSubscribed(topic string) bool {
 	return ok
 }
 
-func (p Producer) IsOpenToggle() bool {
+func (p producer) IsOpenToggle() bool {
 	return p.toggle
 }

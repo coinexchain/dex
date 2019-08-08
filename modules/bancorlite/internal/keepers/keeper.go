@@ -145,14 +145,14 @@ type Keeper struct {
 	Bxk         types.ExpectedBankxKeeper
 	Axk         types.ExpectedAssetStatusKeeper
 	Mk          types.ExpectedMarketKeeper
-	MsgProducer msgqueue.Producer
+	MsgProducer msgqueue.MsgSender
 }
 
 func NewKeeper(bik *BancorInfoKeeper,
 	bxk types.ExpectedBankxKeeper,
 	axk types.ExpectedAssetStatusKeeper,
 	mk types.ExpectedMarketKeeper,
-	mq msgqueue.Producer) Keeper {
+	mq msgqueue.MsgSender) Keeper {
 	return Keeper{
 		Bik:         bik,
 		Bxk:         bxk,

@@ -175,7 +175,7 @@ type CetChainApp struct {
 	paramsKeeper    params.Keeper
 	marketKeeper    market.Keeper
 	bancorKeeper    bancorlite.Keeper
-	msgQueProducer  msgqueue.Producer
+	msgQueProducer  msgqueue.MsgSender
 	aliasKeeper     alias.Keeper
 	commentKeeper   comment.Keeper
 

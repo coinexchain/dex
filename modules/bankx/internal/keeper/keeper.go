@@ -20,12 +20,12 @@ type Keeper struct {
 	Ak            auth.AccountKeeper
 	Tk            types.ExpectedAssetStatusKeeper
 	Sk            types.SupplyKeeper
-	MsgProducer   msgqueue.Producer
+	MsgProducer   msgqueue.MsgSender
 }
 
 func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	bk bank.BaseKeeper, ak auth.AccountKeeper,
-	tk types.ExpectedAssetStatusKeeper, sk types.SupplyKeeper, msgProducer msgqueue.Producer) Keeper {
+	tk types.ExpectedAssetStatusKeeper, sk types.SupplyKeeper, msgProducer msgqueue.MsgSender) Keeper {
 
 	return Keeper{
 		ParamSubspace: paramSubspace.WithKeyTable(types.ParamKeyTable()),
