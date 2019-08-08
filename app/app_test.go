@@ -35,11 +35,6 @@ import (
 
 const testChainID = "c1"
 
-func TestMain(m *testing.M) {
-	dex.InitSdkConfig()
-	os.Exit(m.Run())
-}
-
 type genesisStateCallback func(state *GenesisState)
 
 func newStdTxBuilder() *testutil.StdTxBuilder {
@@ -68,6 +63,7 @@ func addGenesisAccounts(genState *GenesisState, accs ...auth.BaseAccount) {
 
 	addAccountForDanglingCET(amount, genState)
 }
+
 func addModuleAccounts(genState *GenesisState) {
 	maccs := []*supply.ModuleAccount{
 		supply.NewEmptyModuleAccount(auth.FeeCollectorName),
@@ -123,6 +119,7 @@ func initAppWithAccounts(accs ...auth.BaseAccount) *CetChainApp {
 		addModuleAccounts(genState)
 	})
 }
+
 func cetToken() asset.Token {
 	cetOwnerAddr, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	return &asset.BaseToken{
@@ -139,6 +136,11 @@ func cetToken() asset.Token {
 		TotalMint:        sdk.ZeroInt(),
 		IsForbidden:      false,
 	}
+}
+
+func TestMain(m *testing.M) {
+	dex.InitSdkConfig()
+	os.Exit(m.Run())
 }
 
 func TestSend(t *testing.T) {
@@ -170,6 +172,7 @@ func TestSend(t *testing.T) {
 	result = app.Deliver(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
 }
+
 func TestBankSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
@@ -195,8 +198,8 @@ func TestBankSend(t *testing.T) {
 
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeUnknownRequest, result.Code)
-
 }
+
 func TestMemo(t *testing.T) {
 	key, _, addr := testutil.KeyPubAddr()
 	acc0 := auth.BaseAccount{Address: addr, Coins: dex.NewCetCoins(1000)}
@@ -389,7 +392,6 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 }
 
 func TestDonateToCommunityPool(t *testing.T) {
-
 	key, _, fromAddr := testutil.KeyPubAddr()
 	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 10e8))
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
@@ -577,5 +579,4 @@ func TestMultiSendMemoRequired(t *testing.T) {
 		AccNumSeqKey(0, 0, key1).AccNumSeqKey(1, 0, key2).Build()
 	result := app.Deliver(tx)
 	require.Equal(t, bankx.CodeMemoMissing, result.Code)
-
 }
