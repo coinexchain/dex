@@ -43,7 +43,7 @@ func TestEndBlocker(t *testing.T) {
 
 	input.axk.InsertUnlockedCoinsQueue(input.ctx, input.ctx.BlockHeader().Time.Unix()-1, addr1)
 	input.axk.InsertUnlockedCoinsQueue(input.ctx, input.ctx.BlockHeader().Time.Unix()+1, addr2)
-	EndBlocker(input.ctx, input.axk, input.ak)
+	EndBlocker(input.ctx, input.axk, input.ak, input.tk)
 	acc1 = input.ak.GetAccount(input.ctx, addr1)
 	require.Equal(t, int64(21), acc1.GetCoins().AmountOf("cet").Int64())
 	acc2 = input.ak.GetAccount(input.ctx, addr2)

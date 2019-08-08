@@ -413,7 +413,7 @@ func (app *CetChainApp) InitModules() {
 	modules := []module.AppModule{
 		genaccounts.NewAppModule(app.accountKeeper),
 		auth.NewAppModule(app.accountKeeper),
-		authx.NewAppModule(app.accountXKeeper),
+		authx.NewAppModule(app.accountXKeeper, app.tokenKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		bankx.NewAppModule(app.bankxKeeper),
 		crisis.NewAppModule(&app.crisisKeeper),

@@ -7,7 +7,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx/types"
 )
 
-func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeeper) {
+func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeeper, tk ExpectedTokenKeeper) {
 	currentTime := ctx.BlockHeader().Time.Unix()
 	iterator := aux.UnlockedCoinsQueueIterator(ctx, currentTime)
 	defer iterator.Close()
@@ -19,7 +19,7 @@ func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeepe
 				//always account exist
 				continue
 			}
-			withdrawUnlockedCoins(&acc, currentTime, ctx, aux, keeper)
+			withdrawUnlockedCoins(&acc, currentTime, ctx, aux, keeper, tk)
 			aux.RemoveFromUnlockedCoinsQueueByKey(ctx, iterator.Key())
 		}
 	}
@@ -33,7 +33,7 @@ type NotificationUnlock struct {
 	Coins       sdk.Coins         `json:"coins" yaml:"coins"`
 }
 
-func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper) {
+func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper, tk ExpectedTokenKeeper) {
 	var unlocked = sdk.Coins{}
 	var stillLocked types.LockedCoins
 	for _, c := range accx.LockedCoins {
@@ -49,6 +49,9 @@ func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx
 	newCoins := acc.GetCoins().Add(unlocked)
 	_ = acc.SetCoins(newCoins)
 	keeper.SetAccount(ctx, acc)
+	for _, coin := range unlocked {
+		_ = tk.UpdateTokenSendLock(ctx, coin.Denom, coin.Amount, false)
+	}
 
 	accx.LockedCoins = stillLocked
 	kx.SetAccountX(ctx, *accx)

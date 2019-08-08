@@ -1,6 +1,7 @@
 package authx
 
 import (
+	"github.com/coinexchain/dex/modules/asset"
 	"time"
 
 	"github.com/coinexchain/dex/modules/authx/types"
@@ -25,6 +26,7 @@ type testInput struct {
 	ak  auth.AccountKeeper
 	sk  supply.Keeper
 	cdc *codec.Codec
+	tk  ExpectedTokenKeeper
 }
 
 func setupTestInput() testInput {
@@ -36,9 +38,10 @@ func setupTestInput() testInput {
 	codec.RegisterCrypto(cdc)
 	supply.RegisterCodec(cdc)
 
+	assetKey := sdk.NewKVStoreKey("asset")
 	authXKey := sdk.NewKVStoreKey("authXKey")
 	authKey := sdk.NewKVStoreKey("authKey")
-	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
+	keySupply := sdk.NewKVStoreKey("supply")
 	skey := sdk.NewKVStoreKey("params")
 	tkey := sdk.NewTransientStoreKey("transient_params")
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey, "") // TODO
@@ -49,7 +52,7 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(tkey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keySupply, sdk.StoreTypeIAVL, db)
-	ms.LoadLatestVersion()
+	_ = ms.LoadLatestVersion()
 
 	maccPerms := map[string][]string{
 		types.ModuleName: nil,
@@ -58,9 +61,10 @@ func setupTestInput() testInput {
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, map[string]bool{})
 	supplyKeeper := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
+	tk := asset.NewBaseTokenKeeper(cdc, assetKey)
 
 	axk := NewKeeper(cdc, authXKey, paramsKeeper.Subspace(DefaultParamspace), supplyKeeper, ak, "")
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Time: time.Unix(1560334620, 0)}, false, log.NewNopLogger())
 
-	return testInput{ctx: ctx, axk: axk, ak: ak, sk: supplyKeeper, cdc: cdc}
+	return testInput{ctx: ctx, axk: axk, ak: ak, sk: supplyKeeper, cdc: cdc, tk: tk}
 }

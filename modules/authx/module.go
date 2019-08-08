@@ -71,12 +71,14 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	axk AccountXKeeper
+	tk  ExpectedTokenKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(axk AccountXKeeper) AppModule {
+func NewAppModule(axk AccountXKeeper, tk ExpectedTokenKeeper) AppModule {
 	return AppModule{
 		axk: axk,
+		tk:  tk,
 	}
 }
 
@@ -125,6 +127,6 @@ func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // module end-block
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	EndBlocker(ctx, am.axk, am.axk.ak)
+	EndBlocker(ctx, am.axk, am.axk.ak, am.tk)
 	return []abci.ValidatorUpdate{}
 }
