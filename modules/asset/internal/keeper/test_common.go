@@ -53,6 +53,8 @@ func createTestInput() testInput {
 
 	// account permissions
 	maccPerms := map[string][]string{
+		auth.FeeCollectorName:     nil,
+		authx.ModuleName:          nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		types.ModuleName:          {supply.Burner, supply.Minter},

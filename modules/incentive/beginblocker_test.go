@@ -32,6 +32,9 @@ func (k fakeAssetStatusKeeper) IsTokenForbidden(ctx sdk.Context, symbol string) 
 func (k fakeAssetStatusKeeper) IsForbiddenByTokenIssuer(ctx sdk.Context, symbol string, addr sdk.AccAddress) bool {
 	return false
 }
+func (k fakeAssetStatusKeeper) UpdateTokenSendLock(ctx sdk.Context, symbol string, amount sdk.Int, lock bool) sdk.Error {
+	return nil
+}
 
 func defaultContext() (sdk.Context, *codec.Codec, Keeper, auth.AccountKeeper) {
 	cdc := codec.New()
