@@ -77,7 +77,7 @@ func setupTestInput() testInput {
 	//ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
 
 	axk := authx.NewKeeper(cdc, authxKey, paramsKeeper.Subspace(authx.DefaultParamspace), sk, ak, "")
-	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, sk, msgqueue.Producer{})
+	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, asset.BaseTokenKeeper{}, sk, msgqueue.NewProducer())
 	distrKeeper := distribution.NewKeeper(cdc, distrKey, paramsKeeper.Subspace(distribution.DefaultParamspace),
 		staking.Keeper{}, sk, distribution.DefaultCodespace, auth.FeeCollectorName, map[string]bool{})
 
