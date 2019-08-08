@@ -9,7 +9,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market/internal/types"
-	"github.com/coinexchain/dex/modules/msgqueue"
+	"github.com/coinexchain/dex/msgqueue"
 )
 
 var (

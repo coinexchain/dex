@@ -1,11 +1,12 @@
 package authx_test
 
 import (
+	"time"
+
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/msgqueue"
-	"time"
+	"github.com/coinexchain/dex/msgqueue"
 
 	"github.com/coinexchain/dex/modules/authx/types"
 
@@ -15,13 +16,14 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	dex "github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 type testInput struct {

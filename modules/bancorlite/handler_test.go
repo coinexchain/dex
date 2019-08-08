@@ -4,12 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -21,12 +15,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
-	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/msgqueue"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+
+	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 type testInput struct {

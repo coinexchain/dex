@@ -24,7 +24,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	types2 "github.com/coinexchain/dex/modules/authx/types"
 	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
-	"github.com/coinexchain/dex/modules/msgqueue"
+	"github.com/coinexchain/dex/msgqueue"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )

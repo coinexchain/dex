@@ -1,12 +1,14 @@
 package keepers
 
 import (
-	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
-	"github.com/coinexchain/dex/modules/msgqueue"
+	"time"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"time"
+
+	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
+	"github.com/coinexchain/dex/msgqueue"
 )
 
 var (

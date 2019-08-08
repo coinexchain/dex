@@ -2,14 +2,13 @@ package keeper
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/stretchr/testify/assert"
-
-	"testing"
 
 	"github.com/stretchr/testify/require"
 
@@ -27,7 +26,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	ax "github.com/coinexchain/dex/modules/authx/types"
 	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
-	"github.com/coinexchain/dex/modules/msgqueue"
+	"github.com/coinexchain/dex/msgqueue"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/coinexchain/dex/types"
 )

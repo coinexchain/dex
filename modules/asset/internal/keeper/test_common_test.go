@@ -1,12 +1,6 @@
 package keeper_test
 
 import (
-	"github.com/coinexchain/dex/modules/asset/internal/keeper"
-	"github.com/coinexchain/dex/modules/asset/internal/types"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/msgqueue"
-	dex "github.com/coinexchain/dex/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,6 +15,13 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+
+	"github.com/coinexchain/dex/modules/asset/internal/keeper"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/msgqueue"
+	dex "github.com/coinexchain/dex/types"
 )
 
 type testInput struct {

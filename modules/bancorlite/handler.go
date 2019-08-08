@@ -3,10 +3,12 @@ package bancorlite
 import (
 	"bytes"
 	"encoding/json"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
-	"github.com/coinexchain/dex/modules/msgqueue"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/coinexchain/dex/msgqueue"
 )
 
 func NewHandler(k Keeper) sdk.Handler {

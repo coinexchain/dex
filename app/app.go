@@ -38,9 +38,9 @@ import (
 	"github.com/coinexchain/dex/modules/distributionx"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/msgqueue"
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/modules/supplyx"
+	"github.com/coinexchain/dex/msgqueue"
 )
 
 const (

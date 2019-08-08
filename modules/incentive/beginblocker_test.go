@@ -1,9 +1,9 @@
 package incentive
 
 import (
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/msgqueue"
+	"os"
+	"testing"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,8 +18,10 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
-	"os"
-	"testing"
+
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/msgqueue"
 
 	dex "github.com/coinexchain/dex/types"
 )

@@ -10,7 +10,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	mtype "github.com/coinexchain/dex/modules/market/internal/types"
-	"github.com/coinexchain/dex/modules/msgqueue"
+	"github.com/coinexchain/dex/msgqueue"
 	"github.com/coinexchain/dex/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
