@@ -2,7 +2,7 @@ package stakingx
 
 import (
 	abci "github.com/tendermint/tendermint/abci/types"
-	dbm "github.com/tendermint/tendermint/libs/db"
+	dbm "github.com/tendermint/tm-db"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -51,7 +51,7 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 	paramsKeeper := params.NewKeeper(cdc, skey, tkey, params.DefaultCodespace)
 
 	ak := auth.NewAccountKeeper(cdc, authKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot)
+	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot, map[string]bool{})
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:     nil,
@@ -62,7 +62,7 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 		gov.ModuleName:            {supply.Burner},
 		asset.ModuleName:          {supply.Minter},
 	}
-	splk := supply.NewKeeper(cdc, supplyKey, ak, bk, supply.DefaultCodespace, maccPerms)
+	splk := supply.NewKeeper(cdc, supplyKey, ak, bk, maccPerms)
 
 	sk := staking.NewKeeper(
 		cdc,
@@ -70,7 +70,7 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 		paramsKeeper.Subspace(staking.DefaultParamspace),
 		staking.DefaultCodespace,
 	)
-	dk := distribution.NewKeeper(cdc, distKey, paramsKeeper.Subspace(distribution.StoreKey), sk, splk, types.DefaultCodespace, auth.FeeCollectorName)
+	dk := distribution.NewKeeper(cdc, distKey, paramsKeeper.Subspace(distribution.StoreKey), sk, splk, types.DefaultCodespace, auth.FeeCollectorName, map[string]bool{})
 	sxk := NewKeeper(paramsKeeper.Subspace(DefaultParamspace), nil, &sk, dk, ak, nil, splk, auth.FeeCollectorName) // TODO
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1}, false, log.NewNopLogger())

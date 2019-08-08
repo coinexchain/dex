@@ -82,7 +82,7 @@ func getWithdrawRewardInfo(dualEvent []abci.Event) []byte {
 	for _, attr := range dualEvent[0].Attributes {
 		if string(attr.Key) == dtypes.AttributeKeyValidator {
 			res.Validator = string(attr.Value)
-		} else if string(attr.Key) == dtypes.AttributeKeyAmount {
+		} else if string(attr.Key) == sdk.AttributeKeyAmount {
 			res.Amount = string(attr.Value)
 		}
 	}
@@ -113,7 +113,7 @@ func getNotificationBeginRedelegation(dualEvent []abci.Event) []byte {
 			res.ValidatorSrc = string(attr.Value)
 		} else if string(attr.Key) == stypes.AttributeKeyDstValidator {
 			res.ValidatorDst = string(attr.Value)
-		} else if string(attr.Key) == stypes.AttributeKeyAmount {
+		} else if string(attr.Key) == sdk.AttributeKeyAmount {
 			res.Amount = string(attr.Value)
 		} else if string(attr.Key) == stypes.AttributeKeyCompletionTime {
 			res.CompletionTime = string(attr.Value)
@@ -143,7 +143,7 @@ func getNotificationBeginUnbonding(dualEvent []abci.Event) []byte {
 	for _, attr := range dualEvent[0].Attributes {
 		if string(attr.Key) == stypes.AttributeKeyValidator {
 			res.Validator = string(attr.Value)
-		} else if string(attr.Key) == stypes.AttributeKeyAmount {
+		} else if string(attr.Key) == sdk.AttributeKeyAmount {
 			res.Amount = string(attr.Value)
 		} else if string(attr.Key) == stypes.AttributeKeyCompletionTime {
 			res.CompletionTime = string(attr.Value)

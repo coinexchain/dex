@@ -4,7 +4,6 @@ import (
 	"github.com/coinexchain/dex/modules/asset"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 	supplyexported "github.com/cosmos/cosmos-sdk/x/supply/exported"
 )
 
@@ -22,7 +21,7 @@ type ExpectBankxKeeper interface {
 
 type ExpectSupplyKeeper interface {
 	GetModuleAccount(ctx sdk.Context, name string) supplyexported.ModuleAccountI
-	GetSupply(ctx sdk.Context) (supply supply.Supply)
+	GetSupply(ctx sdk.Context) (supply supplyexported.SupplyI)
 }
 
 type AssetViewKeeper interface {

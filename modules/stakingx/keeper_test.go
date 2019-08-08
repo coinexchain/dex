@@ -60,7 +60,7 @@ func TestCalcBondPoolStatus(t *testing.T) {
 	bondedAcc = sxk.supplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName)
 	notBondedAcc := sxk.supplyKeeper.GetModuleAccount(ctx, staking.NotBondedPoolName)
 	expectedNonBondableTokens := feePool.CommunityPool.AmountOf("cet").Add(acc.Coins.AmountOf("cet").ToDec())
-	expectedTotalSupply := sxk.supplyKeeper.GetSupply(ctx).Total.AmountOf("cet")
+	expectedTotalSupply := sxk.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf("cet")
 	expectedBondRatio := bondedAcc.GetCoins().AmountOf("cet").ToDec().QuoInt(expectedTotalSupply.Sub(expectedNonBondableTokens.RoundInt()))
 
 	//test

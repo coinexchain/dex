@@ -19,7 +19,7 @@ func NewKeeper(sk supply.Keeper, dk distribution.Keeper) Keeper {
 		dk: dk,
 	}
 }
-func (k Keeper) GetSupply(ctx sdk.Context) supply.Supply {
+func (k Keeper) GetSupply(ctx sdk.Context) supplyexported.SupplyI {
 	return k.sk.GetSupply(ctx)
 }
 

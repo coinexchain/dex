@@ -23,6 +23,7 @@ import (
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -57,9 +58,17 @@ type testnetNodeInfo struct {
 	genFile   string
 }
 
+type GenesisAccountsIterator interface {
+	IterateGenesisAccounts(
+		cdc *codec.Codec,
+		appGenesis map[string]json.RawMessage,
+		iterateFn func(authexported.Account) (stop bool),
+	)
+}
+
 // get cmd to initialize all files for tendermint testnet and application
 func testnetCmd(ctx *server.Context, cdc *codec.Codec,
-	mbm app.OrderedBasicManager, genAccIterator genutil.GenesisAccountsIterator) *cobra.Command {
+	mbm app.OrderedBasicManager, genAccIterator GenesisAccountsIterator) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "testnet",
@@ -115,7 +124,7 @@ func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 }
 
 func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
-	mbm app.OrderedBasicManager, genAccIterator genutil.GenesisAccountsIterator,
+	mbm app.OrderedBasicManager, genAccIterator GenesisAccountsIterator,
 	outputDir, chainID, minGasPrices, nodeDirPrefix, nodeDaemonHome,
 	nodeCLIHome, startingIPAddress string, numValidators int) error {
 
@@ -391,7 +400,7 @@ func collectGenFiles(
 	cdc *codec.Codec, config *tmconfig.Config, chainID string,
 	nodeIDs []string, valPubKeys []crypto.PubKey,
 	numValidators int, outputDir, nodeDirPrefix, nodeDaemonHome string,
-	genAccIterator genutil.GenesisAccountsIterator) error {
+	genAccIterator GenesisAccountsIterator) error {
 
 	var appState json.RawMessage
 	genTime := tmtime.Now()

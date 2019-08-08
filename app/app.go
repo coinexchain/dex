@@ -7,7 +7,7 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
-	dbm "github.com/tendermint/tendermint/libs/db"
+	dbm "github.com/tendermint/tm-db"
 	"github.com/tendermint/tendermint/libs/log"
 
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
@@ -141,7 +141,6 @@ type CetChainApp struct {
 	tkeyStaking  *sdk.TransientStoreKey
 	keySlashing  *sdk.KVStoreKey
 	keyDistr     *sdk.KVStoreKey
-	tkeyDistr    *sdk.TransientStoreKey
 	keyGov       *sdk.KVStoreKey
 	keyParams    *sdk.KVStoreKey
 	tkeyParams   *sdk.TransientStoreKey
@@ -226,7 +225,6 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint, tx
 		keyStaking:     sdk.NewKVStoreKey(staking.StoreKey),
 		tkeyStaking:    sdk.NewTransientStoreKey(staking.TStoreKey),
 		keyDistr:       sdk.NewKVStoreKey(distr.StoreKey),
-		tkeyDistr:      sdk.NewTransientStoreKey(distr.TStoreKey),
 		keySlashing:    sdk.NewKVStoreKey(slashing.StoreKey),
 		keyGov:         sdk.NewKVStoreKey(gov.StoreKey),
 		keyParams:      sdk.NewKVStoreKey(params.StoreKey),
@@ -254,11 +252,11 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.bankKeeper = bank.NewBaseKeeper(
 		app.accountKeeper,
 		app.paramsKeeper.Subspace(bank.DefaultParamspace),
-		bank.DefaultCodespace,
+		bank.DefaultCodespace, app.ModuleAccountAddrs(),
 	)
 
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
-		app.bankKeeper, supply.DefaultCodespace, maccPerms)
+		app.bankKeeper, maccPerms)
 
 	var stakingKeeper staking.Keeper
 
@@ -270,6 +268,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.supplyKeeper,
 		distr.DefaultCodespace,
 		auth.FeeCollectorName,
+		app.ModuleAccountAddrs(),
 	)
 	supplyxKeeper := supplyx.NewKeeper(app.supplyKeeper, app.distrKeeper)
 
@@ -417,7 +416,7 @@ func (app *CetChainApp) InitModules() {
 		authx.NewAppModule(app.accountXKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		bankx.NewAppModule(app.bankxKeeper),
-		crisis.NewAppModule(app.crisisKeeper),
+		crisis.NewAppModule(&app.crisisKeeper),
 		incentive.NewAppModule(app.incentiveKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
@@ -481,7 +480,7 @@ func (app *CetChainApp) InitModules() {
 }
 
 func (app *CetChainApp) replaceEmptyCrisisModule(modules *[]module.AppModule) {
-	crisisWithInvariants := crisis.NewAppModule(app.crisisKeeper)
+	crisisWithInvariants := crisis.NewAppModule(&app.crisisKeeper)
 
 	app.mm.Modules[crisis.ModuleName] = crisisWithInvariants
 
@@ -507,7 +506,7 @@ func registerRoutesWithOrder(modules []module.AppModule, router sdk.Router, quer
 func (app *CetChainApp) mountStores() {
 	app.MountStores(app.keyMain, app.keyAccount, app.keySupply, app.keyStaking, app.keyDistr,
 		app.keySlashing, app.keyGov, app.keyParams,
-		app.tkeyParams, app.tkeyStaking, app.tkeyDistr,
+		app.tkeyParams, app.tkeyStaking,
 		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,
 		app.keyBancor, app.keyAlias, app.keyComment,
 	)

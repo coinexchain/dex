@@ -12,7 +12,7 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	dex "github.com/coinexchain/dex/types"
-	dbm "github.com/tendermint/tendermint/libs/db"
+	dbm "github.com/tendermint/tm-db"
 )
 
 func init() {

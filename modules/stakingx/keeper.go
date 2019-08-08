@@ -81,7 +81,7 @@ func (k Keeper) GetMinMandatoryCommissionRate(ctx sdk.Context) (rate sdk.Dec) {
 
 func (k Keeper) CalcBondPoolStatus(ctx sdk.Context) BondPool {
 
-	total := k.supplyKeeper.GetSupply(ctx).Total.AmountOf(types.CET)
+	total := k.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf(types.CET)
 	var bondPool BondPool
 
 	bondPool.TotalSupply = total
