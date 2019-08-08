@@ -12,9 +12,9 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmconfig "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/cli"
-	dbm "github.com/tendermint/tm-db"
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
+	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
