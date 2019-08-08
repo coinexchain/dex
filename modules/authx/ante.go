@@ -21,10 +21,10 @@ func NewAnteHandler(ak auth.AccountKeeper, supplyKeeper authtypes.SupplyKeeper,
 	axk AccountXKeeper, anteHelper AnteHelper) sdk.AnteHandler {
 
 	ah := auth.NewAnteHandler(ak, supplyKeeper, auth.DefaultSigVerificationGasConsumer)
-	return wrapAnteHandler(ah, axk, anteHelper)
+	return WrapAnteHandler(ah, axk, anteHelper)
 }
 
-func wrapAnteHandler(ah sdk.AnteHandler,
+func WrapAnteHandler(ah sdk.AnteHandler,
 	axk AccountXKeeper, anteHelper AnteHelper) sdk.AnteHandler {
 
 	return func(ctx sdk.Context, tx sdk.Tx, simulate bool) (newCtx sdk.Context, res sdk.Result, abort bool) {

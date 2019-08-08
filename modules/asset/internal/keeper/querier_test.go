@@ -24,7 +24,7 @@ func Test_queryToken(t *testing.T) {
 	query := keeper.NewQuerier(input.tk)
 
 	// no token
-	res, err := query(input.ctx, []string{types.QueryToken}, req)
+	res, err := query(input.ctx, path0, req)
 	require.Error(t, err)
 	require.Nil(t, res)
 
