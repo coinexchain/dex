@@ -2,10 +2,12 @@ package bancorlite
 
 import (
 	"errors"
+	"strings"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"strings"
 )
 
 type GenesisState struct {
@@ -14,10 +16,10 @@ type GenesisState struct {
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params types.Params, BancorInfoMap map[string]keepers.BancorInfo) GenesisState {
+func NewGenesisState(params types.Params, bancorInfoMap map[string]keepers.BancorInfo) GenesisState {
 	return GenesisState{
 		Params:        params,
-		BancorInfoMap: BancorInfoMap,
+		BancorInfoMap: bancorInfoMap,
 	}
 }
 
