@@ -461,7 +461,7 @@ func TestFullAppSimulation(t *testing.T) {
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", app.Name())
+	require.Equal(t, "CoinExChainApp", app.Name())
 
 	// Run randomized simulation
 	_, params, simErr := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
@@ -519,7 +519,7 @@ func TestAppImportExport(t *testing.T) {
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", app.Name())
+	require.Equal(t, "CoinExChainApp", app.Name())
 
 	// Run randomized simulation
 	_, simParams, simErr := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
@@ -568,7 +568,7 @@ func TestAppImportExport(t *testing.T) {
 	}()
 
 	newApp := NewCetChainApp(log.NewNopLogger(), newDB, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", newApp.Name())
+	require.Equal(t, "CoinExChainApp", newApp.Name())
 
 	var genesisState simapp.GenesisState
 	err = app.cdc.UnmarshalJSON(appState, &genesisState)
@@ -637,7 +637,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", app.Name())
+	require.Equal(t, "CoinExChainApp", app.Name())
 
 	// Run randomized simulation
 	stopEarly, params, simErr := simulation.SimulateFromSeed(getSimulateFromSeedInput(t, os.Stdout, app))
@@ -695,7 +695,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}()
 
 	newApp := NewCetChainApp(log.NewNopLogger(), newDB, nil, true, 0, fauxMerkleModeOpt)
-	require.Equal(t, "CetChainApp", newApp.Name())
+	require.Equal(t, "CoinExChainApp", newApp.Name())
 	newApp.InitChain(abci.RequestInitChain{
 		AppStateBytes: appState,
 	})

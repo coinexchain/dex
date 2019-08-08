@@ -7,17 +7,17 @@ SIMAPP = github.com/coinexchain/dex/app
 
 sim-dex-nondeterminism:
 	@echo "Running nondeterminism test..."
-	@go test -mod=readonly $(SIMAPP) -run TestAppStateDeterminism -SimulationEnabled=true -v -timeout 10m
+	@go test -mod=readonly $(SIMAPP) -run TestAppStateDeterminism -Enabled=true -v -timeout 10m
 
 sim-dex-custom-genesis-fast:
 	@echo "Running custom genesis simulation..."
 	@echo "By default, ${HOME}/.cetd/config/genesis.json will be used."
-	@go test -mod=readonly github.com/coinexchain/dex/app -run TestFullAppSimulation -SimulationGenesis=${HOME}/.cetd/config/genesis.json \
-		-SimulationEnabled=true -SimulationNumBlocks=100 -SimulationBlockSize=200 -SimulationCommit=true -SimulationSeed=99 -SimulationPeriod=5 -v -timeout 24h
+	@go test -mod=readonly github.com/coinexchain/dex/app -run TestFullAppSimulation -Genesis=${HOME}/.cetd/config/genesis.json \
+		-Enabled=true -NumBlocks=100 -BlockSize=200 -Commit=true -Seed=99 -Period=5 -v -timeout 24h
 
 sim-dex-fast:
 	@echo "Running quick CoinEx Chain simulation. This may take several minutes..."
-	@go test -mod=readonly github.com/coinexchain/dex/app -run TestFullAppSimulation -SimulationEnabled=true -SimulationNumBlocks=100 -SimulationBlockSize=200 -SimulationCommit=true -SimulationSeed=99 -SimulationPeriod=5 -v -timeout 24h
+	@go test -mod=readonly github.com/coinexchain/dex/app -run TestFullAppSimulation -Enabled=true -NumBlocks=100 -BlockSize=200 -Commit=true -Seed=99 -Period=5 -v -timeout 24h
 
 sim-dex-import-export: runsim
 	@echo "Running CoinEx Chain import/export simulation. This may take several minutes..."
@@ -39,8 +39,8 @@ sim-dex-multi-seed: runsim
 sim-benchmark-invariants:
 	@echo "Running simulation invariant benchmarks..."
 	@go test -mod=readonly github.com/coinexchain/dex/app -benchmem -bench=BenchmarkInvariants -run=^$ \
-	-SimulationEnabled=true -SimulationNumBlocks=1000 -SimulationBlockSize=200 \
-	-SimulationCommit=true -SimulationSeed=57 -v -timeout 24h
+	-Enabled=true -NumBlocks=1000 -BlockSize=200 \
+	-Commit=true -Seed=57 -v -timeout 24h
 
 SIM_NUM_BLOCKS ?= 500
 SIM_BLOCK_SIZE ?= 200
@@ -48,12 +48,12 @@ SIM_COMMIT ?= true
 sim-dex-benchmark:
 	@echo "Running CoinEx Chain benchmark for numBlocks=$(SIM_NUM_BLOCKS), blockSize=$(SIM_BLOCK_SIZE). This may take awhile!"
 	@go test -mod=readonly -benchmem -run=^$$ github.com/coinexchain/dex/app -bench ^BenchmarkFullAppSimulation$$  \
-		-SimulationEnabled=true -SimulationNumBlocks=$(SIM_NUM_BLOCKS) -SimulationBlockSize=$(SIM_BLOCK_SIZE) -SimulationCommit=$(SIM_COMMIT) -timeout 24h
+		-Enabled=true -NumBlocks=$(SIM_NUM_BLOCKS) -BlockSize=$(SIM_BLOCK_SIZE) -Commit=$(SIM_COMMIT) -timeout 24h
 
 sim-dex-profile:
 	@echo "Running CoinEx Chain benchmark for numBlocks=$(SIM_NUM_BLOCKS), blockSize=$(SIM_BLOCK_SIZE). This may take awhile!"
 	@go test -mod=readonly -benchmem -run=^$$ github.com/coinexchain/dex/app -bench ^BenchmarkFullAppSimulation$$ \
-		-SimulationEnabled=true -SimulationNumBlocks=$(SIM_NUM_BLOCKS) -SimulationBlockSize=$(SIM_BLOCK_SIZE) -SimulationCommit=$(SIM_COMMIT) -timeout 24h -cpuprofile cpu.out -memprofile mem.out
+		-Enabled=true -NumBlocks=$(SIM_NUM_BLOCKS) -BlockSize=$(SIM_BLOCK_SIZE) -Commit=$(SIM_COMMIT) -timeout 24h -cpuprofile cpu.out -memprofile mem.out
 
 
 .PHONY: runsim sim-dex-nondeterminism sim-dex-custom-genesis-fast sim-dex-fast sim-dex-import-export \
