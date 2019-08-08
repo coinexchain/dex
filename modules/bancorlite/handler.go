@@ -65,7 +65,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	}
 	k.Bik.Save(ctx, bi)
 
-	m := keepers.MsgBancorCreateForKafka{
+	m := types.MsgBancorCreateForKafka{
 		Owner:            msg.Owner,
 		Stock:            msg.Stock,
 		Money:            msg.Money,
@@ -122,7 +122,7 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
 		return err.Result()
 	}
-	m := keepers.MsgBancorCancelForKafka{
+	m := types.MsgBancorCancelForKafka{
 		Owner:       msg.Owner,
 		Stock:       msg.Stock,
 		Money:       msg.Money,
@@ -194,7 +194,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		side = "buy"
 	}
 
-	m := keepers.MsgBancorTradeInfoForKafka{
+	m := types.MsgBancorTradeInfoForKafka{
 		Sender:      msg.Sender,
 		Stock:       msg.Stock,
 		Money:       msg.Money,
