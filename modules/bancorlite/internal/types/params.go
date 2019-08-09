@@ -3,8 +3,9 @@ package types
 import (
 	"bytes"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/x/params"
 	"math"
+
+	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 const (

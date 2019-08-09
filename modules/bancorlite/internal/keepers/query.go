@@ -1,11 +1,12 @@
 package keepers
 
 import (
-	abcitypes "github.com/tendermint/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 
 // creates a querier for asset REST endpoints
 func NewQuerier(keeper Keeper, cdc *codec.Codec) sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abcitypes.RequestQuery) (res []byte, err sdk.Error) {
+	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
 		case QueryBancorInfo:
 			return queryBancorInfo(ctx, req, keeper)
@@ -28,7 +29,7 @@ type QueryBancorInfoParam struct {
 	Symbol string `json:"symbol"`
 }
 
-func queryBancorInfo(ctx sdk.Context, req abcitypes.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+func queryBancorInfo(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var param QueryBancorInfoParam
 	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &param); err != nil {
 		return nil, sdk.NewError(types.CodeSpaceBancorlite, types.CodeUnMarshalFailed, "failed to parse param")
