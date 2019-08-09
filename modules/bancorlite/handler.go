@@ -65,18 +65,18 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	}
 	k.Bik.Save(ctx, bi)
 
-	m := types.MsgBancorCreateForKafka{
-		Owner:            msg.Owner,
-		Stock:            msg.Stock,
-		Money:            msg.Money,
-		InitPrice:        msg.InitPrice,
-		MaxSupply:        msg.MaxSupply,
-		MaxPrice:         msg.MaxPrice,
-		EnableCancelTime: msg.EnableCancelTime,
-		BlockHeight:      ctx.BlockHeight(),
-	}
+	//m := types.MsgBancorCreateForKafka{
+	//	Owner:            msg.Owner,
+	//	Stock:            msg.Stock,
+	//	Money:            msg.Money,
+	//	InitPrice:        msg.InitPrice,
+	//	MaxSupply:        msg.MaxSupply,
+	//	MaxPrice:         msg.MaxPrice,
+	//	EnableCancelTime: msg.EnableCancelTime,
+	//	BlockHeight:      ctx.BlockHeight(),
+	//}
 
-	fillMsgQueue(ctx, k, KafkaBancorCreate, m)
+	//fillMsgQueue(ctx, k, KafkaBancorCreate, m)
 	fillMsgQueue(ctx, k, KafkaBancorInfo, *bi)
 	//ctx.EventManager().EmitEvents(sdk.Events{
 	//	sdk.NewEvent(
@@ -122,13 +122,13 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
 		return err.Result()
 	}
-	m := types.MsgBancorCancelForKafka{
-		Owner:       msg.Owner,
-		Stock:       msg.Stock,
-		Money:       msg.Money,
-		BlockHeight: ctx.BlockHeight(),
-	}
-	fillMsgQueue(ctx, k, KafkaBancorCancel, m)
+	//m := types.MsgBancorCancelForKafka{
+	//	Owner:       msg.Owner,
+	//	Stock:       msg.Stock,
+	//	Money:       msg.Money,
+	//	BlockHeight: ctx.BlockHeight(),
+	//}
+	//fillMsgQueue(ctx, k, KafkaBancorCancel, m)
 	return sdk.Result{}
 }
 
