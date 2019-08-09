@@ -143,7 +143,12 @@ paths:
         200:
           description: The latest block
           schema:
-            $ref: "#/definitions/BlockQuery"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/BlockQuery"
         500:
           description: Server internal error
   /blocks/{height}:
@@ -165,7 +170,12 @@ paths:
         200:
           description: The block at a specific height
           schema:
-            $ref: "#/definitions/BlockQuery"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/BlockQuery"
         404:
           description: Request block height doesn't
         400:
@@ -220,12 +230,17 @@ paths:
           schema:
             type: object
             properties:
-              block_height:
+              height:
                 type: string
-              validators:
-                type: array
-                items:
-                  $ref: "#/definitions/TendermintValidator"
+              result:
+                type: object
+                properties:
+                  block_height:
+                    type: string
+                  validators:
+                    type: array
+                    items:
+                      $ref: "#/definitions/TendermintValidator"
         404:
           description: Block at height not available
         400:
@@ -251,7 +266,12 @@ paths:
         200:
           description: Tx with the provided hash
           schema:
-            $ref: "#/definitions/BroadcastTxCommitResult"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/BroadcastTxCommitResult"
         404:
           description: Tx not found
         500:
@@ -290,7 +310,12 @@ paths:
         200:
           description: All txs matching the provided events
           schema:
-            $ref: "#/definitions/PaginatedQueryTxs"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/PaginatedQueryTxs"
         400:
           description: Invalid search events
         500:
@@ -493,30 +518,35 @@ paths:
             properties:
               height:
                 type: string
-              address:
-                type: string
-              coins:
-                type: array
-                items:
-                  $ref: "#/definitions/Coin"
-              locked_coins:
-                type: array
-                items:
-                  $ref: "#/definitions/LockedCoin"
-                x-nullable: true
-              frozen_coins:
-                type: array
-                items:
-                  $ref: "#/definitions/Coin"
-                x-nullable: true
-              public_key:
-                $ref: "#/definitions/PublicKey"
-              account_number:
-                type: string
-              sequence:
-                type: string
-              memo_required:
-                type: boolean
+              result:
+                type: object
+                properties:
+                  height:
+                    type: string
+                  address:
+                    type: string
+                  coins:
+                    type: array
+                    items:
+                      $ref: "#/definitions/Coin"
+                  locked_coins:
+                    type: array
+                    items:
+                      $ref: "#/definitions/LockedCoin"
+                    x-nullable: true
+                  frozen_coins:
+                    type: array
+                    items:
+                      $ref: "#/definitions/Coin"
+                    x-nullable: true
+                  public_key:
+                    $ref: "#/definitions/PublicKey"
+                  account_number:
+                    type: string
+                  sequence:
+                    type: string
+                  memo_required:
+                    type: boolean
         204:
           description: No content about this account address
         500:
