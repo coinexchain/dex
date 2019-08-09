@@ -15,7 +15,6 @@ import (
 	"github.com/coinexchain/dex/modules/bancorlite/client/rest"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
-	dex "github.com/coinexchain/dex/types"
 )
 
 // app module basics object
@@ -60,7 +59,6 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	blKeeper keepers.Keeper
-	apc      dex.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object
