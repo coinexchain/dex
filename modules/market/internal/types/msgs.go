@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -16,7 +17,7 @@ const (
 	CreateOrderInfoKey    = "create_order_info"
 	FillOrderInfoKey      = "fill_order_info"
 	CancelOrderInfoKey    = "del_order_info"
-	HeightInfoKey         = "height-info"
+	HeightInfoKey         = "height_info"
 	PricePrecisionInfoKey = "modify-price-precision"
 )
 
@@ -336,8 +337,8 @@ type CancelOrderInfo struct {
 }
 
 type NewHeightInfo struct {
-	Height    int64 `json:"height"`
-	TimeStamp int64 `json:"timestamp"`
+	Height    int64     `json:"height"`
+	TimeStamp time.Time `json:"timestamp"`
 }
 
 type ModifyPricePrecisionInfo struct {
