@@ -143,12 +143,7 @@ paths:
         200:
           description: The latest block
           schema:
-            type: object
-            properties:
-              height:
-                type: string
-              result:
-                $ref: "#/definitions/BlockQuery"
+            $ref: "#/definitions/BlockQuery"
         500:
           description: Server internal error
   /blocks/{height}:
@@ -170,12 +165,7 @@ paths:
         200:
           description: The block at a specific height
           schema:
-            type: object
-            properties:
-              height:
-                type: string
-              result:
-                $ref: "#/definitions/BlockQuery"
+            $ref: "#/definitions/BlockQuery"
         404:
           description: Request block height doesn't
         400:
@@ -266,12 +256,7 @@ paths:
         200:
           description: Tx with the provided hash
           schema:
-            type: object
-            properties:
-              height:
-                type: string
-              result:
-                $ref: "#/definitions/BroadcastTxCommitResult"
+            $ref: "#/definitions/BroadcastTxCommitResult"
         404:
           description: Tx not found
         500:
@@ -310,12 +295,7 @@ paths:
         200:
           description: All txs matching the provided events
           schema:
-            type: object
-            properties:
-              height:
-                type: string
-              result:
-                $ref: "#/definitions/PaginatedQueryTxs"
+            $ref: "#/definitions/PaginatedQueryTxs"
         400:
           description: Invalid search events
         500:
@@ -570,14 +550,9 @@ paths:
         200:
           description: OK
           schema:
-            type: object
-            properties:
-              height:
-                type: string
-              result:
-                type: array
-                items:
-                  $ref: "#/definitions/Delegation"
+            type: array
+            items:
+              $ref: "#/definitions/Delegation"
         400:
           description: Invalid delegator address
         500:
