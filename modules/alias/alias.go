@@ -12,6 +12,7 @@ const (
 
 var (
 	NewBaseKeeper = keepers.NewKeeper
+	DefaultParams = keepers.DefaultParams
 )
 
 type (

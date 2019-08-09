@@ -23,6 +23,7 @@ var (
 	NewLockedCoin              = types.NewLockedCoin
 	NewParams                  = types.NewParams
 	NewAccountX                = types.NewAccountX
+	DefaultParams              = types.DefaultParams
 )
 
 type (

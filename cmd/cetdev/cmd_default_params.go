@@ -14,8 +14,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	"github.com/coinexchain/dex/modules/alias"
 	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bancorlite"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
@@ -43,12 +44,13 @@ func DefaultParamsCmd() *cobra.Command {
 
 func getParamSets() []moduleParamSet {
 	set := []moduleParamSet{
-		toParamSet("authx", types.DefaultParams()),
+		toParamSet("authx", authx.DefaultParams()),
 		toParamSet("bankx", bankx.DefaultParams()),
 		toParamSet("stakingx", stakingx.DefaultParams()),
 		toParamSet("asset", asset.DefaultParams()),
 		toParamSet("market", market.DefaultParams()),
 		toParamSet("bancorlite", bancorlite.DefaultParams()),
+		toParamSet("alias", alias.DefaultParams()),
 	}
 	if viper.GetBool("include-sdk") {
 		set = append(set,
