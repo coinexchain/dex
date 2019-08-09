@@ -5,12 +5,11 @@ import (
 )
 
 func FillDec(s string, dec *sdk.Dec) {
-	defer func() {
-		if r := recover(); r != nil {
-			*dec = sdk.ZeroDec()
-		}
-	}()
-	*dec = sdk.MustNewDecFromStr(s)
+	var err sdk.Error
+	*dec, err = sdk.NewDecFromStr(s)
+	if err != nil {
+		*dec = sdk.ZeroDec()
+	}
 }
 
 // /////////////////////////////////////////////////////////
