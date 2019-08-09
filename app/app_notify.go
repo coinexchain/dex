@@ -2,12 +2,11 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/gov"
+	sltypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -250,24 +249,54 @@ func getNotificationCompleteUnbonding(event abci.Event) []byte {
 	return bytes
 }
 
-func (app *CetChainApp) notifyComplete(events []abci.Event) {
-	fmt.Printf("========== EndBlock events ============\n")
-	fmt.Printf("========== EndBlock events ============\n")
-	fmt.Printf("========== EndBlock events ============\n")
-	fmt.Printf("========== EndBlock events ============\n")
-	addr := app.supplyKeeper.GetModuleAddress(gov.ModuleName).String()
-	fmt.Printf("========== EndBlock events ============ %s\n", addr)
-	for _, event := range events {
-		fmt.Printf("= Event: %s\n", event.Type)
-		for _, attr := range event.Attributes {
-			fmt.Printf("= K: %s; V: %s\n", attr.Key, attr.Value)
+type NotificationSlash struct {
+	Validator string `json:"validator"`
+	Power     string `json:"power"`
+	Reason    string `json:"reason"`
+	Jailed    bool   `json:"jailed"`
+}
+
+func getNotificationSlash(event abci.Event) []byte {
+	var res NotificationSlash
+	for _, attr := range event.Attributes {
+		if string(attr.Key) == sltypes.AttributeKeyAddress {
+			res.Validator = string(attr.Value)
+		} else if string(attr.Key) == sltypes.AttributeKeyPower {
+			res.Power = string(attr.Value)
+		} else if string(attr.Key) == sltypes.AttributeKeyReason {
+			res.Reason = string(attr.Value)
+		} else if string(attr.Key) == sltypes.AttributeKeyJailed {
+			res.Jailed = true
 		}
+	}
+	bytes, errJSON := json.Marshal(res)
+	if errJSON != nil {
+		return []byte{}
+	}
+	return bytes
+}
+
+func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
+	//fmt.Printf("========== EndBlock events ============\n")
+	//fmt.Printf("========== EndBlock events ============\n")
+	//fmt.Printf("========== EndBlock events ============\n")
+	//fmt.Printf("========== EndBlock events ============\n")
+	//addr := app.supplyKeeper.GetModuleAddress(gov.ModuleName).String()
+	//fmt.Printf("========== EndBlock events ============ %s\n", addr)
+	for _, event := range events {
+		//fmt.Printf("= Event: %s\n", event.Type)
+		//for _, attr := range event.Attributes {
+		//	fmt.Printf("= K: %s; V: %s\n", attr.Key, attr.Value)
+		//}
 		if event.Type == stypes.EventTypeCompleteUnbonding {
 			val := getNotificationCompleteUnbonding(event)
 			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_unbonding"), Value: val})
 		} else if event.Type == stypes.EventTypeCompleteRedelegation {
 			val := getNotificationCompleteRedelegation(event)
 			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_redelegation"), Value: val})
+		} else if event.Type == sltypes.EventTypeSlash {
+			val := getNotificationSlash(event)
+			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("slash"), Value: val})
 		}
 	}
 }
@@ -325,13 +354,6 @@ func (app *CetChainApp) notifyComplete(events []abci.Event) {
 //			sdk.EventTypeMessage,
 //			sdk.NewAttribute(types.AttributeKeySender, fromAddr.String()),
 //		),
-
-type NotificationSlash struct {
-	Validator string `json:"validator"`
-	Power     string `json:"power"`
-	Reason    string `json:"reason"`
-	Jailed    bool   `json:"jailed"`
-}
 
 //					types.EventTypeSlash,
 //					sdk.NewAttribute(types.AttributeKeyAddress, consAddr.String()),

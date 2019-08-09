@@ -549,7 +549,7 @@ func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) ab
 	ret := app.mm.EndBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
 		ret.Events = FilterMsgsOnlyKafka(ret.Events)
-		app.notifyComplete(ret.Events)
+		app.notifyEndBlock(ret.Events)
 	}
 	return ret
 }

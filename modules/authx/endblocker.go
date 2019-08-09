@@ -31,6 +31,7 @@ type NotificationUnlock struct {
 	LockedCoins types.LockedCoins `json:"locked_coins"`
 	FrozenCoins sdk.Coins         `json:"frozen_coins"`
 	Coins       sdk.Coins         `json:"coins" yaml:"coins"`
+	Height      int64             `json:"height"`
 }
 
 func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper, tk ExpectedTokenKeeper) {
@@ -63,6 +64,7 @@ func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx
 			LockedCoins: accx.LockedCoins,
 			FrozenCoins: accx.FrozenCoins,
 			Coins:       newCoins,
+			Height:      ctx.BlockHeight(),
 		}
 		bytes, err := json.Marshal(notifyUnlock)
 		if err != nil {
