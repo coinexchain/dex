@@ -19,7 +19,6 @@ import (
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
-	dex "github.com/coinexchain/dex/types"
 )
 
 var msgCdc = types.ModuleCdc
@@ -161,11 +160,10 @@ func TestUnfreezeCoinsForOrder(t *testing.T) {
 	}
 
 	coinFee := sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity)).RoundInt64()
-	refout = fmt.Sprintf("addr : %s, fee : %s", order.Sender, dex.NewCetCoin(coinFee).String())
+	refout = fmt.Sprintf("addr : %s, fee : %d", order.Sender, coinFee)
 	if refout != mockFeeK.records[0] {
 		t.Errorf("Error in unfreezeCoinsForOrder")
 	}
-
 }
 
 func TestRemoveOrders(t *testing.T) {
