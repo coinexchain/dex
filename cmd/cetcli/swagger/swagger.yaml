@@ -1013,20 +1013,25 @@ paths:
           schema:
             type: object
             properties:
-              inflation_rate_change:
+              height:
                 type: string
-              inflation_max:
-                type: string
-              inflation_min:
-                type: string
-              goal_bonded:
-                type: string
-              unbonding_time:
-                type: string
-              max_validators:
-                type: integer
-              bond_denom:
-                type: string
+              result:
+                type: object
+                properties:
+                  inflation_rate_change:
+                    type: string
+                  inflation_max:
+                    type: string
+                  inflation_min:
+                    type: string
+                  goal_bonded:
+                    type: string
+                  unbonding_time:
+                    type: string
+                  max_validators:
+                    type: integer
+                  bond_denom:
+                    type: string
         500:
           description: Internal Server Error
   /slashing/validators/{validatorPubKey}/signing_info:
@@ -1901,9 +1906,13 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Coin"
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
         500:
           description: Internal Server Error
   /distribution/validators/{validatorAddr}/rewards:
