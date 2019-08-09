@@ -379,15 +379,20 @@ paths:
           schema:
             type: object
             properties:
-              coins:
-                type: array
-                items:
-                  $ref: "#/definitions/Coin"
-              locked_coins:
-                type: array
-                items:
-                  $ref: "#/definitions/LockedCoin"
-                x-nullable: true
+              height:
+                type: string
+              result:
+                type: object
+                properties:
+                  coins:
+                    type: array
+                    items:
+                      $ref: "#/definitions/Coin"
+                  locked_coins:
+                    type: array
+                    items:
+                      $ref: "#/definitions/LockedCoin"
+                    x-nullable: true
         204:
           description: There is no data for the requested account
         500:
@@ -939,9 +944,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Delegation"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Delegation"
         400:
           description: Invalid validator address
         500:
@@ -1686,8 +1696,8 @@ paths:
                 properties:
                   min_deposit:
                     type: array
-                      items:
-                        $ref: "#/definitions/Coin"
+                    items:
+                      $ref: "#/definitions/Coin"
                   max_deposit_period:
                     type: string
                     example: "86400000000000"
@@ -1851,7 +1861,7 @@ paths:
                 type: string
               result:
                 type: array
-                  items:
+                items:
                   $ref: "#/definitions/Coin"
         400:
           description: Invalid delegator address
