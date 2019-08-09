@@ -16,10 +16,10 @@ func NewHandler(k Keeper) sdk.Handler {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 
 		switch msg := msg.(type) {
-		case types.MsgBancorTrade:
-			return handleMsgBancorTrade(ctx, k, msg)
 		case types.MsgBancorInit:
 			return handleMsgBancorInit(ctx, k, msg)
+		case types.MsgBancorTrade:
+			return handleMsgBancorTrade(ctx, k, msg)
 		case types.MsgBancorCancel:
 			return handleMsgBancorCancel(ctx, k, msg)
 		default:
@@ -43,8 +43,8 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		!k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
 		return types.ErrNonMarketExist().Result()
 	}
-	coins := sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: msg.MaxSupply}}
-	if err := k.Bxk.FreezeCoins(ctx, msg.Owner, coins); err != nil {
+	suppliedCoins := sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: msg.MaxSupply}}
+	if err := k.Bxk.FreezeCoins(ctx, msg.Owner, suppliedCoins); err != nil {
 		return err.Result()
 	}
 	if err := k.Bxk.DeductFee(ctx, msg.Owner,
