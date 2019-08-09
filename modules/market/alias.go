@@ -31,4 +31,7 @@ type (
 	MarketInfo           = types.MarketInfo
 	MsgCreateOrder       = types.MsgCreateOrder
 	MsgCreateTradingPair = types.MsgCreateTradingPair
+	CreateOrderInfo      = types.CreateOrderInfo
+	FillOrderInfo        = types.FillOrderInfo
+	CancelOrderInfo      = types.CancelOrderInfo
 )

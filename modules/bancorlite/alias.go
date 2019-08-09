@@ -17,5 +17,7 @@ var (
 )
 
 type (
-	Keeper = keepers.Keeper
+	Keeper                     = keepers.Keeper
+	MsgBancorTradeInfoForKafka = types.MsgBancorTradeInfoForKafka
+	MsgBancorInfoForKafka      = types.MsgBancorInfoForKafka
 )

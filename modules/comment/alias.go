@@ -15,5 +15,7 @@ var (
 )
 
 type (
-	Keeper = keepers.Keeper
+	Keeper       = keepers.Keeper
+	TokenComment = types.TokenComment
+	CommentRef   = types.CommentRef
 )
