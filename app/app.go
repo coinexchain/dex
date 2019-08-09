@@ -134,6 +134,7 @@ type CetChainApp struct {
 	cdc       *codec.Codec
 	txDecoder sdk.TxDecoder // unmarshal []byte into sdk.Tx
 	txCount   int64
+	height    int64
 
 	invCheckPeriod uint
 
@@ -519,6 +520,7 @@ func (app *CetChainApp) mountStores() {
 
 // application updates every end block
 func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	app.height = ctx.BlockHeight()
 	PubMsgs = make([]PubMsg, 0, 10000)
 	ret := app.mm.BeginBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
@@ -533,8 +535,7 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 	if app.msgQueProducer.IsOpenToggle() {
 		if ret.Code == uint32(sdk.CodeOK) {
 			ret.Events = FilterMsgsOnlyKafka(ret.Events)
-			app.notifySigners(req, ret.Events)
-			app.notifyInTx(ret.Events)
+			app.notifyTx(req, ret.Events)
 		} else {
 			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
 		}

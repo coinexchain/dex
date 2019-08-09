@@ -113,6 +113,7 @@ type MsgCommentToken struct {
 
 type TokenComment struct {
 	ID          uint64         `json:"id"`
+	Height      int64          `json:"height"`
 	Sender      sdk.AccAddress `json:"sender"`
 	Token       string         `json:"token"`
 	Donation    int64          `json:"donation"`
@@ -156,9 +157,10 @@ func NewMsgCommentToken(
 	}
 }
 
-func NewTokenComment(msg *MsgCommentToken, id uint64) *TokenComment {
+func NewTokenComment(msg *MsgCommentToken, id uint64, height int64) *TokenComment {
 	tokenComment := &TokenComment{
 		ID:          id,
+		Height:      height,
 		Sender:      msg.Sender,
 		Token:       msg.Token,
 		Donation:    msg.Donation,

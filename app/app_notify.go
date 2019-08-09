@@ -2,21 +2,46 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	dtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	stypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-type NotificationForSigners struct {
+type TransferRecord struct {
+	Sender    string `json:"sender"`
+	Recipient string `json:"recipient"`
+	Amount    string `json:"amount"`
+}
+
+type NotificationTx struct {
 	Signers      []sdk.AccAddress `json:"signers"`
-	Recipients   []string         `json:"recipients"`
+	Transfers    []TransferRecord `json:"transfers"`
 	SerialNumber int64            `json:"serial_number"`
 	MsgTypes     []string         `json:"msg_types"`
 	Tx           *auth.StdTx      `json:"tx"`
+	Height       int64            `json:"height"`
+}
+
+func getTransferRecord(dualEvent []abci.Event) TransferRecord {
+	var res TransferRecord
+	for _, attr := range dualEvent[0].Attributes {
+		if string(attr.Key) == "recipient" {
+			res.Recipient = string(attr.Value)
+		} else if string(attr.Key) == "amount" {
+			res.Amount = string(attr.Value)
+		}
+	}
+	for _, attr := range dualEvent[1].Attributes {
+		if string(attr.Key) == sdk.AttributeKeySender {
+			res.Sender = string(attr.Value)
+		}
+	}
+	return res
 }
 
 func getType(myvar interface{}) string {
@@ -27,13 +52,31 @@ func getType(myvar interface{}) string {
 	return t.Name()
 }
 
-func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx, events []abci.Event) {
-	recipients := make([]string, 0, 10)
-	for _, event := range events {
-		for _, attr := range event.Attributes {
-			if string(attr.Key) == "recipient" {
-				recipients = append(recipients, string(attr.Value))
+func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, events []abci.Event) {
+	transfers := make([]TransferRecord, 0, 10)
+	for i := 0; i < len(events); i++ {
+		if events[i].Type == stypes.EventTypeUnbond {
+			if i+1 <= len(events) {
+				val := getNotificationBeginUnbonding(events[i : i+2])
+				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_unbonding"), Value: val})
+				i++
 			}
+		} else if events[i].Type == stypes.EventTypeRedelegate {
+			if i+1 <= len(events) {
+				val := getNotificationBeginRedelegation(events[i : i+2])
+				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_redelegation"), Value: val})
+				i++
+			}
+			//} else if events[i].Type == dtypes.EventTypeWithdrawRewards {
+			//	if i+1 <= len(events) {
+			//		val := getWithdrawRewardInfo(events[i : i+2])
+			//		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("withdraw_reward"), Value: val})
+			//		i++
+			//	}
+		} else if events[i].Type == "transfer" && i+1 <= len(events) {
+			val := getTransferRecord(events[i : i+2])
+			transfers = append(transfers, val)
+			i++
 		}
 	}
 
@@ -55,12 +98,13 @@ func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx, events []abci.E
 		msgTypes[i] = getType(msg)
 	}
 
-	n4s := &NotificationForSigners{
+	n4s := &NotificationTx{
 		Signers:      stdTx.GetSigners(),
-		Recipients:   recipients,
+		Transfers:    transfers,
 		SerialNumber: app.txCount,
 		Tx:           &stdTx,
 		MsgTypes:     msgTypes,
+		Height:       app.height,
 	}
 
 	bytes, errJSON := json.Marshal(n4s)
@@ -68,35 +112,35 @@ func (app *CetChainApp) notifySigners(req abci.RequestDeliverTx, events []abci.E
 		return
 	}
 
-	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_signers"), Value: bytes})
+	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx"), Value: bytes})
 }
 
-type WithdrawRewardInfo struct {
-	Delegator string `json:"delegator"`
-	Validator string `json:"validator"`
-	Amount    string `json:"amount"`
-}
-
-func getWithdrawRewardInfo(dualEvent []abci.Event) []byte {
-	var res WithdrawRewardInfo
-	for _, attr := range dualEvent[0].Attributes {
-		if string(attr.Key) == dtypes.AttributeKeyValidator {
-			res.Validator = string(attr.Value)
-		} else if string(attr.Key) == sdk.AttributeKeyAmount {
-			res.Amount = string(attr.Value)
-		}
-	}
-	for _, attr := range dualEvent[1].Attributes {
-		if string(attr.Key) == sdk.AttributeKeySender {
-			res.Delegator = string(attr.Value)
-		}
-	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
-}
+//type WithdrawRewardInfo struct {
+//	Delegator string `json:"delegator"`
+//	Validator string `json:"validator"`
+//	Amount    string `json:"amount"`
+//}
+//
+//func getWithdrawRewardInfo(dualEvent []abci.Event) []byte {
+//	var res WithdrawRewardInfo
+//	for _, attr := range dualEvent[0].Attributes {
+//		if string(attr.Key) == dtypes.AttributeKeyValidator {
+//			res.Validator = string(attr.Value)
+//		} else if string(attr.Key) == dtypes.AttributeKeyAmount {
+//			res.Amount = string(attr.Value)
+//		}
+//	}
+//	for _, attr := range dualEvent[1].Attributes {
+//		if string(attr.Key) == sdk.AttributeKeySender {
+//			res.Delegator = string(attr.Value)
+//		}
+//	}
+//	bytes, errJSON := json.Marshal(res)
+//	if errJSON != nil {
+//		return []byte{}
+//	}
+//	return bytes
+//}
 
 type NotificationBeginRedelegation struct {
 	Delegator      string `json:"delegator"`
@@ -206,32 +250,18 @@ func getNotificationCompleteUnbonding(event abci.Event) []byte {
 	return bytes
 }
 
-func (app *CetChainApp) notifyInTx(events []abci.Event) {
-	for i := 0; i < len(events); i++ {
-		if events[i].Type == stypes.EventTypeUnbond {
-			if i+1 <= len(events) {
-				val := getNotificationBeginUnbonding(events[i : i+2])
-				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_unbonding"), Value: val})
-				i++
-			}
-		} else if events[i].Type == stypes.EventTypeRedelegate {
-			if i+1 <= len(events) {
-				val := getNotificationBeginRedelegation(events[i : i+2])
-				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_redelegation"), Value: val})
-				i++
-			}
-		} else if events[i].Type == dtypes.EventTypeWithdrawRewards {
-			if i+1 <= len(events) {
-				val := getWithdrawRewardInfo(events[i : i+2])
-				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("withdraw_reward"), Value: val})
-				i++
-			}
-		}
-	}
-}
-
 func (app *CetChainApp) notifyComplete(events []abci.Event) {
+	fmt.Printf("========== EndBlock events ============\n")
+	fmt.Printf("========== EndBlock events ============\n")
+	fmt.Printf("========== EndBlock events ============\n")
+	fmt.Printf("========== EndBlock events ============\n")
+	addr := app.supplyKeeper.GetModuleAddress(gov.ModuleName).String()
+	fmt.Printf("========== EndBlock events ============ %s\n", addr)
 	for _, event := range events {
+		fmt.Printf("= Event: %s\n", event.Type)
+		for _, attr := range event.Attributes {
+			fmt.Printf("= K: %s; V: %s\n", attr.Key, attr.Value)
+		}
 		if event.Type == stypes.EventTypeCompleteUnbonding {
 			val := getNotificationCompleteUnbonding(event)
 			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_unbonding"), Value: val})
@@ -286,3 +316,25 @@ func (app *CetChainApp) notifyComplete(events []abci.Event) {
 //				sdk.NewAttribute(stypes.AttributeKeySrcValidator, dvvTriplet.ValidatorSrcAddress.String()),
 //				sdk.NewAttribute(stypes.AttributeKeyDstValidator, dvvTriplet.ValidatorDstAddress.String()),
 //			),
+//		sdk.NewEvent(
+//			types.EventTypeTransfer,
+//			sdk.NewAttribute(types.AttributeKeyRecipient, toAddr.String()),
+//			sdk.NewAttribute(sdk.AttributeKeyAmount, amt.String()),
+//		),
+//		sdk.NewEvent(
+//			sdk.EventTypeMessage,
+//			sdk.NewAttribute(types.AttributeKeySender, fromAddr.String()),
+//		),
+
+type NotificationSlash struct {
+	Validator string `json:"validator"`
+	Power     string `json:"power"`
+	Reason    string `json:"reason"`
+	Jailed    bool   `json:"jailed"`
+}
+
+//					types.EventTypeSlash,
+//					sdk.NewAttribute(types.AttributeKeyAddress, consAddr.String()),
+//					sdk.NewAttribute(types.AttributeKeyPower, fmt.Sprintf("%d", power)),
+//					sdk.NewAttribute(types.AttributeKeyReason, types.AttributeValueMissingSignature),
+//					sdk.NewAttribute(types.AttributeKeyJailed, consAddr.String()),

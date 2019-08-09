@@ -76,19 +76,19 @@ func Test1(t *testing.T) {
 		t.Errorf("This should be a valid Msg!")
 	}
 
-	tc := NewTokenComment(msg, 108)
+	tc := NewTokenComment(msg, 108, 1000)
 	if msg.ContentType != ShortHanzi || shorthanzi.Text0 != tc.Content || tc.ContentType != UTF8Text {
 		t.Errorf("Invalid Token Comment!")
 	}
 
 	////// ShortHanziLZ4
 	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text1, ShortHanzi, refs)
-	tc = NewTokenComment(msg, 108)
+	tc = NewTokenComment(msg, 108, 1000)
 	if msg.ContentType != ShortHanziLZ4 || shorthanzi.Text1 != tc.Content || tc.ContentType != UTF8Text {
 		t.Errorf("Invalid Token Comment!")
 	}
 	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", shorthanzi.Text2, ShortHanzi, refs)
-	tc = NewTokenComment(msg, 108)
+	tc = NewTokenComment(msg, 108, 1000)
 	if msg.ContentType != ShortHanziLZ4 || shorthanzi.Text2 != tc.Content || tc.ContentType != UTF8Text {
 		t.Errorf("Invalid Token Comment!")
 	}
@@ -96,7 +96,7 @@ func Test1(t *testing.T) {
 	////// RawBytes
 	s := base64.StdEncoding.EncodeToString([]byte("大获全胜"))
 	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, RawBytes, refs)
-	tc = NewTokenComment(msg, 108)
+	tc = NewTokenComment(msg, 108, 1000)
 	fmt.Printf("Here! %s %d\n", tc.Content, tc.ContentType)
 	if tc.Content != s || tc.ContentType != RawBytes {
 		t.Errorf("Invalid Token Comment!")
@@ -105,7 +105,7 @@ func Test1(t *testing.T) {
 	////// UTF8Text
 	s = "孜孜不倦"
 	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, UTF8Text, refs)
-	tc = NewTokenComment(msg, 108)
+	tc = NewTokenComment(msg, 108, 1000)
 	fmt.Printf("Here! %s %d\n", tc.Content, tc.ContentType)
 	if tc.Content != s || tc.ContentType != UTF8Text {
 		t.Errorf("Invalid Token Comment!")
@@ -114,7 +114,7 @@ func Test1(t *testing.T) {
 	////// HTTP
 	s = "http://google.com"
 	msg = NewMsgCommentToken(simpleAddr("00003"), "cet", 1, "First Comment", s, HTTP, refs)
-	tc = NewTokenComment(msg, 108)
+	tc = NewTokenComment(msg, 108, 1000)
 	fmt.Printf("Here! %s %d\n", tc.Content, tc.ContentType)
 	if tc.Content != s || tc.ContentType != HTTP {
 		t.Errorf("Invalid Token Comment!")
