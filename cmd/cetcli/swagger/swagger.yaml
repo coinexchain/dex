@@ -2824,7 +2824,12 @@ paths:
         200:
           description: trading-pair info of the specified symbol
           schema:
-            $ref: "#/definitions/MarketInfo"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/MarketInfo"
         400:
           description: Invalid symbol
         500:
@@ -2848,7 +2853,12 @@ paths:
         200:
           description: Order info of the specified id
           schema:
-            $ref: "#/definitions/OrderInfo"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/OrderInfo"
         400:
           description: Invalid order-id
         500:
@@ -2872,7 +2882,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/Order-Ids"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/Order-Ids"
         400:
           description: Invalid address
         500:
@@ -2965,10 +2980,15 @@ paths:
         200:
           description: The corresponding address. Emtpy string means no corresponding address was found.
           schema:
-            type: array
-            items:
-              type: string
-              x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  type: string
+                  x-example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
         400:
           description: Invalid request
         500:
@@ -2994,10 +3014,15 @@ paths:
         200:
           description: An array of corresponding aliases. If there is a default alias, it will be the first item in the array; If there is no default alias, empty string will be the first item; If there is not any alias at all, the array will contain only an empty string.
           schema:
-            type: array
-            items:
-              type: string
-              example: superman
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  type: string
+                  example: superman
         400:
           description: Invalid request
         500:
@@ -3332,24 +3357,29 @@ paths:
           schema:
             type: object
             properties:
-              stock:
+              height:
                 type: string
-              money:
-                type: string
-              init_price:
-                type: string
-              max_supply:
-                type: string
-              max_price:
-                type: string
-              current_Price:
-                type: string
-              stock_in_pool:
-                type: string
-              money_in_pool:
-                type: string
-              enable_cancel_time:
-                type: string
+              result:
+                type: object
+                properties:
+                  stock:
+                    type: string
+                  money:
+                    type: string
+                  init_price:
+                    type: string
+                  max_supply:
+                    type: string
+                  max_price:
+                    type: string
+                  current_Price:
+                    type: string
+                  stock_in_pool:
+                    type: string
+                  money_in_pool:
+                    type: string
+                  enable_cancel_time:
+                    type: string
         404:
           description: There is no corresponding bancor info
         500:
