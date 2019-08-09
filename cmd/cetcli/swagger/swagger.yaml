@@ -1996,9 +1996,13 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Coin"
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
         500:
           description: Internal Server Error
   /distribution/parameters:
