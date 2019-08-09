@@ -23,8 +23,8 @@ var _ sdk.Msg = MsgBancorCancel{}
 
 type MsgBancorInit struct {
 	Owner            sdk.AccAddress `json:"owner"`
-	Stock            string         `json:"stock"`
-	Money            string         `json:"money"`
+	Stock            string         `json:"stock"` // supply denom
+	Money            string         `json:"money"` // paying denom
 	InitPrice        sdk.Dec        `json:"init_price"`
 	MaxSupply        sdk.Int        `json:"max_supply"`
 	MaxPrice         sdk.Dec        `json:"max_price"`
