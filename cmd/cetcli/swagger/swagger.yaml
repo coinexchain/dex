@@ -186,12 +186,17 @@ paths:
           schema:
             type: object
             properties:
-              block_height:
+              height:
                 type: string
-              validators:
-                type: array
-                items:
-                  $ref: "#/definitions/TendermintValidator"
+              result:
+                type: object
+                properties:
+                  block_height:
+                    type: string
+                  validators:
+                    type: array
+                    items:
+                      $ref: "#/definitions/TendermintValidator"
         500:
           description: Server internal error
   /validatorsets/{height}:
@@ -481,6 +486,8 @@ paths:
           schema:
             type: object
             properties:
+              height:
+                type: string
               address:
                 type: string
               coins:
@@ -879,9 +886,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Validator"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Validator"
         500:
           description: Internal Server Error
   /staking/validators/{validatorAddr}:
@@ -1382,9 +1394,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Deposit"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Deposit"
         400:
           description: Invalid proposal id
         500:

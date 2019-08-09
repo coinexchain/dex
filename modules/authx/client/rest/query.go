@@ -99,6 +99,6 @@ func QueryBalancesRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			L types.LockedCoins `json:"locked_coins"`
 		}{acc.GetCoins(), lockedCoins}
 
-		rest.PostProcessResponseBare(w, cliCtx, all)
+		rest.PostProcessResponse(w, cliCtx, all)
 	}
 }

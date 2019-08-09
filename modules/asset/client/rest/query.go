@@ -48,14 +48,14 @@ func QueryTokenRequestHandlerFn(
 			return
 		}
 		if len(res) == 0 {
-			rest.PostProcessResponseBare(w, cliCtx, types.BaseToken{})
+			rest.PostProcessResponse(w, cliCtx, types.BaseToken{})
 			return
 		}
 
 		var token types.Token
 		cdc.MustUnmarshalJSON(res, &token)
 
-		rest.PostProcessResponseBare(w, cliCtx, token)
+		rest.PostProcessResponse(w, cliCtx, token)
 	}
 }
 
@@ -76,7 +76,7 @@ func QueryTokensRequestHandlerFn(
 			res = []byte("[]")
 		}
 
-		rest.PostProcessResponseBare(w, cliCtx, res)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
 
@@ -104,7 +104,7 @@ func QueryWhitelistRequestHandlerFn(
 			res = []byte("[]")
 		}
 
-		rest.PostProcessResponseBare(w, cliCtx, res)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
 
@@ -132,7 +132,7 @@ func QueryForbiddenAddrRequestHandlerFn(
 			res = []byte("[]")
 		}
 
-		rest.PostProcessResponseBare(w, cliCtx, res)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
 
@@ -153,6 +153,6 @@ func QueryReservedSymbolsRequestHandlerFn(
 			res = []byte("[]")
 		}
 
-		rest.PostProcessResponseBare(w, cliCtx, res)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }

@@ -21,6 +21,6 @@ func poolHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		rest.PostProcessResponseBare(w, cliCtx, res)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }

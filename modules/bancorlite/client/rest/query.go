@@ -37,6 +37,6 @@ func queryBancorInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		rest.PostProcessResponseBare(w, cliCtx, res)
+		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
