@@ -23,7 +23,7 @@ func NewHandler(k Keeper) sdk.Handler {
 		case types.MsgBancorCancel:
 			return handleMsgBancorCancel(ctx, k, msg)
 		default:
-			errMsg := "Unrecognized bancorlite Msg type: %s" + msg.Type()
+			errMsg := "Unrecognized bancorlite Msg type: " + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
