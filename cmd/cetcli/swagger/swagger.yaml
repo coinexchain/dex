@@ -1054,7 +1054,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/SigningInfo"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  $ref: "#/definitions/SigningInfo"
         204:
           description: No sign info of this validator
         400:
@@ -1087,9 +1092,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/SigningInfo"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  type: array
+                  items:
+                    $ref: "#/definitions/SigningInfo"
         400:
           description: Invalid validator public key for one of the validators
         500:
@@ -1143,21 +1153,26 @@ paths:
           description: OK
           schema:
             type: object
-            properties:
-              max_evidence_age:
-                type: string
-              signed_blocks_window:
-                type: string
-              min_signed_per_window:
-                type: string
-              double_sign_unbond_duration:
-                type: string
-              downtime_unbond_duration:
-                type: string
-              slash_fraction_double_sign:
-                type: string
-              slash_fraction_downtime:
-                type: string
+              properties:
+                height:
+                  type: string
+                result:
+                  type: object
+                  properties:
+                    max_evidence_age:
+                      type: string
+                    signed_blocks_window:
+                      type: string
+                    min_signed_per_window:
+                      type: string
+                    double_sign_unbond_duration:
+                      type: string
+                    downtime_unbond_duration:
+                      type: string
+                    slash_fraction_double_sign:
+                      type: string
+                    slash_fraction_downtime:
+                      type: string
         500:
           description: Internal Server Error
   /gov/proposals:
@@ -1231,9 +1246,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/TextProposal"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  type: array
+                  items:
+                    $ref: "#/definitions/TextProposal"
         400:
           description: Invalid query parameters
         500:
@@ -1351,7 +1371,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/TextProposal"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  $ref: "#/definitions/TextProposal"
         400:
           description: Invalid proposal id
         500:
@@ -1375,7 +1400,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/Proposer"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  $ref: "#/definitions/Proposer"
         400:
           description: Invalid proposal ID
         500:
@@ -1480,7 +1510,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/Deposit"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  $ref: "#/definitions/Deposit"
         400:
           description: Invalid proposal id or depositor address
         404:
@@ -1507,9 +1542,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Vote"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Vote"
         400:
           description: Invalid proposal id
         500:
@@ -1582,7 +1622,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/Vote"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/Vote"
         400:
           description: Invalid proposal id or voter address
         404:
@@ -1609,7 +1654,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/TallyResult"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  $ref: "#/definitions/TallyResult"
         400:
           description: Invalid proposal id
         500:
@@ -1628,14 +1678,19 @@ paths:
           description: OK
           schema:
             type: object
-            properties:
-              min_deposit:
-                type: array
-                items:
-                  $ref: "#/definitions/Coin"
-              max_deposit_period:
-                type: string
-                example: "86400000000000"
+              properties:
+                height:
+                  type: string
+                result:
+                  type: object
+                  properties:
+                    min_deposit:
+                      type: array
+                        items:
+                          $ref: "#/definitions/Coin"
+                    max_deposit_period:
+                      type: string
+                      example: "86400000000000"
         400:
           description: <other_path> is not a valid query request path
         404:
@@ -1655,16 +1710,22 @@ paths:
         200:
           description: OK
           schema:
+            type: object
             properties:
-              threshold:
+              height:
                 type: string
-                example: "0.5000000000"
-              veto:
-                type: string
-                example: "0.3340000000"
-              governance_penalty:
-                type: string
-                example: "0.0100000000"
+              result:
+                type: object
+                properties:
+                  threshold:
+                    type: string
+                    example: "0.5000000000"
+                  veto:
+                    type: string
+                    example: "0.3340000000"
+                  governance_penalty:
+                    type: string
+                    example: "0.0100000000"
         400:
           description: <other_path> is not a valid query request path
         404:
@@ -1684,10 +1745,16 @@ paths:
         200:
           description: OK
           schema:
-            properties:
-              voting_period:
-                type: string
-                example: "86400000000000"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  type: object
+                  properties:
+                    voting_period:
+                      type: string
+                      example: "86400000000000"
         400:
           description: <other_path> is not a valid query request path
         404:
@@ -1714,7 +1781,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/DelegatorTotalRewards"
+            type: object
+              properties:
+                height:
+                  type: string
+                result:
+                  $ref: "#/definitions/DelegatorTotalRewards"
         400:
           description: Invalid delegator address
         500:
