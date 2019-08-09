@@ -1,7 +1,6 @@
 package bankx
 
 import (
-	"encoding/json"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
-	"github.com/coinexchain/dex/msgqueue"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -57,7 +55,7 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 		),
 	})
 
-	fillMsgQueue(ctx, k, "multi_send", msg)
+	//fillMsgQueue(ctx, k, "multi_send", msg)
 
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
@@ -156,7 +154,7 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		k.Axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 	}
 
-	fillMsgQueue(ctx, k, "send_lock_coins", types.NewMsgSend(fromAddr, toAddr, amt, unlockTime))
+	//fillMsgQueue(ctx, k, "send_lock_coins", types.NewMsgSend(fromAddr, toAddr, amt, unlockTime))
 
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
@@ -170,7 +168,7 @@ func normalSend(ctx sdk.Context, k Keeper,
 	if err != nil {
 		return err.Result()
 	}
-	fillMsgQueue(ctx, k, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
+	//fillMsgQueue(ctx, k, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
 
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
@@ -189,7 +187,7 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 	accountX := k.Axk.GetOrCreateAccountX(ctx, addr)
 	accountX.MemoRequired = required
 	k.Axk.SetAccountX(ctx, accountX)
-	fillMsgQueue(ctx, k, "send_memo_required", msg)
+	//fillMsgQueue(ctx, k, "send_memo_required", msg)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(sdk.EventTypeMessage,
@@ -204,16 +202,16 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 	}
 }
 
-func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
-	if keeper.MsgProducer.IsSubscribed(types.Topic) {
-		bytes, err := json.Marshal(msg)
-		if err != nil {
-			return
-		}
-		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
-			sdk.NewAttribute(key, string(bytes))))
-	}
-}
+//func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
+//	if keeper.MsgProducer.IsSubscribed(types.Topic) {
+//		bytes, err := json.Marshal(msg)
+//		if err != nil {
+//			return
+//		}
+//		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
+//			sdk.NewAttribute(key, string(bytes))))
+//	}
+//}
 
 func checkInputs(ctx sdk.Context, k Keeper, inputs []bank.Input) sdk.Error {
 	for _, input := range inputs {

@@ -59,15 +59,15 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg mtype.MsgCreateTradingPair,
 		return err.Result()
 	}
 
-	// send msg to kafka
-	msgInfo := mtype.CreateMarketInfo{
-		Stock:          msg.Stock,
-		Money:          msg.Money,
-		PricePrecision: msg.PricePrecision,
-		Creator:        msg.Creator.String(),
-		CreateHeight:   ctx.BlockHeight(),
-	}
-	fillMsgQueue(ctx, keeper, mtype.CreateTradingInfoKey, msgInfo)
+	//// send msg to kafka
+	//msgInfo := mtype.CreateMarketInfo{
+	//	Stock:          msg.Stock,
+	//	Money:          msg.Money,
+	//	PricePrecision: msg.PricePrecision,
+	//	Creator:        msg.Creator.String(),
+	//	CreateHeight:   ctx.BlockHeight(),
+	//}
+	//fillMsgQueue(ctx, keeper, mtype.CreateTradingInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -412,14 +412,14 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg mtype.MsgCancelTradingPair,
 	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.TradingPair)
 
 	// send msg to kafka
-	values := strings.Split(msg.TradingPair, mtype.SymbolSeparator)
-	msgInfo := mtype.CancelMarketInfo{
-		Stock:   values[0],
-		Money:   values[1],
-		Deleter: msg.Sender.String(),
-		DelTime: msg.EffectiveTime,
-	}
-	fillMsgQueue(ctx, keeper, mtype.CancelTradingInfoKey, msgInfo)
+	//values := strings.Split(msg.TradingPair, mtype.SymbolSeparator)
+	//msgInfo := mtype.CancelMarketInfo{
+	//	Stock:   values[0],
+	//	Money:   values[1],
+	//	Deleter: msg.Sender.String(),
+	//	DelTime: msg.EffectiveTime,
+	//}
+	//fillMsgQueue(ctx, keeper, mtype.CancelTradingInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
@@ -493,13 +493,13 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg mtype.MsgModifyPricePrec
 		return err.Result()
 	}
 
-	msgInfo := mtype.ModifyPricePrecisionInfo{
-		Sender:            msg.Sender.String(),
-		TradingPair:       msg.TradingPair,
-		OldPricePrecision: oldInfo.PricePrecision,
-		NewPricePrecision: info.PricePrecision,
-	}
-	fillMsgQueue(ctx, k, mtype.PricePrecisionInfoKey, msgInfo)
+	//msgInfo := mtype.ModifyPricePrecisionInfo{
+	//	Sender:            msg.Sender.String(),
+	//	TradingPair:       msg.TradingPair,
+	//	OldPricePrecision: oldInfo.PricePrecision,
+	//	NewPricePrecision: info.PricePrecision,
+	//}
+	//fillMsgQueue(ctx, k, mtype.PricePrecisionInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
