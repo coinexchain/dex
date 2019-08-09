@@ -82,7 +82,7 @@ type mocBankxKeeper struct {
 func (k *mocBankxKeeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	return nil
 }
-func (k *mocBankxKeeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+func (k *mocBankxKeeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
 	return nil
 }
 func (k *mocBankxKeeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
@@ -140,8 +140,8 @@ type mockFeeColletKeeper struct {
 	records []string
 }
 
-func (k *mockFeeColletKeeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	fee := fmt.Sprintf("addr : %s, fee : %s", addr, amt.String())
+func (k *mockFeeColletKeeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
+	fee := fmt.Sprintf("addr : %s, fee : %d", addr, amt)
 	k.records = append(k.records, fee)
 	return nil
 }

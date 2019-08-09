@@ -217,8 +217,8 @@ func (k Keeper) GetMarketInfo(ctx sdk.Context, symbol string) (types.MarketInfo,
 	return k.gmk.GetMarketInfo(ctx, symbol)
 }
 
-func (k Keeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	return k.bnk.DeductFee(ctx, addr, amt)
+func (k Keeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
+	return k.bnk.DeductInt64CetFee(ctx, addr, amt)
 }
 
 func (k Keeper) MarketOwner(ctx sdk.Context, info types.MarketInfo) sdk.AccAddress {

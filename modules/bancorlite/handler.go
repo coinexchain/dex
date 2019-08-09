@@ -47,8 +47,8 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	if err := k.Bxk.FreezeCoins(ctx, msg.Owner, suppliedCoins); err != nil {
 		return err.Result()
 	}
-	if err := k.Bxk.DeductFee(ctx, msg.Owner,
-		sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(k.Bik.GetParam(ctx).CreateBancorFee)))); err != nil {
+	fee := k.Bik.GetParam(ctx).CreateBancorFee
+	if err := k.Bxk.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
 		return err.Result()
 	}
 	bi := &keepers.BancorInfo{
@@ -111,8 +111,8 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if !k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
 		return types.ErrNonMarketExist().Result()
 	}
-	if err := k.Bxk.DeductFee(ctx, msg.Owner,
-		sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(k.Bik.GetParam(ctx).CancelBancorFee)))); err != nil {
+	fee := k.Bik.GetParam(ctx).CancelBancorFee
+	if err := k.Bxk.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
 		return err.Result()
 	}
 	k.Bik.Remove(ctx, bi)

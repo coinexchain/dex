@@ -11,6 +11,7 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
+	dex "github.com/coinexchain/dex/types"
 )
 
 type Keeper struct {
@@ -56,7 +57,6 @@ func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddres
 }
 
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-
 	_, err := k.Bk.SubtractCoins(ctx, addr, amt)
 	if err != nil {
 		return err
@@ -70,7 +70,6 @@ func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins)
 }
 
 func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-
 	accx, ok := k.Axk.GetAccountX(ctx, addr)
 	if !ok {
 		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
@@ -99,8 +98,11 @@ func (k Keeper) AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sd
 	return nil
 }
 
-func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
+	return k.DeductFee(ctx, addr, dex.NewCetCoins(amt))
+}
 
+func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	err := k.Sk.SendCoinsFromAccountToModule(ctx, addr, auth.FeeCollectorName, amt)
 	if err != nil {
 		return err

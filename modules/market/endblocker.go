@@ -122,7 +122,7 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper mtype.ExpectedBankxKeeper, 
 		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin(types.CET, sdk.NewInt(order.FrozenFee))})
 		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 		actualFee := order.CalOrderFee(feeForZeroDeal)
-		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, types.NewCetCoins(actualFee.RoundInt64())); err != nil {
+		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee.RoundInt64()); err != nil {
 			panic(err)
 		}
 	}

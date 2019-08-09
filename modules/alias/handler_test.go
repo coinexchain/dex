@@ -9,15 +9,17 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	sdkstore "github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
+	sdkstore "github.com/cosmos/cosmos-sdk/store"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
+
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 //// Bankx Keeper will implement the interface
@@ -33,6 +35,10 @@ var logStr string
 
 type mocBankxKeeper struct {
 	maxAmount sdk.Int
+}
+
+func (k *mocBankxKeeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
+	return k.DeductFee(ctx, addr, dex.NewCetCoins(amt))
 }
 
 func (k *mocBankxKeeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {

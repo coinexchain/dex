@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
-	dexsdk "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -36,25 +35,24 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 		if !ok {
 			return types.ErrMaxAliasCountReached().Result()
 		} else if addNewAlias {
-			var coins sdk.Coins
+			var fee int64
 			if len(msg.Alias) == 2 {
-				coins = dexsdk.NewCetCoins(aliasParams.FeeForAliasLength2)
+				fee = aliasParams.FeeForAliasLength2
 			} else if len(msg.Alias) == 3 {
-				coins = dexsdk.NewCetCoins(aliasParams.FeeForAliasLength3)
+				fee = aliasParams.FeeForAliasLength3
 			} else if len(msg.Alias) == 4 {
-				coins = dexsdk.NewCetCoins(aliasParams.FeeForAliasLength4)
+				fee = aliasParams.FeeForAliasLength4
 			} else if len(msg.Alias) == 5 {
-				coins = dexsdk.NewCetCoins(aliasParams.FeeForAliasLength5)
+				fee = aliasParams.FeeForAliasLength5
 			} else if len(msg.Alias) == 6 {
-				coins = dexsdk.NewCetCoins(aliasParams.FeeForAliasLength6)
+				fee = aliasParams.FeeForAliasLength6
 			} else {
-				coins = dexsdk.NewCetCoins(aliasParams.FeeForAliasLength7OrHigher)
+				fee = aliasParams.FeeForAliasLength7OrHigher
 			}
-			err := k.BankKeeper.DeductFee(ctx, msg.Owner, coins)
+			err := k.BankKeeper.DeductInt64CetFee(ctx, msg.Owner, fee)
 			if err != nil {
 				return err.Result()
 			}
-
 		}
 	} else {
 		addr, _ := k.AliasKeeper.GetAddressFromAlias(ctx, msg.Alias)

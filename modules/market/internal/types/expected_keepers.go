@@ -9,7 +9,7 @@ import (
 // Bankx Keeper will implement the interface
 type ExpectedBankxKeeper interface {
 	SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
-	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
+	DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error
 	HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool                          // to check whether have sufficient coins in special address
 	SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error // to tranfer coins
 	FreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error                   // freeze some coins when creating orders
@@ -26,7 +26,7 @@ type ExpectedAssetStatusKeeper interface {
 }
 
 type ExpectedChargeFeeKeeper interface {
-	SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
+	SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error
 }
 
 type ExpectedBancorKeeper interface {

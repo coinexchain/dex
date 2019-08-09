@@ -10,6 +10,7 @@ type ExpectedBankxKeeper interface {
 	FreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error                   // freeze some coins when creating orders
 	UnFreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error                 // unfreeze coins and then orders can be executed
 	DeductFee(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error
+	DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error
 }
 
 // Asset Keeper will implement the interface

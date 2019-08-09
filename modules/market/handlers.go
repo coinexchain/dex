@@ -55,7 +55,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg mtype.MsgCreateTradingPair,
 	}
 
 	param := keeper.GetParams(ctx)
-	if err := keeper.SubtractFeeAndCollectFee(ctx, msg.Creator, types.NewCetCoins(param.CreateMarketFee)); err != nil {
+	if err := keeper.SubtractFeeAndCollectFee(ctx, msg.Creator, param.CreateMarketFee); err != nil {
 		return err.Result()
 	}
 
@@ -193,7 +193,7 @@ func handleFeeForCreateOrder(ctx sdk.Context, keeper keepers.Keeper, amount int6
 		}
 	}
 	if featureFee != 0 {
-		if err := keeper.SubtractFeeAndCollectFee(ctx, sender, types.NewCetCoins(featureFee)); err != nil {
+		if err := keeper.SubtractFeeAndCollectFee(ctx, sender, featureFee); err != nil {
 			return err
 		}
 	}

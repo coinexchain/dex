@@ -119,7 +119,7 @@ func deductActivationFee(ctx sdk.Context, k Keeper,
 		return sendAmt, types.ErrorInsufficientCETForActivatingFee()
 	}
 
-	err := k.DeductFee(ctx, fromAccount.GetAddress(), dex.NewCetCoins(activationFee))
+	err := k.DeductInt64CetFee(ctx, fromAccount.GetAddress(), activationFee)
 	if err != nil {
 		return sendAmt, err
 	}
@@ -134,7 +134,7 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		_, _ = k.Bk.AddCoins(ctx, toAddr, sdk.Coins{})
 	}
 
-	if err := k.DeductFee(ctx, fromAddr, dex.NewCetCoins(k.GetParam(ctx).LockCoinsFee)); err != nil {
+	if err := k.DeductInt64CetFee(ctx, fromAddr, k.GetParam(ctx).LockCoinsFee); err != nil {
 		return err.Result()
 	}
 
@@ -246,7 +246,7 @@ func precheckFreshAccounts(ctx sdk.Context, k Keeper, outputs []bank.Output) []s
 func deductActivationFeeForFreshAccount(ctx sdk.Context, k Keeper, addrs []sdk.AccAddress) sdk.Error {
 	for _, addr := range addrs {
 		activationFee := k.GetParam(ctx).ActivationFee
-		err := k.DeductFee(ctx, addr, dex.NewCetCoins(activationFee))
+		err := k.DeductInt64CetFee(ctx, addr, activationFee)
 		if err != nil {
 			return err
 		}
