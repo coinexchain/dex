@@ -104,15 +104,15 @@ func init() {
 
 		//modules of cosmos
 		AuthModuleBasic{},
-		bank.AppModuleBasic{},
 		CrisisModuleBasic{},
+		GovModuleBasic{gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler)},
+		SlashingModuleBasic{},
+		StakingModuleBasic{},
+		bank.AppModuleBasic{},
 		distr.AppModuleBasic{},
 		genaccounts.AppModuleBasic{},
 		genutil.AppModuleBasic{},
-		GovModuleBasic{gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler)},
 		params.AppModuleBasic{},
-		SlashingModuleBasic{},
-		StakingModuleBasic{},
 		supply.AppModuleBasic{},
 	}
 
