@@ -558,6 +558,7 @@ func (app *CetChainApp) Commit() abci.ResponseCommit {
 	for _, msg := range PubMsgs {
 		app.msgQueProducer.SendMsg(msg.Key, msg.Value)
 	}
+	app.msgQueProducer.SendMsg([]byte("commit"), []byte("{}"))
 	return app.BaseApp.Commit()
 }
 
