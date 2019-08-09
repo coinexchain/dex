@@ -2203,9 +2203,14 @@ paths:
         200:
           description: All existing tokens
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Token"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Token"
         400:
           description: Invalid Request
         500:
@@ -2230,7 +2235,12 @@ paths:
         200:
           description: token with provided symbol
           schema:
-            $ref: "#/definitions/Token"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/Token"
         400:
           description: Invalid Request
         404:
@@ -2443,9 +2453,14 @@ paths:
         200:
           description: whitelist with provided symbol
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Address"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Address"
         404:
           description: Token not found
         500:
@@ -2535,9 +2550,14 @@ paths:
         200:
           description: forbidden addresses with provided symbol
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Address"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Address"
         400:
           description: Invalid Request
         500:
@@ -2620,7 +2640,12 @@ paths:
         200:
           description: All reserved symbols
           schema:
-            type: string
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: string
         400:
           description: Invalid Request
         500:
