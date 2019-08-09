@@ -570,9 +570,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Delegation"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Delegation"
         400:
           description: Invalid delegator address
         500:
@@ -637,7 +642,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/Delegation"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/Delegation"
         400:
           description: Invalid delegator address or validator address
         500:
@@ -661,9 +671,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/UnbondingDelegationPair"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/UnbondingDelegationPair"
         400:
           description: Invalid delegator address
         500:
@@ -728,7 +743,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/UnbondingDelegationPair"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/UnbondingDelegationPair"
         400:
           description: Invalid delegator address or validator address
         500:
@@ -761,9 +781,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Redelegation"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Redelegation"
         500:
           description: Internal Server Error
   /staking/delegators/{delegatorAddr}/redelegations:
@@ -828,9 +853,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Validator"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/Validator"
         400:
           description: Invalid delegator address
         500:
@@ -860,7 +890,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/Validator"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/Validator"
         400:
           description: Invalid delegator address or validator address
         500:
@@ -884,9 +919,14 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/TxQuery"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/TxQuery"
         204:
           description: No staking transaction about this delegator address
         400:
@@ -950,7 +990,12 @@ paths:
         200:
           description: OK
           schema:
-            $ref: "#/definitions/Validator"
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/Validator"
         400:
           description: Invalid validator address
         500:
@@ -1005,10 +1050,15 @@ paths:
         200:
           description: OK
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/UnbondingDelegationPair"
-            x-nullable: true
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/UnbondingDelegationPair"
+                x-nullable: true
         400:
           description: Invalid validator address
         500:
@@ -1027,16 +1077,21 @@ paths:
           schema:
             type: object
             properties:
-              not_bonded_tokens:
+              height:
                 type: string
-              bonded_tokens:
-                type: string
-              non_bondable_tokens:
-                type: string
-              total_supply:
-                type: string
-              bonded_ratio:
-                type: string
+              result:
+                type: object
+                properties:
+                  not_bonded_tokens:
+                    type: string
+                  bonded_tokens:
+                    type: string
+                  non_bondable_tokens:
+                    type: string
+                  total_supply:
+                    type: string
+                  bonded_ratio:
+                    type: string
         500:
           description: Internal Server Error
   /staking/parameters:
