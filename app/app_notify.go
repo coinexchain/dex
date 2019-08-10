@@ -22,7 +22,7 @@ type NotificationTx struct {
 	Transfers    []TransferRecord `json:"transfers"`
 	SerialNumber int64            `json:"serial_number"`
 	MsgTypes     []string         `json:"msg_types"`
-	Tx           *auth.StdTx      `json:"tx"`
+	TxJSON       string           `json:"tx_json"`
 	Height       int64            `json:"height"`
 }
 
@@ -97,16 +97,21 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, events []abci.Event)
 		msgTypes[i] = getType(msg)
 	}
 
+	bytes, errJSON := json.Marshal(&stdTx)
+	if errJSON != nil {
+		return
+	}
+
 	n4s := &NotificationTx{
 		Signers:      stdTx.GetSigners(),
 		Transfers:    transfers,
 		SerialNumber: app.txCount,
-		Tx:           &stdTx,
+		TxJSON:       string(bytes),
 		MsgTypes:     msgTypes,
 		Height:       app.height,
 	}
 
-	bytes, errJSON := json.Marshal(n4s)
+	bytes, errJSON = json.Marshal(n4s)
 	if errJSON != nil {
 		return
 	}
