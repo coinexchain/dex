@@ -16,8 +16,11 @@ const (
 	OrderIDPartsNum         = types.OrderIDPartsNum
 	SymbolSeparator         = types.SymbolSeparator
 	LimitOrder              = types.LimitOrder
-	SELL                    = types.SELL
 	GTE                     = types.GTE
+	BID                     = types.BID
+	ASK                     = types.ASK
+	BUY                     = types.BUY
+	SELL                    = types.SELL
 )
 
 var (
