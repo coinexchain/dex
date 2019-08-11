@@ -31,6 +31,8 @@ const (
 	CodeNotAllowedOffline     sdk.CodeType = 623
 	CodeInvalidOrderAmount    sdk.CodeType = 624
 	CodeInvalidBancorExist    sdk.CodeType = 625
+	CodeInvalidExistBlocks    sdk.CodeType = 626
+	CodeInvalidTimeInforce    sdk.CodeType = 627
 )
 
 func ErrTokenNoExist() sdk.Error {
@@ -46,7 +48,7 @@ func ErrInvalidPricePrecision() sdk.Error {
 }
 
 func ErrInvalidPrice(price int64) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price out of range [0, 9E18], actual price :  ", price)
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price out of range [0, 1E18], actual price :  ", price)
 }
 
 func ErrInvalidTokenIssuer() sdk.Error {

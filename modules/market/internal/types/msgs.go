@@ -66,7 +66,7 @@ func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 	if len(msg.Stock) == 0 || len(msg.Money) == 0 {
 		return ErrInvalidSymbol()
 	}
-	if msg.PricePrecision > sdk.Precision {
+	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
 		return ErrInvalidPricePrecision()
 	}
 	if msg.Money == msg.Stock {
@@ -115,22 +115,23 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if msg.PricePrecision < 0 || msg.PricePrecision > MaxTokenPricePrecision {
 		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [0, 18]. actual : %d", msg.PricePrecision))
 	}
-
 	if msg.Side != BUY && msg.Side != SELL {
 		return ErrInvalidTradeSide()
 	}
-
 	if msg.OrderType != LimitOrder {
 		return ErrInvalidOrderType()
 	}
-
 	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
 		return ErrInvalidSymbol()
 	}
-
-	//todo: const 1E18
 	if msg.Price <= 0 || msg.Price > 1E18 {
 		return ErrInvalidPrice(msg.Price)
+	}
+	if msg.ExistBlocks < 0 {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", msg.ExistBlocks))
+	}
+	if msg.TimeInForce != GTE && msg.TimeInForce != IOC {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidTimeInforce, fmt.Sprintf("Invalid timeInforce : %d; The valid value : 3, 4", msg.TimeInForce))
 	}
 
 	return nil
@@ -168,7 +169,6 @@ func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return ErrInvalidAddress()
 	}
-
 	if len(strings.Split(msg.OrderID, OrderIDSeparator)) != OrderIDPartsNum {
 		return ErrInvalidOrderID()
 	}
@@ -205,11 +205,9 @@ func (msg MsgCancelTradingPair) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return ErrInvalidAddress()
 	}
-
 	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
 		return ErrInvalidSymbol()
 	}
-
 	if msg.EffectiveTime < 0 {
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidTime, "Invalid height")
 	}
@@ -246,11 +244,9 @@ func (msg MsgModifyPricePrecision) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return ErrInvalidAddress()
 	}
-
 	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
 		return ErrInvalidSymbol()
 	}
-
 	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
 		return ErrInvalidPricePrecision()
 	}

@@ -243,6 +243,10 @@ func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keep
 	if ret := checkMsgCreateOrder(ctx, keeper, msg, frozenFee+featureFee, amount, denom); !ret.IsOK() {
 		return ret
 	}
+	existBlocks := msg.ExistBlocks
+	if existBlocks == 0 {
+		existBlocks = marketParams.GTEOrderLifetime
+	}
 
 	order := mtype.Order{
 		Sender:      msg.Sender,
@@ -254,7 +258,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keep
 		Side:        msg.Side,
 		TimeInForce: msg.TimeInForce,
 		Height:      ctx.BlockHeight(),
-		ExistBlocks: msg.ExistBlocks,
+		ExistBlocks: existBlocks,
 		FrozenFee:   frozenFee,
 		LeftStock:   msg.Quantity,
 		Freeze:      amount,
