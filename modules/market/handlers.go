@@ -370,6 +370,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg mtype.MsgCancelOrder, keeper keep
 			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyDelOrderReason, mtype.CancelOrderByManual),
 			sdk.NewAttribute(AttributeKeyDelOrderHeight, strconv.Itoa(int(ctx.BlockHeight()))),
+			sdk.NewAttribute(AttributeKeyTradingPair, order.TradingPair),
 		),
 	})
 	return sdk.Result{
