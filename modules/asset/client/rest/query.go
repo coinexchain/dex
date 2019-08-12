@@ -40,13 +40,17 @@ func QueryTokenRequestHandlerFn(
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryToken)
-		res, _, err := cliCtx.QueryWithData(route, bz)
+		res, height, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+		cliCtx = cliCtx.WithHeight(height)
 		if len(res) == 0 {
 			rest.PostProcessResponse(w, cliCtx, types.BaseToken{})
 			return
@@ -64,14 +68,17 @@ func QueryTokensRequestHandlerFn(
 	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryTokenList)
-		res, _, err := cliCtx.QueryWithData(route, nil)
+		res, height, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-
+		cliCtx = cliCtx.WithHeight(height)
 		if len(res) == 0 {
 			res = []byte("[]")
 		}
@@ -93,13 +100,17 @@ func QueryWhitelistRequestHandlerFn(
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryWhitelist)
-		res, _, err := cliCtx.QueryWithData(route, bz)
+		res, height, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+		cliCtx = cliCtx.WithHeight(height)
 		if len(res) == 0 {
 			res = []byte("[]")
 		}
@@ -121,9 +132,12 @@ func QueryForbiddenAddrRequestHandlerFn(
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryForbiddenAddr)
-		res, _, err := cliCtx.QueryWithData(route, bz)
+		res, height, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -131,7 +145,7 @@ func QueryForbiddenAddrRequestHandlerFn(
 		if len(res) == 0 {
 			res = []byte("[]")
 		}
-
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
@@ -141,9 +155,12 @@ func QueryReservedSymbolsRequestHandlerFn(
 	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryReservedSymbols)
-		res, _, err := cliCtx.QueryWithData(route, nil)
+		res, height, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
@@ -152,7 +169,7 @@ func QueryReservedSymbolsRequestHandlerFn(
 		if len(res) == 0 {
 			res = []byte("[]")
 		}
-
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }

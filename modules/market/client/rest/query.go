@@ -20,8 +20,11 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 		vars := mux.Vars(r)
 		stock := vars["stock"]
 		money := vars["money"]
-
-		res, err := queryMarketInfo(cdc, cliCtx, stock+types.SymbolSeparator+money)
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
+		res, height, err := queryMarketInfo(cdc, cliCtx, stock+types.SymbolSeparator+money)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -31,22 +34,23 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, queryInfo)
 	}
 }
 
-func queryMarketInfo(cdc *codec.Codec, cliCtx context.CLIContext, symbol string) ([]byte, error) {
+func queryMarketInfo(cdc *codec.Codec, cliCtx context.CLIContext, symbol string) ([]byte, int64, error) {
 	bz, err := cdc.MarshalJSON(keepers.NewQueryMarketParam(symbol))
 	if err != nil {
-		return nil, err
+		return nil, cliCtx.Height, err
 	}
 
 	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
-	res, _, err := cliCtx.QueryWithData(query, bz)
+	res, height, err := cliCtx.QueryWithData(query, bz)
 	if err != nil {
-		return nil, err
+		return nil, height, err
 	}
-	return res, nil
+	return res, height, nil
 }
 
 func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -70,14 +74,17 @@ func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid order id")
 			return
 		}
-
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
 		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryOrder)
-		res, _, err := cliCtx.QueryWithData(route, bz)
+		res, height, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
@@ -97,15 +104,18 @@ func queryUserOrderListHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) ht
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
 		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryUserOrders)
 		fmt.Println(route)
-		res, _, err := cliCtx.QueryWithData(route, bz)
+		res, height, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }

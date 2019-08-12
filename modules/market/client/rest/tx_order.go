@@ -89,7 +89,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		return
 	}
 
-	if _, err := queryMarketInfo(cdc, cliCtx, req.TradingPair); err != nil {
+	if _, _, err := queryMarketInfo(cdc, cliCtx, req.TradingPair); err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
