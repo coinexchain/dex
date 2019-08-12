@@ -74,6 +74,9 @@ func NewBaseKeeper(cdc *codec.Codec, key sdk.StoreKey,
 func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string, totalSupply sdk.Int, owner sdk.AccAddress,
 	mintable bool, burnable bool, addrForbiddable bool, tokenForbiddable bool,
 	url string, description string, identity string) sdk.Error {
+	if keeper.bkx.BlacklistedAddr(owner) {
+		return types.ErrAccInBlackList(owner)
+	}
 
 	if keeper.IsTokenExists(ctx, symbol) {
 		return types.ErrDuplicateTokenSymbol(symbol)
@@ -123,6 +126,9 @@ func (keeper BaseKeeper) IssueToken(ctx sdk.Context, name string, symbol string,
 
 // TransferOwnership - transfer token owner
 func (keeper BaseKeeper) TransferOwnership(ctx sdk.Context, symbol string, originalOwner sdk.AccAddress, newOwner sdk.AccAddress) sdk.Error {
+	if keeper.bkx.BlacklistedAddr(newOwner) {
+		return types.ErrAccInBlackList(newOwner)
+	}
 	token, err := keeper.checkPrecondition(ctx, symbol, originalOwner)
 	if err != nil {
 		return err

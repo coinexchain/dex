@@ -10,6 +10,7 @@ type ExpectedBankxKeeper interface {
 
 	AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
+	BlacklistedAddr(addr sdk.AccAddress) bool
 }
 
 // Supply Keeper will implement the interface

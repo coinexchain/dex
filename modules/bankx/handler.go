@@ -36,7 +36,7 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 	}
 
 	for _, out := range msg.Outputs {
-		if k.Bk.BlacklistedAddr(out.Address) {
+		if k.BlacklistedAddr(out.Address) {
 			return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", out.Address)).Result()
 		}
 	}
@@ -73,7 +73,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 		return bank.ErrSendDisabled(k.Bk.Codespace()).Result()
 	}
 
-	if k.Bk.BlacklistedAddr(msg.ToAddress) {
+	if k.BlacklistedAddr(msg.ToAddress) {
 		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.ToAddress)).Result()
 	}
 
@@ -189,7 +189,7 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 	addr := msg.Address
 	required := msg.Required
 
-	if k.Bk.BlacklistedAddr(msg.Address) {
+	if k.BlacklistedAddr(msg.Address) {
 		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.Address)).Result()
 	}
 

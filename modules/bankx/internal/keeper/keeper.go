@@ -155,3 +155,7 @@ func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int {
 
 	return axkTotalAmount.Add(akTotalAmount)
 }
+
+func (k Keeper) BlacklistedAddr(addr sdk.AccAddress) bool {
+	return k.Bk.BlacklistedAddr(addr)
+}
