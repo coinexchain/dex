@@ -28,7 +28,7 @@ type BancorInfo struct {
 	Price              sdk.Dec        `json:"price"`
 	StockInPool        sdk.Int        `json:"stock_in_pool"`
 	MoneyInPool        sdk.Int        `json:"money_in_pool"`
-	EarliestCancelTime int64          `json:"enable_cancel_time"`
+	EarliestCancelTime int64          `json:"earliest_cancel_time"`
 }
 
 func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
@@ -62,7 +62,7 @@ type BancorInfoDisplay struct {
 	CurrentPrice       string `json:"current_price"`
 	StockInPool        string `json:"stock_in_pool"`
 	MoneyInPool        string `json:"money_in_pool"`
-	EarliestCancelTime string `json:"enable_cancel_time"`
+	EarliestCancelTime string `json:"earliest_cancel_time"`
 }
 
 func NewBancorInfoDisplay(bi *BancorInfo) BancorInfoDisplay {

@@ -21,7 +21,7 @@ type BancorInitReq struct {
 	InitPrice          string       `json:"init_price"`
 	MaxSupply          string       `json:"max_supply"`
 	MaxPrice           string       `json:"max_price"`
-	EarliestCancelTime string       `json:"enable_cancel_time"`
+	EarliestCancelTime string       `json:"earliest_cancel_time"`
 }
 
 func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
