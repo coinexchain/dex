@@ -29,6 +29,8 @@ import (
 	slashingsim "github.com/cosmos/cosmos-sdk/x/slashing/simulation"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingsim "github.com/cosmos/cosmos-sdk/x/staking/simulation"
+
+	assetsim "github.com/coinexchain/dex/modules/asset/simulation"
 )
 
 var (
@@ -361,7 +363,18 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			}(nil),
 			Op: slashingsim.SimulateMsgUnjail(app.slashingKeeper),
 		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgIssueToken, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgIssuerToken(app.assetKeeper),
+		},
 	}
+
 }
 
 func invariants(app *CetChainApp) []sdk.Invariant {
