@@ -159,7 +159,7 @@ func appStateRandomizedFn(
 	simapp.GenBankGenesisState(cdc, r, appParams, genesisState)
 	simapp.GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState)
 	simapp.GenGovGenesisState(cdc, r, appParams, genesisState)
-	simapp.GenMintGenesisState(cdc, r, appParams, genesisState)
+	//simapp.GenMintGenesisState(cdc, r, appParams, genesisState)
 	simapp.GenDistrGenesisState(cdc, r, appParams, genesisState)
 	stakingGen := simapp.GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState)
 	simapp.GenSlashingGenesisState(cdc, r, stakingGen, appParams, genesisState)
