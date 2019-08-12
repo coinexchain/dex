@@ -190,7 +190,7 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 	required := msg.Required
 
 	if k.Bk.BlacklistedAddr(msg.Address) {
-		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.ToAddress)).Result()
+		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.Address)).Result()
 	}
 
 	account := k.Ak.GetAccount(ctx, addr)
