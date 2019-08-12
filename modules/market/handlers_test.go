@@ -328,7 +328,7 @@ func TestMarketInfoSetFailed(t *testing.T) {
 	// failed by price precision
 	failedPricePrecision := msgMarket
 	failedPricePrecision.Money = "cet"
-	failedPricePrecision.PricePrecision = 6
+	failedPricePrecision.PricePrecision = 20
 	ret = input.handler(input.ctx, failedPricePrecision)
 	require.Equal(t, types.CodeInvalidPricePrecision, ret.Code, "create market info should failed")
 	require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
