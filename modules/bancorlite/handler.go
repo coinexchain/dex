@@ -52,16 +52,16 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		return err.Result()
 	}
 	bi := &keepers.BancorInfo{
-		Owner:            msg.Owner,
-		Stock:            msg.Stock,
-		Money:            msg.Money,
-		InitPrice:        msg.InitPrice,
-		MaxSupply:        msg.MaxSupply,
-		MaxPrice:         msg.MaxPrice,
-		Price:            msg.InitPrice,
-		StockInPool:      msg.MaxSupply,
-		MoneyInPool:      sdk.ZeroInt(),
-		EnableCancelTime: msg.EnableCancelTime,
+		Owner:              msg.Owner,
+		Stock:              msg.Stock,
+		Money:              msg.Money,
+		InitPrice:          msg.InitPrice,
+		MaxSupply:          msg.MaxSupply,
+		MaxPrice:           msg.MaxPrice,
+		Price:              msg.InitPrice,
+		StockInPool:        msg.MaxSupply,
+		MoneyInPool:        sdk.ZeroInt(),
+		EarliestCancelTime: msg.EarliestCancelTime,
 	}
 	k.Bik.Save(ctx, bi)
 
@@ -72,7 +72,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	//	InitPrice:        msg.InitPrice,
 	//	MaxSupply:        msg.MaxSupply,
 	//	MaxPrice:         msg.MaxPrice,
-	//	EnableCancelTime: msg.EnableCancelTime,
+	//	EarliestCancelTime: msg.EarliestCancelTime,
 	//	BlockHeight:      ctx.BlockHeight(),
 	//}
 
@@ -105,8 +105,8 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if !bytes.Equal(bi.Owner, msg.Owner) {
 		return types.ErrNotBancorOwner().Result()
 	}
-	if ctx.BlockHeader().Time.Unix() < bi.EnableCancelTime {
-		return types.ErrEnableCancelTimeNotArrive().Result()
+	if ctx.BlockHeader().Time.Unix() < bi.EarliestCancelTime {
+		return types.ErrEarliestCancelTimeNotArrive().Result()
 	}
 	if !k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
 		return types.ErrNonMarketExist().Result()

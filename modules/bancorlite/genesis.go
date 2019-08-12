@@ -84,8 +84,8 @@ func (data GenesisState) Validate() error {
 		if bi.MoneyInPool.IsNegative() {
 			return errors.New("MoneyInPool is negative")
 		}
-		if bi.EnableCancelTime < 0 {
-			return errors.New("EnableCancelTime cannot be negative")
+		if bi.EarliestCancelTime < 0 {
+			return errors.New("EarliestCancelTime cannot be negative")
 		}
 		if !bi.IsConsistent() {
 			return errors.New("BancorInfo is not consistent")

@@ -17,19 +17,19 @@ import (
 )
 
 const (
-	FlagMaxSupply        = "max-supply"
-	FlagMaxPrice         = "max-price"
-	FlagSide             = "side"
-	FlagAmount           = "amount"
-	FlagMoneyLimit       = "money-limit"
-	FlagInitPrice        = "init-price"
-	FlagEnableCancelTime = "enable-cancel-time"
+	FlagMaxSupply          = "max-supply"
+	FlagMaxPrice           = "max-price"
+	FlagSide               = "side"
+	FlagAmount             = "amount"
+	FlagMoneyLimit         = "money-limit"
+	FlagInitPrice          = "init-price"
+	FlagEarliestCancelTime = "earliest-cancel-time"
 )
 
 var bancorInitFlags = []string{
 	FlagMaxSupply,
 	FlagMaxPrice,
-	FlagEnableCancelTime,
+	FlagEarliestCancelTime,
 	FlagInitPrice,
 }
 
@@ -46,7 +46,7 @@ func BancorInitCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Initialize a bancor pool for a stock/money pair, specifying the maximum supply of this pool and the maximum reachable price when all the supply are sold out, specifying the init price, and specifying the time before which no cancellation is allowed.
 
 Example: 
-	 cetcli tx bancorlite init stock money --max-supply=10000000000000 --max-price=5 --init-price=1 --enable-cancel-time=1563954165
+	 cetcli tx bancorlite init stock money --max-supply=10000000000000 --max-price=5 --init-price=1 --earliest-cancel-time=1563954165
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -67,18 +67,18 @@ Example:
 			if !ok {
 				return errors.New("max Supply is Invalid")
 			}
-			time, err := strconv.ParseInt(viper.GetString(FlagEnableCancelTime), 10, 64)
+			time, err := strconv.ParseInt(viper.GetString(FlagEarliestCancelTime), 10, 64)
 			if err != nil {
 				return errors.New("bancor enable-cancel-time is invalid")
 			}
 			msg := &types.MsgBancorInit{
-				Owner:            sender,
-				Stock:            args[0],
-				Money:            args[1],
-				InitPrice:        initPrice,
-				MaxSupply:        maxSupply,
-				MaxPrice:         maxPrice,
-				EnableCancelTime: time,
+				Owner:              sender,
+				Stock:              args[0],
+				Money:              args[1],
+				InitPrice:          initPrice,
+				MaxSupply:          maxSupply,
+				MaxPrice:           maxPrice,
+				EarliestCancelTime: time,
 			}
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -89,7 +89,7 @@ Example:
 
 	cmd.Flags().String(FlagMaxSupply, "0", "The maximum supply of this pool.")
 	cmd.Flags().String(FlagMaxPrice, "0", "The maximum reachable price when all the supply are sold out")
-	cmd.Flags().String(FlagEnableCancelTime, "0", "The time that bancor can be canceled")
+	cmd.Flags().String(FlagEarliestCancelTime, "0", "The time that bancor can be canceled")
 	cmd.Flags().String(FlagInitPrice, "0", "The init price of this bancor")
 	for _, flag := range bancorInitFlags {
 		cmd.MarkFlagRequired(flag)

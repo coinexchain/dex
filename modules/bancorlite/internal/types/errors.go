@@ -83,7 +83,7 @@ func ErrNotBancorOwner() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeNotBancorOwner, "The sender is not the bancor owner")
 }
 
-func ErrEnableCancelTimeNotArrive() sdk.Error {
+func ErrEarliestCancelTimeNotArrive() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeCancelTimeNotArrived, "The time which bancor can be canceled has not arrived")
 }
 
@@ -103,6 +103,6 @@ func ErrPriceConfiguration() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeInitPriceBigThanMaxPrice, "The init price is big than max price")
 }
 
-func ErrEnableCancelTimeIsNegative() sdk.Error {
+func ErrEarliestCancelTimeIsNegative() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeCancelEnableTimeNegative, "The cancellation enable time is negative")
 }

@@ -13,13 +13,13 @@ var addrUser = sdk.AccAddress("user")
 
 func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 	type fields struct {
-		Owner            sdk.AccAddress
-		Stock            string
-		Money            string
-		InitPrice        sdk.Dec
-		MaxSupply        sdk.Int
-		MaxPrice         sdk.Dec
-		EnableCancelTime int64
+		Owner              sdk.AccAddress
+		Stock              string
+		Money              string
+		InitPrice          sdk.Dec
+		MaxSupply          sdk.Int
+		MaxPrice           sdk.Dec
+		EarliestCancelTime int64
 	}
 	tests := []struct {
 		name   string
@@ -94,13 +94,13 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msg := MsgBancorInit{
-				Owner:            tt.fields.Owner,
-				Stock:            tt.fields.Stock,
-				Money:            tt.fields.Money,
-				InitPrice:        tt.fields.InitPrice,
-				MaxSupply:        tt.fields.MaxSupply,
-				MaxPrice:         tt.fields.MaxPrice,
-				EnableCancelTime: tt.fields.EnableCancelTime,
+				Owner:              tt.fields.Owner,
+				Stock:              tt.fields.Stock,
+				Money:              tt.fields.Money,
+				InitPrice:          tt.fields.InitPrice,
+				MaxSupply:          tt.fields.MaxSupply,
+				MaxPrice:           tt.fields.MaxPrice,
+				EarliestCancelTime: tt.fields.EarliestCancelTime,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MsgBancorInit.ValidateBasic() = %v, want %v", got, tt.want)

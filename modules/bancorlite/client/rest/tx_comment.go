@@ -15,13 +15,13 @@ import (
 )
 
 type BancorInitReq struct {
-	BaseReq          rest.BaseReq `json:"base_req"`
-	Stock            string       `json:"stock"`
-	Money            string       `json:"money"`
-	InitPrice        string       `json:"init_price"`
-	MaxSupply        string       `json:"max_supply"`
-	MaxPrice         string       `json:"max_price"`
-	EnableCancelTime string       `json:"enable_cancel_time"`
+	BaseReq            rest.BaseReq `json:"base_req"`
+	Stock              string       `json:"stock"`
+	Money              string       `json:"money"`
+	InitPrice          string       `json:"init_price"`
+	MaxSupply          string       `json:"max_supply"`
+	MaxPrice           string       `json:"max_price"`
+	EarliestCancelTime string       `json:"enable_cancel_time"`
 }
 
 func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -68,19 +68,19 @@ func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Max Supply is Invalid")
 			return
 		}
-		time, err := strconv.ParseInt(req.EnableCancelTime, 10, 64)
+		time, err := strconv.ParseInt(req.EarliestCancelTime, 10, 64)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid enable cancel time")
 		}
 
 		msg := &types.MsgBancorInit{
-			Owner:            sender,
-			Stock:            req.Stock,
-			Money:            req.Money,
-			InitPrice:        initPrice,
-			MaxSupply:        maxSupply,
-			MaxPrice:         maxPrice,
-			EnableCancelTime: time,
+			Owner:              sender,
+			Stock:              req.Stock,
+			Money:              req.Money,
+			InitPrice:          initPrice,
+			MaxSupply:          maxSupply,
+			MaxPrice:           maxPrice,
+			EarliestCancelTime: time,
 		}
 
 		if err := msg.ValidateBasic(); err != nil {

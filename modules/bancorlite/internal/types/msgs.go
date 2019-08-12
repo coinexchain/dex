@@ -21,13 +21,13 @@ var _ sdk.Msg = MsgBancorTrade{}
 var _ sdk.Msg = MsgBancorCancel{}
 
 type MsgBancorInit struct {
-	Owner            sdk.AccAddress `json:"owner"`
-	Stock            string         `json:"stock"` // supply denom
-	Money            string         `json:"money"` // paying denom
-	InitPrice        sdk.Dec        `json:"init_price"`
-	MaxSupply        sdk.Int        `json:"max_supply"`
-	MaxPrice         sdk.Dec        `json:"max_price"`
-	EnableCancelTime int64          `json:"enable_cancel_time"`
+	Owner              sdk.AccAddress `json:"owner"`
+	Stock              string         `json:"stock"` // supply denom
+	Money              string         `json:"money"` // paying denom
+	InitPrice          sdk.Dec        `json:"init_price"`
+	MaxSupply          sdk.Int        `json:"max_supply"`
+	MaxPrice           sdk.Dec        `json:"max_price"`
+	EarliestCancelTime int64          `json:"earliest_cancel_time"`
 }
 
 type MsgBancorCancel struct {
@@ -71,8 +71,8 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 	if msg.InitPrice.GT(msg.MaxPrice) {
 		return ErrPriceConfiguration()
 	}
-	if msg.EnableCancelTime < 0 {
-		return ErrEnableCancelTimeIsNegative()
+	if msg.EarliestCancelTime < 0 {
+		return ErrEarliestCancelTimeIsNegative()
 	}
 	return nil
 }
