@@ -58,7 +58,7 @@ func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 			return
 		}
 		initPrice, err := sdk.NewDecFromStr(req.InitPrice)
-		if initPrice.IsNegative() {
+		if err != nil || initPrice.IsNegative() {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Negative init price")
 		}
 		maxSupply, ok := sdk.NewIntFromString(req.MaxSupply)
