@@ -52,14 +52,12 @@ func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 		}
 		req.BaseReq.Sequence = sequence
 
-		var maxPrice sdk.Dec
-		types.FillDec(req.MaxPrice, &maxPrice)
-		if maxPrice.IsZero() {
+		maxPrice, err := sdk.NewDecFromStr(req.MaxPrice)
+		if err != nil || maxPrice.IsZero() {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Max Price is Invalid or Zero")
 			return
 		}
-		var initPrice sdk.Dec
-		types.FillDec(req.InitPrice, &initPrice)
+		initPrice, err := sdk.NewDecFromStr(req.InitPrice)
 		if initPrice.IsNegative() {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Negative init price")
 		}

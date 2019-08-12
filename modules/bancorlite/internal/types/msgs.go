@@ -4,14 +4,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func FillDec(s string, dec *sdk.Dec) {
-	var err sdk.Error
-	*dec, err = sdk.NewDecFromStr(s)
-	if err != nil {
-		*dec = sdk.ZeroDec()
-	}
-}
-
 // /////////////////////////////////////////////////////////
 
 const MaxTradeAmount = int64(10000) * int64(10000) * int64(10000) * int64(10000) * 100 // Ten Billion

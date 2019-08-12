@@ -53,14 +53,12 @@ Example:
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			sender := cliCtx.GetFromAddress()
-			var maxPrice sdk.Dec
-			types.FillDec(viper.GetString(FlagMaxPrice), &maxPrice)
-			if maxPrice.IsZero() {
+			maxPrice, err0 := sdk.NewDecFromStr(viper.GetString(FlagMaxPrice))
+			if err0 != nil || maxPrice.IsZero() {
 				return errors.New("max Price is Invalid or Zero")
 			}
-			var initPrice sdk.Dec
-			types.FillDec(viper.GetString(FlagInitPrice), &initPrice)
-			if initPrice.IsNegative() {
+			initPrice, err0 := sdk.NewDecFromStr(viper.GetString(FlagInitPrice))
+			if err0 != nil || initPrice.IsNegative() {
 				return errors.New("init price is negative")
 			}
 			maxSupply, ok := sdk.NewIntFromString(viper.GetString(FlagMaxSupply))
