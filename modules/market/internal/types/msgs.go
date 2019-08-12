@@ -289,18 +289,18 @@ type CancelMarketInfo struct {
 }
 
 type CreateOrderInfo struct {
-	OrderID     string `json:"order_id"`
-	Sender      string `json:"sender"`
-	TradingPair string `json:"trading_pair"`
-	OrderType   byte   `json:"order_type"`
-	Price       string `json:"price"`
-	Quantity    int64  `json:"quantity"`
-	Side        byte   `json:"side"`
-	TimeInForce int    `json:"time_in_force"`
-	FeatureFee  int64  `json:"feature_fee"`
-	Height      int64  `json:"height"`
-	FrozenFee   int64  `json:"frozen_fee"`
-	Freeze      int64  `json:"freeze"`
+	OrderID     string  `json:"order_id"`
+	Sender      string  `json:"sender"`
+	TradingPair string  `json:"trading_pair"`
+	OrderType   byte    `json:"order_type"`
+	Price       sdk.Dec `json:"price"`
+	Quantity    int64   `json:"quantity"`
+	Side        byte    `json:"side"`
+	TimeInForce int     `json:"time_in_force"`
+	FeatureFee  int64   `json:"feature_fee"`
+	Height      int64   `json:"height"`
+	FrozenFee   int64   `json:"frozen_fee"`
+	Freeze      int64   `json:"freeze"`
 }
 
 type FillOrderInfo struct {
@@ -308,6 +308,7 @@ type FillOrderInfo struct {
 	TradingPair string `json:"trading_pair"`
 	Height      int64  `json:"height"`
 	Side        byte   `json:"side"`
+	Price     sdk.Dec `json:"price"`
 
 	// These fields will change when order was filled/canceled.
 	LeftStock int64  `json:"left_stock"`
@@ -316,7 +317,6 @@ type FillOrderInfo struct {
 	DealMoney int64  `json:"deal_money"`
 	CurrStock int64  `json:"curr_stock"`
 	CurrMoney int64  `json:"curr_money"`
-	Price     string `json:"price"`
 }
 
 type CancelOrderInfo struct {
@@ -324,6 +324,7 @@ type CancelOrderInfo struct {
 	TradingPair string `json:"trading_pair"`
 	Height      int64  `json:"height"`
 	Side        byte   `json:"side"`
+	Price     sdk.Dec `json:"price"`
 
 	// Del infos
 	DelReason string `json:"del_reason"`
