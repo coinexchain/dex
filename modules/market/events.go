@@ -10,6 +10,7 @@ var (
 	AttributeKeyMoney            = "money"
 	AttributeKeyPricePrecision   = "price-precision"
 	AttributeKeyLastExecutePrice = "last-execute-price"
+	AttributeKeySender           = "sender"
 
 	AttributeKeySequence    = "sequence"
 	AttributeKeyOrderType   = "order-type"

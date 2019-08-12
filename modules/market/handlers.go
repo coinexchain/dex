@@ -79,6 +79,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg mtype.MsgCreateTradingPair,
 			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyStock, msg.Stock),
 			sdk.NewAttribute(AttributeKeyMoney, msg.Money),
+			sdk.NewAttribute(AttributeKeySender, msg.Creator.String()),
 			sdk.NewAttribute(AttributeKeyPricePrecision, strconv.Itoa(int(info.PricePrecision))),
 			sdk.NewAttribute(AttributeKeyLastExecutePrice, info.LastExecutedPrice.String()),
 		),
@@ -281,6 +282,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keep
 			AttributeKeyOrder, order.OrderID())),
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
+			sdk.NewAttribute(AttributeKeySender, msg.Sender.String()),
 			sdk.NewAttribute(AttributeKeyTradingPair, order.TradingPair),
 			sdk.NewAttribute(AttributeKeyHeight, strconv.FormatInt(order.Height, 10))),
 	})
@@ -369,6 +371,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg mtype.MsgCancelOrder, keeper keep
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyDelOrderReason, mtype.CancelOrderByManual),
+			sdk.NewAttribute(AttributeKeySender, msg.Sender.String()),
 			sdk.NewAttribute(AttributeKeyDelOrderHeight, strconv.Itoa(int(ctx.BlockHeight()))),
 			sdk.NewAttribute(AttributeKeyTradingPair, order.TradingPair),
 		),
@@ -421,7 +424,9 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg mtype.MsgCancelTradingPair,
 			AttributeKeyTradingPair, msg.TradingPair)),
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
-			sdk.NewAttribute(AttributeKeyEffectiveTime, strconv.Itoa(int(msg.EffectiveTime)))),
+			sdk.NewAttribute(AttributeKeyEffectiveTime, strconv.Itoa(int(msg.EffectiveTime))),
+			sdk.NewAttribute(AttributeKeySender, msg.Sender.String()),
+		),
 	})
 
 	return sdk.Result{
@@ -501,6 +506,7 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg mtype.MsgModifyPricePrec
 			AttributeKeyTradingPair, msg.TradingPair)),
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
+			sdk.NewAttribute(AttributeKeySender, msg.Sender.String()),
 			sdk.NewAttribute(AttributeKeyOldPricePrecision, strconv.Itoa(int(oldInfo.PricePrecision))),
 			sdk.NewAttribute(AttributeKeyNewPricePrecision, strconv.Itoa(int(info.PricePrecision)))),
 	})
