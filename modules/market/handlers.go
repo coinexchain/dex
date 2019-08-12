@@ -147,7 +147,7 @@ func calFrozenFeeInOrder(ctx sdk.Context, marketParams keepers.Params, keeper ke
 	rate := sdk.NewDec(marketParams.MarketFeeRate)
 	div := sdk.NewDec(int64(math.Pow10(keepers.MarketFeeRatePrecision)))
 	if stock == types.CET {
-		frozenFee = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).RoundInt64()
+		frozenFee = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).Ceil().RoundInt64()
 	} else {
 		stockSepCet := stock + mtype.SymbolSeparator + types.CET
 		marketInfo, err := keeper.GetMarketInfo(ctx, stockSepCet)
@@ -155,7 +155,7 @@ func calFrozenFeeInOrder(ctx sdk.Context, marketParams keepers.Params, keeper ke
 			frozenFee = marketParams.FixedTradeFee
 		} else {
 			totalPriceInCet := marketInfo.LastExecutedPrice.Mul(sdk.NewDec(msg.Quantity))
-			frozenFee = totalPriceInCet.Mul(rate).Quo(div).RoundInt64()
+			frozenFee = totalPriceInCet.Mul(rate).Quo(div).Ceil().RoundInt64()
 		}
 	}
 	if frozenFee < marketParams.MarketFeeMin {
@@ -282,13 +282,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg mtype.MsgCreateOrder, keeper keep
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyTradingPair, order.TradingPair),
-			sdk.NewAttribute(AttributeKeyHeight, strconv.FormatInt(order.Height, 10)),
-			sdk.NewAttribute(AttributeKeySequence, strconv.FormatInt(int64(order.Sequence), 10)),
-			sdk.NewAttribute(AttributeKeyOrderType, strconv.Itoa(int(order.OrderType))),
-			sdk.NewAttribute(AttributeKeySide, strconv.Itoa(int(order.Side))),
-			sdk.NewAttribute(AttributeKeyPrice, order.Price.String()),
-			sdk.NewAttribute(AttributeKeyQuantity, strconv.FormatInt(order.Quantity, 10)),
-			sdk.NewAttribute(AttributeKeyTimeInForce, strconv.Itoa(order.TimeInForce))),
+			sdk.NewAttribute(AttributeKeyHeight, strconv.FormatInt(order.Height, 10))),
 	})
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
@@ -376,11 +370,6 @@ func handleMsgCancelOrder(ctx sdk.Context, msg mtype.MsgCancelOrder, keeper keep
 			sdk.NewAttribute(sdk.AttributeKeyModule, mtype.ModuleName),
 			sdk.NewAttribute(AttributeKeyDelOrderReason, mtype.CancelOrderByManual),
 			sdk.NewAttribute(AttributeKeyDelOrderHeight, strconv.Itoa(int(ctx.BlockHeight()))),
-			sdk.NewAttribute(AttributeKeyUsedCommission, order.CalOrderFee(marketParams.FeeForZeroDeal).String()),
-			sdk.NewAttribute(AttributeKeyLeftStock, strconv.Itoa(int(order.LeftStock))),
-			sdk.NewAttribute(AttributeKeyDealStock, strconv.Itoa(int(order.DealStock))),
-			sdk.NewAttribute(AttributeKeyRemainAmount, strconv.Itoa(int(order.FrozenFee))),
-			sdk.NewAttribute(AttributeKeyDealMoney, strconv.Itoa(int(order.DealMoney))),
 		),
 	})
 	return sdk.Result{
@@ -535,7 +524,7 @@ func checkMsgModifyPricePrecision(ctx sdk.Context, msg mtype.MsgModifyPricePreci
 		return sdk.NewError(mtype.CodeSpaceMarket, mtype.CodeInvalidPricePrecision,
 			fmt.Sprintf("Price Precision can only be increased; "+
 				"tradingPair price_precision : %d, msg price_precision : %d",
-				&info.PricePrecision, msg.PricePrecision)).Result()
+				info.PricePrecision, msg.PricePrecision)).Result()
 	}
 
 	stock := strings.Split(msg.TradingPair, mtype.SymbolSeparator)[0]

@@ -66,7 +66,7 @@ func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 	if len(msg.Stock) == 0 || len(msg.Money) == 0 {
 		return ErrInvalidSymbol()
 	}
-	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
+	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
 		return ErrInvalidPricePrecision()
 	}
 	if msg.Money == msg.Stock {
@@ -112,26 +112,29 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if len(msg.TradingPair) == 0 {
 		return sdk.ErrInvalidAddress("missing GTE order TradingPair identifier")
 	}
-	if msg.PricePrecision < 0 || msg.PricePrecision > MaxTokenPricePrecision {
-		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [0, 18]. actual : %d", msg.PricePrecision))
-	}
-	if msg.Side != BUY && msg.Side != SELL {
-		return ErrInvalidTradeSide()
+	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
+		return ErrInvalidSymbol()
 	}
 	if msg.OrderType != LimitOrder {
 		return ErrInvalidOrderType()
 	}
-	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
-		return ErrInvalidSymbol()
+	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
+		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [0, 18]. actual : %d", msg.PricePrecision))
 	}
 	if msg.Price <= 0 || msg.Price > 1E18 {
 		return ErrInvalidPrice(msg.Price)
 	}
-	if msg.ExistBlocks < 0 {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", msg.ExistBlocks))
+	if msg.Quantity < 0 {
+		return ErrOrderQuantityToSmall()
+	}
+	if msg.Side != BUY && msg.Side != SELL {
+		return ErrInvalidTradeSide()
 	}
 	if msg.TimeInForce != GTE && msg.TimeInForce != IOC {
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidTimeInforce, fmt.Sprintf("Invalid timeInforce : %d; The valid value : 3, 4", msg.TimeInForce))
+	}
+	if msg.ExistBlocks < 0 {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", msg.ExistBlocks))
 	}
 
 	return nil
@@ -247,7 +250,7 @@ func (msg MsgModifyPricePrecision) ValidateBasic() sdk.Error {
 	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
 		return ErrInvalidSymbol()
 	}
-	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
+	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
 		return ErrInvalidPricePrecision()
 	}
 

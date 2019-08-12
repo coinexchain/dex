@@ -3,7 +3,7 @@ package types
 type OrderType = byte
 
 const (
-	MinTokenPricePrecision           = 8
+	MinTokenPricePrecision           = 0
 	MaxTokenPricePrecision           = 18
 	LimitOrder             OrderType = 2
 	SymbolSeparator                  = "/"
@@ -28,9 +28,6 @@ const (
 )
 
 const (
-	IntegrationNetSubString = "coinex-integrationtest"
-)
-
-var (
-	MaxOrderAmount int64 = 1e18
+	IntegrationNetSubString       = "coinex-integrationtest"
+	MaxOrderAmount          int64 = 1e18
 )

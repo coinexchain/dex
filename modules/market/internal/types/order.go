@@ -36,7 +36,7 @@ func (or *Order) CalOrderFee(feeForZeroDeal int64) sdk.Dec {
 	if or.DealStock == 0 {
 		actualFee = sdk.NewDec(feeForZeroDeal)
 	}
-	return actualFee
+	return actualFee.TruncateDec()
 }
 
 type PricePoint struct {
