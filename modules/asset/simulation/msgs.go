@@ -43,6 +43,9 @@ func SimulateMsgTransferOwnership(k asset.Keeper) simulation.Operation {
 		symbol := RandStringBytes(r, SymbolLenth)
 		originOwner := simulation.RandomAcc(r, accounts)
 		newOwner := simulation.RandomAcc(r, accounts)
+		for newOwner.Equals(originOwner) {
+			newOwner = simulation.RandomAcc(r, accounts)
+		}
 		msg := asset.NewMsgTransferOwnership(symbol, originOwner.Address, newOwner.Address)
 		if msg.ValidateBasic() != nil {
 			return simulation.NoOpMsg(), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
