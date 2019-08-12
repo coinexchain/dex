@@ -371,7 +371,107 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 				})
 				return v
 			}(nil),
-			Op: assetsim.SimulateMsgIssuerToken(app.assetKeeper),
+			Op: assetsim.SimulateMsgIssueToken(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgBurnToken, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgBurnToken(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgTransferOwnership, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgTransferOwnership(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgMintToken, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgMintToken(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgForbidToken, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgForbidToken(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgUnForbidToken, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgUnForbidToken(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgAddTokenWhitelist, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgAddTokenWhitelist(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgRemoveTokenWhitelist, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgRemoveTokenWhitelist(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgForbidAddr, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgForbidAddr(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgUnForbidAddr, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgUnForbidAddr(app.assetKeeper),
+		},
+		{
+			Weight: func(_ *rand.Rand) int {
+				var v int
+				ap.GetOrGenerate(cdc, assetsim.OpWeightMsgModifyTokenInfo, &v, nil, func(_ *rand.Rand) {
+					v = 100
+				})
+				return v
+			}(nil),
+			Op: assetsim.SimulateMsgModifyTokenInfo(app.assetKeeper),
 		},
 	}
 
