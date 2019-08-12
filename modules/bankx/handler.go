@@ -35,6 +35,12 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 		return bank.ErrSendDisabled(k.Bk.Codespace()).Result()
 	}
 
+	for _, out := range msg.Outputs {
+		if k.Bk.BlacklistedAddr(out.Address) {
+			return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", out.Address)).Result()
+		}
+	}
+
 	if err := checkInputs(ctx, k, msg.Inputs); err != nil {
 		return err.Result()
 	}
@@ -65,6 +71,10 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	if !k.Bk.GetSendEnabled(ctx) {
 		return bank.ErrSendDisabled(k.Bk.Codespace()).Result()
+	}
+
+	if k.Bk.BlacklistedAddr(msg.ToAddress) {
+		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.ToAddress)).Result()
 	}
 
 	if k.IsSendForbidden(ctx, msg.Amount, msg.FromAddress) {
@@ -178,6 +188,10 @@ func normalSend(ctx sdk.Context, k Keeper,
 func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoRequired) sdk.Result {
 	addr := msg.Address
 	required := msg.Required
+
+	if k.Bk.BlacklistedAddr(msg.Address) {
+		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.ToAddress)).Result()
+	}
 
 	account := k.Ak.GetAccount(ctx, addr)
 	if account == nil {
