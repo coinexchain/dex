@@ -44,7 +44,6 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 
 	rootCmd.AddCommand(
 		ExampleGenesisCmd(cdc),
-		TestnetGenesisCmd(cdc),
 		DefaultParamsCmd(),
 		CosmosHubParamsCmd(cdc),
 		RestEndpointsCmd(registerRoutes),

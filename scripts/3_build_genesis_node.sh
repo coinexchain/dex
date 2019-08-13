@@ -121,4 +121,3 @@ cp `which cetd` ${OUTPUT_DIR}
 md5sum * > md5
 
 echo "prepare testnet release package succeeded: $(pwd)"
-

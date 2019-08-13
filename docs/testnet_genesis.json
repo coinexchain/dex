@@ -1,6 +1,479 @@
 {
-  "genesis_time": "2019-07-17T07:41:22.14589Z",
-  "chain_id": "coinexdex-1",
+  "app_hash": "",
+  "app_state": {
+    "accounts": [
+      {
+        "account_number": "0",
+        "address": "coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97",
+        "coins": [
+          {
+            "amount": "31536000000000000",
+            "denom": "cet"
+          }
+        ],
+        "delegated_free": [],
+        "delegated_vesting": [],
+        "end_time": "0",
+        "module_name": "",
+        "module_permissions": [
+          ""
+        ],
+        "original_vesting": [],
+        "sequence_number": "0",
+        "start_time": "0"
+      },
+      {
+        "account_number": "0",
+        "address": "coinex1drkq5407rlm2eqcatzdslvwxtxcph89vaevuy8",
+        "coins": [
+          {
+            "amount": "287767527061317189",
+            "denom": "cet"
+          }
+        ],
+        "delegated_free": [],
+        "delegated_vesting": [],
+        "end_time": "0",
+        "module_name": "",
+        "module_permissions": [
+          ""
+        ],
+        "original_vesting": [],
+        "sequence_number": "0",
+        "start_time": "0"
+      },
+      {
+        "account_number": "0",
+        "address": "coinex1cfg6fld5snhrmjdjh29msgqn4luf5ugqt96h0s",
+        "coins": [
+          {
+            "amount": "88464000000000000",
+            "denom": "cet"
+          }
+        ],
+        "delegated_free": [],
+        "delegated_vesting": [],
+        "end_time": "0",
+        "module_name": "",
+        "module_permissions": [
+          ""
+        ],
+        "original_vesting": [],
+        "sequence_number": "0",
+        "start_time": "0"
+      },
+      {
+        "account_number": "0",
+        "address": "coinex1n996vusm2e592y35t7p95aj7gfpxkzt8v3nqcd",
+        "coins": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "delegated_free": [],
+        "delegated_vesting": [],
+        "end_time": "1577836800",
+        "module_name": "",
+        "module_permissions": [
+          ""
+        ],
+        "original_vesting": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "sequence_number": "0",
+        "start_time": "0"
+      },
+      {
+        "account_number": "0",
+        "address": "coinex1wdh5fsl5duv0yhky2cx3jfqgc0nvt73kzq60c9",
+        "coins": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "delegated_free": [],
+        "delegated_vesting": [],
+        "end_time": "1609459200",
+        "module_name": "",
+        "module_permissions": [
+          ""
+        ],
+        "original_vesting": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "sequence_number": "0",
+        "start_time": "0"
+      },
+      {
+        "account_number": "0",
+        "address": "coinex1hvwyuk60ehlcfpk85l3ere205hec5fm0c7vcxh",
+        "coins": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "delegated_free": [],
+        "delegated_vesting": [],
+        "end_time": "1640995200",
+        "module_name": "",
+        "module_permissions": [
+          ""
+        ],
+        "original_vesting": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "sequence_number": "0",
+        "start_time": "0"
+      },
+      {
+        "account_number": "0",
+        "address": "coinex16lvmlnvuze2sym63cc8vm5wqz577z6y6ehwt7a",
+        "coins": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "delegated_free": [],
+        "delegated_vesting": [],
+        "end_time": "1672531200",
+        "module_name": "",
+        "module_permissions": [
+          ""
+        ],
+        "original_vesting": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "sequence_number": "0",
+        "start_time": "0"
+      },
+      {
+        "account_number": "0",
+        "address": "coinex1gfzu2zyzwmt9e7lqmdr27pe939fvpvddpuqxpt",
+        "coins": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "delegated_free": [],
+        "delegated_vesting": [],
+        "end_time": "1704067200",
+        "module_name": "",
+        "module_permissions": [
+          ""
+        ],
+        "original_vesting": [
+          {
+            "amount": "36000000000000000",
+            "denom": "cet"
+          }
+        ],
+        "sequence_number": "0",
+        "start_time": "0"
+      }
+    ],
+    "alias": {
+      "alias_entry_list": [],
+      "params": {
+        "fee_for_alias_length_2": "2000000",
+        "fee_for_alias_length_3": "300000",
+        "fee_for_alias_length_4": "40000",
+        "fee_for_alias_length_5": "5000",
+        "fee_for_alias_length_6": "600",
+        "fee_for_alias_length_7_or_higher": "70",
+        "max_alias_count": "5"
+      }
+    },
+    "asset": {
+      "forbidden_addresses": null,
+      "params": {
+        "issue_rare_token_fee": [
+          {
+            "amount": "1000000000000",
+            "denom": "cet"
+          }
+        ],
+        "issue_token_fee": [
+          {
+            "amount": "100000000000",
+            "denom": "cet"
+          }
+        ]
+      },
+      "tokens": [
+        {
+          "type": "asset/BaseToken",
+          "value": {
+            "addr_forbiddable": false,
+            "burnable": true,
+            "description": "Decentralized public chain ecosystem, Born for financial liberalization",
+            "identity": "B8E2E010853148F5",
+            "is_forbidden": false,
+            "mintable": false,
+            "name": "CoinEx Chain Native Token",
+            "owner": "coinex1cfg6fld5snhrmjdjh29msgqn4luf5ugqt96h0s",
+            "send_lock": "0",
+            "symbol": "cet",
+            "token_forbiddable": false,
+            "total_burn": "412232472938682811",
+            "total_mint": "0",
+            "total_supply": "587767527061317189",
+            "url": "www.coinex.org"
+          }
+        }
+      ],
+      "whitelist": null
+    },
+    "auth": {
+      "params": {
+        "max_memo_characters": "512",
+        "sig_verify_cost_ed25519": "590",
+        "sig_verify_cost_secp256k1": "1000",
+        "tx_sig_limit": "7",
+        "tx_size_cost_per_byte": "10"
+      }
+    },
+    "authx": {
+      "accountxs": [],
+      "params": {
+        "min_gas_price_limit": "20.000000000000000000"
+      }
+    },
+    "bancorlite": {
+      "bancor_info_map": {},
+      "params": {
+        "cancel_bancor_fee": "10000000000",
+        "create_bancor_fee": "10000000000",
+        "trade_fee_rate": "10"
+      }
+    },
+    "bank": {
+      "send_enabled": true
+    },
+    "bankx": {
+      "params": {
+        "activation_fee": "100000000",
+        "lock_coins_fee": "10000000000"
+      }
+    },
+    "comment": {
+      "comment_count": {}
+    },
+    "crisis": {
+      "constant_fee": {
+        "amount": "35000000000000",
+        "denom": "cet"
+      }
+    },
+    "distribution": {
+      "base_proposer_reward": "0.010000000000000000",
+      "bonus_proposer_reward": "0.040000000000000000",
+      "community_tax": "0.020000000000000000",
+      "delegator_starting_infos": [],
+      "delegator_withdraw_infos": [],
+      "fee_pool": {
+        "community_pool": []
+      },
+      "outstanding_rewards": [],
+      "previous_proposer": "",
+      "validator_accumulated_commissions": [],
+      "validator_current_rewards": [],
+      "validator_historical_rewards": [],
+      "validator_slash_events": [],
+      "withdraw_addr_enabled": true
+    },
+    "distrx": null,
+    "genutil": {
+      "gentxs": [
+        {
+          "type": "cosmos-sdk/StdTx",
+          "value": {
+            "fee": {
+              "amount": [],
+              "gas": "200000"
+            },
+            "memo": "e6c37658d66cf677acfa3e4ac9014b998d33bc1b@10.211.55.8:26656",
+            "msg": [
+              {
+                "type": "cosmos-sdk/MsgCreateValidator",
+                "value": {
+                  "commission": {
+                    "max_change_rate": "0.100000000000000000",
+                    "max_rate": "1.000000000000000000",
+                    "rate": "0.200000000000000000"
+                  },
+                  "delegator_address": "coinex1cfg6fld5snhrmjdjh29msgqn4luf5ugqt96h0s",
+                  "description": {
+                    "details": "Initial genesis node.",
+                    "identity": "",
+                    "moniker": "GenesisNode",
+                    "website": "www.coinex.org"
+                  },
+                  "min_self_delegation": "100000000000000",
+                  "pubkey": "coinexvalconspub1zcjduepqddmqvjxtktw6g9mkkn0hdaqpszkqtpv6zt45rru7z5w4hvq07uuqmnwwe3",
+                  "validator_address": "coinexvaloper1cfg6fld5snhrmjdjh29msgqn4luf5ugqs2elpy",
+                  "value": {
+                    "amount": "200000000000000",
+                    "denom": "cet"
+                  }
+                }
+              }
+            ],
+            "signatures": [
+              {
+                "pub_key": {
+                  "type": "tendermint/PubKeySecp256k1",
+                  "value": "A2iAW8Nm9gJAw0pee5+piD1EKkVG+FrMKQz1FfOFROOF"
+                },
+                "signature": "XBpp9/v04zMXZO9nP3o2vMr9AM61nDLtagrp6css3BNMDXM2Pm0xfsUb1x3sU3ijGiN56hvtF2rPHOmWwqHRgg=="
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "gov": {
+      "deposit_params": {
+        "max_deposit_period": "86400000000000",
+        "min_deposit": [
+          {
+            "amount": "1000000000000",
+            "denom": "cet"
+          }
+        ]
+      },
+      "deposits": null,
+      "proposals": null,
+      "starting_proposal_id": "1",
+      "tally_params": {
+        "quorum": "0.400000000000000000",
+        "threshold": "0.500000000000000000",
+        "veto": "0.334000000000000000"
+      },
+      "votes": null,
+      "voting_params": {
+        "voting_period": "86400000000000"
+      }
+    },
+    "incentive": {
+      "params": {
+        "default_reward_per_block": 0,
+        "plans": [
+          {
+            "end_height": "10512000",
+            "reward_per_block": "1000000000",
+            "start_height": "0",
+            "total_incentive": "10512000000000000"
+          },
+          {
+            "end_height": "21024000",
+            "reward_per_block": "800000000",
+            "start_height": "10512000",
+            "total_incentive": "8409600000000000"
+          },
+          {
+            "end_height": "31536000",
+            "reward_per_block": "600000000",
+            "start_height": "21024000",
+            "total_incentive": "6307200000000000"
+          },
+          {
+            "end_height": "42048000",
+            "reward_per_block": "400000000",
+            "start_height": "31536000",
+            "total_incentive": "4204800000000000"
+          },
+          {
+            "end_height": "52560000",
+            "reward_per_block": "200000000",
+            "start_height": "42048000",
+            "total_incentive": "2102400000000000"
+          }
+        ]
+      },
+      "state": {
+        "height_adjustment": "0"
+      }
+    },
+    "market": {
+      "market_infos": [],
+      "orders": [],
+      "params": {
+        "create_market_fee": "1000000000000",
+        "fee_for_zero_deal": "1000000",
+        "fixed_trade_fee": "1000000",
+        "gte_order_feature_fee_by_blocks": "6000000",
+        "gte_order_lifetime": "10000",
+        "market_fee_min": "1000000",
+        "market_fee_rate": "10",
+        "market_min_expired_time": "604800",
+        "max_executed_price_change_ratio": "25"
+      }
+    },
+    "params": null,
+    "slashing": {
+      "missed_blocks": {},
+      "params": {
+        "downtime_jail_duration": "600000000000",
+        "max_evidence_age": "1814400000000000",
+        "min_signed_per_window": "0.050000000000000000",
+        "signed_blocks_window": "10000",
+        "slash_fraction_double_sign": "0.050000000000000000",
+        "slash_fraction_downtime": "0.000100000000000000"
+      },
+      "signing_infos": {}
+    },
+    "staking": {
+      "delegations": null,
+      "exported": false,
+      "last_total_power": "0",
+      "last_validator_powers": null,
+      "params": {
+        "bond_denom": "cet",
+        "max_entries": 7,
+        "max_validators": 42,
+        "unbonding_time": "3600000000000"
+      },
+      "redelegations": null,
+      "unbonding_delegations": null,
+      "validators": null
+    },
+    "stakingx": {
+      "params": {
+        "min_mandatory_commission_rate": "0.050000000000000000",
+        "min_self_delegation": "1000000000000",
+        "non_bondable_addresses": [
+          "coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97",
+          "coinex1cfg6fld5snhrmjdjh29msgqn4luf5ugqt96h0s",
+          "coinex1n996vusm2e592y35t7p95aj7gfpxkzt8v3nqcd",
+          "coinex1wdh5fsl5duv0yhky2cx3jfqgc0nvt73kzq60c9",
+          "coinex1hvwyuk60ehlcfpk85l3ere205hec5fm0c7vcxh",
+          "coinex16lvmlnvuze2sym63cc8vm5wqz577z6y6ehwt7a",
+          "coinex1gfzu2zyzwmt9e7lqmdr27pe939fvpvddpuqxpt"
+        ]
+      }
+    },
+    "supply": {
+      "supply": []
+    }
+  },
+  "chain_id": "coinexdex-test2000",
   "consensus_params": {
     "block": {
       "max_bytes": "22020096",
@@ -16,496 +489,5 @@
       ]
     }
   },
-  "app_hash": "",
-  "app_state": {
-    "accounts": [
-      {
-        "address": "coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "31500000000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": [],
-        "delegated_free": [],
-        "delegated_vesting": [],
-        "start_time": "0",
-        "end_time": "0",
-        "module_name": "",
-        "module_permissions": null
-      },
-      {
-        "address": "coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "288800000000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": [],
-        "delegated_free": [],
-        "delegated_vesting": [],
-        "start_time": "0",
-        "end_time": "0",
-        "module_name": "",
-        "module_permissions": null
-      },
-      {
-        "address": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "88500000000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": [],
-        "delegated_free": [],
-        "delegated_vesting": [],
-        "start_time": "0",
-        "end_time": "0",
-        "module_name": "",
-        "module_permissions": null
-      },
-      {
-        "address": "coinex1zvf0hx6rpz0n7dkuzu34s39dnsyr8eygqs8h3q",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "delegated_free": [],
-        "delegated_vesting": [],
-        "start_time": "0",
-        "end_time": "1577836800",
-        "module_name": "",
-        "module_permissions": null
-      },
-      {
-        "address": "coinex1rfeae36tmm9t3gzacfq59hnv9j7fnaed3m4hhg",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "delegated_free": [],
-        "delegated_vesting": [],
-        "start_time": "0",
-        "end_time": "1609459200",
-        "module_name": "",
-        "module_permissions": null
-      },
-      {
-        "address": "coinex1ekevrsx6s853fqjt6rln9r84u8cwuft7e4wp47",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "delegated_free": [],
-        "delegated_vesting": [],
-        "start_time": "0",
-        "end_time": "1640995200",
-        "module_name": "",
-        "module_permissions": null
-      },
-      {
-        "address": "coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "delegated_free": [],
-        "delegated_vesting": [],
-        "start_time": "0",
-        "end_time": "1672531200",
-        "module_name": "",
-        "module_permissions": null
-      },
-      {
-        "address": "coinex1qyy6tvx7ymw44t4444sfmexpvczchr0tcp2p6p",
-        "coins": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "sequence_number": "0",
-        "account_number": "0",
-        "original_vesting": [
-          {
-            "denom": "cet",
-            "amount": "36000000000000000"
-          }
-        ],
-        "delegated_free": [],
-        "delegated_vesting": [],
-        "start_time": "0",
-        "end_time": "1704067200",
-        "module_name": "",
-        "module_permissions": null
-      }
-    ],
-    "auth": {
-      "params": {
-        "max_memo_characters": "512",
-        "tx_sig_limit": "7",
-        "tx_size_cost_per_byte": "10",
-        "sig_verify_cost_ed25519": "590",
-        "sig_verify_cost_secp256k1": "1000"
-      }
-    },
-    "authx": {
-      "params": {
-        "min_gas_price_limit": "20.000000000000000000"
-      },
-      "accountxs": null
-    },
-    "bank": {
-      "send_enabled": true
-    },
-    "bankx": {
-      "params": {
-        "activation_fee": "100000000",
-        "lock_coins_fee": "10000000000"
-      }
-    },
-    "staking": {
-      "params": {
-        "unbonding_time": "1814400000000000",
-        "max_validators": 42,
-        "max_entries": 7,
-        "bond_denom": "cet"
-      },
-      "last_total_power": "0",
-      "last_validator_powers": null,
-      "validators": null,
-      "delegations": null,
-      "unbonding_delegations": null,
-      "redelegations": null,
-      "exported": false
-    },
-    "stakingx": {
-      "params": {
-        "min_self_delegation": "100000000000000",
-        "non_bondable_addresses": null
-      }
-    },
-    "distribution": {
-      "fee_pool": {
-        "community_pool": null
-      },
-      "community_tax": "0.020000000000000000",
-      "base_proposer_reward": "0.010000000000000000",
-      "bonus_proposer_reward": "0.040000000000000000",
-      "withdraw_addr_enabled": true,
-      "delegator_withdraw_infos": null,
-      "previous_proposer": "",
-      "outstanding_rewards": null,
-      "validator_accumulated_commissions": null,
-      "validator_historical_rewards": null,
-      "validator_current_rewards": null,
-      "delegator_starting_infos": null,
-      "validator_slash_events": null
-    },
-    "gov": {
-      "starting_proposal_id": "1",
-      "deposits": null,
-      "votes": null,
-      "proposals": null,
-      "deposit_params": {
-        "min_deposit": [
-          {
-            "denom": "cet",
-            "amount": "1000000000000"
-          }
-        ],
-        "max_deposit_period": "1209600000000000"
-      },
-      "voting_params": {
-        "voting_period": "1209600000000000"
-      },
-      "tally_params": {
-        "quorum": "0.400000000000000000",
-        "threshold": "0.500000000000000000",
-        "veto": "0.334000000000000000"
-      }
-    },
-    "crisis": {
-      "constant_fee": {
-        "denom": "cet",
-        "amount": "35000000000000"
-      }
-    },
-    "slashing": {
-      "params": {
-        "max_evidence_age": "1814400000000000",
-        "signed_blocks_window": "10000",
-        "min_signed_per_window": "0.050000000000000000",
-        "downtime_jail_duration": "600000000000",
-        "slash_fraction_double_sign": "0.050000000000000000",
-        "slash_fraction_downtime": "0.000100000000000000"
-      },
-      "signing_infos": {},
-      "missed_blocks": {}
-    },
-    "asset": {
-      "params": {
-        "issue_token_fee": [
-          {
-            "denom": "cet",
-            "amount": "1000000000000"
-          }
-        ],
-        "issue_rare_token_fee": [
-          {
-            "denom": "cet",
-            "amount": "10000000000000"
-          }
-        ]
-      },
-      "tokens": [
-        {
-          "type": "asset/BaseToken",
-          "value": {
-            "name": "CoinEx Chain Native Token",
-            "symbol": "cet",
-            "total_supply": "588788547005740000",
-            "send_lock": "0",
-            "owner": "coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h",
-            "mintable": false,
-            "burnable": true,
-            "addr_forbiddable": false,
-            "token_forbiddable": false,
-            "total_burn": "411211452994260000",
-            "total_mint": "0",
-            "is_forbidden": false,
-            "url": "https://www.coinex.org",
-            "description": "Decentralized public chain ecosystem, Born for financial liberalization"
-          }
-        },
-        {
-          "type": "asset/BaseToken",
-          "value": {
-            "name": "ABC Chain Native Token",
-            "symbol": "abc",
-            "total_supply": "588788547005740000",
-            "send_lock": "0",
-            "owner": "coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd",
-            "mintable": false,
-            "burnable": true,
-            "addr_forbiddable": false,
-            "token_forbiddable": false,
-            "total_burn": "411211452994260000",
-            "total_mint": "0",
-            "is_forbidden": false,
-            "url": "",
-            "description": ""
-          }
-        }
-      ],
-      "whitelist": [],
-      "forbidden_addresses": []
-    },
-    "market": {
-      "params": {
-        "create_market_fee": "1000000000000",
-        "fixed_trade_fee": "1000000",
-        "market_min_expired_time": "604800",
-        "gte_order_lifetime": "10000",
-        "gte_order_feature_fee_by_blocks": "6000000",
-        "max_executed_price_change_ratio": "25",
-        "market_fee_rate": "10",
-        "market_fee_min": "1000000",
-        "fee_for_zero_deal": "1000000",
-        "chain_id_version": "0"
-      },
-      "orders": [
-        {
-          "sender": "coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd",
-          "sequence": "100",
-          "trading_pair": "abc/cet",
-          "order_type": 2,
-          "price": "100.000000000000000000",
-          "quantity": "100000",
-          "side": 1,
-          "time_in_force": "10092839",
-          "height": "100",
-          "frozen_fee": "0",
-          "exist_blocks": "0",
-          "left_stock": "0",
-          "freeze": "0",
-          "deal_stock": "0",
-          "deal_money": "0"
-        },
-        {
-          "sender": "coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd",
-          "sequence": "170",
-          "trading_pair": "btc/cet",
-          "order_type": 2,
-          "price": "121920.000000000000000000",
-          "quantity": "100000",
-          "side": 1,
-          "time_in_force": "1002682839",
-          "height": "100",
-          "frozen_fee": "0",
-          "exist_blocks": "0",
-          "left_stock": "0",
-          "freeze": "0",
-          "deal_stock": "0",
-          "deal_money": "0"
-        }
-      ],
-      "market_infos": [
-        {
-          "stock": "abc",
-          "money": "cet",
-          "price_precision": 8,
-          "last_executed_price": "8568.000000000000000000"
-        }
-      ]
-    },
-    "incentive": {
-      "state": {
-        "height_adjustment": "0"
-      },
-      "params": {
-        "default_reward_per_block": 0,
-        "plans": [
-          {
-            "start_height": "0",
-            "end_height": "10512000",
-            "reward_per_block": "1000000000",
-            "total_incentive": "10512000000000000"
-          },
-          {
-            "start_height": "10512000",
-            "end_height": "21024000",
-            "reward_per_block": "800000000",
-            "total_incentive": "8409600000000000"
-          },
-          {
-            "start_height": "21024000",
-            "end_height": "31536000",
-            "reward_per_block": "600000000",
-            "total_incentive": "6307200000000000"
-          },
-          {
-            "start_height": "31536000",
-            "end_height": "42048000",
-            "reward_per_block": "400000000",
-            "total_incentive": "4204800000000000"
-          },
-          {
-            "start_height": "42048000",
-            "end_height": "52560000",
-            "reward_per_block": "200000000",
-            "total_incentive": "2102400000000000"
-          }
-        ]
-      }
-    },
-    "supply": {
-      "supply": {
-        "total_supply": []
-      }
-    },
-    "genutil": {
-      "gentxs": [
-        {
-          "type": "cosmos-sdk/StdTx",
-          "value": {
-            "msg": [
-              {
-                "type": "cosmos-sdk/MsgCreateValidator",
-                "value": {
-                  "description": {
-                    "moniker": "node0",
-                    "identity": "node0",
-                    "website": "http://node0.coinexchain.org",
-                    "details": ""
-                  },
-                  "commission": {
-                    "rate": "0.100000000000000000",
-                    "max_rate": "0.200000000000000000",
-                    "max_change_rate": "0.010000000000000000"
-                  },
-                  "min_self_delegation": "10000000000000000",
-                  "delegator_address": "coinex1vy8unpkxt7menpvl676zu35a7pdhvhsunq4xzc",
-                  "validator_address": "coinexvaloper1vy8unpkxt7menpvl676zu35a7pdhvhsug0kwvv",
-                  "pubkey": "coinexvalconspub1addwnpepq0hv2p8fhatpya9kk4a57hjt6eweqrhehs3mu3umdh7pdftptg82cp2vhy9",
-                  "value": {
-                    "denom": "cet",
-                    "amount": "10000000000000000"
-                  }
-                }
-              }
-            ],
-            "fee": {
-              "amount": [
-                {
-                  "denom": "cet",
-                  "amount": "10"
-                }
-              ],
-              "gas": "200000"
-            },
-            "signatures": [
-              {
-                "pub_key": {
-                  "type": "tendermint/PubKeySecp256k1",
-                  "value": "A+7FBOm/VhJ0trV7T15L1l2QDvm8I75Hm238FqVhWg6s"
-                },
-                "signature": "Noe0Npb8PPmUDPbSBzNeabY0mRT+lKBLEXvsUO0oWdNxN798Ii7bMPy/B07q814E8yCzOSqhfDtJi+cEza11tQ=="
-              }
-            ],
-            "memo": ""
-          }
-        }
-      ]
-    }
-  }
+  "genesis_time": "2019-08-13T14:10:07.851481982Z"
 }
