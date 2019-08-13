@@ -51,13 +51,9 @@ func TestnetGenesisCmd(cdc *codec.Codec) *cobra.Command {
 }
 
 func addCmdFlags(cmd *cobra.Command) {
-	cmd.Flags().String(flagAddrCirculation, "", "circulationn account address")
-	cmd.Flags().String(flagAddrCoinExFoundation, "", "coinex foundation account address")
-	cmd.Flags().String(flagAddrVesting2020, "", "coinex team vesting account address unfreezed on 2020")
-	cmd.Flags().String(flagAddrVesting2021, "", "coinex team vesting account address unfreezed on 2021")
-	cmd.Flags().String(flagAddrVesting2022, "", "coinex team vesting account address unfreezed on 2022")
-	cmd.Flags().String(flagAddrVesting2023, "", "coinex team vesting account address unfreezed on 2023")
-	cmd.Flags().String(flagAddrVesting2024, "", "coinex team vesting account address unfreezed on 2024")
+	_ = cmd.MarkFlagRequired(client.FlagChainID)
+	cmd.Flags().String(client.FlagChainID, "", "genesis file chain-id, if left blank will be randomly created")
+
 	_ = cmd.MarkFlagRequired(flagAddrCirculation)
 	_ = cmd.MarkFlagRequired(flagAddrCoinExFoundation)
 	_ = cmd.MarkFlagRequired(flagAddrVesting2020)
@@ -66,7 +62,13 @@ func addCmdFlags(cmd *cobra.Command) {
 	_ = cmd.MarkFlagRequired(flagAddrVesting2023)
 	_ = cmd.MarkFlagRequired(flagAddrVesting2024)
 
-	_ = cmd.MarkFlagRequired(client.FlagChainID)
+	cmd.Flags().String(flagAddrCirculation, "", "circulationn account address")
+	cmd.Flags().String(flagAddrCoinExFoundation, "", "coinex foundation account address")
+	cmd.Flags().String(flagAddrVesting2020, "", "coinex team vesting account address unfreezed on 2020")
+	cmd.Flags().String(flagAddrVesting2021, "", "coinex team vesting account address unfreezed on 2021")
+	cmd.Flags().String(flagAddrVesting2022, "", "coinex team vesting account address unfreezed on 2022")
+	cmd.Flags().String(flagAddrVesting2023, "", "coinex team vesting account address unfreezed on 2023")
+	cmd.Flags().String(flagAddrVesting2024, "", "coinex team vesting account address unfreezed on 2024")
 }
 
 func generateGenesisJSON(cdc *codec.Codec) error {

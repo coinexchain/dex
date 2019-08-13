@@ -1,4 +1,5 @@
 #!/bin/bash
+#(1/2) build cetd and cetcli
 
 set -ex
 
@@ -56,5 +57,12 @@ if [ $RET -ne 0 ]; then
 else
     echo "=====build cetd with cgo libsecp256k1 succeeded====="
 fi
+
+md5sum `which cetd`
+md5sum `which cetcli`
+md5sum `which cetdev`
+
+cetd version --long
+cetcli version --long
 
 exit $RET

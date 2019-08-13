@@ -28,7 +28,7 @@ func main() {
 
 	rootCmd := createRootCmd(cdc)
 
-	executor := cli.Executor{Command: rootCmd, Exit: os.Exit}
+	executor := cli.PrepareMainCmd(rootCmd, "", app.DefaultCLIHome)
 	err := executor.Execute()
 	if err != nil {
 		fmt.Printf("Failed executing CLI command: %s, exiting...\n", err)
