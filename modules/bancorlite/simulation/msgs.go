@@ -3,32 +3,36 @@ package simulation
 import (
 	"math"
 	"math/rand"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bancorlite"
 )
 
+var symbolPrefix = "bl" // bancor_lite
+
 func SimulateMsgBancorInit(assetKeeper asset.Keeper, blk bancorlite.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account) (
 		opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
 
-		tokenOwner := simulation.RandomAcc(r, accs).Address
-		newSymbol := randomSymbol(r, "bl", 3)
+		addr := simulation.RandomAcc(r, accs).Address
+		newSymbol := randomSymbol(r, symbolPrefix, 3)
 		amount := 1e10 + r.Int63n(1e12)
 
 		// issue new token
-		issueTokenMsg := createMsgIssueToken(newSymbol, amount, tokenOwner)
+		issueTokenMsg := createMsgIssueToken(newSymbol, amount, addr)
 		issueTokenOK := simulateHandleMsg(issueTokenMsg, asset.NewHandler(assetKeeper), ctx)
 		if issueTokenOK {
 			return simulation.NoOpMsg(), nil, nil
 		}
 
 		// create bancor
-		bancorInitMsg := createMsgBancorInit(r, tokenOwner, newSymbol, amount)
+		bancorInitMsg := createMsgBancorInit(r, addr, newSymbol, amount)
 		bancorInitOk := simulateHandleMsg(bancorInitMsg, bancorlite.NewHandler(blk), ctx)
 		opMsg = simulation.NewOperationMsg(bancorInitMsg, bancorInitOk, "")
 		return opMsg, nil, nil
@@ -61,29 +65,71 @@ func createMsgBancorInit(r *rand.Rand,
 	}
 }
 
-func SimulateMsgBancorTrade(blk bancorlite.Keeper) simulation.Operation {
+func SimulateMsgBancorTrade(ak auth.AccountKeeper, blk bancorlite.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account) (
 		opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
 
-		sender := simulation.RandomAcc(r, accs).Address
-		bancorInfo := randomBancorInfo(r, blk, ctx)
-		if bancorInfo == nil || !bancorInfo.StockInPool.IsPositive() {
-			return simulation.NoOpMsg(), nil, nil
+		addr := simulation.RandomAcc(r, accs).Address
+		dbAcc := ak.GetAccount(ctx, addr)
+		saleableCoins := getSaleableCoins(dbAcc)
+		if len(saleableCoins) > 0 && r.Intn(2) > 0 {
+			return simulateMsgBancorSell(blk, r, ctx, addr, saleableCoins)
 		}
-
-		amount := r.Int63n(bancorInfo.StockInPool.Int64() / 2)
-		msg := bancorlite.MsgBancorTrade{
-			Sender:     sender,
-			Stock:      bancorInfo.Stock,
-			Money:      bancorInfo.Money,
-			IsBuy:      true, // TODO
-			Amount:     amount,
-			MoneyLimit: math.MaxInt64, // TODO
-		}
-		ok := simulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
-		opMsg = simulation.NewOperationMsg(msg, ok, "")
-		return opMsg, nil, nil
+		return simulateMsgBancorBuy(blk, r, ctx, addr)
 	}
+}
+
+func simulateMsgBancorSell(blk bancorlite.Keeper,
+	r *rand.Rand, ctx sdk.Context, addr sdk.AccAddress, saleableCoins sdk.Coins,
+) (opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
+
+	saleableCoin := saleableCoins[r.Intn(len(saleableCoins))]
+	amount := r.Int63n(saleableCoin.Amount.Int64() / 2)
+	msg := bancorlite.MsgBancorTrade{
+		Sender:     addr,
+		Stock:      saleableCoin.Denom,
+		Money:      sdk.DefaultBondDenom, // TODO
+		IsBuy:      false,                // TODO
+		Amount:     amount,
+		MoneyLimit: 0, // TODO
+	}
+	ok := simulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
+	opMsg = simulation.NewOperationMsg(msg, ok, "")
+	return opMsg, nil, nil
+	// TODO
+}
+
+func simulateMsgBancorBuy(blk bancorlite.Keeper,
+	r *rand.Rand, ctx sdk.Context, addr sdk.AccAddress,
+) (opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
+
+	bancorInfo := randomBancorInfo(r, blk, ctx)
+	if bancorInfo == nil || !bancorInfo.StockInPool.IsPositive() {
+		return simulation.NoOpMsg(), nil, nil
+	}
+
+	amount := r.Int63n(bancorInfo.StockInPool.Int64() / 2)
+	msg := bancorlite.MsgBancorTrade{
+		Sender:     addr,
+		Stock:      bancorInfo.Stock,
+		Money:      bancorInfo.Money,
+		IsBuy:      true, // TODO
+		Amount:     amount,
+		MoneyLimit: math.MaxInt64, // TODO
+	}
+	ok := simulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
+	opMsg = simulation.NewOperationMsg(msg, ok, "")
+	return opMsg, nil, nil
+}
+
+func getSaleableCoins(acc auth.Account) sdk.Coins {
+	saleableCoins := sdk.Coins{}
+	for _, coin := range acc.GetCoins() {
+		if strings.HasPrefix(coin.Denom, symbolPrefix) && coin.IsPositive() {
+			saleableCoins = append(saleableCoins, coin)
+		}
+	}
+	return saleableCoins
 }
 
 func randomBancorInfo(r *rand.Rand, blk bancorlite.Keeper, ctx sdk.Context) *bancorlite.BancorInfo {
