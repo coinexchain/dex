@@ -82,6 +82,7 @@ build-linux: go.sum
 install: go.sum check-ledger update-cet-lite-docs
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetd
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetcli
+	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetdev
 
 install-debug: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetdebug
