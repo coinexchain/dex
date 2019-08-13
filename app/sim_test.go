@@ -11,8 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/stretchr/testify/require"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -31,6 +34,7 @@ import (
 	stakingsim "github.com/cosmos/cosmos-sdk/x/staking/simulation"
 
 	assetsim "github.com/coinexchain/dex/modules/asset/simulation"
+	"github.com/coinexchain/dex/types"
 )
 
 var (
@@ -136,7 +140,7 @@ func appStateRandomizedFn(
 	)
 
 	appParams.GetOrGenerate(cdc, simapp.StakePerAccount, &amount, r,
-		func(r *rand.Rand) { amount = int64(r.Intn(1e12)) })
+		func(r *rand.Rand) { amount = int64(r.Intn(1e12)) + 1e13 })
 	appParams.GetOrGenerate(cdc, simapp.InitiallyBondedValidators, &amount, r,
 		func(r *rand.Rand) { numInitiallyBonded = int64(r.Intn(250)) })
 
@@ -154,14 +158,14 @@ func appStateRandomizedFn(
 `, amount, numInitiallyBonded,
 	)
 
-	simapp.GenGenesisAccounts(cdc, r, accs, genesisTimestamp, amount, numInitiallyBonded, genesisState)
+	GenGenesisAccounts(cdc, r, accs, genesisTimestamp, amount, numInitiallyBonded, genesisState)
 	simapp.GenAuthGenesisState(cdc, r, appParams, genesisState)
 	simapp.GenBankGenesisState(cdc, r, appParams, genesisState)
-	simapp.GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState)
+	GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState)
 	simapp.GenGovGenesisState(cdc, r, appParams, genesisState)
 	//simapp.GenMintGenesisState(cdc, r, appParams, genesisState)
 	simapp.GenDistrGenesisState(cdc, r, appParams, genesisState)
-	stakingGen := simapp.GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState)
+	stakingGen := GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState)
 	simapp.GenSlashingGenesisState(cdc, r, stakingGen, appParams, genesisState)
 
 	appState, err := MakeCodec().MarshalJSON(genesisState)
@@ -170,6 +174,134 @@ func appStateRandomizedFn(
 	}
 
 	return appState, accs, "simulation"
+}
+
+// GenStakingGenesisState generates a random GenesisState for staking
+func GenStakingGenesisState(
+	cdc *codec.Codec, r *rand.Rand, accs []simulation.Account, amount, numAccs, numInitiallyBonded int64,
+	ap simulation.AppParams, genesisState map[string]json.RawMessage,
+) staking.GenesisState {
+
+	stakingGenesis := staking.NewGenesisState(
+		staking.NewParams(
+			func(r *rand.Rand) time.Duration {
+				var v time.Duration
+				ap.GetOrGenerate(cdc, simulation.UnbondingTime, &v, r,
+					func(r *rand.Rand) {
+						v = simulation.ModuleParamSimulator[simulation.UnbondingTime](r).(time.Duration)
+					})
+				return v
+			}(r),
+			func(r *rand.Rand) uint16 {
+				var v uint16
+				ap.GetOrGenerate(cdc, simulation.MaxValidators, &v, r,
+					func(r *rand.Rand) {
+						v = simulation.ModuleParamSimulator[simulation.MaxValidators](r).(uint16)
+					})
+				return v
+			}(r),
+			7,
+			types.CET,
+		),
+		nil,
+		nil,
+	)
+
+	var (
+		validators  []staking.Validator
+		delegations []staking.Delegation
+	)
+
+	valAddrs := make([]sdk.ValAddress, numInitiallyBonded)
+	for i := 0; i < int(numInitiallyBonded); i++ {
+		valAddr := sdk.ValAddress(accs[i].Address)
+		valAddrs[i] = valAddr
+
+		validator := staking.NewValidator(valAddr, accs[i].PubKey, staking.Description{})
+		validator.Tokens = sdk.NewInt(amount)
+		validator.DelegatorShares = sdk.NewDec(amount)
+		delegation := staking.NewDelegation(accs[i].Address, valAddr, sdk.NewDec(amount))
+		validators = append(validators, validator)
+		delegations = append(delegations, delegation)
+	}
+
+	stakingGenesis.Validators = validators
+	stakingGenesis.Delegations = delegations
+
+	fmt.Printf("Selected randomly generated staking parameters:\n%s\n", codec.MustMarshalJSONIndent(cdc, stakingGenesis.Params))
+	genesisState[staking.ModuleName] = cdc.MustMarshalJSON(stakingGenesis)
+
+	return stakingGenesis
+}
+
+// GenSupplyGenesisState generates a random GenesisState for supply
+func GenSupplyGenesisState(cdc *codec.Codec, amount, numInitiallyBonded, numAccs int64, genesisState map[string]json.RawMessage) {
+	totalSupply := sdk.NewInt(amount * (numAccs + numInitiallyBonded))
+	supplyGenesis := supply.NewGenesisState(
+		sdk.NewCoins(sdk.NewCoin(types.CET, totalSupply)),
+	)
+
+	fmt.Printf("Generated supply parameters:\n%s\n", codec.MustMarshalJSONIndent(cdc, supplyGenesis))
+	genesisState[supply.ModuleName] = cdc.MustMarshalJSON(supplyGenesis)
+}
+
+func GenGenesisAccounts(
+	cdc *codec.Codec, r *rand.Rand, accs []simulation.Account,
+	genesisTimestamp time.Time, amount, numInitiallyBonded int64,
+	genesisState map[string]json.RawMessage,
+) {
+
+	var genesisAccounts []genaccounts.GenesisAccount
+
+	fmt.Println("total amount : ", amount*int64(len(accs)), "; accounts : ", len(accs))
+	// randomly generate some genesis accounts
+	for i, acc := range accs {
+		coins := sdk.Coins{sdk.NewCoin(types.CET, sdk.NewInt(amount))}
+		bacc := auth.NewBaseAccountWithAddress(acc.Address)
+		bacc.SetCoins(coins)
+
+		var gacc genaccounts.GenesisAccount
+
+		// Only consider making a vesting account once the initial bonded validator
+		// set is exhausted due to needing to track DelegatedVesting.
+		if int64(i) > numInitiallyBonded && r.Intn(100) < 50 {
+			var (
+				vacc    auth.VestingAccount
+				endTime int64
+			)
+
+			startTime := genesisTimestamp.Unix()
+
+			// Allow for some vesting accounts to vest very quickly while others very slowly.
+			if r.Intn(100) < 50 {
+				endTime = int64(simulation.RandIntBetween(r, int(startTime), int(startTime+(60*60*24*30))))
+			} else {
+				endTime = int64(simulation.RandIntBetween(r, int(startTime), int(startTime+(60*60*12))))
+			}
+
+			if startTime == endTime {
+				endTime++
+			}
+
+			if r.Intn(100) < 50 {
+				vacc = auth.NewContinuousVestingAccount(&bacc, startTime, endTime)
+			} else {
+				vacc = auth.NewDelayedVestingAccount(&bacc, endTime)
+			}
+
+			var err error
+			gacc, err = genaccounts.NewGenesisAccountI(vacc)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			gacc = genaccounts.NewGenesisAccount(&bacc)
+		}
+
+		genesisAccounts = append(genesisAccounts, gacc)
+	}
+
+	genesisState[genaccounts.ModuleName] = cdc.MustMarshalJSON(genesisAccounts)
 }
 
 // TODO: add description
