@@ -8,7 +8,7 @@ if [ ! -f "./go.mod" ]; then
     exit 1
 fi
 
-SRC_DIR=`pwd`
+DEX_SRC_DIR=`pwd`
 
 
 # delete old binaries
@@ -28,19 +28,23 @@ rm $CETCLI_PATH || true
 # find correct library version by go.mod
 TENDERMINT_VERSION=`grep tendermint/tendermint go.mod | sed -r -e 's/(.*) (v[^ ]*)/\2/g'`
 SECP256K1_PATH="$GOPATH/pkg/mod/github.com/tendermint/tendermint@$TENDERMINT_VERSION/crypto/secp256k1/internal/secp256k1/libsecp256k1"
-cd $SECP256K1_PATH
 
+TMP_DIR=/tmp/libsecp256k1
+rm -rdf $TMP_DIR && mkdir -p $TMP_DIR
+cp -r $SECP256K1_PATH/* $TMP_DIR
+chmod a+w -R $TMP_DIR
+cd $TMP_DIR
 
 # build cgo libsecp256k1
 ./autogen.sh
-./configure --with-bignum=gmp --enable-endomorphism
+./configure --with-bignum=gmp --enable-endomorphism --prefix=$TMP_DIR/output
 
 make -j9
-sudo make install
+make install
 
 
 # build cetd and cetcli with cgo libsecp256k1
-cd $SRC_DIR
+cd $DEX_SRC_DIR
 make tools install BUILD_TAGS=libsecp256k1
 
 
