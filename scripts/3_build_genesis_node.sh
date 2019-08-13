@@ -4,10 +4,15 @@
 set -eux;
 
 CHAIN_ID=coinexdex-test2000
+
+# mainnet parameter
 GENESIS_NODE_MONIKER=GenesisNode
-TOKEN_IDENTITY=CF1FAAA36A78BE02
-TOKEN_NAME="CoinEx Chain Native Token"
+TOKEN_IDENTITY=B8E2E010853148F5
 TOKEN_SYMBOL=cet
+
+# TODO: testnet parameter
+
+
 
 OUTPUT_DIR=/tmp/build
 
@@ -18,11 +23,16 @@ mkdir -p ${OUTPUT_DIR}
 #assure cetd and cetcli exists
 which cetd
 which cetcli
+which jq || echo "No jq found, install jq by: 'brew install jq' or 'sudo apt-get install jq'"
 
 # generate initial genesis.json
 cd ${OUTPUT_DIR}
 
 cetd init ${GENESIS_NODE_MONIKER} --chain-id=${CHAIN_ID} --home ${OUTPUT_DIR}/.cetd
+
+#https://etherscan.io/token/0x081f67afa0ccf8c7b17540767bbe95df2ba8d97f
+#date: 2019/08/06 total:5,877,675,270.61317189
+#5,877,675,270.61317189 - 300000000000000000 = 287767527061317189
 
 INCENTIVE_POOL_ADDR=coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97
 cetd add-genesis-account ${INCENTIVE_POOL_ADDR}                    31536000000000000cet --home ${OUTPUT_DIR}/.cetd
@@ -34,7 +44,20 @@ cetd add-genesis-account $(cetcli keys show vesting2022 -a)        3600000000000
 cetd add-genesis-account $(cetcli keys show vesting2023 -a)        36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1672531200  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account $(cetcli keys show vesting2024 -a)        36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1704067200  --home ${OUTPUT_DIR}/.cetd
 
-cetd add-genesis-token --name=${TOKEN_NAME}                             \
+
+NON_BONDABLE_ADDRS="
+\"${INCENTIVE_POOL_ADDR}\",
+\"$(cetcli keys show coinex_foundation -a)\",
+\"$(cetcli keys show vesting2020 -a)\",
+\"$(cetcli keys show vesting2021 -a)\",
+\"$(cetcli keys show vesting2022 -a)\",
+\"$(cetcli keys show vesting2023 -a)\",
+\"$(cetcli keys show vesting2024 -a)\""
+
+
+CET_TOKEN_DESCRIPTION="Decentralized public chain ecosystem, Born for financial liberalization"
+
+cetd add-genesis-token --name="CoinEx Chain Native Token"               \
     --symbol="${TOKEN_SYMBOL}"                                          \
     --owner=$(cetcli keys show coinex_foundation -a)                    \
     --total-supply=587767527061317189                                   \
@@ -46,7 +69,7 @@ cetd add-genesis-token --name=${TOKEN_NAME}                             \
     --total-mint=0                                                      \
     --is-forbidden=false                                                \
     --url="www.coinex.org"                                              \
-    --description="A public chain built for the decentralized exchange" \
+    --description="${CET_TOKEN_DESCRIPTION}"                            \
     --identity="${TOKEN_IDENTITY}"                                      \
     --home ${OUTPUT_DIR}/.cetd
 
@@ -61,10 +84,27 @@ cetd gentx                                \
 --amount=200000000000000cet               \
 --commission-rate=0.2                     \
 --commission-max-rate=1                   \
---commission-max-change-rate=0.01         \
+--commission-max-change-rate=0.1          \
 --min-self-delegation=100000000000000     \
 --home ${OUTPUT_DIR}/.cetd                \
 --output-document ${OUTPUT_DIR}/gentx/gentx.json
+
+
+# add non bondable address
+GENESIS_JSON=${OUTPUT_DIR}/.cetd/config/genesis.json
+
+jq ".app_state.stakingx.params.non_bondable_addresses = [ ${NON_BONDABLE_ADDRS} ] " $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+
+# TODO: only adjust in testnet mode
+# adjust testnet parameters
+jq ".app_state.staking.params.unbonding_time               = \"3600000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+jq ".app_state.stakingx.params.min_self_delegation         = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+jq ".app_state.gov.deposit_params.max_deposit_period       = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+jq ".app_state.gov.voting_params.voting_period             = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+jq ".app_state.asset.params.issue_rare_token_fee[0].amount = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+jq ".app_state.asset.params.issue_token_fee[0].amount      = \"100000000000\"   "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+jq ".consensus_params.evidence.max_age                     = \"1000000\"        "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+
 
 # collect gentx
 cetd collect-gentxs --gentx-dir ${OUTPUT_DIR}/gentx  --home ${OUTPUT_DIR}/.cetd
