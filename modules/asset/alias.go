@@ -63,4 +63,5 @@ type (
 	BaseToken       = types.BaseToken
 	MsgForbidToken  = types.MsgForbidToken
 	MsgForbidAddr   = types.MsgForbidAddr
+	MsgIssueToken   = types.MsgIssueToken
 )
