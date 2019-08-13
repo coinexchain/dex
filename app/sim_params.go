@@ -1,6 +1,7 @@
 package app
 
 const (
+	// asset
 	OpWeightMsgIssueToken           = "op_weight_msg_issue_token"
 	OpWeightMsgTransferOwnership    = "op_weight_msg_transfer_ownership"
 	OpWeightMsgMintToken            = "op_weight_msg_mint_token"
@@ -12,4 +13,8 @@ const (
 	OpWeightMsgForbidAddr           = "op_weight_msg_forbid_addr"
 	OpWeightMsgUnForbidAddr         = "op_weight_msg_unforbid_addr"
 	OpWeightMsgModifyTokenInfo      = "op_weight_msg_modify_token_info"
+	// bancorlite
+	OpWeightMsgBancorInit   = "op_weight_msg_bancor_init"
+	OpWeightMsgBancorTrade  = "op_weight_msg_bancor_trade"
+	OpWeightMsgBancorCancel = "op_weight_msg_bancor_cancel"
 )
