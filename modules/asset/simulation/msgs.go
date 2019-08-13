@@ -3,6 +3,7 @@ package simulation
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/types"
@@ -32,7 +33,25 @@ func SimulateMsgIssueToken(k asset.Keeper) simulation.Operation {
 		}
 
 		opMsg := simulation.NewOperationMsg(msg, ok, "")
+		if ok {
+			future := simulation.FutureOperation{
+				BlockHeight: int(ctx.BlockHeight() + 1),
+				BlockTime:   ctx.BlockTime().Add(time.Duration(100)),
+				Op:          checkIssueTokenValid(k, tokenSymbol),
+			}
+			return opMsg, []simulation.FutureOperation{future}, nil
+		}
 		return opMsg, nil, nil
+	}
+}
+
+func checkIssueTokenValid(k asset.Keeper, symbol string) simulation.Operation {
+	return func(r *rand.Rand, app *baseapp.BaseApp, ctx types.Context, accounts []simulation.Account) (
+		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
+
+		// check the token have succeed issue
+		_ = k.GetToken(ctx, symbol)
+		return simulation.OperationMsg{}, nil, nil
 	}
 }
 

@@ -499,7 +499,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgIssueToken, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 150
 				})
 				return v
 			}(nil),
@@ -509,7 +509,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgBurnToken, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 50
 				})
 				return v
 			}(nil),
@@ -519,7 +519,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgTransferOwnership, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 60
 				})
 				return v
 			}(nil),
@@ -529,7 +529,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgMintToken, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 50
 				})
 				return v
 			}(nil),
@@ -539,7 +539,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgForbidToken, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 50
 				})
 				return v
 			}(nil),
@@ -549,7 +549,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgUnForbidToken, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 50
 				})
 				return v
 			}(nil),
@@ -559,7 +559,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgAddTokenWhitelist, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 70
 				})
 				return v
 			}(nil),
@@ -569,7 +569,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgRemoveTokenWhitelist, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 60
 				})
 				return v
 			}(nil),
@@ -579,7 +579,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgForbidAddr, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 30
 				})
 				return v
 			}(nil),
@@ -589,7 +589,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgUnForbidAddr, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 25
 				})
 				return v
 			}(nil),
@@ -599,7 +599,7 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: func(_ *rand.Rand) int {
 				var v int
 				ap.GetOrGenerate(cdc, OpWeightMsgModifyTokenInfo, &v, nil, func(_ *rand.Rand) {
-					v = 100
+					v = 40
 				})
 				return v
 			}(nil),
