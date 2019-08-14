@@ -11,29 +11,30 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/genaccounts"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	authsim "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	distrsim "github.com/cosmos/cosmos-sdk/x/distribution/simulation"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	govsim "github.com/cosmos/cosmos-sdk/x/gov/simulation"
 	paramsim "github.com/cosmos/cosmos-sdk/x/params/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	slashingsim "github.com/cosmos/cosmos-sdk/x/slashing/simulation"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingsim "github.com/cosmos/cosmos-sdk/x/staking/simulation"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	assetsim "github.com/coinexchain/dex/modules/asset/simulation"
+	bancorsim "github.com/coinexchain/dex/modules/bancorlite/simulation"
 	"github.com/coinexchain/dex/types"
 )
 
@@ -432,6 +433,18 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			Weight: getWeightOrDefault(OpWeightMsgModifyTokenInfo, 40),
 			Op:     assetsim.SimulateMsgModifyTokenInfo(app.assetKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgBancorInit, 0),
+			Op:     bancorsim.SimulateMsgBancorInit(app.assetKeeper, app.bancorKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgBancorTrade, 0),
+			Op:     bancorsim.SimulateMsgBancorTrade(app.accountKeeper, app.bancorKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgBancorCancel, 0),
+			Op:     bancorsim.SimulateMsgBancorCancel(app.bancorKeeper),
 		},
 	}
 }
