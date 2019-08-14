@@ -323,295 +323,128 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		cdc.MustUnmarshalJSON(bz, &ap)
 	}
 
+	getWeightOrDefault := getIntOrDefaultFn(ap, cdc)
 	return []simulation.WeightedOperation{
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightDeductFee, &v, nil,
-					func(_ *rand.Rand) {
-						v = 5
-					})
-				return v
-			}(),
-			Op: authsim.SimulateDeductFee(app.accountKeeper, app.supplyKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightDeductFee, 5),
+			Op:     authsim.SimulateDeductFee(app.accountKeeper, app.supplyKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgSend, &v, nil,
-					func(_ *rand.Rand) {
-						v = 100
-					})
-				return v
-			}(),
-			Op: bank.SimulateMsgSend(app.accountKeeper, app.bankKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgSend, 100),
+			Op:     bank.SimulateMsgSend(app.accountKeeper, app.bankKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightSingleInputMsgMultiSend, &v, nil,
-					func(_ *rand.Rand) {
-						v = 10
-					})
-				return v
-			}(),
-			Op: bank.SimulateSingleInputMsgMultiSend(app.accountKeeper, app.bankKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightSingleInputMsgMultiSend, 10),
+			Op:     bank.SimulateSingleInputMsgMultiSend(app.accountKeeper, app.bankKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgSetWithdrawAddress, &v, nil,
-					func(_ *rand.Rand) {
-						v = 50
-					})
-				return v
-			}(),
-			Op: distrsim.SimulateMsgSetWithdrawAddress(app.accountKeeper, app.distrKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgSetWithdrawAddress, 50),
+			Op:     distrsim.SimulateMsgSetWithdrawAddress(app.accountKeeper, app.distrKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgWithdrawDelegationReward, &v, nil,
-					func(_ *rand.Rand) {
-						v = 50
-					})
-				return v
-			}(),
-			Op: distrsim.SimulateMsgWithdrawDelegatorReward(app.accountKeeper, app.distrKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgWithdrawDelegationReward, 50),
+			Op:     distrsim.SimulateMsgWithdrawDelegatorReward(app.accountKeeper, app.distrKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgWithdrawValidatorCommission, &v, nil,
-					func(_ *rand.Rand) {
-						v = 50
-					})
-				return v
-			}(),
-			Op: distrsim.SimulateMsgWithdrawValidatorCommission(app.accountKeeper, app.distrKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgWithdrawValidatorCommission, 50),
+			Op:     distrsim.SimulateMsgWithdrawValidatorCommission(app.accountKeeper, app.distrKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingTextProposal, &v, nil,
-					func(_ *rand.Rand) {
-						v = 5
-					})
-				return v
-			}(),
-			Op: govsim.SimulateSubmittingVotingAndSlashingForProposal(app.govKeeper, govsim.SimulateTextProposalContent),
+			Weight: getWeightOrDefault(simapp.OpWeightSubmitVotingSlashingTextProposal, 5),
+			Op:     govsim.SimulateSubmittingVotingAndSlashingForProposal(app.govKeeper, govsim.SimulateTextProposalContent),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingCommunitySpendProposal, &v, nil,
-					func(_ *rand.Rand) {
-						v = 5
-					})
-				return v
-			}(),
-			Op: govsim.SimulateSubmittingVotingAndSlashingForProposal(app.govKeeper, distrsim.SimulateCommunityPoolSpendProposalContent(app.distrKeeper)),
+			Weight: getWeightOrDefault(simapp.OpWeightSubmitVotingSlashingCommunitySpendProposal, 5),
+			Op:     govsim.SimulateSubmittingVotingAndSlashingForProposal(app.govKeeper, distrsim.SimulateCommunityPoolSpendProposalContent(app.distrKeeper)),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightSubmitVotingSlashingParamChangeProposal, &v, nil,
-					func(_ *rand.Rand) {
-						v = 5
-					})
-				return v
-			}(),
-			Op: govsim.SimulateSubmittingVotingAndSlashingForProposal(app.govKeeper, paramsim.SimulateParamChangeProposalContent),
+			Weight: getWeightOrDefault(simapp.OpWeightSubmitVotingSlashingParamChangeProposal, 5),
+			Op:     govsim.SimulateSubmittingVotingAndSlashingForProposal(app.govKeeper, paramsim.SimulateParamChangeProposalContent),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgDeposit, &v, nil,
-					func(_ *rand.Rand) {
-						v = 100
-					})
-				return v
-			}(),
-			Op: govsim.SimulateMsgDeposit(app.govKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgDeposit, 100),
+			Op:     govsim.SimulateMsgDeposit(app.govKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgCreateValidator, &v, nil,
-					func(_ *rand.Rand) {
-						v = 100
-					})
-				return v
-			}(),
-			Op: stakingsim.SimulateMsgCreateValidator(app.accountKeeper, app.stakingKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgCreateValidator, 100),
+			Op:     stakingsim.SimulateMsgCreateValidator(app.accountKeeper, app.stakingKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgEditValidator, &v, nil,
-					func(_ *rand.Rand) {
-						v = 5
-					})
-				return v
-			}(),
-			Op: stakingsim.SimulateMsgEditValidator(app.stakingKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgEditValidator, 5),
+			Op:     stakingsim.SimulateMsgEditValidator(app.stakingKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgDelegate, &v, nil,
-					func(_ *rand.Rand) {
-						v = 100
-					})
-				return v
-			}(),
-			Op: stakingsim.SimulateMsgDelegate(app.accountKeeper, app.stakingKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgDelegate, 100),
+			Op:     stakingsim.SimulateMsgDelegate(app.accountKeeper, app.stakingKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgUndelegate, &v, nil,
-					func(_ *rand.Rand) {
-						v = 100
-					})
-				return v
-			}(),
-			Op: stakingsim.SimulateMsgUndelegate(app.accountKeeper, app.stakingKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgUndelegate, 100),
+			Op:     stakingsim.SimulateMsgUndelegate(app.accountKeeper, app.stakingKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgBeginRedelegate, &v, nil,
-					func(_ *rand.Rand) {
-						v = 100
-					})
-				return v
-			}(),
-			Op: stakingsim.SimulateMsgBeginRedelegate(app.accountKeeper, app.stakingKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgBeginRedelegate, 100),
+			Op:     stakingsim.SimulateMsgBeginRedelegate(app.accountKeeper, app.stakingKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, simapp.OpWeightMsgUnjail, &v, nil,
-					func(_ *rand.Rand) {
-						v = 100
-					})
-				return v
-			}(),
-			Op: slashingsim.SimulateMsgUnjail(app.slashingKeeper),
+			Weight: getWeightOrDefault(simapp.OpWeightMsgUnjail, 100),
+			Op:     slashingsim.SimulateMsgUnjail(app.slashingKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgIssueToken, &v, nil, func(_ *rand.Rand) {
-					v = 150
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgIssueToken(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgIssueToken, 150),
+			Op:     assetsim.SimulateMsgIssueToken(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgBurnToken, &v, nil, func(_ *rand.Rand) {
-					v = 50
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgBurnToken(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgBurnToken, 50),
+			Op:     assetsim.SimulateMsgBurnToken(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgTransferOwnership, &v, nil, func(_ *rand.Rand) {
-					v = 60
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgTransferOwnership(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgTransferOwnership, 60),
+			Op:     assetsim.SimulateMsgTransferOwnership(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgMintToken, &v, nil, func(_ *rand.Rand) {
-					v = 50
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgMintToken(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgMintToken, 50),
+			Op:     assetsim.SimulateMsgMintToken(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgForbidToken, &v, nil, func(_ *rand.Rand) {
-					v = 50
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgForbidToken(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgForbidToken, 50),
+			Op:     assetsim.SimulateMsgForbidToken(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgUnForbidToken, &v, nil, func(_ *rand.Rand) {
-					v = 50
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgUnForbidToken(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgUnForbidToken, 50),
+			Op:     assetsim.SimulateMsgUnForbidToken(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgAddTokenWhitelist, &v, nil, func(_ *rand.Rand) {
-					v = 70
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgAddTokenWhitelist(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgAddTokenWhitelist, 70),
+			Op:     assetsim.SimulateMsgAddTokenWhitelist(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgRemoveTokenWhitelist, &v, nil, func(_ *rand.Rand) {
-					v = 60
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgRemoveTokenWhitelist(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgRemoveTokenWhitelist, 60),
+			Op:     assetsim.SimulateMsgRemoveTokenWhitelist(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgForbidAddr, &v, nil, func(_ *rand.Rand) {
-					v = 30
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgForbidAddr(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgForbidAddr, 30),
+			Op:     assetsim.SimulateMsgForbidAddr(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgUnForbidAddr, &v, nil, func(_ *rand.Rand) {
-					v = 25
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgUnForbidAddr(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgUnForbidAddr, 25),
+			Op:     assetsim.SimulateMsgUnForbidAddr(app.assetKeeper),
 		},
 		{
-			Weight: func() int {
-				var v int
-				ap.GetOrGenerate(cdc, OpWeightMsgModifyTokenInfo, &v, nil, func(_ *rand.Rand) {
-					v = 40
-				})
-				return v
-			}(),
-			Op: assetsim.SimulateMsgModifyTokenInfo(app.assetKeeper),
+			Weight: getWeightOrDefault(OpWeightMsgModifyTokenInfo, 40),
+			Op:     assetsim.SimulateMsgModifyTokenInfo(app.assetKeeper),
 		},
 	}
+}
 
+func getIntOrDefaultFn(ap simulation.AppParams, cdc *codec.Codec) func(string, int) int {
+	return func(key string, defaultValue int) int {
+		var v int
+		ap.GetOrGenerate(cdc, key, &v, nil,
+			func(_ *rand.Rand) {
+				v = defaultValue
+			})
+		return v
+	}
 }
 
 func invariants(app *CetChainApp) []sdk.Invariant {
