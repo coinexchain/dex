@@ -4153,8 +4153,6 @@ definitions:
         type: string
       initial_balance:
         type: string
-      balance:
-        type: string
       shares_dst:
         type: string
   ValidatorDistInfo:
