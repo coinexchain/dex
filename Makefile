@@ -33,6 +33,13 @@ ifeq ($(LEDGER_ENABLED),true)
   endif
 endif
 
+
+ifeq ($(IS_TESTNET),true)
+	ldflags += -X github.com/coinexchain/dex/types.Bech32MainPrefix=cettest
+	build_tags += testnet
+endif
+
+
 ifeq ($(WITH_CLEVELDB),yes)
   build_tags += gcc
 endif
@@ -53,10 +60,6 @@ ldflags = -X "github.com/cosmos/cosmos-sdk/version.Name=CoinEx Chain" \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
 		  -X github.com/cosmos/cosmos-sdk/types.reDnmString=[a-z][a-z0-9.]{1,7}(\.[a-z])?
-
-ifeq ($(IS_TESTNET),true)
-	ldflags += -X github.com/coinexchain/dex/types.Bech32MainPrefix=cettest
-endif
 
 
 ifeq ($(WITH_CLEVELDB),yes)
