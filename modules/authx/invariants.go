@@ -10,6 +10,6 @@ func PreTotalSupplyInvariant(k AccountXKeeper) sdk.Invariant {
 
 		// TODO
 		return sdk.FormatInvariant(ModuleName, "total supply",
-			"ok", false)
+			"ok"), false
 	}
 }
