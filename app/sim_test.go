@@ -43,7 +43,9 @@ var (
 	exportParamsPath   string
 	exportParamsHeight int
 	exportStatePath    string
+	exportStatsPath    string
 	seed               int64
+	initialBlockHeight int
 	numBlocks          int
 	blockSize          int
 	enabled            bool
@@ -62,7 +64,9 @@ func init() {
 	flag.StringVar(&exportParamsPath, "ExportParamsPath", "", "custom file path to save the exported params JSON")
 	flag.IntVar(&exportParamsHeight, "ExportParamsHeight", 0, "height to which export the randomly generated params")
 	flag.StringVar(&exportStatePath, "ExportStatePath", "", "custom file path to save the exported app state JSON")
+	flag.StringVar(&exportStatsPath, "ExportStatsPath", "", "custom file path to save the exported simulation statistics JSON")
 	flag.Int64Var(&seed, "Seed", 42, "simulation random seed")
+	flag.IntVar(&initialBlockHeight, "InitialBlockHeight", 1, "initial block to start the simulation")
 	flag.IntVar(&numBlocks, "NumBlocks", 500, "number of blocks")
 	flag.IntVar(&blockSize, "BlockSize", 200, "operations per block")
 	flag.BoolVar(&enabled, "Enabled", false, "enable the simulation")
@@ -76,17 +80,18 @@ func init() {
 }
 
 // helper function for populating input for SimulateFromSeed
+// TODO: clean up this function along with the simulation refactor
 func getSimulateFromSeedInput(tb testing.TB, w io.Writer, app *CetChainApp) (
 	testing.TB, io.Writer, *baseapp.BaseApp, simulation.AppStateFn, int64,
-	simulation.WeightedOperations, sdk.Invariants, int, int, int,
+	simulation.WeightedOperations, sdk.Invariants, int, int, int, int, string,
 	bool, bool, bool, bool, bool, map[string]bool) {
 
 	exportParams := exportParamsPath != ""
 
 	return tb, w, app.BaseApp, appStateFn, seed,
 		testAndRunTxs(app), invariants(app),
-		numBlocks, exportParamsHeight, blockSize,
-		exportParams, commit, lean, onOperation, allInvariants, app.ModuleAccountAddrs()
+		initialBlockHeight, numBlocks, exportParamsHeight, blockSize,
+		exportStatsPath, exportParams, commit, lean, onOperation, allInvariants, app.ModuleAccountAddrs()
 }
 
 func appStateFn(
@@ -633,7 +638,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 	db, _ = sdk.NewLevelDB("Simulation", dir)
 	defer func() {
 		db.Close()
-		os.RemoveAll(dir)
+		_ = os.RemoveAll(dir)
 	}()
 	app := NewCetChainApp(logger, db, nil, true, 0)
 
@@ -677,7 +682,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 	}
 
 	if commit {
-		fmt.Println("GoLevelDB Stats")
+		fmt.Println("\nGoLevelDB Stats")
 		fmt.Println(db.Stats()["leveldb.stats"])
 		fmt.Println("GoLevelDB cached block size", db.Stats()["leveldb.cachedblock"])
 	}
@@ -736,7 +741,7 @@ func TestFullAppSimulation(t *testing.T) {
 	if commit {
 		// for memdb:
 		// fmt.Println("Database Size", db.Stats()["database.size"])
-		fmt.Println("GoLevelDB Stats")
+		fmt.Println("\nGoLevelDB Stats")
 		fmt.Println(db.Stats()["leveldb.stats"])
 		fmt.Println("GoLevelDB cached block size", db.Stats()["leveldb.cachedblock"])
 	}
@@ -793,7 +798,7 @@ func TestAppImportExport(t *testing.T) {
 	if commit {
 		// for memdb:
 		// fmt.Println("Database Size", db.Stats()["database.size"])
-		fmt.Println("GoLevelDB Stats")
+		fmt.Println("\nGoLevelDB Stats")
 		fmt.Println(db.Stats()["leveldb.stats"])
 		fmt.Println("GoLevelDB cached block size", db.Stats()["leveldb.cachedblock"])
 	}
@@ -968,13 +973,19 @@ func TestAppStateDeterminism(t *testing.T) {
 			db := dbm.NewMemDB()
 			app := NewCetChainApp(logger, db, nil, true, 0)
 
-			// Run randomized simulation
-			simulation.SimulateFromSeed(
-				t, os.Stdout, app.BaseApp, appStateFn, seed,
-				testAndRunTxs(app), []sdk.Invariant{},
-				50, 100, 0,
-				false, true, false, false, false, app.ModuleAccountAddrs(),
+			fmt.Printf(
+				"Running non-determinism simulation; seed: %d/%d (%d), attempt: %d/%d\n",
+				i+1, numSeeds, seed, j+1, numTimesToRunPerSeed,
 			)
+
+			_, _, err := simulation.SimulateFromSeed(
+				t, os.Stdout, app.BaseApp, appStateFn, seed, testAndRunTxs(app),
+				[]sdk.Invariant{}, 1, numBlocks, exportParamsHeight,
+				blockSize, "", false, commit, lean,
+				false, false, app.ModuleAccountAddrs(),
+			)
+			require.NoError(t, err)
+
 			appHash := app.LastCommitID().Hash
 			appHashList[j] = appHash
 		}
@@ -991,7 +1002,7 @@ func BenchmarkInvariants(b *testing.B) {
 
 	defer func() {
 		db.Close()
-		os.RemoveAll(dir)
+		_ = os.RemoveAll(dir)
 	}()
 
 	app := NewCetChainApp(logger, db, nil, true, 0)
@@ -1000,8 +1011,8 @@ func BenchmarkInvariants(b *testing.B) {
 	// 2. Run parameterized simulation (w/o invariants)
 	_, params, simErr := simulation.SimulateFromSeed(
 		b, ioutil.Discard, app.BaseApp, appStateFn, seed, testAndRunTxs(app),
-		[]sdk.Invariant{}, numBlocks, exportParamsHeight, blockSize,
-		exportParams, commit, lean, onOperation, false, app.ModuleAccountAddrs(),
+		[]sdk.Invariant{}, initialBlockHeight, numBlocks, exportParamsHeight, blockSize,
+		exportStatsPath, exportParams, commit, lean, onOperation, false, app.ModuleAccountAddrs(),
 	)
 
 	// export state and params before the simulation error is checked
