@@ -39,19 +39,22 @@ func QueryAccountRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) h
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
 		accRetriever := auth.NewAccountRetriever(cliCtx)
 		if err = accRetriever.EnsureExists(addr); err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		acc, err := accRetriever.GetAccount(addr)
+		acc, height, err := accRetriever.GetAccountWithHeight(addr)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-
+		cliCtx = cliCtx.WithHeight(height)
 		aux, err := cli.GetAccountX(cliCtx, addr)
 		if err != nil {
 			aux = types.AccountX{}
