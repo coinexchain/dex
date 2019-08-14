@@ -4285,3 +4285,12 @@ definitions:
         type: array
         items:
           type: integer
+  BancorInfoDisplay:
+    type: object
+    properties:
+      stock:
+        type: string
+        example: bch
+      money:
+        type: string
+        example: cet
