@@ -28,7 +28,7 @@ func SimulateMsgBancorInit(assetKeeper asset.Keeper, blk bancorlite.Keeper) simu
 		issueTokenMsg := createMsgIssueToken(newSymbol, amount, addr)
 		issueTokenOK := simulateHandleMsg(issueTokenMsg, asset.NewHandler(assetKeeper), ctx)
 		if issueTokenOK {
-			return simulation.NoOpMsg(), nil, nil
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		// create bancor
@@ -105,7 +105,7 @@ func simulateMsgBancorBuy(blk bancorlite.Keeper,
 
 	bancorInfo := randomBancorInfo(r, blk, ctx)
 	if bancorInfo == nil || !bancorInfo.StockInPool.IsPositive() {
-		return simulation.NoOpMsg(), nil, nil
+		return simulation.NoOpMsg(asset.ModuleName), nil, nil
 	}
 
 	amount := r.Int63n(bancorInfo.StockInPool.Int64() / 2)
