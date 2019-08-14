@@ -1,6 +1,7 @@
 #!/bin/bash
+#(2/3) generate account keys
 
-set -ex
+set -x
 
 # cetcli keys add circulation       <<<$'12345678\n12345678\n'
 # cetcli keys add coinex_foundation <<<$'12345678\n12345678\n'

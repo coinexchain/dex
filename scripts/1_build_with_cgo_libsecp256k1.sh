@@ -1,8 +1,7 @@
 #!/bin/bash
-#(1/2) build cetd and cetcli
+#(1/3) build cetd and cetcli
 
 set -ex
-
 
 if [ ! -f "./go.mod" ]; then
     echo "make sure ./scripts/build.sh executed under dex code root dir."

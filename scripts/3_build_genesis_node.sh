@@ -1,21 +1,30 @@
 #!/bin/bash
-#(2/2) generate genesis.json
+#(3/3) generate genesis.json
 
 set -eux;
 
-CHAIN_ID=coinexdex-test2000
+if [ "${IS_TESTNET:-false}" == "true" ]; then
+    echo "---compile for testnet---"
+    CHAIN_ID=coinexdex-test2000
+    TOKEN_IDENTITY=CF1FAAA36A78BE02
+    INCENTIVE_POOL_ADDR=cettest1gc5t98jap4zyhmhmyq5af5s7pyv57w566ewmx0
+else
+    echo "---compile for mainnet---"
+    CHAIN_ID=coinexdex
+    TOKEN_IDENTITY=C28AB11AA9BB64F0
+    INCENTIVE_POOL_ADDR=coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97
+fi
 
-# parameter
-TOKEN_IDENTITY=C28AB11AA9BB64F0
+# common parameter
 TOKEN_SYMBOL=cet
 GENESIS_NODE_MONIKER=GenesisNode
 OUTPUT_DIR=/tmp/build
 
-#prepare output dir
+# prepare output dir
 rm -rf ${OUTPUT_DIR}
 mkdir -p ${OUTPUT_DIR}
 
-#assure cetd and cetcli exists
+# assure cetd and cetcli exists
 which cetd
 which cetcli
 which jq || echo "No jq found, install jq by: 'brew install jq' or 'sudo apt-get install jq'"
@@ -25,11 +34,10 @@ cd ${OUTPUT_DIR}
 
 cetd init ${GENESIS_NODE_MONIKER} --chain-id=${CHAIN_ID} --home ${OUTPUT_DIR}/.cetd
 
-#https://etherscan.io/token/0x081f67afa0ccf8c7b17540767bbe95df2ba8d97f
-#date: 2019/08/06 total:5,877,675,270.61317189
-#5,877,675,270.61317189 - 300000000000000000 = 287767527061317189
+# https://etherscan.io/token/0x081f67afa0ccf8c7b17540767bbe95df2ba8d97f
+# date: 2019/08/06 total:5,877,675,270.61317189
+# 5,877,675,270.61317189 - 300000000000000000 = 287767527061317189
 
-INCENTIVE_POOL_ADDR=coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97
 cetd add-genesis-account ${INCENTIVE_POOL_ADDR}                    31536000000000000cet --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account $(cetcli keys show circulation -a)       287767527061317189cet --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account $(cetcli keys show coinex_foundation -a)  88464000000000000cet --home ${OUTPUT_DIR}/.cetd
@@ -75,7 +83,7 @@ mkdir ${OUTPUT_DIR}/gentx
 cetd gentx                                \
 --name coinex_foundation                  \
 --website www.coinex.org                  \
---details "Initial genesis node."         \
+--details "Network Genesis Node"          \
 --amount=200000000000000cet               \
 --commission-rate=0.2                     \
 --commission-max-rate=1                   \
@@ -90,15 +98,16 @@ GENESIS_JSON=${OUTPUT_DIR}/.cetd/config/genesis.json
 
 jq ".app_state.stakingx.params.non_bondable_addresses = [ ${NON_BONDABLE_ADDRS} ] " $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
 
-# TODO: only adjust in testnet mode
-# adjust testnet parameters
-jq ".app_state.staking.params.unbonding_time               = \"3600000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-jq ".app_state.stakingx.params.min_self_delegation         = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-jq ".app_state.gov.deposit_params.max_deposit_period       = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-jq ".app_state.gov.voting_params.voting_period             = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-jq ".app_state.asset.params.issue_rare_token_fee[0].amount = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-jq ".app_state.asset.params.issue_token_fee[0].amount      = \"100000000000\"   "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-jq ".consensus_params.evidence.max_age                     = \"1000000\"        "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+if [ "${IS_TESTNET:-false}" == "true" ]; then
+    # adjust testnet parameters
+    jq ".app_state.staking.params.unbonding_time               = \"3600000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+    jq ".app_state.stakingx.params.min_self_delegation         = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+    jq ".app_state.gov.deposit_params.max_deposit_period       = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+    jq ".app_state.gov.voting_params.voting_period             = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+    jq ".app_state.asset.params.issue_rare_token_fee[0].amount = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+    jq ".app_state.asset.params.issue_token_fee[0].amount      = \"100000000000\"   "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+    jq ".consensus_params.evidence.max_age                     = \"1000000\"        "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+fi
 
 
 # collect gentx

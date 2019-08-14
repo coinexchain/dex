@@ -53,7 +53,7 @@ build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
 # process linker flags
 
-ldflags = -X "github.com/cosmos/cosmos-sdk/version.Name=CoinEx Chain" \
+ldflags += -X "github.com/cosmos/cosmos-sdk/version.Name=CoinEx Chain" \
 		  -X github.com/cosmos/cosmos-sdk/version.ServerName=cetd \
 		  -X github.com/cosmos/cosmos-sdk/version.ClientName=cetcli \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
