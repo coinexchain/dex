@@ -9,17 +9,13 @@ import (
 )
 
 func TestAddressPrefixes(t *testing.T) {
-	require.Equal(t, "coinexpub", Bech32PrefixAccPub)
-	require.Equal(t, "coinexvaloper", Bech32PrefixValAddr)
-	require.Equal(t, "coinexvaloperpub", Bech32PrefixValPub)
-	require.Equal(t, "coinexvalcons", Bech32PrefixConsAddr)
-	require.Equal(t, "coinexvalconspub", Bech32PrefixConsPub)
-}
-
-func TestInitSdkConfig(t *testing.T) {
 	InitSdkConfig()
 	config := sdk.GetConfig()
+
 	require.Equal(t, "coinex", config.GetBech32AccountAddrPrefix())
+	require.Equal(t, "coinexpub", config.GetBech32AccountPubPrefix())
 	require.Equal(t, "coinexvaloper", config.GetBech32ValidatorAddrPrefix())
+	require.Equal(t, "coinexvaloperpub", config.GetBech32ValidatorPubPrefix())
 	require.Equal(t, "coinexvalcons", config.GetBech32ConsensusAddrPrefix())
+	require.Equal(t, "coinexvalconspub", config.GetBech32ConsensusPubPrefix())
 }

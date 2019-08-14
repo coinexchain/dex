@@ -106,15 +106,6 @@ func SetupTestInput() TestInput {
 	return TestInput{ctx: ctx, cdc: cdc, keeper: Keep, ak: ak}
 }
 
-func TestMain(m *testing.M) {
-	dex.InitSdkConfig()
-	os.Exit(m.Run())
-}
-
-func TestIncentiveCoinsAddress(t *testing.T) {
-	require.Equal(t, "coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97", PoolAddr.String())
-}
-
 func TestBeginBlockerInvalidCoin(t *testing.T) {
 
 	input := SetupTestInput()
@@ -134,4 +125,21 @@ func TestBeginBlocker(t *testing.T) {
 	input.ak.SetAccount(input.ctx, acc)
 	err := BeginBlocker(input.ctx, input.keeper)
 	require.Equal(t, nil, err)
+}
+
+func TestIncentiveCoinsAddress(t *testing.T) {
+	require.Equal(t, "coinex1gc5t98jap4zyhmhmyq5af5s7pyv57w5694el97", PoolAddr.String())
+}
+
+func TestIncentiveCoinsAddressInTestNet(t *testing.T) {
+	config := sdk.GetConfig()
+	testnetAddrPrefix := "cettest"
+	config.SetBech32PrefixForAccount(testnetAddrPrefix, testnetAddrPrefix+sdk.PrefixPublic)
+	require.Equal(t, "cettest1gc5t98jap4zyhmhmyq5af5s7pyv57w566ewmx0", PoolAddr.String())
+}
+
+func TestMain(m *testing.M) {
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(dex.Bech32MainPrefix, dex.Bech32MainPrefix+sdk.PrefixPublic)
+	os.Exit(m.Run())
 }

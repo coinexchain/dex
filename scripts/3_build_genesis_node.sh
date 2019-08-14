@@ -5,15 +5,10 @@ set -eux;
 
 CHAIN_ID=coinexdex-test2000
 
-# mainnet parameter
-GENESIS_NODE_MONIKER=GenesisNode
-TOKEN_IDENTITY=B8E2E010853148F5
+# parameter
+TOKEN_IDENTITY=C28AB11AA9BB64F0
 TOKEN_SYMBOL=cet
-
-# TODO: testnet parameter
-
-
-
+GENESIS_NODE_MONIKER=GenesisNode
 OUTPUT_DIR=/tmp/build
 
 #prepare output dir
