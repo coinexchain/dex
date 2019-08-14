@@ -12,6 +12,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bancorlite"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var symbolPrefix = "bl" // bancor_lite
@@ -57,7 +58,7 @@ func createMsgBancorInit(r *rand.Rand,
 	return bancorlite.MsgBancorInit{
 		Owner:              owner,
 		Stock:              stockSymbol,
-		Money:              sdk.DefaultBondDenom, // TODO
+		Money:              dex.DefaultBondDenom,
 		InitPrice:          sdk.NewDec(initPrice),
 		MaxPrice:           sdk.NewDec(maxPrice),
 		MaxSupply:          sdk.NewInt(maxSupply),
@@ -88,8 +89,8 @@ func simulateMsgBancorSell(blk bancorlite.Keeper,
 	msg := bancorlite.MsgBancorTrade{
 		Sender:     addr,
 		Stock:      saleableCoin.Denom,
-		Money:      sdk.DefaultBondDenom, // TODO
-		IsBuy:      false,                // TODO
+		Money:      dex.DefaultBondDenom,
+		IsBuy:      false,
 		Amount:     amount,
 		MoneyLimit: 0, // TODO
 	}
@@ -105,7 +106,7 @@ func simulateMsgBancorBuy(blk bancorlite.Keeper,
 
 	bancorInfo := randomBancorInfo(r, blk, ctx)
 	if bancorInfo == nil || !bancorInfo.StockInPool.IsPositive() {
-		return simulation.NoOpMsg(asset.ModuleName), nil, nil
+		return simulation.NoOpMsg(bancorlite.ModuleName), nil, nil
 	}
 
 	amount := r.Int63n(bancorInfo.StockInPool.Int64() / 2)
@@ -113,7 +114,7 @@ func simulateMsgBancorBuy(blk bancorlite.Keeper,
 		Sender:     addr,
 		Stock:      bancorInfo.Stock,
 		Money:      bancorInfo.Money,
-		IsBuy:      true, // TODO
+		IsBuy:      true,
 		Amount:     amount,
 		MoneyLimit: math.MaxInt64, // TODO
 	}
@@ -157,6 +158,10 @@ func SimulateMsgBancorCancel(blk bancorlite.Keeper) simulation.Operation {
 		opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
 
 		bancorInfo := randomBancorInfo(r, blk, ctx)
+		if bancorInfo == nil {
+			return simulation.NoOpMsg(bancorlite.ModuleName), nil, nil
+		}
+
 		msg := bancorlite.MsgBancorCancel{
 			Owner: bancorInfo.Owner,
 			Stock: bancorInfo.Stock,
