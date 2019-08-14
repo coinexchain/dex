@@ -97,6 +97,7 @@ cetd gentx                                \
 GENESIS_JSON=${OUTPUT_DIR}/.cetd/config/genesis.json
 
 jq ".app_state.stakingx.params.non_bondable_addresses = [ ${NON_BONDABLE_ADDRS} ] " $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+jq ".consensus_params.evidence.max_age = \"1000000\" "                              $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
 
 if [ "${IS_TESTNET:-false}" == "true" ]; then
     # adjust testnet parameters
@@ -106,7 +107,6 @@ if [ "${IS_TESTNET:-false}" == "true" ]; then
     jq ".app_state.gov.voting_params.voting_period             = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
     jq ".app_state.asset.params.issue_rare_token_fee[0].amount = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
     jq ".app_state.asset.params.issue_token_fee[0].amount      = \"100000000000\"   "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-    jq ".consensus_params.evidence.max_age                     = \"1000000\"        "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
 fi
 
 
