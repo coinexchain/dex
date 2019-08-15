@@ -416,7 +416,36 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 }
 
 func (app *CetChainApp) initModules() {
-	modules := []module.AppModule{
+	modules := app.createAppModules()
+
+	app.mm = module.NewManager(modules...)
+	// During begin block slashing happens after distr.BeginBlocker so that
+	// there is nothing left over in the validator fee pool, so as to keep the
+	// CanWithdrawInvariant invariant.
+	app.mm.SetOrderBeginBlockers(market.ModuleName, incentive.ModuleName, distr.ModuleName, slashing.ModuleName)
+
+	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, authx.ModuleName, market.ModuleName, crisis.ModuleName)
+
+	initGenesisOrder := getAppModuleInitOrder()
+
+	// genutils must occur after staking so that pools are properly
+	// initialized with tokens from genesis accounts.
+	app.mm.SetOrderInitGenesis(initGenesisOrder...)
+
+	exportGenesisOrder := initGenesisOrder
+	app.mm.SetOrderExportGenesis(exportGenesisOrder...)
+
+	app.crisisKeeper.RegisterRoute(authx.ModuleName, "pre-total-supply", authx.PreTotalSupplyInvariant(app.accountXKeeper))
+	app.mm.RegisterInvariants(&app.crisisKeeper)
+
+	//crisis module should be reset since invariants has been registered to crisis keeper
+	app.replaceEmptyCrisisModule(&modules)
+
+	registerRoutesWithOrder(modules, app.Router(), app.QueryRouter())
+}
+
+func (app *CetChainApp) createAppModules() []module.AppModule {
+	return []module.AppModule{
 		genaccounts.NewAppModule(app.accountKeeper),
 		auth.NewAppModule(app.accountKeeper),
 		authx.NewAppModule(app.accountXKeeper, app.tokenKeeper),
@@ -438,34 +467,9 @@ func (app *CetChainApp) initModules() {
 		alias.NewAppModule(app.aliasKeeper),
 		comment.NewAppModule(app.commentKeeper),
 	}
-
-	app.mm = module.NewManager(modules...)
-	// During begin block slashing happens after distr.BeginBlocker so that
-	// there is nothing left over in the validator fee pool, so as to keep the
-	// CanWithdrawInvariant invariant.
-	app.mm.SetOrderBeginBlockers(market.ModuleName, incentive.ModuleName, distr.ModuleName, slashing.ModuleName)
-
-	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, authx.ModuleName, market.ModuleName, crisis.ModuleName)
-
-	initGenesisOrder := getModuleInitOrder()
-
-	// genutils must occur after staking so that pools are properly
-	// initialized with tokens from genesis accounts.
-	app.mm.SetOrderInitGenesis(initGenesisOrder...)
-
-	exportGenesisOrder := initGenesisOrder
-	app.mm.SetOrderExportGenesis(exportGenesisOrder...)
-
-	app.crisisKeeper.RegisterRoute(authx.ModuleName, "pre-total-supply", authx.PreTotalSupplyInvariant(app.accountXKeeper))
-	app.mm.RegisterInvariants(&app.crisisKeeper)
-
-	//crisis module should be reset since invariants has been registered to crisis keeper
-	app.replaceEmptyCrisisModule(&modules)
-
-	registerRoutesWithOrder(modules, app.Router(), app.QueryRouter())
 }
 
-func getModuleInitOrder() []string {
+func getAppModuleInitOrder() []string {
 	return []string{
 		genaccounts.ModuleName,
 		distr.ModuleName,
