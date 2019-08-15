@@ -379,11 +379,17 @@ paths:
           description: Account balances
           schema:
             type: object
+            required:
+              - height
+              - result
             properties:
               height:
                 type: string
               result:
                 type: object
+                required:
+                  - coins
+                  - locked_coins
                 properties:
                   coins:
                     type: array
@@ -394,6 +400,8 @@ paths:
                     items:
                       $ref: "#/definitions/LockedCoin"
                     x-nullable: true
+                additionalProperties: false
+            additionalProperties: false
         204:
           description: There is no data for the requested account
         500:
@@ -421,6 +429,10 @@ paths:
           required: true
           schema:
             type: object
+            required:
+              - base_req
+              - amount
+              - unlock_time
             properties:
               base_req:
                 $ref: "#/definitions/BaseReq"
@@ -431,6 +443,7 @@ paths:
               unlock_time:
                 type: string
                 example: "675132000"
+            additionalProperties: false
       responses:
         200:
           description: Tx was succesfully generated
@@ -457,11 +470,15 @@ paths:
           required: true
           schema:
             type: object
+            required:
+              - base_req
+              - memo_required
             properties:
               base_req:
                 $ref: "#/definitions/BaseReq"
               memo_required:
                 type: boolean
+            additionalProperties: false
       responses:
         200:
           description: Tx was succesfully generated
@@ -496,9 +513,16 @@ paths:
                 type: string
               result:
                 type: object
+                required:
+                  - address
+                  - coins
+                  - locked_coins
+                  - frozen_coins
+                  - public_key
+                  - account_number
+                  - sequence
+                  - memo_required
                 properties:
-                  height:
-                    type: string
                   address:
                     type: string
                   coins:
@@ -523,6 +547,7 @@ paths:
                     type: string
                   memo_required:
                     type: boolean
+                additionalProperties: false
         204:
           description: No content about this account address
         500:
@@ -2232,12 +2257,7 @@ paths:
           description: the detail info about the Token to issue
           required: true
           schema:
-            type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-              - $ref: "#/definitions/TokenBasicInfo"
+            $ref: "#/definitions/IssueToken"
       responses:
         200:
           description: Token issuance result
@@ -3305,28 +3325,36 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  stock:
-                    type: string
-                    example: btc
-                  money:
-                    type: string
-                    example: cet
-                  init_price:
-                    type: string
-                    example: "10"
-                  max_supply:
-                    type: string
-                    example: "100000"
-                  max_price:
-                    type: string
-                    example: "100"
-                  enable_cancel_time:
-                    type: string
-                    example: "1564479501"
+            required:
+              - base_req
+              - stock
+              - money
+              - init_price
+              - max_supply
+              - max_price
+              - earliest_cancel_time
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              stock:
+                type: string
+                example: btc
+              money:
+                type: string
+                example: cet
+              init_price:
+                type: string
+                example: "10"
+              max_supply:
+                type: string
+                example: "100000"
+              max_price:
+                type: string
+                example: "100"
+              earliest_cancel_time:
+                type: string
+                example: "1564479501"
+            additionalProperties: false
       responses:
         200:
           description: Tx was succesfully generated
@@ -3353,25 +3381,32 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  stock:
-                    type: string
-                    example: btc
-                  money:
-                    type: string
-                    example: cet
-                  amount:
-                    type: string
-                    example: "100"
-                  is_buy:
-                    type: boolean
-                    example: true
-                  money_limit:
-                    type: string
-                    example: "1000"
+            required:
+              - base_req
+              - stock
+              - money
+              - amount
+              - is_buy
+              - money_limit
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              stock:
+                type: string
+                example: btc
+              money:
+                type: string
+                example: cet
+              amount:
+                type: string
+                example: "100"
+              is_buy:
+                type: boolean
+                example: true
+              money_limit:
+                type: string
+                example: "1000"
+            additionalProperties: false
       responses:
         200:
           description: Tx was succesfully generated
@@ -3398,16 +3433,20 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  stock:
-                    type: string
-                    example: btc
-                  money:
-                    type: string
-                    example: cet
+            required:
+              - base_req
+              - stock
+              - money
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              stock:
+                type: string
+                example: btc
+              money:
+                type: string
+                example: cet
+            additionalProperties: false
       responses:
         200:
           description: Tx was succesfully generated
@@ -3442,6 +3481,16 @@ paths:
                 type: string
               result:
                 type: object
+                required:
+                  - stock
+                  - money
+                  - init_price
+                  - max_supply
+                  - max_price
+                  - current_price
+                  - stock_in_pool
+                  - money_in_pool
+                  - earliest_cancel_time
                 properties:
                   stock:
                     type: string
@@ -3453,14 +3502,15 @@ paths:
                     type: string
                   max_price:
                     type: string
-                  current_Price:
+                  current_price:
                     type: string
                   stock_in_pool:
                     type: string
                   money_in_pool:
                     type: string
-                  enable_cancel_time:
+                  earliest_cancel_time:
                     type: string
+                additionalProperties: false
         404:
           description: There is no corresponding bancor info
         500:
@@ -3677,6 +3727,9 @@ definitions:
     example: coinexvaloper1depk54cuajgkzea6zpgkq36tnjwdzv4avv9cxd
   Coin:
     type: object
+    required:
+      - denom
+      - amount
     properties:
       denom:
         type: string
@@ -3684,14 +3737,19 @@ definitions:
       amount:
         type: string
         example: "50"
+    additionalProperties: false
   LockedCoin:
     type: object
+    required:
+      - coin
+      - unlock_time
     properties:
       coin:
         $ref: "#/definitions/Coin"
       unlock_time:
         type: string
         example: "1559549834"
+    additionalProperties: false
   Hash:
     type: string
     example: EE5F3404034C524501629B56E0DDC38FAD651F04
@@ -4170,11 +4228,15 @@ definitions:
           $ref: "#/definitions/Coin"
   PublicKey:
     type: object
+    required:
+      - type
+      - value
     properties:
       type:
         type: string
       value:
         type: string
+    additionalProperties: false
   SigningInfo:
     type: object
     properties:
@@ -4206,9 +4268,20 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Coin"
-  TokenBasicInfo:
+  IssueToken:
     type: object
+    required:
+      - base_req
+      - name
+      - symbol
+      - total_supply
+      - mintable
+      - burnable
+      - addr_forbiddable
+      - token_forbiddable
     properties:
+      base_req:
+        $ref: "#/definitions/BaseReq"
       name:
         type: string
         example: "ABC Token"
@@ -4240,11 +4313,62 @@ definitions:
         example: "token abc is a example token"
       identity:
         type: string
+    additionalProperties: false
   Token:
     type: object
-    allOf:
-      - $ref: "#/definitions/TokenBasicInfo"
-      - properties:
+    required:
+      - type
+      - value
+    properties:
+      type:
+        type: string
+        example: "asset/BaseToken"
+      value:
+        type: object
+        required:
+          - name
+          - symbol
+          - total_supply
+          - mintable
+          - burnable
+          - addr_forbiddable
+          - token_forbiddable
+          - send_lock
+          - total_burn
+          - total_mint
+          - is_forbidden
+        properties:
+          name:
+            type: string
+            example: "ABC Token"
+          symbol:
+            type: string
+            example: "abc"
+          total_supply:
+            type: string
+            example: "2000000000000000"
+          owner:
+            $ref: "#/definitions/Address"
+          mintable:
+            type: boolean
+            example: false
+          burnable:
+            type: boolean
+            example: true
+          addr_forbiddable:
+            type: boolean
+            example: false
+          token_forbiddable:
+            type: boolean
+            example: false
+          url:
+            type: string
+            example: "www.abc.org"
+          description:
+            type: string
+            example: "token abc is a example token"
+          identity:
+            type: string
           send_lock:
             type: string
             example: "0"
@@ -4257,6 +4381,8 @@ definitions:
           is_forbidden:
             type: boolean
             example: false
+        additionalProperties: false
+    additionalProperties: false
   AddrList:
     type: object
     properties:
@@ -4285,12 +4411,3 @@ definitions:
         type: array
         items:
           type: integer
-  BancorInfoDisplay:
-    type: object
-    properties:
-      stock:
-        type: string
-        example: bch
-      money:
-        type: string
-        example: cet
