@@ -432,8 +432,7 @@ func (app *CetChainApp) initModules() {
 	// initialized with tokens from genesis accounts.
 	app.mm.SetOrderInitGenesis(initGenesisOrder...)
 
-	exportGenesisOrder := initGenesisOrder
-	app.mm.SetOrderExportGenesis(exportGenesisOrder...)
+	app.mm.SetOrderExportGenesis(initGenesisOrder...)
 
 	app.crisisKeeper.RegisterRoute(authx.ModuleName, "pre-total-supply", authx.PreTotalSupplyInvariant(app.accountXKeeper))
 	app.mm.RegisterInvariants(&app.crisisKeeper)
@@ -441,7 +440,7 @@ func (app *CetChainApp) initModules() {
 	//crisis module should be reset since invariants has been registered to crisis keeper
 	app.replaceEmptyCrisisModule(&modules)
 
-	registerRoutesWithOrder(modules, app.Router(), app.QueryRouter())
+	app.registerRoutesWithOrder(modules)
 }
 
 func (app *CetChainApp) createAppModules() []module.AppModule {
@@ -505,7 +504,10 @@ func (app *CetChainApp) replaceEmptyCrisisModule(modules *[]module.AppModule) {
 	}
 }
 
-func registerRoutesWithOrder(modules []module.AppModule, router sdk.Router, queryRouter sdk.QueryRouter) {
+func (app *CetChainApp) registerRoutesWithOrder(modules []module.AppModule) {
+	router := app.Router()
+	queryRouter := app.QueryRouter()
+
 	for _, module := range modules {
 		if module.Route() != "" && module.Route() != "bank" {
 			router.AddRoute(module.Route(), module.NewHandler())
