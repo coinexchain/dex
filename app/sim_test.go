@@ -435,15 +435,15 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Op:     assetsim.SimulateMsgModifyTokenInfo(app.assetKeeper),
 		},
 		{
-			Weight: getWeightOrDefault(OpWeightMsgBancorInit, 0),
+			Weight: getWeightOrDefault(OpWeightMsgBancorInit, 100),
 			Op:     bancorsim.SimulateMsgBancorInit(app.assetKeeper, app.bancorKeeper),
 		},
 		{
-			Weight: getWeightOrDefault(OpWeightMsgBancorTrade, 0),
+			Weight: getWeightOrDefault(OpWeightMsgBancorTrade, 100),
 			Op:     bancorsim.SimulateMsgBancorTrade(app.accountKeeper, app.bancorKeeper),
 		},
 		{
-			Weight: getWeightOrDefault(OpWeightMsgBancorCancel, 0),
+			Weight: getWeightOrDefault(OpWeightMsgBancorCancel, 100),
 			Op:     bancorsim.SimulateMsgBancorCancel(app.bancorKeeper),
 		},
 	}

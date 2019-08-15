@@ -126,7 +126,7 @@ func simulateMsgBancorBuy(blk bancorlite.Keeper,
 func getSaleableCoins(acc auth.Account) sdk.Coins {
 	saleableCoins := sdk.Coins{}
 	for _, coin := range acc.GetCoins() {
-		if strings.HasPrefix(coin.Denom, symbolPrefix) && coin.IsPositive() {
+		if strings.HasPrefix(coin.Denom, symbolPrefix) && coin.Amount.Int64() > 1 {
 			saleableCoins = append(saleableCoins, coin)
 		}
 	}
