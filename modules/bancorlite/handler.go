@@ -8,6 +8,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
+	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/msgqueue"
 )
 
@@ -189,9 +190,11 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	}
 	k.Bik.Save(ctx, &biNew)
 
-	side := "sell"
+	sideStr := "sell"
+	side := market.SELL
 	if msg.IsBuy {
-		side = "buy"
+		sideStr = "buy"
+		side = market.BUY
 	}
 
 	m := types.MsgBancorTradeInfoForKafka{
@@ -199,7 +202,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		Stock:       msg.Stock,
 		Money:       msg.Money,
 		Amount:      msg.Amount,
-		Side:        side,
+		Side:        byte(side),
 		MoneyLimit:  msg.MoneyLimit,
 		TxPrice:     price,
 		BlockHeight: ctx.BlockHeight(),
@@ -219,7 +222,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 			sdk.NewAttribute(AttributeNewMoneyInPool, biNew.MoneyInPool.String()),
 			sdk.NewAttribute(AttributeNewPrice, biNew.Price.String()),
 			sdk.NewAttribute(AttributeNewPrice, biNew.Price.String()),
-			sdk.NewAttribute(AttributeTradeSide, side),
+			sdk.NewAttribute(AttributeTradeSide, sideStr),
 			sdk.NewAttribute(AttributeCoinsFromPool, coinsFromPool.String()),
 			sdk.NewAttribute(AttributeCoinsToPool, coinsToPool.String()),
 		),

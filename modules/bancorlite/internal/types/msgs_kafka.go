@@ -35,7 +35,7 @@ type MsgBancorTradeInfoForKafka struct {
 	Stock       string         `json:"stock"`
 	Money       string         `json:"money"`
 	Amount      int64          `json:"amount"`
-	Side        string         `json:"side"`
+	Side        byte           `json:"side"`
 	MoneyLimit  int64          `json:"money_limit"`
 	TxPrice     sdk.Dec        `json:"transaction_price"`
 	BlockHeight int64          `json:"block_height"`
