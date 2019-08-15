@@ -365,7 +365,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		bancorlite.NewBancorInfoKeeper(app.keyBancor, app.cdc, app.paramsKeeper.Subspace(bancorlite.StoreKey)),
 		app.bankxKeeper,
 		app.assetKeeper,
-		&app.marketKeeper, // TODO: unit test this
+		&app.marketKeeper, 
 		app.msgQueProducer)
 
 	app.marketKeeper = market.NewBaseKeeper(
