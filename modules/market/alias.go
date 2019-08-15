@@ -24,8 +24,9 @@ const (
 )
 
 var (
-	NewBaseKeeper = keepers.NewKeeper
-	DefaultParams = keepers.DefaultParams
+	NewBaseKeeper       = keepers.NewKeeper
+	DefaultParams       = keepers.DefaultParams
+	DecToBigEndianBytes = types.DecToBigEndianBytes
 )
 
 type (
