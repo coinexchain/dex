@@ -74,18 +74,6 @@ var (
 	}
 )
 
-type impKeeper struct {
-	*CetChainApp
-}
-
-func (ik impKeeper) GetMarketLastExePrice(ctx sdk.Context, symbol string) (sdk.Dec, error) {
-	return ik.marketKeeper.GetMarketLastExePrice(ctx, symbol)
-}
-
-func (ik impKeeper) IsMarketExist(ctx sdk.Context, symbol string) bool {
-	return ik.marketKeeper.IsMarketExist(ctx, symbol)
-}
-
 func init() {
 	modules := []module.AppModuleBasic{
 		// modules added additionally
@@ -373,12 +361,11 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		auth.FeeCollectorName,
 	)
 
-	ik := impKeeper{app}
 	app.bancorKeeper = bancorlite.NewBaseKeeper(
 		bancorlite.NewBancorInfoKeeper(app.keyBancor, app.cdc, app.paramsKeeper.Subspace(bancorlite.StoreKey)),
 		app.bankxKeeper,
 		app.assetKeeper,
-		ik,
+		&app.marketKeeper, // TODO: unit test this
 		app.msgQueProducer)
 
 	app.marketKeeper = market.NewBaseKeeper(
