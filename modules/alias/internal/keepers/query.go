@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	QueryAliasInfo = "alias-info"
+	QueryAliasInfo  = "alias-info"
+	QueryParameters = "parameters"
 )
 
 // creates a querier for asset REST endpoints
@@ -18,6 +19,8 @@ func NewQuerier(keeper Keeper, cdc *codec.Codec) sdk.Querier {
 		switch path[0] {
 		case QueryAliasInfo:
 			return queryAliasInfo(ctx, req, keeper)
+		case QueryParameters:
+			return queryParameters(ctx, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("query symbol : " + path[0])
 		}
@@ -59,4 +62,14 @@ func queryAliasInfo(ctx sdk.Context, req abcitypes.RequestQuery, keeper Keeper) 
 		return nil, sdk.NewError(types.CodeSpaceAlias, types.CodeMarshalFailed, "could not marshal result to JSON")
 	}
 	return bz, nil
+}
+func queryParameters(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
+	params := k.GetParams(ctx)
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return res, nil
 }

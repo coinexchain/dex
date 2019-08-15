@@ -3165,6 +3165,41 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /alias/parameters:
+    get:
+      operationId: getAliasParams
+      summary: Get the current alias parameters
+      tags:
+        - Alias
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: object
+                properties:
+                  fee_for_alias_length_2:
+                    type: string
+                  fee_for_alias_length_3:
+                    type: string
+                  fee_for_alias_length_4:
+                    type: string
+                  fee_for_alias_length_5:
+                    type: string
+                  fee_for_alias_length_6:
+                    type: string
+                  fee_for_alias_length_7_or_higher:
+                    type: string
+                  max_alias_count:
+                    type: string
+        500:
+          description: Internal Server Error
   /comment/new-thread:
     post:
       summary: Post a new comment to open a new thread

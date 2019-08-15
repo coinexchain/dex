@@ -18,6 +18,7 @@ import (
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
 	r.HandleFunc("/alias/address-of-alias/{alias}", queryAddressHandlerFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/alias/aliases-of-address/{address}", queryAliasesHandlerFn(cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/alias/parameters", queryParamsHandlerFn(cliCtx)).Methods("GET")
 }
 
 func queryAddressHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -68,6 +69,25 @@ func queryAliasesHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
+		cliCtx = cliCtx.WithHeight(height)
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+// HTTP request handler to query the staking params values
+func queryParamsHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
+
+		res, height, err := cliCtx.QueryWithData("custom/alias/parameters", nil)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
 		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
