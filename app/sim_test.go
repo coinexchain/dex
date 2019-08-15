@@ -33,6 +33,7 @@ import (
 	stakingsim "github.com/cosmos/cosmos-sdk/x/staking/simulation"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	aliassim "github.com/coinexchain/dex/modules/alias/simulation"
 	assetsim "github.com/coinexchain/dex/modules/asset/simulation"
 	bancorsim "github.com/coinexchain/dex/modules/bancorlite/simulation"
 	"github.com/coinexchain/dex/types"
@@ -389,6 +390,10 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			Weight: getWeightOrDefault(simapp.OpWeightMsgUnjail, 100),
 			Op:     slashingsim.SimulateMsgUnjail(app.slashingKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgAliasUpdate, 100),
+			Op:     aliassim.SimulateMsgAliasUpdate(app.aliasKeeper),
 		},
 		{
 			Weight: getWeightOrDefault(OpWeightMsgIssueToken, 150),

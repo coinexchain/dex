@@ -1,6 +1,8 @@
 package app
 
 const (
+	//alias
+	OpWeightMsgAliasUpdate = "op_weight_msg_alias_update"
 	// asset
 	OpWeightMsgIssueToken           = "op_weight_msg_issue_token"
 	OpWeightMsgTransferOwnership    = "op_weight_msg_transfer_ownership"
