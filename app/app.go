@@ -198,16 +198,16 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod, txDecoder)
 	app.initKeepers(invCheckPeriod)
-	app.InitModules()
+	app.initModules()
 	app.mountStores()
 
 	ah := authx.NewAnteHandler(app.accountKeeper, app.supplyKeeper, app.accountXKeeper,
 		newAnteHelper(app.accountXKeeper, app.stakingXKeeper))
 
 	app.SetInitChainer(app.initChainer)
-	app.SetBeginBlocker(app.BeginBlocker)
+	app.SetBeginBlocker(app.beginBlocker)
 	app.SetAnteHandler(ah)
-	app.SetEndBlocker(app.EndBlocker)
+	app.SetEndBlocker(app.endBlocker)
 
 	if loadLatest {
 		err := app.LoadLatestVersion(app.keyMain)
@@ -415,8 +415,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	)
 }
 
-func (app *CetChainApp) InitModules() {
-
+func (app *CetChainApp) initModules() {
 	modules := []module.AppModule{
 		genaccounts.NewAppModule(app.accountKeeper),
 		auth.NewAppModule(app.accountKeeper),
@@ -520,7 +519,7 @@ func (app *CetChainApp) mountStores() {
 }
 
 // application updates every end block
-func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	app.height = ctx.BlockHeight()
 	PubMsgs = make([]PubMsg, 0, 10000)
 	ret := app.mm.BeginBlock(ctx, req)
@@ -531,36 +530,15 @@ func (app *CetChainApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 	return ret
 }
 
-func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx {
-	ret := app.BaseApp.DeliverTx(req)
-	if app.msgQueProducer.IsOpenToggle() {
-		if ret.Code == uint32(sdk.CodeOK) {
-			ret.Events = FilterMsgsOnlyKafka(ret.Events)
-			app.notifyTx(req, ret.Events)
-		} else {
-			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
-		}
-	}
-	return ret
-}
-
 // application updates every end block
 // nolint: unparam
-func (app *CetChainApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+func (app *CetChainApp) endBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	ret := app.mm.EndBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
 		ret.Events = FilterMsgsOnlyKafka(ret.Events)
 		app.notifyEndBlock(ret.Events)
 	}
 	return ret
-}
-
-func (app *CetChainApp) Commit() abci.ResponseCommit {
-	for _, msg := range PubMsgs {
-		app.msgQueProducer.SendMsg(msg.Key, msg.Value)
-	}
-	app.msgQueProducer.SendMsg([]byte("commit"), []byte("{}"))
-	return app.BaseApp.Commit()
 }
 
 // custom logic for coindex initialization
@@ -588,4 +566,27 @@ func (app *CetChainApp) ModuleAccountAddrs() map[string]bool {
 	}
 
 	return modAccAddrs
+}
+
+// "override" ABCI methods
+
+func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx {
+	ret := app.BaseApp.DeliverTx(req)
+	if app.msgQueProducer.IsOpenToggle() {
+		if ret.Code == uint32(sdk.CodeOK) {
+			ret.Events = FilterMsgsOnlyKafka(ret.Events)
+			app.notifyTx(req, ret.Events)
+		} else {
+			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
+		}
+	}
+	return ret
+}
+
+func (app *CetChainApp) Commit() abci.ResponseCommit {
+	for _, msg := range PubMsgs {
+		app.msgQueProducer.SendMsg(msg.Key, msg.Value)
+	}
+	app.msgQueProducer.SendMsg([]byte("commit"), []byte("{}"))
+	return app.BaseApp.Commit()
 }
