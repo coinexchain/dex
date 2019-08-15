@@ -14,7 +14,6 @@ import (
 	"github.com/coinexchain/dex/modules/comment/client/rest"
 	"github.com/coinexchain/dex/modules/comment/internal/keepers"
 	types2 "github.com/coinexchain/dex/modules/comment/internal/types"
-	"github.com/coinexchain/dex/types"
 )
 
 // app module basics object
@@ -59,7 +58,6 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	commentKeeper keepers.Keeper
-	apc           types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object

@@ -74,7 +74,6 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	stakingXKeeper Keeper //TODO: rename to StakingXKeeper
-	apc            types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object

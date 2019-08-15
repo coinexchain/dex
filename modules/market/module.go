@@ -14,7 +14,6 @@ import (
 	"github.com/coinexchain/dex/modules/market/client/rest"
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	types2 "github.com/coinexchain/dex/modules/market/internal/types"
-	"github.com/coinexchain/dex/types"
 )
 
 // app module basics object
@@ -59,7 +58,6 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	marketKeeper keepers.Keeper //TODO: rename to AssetKeeper
-	apc          types.ModuleClient
 }
 
 // NewAppModule creates a new AppModule object
