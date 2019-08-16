@@ -12,6 +12,7 @@ func BeginBlocker(ctx sdk.Context, k keepers.Keeper) {
 		msg := types.NewHeightInfo{
 			Height:    ctx.BlockHeight(),
 			TimeStamp: ctx.BlockHeader().Time,
+			LastBlockHash: ctx.BlockHeader().LastBlockID.Hash,
 		}
 		fillMsgs(ctx, types.HeightInfoKey, msg)
 	}

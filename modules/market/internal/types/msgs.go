@@ -6,6 +6,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
 )
 
 // RouterKey is the name of the market module
@@ -339,6 +340,7 @@ type CancelOrderInfo struct {
 type NewHeightInfo struct {
 	Height    int64     `json:"height"`
 	TimeStamp time.Time `json:"timestamp"`
+	LastBlockHash cmn.HexBytes  `json:"last_block_hash"`
 }
 
 type ModifyPricePrecisionInfo struct {
