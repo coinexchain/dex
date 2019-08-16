@@ -57,7 +57,7 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 	// Add --chain-id to persistent flags and mark it required
 	rootCmd.PersistentFlags().String(client.FlagChainID, "", "Chain ID of tendermint node")
 	rootCmd.PersistentFlags().String(FlagSwaggerHost, "", "Default host of swagger API")
-	rootCmd.PersistentFlags().Bool(FlagDefaultHttp, false, "Use Http as default schema")
+	rootCmd.PersistentFlags().Bool(FlagDefaultHTTP, false, "Use Http as default schema")
 	rootCmd.PersistentPreRunE = func(_ *cobra.Command, _ []string) error {
 		return initConfig(rootCmd)
 	}

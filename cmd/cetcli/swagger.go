@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const FlagDefaultHttp = "default-http"
+const FlagDefaultHTTP = "default-http"
 const FlagSwaggerHost = "swagger-host"
 
 func registerSwaggerUI(rs *lcd.RestServer) {
@@ -36,7 +36,7 @@ func serveSwagger(fs http.FileSystem) http.HandlerFunc {
 		swagger = strings.Replace(swagger, "host: dex-api.coinex.org", "host: "+swaggerHost, -1)
 	}
 
-	if viper.GetBool(FlagDefaultHttp) {
+	if viper.GetBool(FlagDefaultHTTP) {
 		swagger = strings.Replace(swagger,
 			"schemes:\n  - https\n  - http", "schemes:\n  - http\n  - https", -1)
 	}
@@ -47,7 +47,7 @@ func serveSwagger(fs http.FileSystem) http.HandlerFunc {
 }
 
 func bindSwaggerFlags(cmd *cobra.Command) error {
-	if err := viper.BindPFlag(FlagDefaultHttp, cmd.PersistentFlags().Lookup(FlagDefaultHttp)); err != nil {
+	if err := viper.BindPFlag(FlagDefaultHTTP, cmd.PersistentFlags().Lookup(FlagDefaultHTTP)); err != nil {
 		return err
 	}
 
