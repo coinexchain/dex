@@ -3019,7 +3019,12 @@ paths:
               height:
                 type: string
               result:
-                $ref: "#/definitions/OrderInfo"
+                type: object
+                properties:
+                  type:
+                    type: string
+                  value:
+                    $ref: "#/definitions/OrderInfo"
         400:
           description: Invalid order-id
         500:
@@ -3643,19 +3648,17 @@ definitions:
           creator:
             type: string
             example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
-    additionalProperties: false
   Order:
     type: object
     required:
       - order_type
       - trading_pair
-      - price_precision
       - price
       - quantity
       - side
     properties:
       order_type:
-        type: string
+        type: integer
         example: 1
       trading_pair:
         type: string
@@ -3670,7 +3673,7 @@ definitions:
         type: string
         example: 12320
       side:
-        type: string
+        type: integer
         example: 1
 
   OrderInfo:
