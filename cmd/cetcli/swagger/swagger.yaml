@@ -699,6 +699,11 @@ paths:
           description: The password of the account to remove from the KMS
           schema:
             type: object
+            required:
+              - base_req
+              - delegator_address
+              - validator_address
+              - amount
             properties:
               base_req:
                 $ref: "#/definitions/BaseReq"
@@ -708,6 +713,7 @@ paths:
                 $ref: "#/definitions/ValidatorAddress"
               amount:
                 $ref: "#/definitions/Coin"
+            additionalProperties: false
       tags:
         - Staking
       consumes:
@@ -815,6 +821,12 @@ paths:
           description: The sender and tx information
           schema:
             type: object
+            required:
+              - base_req
+              - delegator_address
+              - validator_src_address
+              - validator_dst_address
+              - amount
             properties:
               base_req:
                 $ref: "#/definitions/BaseReq"
@@ -826,6 +838,7 @@ paths:
                 $ref: "#/definitions/ValidatorAddress"
               amount:
                 $ref: "#/definitions/Coin"
+            additionalProperties: false
       tags:
         - Staking
       consumes:
@@ -3883,6 +3896,13 @@ definitions:
               $ref: "#/definitions/KVPair"
   PaginatedQueryTxs:
     type: object
+    required:
+      - total_count
+      - count
+      - page_number
+      - page_total
+      - limit
+      - txs
     properties:
       total_count:
         type: number
@@ -3903,41 +3923,57 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/TxQuery"
+    additionalProperties: false
   StdTx:
     type: object
+    required:
+      - type
+      - value
     properties:
-      msg:
-        type: array
-        items:
-          $ref: "#/definitions/Msg"
-      fee:
+      type:
+        type: string
+      value:
         type: object
+        required:
+          - fee
+          - memo
+          - signatures
         properties:
-          gas:
-            type: string
-          amount:
+          msg:
             type: array
             items:
-              $ref: "#/definitions/Coin"
-      memo:
-        type: string
-      signatures:
-        type: array
-        items:
-          type: object
-          properties:
-            signature:
-              type: string
-              example: MEUCIQD02fsDPra8MtbRsyB1w7bqTM55Wu138zQbFcWx4+CFyAIge5WNPfKIuvzBZ69MyqHsqD8S1IwiEp+iUb6VSdtlpgY=
-            pub_key:
+              $ref: "#/definitions/Msg"
+          fee:
+            type: object
+            properties:
+              gas:
+                type: string
+              amount:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
+          memo:
+            type: string
+          signatures:
+            type: array
+            items:
               type: object
               properties:
-                type:
+                signature:
                   type: string
-                  example: "tendermint/PubKeySecp256k1"
-                value:
-                  type: string
-                  example: "Avz04VhtKJh8ACCVzlI8aTosGy0ikFXKIVHQ3jKMrosH"
+                  example: MEUCIQD02fsDPra8MtbRsyB1w7bqTM55Wu138zQbFcWx4+CFyAIge5WNPfKIuvzBZ69MyqHsqD8S1IwiEp+iUb6VSdtlpgY=
+                pub_key:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: "tendermint/PubKeySecp256k1"
+                    value:
+                      type: string
+                      example: "Avz04VhtKJh8ACCVzlI8aTosGy0ikFXKIVHQ3jKMrosH"
+            x-nullable: true
+        additionalProperties: false
+    additionalProperties: false
   KeyOutput:
     type: object
     properties:
@@ -3957,6 +3993,9 @@ definitions:
         type: string
   BlockID:
     type: object
+    required:
+      - hash
+      - parts
     properties:
       hash:
         $ref: "#/definitions/Hash"
@@ -3968,8 +4007,26 @@ definitions:
             example: 0
           hash:
             $ref: "#/definitions/Hash"
+    additionalProperties: false
   BlockHeader:
     type: object
+    required:
+      - chain_id
+      - height
+      - time
+      - num_txs
+      - last_block_id
+      - total_txs
+      - last_commit_hash
+      - data_hash
+      - validators_hash
+      - next_validators_hash
+      - consensus_hash
+      - app_hash
+      - last_results_hash
+      - evidence_hash
+      - proposer_address
+      - version
     properties:
       chain_id:
         type: string
@@ -4015,6 +4072,7 @@ definitions:
           app:
             type: string
             example: 0
+    additionalProperties: false
   Block:
     type: object
     properties:
@@ -4077,6 +4135,9 @@ definitions:
         $ref: "#/definitions/Block"
   DelegationDelegatorReward:
     type: object
+    required:
+      - validator_address
+      - reward
     properties:
       validator_address:
         $ref: "#/definitions/ValidatorAddress"
@@ -4084,8 +4145,12 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Coin"
+    additionalProperties: false
   DelegatorTotalRewards:
     type: object
+    required:
+      - rewards
+      - total
     properties:
       rewards:
         type: array
@@ -4095,6 +4160,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Coin"
+    additionalProperties: false
   BaseReq:
     type: object
     properties:
@@ -4130,6 +4196,11 @@ definitions:
         description: Estimate gas for a transaction (cannot be used in conjunction with generate_only)
   TendermintValidator:
     type: object
+    required:
+      - address
+      - pub_key
+      - voting_power
+      - proposer_priority
     properties:
       address:
         $ref: "#/definitions/ValidatorAddress"
@@ -4142,8 +4213,19 @@ definitions:
       proposer_priority:
         type: string
         example: "1000"
+    additionalProperties: false
   TextProposal:
     type: object
+    required:
+      - proposal_id
+      - title
+      - description
+      - proposal_type
+      - proposal_status
+      - final_tally_result
+      - submit_time
+      - total_deposit
+      - voting_start_time
     properties:
       proposal_id:
         type: string
@@ -4165,15 +4247,24 @@ definitions:
           $ref: "#/definitions/Coin"
       voting_start_time:
         type: string
+    additionalProperties: false
   Proposer:
     type: object
+    required:
+      - proposal_id
+      - proposer
     properties:
       proposal_id:
         type: string
       proposer:
         type: string
+    additionalProperties: false
   Deposit:
     type: object
+    required:
+      - amount
+      - proposal_id
+      - depositor
     properties:
       amount:
         type: array
@@ -4183,8 +4274,14 @@ definitions:
         type: string
       depositor:
         $ref: "#/definitions/Address"
+    additionalProperties: false
   TallyResult:
     type: object
+    required:
+      - 'yes'
+      - abstain
+      - 'no'
+      - no_with_veto
     properties:
       'yes':
         type: string
@@ -4198,8 +4295,13 @@ definitions:
       no_with_veto:
         type: string
         example: "0.0000000000"
+    additionalProperties: false
   Vote:
     type: object
+    required:
+      - voter
+      - proposal_id
+      - option
     properties:
       voter:
         type: string
@@ -4207,6 +4309,7 @@ definitions:
         type: string
       option:
         type: string
+    additionalProperties: false
   Validator:
     type: object
     required:
@@ -4408,6 +4511,11 @@ definitions:
     additionalProperties: false
   SigningInfo:
     type: object
+    required:
+      - start_height
+      - index_offset
+      - jailed_until
+      - missed_blocks_counter
     properties:
       start_height:
         type: string
@@ -4417,8 +4525,14 @@ definitions:
         type: string
       missed_blocks_counter:
         type: string
+    additionalProperties: false
   ParamChange:
     type: object
+    required:
+      - subspace
+      - key
+      - subkey
+      - value
     properties:
       subspace:
         type: string
@@ -4430,6 +4544,7 @@ definitions:
         type: string
         example: ""
       value: {}
+    additionalProperties: false
   Supply:
     type: object
     properties:
@@ -4554,6 +4669,9 @@ definitions:
     additionalProperties: false
   AddrList:
     type: object
+    required:
+      - base_req
+      - addr_list
     properties:
       base_req:
         $ref: "#/definitions/BaseReq"
@@ -4561,8 +4679,15 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Address"
+    additionalProperties: false
   CommentRef:
     type: object
+    required:
+      - id
+      - reward_target
+      - reward_token
+      - reward_amount
+      - attitudes
     properties:
       id:
         type: string
@@ -4580,3 +4705,4 @@ definitions:
         type: array
         items:
           type: integer
+    additionalProperties: false
