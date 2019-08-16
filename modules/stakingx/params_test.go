@@ -16,14 +16,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-
-	"github.com/coinexchain/dex/testutil"
 )
 
 func TestDefaultParams(t *testing.T) {
 	params := DefaultParams()
 	require.Equal(t, "100000000000000", params.MinSelfDelegation.String())
-	require.Equal(t, 0, len(params.NonBondableAddresses))
 }
 
 func defaultContext() (sdk.Context, params.Keeper) {
@@ -46,12 +43,10 @@ func defaultContext() (sdk.Context, params.Keeper) {
 func TestParamGetSet(t *testing.T) {
 	ctx, paramsKeeper := defaultContext()
 	subspace := paramsKeeper.Subspace(DefaultParamspace)
-	sxk := NewKeeper(subspace, nil, &staking.Keeper{}, distribution.Keeper{}, auth.AccountKeeper{}, nil, nil, "")
+	sxk := NewKeeper(sdk.NewKVStoreKey("test"), codec.New(), subspace, nil, &staking.Keeper{}, distribution.Keeper{}, auth.AccountKeeper{}, nil, nil, "")
 
-	_, _, addr := testutil.KeyPubAddr()
 	testParam := Params{
 		MinSelfDelegation:          sdk.ZeroInt(),
-		NonBondableAddresses:       []sdk.AccAddress{addr},
 		MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
 	}
 

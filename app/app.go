@@ -133,6 +133,7 @@ type CetChainApp struct {
 	keyAccountX  *sdk.KVStoreKey
 	keySupply    *sdk.KVStoreKey
 	keyStaking   *sdk.KVStoreKey
+	keyStakingX  *sdk.KVStoreKey
 	tkeyStaking  *sdk.TransientStoreKey
 	keySlashing  *sdk.KVStoreKey
 	keyDistr     *sdk.KVStoreKey
@@ -218,6 +219,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint, tx
 		keyAccountX:    sdk.NewKVStoreKey(authx.StoreKey),
 		keySupply:      sdk.NewKVStoreKey(supply.StoreKey),
 		keyStaking:     sdk.NewKVStoreKey(staking.StoreKey),
+		keyStakingX:    sdk.NewKVStoreKey(stakingx.StoreKey),
 		tkeyStaking:    sdk.NewTransientStoreKey(staking.TStoreKey),
 		keyDistr:       sdk.NewKVStoreKey(distr.StoreKey),
 		keySlashing:    sdk.NewKVStoreKey(slashing.StoreKey),
@@ -351,6 +353,8 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.supplyKeeper,
 	)
 	app.stakingXKeeper = stakingx.NewKeeper(
+		app.keyStakingX,
+		app.cdc,
 		app.paramsKeeper.Subspace(stakingx.DefaultParamspace),
 		app.assetKeeper,
 		&stakingKeeper,
@@ -468,8 +472,8 @@ func getAppModuleInitOrder() []string {
 		authx.ModuleName,
 		bankx.ModuleName,
 		incentive.ModuleName,
-		stakingx.ModuleName,
 		asset.ModuleName,
+		stakingx.ModuleName,
 		market.ModuleName,
 		bancorlite.ModuleName,
 		crisis.ModuleName,
@@ -511,7 +515,7 @@ func (app *CetChainApp) mountStores() {
 		app.keySlashing, app.keyGov, app.keyParams,
 		app.tkeyParams, app.tkeyStaking,
 		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,
-		app.keyBancor, app.keyAlias, app.keyComment,
+		app.keyBancor, app.keyAlias, app.keyComment, app.keyStakingX,
 	)
 }
 

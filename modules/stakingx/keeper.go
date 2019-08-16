@@ -1,11 +1,13 @@
 package stakingx
 
 import (
-	"github.com/coinexchain/dex/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 const (
@@ -21,7 +23,14 @@ const (
 	QuerierRoute = ModuleName
 )
 
+var (
+	NonBondableAddressesKey = []byte("0x01")
+)
+
 type Keeper struct {
+	key sdk.StoreKey
+	cdc *codec.Codec
+
 	paramSubspace params.Subspace
 
 	assetViewKeeper AssetViewKeeper
@@ -39,11 +48,14 @@ type Keeper struct {
 	feeCollectorName string
 }
 
-func NewKeeper(paramSubspace params.Subspace, assetViewKeeper AssetViewKeeper, sk *staking.Keeper,
+func NewKeeper(key sdk.StoreKey, cdc *codec.Codec,
+	paramSubspace params.Subspace, assetViewKeeper AssetViewKeeper, sk *staking.Keeper,
 	dk DistributionKeeper, ak auth.AccountKeeper, bk ExpectBankxKeeper,
 	supplyKeeper ExpectSupplyKeeper, feeCollectorName string) Keeper {
 
 	return Keeper{
+		key:              key,
+		cdc:              cdc,
 		paramSubspace:    paramSubspace.WithKeyTable(ParamKeyTable()),
 		assetViewKeeper:  assetViewKeeper,
 		sk:               sk,
@@ -69,24 +81,18 @@ func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
 	return
 }
 
-func (k Keeper) GetNonBondableAddresses(ctx sdk.Context) (addrs []sdk.AccAddress) {
-	k.paramSubspace.Get(ctx, KeyNonBondableAddresses, &addrs)
-	return
-}
-
 func (k Keeper) GetMinMandatoryCommissionRate(ctx sdk.Context) (rate sdk.Dec) {
 	k.paramSubspace.Get(ctx, KeyMinMandatoryCommissionRate, &rate)
 	return
 }
 
 func (k Keeper) CalcBondPoolStatus(ctx sdk.Context) BondPool {
-
-	total := k.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf(types.CET)
+	total := k.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf(dex.CET)
 	var bondPool BondPool
 
 	bondPool.TotalSupply = total
-	bondPool.BondedTokens = k.supplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName).GetCoins().AmountOf(types.CET)
-	bondPool.NotBondedTokens = k.supplyKeeper.GetModuleAccount(ctx, staking.NotBondedPoolName).GetCoins().AmountOf(types.CET)
+	bondPool.BondedTokens = k.supplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName).GetCoins().AmountOf(dex.CET)
+	bondPool.NotBondedTokens = k.supplyKeeper.GetModuleAccount(ctx, staking.NotBondedPoolName).GetCoins().AmountOf(dex.CET)
 	bondPool.NonBondableTokens = calcNonBondableTokens(ctx, &k)
 
 	bondPool.BondRatio = calcBondedRatio(&bondPool)
@@ -110,19 +116,61 @@ func calcBondedRatio(p *BondPool) sdk.Dec {
 
 func calcNonBondableTokens(ctx sdk.Context, k *Keeper) sdk.Int {
 	ret := sdk.ZeroInt()
-	addrs := k.GetNonBondableAddresses(ctx)
+	addrs := k.getNonBondableAddresses(ctx)
 
 	for _, addr := range addrs {
 		if acc := k.ak.GetAccount(ctx, addr); acc != nil {
-			amt := acc.GetCoins().AmountOf(types.CET)
+			amt := acc.GetCoins().AmountOf(dex.CET)
 			if amt.IsPositive() {
 				ret = ret.Add(amt)
 			}
 		}
 	}
 
-	communityPoolAmt := k.dk.GetFeePoolCommunityCoins(ctx).AmountOf(types.CET)
+	communityPoolAmt := k.dk.GetFeePoolCommunityCoins(ctx).AmountOf(dex.CET)
 	ret = ret.Add(communityPoolAmt.TruncateInt())
 
 	return ret
+}
+
+func (k Keeper) getCetOwnerAddress(ctx sdk.Context) sdk.AccAddress {
+	cet := k.assetViewKeeper.GetToken(ctx, dex.CET)
+	if cet == nil {
+		return nil
+	}
+	return cet.GetOwner()
+}
+
+func (k Keeper) getAllVestingAccountAddresses(ctx sdk.Context) []sdk.AccAddress {
+	addresses := make([]sdk.AccAddress, 0, 8)
+	k.ak.IterateAccounts(ctx, func(acc auth.Account) bool {
+		if vacc, ok := acc.(auth.VestingAccount); ok {
+			addresses = append(addresses, vacc.GetAddress())
+		}
+		return false
+	})
+	return addresses
+}
+
+func (k Keeper) setNonBondableAddresses(ctx sdk.Context, addresses []sdk.AccAddress) {
+	store := ctx.KVStore(k.key)
+	bz, err := k.cdc.MarshalBinaryBare(addresses)
+	if err != nil {
+		panic(err)
+	}
+	store.Set(NonBondableAddressesKey, bz)
+}
+
+func (k Keeper) getNonBondableAddresses(ctx sdk.Context) (addresses []sdk.AccAddress) {
+	store := ctx.KVStore(k.key)
+	bz := store.Get(NonBondableAddressesKey)
+	if bz == nil {
+		return
+	}
+
+	err := k.cdc.UnmarshalBinaryBare(bz, &addresses)
+	if err != nil {
+		panic(err) // TODO
+	}
+	return
 }

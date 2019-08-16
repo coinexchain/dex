@@ -1,6 +1,7 @@
 package stakingx
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -17,11 +18,9 @@ import (
 func TestInitExportGenesis(t *testing.T) {
 	sxk, ctx, _ := setUpInput()
 
-	_, _, addr := testutil.KeyPubAddr()
 	genesisState := GenesisState{
 		Params: Params{
 			MinSelfDelegation:          sdk.NewInt(DefaultMinSelfDelegation),
-			NonBondableAddresses:       []sdk.AccAddress{addr},
 			MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
 		},
 	}
@@ -29,7 +28,6 @@ func TestInitExportGenesis(t *testing.T) {
 	InitGenesis(ctx, sxk, genesisState)
 	exportGenesis := ExportGenesis(ctx, sxk)
 	require.Equal(t, genesisState, exportGenesis)
-
 }
 
 func TestCalcBondPoolStatus(t *testing.T) {
@@ -38,15 +36,15 @@ func TestCalcBondPoolStatus(t *testing.T) {
 
 	_, _, addr := testutil.KeyPubAddr()
 	testParam := Params{
-		MinSelfDelegation:    sdk.ZeroInt(),
-		NonBondableAddresses: []sdk.AccAddress{addr},
+		MinSelfDelegation: sdk.ZeroInt(),
 	}
-	sxk.SetParams(ctx, testParam)
 	acc := auth.BaseAccount{
 		Address: addr,
 		Coins:   dex.NewCetCoins(1e8),
 	}
-	sxk.ak.SetAccount(ctx, &acc)
+	vacc := auth.NewDelayedVestingAccount(&acc, math.MaxInt64)
+	sxk.ak.SetAccount(ctx, vacc)
+	InitGenesis(ctx, sxk, GenesisState{Params: testParam})
 
 	feePool := types.FeePool{
 		CommunityPool: sdk.NewDecCoins(dex.NewCetCoins(1000)),

@@ -32,19 +32,23 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 	supply.RegisterCodec(cdc)
 
 	keyStaking := sdk.NewKVStoreKey(staking.StoreKey)
+	keyStakingX := sdk.NewKVStoreKey(StoreKey)
 	skey := sdk.NewKVStoreKey("test")
 	tkey := sdk.NewTransientStoreKey("transient_test")
 	distKey := sdk.NewKVStoreKey(distribution.StoreKey)
 	authKey := sdk.NewKVStoreKey(auth.StoreKey)
 	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
+	assetKey := sdk.NewKVStoreKey(asset.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(skey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(tkey, sdk.StoreTypeTransient, db)
 	ms.MountStoreWithDB(keyStaking, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keyStakingX, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(distKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(supplyKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(assetKey, sdk.StoreTypeIAVL, db)
 
 	ms.LoadLatestVersion()
 
@@ -71,7 +75,8 @@ func setUpInput() (Keeper, sdk.Context, auth.AccountKeeper) {
 		staking.DefaultCodespace,
 	)
 	dk := distribution.NewKeeper(cdc, distKey, paramsKeeper.Subspace(distribution.StoreKey), sk, splk, types.DefaultCodespace, auth.FeeCollectorName, map[string]bool{})
-	sxk := NewKeeper(paramsKeeper.Subspace(DefaultParamspace), nil, &sk, dk, ak, nil, splk, auth.FeeCollectorName) // TODO
+	avk := asset.NewBaseTokenKeeper(cdc, assetKey)
+	sxk := NewKeeper(keyStakingX, cdc, paramsKeeper.Subspace(DefaultParamspace), avk, &sk, dk, ak, nil, splk, auth.FeeCollectorName) // TODO
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id", Height: 1}, false, log.NewNopLogger())
 	bk.SetSendEnabled(ctx, true)

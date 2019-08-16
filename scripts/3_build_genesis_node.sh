@@ -48,16 +48,6 @@ cetd add-genesis-account $(cetcli keys show vesting2023 -a)        3600000000000
 cetd add-genesis-account $(cetcli keys show vesting2024 -a)        36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1704067200  --home ${OUTPUT_DIR}/.cetd
 
 
-NON_BONDABLE_ADDRS="
-\"${INCENTIVE_POOL_ADDR}\",
-\"$(cetcli keys show coinex_foundation -a)\",
-\"$(cetcli keys show vesting2020 -a)\",
-\"$(cetcli keys show vesting2021 -a)\",
-\"$(cetcli keys show vesting2022 -a)\",
-\"$(cetcli keys show vesting2023 -a)\",
-\"$(cetcli keys show vesting2024 -a)\""
-
-
 CET_TOKEN_DESCRIPTION="Decentralized public chain ecosystem, Born for financial liberalization"
 
 cetd add-genesis-token --name="CoinEx Chain Native Token"               \
@@ -96,7 +86,6 @@ cetd gentx                                \
 # add non bondable address
 GENESIS_JSON=${OUTPUT_DIR}/.cetd/config/genesis.json
 
-jq ".app_state.stakingx.params.non_bondable_addresses = [ ${NON_BONDABLE_ADDRS} ] " $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
 jq ".consensus_params.evidence.max_age = \"1000000\" "                              $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
 
 if [ "${IS_TESTNET:-false}" == "true" ]; then

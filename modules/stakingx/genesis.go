@@ -1,9 +1,9 @@
 package stakingx
 
 import (
-	"errors"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/incentive"
 )
 
 type GenesisState struct {
@@ -24,6 +24,14 @@ func DefaultGenesisState() GenesisState {
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
+
+	// cache non-bondable addresses
+	addresses := keeper.getAllVestingAccountAddresses(ctx)
+	addresses = append(addresses, incentive.PoolAddr)
+	if cetOwner := keeper.getCetOwnerAddress(ctx); cetOwner != nil {
+		addresses = append(addresses, cetOwner)
+	}
+	keeper.setNonBondableAddresses(ctx, addresses)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
@@ -39,15 +47,5 @@ func (data GenesisState) ValidateGenesis() error {
 	if !msd.IsPositive() {
 		return ErrInvalidMinSelfDelegation(msd)
 	}
-
-	addrSet := make(map[string]interface{})
-	for _, addr := range data.Params.NonBondableAddresses {
-		if _, exists := addrSet[addr.String()]; exists {
-			return errors.New("duplicate addresses in non_bondable_addresses")
-		}
-
-		addrSet[addr.String()] = nil
-	}
-
 	return nil
 }

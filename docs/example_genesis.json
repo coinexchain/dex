@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2019-08-07T02:22:51.097809Z",
+  "genesis_time": "2019-08-16T02:59:17.473432Z",
   "chain_id": "coinexdex-1",
   "consensus_params": {
     "block": {
@@ -231,7 +231,6 @@
     "stakingx": {
       "params": {
         "min_self_delegation": "100000000000000",
-        "non_bondable_addresses": null,
         "min_mandatory_commission_rate": "0.050000000000000000"
       }
     },
@@ -474,9 +473,7 @@
       }
     },
     "supply": {
-      "supply": {
-        "total": []
-      }
+      "supply": []
     },
     "genutil": {
       "gentxs": [
@@ -499,9 +496,9 @@
                     "max_change_rate": "0.010000000000000000"
                   },
                   "min_self_delegation": "10000000000000000",
-                  "delegator_address": "coinex14x5xeqkgc8sy7hkjnjad53z5qujumkhgjhvlaa",
-                  "validator_address": "coinexvaloper14x5xeqkgc8sy7hkjnjad53z5qujumkhgfc0hnf",
-                  "pubkey": "coinexvalconspub1addwnpepqwtqxlgr22uq39gv66kl8jlglyr3nqve353yh3ajwgf8x42qgg2kxwj39xt",
+                  "delegator_address": "coinex1nvc8wu6kzy3pvse2ppzepkg9qmrecm8rl2pq8x",
+                  "validator_address": "coinexvaloper1nvc8wu6kzy3pvse2ppzepkg9qmrecm8ry9zgfj",
+                  "pubkey": "coinexvalconspub1addwnpepq2qpqmwqwuk06latryacwr64wg64kldtyfyjsw6me0wusdu3gjhvgvk8523",
                   "value": {
                     "denom": "cet",
                     "amount": "10000000000000000"
@@ -522,9 +519,9 @@
               {
                 "pub_key": {
                   "type": "tendermint/PubKeySecp256k1",
-                  "value": "A5YDfQNSuAiVDNat88vo+QcZgZmNIkvHsnISc1VAQhVj"
+                  "value": "AoAQbcB3LP1/qxk7hw9VcjVbfasiSSg7W8vdyDeRRK7E"
                 },
-                "signature": "/0zYbASQ0JBDMVH2i2EQBVthuluTbFTkI1c6w5HICzs04UcVPr6Ie2bjEpe02SdNll9JqdiUAFf7HYO93khflw=="
+                "signature": "WwEGuZ8VuwcuAcBNphAUTRh4Iay6lhXh5D977PDnuapFsoNpQMUSbYHReq6UMK0EsDhD5/Bg1sE4f/N/CvOtOA=="
               }
             ],
             "memo": ""
