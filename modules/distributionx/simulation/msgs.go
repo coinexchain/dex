@@ -13,7 +13,7 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
-func SimulateMsgMsgDonateToCommunityPool(ak auth.AccountKeeper, dxk distributionx.Keeper) simulation.Operation {
+func SimulateMsgDonateToCommunityPool(ak auth.AccountKeeper, dxk distributionx.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account) (
 		opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
 

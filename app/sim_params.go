@@ -19,4 +19,6 @@ const (
 	OpWeightMsgBancorInit   = "op_weight_msg_bancor_init"
 	OpWeightMsgBancorTrade  = "op_weight_msg_bancor_trade"
 	OpWeightMsgBancorCancel = "op_weight_msg_bancor_cancel"
+	// distrx
+	OpWeightMsgDonateToCommunityPool = "op_weight_msg_donate_to_community_pool"
 )
