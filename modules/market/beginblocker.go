@@ -10,9 +10,9 @@ import (
 func BeginBlocker(ctx sdk.Context, k keepers.Keeper) {
 	if k.IsSubScribe(types.Topic) {
 		msg := types.NewHeightInfo{
-			Height:    ctx.BlockHeight(),
-			TimeStamp: ctx.BlockHeader().Time,
-			LastBlockHash: ctx.BlockHeader().LastBlockID.Hash,
+			Height:        ctx.BlockHeight(),
+			TimeStamp:     ctx.BlockHeader().Time,
+			LastBlockHash: ctx.BlockHeader().LastBlockId.Hash,
 		}
 		fillMsgs(ctx, types.HeightInfoKey, msg)
 	}

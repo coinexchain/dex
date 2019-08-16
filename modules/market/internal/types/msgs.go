@@ -338,9 +338,9 @@ type CancelOrderInfo struct {
 }
 
 type NewHeightInfo struct {
-	Height    int64     `json:"height"`
-	TimeStamp time.Time `json:"timestamp"`
-	LastBlockHash cmn.HexBytes  `json:"last_block_hash"`
+	Height        int64        `json:"height"`
+	TimeStamp     time.Time    `json:"timestamp"`
+	LastBlockHash cmn.HexBytes `json:"last_block_hash"`
 }
 
 type ModifyPricePrecisionInfo struct {
