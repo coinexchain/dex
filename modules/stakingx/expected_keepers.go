@@ -1,10 +1,11 @@
 package stakingx
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	supplyexported "github.com/cosmos/cosmos-sdk/x/supply/exported"
+
+	"github.com/coinexchain/dex/modules/asset"
 )
 
 type DistributionKeeper interface {

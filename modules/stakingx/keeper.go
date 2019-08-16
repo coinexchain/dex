@@ -86,6 +86,9 @@ func (k Keeper) GetMinMandatoryCommissionRate(ctx sdk.Context) (rate sdk.Dec) {
 	return
 }
 
+// -----------------------------------------------------------------------------
+// BondPoolStatus
+
 func (k Keeper) CalcBondPoolStatus(ctx sdk.Context) BondPool {
 	total := k.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf(dex.CET)
 	var bondPool BondPool
@@ -132,6 +135,9 @@ func calcNonBondableTokens(ctx sdk.Context, k *Keeper) sdk.Int {
 
 	return ret
 }
+
+// -----------------------------------------------------------------------------
+// Non-bondable addresses
 
 func (k Keeper) getCetOwnerAddress(ctx sdk.Context) sdk.AccAddress {
 	cet := k.assetViewKeeper.GetToken(ctx, dex.CET)
