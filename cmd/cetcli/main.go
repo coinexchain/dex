@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path"
 
-	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tendermint/go-amino"
@@ -58,6 +56,8 @@ func createRootCmd(cdc *amino.Codec) *cobra.Command {
 
 	// Add --chain-id to persistent flags and mark it required
 	rootCmd.PersistentFlags().String(client.FlagChainID, "", "Chain ID of tendermint node")
+	rootCmd.PersistentFlags().String(FlagSwaggerHost, "", "Default host of swagger API")
+	rootCmd.PersistentFlags().Bool(FlagDefaultHttp, false, "Use Http as default schema")
 	rootCmd.PersistentPreRunE = func(_ *cobra.Command, _ []string) error {
 		return initConfig(rootCmd)
 	}
@@ -100,7 +100,11 @@ func initConfig(cmd *cobra.Command) error {
 	if err := viper.BindPFlag(cli.EncodingFlag, cmd.PersistentFlags().Lookup(cli.EncodingFlag)); err != nil {
 		return err
 	}
-	return viper.BindPFlag(cli.OutputFlag, cmd.PersistentFlags().Lookup(cli.OutputFlag))
+	if err := viper.BindPFlag(cli.OutputFlag, cmd.PersistentFlags().Lookup(cli.OutputFlag)); err != nil {
+		return err
+	}
+
+	return bindSwaggerFlags(cmd)
 }
 
 func queryCmd(cdc *amino.Codec) *cobra.Command {
@@ -169,13 +173,4 @@ func registerRoutes(rs *lcd.RestServer) {
 	client.RegisterRoutes(rs.CliCtx, rs.Mux)
 	authrest.RegisterTxRoutes(rs.CliCtx, rs.Mux)
 	app.ModuleBasics.RegisterRESTRoutes(rs.CliCtx, rs.Mux)
-}
-
-func registerSwaggerUI(rs *lcd.RestServer) {
-	statikFS, err := fs.New()
-	if err != nil {
-		panic(err)
-	}
-	staticServer := http.FileServer(statikFS)
-	rs.Mux.PathPrefix("/swagger").Handler(http.StripPrefix("/swagger", staticServer))
 }
