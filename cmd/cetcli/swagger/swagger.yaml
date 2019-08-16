@@ -2910,12 +2910,13 @@ paths:
           description: Create trading-pair
           required: true
           schema:
-            type: object
             allOf:
-              - properties:
+              - type: object
+                properties:
                   base_req:
                     $ref: "#/definitions/BaseReq"
               - $ref: "#/definitions/BaseMarket"
+            additionalProperties: false
       responses:
         200:
           description: Tx was succesfully generated
@@ -3636,7 +3637,6 @@ definitions:
       price_precision:
         type: string
         example: 10
-    additionalProperties: false
   MarketInfo:
     type: object
     allOf:
