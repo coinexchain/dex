@@ -3685,28 +3685,28 @@ definitions:
             type: string
             example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
           sequence:
-            type: integer
+            type: string
             example: 8
           time_in_force:
-            type: integer
+            type: string
             example: 1
           height:
-            type: integer
+            type: string
             example: 10
           frozen_fee:
-            type: integer
+            type: string
             example: 100
           left_stock:
-            type: integer
+            type: string
             example: 100
           freeze:
-            type: integer
+            type: string
             example: 100
           DealStock:
-            type: integer
+            type: string
             example: 100
           DealMoney:
-            type: integer
+            type: string
             example: 100
   Order-Ids:
     type: array
