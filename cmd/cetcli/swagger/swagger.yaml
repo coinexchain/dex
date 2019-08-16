@@ -4219,23 +4219,31 @@ definitions:
   TextProposal:
     type: object
     required:
-      - proposal_id
-      - title
-      - description
-      - proposal_type
+      - id
+      - content
+      - deposit_end_time
+      - voting_end_time
       - proposal_status
       - final_tally_result
       - submit_time
       - total_deposit
       - voting_start_time
     properties:
-      proposal_id:
+      id:
         type: string
-      title:
-        type: string
-      description:
-        type: string
-      proposal_type:
+      content:
+        type: object
+        properties:
+          type:
+            type: string
+          value:
+            type: object
+            properties:
+              description:
+                type: string
+              title:
+                type: string
+      deposit_end_time:
         type: string
       proposal_status:
         type: string
@@ -4248,6 +4256,8 @@ definitions:
         items:
           $ref: "#/definitions/Coin"
       voting_start_time:
+        type: string
+      voting_end_time:
         type: string
     additionalProperties: false
   Proposer:
