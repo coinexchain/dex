@@ -118,7 +118,6 @@ func TestDonateToCommunityPool(t *testing.T) {
 
 	fromAcc = input.ak.GetAccount(input.ctx, addr)
 	require.True(t, fromAcc.GetCoins().AmountOf("cet").Equal(sdk.NewInt(9e8)))
-
 }
 
 func TestDonateToCommunityPoolFailed(t *testing.T) {

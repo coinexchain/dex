@@ -14,14 +14,13 @@ func NewHandler(k Keeper) sdk.Handler {
 		case types.MsgDonateToCommunityPool:
 			return handleMsgDonateToCommunityPool(ctx, k, msg)
 		default:
-			errMsg := "Unrecognized distributionx Msg type: %s" + msg.Type()
+			errMsg := "Unrecognized distributionx Msg type: " + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
 }
 
 func handleMsgDonateToCommunityPool(ctx sdk.Context, k Keeper, msg types.MsgDonateToCommunityPool) sdk.Result {
-
 	err := k.DonateToCommunityPool(ctx, msg.FromAddr, msg.Amount)
 	if err != nil {
 		return err.Result()

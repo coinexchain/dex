@@ -20,11 +20,9 @@ func NewKeeper(bxk bankx.Keeper, dk distribution.Keeper) Keeper {
 }
 
 func (keeper Keeper) AddCoinsToFeePool(ctx sdk.Context, coins sdk.Coins) {
-
 	feePool := keeper.dk.GetFeePool(ctx)
 	feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoins(coins))
 	keeper.dk.SetFeePool(ctx, feePool)
-
 }
 
 func (keeper Keeper) DonateToCommunityPool(ctx sdk.Context, fromAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
