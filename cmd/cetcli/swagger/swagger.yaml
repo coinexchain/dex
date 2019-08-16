@@ -2815,10 +2815,8 @@ paths:
                 $ref: "#/definitions/BaseReq"
               url:
                 type: string
-                example: "[do-not-modify]"
               description:
                 type: string
-                example: "[do-not-modify]"
       responses:
         200:
           description: Modify token info result
@@ -2844,16 +2842,16 @@ paths:
           description: create order tx
           required: true
           schema:
-            type: object
             allOf:
-              - properties:
+              - type: object
+                properties:
                   base_req:
                     $ref: "#/definitions/BaseReq"
                   exist_blocks:
                     type: string
                     example: 10000
               - $ref: "#/definitions/Order"
-
+            additionalProperties: false
       responses:
         200:
           description: Tx was succesfully generated
@@ -2879,12 +2877,13 @@ paths:
           description: create order tx
           required: true
           schema:
-            type: object
             allOf:
-              - properties:
+              - type: object
+                properties:
                   base_req:
                     $ref: "#/definitions/BaseReq"
               - $ref: "#/definitions/Order"
+            additionalProperties: false
       responses:
         200:
           description: Tx was succesfully generated
@@ -3215,17 +3214,16 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  alias:
-                    type: string
-                    example: superman
-                  is_add:
-                    type: boolean
-                  as_default:
-                    type: boolean
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              alias:
+                type: string
+                example: superman
+              is_add:
+                type: boolean
+              as_default:
+                type: boolean
       responses:
         200:
           description: Tx was succesfully generated
@@ -3287,25 +3285,24 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  token:
-                    type: string
-                    example: cetdac
-                  donation:
-                    type: string
-                    example: 100000000
-                  title:
-                    type: string
-                    example: I love cetdac
-                  content:
-                    type: string
-                    example: This is the content. The end.
-                  content_type:
-                    type: integer
-                    example: 3
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              token:
+                type: string
+                example: cetdac
+              donation:
+                type: string
+                example: 100000000
+              title:
+                type: string
+                example: I love cetdac
+              content:
+                type: string
+                example: This is the content. The end.
+              content_type:
+                type: integer
+                example: 3
       responses:
         200:
           description: Tx was succesfully generated
@@ -3332,41 +3329,40 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  token:
-                    type: string
-                    example: cetdac
-                  donation:
-                    type: string
-                    example: 100000000
-                  title:
-                    type: string
-                    example: I love cetdac too
-                  content:
-                    type: string
-                    example: This is the content. The end.
-                  content_type:
-                    type: integer
-                    example: 3
-                  id_rewarded:
-                    type: string
-                    example: 9883409
-                  reward_target:
-                    type: string
-                    example: coinex1qwl879nx9t6kef4supyazayf7vjhennyjqwjgr
-                  reward_token:
-                    type: string
-                    example: cet
-                  reward_amount:
-                    type: string
-                    example: 200000000
-                  attitudes:
-                    type: array
-                    items:
-                      type: integer
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              token:
+                type: string
+                example: cetdac
+              donation:
+                type: string
+                example: 100000000
+              title:
+                type: string
+                example: I love cetdac too
+              content:
+                type: string
+                example: This is the content. The end.
+              content_type:
+                type: integer
+                example: 3
+              id_rewarded:
+                type: string
+                example: 9883409
+              reward_target:
+                type: string
+                example: coinex1qwl879nx9t6kef4supyazayf7vjhennyjqwjgr
+              reward_token:
+                type: string
+                example: cet
+              reward_amount:
+                type: string
+                example: 200000000
+              attitudes:
+                type: array
+                items:
+                  type: integer
       responses:
         200:
           description: Tx was succesfully generated
@@ -3393,17 +3389,16 @@ paths:
           required: true
           schema:
             type: object
-            allOf:
-              - properties:
-                  base_req:
-                    $ref: "#/definitions/BaseReq"
-                  token:
-                    type: string
-                    example: cetdac
-                  references:
-                    type: array
-                    items:
-                      $ref: "#/definitions/CommentRef"
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              token:
+                type: string
+                example: cetdac
+              references:
+                type: array
+                items:
+                  $ref: "#/definitions/CommentRef"
       responses:
         200:
           description: Tx was succesfully generated
@@ -3638,16 +3633,17 @@ definitions:
         type: string
         example: 10
   MarketInfo:
-    type: object
     allOf:
       - $ref: "#/definitions/BaseMarket"
-      - properties:
+      - type: object
+        properties:
           last_executed_price:
             type: string
             example: "0.00002"
           creator:
             type: string
             example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+    additionalProperties: false
   Order:
     type: object
     required:
@@ -3676,7 +3672,7 @@ definitions:
       side:
         type: string
         example: 1
-    additionalProperties: false
+
   OrderInfo:
     type: object
     allOf:
@@ -4717,4 +4713,3 @@ definitions:
         type: array
         items:
           type: integer
-    additionalProperties: false
