@@ -12,6 +12,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bancorlite"
+	dexsim "github.com/coinexchain/dex/simulation"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -22,19 +23,19 @@ func SimulateMsgBancorInit(assetKeeper asset.Keeper, blk bancorlite.Keeper) simu
 		opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
 
 		addr := simulation.RandomAcc(r, accs).Address
-		newSymbol := randomSymbol(r, symbolPrefix, 3)
+		newSymbol := dexsim.RandomSymbol(r, symbolPrefix, 3)
 		amount := 1e10 + r.Int63n(1e12)
 
 		// issue new token
 		issueTokenMsg := createMsgIssueToken(newSymbol, amount, addr)
-		issueTokenOK := simulateHandleMsg(issueTokenMsg, asset.NewHandler(assetKeeper), ctx)
+		issueTokenOK := dexsim.SimulateHandleMsg(issueTokenMsg, asset.NewHandler(assetKeeper), ctx)
 		if issueTokenOK {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		// create bancor
 		bancorInitMsg := createMsgBancorInit(r, addr, newSymbol, amount)
-		bancorInitOk := simulateHandleMsg(bancorInitMsg, bancorlite.NewHandler(blk), ctx)
+		bancorInitOk := dexsim.SimulateHandleMsg(bancorInitMsg, bancorlite.NewHandler(blk), ctx)
 		opMsg = simulation.NewOperationMsg(bancorInitMsg, bancorInitOk, "")
 		return opMsg, nil, nil
 	}
@@ -94,7 +95,7 @@ func simulateMsgBancorSell(blk bancorlite.Keeper,
 		Amount:     amount,
 		MoneyLimit: 0, // TODO
 	}
-	ok := simulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
+	ok := dexsim.SimulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
 	opMsg = simulation.NewOperationMsg(msg, ok, "")
 	return opMsg, nil, nil
 	// TODO
@@ -118,7 +119,7 @@ func simulateMsgBancorBuy(blk bancorlite.Keeper,
 		Amount:     amount,
 		MoneyLimit: math.MaxInt64, // TODO
 	}
-	ok := simulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
+	ok := dexsim.SimulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
 	opMsg = simulation.NewOperationMsg(msg, ok, "")
 	return opMsg, nil, nil
 }
@@ -168,7 +169,7 @@ func SimulateMsgBancorCancel(blk bancorlite.Keeper) simulation.Operation {
 			Money: bancorInfo.Money,
 		}
 
-		ok := simulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
+		ok := dexsim.SimulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
 		opMsg = simulation.NewOperationMsg(msg, ok, "")
 		return opMsg, nil, nil
 	}
