@@ -1247,7 +1247,7 @@ paths:
             type: object
             properties:
               base_req:
-                $ref: "#/definitions/StdTx"
+                $ref: "#/definitions/BaseReq"
       responses:
         200:
           description: Tx was succesfully generated
