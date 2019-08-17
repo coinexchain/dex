@@ -1414,6 +1414,7 @@ paths:
               - base_req
               - title
               - description
+              - proposal_type
               - proposer
               - deposit
               - changes
@@ -1426,6 +1427,9 @@ paths:
               description:
                 type: string
                 x-example: "Update max validators"
+              proposal_type:
+                type: string
+                example: "text"
               proposer:
                 $ref: "#/definitions/Address"
               deposit:
