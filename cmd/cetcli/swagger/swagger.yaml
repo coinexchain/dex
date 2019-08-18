@@ -4150,6 +4150,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Coin"
+        x-nullable: true
     additionalProperties: false
   DelegatorTotalRewards:
     type: object
@@ -4165,6 +4166,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Coin"
+        x-nullable: true
     additionalProperties: false
   BaseReq:
     type: object
@@ -4508,10 +4510,12 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Coin"
+        x-nullable: true
       val_commission:
         type: array
         items:
           $ref: "#/definitions/Coin"
+        x-nullable: true
     additionalProperties: false
   PublicKey:
     type: object
