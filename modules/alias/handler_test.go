@@ -87,7 +87,7 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	)
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: chainid, Height: 1000}, false, log.NewNopLogger())
-	parameters := keepers.DefaultParams()
+	parameters := types.DefaultParams()
 	keeper.SetParams(ctx, parameters)
 
 	return ctx, &keeper
@@ -115,44 +115,44 @@ func Test1(t *testing.T) {
 		{Alias: "tom", Addr: tom, AsDefault: false},
 		{Alias: "tom@gmail.com", Addr: tom, AsDefault: false},
 	}
-	genS := NewGenesisState(keepers.DefaultParams(), refList)
+	genS := NewGenesisState(types.DefaultParams(), refList)
 	InitGenesis(ctx, *keeper, genS)
 
 	aliasEntryList = ExportGenesis(ctx, *keeper).AliasEntryList
 	require.Equal(t, refList, aliasEntryList)
 
-	err := NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
+	err := NewGenesisState(types.DefaultParams(), []keepers.AliasEntry{
 		{Alias: "alice", Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, nil, err)
-	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
+	err = NewGenesisState(types.DefaultParams(), []keepers.AliasEntry{
 		{Alias: "爱丽丝", Addr: alice, AsDefault: false},
 	}).Validate()
 	refErr := errors.New("Invalid Alias")
 	require.Equal(t, refErr, err)
-	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
+	err = NewGenesisState(types.DefaultParams(), []keepers.AliasEntry{
 		{Alias: string([]byte{255, 255}), Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, refErr, err)
-	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
+	err = NewGenesisState(types.DefaultParams(), []keepers.AliasEntry{
 		{Alias: "", Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, refErr, err)
-	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
+	err = NewGenesisState(types.DefaultParams(), []keepers.AliasEntry{
 		{Alias: "a", Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, refErr, err)
-	err = NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{
+	err = NewGenesisState(types.DefaultParams(), []keepers.AliasEntry{
 		{Alias: "abcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxyzzzabcdefghijklmnopqrstuvwxyz", Addr: alice, AsDefault: false},
 	}).Validate()
 	require.Equal(t, refErr, err)
 
-	params := keepers.DefaultParams()
+	params := types.DefaultParams()
 	params.MaxAliasCount = 0
 	err = NewGenesisState(params, []keepers.AliasEntry{
 		{Alias: string([]byte{255, 255}), Addr: alice, AsDefault: false},
 	}).Validate()
-	refErr = fmt.Errorf("%s must be a positive number, is %d", keepers.KeyMaxAliasCount, 0)
+	refErr = fmt.Errorf("%s must be a positive number, is %d", types.KeyMaxAliasCount, 0)
 	require.Equal(t, refErr, err)
 
 	handlerFunc := NewHandler(*keeper)

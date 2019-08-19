@@ -8,12 +8,12 @@ import (
 )
 
 type GenesisState struct {
-	Params         keepers.Params       `json:"params"`
+	Params         types.Params         `json:"params"`
 	AliasEntryList []keepers.AliasEntry `json:"alias_entry_list"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params keepers.Params, AliasEntryList []keepers.AliasEntry) GenesisState {
+func NewGenesisState(params types.Params, AliasEntryList []keepers.AliasEntry) GenesisState {
 	return GenesisState{
 		Params:         params,
 		AliasEntryList: AliasEntryList,
@@ -22,7 +22,7 @@ func NewGenesisState(params keepers.Params, AliasEntryList []keepers.AliasEntry)
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(keepers.DefaultParams(), []keepers.AliasEntry{})
+	return NewGenesisState(types.DefaultParams(), []keepers.AliasEntry{})
 }
 
 // InitGenesis - Init store state from genesis data

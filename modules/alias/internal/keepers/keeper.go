@@ -1,9 +1,10 @@
 package keepers
 
 import (
-	"github.com/coinexchain/dex/modules/alias/internal/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/modules/alias/internal/types"
 )
 
 var (
@@ -136,7 +137,7 @@ func NewKeeper(key sdk.StoreKey,
 	paramstore params.Subspace) Keeper {
 
 	return Keeper{
-		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
+		paramSubspace: paramstore.WithKeyTable(types.ParamKeyTable()),
 		AliasKeeper:   NewAliasKeeper(key),
 		BankKeeper:    bankKeeper,
 		AssetKeeper:   assetKeeper,
@@ -147,12 +148,12 @@ func NewKeeper(key sdk.StoreKey,
 // Params
 
 // SetParams sets the asset module's parameters.
-func (k Keeper) SetParams(ctx sdk.Context, params Params) {
+func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
 // GetParams gets the asset module's parameters.
-func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
+func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	k.paramSubspace.GetParamSet(ctx, &params)
 	return
 }
