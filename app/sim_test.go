@@ -36,6 +36,7 @@ import (
 	aliassim "github.com/coinexchain/dex/modules/alias/simulation"
 	assetsim "github.com/coinexchain/dex/modules/asset/simulation"
 	bancorsim "github.com/coinexchain/dex/modules/bancorlite/simulation"
+	commentsim "github.com/coinexchain/dex/modules/comment/simulation"
 	distrxim "github.com/coinexchain/dex/modules/distributionx/simulation"
 	"github.com/coinexchain/dex/types"
 )
@@ -451,6 +452,14 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			Weight: getWeightOrDefault(OpWeightMsgBancorCancel, 100),
 			Op:     bancorsim.SimulateMsgBancorCancel(app.bancorKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightCreateNewThread, 100),
+			Op:     commentsim.SimulateCreateNewThread(app.commentKeeper, app.assetKeeper, app.accountKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightCreateCommentRefs, 100),
+			Op:     commentsim.SimulateCreateCommentRefs(app.commentKeeper, app.assetKeeper, app.accountKeeper),
 		},
 		{
 			Weight: getWeightOrDefault(OpWeightMsgDonateToCommunityPool, 100),

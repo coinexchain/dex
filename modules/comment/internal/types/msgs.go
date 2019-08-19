@@ -15,6 +15,7 @@ const (
 
 	HanziLengthForLZ4 = 512
 	MaxContentSize    = 16 * 1024
+	MaxTitleSize      = 256
 )
 
 // /////////////////////////////////////////////////////////
@@ -202,6 +203,9 @@ func (msg MsgCommentToken) ValidateBasic() sdk.Error {
 	}
 	if len(msg.Title) == 0 && len(msg.References) <= 1 {
 		return ErrNoTitle()
+	}
+	if len(msg.Title) > MaxTitleSize {
+		return ErrTitleTooLarge()
 	}
 	if msg.ContentType < IPFS || msg.ContentType > ShortHanziLZ4 {
 		return ErrInvalidContentType(msg.ContentType)

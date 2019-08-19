@@ -18,6 +18,7 @@ const (
 	CodeInvalidAttitude    sdk.CodeType = 907
 	CodeNegativeReward     sdk.CodeType = 908
 	CodeNoSuchAsset        sdk.CodeType = 909
+	CodeTitleTooLarge      sdk.CodeType = 910
 	CodeMarshalFailed      sdk.CodeType = 914
 )
 
@@ -31,6 +32,11 @@ func ErrNegativeDonation() sdk.Error {
 
 func ErrNoTitle() sdk.Error {
 	return sdk.NewError(CodeSpaceComment, CodeNoTitle, "No title is provided")
+}
+
+func ErrTitleTooLarge() sdk.Error {
+	return sdk.NewError(CodeSpaceComment, CodeTitleTooLarge,
+		fmt.Sprintf("Title is larger than %d bytes", MaxTitleSize))
 }
 
 func ErrInvalidContentType(t int8) sdk.Error {
