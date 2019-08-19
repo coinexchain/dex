@@ -36,7 +36,6 @@ func (k Keeper) SetParam(ctx sdk.Context, params Params) {
 }
 
 func (k Keeper) GetState(ctx sdk.Context) (state State) {
-
 	store := ctx.KVStore(k.key)
 	bz := store.Get(StateKey)
 	if bz == nil {

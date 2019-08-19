@@ -20,7 +20,6 @@ func BeginBlocker(ctx sdk.Context, k Keeper) sdk.Error {
 }
 
 func collectRewardsFromPool(k Keeper, ctx sdk.Context, blockRewards sdk.Coins) sdk.Error {
-
 	//transfer rewards into collected_fees for further distribution
 	err := k.supplyKeeper.SendCoinsFromAccountToModule(ctx, PoolAddr, auth.FeeCollectorName, blockRewards)
 	if err != nil {
@@ -30,7 +29,6 @@ func collectRewardsFromPool(k Keeper, ctx sdk.Context, blockRewards sdk.Coins) s
 }
 
 func calcRewardsForCurrentBlock(ctx sdk.Context, k Keeper) sdk.Coins {
-
 	var rewardAmount int64
 	height := ctx.BlockHeader().Height
 	adjustmentHeight := k.GetState(ctx).HeightAdjustment

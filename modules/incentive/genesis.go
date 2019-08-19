@@ -46,7 +46,6 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) ValidateGenesis() error {
-
 	state := data.State
 	if state.HeightAdjustment < 0 {
 		return sdk.NewError(CodeSpaceIncentive, CodeInvalidAdjustmentHeight, "invalid adjustment Height")
