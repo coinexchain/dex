@@ -4,16 +4,20 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tendermint/go-amino"
+	"github.com/tendermint/tendermint/crypto"
+	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
@@ -37,6 +41,7 @@ func main() {
 	cdc := app.MakeCodec()
 
 	rootCmd := createRootCmd(cdc)
+	fixDescriptions(rootCmd)
 
 	// Add flags and prefix all env exposed with GA
 	executor := cli.PrepareMainCmd(rootCmd, "GA", app.DefaultCLIHome)
@@ -152,12 +157,12 @@ func txCmd(cdc *amino.Codec) *cobra.Command {
 	// add modules' tx commands
 	app.ModuleBasics.AddTxCommands(txCmd, cdc)
 
-	FixUnknownFlagIssue(txCmd)
+	fixUnknownFlagIssue(txCmd)
 
 	return txCmd
 }
 
-func FixUnknownFlagIssue(txCmd *cobra.Command) {
+func fixUnknownFlagIssue(txCmd *cobra.Command) {
 	cmd, _, err := txCmd.Find([]string{"staking", "edit-validator"})
 	if err == nil {
 		cmd.Flags().AddFlagSet(staking_cli.FsMinSelfDelegation)
@@ -173,4 +178,81 @@ func registerRoutes(rs *lcd.RestServer) {
 	client.RegisterRoutes(rs.CliCtx, rs.Mux)
 	authrest.RegisterTxRoutes(rs.CliCtx, rs.Mux)
 	app.ModuleBasics.RegisterRESTRoutes(rs.CliCtx, rs.Mux)
+}
+
+func fixDescriptions(cmd *cobra.Command) {
+	// cosmosvalconspubXXX -> coinexvalconspubXXX
+	if idx := strings.Index(cmd.Long, "cosmosvalconspub"); idx >= 0 {
+		cosmosPubKey := cmd.Long[idx : idx+83]
+		pubKey := consPubKeyFromBech32("cosmosvalconspub", cosmosPubKey)
+		dexPubKey := sdk.MustBech32ifyConsPub(pubKey)
+		cmd.Long = strings.Replace(cmd.Long, cosmosPubKey, dexPubKey, -1)
+		//fmt.Printf("%s -> %s\n", cosmosPubKey, dexPubKey)
+	}
+	// cosmosvaloperXXX -> coinexvaloperXXX
+	for {
+		if idx := strings.Index(cmd.Long, "cosmosvaloper"); idx >= 0 {
+			cosmosValAddr := cmd.Long[idx : idx+52]
+			rawValAddr := rawAddressFromBech32("cosmosvaloper", cosmosValAddr)
+			dexValAddr := sdk.ValAddress(rawValAddr).String()
+			cmd.Long = strings.Replace(cmd.Long, cosmosValAddr, dexValAddr, -1)
+			//fmt.Printf("%s -> %s\n", cosmosValAddr, dexValAddr)
+		} else {
+			break
+		}
+	}
+	// cosmosXXX -> coinexXXX
+	if idx := strings.Index(cmd.Long, "cosmos1"); idx >= 0 {
+		cosmosAccAddr := cmd.Long[idx : idx+45]
+		rawAccAddr := rawAddressFromBech32("cosmos", cosmosAccAddr)
+		dexAccAddr := sdk.AccAddress(rawAccAddr).String()
+		cmd.Long = strings.Replace(cmd.Long, cosmosAccAddr, dexAccAddr, -1)
+		//fmt.Printf("%s -> %s\n", cosmosAccAddr, dexAccAddr)
+	}
+	if idx := strings.Index(cmd.Long, "0stake"); idx >= 0 {
+		cmd.Long = strings.Replace(cmd.Long, "0stake", "0cet", -1)
+		//fmt.Printf("%s -> %s\n", "stake", "cet")
+	}
+
+	// uatom -> cet
+	for _, flagName := range []string{client.FlagFees, client.FlagGasPrices} {
+		if flag := cmd.Flag(flagName); flag != nil {
+			flag.Usage = strings.Replace(flag.Usage, "uatom", "cet", -1)
+			//fmt.Printf("%s -> %s\n", "uatom", "cet")
+		}
+	}
+
+	if len(cmd.Commands()) > 0 {
+		for _, subCmd := range cmd.Commands() {
+			fixDescriptions(subCmd)
+		}
+	}
+}
+
+func rawAddressFromBech32(prefix, address string) (addr []byte) {
+	bz, err := sdk.GetFromBech32(address, prefix)
+	if err != nil {
+		panic(err)
+	}
+
+	err = sdk.VerifyAddressFormat(bz)
+	if err != nil {
+		panic(err)
+	}
+
+	return bz
+}
+
+func consPubKeyFromBech32(prefix, pubkey string) (pk crypto.PubKey) {
+	bz, err := sdk.GetFromBech32(pubkey, prefix)
+	if err != nil {
+		panic(err)
+	}
+
+	pk, err = cryptoAmino.PubKeyFromBytes(bz)
+	if err != nil {
+		panic(err)
+	}
+
+	return pk
 }

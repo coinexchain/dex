@@ -3,14 +3,17 @@ package main
 import (
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/coinexchain/dex/app"
-	"github.com/cosmos/cosmos-sdk/client"
+	dex "github.com/coinexchain/dex/types"
 )
+
+func init() {
+	dex.InitSdkConfig()
+}
 
 func TestInitConfig(t *testing.T) {
 	cdc := app.MakeCodec()
@@ -23,12 +26,9 @@ func TestInitConfig(t *testing.T) {
 }
 
 func TestFixDescriptions(t *testing.T) {
-	cmd := &cobra.Command{
-		Use:   "cmd",
-		Short: "Command",
-	}
-	cmd.Flags().String(client.FlagFees, "", "Fees")
-	cmd.Flags().String(client.FlagGasPrices, "", "Fees")
-	//fixDescriptions(cmd)
+	cdc := app.MakeCodec()
+	rootCmd := createRootCmd(cdc)
+	fixDescriptions(rootCmd)
+	// TODO
 	//require.Equal(t, cmd.Flag(client.FlagFees).Usage, "Fees to pay along with transaction; eg: 100cet")
 }
