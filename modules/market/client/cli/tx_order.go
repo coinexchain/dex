@@ -16,7 +16,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
@@ -134,7 +133,7 @@ func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*types.MsgCr
 			return nil, fmt.Errorf("--%s flag is a noop" + flag)
 		}
 	}
-	blocks := keepers.DefaultGTEOrderLifetime
+	blocks := types.DefaultGTEOrderLifetime
 	if viper.GetInt(FlagBlocks) > 0 {
 		blocks = viper.GetInt(FlagBlocks)
 	}

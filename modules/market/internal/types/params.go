@@ -1,10 +1,8 @@
-package keepers
+package types
 
 import (
 	"bytes"
 	"fmt"
-
-	"github.com/coinexchain/dex/modules/market/internal/types"
 
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
@@ -65,8 +63,8 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 
 // Equal returns a boolean determining if two Params types are identical.
 func (p Params) Equal(p2 Params) bool {
-	bz1 := types.ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := types.ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
 	return bytes.Equal(bz1, bz2)
 }
 

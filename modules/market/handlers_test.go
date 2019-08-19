@@ -288,7 +288,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	// subspace := paramsKeeper.Subspace(StoreKey)
 	// keeper := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
-	parameters := keepers.DefaultParams()
+	parameters := types.DefaultParams()
 	mk.SetParams(ctx, parameters)
 
 	return testInput{ctx: ctx, mk: mk, handler: NewHandler(mk), akp: akp, keys: keys, cdc: cdc}
@@ -612,7 +612,7 @@ func TestCancelMarketFailed(t *testing.T) {
 	msgCancelMarket := types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
 		TradingPair:   stock + types.SymbolSeparator + "cet",
-		EffectiveTime: time.Now().Unix() + keepers.DefaultMarketMinExpiredTime,
+		EffectiveTime: time.Now().Unix() + types.DefaultMarketMinExpiredTime,
 	}
 
 	header := abci.Header{Time: time.Now(), Height: 10}
@@ -640,14 +640,14 @@ func TestCancelMarketSuccess(t *testing.T) {
 	msgCancelMarket := types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
 		TradingPair:   stock + types.SymbolSeparator + "cet",
-		EffectiveTime: keepers.DefaultMarketMinExpiredTime + 10,
+		EffectiveTime: types.DefaultMarketMinExpiredTime + 10,
 	}
 
 	ret := input.handler(input.ctx, msgCancelMarket)
 	require.Equal(t, true, ret.IsOK(), "cancel market should success")
 
 	dlk := keepers.NewDelistKeeper(input.keys.marketKey)
-	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, keepers.DefaultMarketMinExpiredTime+10+1)[0]
+	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, types.DefaultMarketMinExpiredTime+10+1)[0]
 	if delSymbol != stock+types.SymbolSeparator+"cet" {
 		t.Error("Not find del market in store")
 	}
@@ -689,7 +689,7 @@ func TestChargeOrderFee(t *testing.T) {
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	ret = input.handler(input.ctx, stockIsCetOrder)
 	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
-	rate := sdk.NewDec(param.MarketFeeRate).Quo(sdk.NewDec(int64(math.Pow10(keepers.MarketFeeRatePrecision))))
+	rate := sdk.NewDec(param.MarketFeeRate).Quo(sdk.NewDec(int64(math.Pow10(types.MarketFeeRatePrecision))))
 	frozeFee = dex.NewCetCoin(sdk.NewDec(stockIsCetOrder.Quantity).Mul(rate).RoundInt64())
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, frozeFee), "The amount is error ")

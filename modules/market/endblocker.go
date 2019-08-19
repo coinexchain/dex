@@ -5,33 +5,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coinexchain/dex/modules/market/internal/keepers"
-	mtype "github.com/coinexchain/dex/modules/market/internal/types"
-	"github.com/coinexchain/dex/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 	"github.com/coinexchain/dex/modules/market/match"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // Some handlers which are useful when orders are matched and traded.
 type InfoForDeal struct {
-	bxKeeper      mtype.ExpectedBankxKeeper
+	bxKeeper      types.ExpectedBankxKeeper
 	dataHash      []byte
-	changedOrders map[string]*mtype.Order
+	changedOrders map[string]*types.Order
 	lastPrice     sdk.Dec
 	context       sdk.Context
 }
 
 // returns true when a buyer's frozen money is not enough to buy LeftStock.
-func notEnoughMoney(order *mtype.Order) bool {
-	return order.Side == mtype.BUY &&
+func notEnoughMoney(order *types.Order) bool {
+	return order.Side == types.BUY &&
 		order.Freeze < order.Price.Mul(sdk.NewDec(order.LeftStock)).RoundInt64()
 }
 
 // Wrapper an order with InfoForDeal, which contains useful handlers
 type WrappedOrder struct {
-	order       *mtype.Order
+	order       *types.Order
 	infoForDeal *InfoForDeal
 }
 
@@ -71,7 +70,7 @@ func (wo *WrappedOrder) GetHash() []byte {
 func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price sdk.Dec) {
 	other := otherSide.(*WrappedOrder)
 	buyer, seller := wo.order, other.order
-	if buyer.Side == mtype.SELL {
+	if buyer.Side == types.SELL {
 		buyer, seller = other.order, wo.order
 	}
 	stockAndMoney := strings.Split(buyer.TradingPair, "/")
@@ -107,11 +106,11 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 }
 
 // unfreeze an ask order's stock or a bid order's money
-func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper mtype.ExpectedBankxKeeper, order *mtype.Order, feeForZeroDeal int64, feeK mtype.ExpectedChargeFeeKeeper) {
+func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, order *types.Order, feeForZeroDeal int64, feeK types.ExpectedChargeFeeKeeper) {
 	stockAndMoney := strings.Split(order.TradingPair, "/")
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	frozenToken := stock
-	if order.Side == mtype.BUY {
+	if order.Side == types.BUY {
 		frozenToken = money
 	}
 
@@ -119,7 +118,7 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper mtype.ExpectedBankxKeeper, 
 	bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 
 	if order.FrozenFee != 0 {
-		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin(types.CET, sdk.NewInt(order.FrozenFee))})
+		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin(dex.CET, sdk.NewInt(order.FrozenFee))})
 		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 		actualFee := order.CalOrderFee(feeForZeroDeal)
 		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee.RoundInt64()); err != nil {
@@ -129,14 +128,14 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper mtype.ExpectedBankxKeeper, 
 }
 
 // remove the orders whose age are older than height
-func removeOrderOlderThan(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper mtype.ExpectedBankxKeeper, feeK mtype.ExpectedChargeFeeKeeper, height int64, feeForZeroDeal int64) {
+func removeOrderOlderThan(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper, feeK types.ExpectedChargeFeeKeeper, height int64, feeForZeroDeal int64) {
 	for _, order := range orderKeeper.GetOlderThan(ctx, height) {
 		removeOrder(ctx, orderKeeper, bxKeeper, feeK, order, feeForZeroDeal)
 	}
 }
 
 // unfreeze the frozen token in the order and remove it from the market
-func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper mtype.ExpectedBankxKeeper, feeK mtype.ExpectedChargeFeeKeeper, order *mtype.Order, feeForZeroDeal int64) {
+func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper, feeK types.ExpectedChargeFeeKeeper, order *types.Order, feeForZeroDeal int64) {
 
 	if order.Freeze != 0 || order.FrozenFee != 0 {
 		unfreezeCoinsForOrder(ctx, bxKeeper, order, feeForZeroDeal, feeK)
@@ -145,8 +144,8 @@ func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper mtyp
 }
 
 // Iterate the candidate orders for matching, and remove the orders whose sender is forbidden by the money owner or the stock owner.
-func filterCandidates(ctx sdk.Context, asKeeper mtype.ExpectedAssetStatusKeeper, ordersIn []*mtype.Order, stock, money string) []*mtype.Order {
-	ordersOut := make([]*mtype.Order, 0, len(ordersIn))
+func filterCandidates(ctx sdk.Context, asKeeper types.ExpectedAssetStatusKeeper, ordersIn []*types.Order, stock, money string) []*types.Order {
+	ordersOut := make([]*types.Order, 0, len(ordersIn))
 	for _, order := range ordersIn {
 		if !(asKeeper.IsForbiddenByTokenIssuer(ctx, stock, order.Sender) ||
 			asKeeper.IsForbiddenByTokenIssuer(ctx, money, order.Sender)) {
@@ -156,8 +155,8 @@ func filterCandidates(ctx sdk.Context, asKeeper mtype.ExpectedAssetStatusKeeper,
 	return ordersOut
 }
 
-func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keeper keepers.Keeper, dataHash []byte, currHeight int64) (map[string]*mtype.Order, sdk.Dec) {
-	orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, mtype.ModuleCdc)
+func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keeper keepers.Keeper, dataHash []byte, currHeight int64) (map[string]*types.Order, sdk.Dec) {
+	orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 	asKeeper := keeper.GetAssetKeeper()
 	bxKeeper := keeper.GetBankxKeeper()
 	lowPrice := midPrice.Mul(sdk.NewDec(int64(100 - ratio))).Quo(sdk.NewDec(100))
@@ -166,7 +165,7 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 	infoForDeal := &InfoForDeal{
 		bxKeeper:      bxKeeper,
 		dataHash:      dataHash,
-		changedOrders: make(map[string]*mtype.Order),
+		changedOrders: make(map[string]*types.Order),
 		context:       ctx,
 		lastPrice:     sdk.NewDec(0),
 	}
@@ -191,7 +190,7 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 			order:       orderCandidate,
 			infoForDeal: infoForDeal,
 		}
-		if wrappedOrder.order.Side == mtype.BID {
+		if wrappedOrder.order.Side == types.BID {
 			bidList = append(bidList, wrappedOrder)
 		} else {
 			askList = append(askList, wrappedOrder)
@@ -204,7 +203,7 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 	// both dealt orders and IOC order need further processing
 	ordersForUpdate := infoForDeal.changedOrders
 	for _, order := range orderKeeper.GetOrdersAtHeight(ctx, currHeight) {
-		if order.TimeInForce == mtype.IOC {
+		if order.TimeInForce == types.IOC {
 			// if an IOC order is not included, we include it
 			if _, ok := ordersForUpdate[order.OrderID()]; !ok {
 				ordersForUpdate[order.OrderID()] = order
@@ -212,13 +211,13 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 		}
 	}
 
-	if keeper.IsSubScribe(mtype.Topic) {
+	if keeper.IsSubScribe(types.Topic) {
 		sendFillMsg(ctx, orderOldDeals, orderOldMoneys, ordersForUpdate, ctx.BlockHeight())
 	}
 	return ordersForUpdate, infoForDeal.lastPrice
 }
 
-func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64, ordersForUpdate map[string]*mtype.Order, height int64) {
+func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64, ordersForUpdate map[string]*types.Order, height int64) {
 	if len(ordersForUpdate) == 0 {
 		return
 	}
@@ -226,7 +225,7 @@ func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64,
 	for id, order := range ordersForUpdate {
 		oldDeal := orderOldDeal[id]
 		oldMoney := orderOldMoneys[id]
-		msgInfo := mtype.FillOrderInfo{
+		msgInfo := types.FillOrderInfo{
 			OrderID:     id,
 			Height:      height,
 			TradingPair: order.TradingPair,
@@ -239,12 +238,12 @@ func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64,
 			CurrStock:   order.DealStock - oldDeal,
 			CurrMoney:   order.DealMoney - oldMoney,
 		}
-		fillMsgs(ctx, mtype.FillOrderInfoKey, msgInfo)
+		fillMsgs(ctx, types.FillOrderInfoKey, msgInfo)
 	}
 }
 
-func filterOldOrders(oldOrders []*mtype.Order, currHeight int64, lifeTime int) []*mtype.Order {
-	orders := make([]*mtype.Order, 0, len(oldOrders))
+func filterOldOrders(oldOrders []*types.Order, currHeight int64, lifeTime int) []*types.Order {
+	orders := make([]*types.Order, 0, len(oldOrders))
 	for _, order := range oldOrders {
 		if currHeight-int64(lifeTime) < int64(order.ExistBlocks) {
 			continue
@@ -255,38 +254,38 @@ func filterOldOrders(oldOrders []*mtype.Order, currHeight int64, lifeTime int) [
 	return orders
 }
 
-func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList []mtype.MarketInfo, marketParams keepers.Params) {
+func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList []types.MarketInfo, marketParams types.Params) {
 	lifeTime := marketParams.GTEOrderLifetime
 	currHeight := ctx.BlockHeight()
 	for _, mi := range marketInfoList {
-		symbol := mi.Stock + mtype.SymbolSeparator + mi.Money
-		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, mtype.ModuleCdc)
+		symbol := mi.Stock + types.SymbolSeparator + mi.Money
+		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
 		filterOrders := filterOldOrders(oldOrders, currHeight, lifeTime)
 
 		for _, order := range filterOrders {
 			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
-			if keeper.IsSubScribe(mtype.Topic) {
-				msgInfo := mtype.CancelOrderInfo{
+			if keeper.IsSubScribe(types.Topic) {
+				msgInfo := types.CancelOrderInfo{
 					OrderID:        order.OrderID(),
 					TradingPair:    order.TradingPair,
 					Height:         ctx.BlockHeight(),
 					Side:           order.Side,
 					Price:          order.Price,
-					DelReason:      mtype.CancelOrderByGteTimeOut,
+					DelReason:      types.CancelOrderByGteTimeOut,
 					UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
 					LeftStock:      order.LeftStock,
 					RemainAmount:   order.Freeze,
 					DealStock:      order.DealStock,
 					DealMoney:      order.DealMoney,
 				}
-				fillMsgs(ctx, mtype.CancelOrderInfoKey, msgInfo)
+				fillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
 			}
 		}
 	}
 }
 
-func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams keepers.Params) {
+func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams types.Params) {
 	currHeight := ctx.BlockHeight()
 	currTime := ctx.BlockHeader().Time.Unix()
 
@@ -294,7 +293,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ke
 	delistKeeper := keepers.NewDelistKeeper(keeper.GetMarketKey())
 	delistSymbols := delistKeeper.GetDelistSymbolsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
 	for _, symbol := range delistSymbols {
-		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, mtype.ModuleCdc)
+		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 		removeOrderOlderThan(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, currHeight+1, marketParams.FeeForZeroDeal)
 		keeper.RemoveMarket(ctx, symbol)
 	}
@@ -330,7 +329,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 		return //nil
 	}
 
-	ordersForUpdateList := make([]map[string]*mtype.Order, len(marketInfoList))
+	ordersForUpdateList := make([]map[string]*types.Order, len(marketInfoList))
 	newPrices := make([]sdk.Dec, len(marketInfoList))
 	for idx, mi := range marketInfoList {
 		// if a token is globally forbidden, exchange it is also impossible
@@ -338,7 +337,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 			keeper.IsTokenForbidden(ctx, mi.Money) {
 			continue
 		}
-		symbol := mi.Stock + mtype.SymbolSeparator + mi.Money
+		symbol := mi.Stock + types.SymbolSeparator + mi.Money
 		dataHash := ctx.BlockHeader().DataHash
 		ratio := marketParams.MaxExecutedPriceChangeRatio
 		oUpdate, newPrice := runMatch(ctx, mi.LastExecutedPrice, ratio, symbol, keeper, dataHash, currHeight)
@@ -351,12 +350,12 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 			continue
 		}
 		symbol := mi.Stock + "/" + mi.Money
-		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, mtype.ModuleCdc)
+		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 		// update the order book
 		for _, order := range ordersForUpdateList[idx] {
 			orderKeeper.Add(ctx, order)
-			if order.TimeInForce == mtype.IOC || order.LeftStock == 0 || notEnoughMoney(order) {
-				if keeper.IsSubScribe(mtype.Topic) {
+			if order.TimeInForce == types.IOC || order.LeftStock == 0 || notEnoughMoney(order) {
+				if keeper.IsSubScribe(types.Topic) {
 					sendOrderMsg(ctx, order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, keeper)
 				}
 				removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
@@ -371,8 +370,8 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 
 }
 
-func sendOrderMsg(ctx sdk.Context, order *mtype.Order, height int64, feeForZeroDeal int64, keeper keepers.Keeper) {
-	msgInfo := mtype.CancelOrderInfo{
+func sendOrderMsg(ctx sdk.Context, order *types.Order, height int64, feeForZeroDeal int64, keeper keepers.Keeper) {
+	msgInfo := types.CancelOrderInfo{
 		OrderID:        order.OrderID(),
 		TradingPair:    order.TradingPair,
 		Side:           order.Side,
@@ -384,15 +383,15 @@ func sendOrderMsg(ctx sdk.Context, order *mtype.Order, height int64, feeForZeroD
 		DealStock:      order.DealStock,
 		DealMoney:      order.DealMoney,
 	}
-	if order.TimeInForce == mtype.IOC {
-		msgInfo.DelReason = mtype.CancelOrderByIocType
+	if order.TimeInForce == types.IOC {
+		msgInfo.DelReason = types.CancelOrderByIocType
 	} else if order.LeftStock == 0 {
-		msgInfo.DelReason = mtype.CancelOrderByAllFilled
+		msgInfo.DelReason = types.CancelOrderByAllFilled
 	} else if notEnoughMoney(order) {
-		msgInfo.DelReason = mtype.CancelOrderByNoEnoughMoney
+		msgInfo.DelReason = types.CancelOrderByNoEnoughMoney
 	} else {
-		msgInfo.DelReason = mtype.CancelOrderByNotKnow
+		msgInfo.DelReason = types.CancelOrderByNotKnow
 	}
 
-	fillMsgs(ctx, mtype.CancelOrderInfoKey, msgInfo)
+	fillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
 }

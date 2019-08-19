@@ -12,7 +12,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/market/client/cli"
-	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
@@ -80,7 +79,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 	}
 
 	if req.ExistBlocks <= 0 {
-		req.ExistBlocks = keepers.DefaultGTEOrderLifetime
+		req.ExistBlocks = types.DefaultGTEOrderLifetime
 	}
 
 	creator, err := sdk.AccAddressFromBech32(req.BaseReq.From)

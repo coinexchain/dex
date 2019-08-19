@@ -101,7 +101,7 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 	bancor types.ExpectedBancorKeeper) Keeper {
 
 	return Keeper{
-		paramSubspace: paramstore.WithKeyTable(ParamKeyTable()),
+		paramSubspace: paramstore.WithKeyTable(types.ParamKeyTable()),
 		marketKey:     key,
 		cdc:           cdcVal,
 		axk:           axkVal,
@@ -176,12 +176,12 @@ func (k Keeper) GetMarketKey() sdk.StoreKey {
 // Params
 
 // SetParams sets the asset module's parameters.
-func (k Keeper) SetParams(ctx sdk.Context, params Params) {
+func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
 // GetParams gets the asset module's parameters.
-func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
+func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	k.paramSubspace.GetParamSet(ctx, &params)
 	return
 }

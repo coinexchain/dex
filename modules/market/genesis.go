@@ -10,13 +10,13 @@ import (
 )
 
 type GenesisState struct {
-	Params      keepers.Params     `json:"params"`
+	Params      types.Params       `json:"params"`
 	Orders      []*types.Order     `json:"orders"`
 	MarketInfos []types.MarketInfo `json:"market_infos"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params keepers.Params, orders []*types.Order, infos []types.MarketInfo) GenesisState {
+func NewGenesisState(params types.Params, orders []*types.Order, infos []types.MarketInfo) GenesisState {
 	return GenesisState{
 		Params:      params,
 		Orders:      orders,
@@ -26,7 +26,7 @@ func NewGenesisState(params keepers.Params, orders []*types.Order, infos []types
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(keepers.DefaultParams(), []*types.Order{}, []types.MarketInfo{})
+	return NewGenesisState(types.DefaultParams(), []*types.Order{}, []types.MarketInfo{})
 }
 
 // InitGenesis - Init store state from genesis data

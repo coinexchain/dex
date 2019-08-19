@@ -174,9 +174,9 @@ func TestRemoveOrders(t *testing.T) {
 	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace, mockBancorKeeper{})
 	keeper.SetUnixTime(ctx, time.Now().Unix())
 	ctx = ctx.WithBlockTime(time.Unix(time.Now().Unix()+int64(25*60*60), 0))
-	parameters := keepers.Params{}
+	parameters := types.Params{}
 	parameters.GTEOrderLifetime = 1
-	parameters.MaxExecutedPriceChangeRatio = keepers.DefaultMaxExecutedPriceChangeRatio
+	parameters.MaxExecutedPriceChangeRatio = types.DefaultMaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
 	keeper.SetMarket(ctx, types.MarketInfo{
@@ -243,9 +243,9 @@ func TestDelist(t *testing.T) {
 	// keeper.orderClean.SetUnixTime(ctx, currDay)
 	keeper.SetUnixTime(ctx, time.Now().Unix())
 	ctx = ctx.WithBlockTime(time.Now())
-	parameters := keepers.Params{}
+	parameters := types.Params{}
 	parameters.GTEOrderLifetime = 1
-	parameters.MaxExecutedPriceChangeRatio = keepers.DefaultMaxExecutedPriceChangeRatio
+	parameters.MaxExecutedPriceChangeRatio = types.DefaultMaxExecutedPriceChangeRatio
 	keeper.SetParams(ctx, parameters)
 
 	keeper.SetMarket(ctx, types.MarketInfo{
