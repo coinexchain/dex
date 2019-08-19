@@ -10,6 +10,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+var addr = sdk.AccAddress([]byte("some-address"))
+
 func TestGetSetParams(t *testing.T) {
 	input := setupTestInput()
 	params := types.DefaultParams()
@@ -20,7 +22,6 @@ func TestGetSetParams(t *testing.T) {
 
 func TestAccountXGetSet(t *testing.T) {
 	input := setupTestInput()
-	addr := sdk.AccAddress([]byte("some-address"))
 
 	_, ok := input.axk.GetAccountX(input.ctx, addr)
 	require.False(t, ok)
@@ -39,20 +40,18 @@ func TestAccountXGetSet(t *testing.T) {
 	acc, _ = input.axk.GetAccountX(input.ctx, addr)
 	require.Equal(t, false, acc.MemoRequired)
 
-	lockedcoin := acc.LockedCoins
-	require.Nil(t, lockedcoin)
+	lockedCoins := acc.LockedCoins
+	require.Nil(t, lockedCoins)
 }
 
 func TestAddressStoreKey(t *testing.T) {
-	addr := sdk.AccAddress([]byte("some-address1"))
 	addrStoreKey := authx.AddressStoreKey(addr)
-	expectedOutput := []byte{0x1, 0x73, 0x6f, 0x6d, 0x65, 0x2d, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x31}
+	expectedOutput := []byte{0x1, 0x73, 0x6f, 0x6d, 0x65, 0x2d, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73}
 	require.Equal(t, expectedOutput, addrStoreKey)
 }
 
 func TestGetOrCreateAccountX(t *testing.T) {
 	input := setupTestInput()
-	addr := sdk.AccAddress([]byte("addr"))
 
 	_, ok := input.axk.GetAccountX(input.ctx, addr)
 	require.False(t, ok)
