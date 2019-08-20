@@ -63,6 +63,7 @@ func queryAliasInfo(ctx sdk.Context, req abcitypes.RequestQuery, keeper Keeper) 
 	}
 	return bz, nil
 }
+
 func queryParameters(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
 	params := k.GetParams(ctx)
 

@@ -10,9 +10,11 @@ import (
 )
 
 // NewQuerier - creates a querier for asset REST endpoints
-func NewQuerier(keeper TokenKeeper) sdk.Querier {
+func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
+		case types.QueryParameters:
+			return queryParameters(ctx, keeper)
 		case types.QueryToken:
 			return queryToken(ctx, req, keeper)
 		case types.QueryTokenList:
@@ -27,6 +29,17 @@ func NewQuerier(keeper TokenKeeper) sdk.Querier {
 			return nil, sdk.ErrUnknownRequest("unknown asset query endpoint")
 		}
 	}
+}
+
+func queryParameters(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
+	params := k.GetParams(ctx)
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return res, nil
 }
 
 func queryToken(ctx sdk.Context, req abci.RequestQuery, keeper TokenKeeper) ([]byte, sdk.Error) {

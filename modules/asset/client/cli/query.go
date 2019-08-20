@@ -22,6 +22,7 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	assQueryCmd.AddCommand(client.GetCommands(
+		GetCmdQueryParams(types.QuerierRoute, cdc),
 		GetCmdQueryToken(types.QuerierRoute, cdc),
 		GetCmdQueryTokenList(types.QuerierRoute, cdc),
 		GetCmdQueryTokenWhitelist(types.QuerierRoute, cdc),
@@ -30,6 +31,27 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	)...)
 
 	return assQueryCmd
+}
+
+func GetCmdQueryParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "params",
+		Args:  cobra.NoArgs,
+		Short: "Query alias params",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryParameters)
+			res, _, err := cliCtx.QueryWithData(route, nil)
+			if err != nil {
+				return err
+			}
+
+			var params types.Params
+			cdc.MustUnmarshalJSON(res, &params)
+			return cliCtx.PrintOutput(params)
+		},
+	}
 }
 
 // GetCmdQueryToken returns a query token that will display the info of the

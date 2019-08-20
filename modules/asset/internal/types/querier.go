@@ -7,6 +7,7 @@ const (
 	QueryWhitelist       = "token-whitelist"
 	QueryForbiddenAddr   = "addr-forbidden"
 	QueryReservedSymbols = "reserved-symbols"
+	QueryParameters      = "parameters"
 )
 
 // QueryTokenParams defines the params for query: "custom/asset/token-info"

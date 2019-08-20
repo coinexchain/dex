@@ -3,9 +3,11 @@ package types
 import (
 	"bytes"
 	"fmt"
-	"github.com/coinexchain/dex/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/types"
 )
 
 // DefaultParamspace defines the default asset module parameter subspace
@@ -32,6 +34,14 @@ type Params struct {
 	IssueRareTokenFee sdk.Coins `json:"issue_rare_token_fee" yaml:"issue_rare_token_fee"`
 }
 
+// DefaultParams returns a default set of parameters.
+func DefaultParams() Params {
+	return Params{
+		types.NewCetCoins(IssueTokenFee),
+		types.NewCetCoins(IssueRareTokenFee),
+	}
+}
+
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 // pairs of asset module's parameters.
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
@@ -39,13 +49,6 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeyIssueTokenFee, Value: &p.IssueTokenFee},
 		{Key: KeyIssueRareTokenFee, Value: &p.IssueRareTokenFee},
 	}
-}
-
-// Equal returns a boolean determining if two Params types are identical.
-func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
 }
 
 func (p *Params) ValidateGenesis() error {
@@ -58,10 +61,17 @@ func (p *Params) ValidateGenesis() error {
 	return nil
 }
 
-// DefaultParams returns a default set of parameters.
-func DefaultParams() Params {
-	return Params{
-		types.NewCetCoins(IssueTokenFee),
-		types.NewCetCoins(IssueRareTokenFee),
-	}
+// Equal returns a boolean determining if two Params types are identical.
+func (p Params) Equal(p2 Params) bool {
+	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	return bytes.Equal(bz1, bz2)
+}
+
+func (p Params) String() string {
+	return fmt.Sprintf(`Alias Params:
+  IssueTokenFee:     %s
+  IssueRareTokenFee: %s`,
+		p.IssueTokenFee,
+		p.IssueRareTokenFee)
 }
