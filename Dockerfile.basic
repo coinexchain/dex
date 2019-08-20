@@ -13,8 +13,6 @@ RUN chmod 777 nodesource_setup.sh
 RUN ./nodesource_setup.sh
 RUN apt-get install nodejs
 
-RUN npm install -g bower
-
 WORKDIR /usr/src
 RUN wget https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tgz
 RUN tar xzf Python-3.7.3.tgz

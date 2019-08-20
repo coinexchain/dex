@@ -54,7 +54,7 @@ RUNSIM          = $(TOOLS_DESTDIR)/runsim
 all: tools
 
 tools: tools-stamp
-tools-stamp: $(STATIK) $(GOIMPORTS) $(CLOG) $(GOLANGCI_LINT) bower
+tools-stamp: $(STATIK) $(GOIMPORTS) $(CLOG) $(GOLANGCI_LINT)
 	touch $@
 
 $(GOLANGCI_LINT): $(mkfile_dir)/install-golangci-lint.sh
@@ -71,9 +71,6 @@ $(CLOG):
 
 $(RUNSIM):
 	go install -mod=readonly github.com/cosmos/cosmos-sdk/contrib/runsim
-
-bower:
-	@type bower > /dev/null || npm install -g bower
 
 tools-clean:
 	rm -f $(STATIK) $(GOIMPORTS) $(CLOG) $(GOLANGCI_LINT)
