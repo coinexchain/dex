@@ -2304,6 +2304,31 @@ paths:
                     type: string
         500:
           description: Internal Server Error
+  /bankx/parameters:
+    get:
+      operationId: getBankxParams
+      summary: Get the current bankx parameters
+      tags:
+        - BankX
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: object
+                properties:
+                  activation_fee:
+                    type: string
+                  lock_coins_fee:
+                    type: string
+        500:
+          description: Internal Server Error
   /asset/parameters:
     get:
       operationId: getAssetParams
