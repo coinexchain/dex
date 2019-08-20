@@ -248,7 +248,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 		msgqueue.NewProducer(), paramsKeeper.Subspace(market.StoreKey), Keeper{})
 	bik := keepers.NewBancorInfoKeeper(keys.keyBancor, cdc, paramsKeeper.Subspace(StoreKey))
 	keeper := keepers.NewKeeper(bik, bk, ak, &mk, msgqueue.NewProducer())
-	keeper.Bik.SetParam(ctx, DefaultParams())
+	keeper.Bik.SetParams(ctx, DefaultParams())
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 
 	return testInput{ctx: ctx, bik: keeper, handler: NewHandler(keeper), akp: akp, keys: keys, cdc: cdc}

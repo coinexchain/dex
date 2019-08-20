@@ -48,7 +48,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	if err := k.Bxk.FreezeCoins(ctx, msg.Owner, suppliedCoins); err != nil {
 		return err.Result()
 	}
-	fee := k.Bik.GetParam(ctx).CreateBancorFee
+	fee := k.Bik.GetParams(ctx).CreateBancorFee
 	if err := k.Bxk.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
 		return err.Result()
 	}
@@ -112,7 +112,7 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if !k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
 		return types.ErrNonMarketExist().Result()
 	}
-	fee := k.Bik.GetParam(ctx).CancelBancorFee
+	fee := k.Bik.GetParams(ctx).CancelBancorFee
 	if err := k.Bxk.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
 		return err.Result()
 	}
@@ -172,7 +172,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	if err != nil {
 		return types.ErrGetMarketPrice(err.Error()).Result()
 	}
-	commission := price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParam(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
+	commission := price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
 	if err := k.Bxk.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin("cet", commission))); err != nil {
 		return err.Result()
 	}

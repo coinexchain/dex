@@ -11,12 +11,15 @@ import (
 
 const (
 	QueryBancorInfo = "bancor-info"
+	QueryParameters = "parameters"
 )
 
 // creates a querier for asset REST endpoints
-func NewQuerier(keeper Keeper, cdc *codec.Codec) sdk.Querier {
+func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
+		case QueryParameters:
+			return queryParameters(ctx, keeper)
 		case QueryBancorInfo:
 			return queryBancorInfo(ctx, req, keeper)
 		default:
@@ -44,4 +47,15 @@ func queryBancorInfo(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]b
 		return nil, sdk.NewError(types.CodeSpaceBancorlite, types.CodeMarshalFailed, "could not marshal result to JSON")
 	}
 	return bz, nil
+}
+
+func queryParameters(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
+	params := k.Bik.GetParams(ctx)
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return res, nil
 }

@@ -93,11 +93,11 @@ func NewBancorInfoKeeper(key sdk.StoreKey, cdc *codec.Codec, paramSubspace param
 	}
 }
 
-func (keeper *BancorInfoKeeper) SetParam(ctx sdk.Context, params types.Params) {
+func (keeper *BancorInfoKeeper) SetParams(ctx sdk.Context, params types.Params) {
 	keeper.paramSubspace.SetParamSet(ctx, &params)
 }
 
-func (keeper *BancorInfoKeeper) GetParam(ctx sdk.Context) (param types.Params) {
+func (keeper *BancorInfoKeeper) GetParams(ctx sdk.Context) (param types.Params) {
 	keeper.paramSubspace.GetParamSet(ctx, &param)
 	return
 }

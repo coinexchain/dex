@@ -12,6 +12,27 @@ import (
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 )
 
+func QueryParamsCmd(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "params",
+		Args:  cobra.NoArgs,
+		Short: "Query bancorlite params",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryParameters)
+			res, _, err := cliCtx.QueryWithData(route, nil)
+			if err != nil {
+				return err
+			}
+
+			var params types.Params
+			cdc.MustUnmarshalJSON(res, &params)
+			return cliCtx.PrintOutput(params)
+		},
+	}
+}
+
 func QueryBancorInfoCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "info [stock] [money]",

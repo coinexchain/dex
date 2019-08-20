@@ -33,7 +33,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, bi := range data.BancorInfoMap {
 		keeper.Bik.Save(ctx, &bi)
 	}
-	keeper.Bik.SetParam(ctx, data.Params)
+	keeper.Bik.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
@@ -42,7 +42,7 @@ func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	k.Bik.Iterate(ctx, func(bi *keepers.BancorInfo) {
 		m[bi.Stock+keepers.SymbolSeparator+bi.Money] = *bi
 	})
-	return NewGenesisState(k.Bik.GetParam(ctx), m)
+	return NewGenesisState(k.Bik.GetParams(ctx), m)
 }
 
 func (data GenesisState) Validate() error {

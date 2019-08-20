@@ -17,7 +17,9 @@ func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 		Short: "Querying commands to get the information of a symbol pair's bancor pool",
 	}
 	bancorliteQueryCmd.AddCommand(client.GetCommands(
-		QueryBancorInfoCmd(cdc))...)
+		QueryParamsCmd(cdc),
+		QueryBancorInfoCmd(cdc),
+	)...)
 	return bancorliteQueryCmd
 }
 
