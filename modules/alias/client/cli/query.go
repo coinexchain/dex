@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -12,6 +11,27 @@ import (
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
 )
+
+func QueryParamsCmd(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "params",
+		Args:  cobra.NoArgs,
+		Short: "Query alias params",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryParameters)
+			res, _, err := cliCtx.QueryWithData(route, nil)
+			if err != nil {
+				return err
+			}
+
+			var params types.Params
+			cdc.MustUnmarshalJSON(res, &params)
+			return cliCtx.PrintOutput(params)
+		},
+	}
+}
 
 func QueryAddressCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{

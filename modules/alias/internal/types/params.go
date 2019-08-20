@@ -37,6 +37,24 @@ type Params struct {
 	MaxAliasCount              int   `json:"max_alias_count"`
 }
 
+// ParamKeyTable for asset module
+func ParamKeyTable() params.KeyTable {
+	return params.NewKeyTable().RegisterParamSet(&Params{})
+}
+
+// DefaultParams returns a default set of parameters.
+func DefaultParams() Params {
+	return Params{
+		DefaultFeeForAliasLength2,
+		DefaultFeeForAliasLength3,
+		DefaultFeeForAliasLength4,
+		DefaultFeeForAliasLength5,
+		DefaultFeeForAliasLength6,
+		DefaultFeeForAliasLength7OrHigher,
+		DefaultMaxAliasCount,
+	}
+}
+
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 // pairs of asset module's parameters.
 // nolint
@@ -57,19 +75,6 @@ func (p Params) Equal(p2 Params) bool {
 	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
 	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
 	return bytes.Equal(bz1, bz2)
-}
-
-// DefaultParams returns a default set of parameters.
-func DefaultParams() Params {
-	return Params{
-		DefaultFeeForAliasLength2,
-		DefaultFeeForAliasLength3,
-		DefaultFeeForAliasLength4,
-		DefaultFeeForAliasLength5,
-		DefaultFeeForAliasLength6,
-		DefaultFeeForAliasLength7OrHigher,
-		DefaultMaxAliasCount,
-	}
 }
 
 func (p *Params) ValidateGenesis() error {
@@ -100,7 +105,20 @@ func (p *Params) ValidateGenesis() error {
 	return nil
 }
 
-// ParamKeyTable for asset module
-func ParamKeyTable() params.KeyTable {
-	return params.NewKeyTable().RegisterParamSet(&Params{})
+func (p Params) String() string {
+	return fmt.Sprintf(`Alias Params:
+  FeeForAliasLength2:         %d
+  FeeForAliasLength3:         %d
+  FeeForAliasLength4:         %d
+  FeeForAliasLength5:         %d
+  FeeForAliasLength6:         %d
+  FeeForAliasLength7OrHigher: %d
+  MaxAliasCount:              %d`,
+		p.FeeForAliasLength2,
+		p.FeeForAliasLength3,
+		p.FeeForAliasLength4,
+		p.FeeForAliasLength5,
+		p.FeeForAliasLength6,
+		p.FeeForAliasLength7OrHigher,
+		p.MaxAliasCount)
 }

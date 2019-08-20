@@ -16,6 +16,7 @@ func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 		Short: "Querying commands to get the information of aliases",
 	}
 	aliasQueryCmd.AddCommand(client.GetCommands(
+		QueryParamsCmd(cdc),
 		QueryAliasCmd(cdc),
 		QueryAddressCmd(cdc),
 	)...)
