@@ -85,7 +85,7 @@ func (am AppModule) QuerierRoute() string {
 }
 
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return keepers.NewQuerier(am.marketKeeper, nil)
+	return keepers.NewQuerier(am.marketKeeper)
 }
 
 func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {

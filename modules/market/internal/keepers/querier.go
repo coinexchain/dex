@@ -17,12 +17,15 @@ const (
 	QueryOrder             = "order-info"
 	QueryUserOrders        = "user-order-list"
 	QueryWaitCancelMarkets = "wait-cancel-markets"
+	QueryParameters        = "parameters"
 )
 
 // creates a querier for asset REST endpoints
-func NewQuerier(mk Keeper, cdc *codec.Codec) sdk.Querier {
+func NewQuerier(mk Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
+		case QueryParameters:
+			return queryParameters(ctx, mk)
 		case QueryMarket:
 			return queryMarket(ctx, req, mk)
 		case QueryOrder:
@@ -35,6 +38,17 @@ func NewQuerier(mk Keeper, cdc *codec.Codec) sdk.Querier {
 			return nil, sdk.ErrUnknownRequest("query symbol : " + path[0])
 		}
 	}
+}
+
+func queryParameters(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
+	params := k.GetParams(ctx)
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return res, nil
 }
 
 type QueryMarketParam struct {

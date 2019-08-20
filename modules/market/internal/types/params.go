@@ -44,28 +44,9 @@ type Params struct {
 	FeeForZeroDeal              int64 `json:"fee_for_zero_deal"`
 }
 
-// ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
-// pairs of asset module's parameters.
-// nolint
-func (p *Params) ParamSetPairs() params.ParamSetPairs {
-	return params.ParamSetPairs{
-		{Key: KeyCreateMarketFee, Value: &p.CreateMarketFee},
-		{Key: KeyFixedTradeFee, Value: &p.FixedTradeFee},
-		{Key: keyMarketMinExpiredTime, Value: &p.MarketMinExpiredTime},
-		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
-		{Key: KeyGTEOrderFeatureFeeByBlocks, Value: &p.GTEOrderFeatureFeeByBlocks},
-		{Key: KeyMaxExecutedPriceChangeRatio, Value: &p.MaxExecutedPriceChangeRatio},
-		{Key: KeyMarketFeeRate, Value: &p.MarketFeeRate},
-		{Key: KeyMarketFeeMin, Value: &p.MarketFeeMin},
-		{Key: KeyFeeForZeroDeal, Value: &p.FeeForZeroDeal},
-	}
-}
-
-// Equal returns a boolean determining if two Params types are identical.
-func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
+// ParamKeyTable for asset module
+func ParamKeyTable() params.KeyTable {
+	return params.NewKeyTable().RegisterParamSet(&Params{})
 }
 
 // DefaultParams returns a default set of parameters.
@@ -80,6 +61,23 @@ func DefaultParams() Params {
 		DefaultMarketFeeRate,
 		DefaultMarketFeeMin,
 		DefaultFeeForZeroDeal,
+	}
+}
+
+// ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
+// pairs of asset module's parameters.
+// nolint
+func (p *Params) ParamSetPairs() params.ParamSetPairs {
+	return params.ParamSetPairs{
+		{Key: KeyCreateMarketFee, Value: &p.CreateMarketFee},
+		{Key: KeyFixedTradeFee, Value: &p.FixedTradeFee},
+		{Key: keyMarketMinExpiredTime, Value: &p.MarketMinExpiredTime},
+		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
+		{Key: KeyGTEOrderFeatureFeeByBlocks, Value: &p.GTEOrderFeatureFeeByBlocks},
+		{Key: KeyMaxExecutedPriceChangeRatio, Value: &p.MaxExecutedPriceChangeRatio},
+		{Key: KeyMarketFeeRate, Value: &p.MarketFeeRate},
+		{Key: KeyMarketFeeMin, Value: &p.MarketFeeMin},
+		{Key: KeyFeeForZeroDeal, Value: &p.FeeForZeroDeal},
 	}
 }
 
@@ -99,7 +97,31 @@ func (p *Params) ValidateGenesis() error {
 	return nil
 }
 
-// ParamKeyTable for asset module
-func ParamKeyTable() params.KeyTable {
-	return params.NewKeyTable().RegisterParamSet(&Params{})
+// Equal returns a boolean determining if two Params types are identical.
+func (p Params) Equal(p2 Params) bool {
+	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	return bytes.Equal(bz1, bz2)
+}
+
+func (p Params) String() string {
+	return fmt.Sprintf(`Alias Params:
+  CreateMarketFee:             %d
+  FixedTradeFee:               %d
+  MarketMinExpiredTime:        %d
+  GTEOrderLifetime:            %d
+  GTEOrderFeatureFeeByBlocks:  %d
+  MaxExecutedPriceChangeRatio: %d
+  MarketFeeRate:               %d
+  MarketFeeMin:                %d
+  FeeForZeroDeal:              %d`,
+		p.CreateMarketFee,
+		p.FixedTradeFee,
+		p.MarketMinExpiredTime,
+		p.GTEOrderLifetime,
+		p.GTEOrderFeatureFeeByBlocks,
+		p.MaxExecutedPriceChangeRatio,
+		p.MarketFeeRate,
+		p.MarketFeeMin,
+		p.FeeForZeroDeal)
 }
