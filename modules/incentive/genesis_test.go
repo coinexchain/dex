@@ -1,6 +1,7 @@
-package incentive
+package incentive_test
 
 import (
+	"github.com/coinexchain/dex/modules/incentive"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -8,42 +9,42 @@ import (
 
 func TestGenesisState_Validate(t *testing.T) {
 	type fields struct {
-		State State
-		Param Params
+		State incentive.State
+		Param incentive.Params
 	}
-	field := fields{State: State{int64(0)}, Param: DefaultParams()}
-	fieldInvalid := fields{State: State{-1}, Param: DefaultParams()}
+	field := fields{State: incentive.State{HeightAdjustment: int64(0)}, Param: incentive.DefaultParams()}
+	fieldInvalid := fields{State: incentive.State{HeightAdjustment: -1}, Param: incentive.DefaultParams()}
 
-	param1 := Params{
-		1,
-		[]Plan{
+	param1 := incentive.Params{
+		DefaultRewardPerBlock: 1,
+		Plans: []incentive.Plan{
 			{-1, 2, 1, 10}}}
 
-	param2 := Params{
-		1,
-		[]Plan{
-			{2, 2, 1, 10}}}
+	param2 := incentive.Params{
+		DefaultRewardPerBlock: 1,
+		Plans: []incentive.Plan{
+			{StartHeight: 2, EndHeight: 2, RewardPerBlock: 1, TotalIncentive: 10}}}
 
-	param3 := Params{
-		1,
-		[]Plan{
+	param3 := incentive.Params{
+		DefaultRewardPerBlock: 1,
+		Plans: []incentive.Plan{
 			{2, 20, 0, 10}}}
 
-	param4 := Params{
-		1,
-		[]Plan{
+	param4 := incentive.Params{
+		DefaultRewardPerBlock: 1,
+		Plans: []incentive.Plan{
 			{0, 10, 1, 0}}}
 
-	param5 := Params{
-		1,
-		[]Plan{
+	param5 := incentive.Params{
+		DefaultRewardPerBlock: 1,
+		Plans: []incentive.Plan{
 			{0, 10, 1, 9}}}
 
-	field1 := fields{State: State{1}, Param: param1}
-	field2 := fields{State: State{1}, Param: param2}
-	field3 := fields{State: State{1}, Param: param3}
-	field4 := fields{State: State{1}, Param: param4}
-	field5 := fields{State: State{1}, Param: param5}
+	field1 := fields{State: incentive.State{1}, Param: param1}
+	field2 := fields{State: incentive.State{1}, Param: param2}
+	field3 := fields{State: incentive.State{1}, Param: param3}
+	field4 := fields{State: incentive.State{1}, Param: param4}
+	field5 := fields{State: incentive.State{1}, Param: param5}
 
 	tests := []struct {
 		name    string
@@ -60,7 +61,7 @@ func TestGenesisState_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := GenesisState{
+			data := incentive.GenesisState{
 				State: tt.fields.State,
 				Param: tt.fields.Param,
 			}
@@ -72,18 +73,18 @@ func TestGenesisState_Validate(t *testing.T) {
 }
 
 func TestDefaultGenesisState(t *testing.T) {
-	state := DefaultGenesisState()
+	state := incentive.DefaultGenesisState()
 	require.Equal(t, int64(0), state.State.HeightAdjustment)
 	require.Equal(t, int64(10e8), state.Param.Plans[0].RewardPerBlock)
 }
 
 func TestExportGenesis(t *testing.T) {
 	input := SetupTestInput()
-	genesis := DefaultGenesisState()
-	plan := Plan{0, 10, 1, 10}
-	InitGenesis(input.ctx, input.keeper, genesis)
+	genesis := incentive.DefaultGenesisState()
+	plan := incentive.Plan{EndHeight: 10, RewardPerBlock: 1, TotalIncentive: 10}
+	incentive.InitGenesis(input.ctx, input.keeper, genesis)
 	input.keeper.AddNewPlan(input.ctx, plan)
-	gen := ExportGenesis(input.ctx, input.keeper)
+	gen := incentive.ExportGenesis(input.ctx, input.keeper)
 	genesis.Param.Plans = append(genesis.Param.Plans, plan)
 	require.Equal(t, genesis, gen)
 }
