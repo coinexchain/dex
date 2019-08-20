@@ -82,7 +82,8 @@ func queryParamsHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		res, height, err := cliCtx.QueryWithData("custom/alias/parameters", nil)
+		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryParameters)
+		res, height, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return

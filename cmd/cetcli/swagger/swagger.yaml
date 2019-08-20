@@ -3485,6 +3485,33 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /bancorlite/parameters:
+    get:
+      operationId: getBancorliteParams
+      summary: Get the current bancorlite parameters
+      tags:
+        - Bancorlite
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: object
+                properties:
+                  create_bancor_fee:
+                    type: string
+                  cancel_bancor_fee:
+                    type: string
+                  trade_fee_rate:
+                    type: string
+        500:
+          description: Internal Server Error
   /bancorlite/bancor-init:
     post:
       summary: create bancor
