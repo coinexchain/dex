@@ -14,7 +14,7 @@ func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	bancorliteQueryCmd := &cobra.Command{
 		Use:   types.StoreKey,
-		Short: "Querying commands to get the information of a symbol pair's bancor pool",
+		Short: "Querying commands for the bancorlite module",
 	}
 	bancorliteQueryCmd.AddCommand(client.GetCommands(
 		QueryParamsCmd(cdc),
