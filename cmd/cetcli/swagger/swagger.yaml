@@ -2307,7 +2307,7 @@ paths:
   /asset/parameters:
     get:
       operationId: getAssetParams
-      summary: Get the current alias parameters
+      summary: Get the current asset parameters
       tags:
         - Asset
       produces:
@@ -2857,6 +2857,45 @@ paths:
             $ref: "#/definitions/StdTx"
         400:
           description: Invalid Request
+        500:
+          description: Internal Server Error
+  /market/parameters:
+    get:
+      operationId: getMarketParams
+      summary: Get the current market parameters
+      tags:
+        - Market
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: object
+                properties:
+                  create_market_fee:
+                    type: string
+                  fixed_trade_fee:
+                    type: string
+                  market_min_expired_time:
+                    type: string
+                  gte_order_lifetime:
+                    type: string
+                  gte_order_feature_fee_by_blocks:
+                    type: string
+                  max_executed_price_change_ratio:
+                    type: string
+                  market_fee_rate:
+                    type: string
+                  market_fee_min:
+                    type: string
+                  fee_for_zero_deal:
+                    type: string
         500:
           description: Internal Server Error
   /market/gte-orders:
