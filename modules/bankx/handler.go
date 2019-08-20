@@ -119,7 +119,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 func deductActivationFee(ctx sdk.Context, k Keeper,
 	fromAccount auth.Account, sendAmt sdk.Coins) (sdk.Coins, sdk.Error) {
 
-	activationFee := k.GetParam(ctx).ActivationFee
+	activationFee := k.GetParams(ctx).ActivationFee
 
 	//check whether the first transfer contains at least activationFee cet
 	sendAmt, neg := sendAmt.SafeSub(dex.NewCetCoins(activationFee))
@@ -142,7 +142,7 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 		_, _ = k.Bk.AddCoins(ctx, toAddr, sdk.Coins{})
 	}
 
-	if err := k.DeductInt64CetFee(ctx, fromAddr, k.GetParam(ctx).LockCoinsFee); err != nil {
+	if err := k.DeductInt64CetFee(ctx, fromAddr, k.GetParams(ctx).LockCoinsFee); err != nil {
 		return err.Result()
 	}
 
@@ -257,7 +257,7 @@ func precheckFreshAccounts(ctx sdk.Context, k Keeper, outputs []bank.Output) []s
 }
 func deductActivationFeeForFreshAccount(ctx sdk.Context, k Keeper, addrs []sdk.AccAddress) sdk.Error {
 	for _, addr := range addrs {
-		activationFee := k.GetParam(ctx).ActivationFee
+		activationFee := k.GetParams(ctx).ActivationFee
 		err := k.DeductInt64CetFee(ctx, addr, activationFee)
 		if err != nil {
 			return err

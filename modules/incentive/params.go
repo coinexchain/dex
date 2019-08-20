@@ -29,13 +29,6 @@ type Plan struct {
 	TotalIncentive int64 `json:"total_incentive"`
 }
 
-func (p *Params) ParamSetPairs() params.ParamSetPairs {
-	return params.ParamSetPairs{
-		{Key: KeyIncentiveDefaultRewardPerBlock, Value: &p.DefaultRewardPerBlock},
-		{Key: KeyIncentivePlans, Value: &p.Plans},
-	}
-}
-
 func DefaultParams() Params {
 	return Params{
 		DefaultRewardPerBlock: 0,
@@ -52,4 +45,11 @@ func DefaultParams() Params {
 // ParamKeyTable type declaration for parameters
 func ParamKeyTable() params.KeyTable {
 	return params.NewKeyTable().RegisterParamSet(&Params{})
+}
+
+func (p *Params) ParamSetPairs() params.ParamSetPairs {
+	return params.ParamSetPairs{
+		{Key: KeyIncentiveDefaultRewardPerBlock, Value: &p.DefaultRewardPerBlock},
+		{Key: KeyIncentivePlans, Value: &p.Plans},
+	}
 }

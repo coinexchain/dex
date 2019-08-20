@@ -2,17 +2,20 @@ package bankx
 
 import (
 	"encoding/json"
-	"github.com/coinexchain/dex/modules/bankx/client/rest"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
+
+	"github.com/coinexchain/dex/modules/bankx/client/cli"
+	"github.com/coinexchain/dex/modules/bankx/client/rest"
+	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )
 
 var (
@@ -62,7 +65,7 @@ func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 
 // get the root query command of this module
 func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return nil
+	return cli.GetQueryCmd(cdc)
 }
 
 //___________________________
@@ -96,9 +99,7 @@ func (AppModule) QuerierRoute() string {
 
 // module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
-		return nil, nil
-	}
+	return keeper.NewQuerier(am.BxKeeper)
 }
 
 // module init-genesis

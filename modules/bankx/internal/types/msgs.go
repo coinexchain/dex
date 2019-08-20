@@ -5,12 +5,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
-// RouterKey is the name of the bankx module
-const (
-	RouterKey = ModuleName
-	Topic     = ModuleName
-)
-
 var _ sdk.Msg = MsgSetMemoRequired{}
 
 type MsgSetMemoRequired struct {

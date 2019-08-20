@@ -24,12 +24,12 @@ func DefaultGenesisState() GenesisState {
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
-	keeper.SetParam(ctx, data.Param)
+	keeper.SetParams(ctx, data.Param)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
-	params := keeper.GetParam(ctx)
+	params := keeper.GetParams(ctx)
 	return NewGenesisState(params)
 }
 
