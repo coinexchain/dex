@@ -101,6 +101,10 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 		return errors.Errorf("tx flag is error, please see help : " +
 			"$ cetcli tx market create-ioc-order -h")
 	}
+	msg.TimeInForce = types.IOC
+	if isGTE {
+		msg.TimeInForce = types.GTE
+	}
 	if err = msg.ValidateBasic(); err != nil {
 		return err
 	}
@@ -117,11 +121,6 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 	}
 	if !account.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(msg.Quantity))}) {
 		return errors.New("No have insufficient cet to create market in blockchain")
-	}
-
-	msg.TimeInForce = types.IOC
-	if isGTE {
-		msg.TimeInForce = types.GTE
 	}
 
 	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
