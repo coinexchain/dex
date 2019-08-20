@@ -2882,7 +2882,7 @@ paths:
                     $ref: "#/definitions/BaseReq"
                   exist_blocks:
                     type: string
-                    example: 10000
+                    example: "10000"
               - $ref: "#/definitions/Order"
             additionalProperties: false
       responses:
@@ -3663,13 +3663,13 @@ definitions:
     properties:
       stock:
         type: string
-        example: abc
+        example: "abc"
       money:
         type: string
-        example: cet
+        example: "cet"
       price_precision:
         type: string
-        example: 10
+        example: "10"
   MarketInfo:
     allOf:
       - $ref: "#/definitions/BaseMarket"
@@ -3680,7 +3680,7 @@ definitions:
             example: "0.00002"
           creator:
             type: string
-            example: coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj
+            example: "coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj"
   Order:
     type: object
     required:
@@ -3692,22 +3692,22 @@ definitions:
     properties:
       order_type:
         type: integer
-        example: 1
+        example: "2"
       trading_pair:
         type: string
         example: "abc/cet"
       price_precision:
         type: string
-        example: 9
+        example: "9"
       price:
         type: string
-        example: 1000
+        example: "1000"
       quantity:
         type: string
-        example: 12320
+        example: "12320"
       side:
         type: integer
-        example: 1
+        example: "1"
 
   OrderInfo:
     type: object
