@@ -2304,6 +2304,35 @@ paths:
                     type: string
         500:
           description: Internal Server Error
+  /asset/parameters:
+    get:
+      operationId: getAssetParams
+      summary: Get the current alias parameters
+      tags:
+        - Asset
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: object
+                properties:
+                  issue_token_fee:
+                    type: array
+                    items:
+                      $ref: "#/definitions/Coin"
+                  issue_rare_token_fee:
+                    type: array
+                    items:
+                      $ref: "#/definitions/Coin"
+        500:
+          description: Internal Server Error
   /asset/tokens:
     post:
       tags:

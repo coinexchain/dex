@@ -21,10 +21,11 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, 
 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, storeName string) {
 	r.HandleFunc("/asset/tokens/{symbol}", QueryTokenRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
-	r.HandleFunc("/asset/tokens", QueryTokensRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/asset/tokens", QueryTokensRequestHandlerFn(storeName, cliCtx)).Methods("GET")
 	r.HandleFunc("/asset/tokens/{symbol}/forbidden/whitelist", QueryWhitelistRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/asset/tokens/{symbol}/forbidden/addresses", QueryForbiddenAddrRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
-	r.HandleFunc("/asset/tokens/reserved/symbols", QueryReservedSymbolsRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/asset/tokens/reserved/symbols", QueryReservedSymbolsRequestHandlerFn(storeName, cliCtx)).Methods("GET")
+	r.HandleFunc("/asset/parameters", QueryParamsHandlerFn(storeName, cliCtx)).Methods("GET")
 }
 
 // QueryTokenRequestHandlerFn - query assetREST Handler
@@ -65,7 +66,7 @@ func QueryTokenRequestHandlerFn(
 
 // QueryTokensRequestHandlerFn - query assetREST Handler
 func QueryTokensRequestHandlerFn(
-	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
+	storeName string, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
@@ -152,7 +153,7 @@ func QueryForbiddenAddrRequestHandlerFn(
 
 // QueryReservedSymbolsRequestHandlerFn - query assetREST Handler
 func QueryReservedSymbolsRequestHandlerFn(
-	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
+	storeName string, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
@@ -169,6 +170,26 @@ func QueryReservedSymbolsRequestHandlerFn(
 		if len(res) == 0 {
 			res = []byte("[]")
 		}
+		cliCtx = cliCtx.WithHeight(height)
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+// HTTP request handler to query the asset params values
+func QueryParamsHandlerFn(storeName string, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
+
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryParameters)
+		res, height, err := cliCtx.QueryWithData(route, nil)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
 		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}

@@ -74,7 +74,7 @@ func queryAliasesHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 	}
 }
 
-// HTTP request handler to query the staking params values
+// HTTP request handler to query the alias params values
 func queryParamsHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
