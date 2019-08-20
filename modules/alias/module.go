@@ -3,17 +3,18 @@ package alias
 import (
 	"encoding/json"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/coinexchain/dex/modules/alias/client/cli"
 	"github.com/coinexchain/dex/modules/alias/client/rest"
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
-	types2 "github.com/coinexchain/dex/modules/alias/internal/types"
+	"github.com/coinexchain/dex/modules/alias/internal/types"
 )
 
 // app module basics object
@@ -21,20 +22,20 @@ type AppModuleBasic struct {
 }
 
 func (AppModuleBasic) Name() string {
-	return types2.ModuleName
+	return types.ModuleName
 }
 func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
-	types2.RegisterCodec(cdc)
+	types.RegisterCodec(cdc)
 }
 
 // genesis
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return types2.ModuleCdc.MustMarshalJSON(DefaultGenesisState())
+	return types.ModuleCdc.MustMarshalJSON(DefaultGenesisState())
 }
 
 func (AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 	var state GenesisState
-	if err := types2.ModuleCdc.UnmarshalJSON(data, &state); err != nil {
+	if err := types.ModuleCdc.UnmarshalJSON(data, &state); err != nil {
 		return err
 	}
 	return state.Validate()
@@ -42,7 +43,7 @@ func (AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 
 // client functionality
 func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr, types2.ModuleCdc)
+	rest.RegisterRoutes(ctx, rtr, types.ModuleCdc)
 }
 
 func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
@@ -73,7 +74,7 @@ func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // routes
 func (am AppModule) Route() string {
-	return types2.RouterKey
+	return types.RouterKey
 }
 
 func (am AppModule) NewHandler() sdk.Handler {
@@ -81,11 +82,11 @@ func (am AppModule) NewHandler() sdk.Handler {
 }
 
 func (am AppModule) QuerierRoute() string {
-	return types2.QuerierRoute
+	return types.QuerierRoute
 }
 
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return keepers.NewQuerier(am.blKeeper, nil)
+	return keepers.NewQuerier(am.blKeeper)
 }
 
 func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
@@ -97,12 +98,12 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
-	types2.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.blKeeper, genesisState)
 	return nil
 }
 
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.blKeeper)
-	return types2.ModuleCdc.MustMarshalJSON(gs)
+	return types.ModuleCdc.MustMarshalJSON(gs)
 }

@@ -14,7 +14,7 @@ const (
 )
 
 // creates a querier for asset REST endpoints
-func NewQuerier(keeper Keeper, cdc *codec.Codec) sdk.Querier {
+func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abcitypes.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
 		case QueryAliasInfo:
