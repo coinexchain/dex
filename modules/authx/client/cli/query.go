@@ -2,15 +2,15 @@ package cli
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/authx/types"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/authx/types"
 )
 
 func GetAccountX(ctx context.CLIContext, address []byte) (types.AccountX, error) {
-
 	res, err := QueryAccountX(ctx, address)
 	if err != nil {
 		return types.AccountX{}, err

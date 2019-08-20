@@ -17,15 +17,8 @@ import (
 
 // register REST routes
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
-	r.HandleFunc(
-		"/auth/accounts/{address}",
-		QueryAccountRequestHandlerFn(cdc, cliCtx),
-	).Methods("GET")
-
-	r.HandleFunc(
-		"/bank/balances/{address}",
-		QueryBalancesRequestHandlerFn(cdc, cliCtx),
-	).Methods("GET")
+	r.HandleFunc("/auth/accounts/{address}", QueryAccountRequestHandlerFn(cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/bank/balances/{address}", QueryBalancesRequestHandlerFn(cdc, cliCtx)).Methods("GET")
 }
 
 // query accountREST Handler

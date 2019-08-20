@@ -31,19 +31,19 @@ func ParamKeyTable() params.KeyTable {
 	return params.NewKeyTable().RegisterParamSet(&Params{})
 }
 
+// DefaultParams returns a default set of parameters.
+func DefaultParams() Params {
+	return Params{
+		MinSelfDelegation:          sdk.NewInt(DefaultMinSelfDelegation),
+		MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
+	}
+}
+
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 // pairs of stakingx module's parameters.
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyMinSelfDelegation, Value: &p.MinSelfDelegation},
 		{Key: KeyMinMandatoryCommissionRate, Value: &p.MinMandatoryCommissionRate},
-	}
-}
-
-// DefaultParams returns a default set of parameters.
-func DefaultParams() Params {
-	return Params{
-		MinSelfDelegation:          sdk.NewInt(DefaultMinSelfDelegation),
-		MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
 	}
 }
