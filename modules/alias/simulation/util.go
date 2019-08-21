@@ -15,6 +15,3 @@ func randomSymbol(r *rand.Rand, randomLength int) string {
 	}
 	return string(bytes)
 }
-func randomBool(r *rand.Rand) bool {
-	return r.Uint32()%2 == 0
-}

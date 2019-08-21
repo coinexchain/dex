@@ -34,32 +34,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	aliassim "github.com/coinexchain/dex/modules/alias/simulation"
+	"github.com/coinexchain/dex/modules/asset"
 	assetsim "github.com/coinexchain/dex/modules/asset/simulation"
 	bancorsim "github.com/coinexchain/dex/modules/bancorlite/simulation"
 	commentsim "github.com/coinexchain/dex/modules/comment/simulation"
 	distrxim "github.com/coinexchain/dex/modules/distributionx/simulation"
+	marketsim "github.com/coinexchain/dex/modules/market/simulation"
 	"github.com/coinexchain/dex/types"
-)
-
-var (
-	genesisFile        string
-	paramsFile         string
-	exportParamsPath   string
-	exportParamsHeight int
-	exportStatePath    string
-	exportStatsPath    string
-	seed               int64
-	initialBlockHeight int
-	numBlocks          int
-	blockSize          int
-	enabled            bool
-	verbose            bool
-	lean               bool
-	commit             bool
-	period             int
-	onOperation        bool // TODO Remove in favor of binary search for invariant violation
-	allInvariants      bool
-	genesisTime        int64
 )
 
 func init() {
@@ -115,7 +96,7 @@ func appStateFn(
 		panic("cannot provide both a genesis file and a params file")
 
 	case genesisFile != "":
-		appState, simAccs, chainID = simapp.AppStateFromGenesisFileFn(r, accs, genesisTimestamp)
+		appState, simAccs, chainID = AppStateFromGenesisFileFn(r, accs, genesisTimestamp)
 
 	case paramsFile != "":
 		appParams := make(simulation.AppParams)
@@ -176,6 +157,7 @@ func appStateRandomizedFn(
 	simapp.GenDistrGenesisState(cdc, r, appParams, genesisState)
 	stakingGen := GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState)
 	simapp.GenSlashingGenesisState(cdc, r, stakingGen, appParams, genesisState)
+	GenAssetGenesisState(cdc, accs, genesisState)
 
 	appState, err := MakeCodec().MarshalJSON(genesisState)
 	if err != nil {
@@ -311,6 +293,28 @@ func GenGenesisAccounts(
 	}
 
 	genesisState[genaccounts.ModuleName] = cdc.MustMarshalJSON(genesisAccounts)
+}
+
+func GenAssetGenesisState(cdc *codec.Codec, accs []simulation.Account,
+	genesisState map[string]json.RawMessage) {
+
+	tokenTotalSupply := sdk.NewInt(588788547005740000)
+	assetGenesis := asset.DefaultGenesisState()
+	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
+		"cet",
+		tokenTotalSupply,
+		accs[0].Address,
+		false,
+		true,
+		false,
+		false,
+		"www.coinex.org",
+		"A public chain built for the decentralized exchange",
+		"",
+	)
+	assetGenesis.Tokens = append(assetGenesis.Tokens, baseToken)
+
+	genesisState[asset.ModuleName] = cdc.MustMarshalJSON(assetGenesis)
 }
 
 // TODO: add description
@@ -464,6 +468,26 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		{
 			Weight: getWeightOrDefault(OpWeightMsgDonateToCommunityPool, 100),
 			Op:     distrxim.SimulateMsgDonateToCommunityPool(app.accountKeeper, app.distrxKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgCreateTradingPair, 100),
+			Op:     marketsim.SimulateMsgCreateTradingPair(app.marketKeeper, app.assetKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgCancelTradingPair, 100),
+			Op:     marketsim.SimulateMsgCancelTradingPair(app.marketKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgModifyPricePrecision, 100),
+			Op:     marketsim.SimulateMsgModifyPricePrecision(app.marketKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgCreateOrder, 100),
+			Op:     marketsim.SimulateMsgCreateOrder(app.marketKeeper, app.accountKeeper),
+		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgCancelOrder, 100),
+			Op:     marketsim.SimulateMsgCancelOrder(app.marketKeeper),
 		},
 	}
 }

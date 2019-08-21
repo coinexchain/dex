@@ -44,6 +44,9 @@ func RandomCET(r *rand.Rand, ctx sdk.Context, ak auth.AccountKeeper, fromAcc sim
 }
 func RandomAccCoins(r *rand.Rand, account auth.Account) (string, int64) {
 	coins := account.GetCoins()
+	if len(coins) == 0 {
+		return "", 0
+	}
 	randomCoins := coins[r.Intn(len(coins))]
 	amt, err := simulation.RandPositiveInt(r, randomCoins.Amount)
 	if err == nil {
@@ -53,4 +56,8 @@ func RandomAccCoins(r *rand.Rand, account auth.Account) (string, int64) {
 }
 func GetRandomElemIndex(r *rand.Rand, length int) int {
 	return r.Intn(length)
+}
+
+func RandomBool(r *rand.Rand) bool {
+	return r.Uint32()%2 == 0
 }

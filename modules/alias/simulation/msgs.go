@@ -11,6 +11,7 @@ import (
 	"github.com/coinexchain/dex/modules/alias"
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
+	simulationx "github.com/coinexchain/dex/simulation"
 )
 
 // TODO
@@ -20,7 +21,7 @@ func SimulateMsgAliasUpdate(k keepers.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account) (
 		opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
 
-		isAdd := randomBool(r)
+		isAdd := simulationx.RandomBool(r)
 		fromAcc, msg, err := createMsgAliasUpdate(r, ctx, k, accs, isAdd)
 		if err != nil {
 			return simulation.NoOpMsg(alias.ModuleName), nil, nil
@@ -47,7 +48,7 @@ func createMsgAliasUpdate(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, accs 
 	fromAcc = simulation.RandomAcc(r, accs)
 	if isAdd {
 		alias := randomAlias(r)
-		asDefault := randomBool(r)
+		asDefault := simulationx.RandomBool(r)
 
 		msg = types.MsgAliasUpdate{
 			Owner:     fromAcc.Address,

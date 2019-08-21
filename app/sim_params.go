@@ -24,4 +24,10 @@ const (
 	OpWeightCreateCommentRefs = "op_weight_create_comment_refs"
 	// distrx
 	OpWeightMsgDonateToCommunityPool = "op_weight_msg_donate_to_community_pool"
+	//market
+	OpWeightMsgCreateTradingPair    = "op_weight_msg_create_trading_pair"
+	OpWeightMsgCancelTradingPair    = "op_weight_msg_cancel_trading_pair"
+	OpWeightMsgModifyPricePrecision = "op_weight_msg_modify_price_precision"
+	OpWeightMsgCreateOrder          = "op_weight_msg_create_order"
+	OpWeightMsgCancelOrder          = "op_weight_msg_cancel_order"
 )
