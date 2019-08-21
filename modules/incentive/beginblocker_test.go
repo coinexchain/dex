@@ -1,17 +1,20 @@
 package incentive_test
 
 import (
-	cetapp "github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/modules/incentive"
-	dex "github.com/coinexchain/dex/types"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
+	"os"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
-	"os"
-	"testing"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	cetapp "github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/incentive"
+	dex "github.com/coinexchain/dex/types"
 )
 
 type TestInput struct {
@@ -28,19 +31,17 @@ func SetupTestInput() TestInput {
 }
 
 func TestBeginBlockerInvalidCoin(t *testing.T) {
-
 	input := SetupTestInput()
 	_ = input.keeper.SetState(input.ctx, incentive.State{10})
-	input.keeper.SetParam(input.ctx, incentive.DefaultParams())
+	input.keeper.SetParams(input.ctx, incentive.DefaultParams())
 	err := incentive.BeginBlocker(input.ctx, input.keeper)
 	require.Equal(t, 0xa, int(err.Result().Code))
 }
 
 func TestBeginBlocker(t *testing.T) {
-
 	input := SetupTestInput()
 	_ = input.keeper.SetState(input.ctx, incentive.State{10})
-	input.keeper.SetParam(input.ctx, incentive.DefaultParams())
+	input.keeper.SetParams(input.ctx, incentive.DefaultParams())
 	acc := input.ak.NewAccountWithAddress(input.ctx, incentive.PoolAddr)
 	_ = acc.SetCoins(dex.NewCetCoins(10000 * 1e8))
 	input.ak.SetAccount(input.ctx, acc)

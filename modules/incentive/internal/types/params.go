@@ -1,13 +1,7 @@
-package incentive
+package types
 
 import (
 	"github.com/cosmos/cosmos-sdk/x/params"
-)
-
-const (
-	ModuleName        = "incentive"
-	QuerierRoute      = ModuleName
-	DefaultParamspace = ModuleName
 )
 
 var _ params.ParamSet = &Params{}

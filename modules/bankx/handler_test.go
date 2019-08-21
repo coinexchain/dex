@@ -31,7 +31,7 @@ var (
 func defaultContext() (*keeper.Keeper, sdk.Handler, sdk.Context) {
 	app := cetapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{}, false, log.NewNopLogger())
-	app.BankxKeeper.SetParam(ctx, bx.DefaultParams())
+	app.BankxKeeper.SetParams(ctx, bx.DefaultParams())
 	app.BankxKeeper.Bk.SetSendEnabled(ctx, true)
 	handler := bankx.NewHandler(app.BankxKeeper)
 	cet, _ := asset.NewToken("cet", "cet", sdk.NewInt(200000000000000), owner,
@@ -63,7 +63,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, false, found)
 	require.Equal(t, sdk.NewInt(100000000), bkx.Ak.GetAccount(ctx, feeAddr).GetCoins().AmountOf("cet"))
 
-	fee := bkx.GetParam(ctx).LockCoinsFee
+	fee := bkx.GetParams(ctx).LockCoinsFee
 	_ = fromAccount.SetCoins(dex.NewCetCoins(1000000000 + fee*2))
 	bkx.Ak.SetAccount(ctx, fromAccount)
 
@@ -125,7 +125,7 @@ func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 	bkx, handle, ctx := defaultContext()
 	fromAccount := bkx.Ak.NewAccountWithAddress(ctx, fromAddr)
 	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
-	fee := bkx.GetParam(ctx).LockCoinsFee
+	fee := bkx.GetParams(ctx).LockCoinsFee
 	Coins := dex.NewCetCoins(1000000000 + fee*2)
 	_ = fromAccount.SetCoins(Coins)
 	bkx.Ak.SetAccount(ctx, fromAccount)

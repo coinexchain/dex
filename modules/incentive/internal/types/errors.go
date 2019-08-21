@@ -1,6 +1,8 @@
-package incentive
+package types
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 const (
 	CodeSpaceIncentive sdk.CodespaceType = "incentive"

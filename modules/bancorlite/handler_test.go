@@ -207,7 +207,7 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) bankx
 	ask := asset.NewBaseTokenKeeper(cdc, keys.assetCapKey)
 	bxkKeeper := bankx.NewKeeper(paramsKeeper.Subspace("bankx"), axk, bk, ak, ask, sk, producer)
 	bk.SetSendEnabled(ctx, true)
-	bxkKeeper.SetParam(ctx, bankx.DefaultParams())
+	bxkKeeper.SetParams(ctx, bankx.DefaultParams())
 
 	return bxkKeeper
 }

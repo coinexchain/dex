@@ -206,10 +206,10 @@ func TestParamGetSet(t *testing.T) {
 	require.Equal(t, int64(100000000), defaultParam.ActivationFee)
 
 	//expect SetParam don't panic
-	require.NotPanics(t, func() { bkx.SetParam(ctx, defaultParam) }, "bankxKeeper SetParam panics")
+	require.NotPanics(t, func() { bkx.SetParams(ctx, defaultParam) }, "bankxKeeper SetParam panics")
 
 	//expect GetParam equals defaultParam
-	require.Equal(t, defaultParam, bkx.GetParam(ctx))
+	require.Equal(t, defaultParam, bkx.GetParams(ctx))
 }
 
 func TestKeeper_SendCoins(t *testing.T) {
