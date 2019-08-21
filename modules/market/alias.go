@@ -38,5 +38,4 @@ type (
 	CreateOrderInfo      = types.CreateOrderInfo
 	FillOrderInfo        = types.FillOrderInfo
 	CancelOrderInfo      = types.CancelOrderInfo
-	NewHeightInfo        = types.NewHeightInfo
 )

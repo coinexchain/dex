@@ -519,14 +519,18 @@ func (app *CetChainApp) mountStores() {
 	)
 }
 
-// application updates every end block
+// application updates every begin block
 func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	app.height = ctx.BlockHeight()
 	PubMsgs = make([]PubMsg, 0, 10000)
-	ret := app.mm.BeginBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
 		app.txCount = req.Header.TotalTxs - req.Header.NumTxs
+		app.pushNewHeightInfo(ctx)
+	}
+	ret := app.mm.BeginBlock(ctx, req)
+	if app.msgQueProducer.IsOpenToggle() {
 		ret.Events = FilterMsgsOnlyKafka(ret.Events)
+		app.notifyBeginBlock(ret.Events)
 	}
 	return ret
 }

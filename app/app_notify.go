@@ -3,13 +3,34 @@ package app
 import (
 	"encoding/json"
 	"reflect"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	sltypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
 )
+
+type NewHeightInfo struct {
+	Height        int64        `json:"height"`
+	TimeStamp     time.Time    `json:"timestamp"`
+	LastBlockHash cmn.HexBytes `json:"last_block_hash"`
+}
+
+func (app *CetChainApp) pushNewHeightInfo(ctx sdk.Context) {
+	msg := NewHeightInfo{
+		Height:        ctx.BlockHeight(),
+		TimeStamp:     ctx.BlockHeader().Time,
+		LastBlockHash: ctx.BlockHeader().LastBlockId.Hash,
+	}
+	bytes, errJSON := json.Marshal(msg)
+	if errJSON != nil {
+		bytes = []byte{}
+	}
+	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("height_info"), Value: bytes})
+}
 
 type TransferRecord struct {
 	Sender    string `json:"sender"`
@@ -281,13 +302,22 @@ func getNotificationSlash(event abci.Event) []byte {
 	return bytes
 }
 
+func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {
+	//fmt.Printf("========== BeginBlock events ============\n")
+	for _, event := range events {
+		//fmt.Printf("= Event: %s\n", event.Type)
+		//for _, attr := range event.Attributes {
+		//	fmt.Printf("= K: %s; V: %s\n", attr.Key, attr.Value)
+		//}
+		if event.Type == sltypes.EventTypeSlash {
+			val := getNotificationSlash(event)
+			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("slash"), Value: val})
+		}
+	}
+}
+
 func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
 	//fmt.Printf("========== EndBlock events ============\n")
-	//fmt.Printf("========== EndBlock events ============\n")
-	//fmt.Printf("========== EndBlock events ============\n")
-	//fmt.Printf("========== EndBlock events ============\n")
-	//addr := app.supplyKeeper.GetModuleAddress(gov.ModuleName).String()
-	//fmt.Printf("========== EndBlock events ============ %s\n", addr)
 	for _, event := range events {
 		//fmt.Printf("= Event: %s\n", event.Type)
 		//for _, attr := range event.Attributes {
@@ -299,9 +329,6 @@ func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
 		} else if event.Type == stypes.EventTypeCompleteRedelegation {
 			val := getNotificationCompleteRedelegation(event)
 			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_redelegation"), Value: val})
-		} else if event.Type == sltypes.EventTypeSlash {
-			val := getNotificationSlash(event)
-			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("slash"), Value: val})
 		}
 	}
 }

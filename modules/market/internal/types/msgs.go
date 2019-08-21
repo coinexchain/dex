@@ -3,10 +3,8 @@ package types
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	cmn "github.com/tendermint/tendermint/libs/common"
 )
 
 // RouterKey is the name of the market module
@@ -18,7 +16,6 @@ const (
 	CreateOrderInfoKey    = "create_order_info"
 	FillOrderInfoKey      = "fill_order_info"
 	CancelOrderInfoKey    = "del_order_info"
-	HeightInfoKey         = "height_info"
 	PricePrecisionInfoKey = "modify-price-precision"
 )
 
@@ -335,12 +332,6 @@ type CancelOrderInfo struct {
 	RemainAmount   int64 `json:"remain_amount"`
 	DealStock      int64 `json:"deal_stock"`
 	DealMoney      int64 `json:"deal_money"`
-}
-
-type NewHeightInfo struct {
-	Height        int64        `json:"height"`
-	TimeStamp     time.Time    `json:"timestamp"`
-	LastBlockHash cmn.HexBytes `json:"last_block_hash"`
 }
 
 type ModifyPricePrecisionInfo struct {
