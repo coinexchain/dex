@@ -13,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	staking_cli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 
+	helper "github.com/coinexchain/dex/modules/stakingx/client"
 	"github.com/coinexchain/dex/modules/stakingx/internal/types"
 )
 
@@ -83,47 +84,18 @@ $ %s query staking params
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			params, err := queryStakingParams(cdc, cliCtx)
+			params, err := helper.QueryStakingParams(cdc, cliCtx)
 			if err != nil {
 				return err
 			}
 
-			paramsx, err := queryStakingXParams(cdc, cliCtx)
+			paramsx, err := helper.QueryStakingXParams(cdc, cliCtx)
 			if err != nil {
 				return err
 			}
 
-			mergedParams := MergedParams{
-				UnbondingTime:              params.UnbondingTime,
-				MaxValidators:              params.MaxValidators,
-				MaxEntries:                 params.MaxEntries,
-				BondDenom:                  params.BondDenom,
-				MinSelfDelegation:          paramsx.MinSelfDelegation,
-				MinMandatoryCommissionRate: paramsx.MinMandatoryCommissionRate,
-			}
+			mergedParams := types.NewMergedParams(params, paramsx)
 			return cliCtx.PrintOutput(mergedParams)
 		},
 	}
-}
-
-func queryStakingParams(cdc *codec.Codec, cliCtx context.CLIContext) (staking.Params, error) {
-	route := fmt.Sprintf("custom/%s/%s", staking.StoreKey, staking.QueryParameters)
-	bz, _, err := cliCtx.QueryWithData(route, nil)
-	if err != nil {
-		return staking.Params{}, err
-	}
-	var params staking.Params
-	cdc.MustUnmarshalJSON(bz, &params)
-	return params, nil
-}
-
-func queryStakingXParams(cdc *codec.Codec, cliCtx context.CLIContext) (types.Params, error) {
-	route := fmt.Sprintf("custom/%s/%s", types.StoreKey, staking.QueryParameters)
-	bz, _, err := cliCtx.QueryWithData(route, nil)
-	if err != nil {
-		return types.Params{}, err
-	}
-	var params types.Params
-	cdc.MustUnmarshalJSON(bz, &params)
-	return params, nil
 }

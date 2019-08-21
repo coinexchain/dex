@@ -1,7 +1,8 @@
-package cli
+package types
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,6 +16,17 @@ type MergedParams struct {
 	BondDenom                  string        `json:"bond_denom" yaml:"bond_denom"`
 	MinSelfDelegation          sdk.Int       `json:"min_self_delegation" yaml:"min_self_delegation"`
 	MinMandatoryCommissionRate sdk.Dec       `json:"min_mandatory_commission_rate" yaml:"min_mandatory_commission_rate"`
+}
+
+func NewMergedParams(params staking.Params, paramsx Params) MergedParams {
+	return MergedParams{
+		UnbondingTime:              params.UnbondingTime,
+		MaxValidators:              params.MaxValidators,
+		MaxEntries:                 params.MaxEntries,
+		BondDenom:                  params.BondDenom,
+		MinSelfDelegation:          paramsx.MinSelfDelegation,
+		MinMandatoryCommissionRate: paramsx.MinMandatoryCommissionRate,
+	}
 }
 
 func (p MergedParams) String() string {
