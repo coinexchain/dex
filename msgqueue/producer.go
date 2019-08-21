@@ -154,6 +154,7 @@ func (p producer) SendMsg(key []byte, v []byte) {
 		})
 	case sMode, fMode:
 		p.WriteCloser.Write(key)
+		p.WriteCloser.Write([]byte("#"))
 		p.WriteCloser.Write(v)
 		p.WriteCloser.Write([]byte("\r\n"))
 	}
