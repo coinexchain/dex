@@ -1,6 +1,8 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
@@ -46,4 +48,17 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeyIncentiveDefaultRewardPerBlock, Value: &p.DefaultRewardPerBlock},
 		{Key: KeyIncentivePlans, Value: &p.Plans},
 	}
+}
+
+func (p Params) String() string {
+	s := fmt.Sprintf(`Incentive Params:
+  DefaultRewardPerBlock: %d`,
+		p.DefaultRewardPerBlock)
+
+	for _, p := range p.Plans {
+		s += fmt.Sprintf("\n  Plan: StartHeight=%d EndHeight=%d RewardPerBlock=%d TotalIncentive=%d",
+			p.StartHeight, p.EndHeight, p.RewardPerBlock, p.TotalIncentive)
+	}
+
+	return s
 }

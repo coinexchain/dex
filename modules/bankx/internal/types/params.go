@@ -38,7 +38,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 }
 
 func (p Params) String() string {
-	return fmt.Sprintf(`Alias Params:
+	return fmt.Sprintf(`BankX Params:
   ActivationFee: %d
   LockCoinsFee:  %d`,
 		p.ActivationFee,

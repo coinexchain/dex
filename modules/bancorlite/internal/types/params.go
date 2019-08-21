@@ -70,7 +70,7 @@ func (p Params) Equal(p2 Params) bool {
 }
 
 func (p Params) String() string {
-	return fmt.Sprintf(`Alias Params:
+	return fmt.Sprintf(`BancorLite Params:
   CreateBancorFee: %d
   CancelBancorFee: %d
   TradeFeeRate:    %d`,

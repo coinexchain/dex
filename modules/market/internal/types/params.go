@@ -105,7 +105,7 @@ func (p Params) Equal(p2 Params) bool {
 }
 
 func (p Params) String() string {
-	return fmt.Sprintf(`Alias Params:
+	return fmt.Sprintf(`Market Params:
   CreateMarketFee:             %d
   FixedTradeFee:               %d
   MarketMinExpiredTime:        %d

@@ -12,6 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
+	"github.com/coinexchain/dex/modules/incentive/client/cli"
 	"github.com/coinexchain/dex/modules/incentive/internal/keepers"
 	"github.com/coinexchain/dex/modules/incentive/internal/types"
 )
@@ -61,7 +62,7 @@ func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 
 // get the root query command of this module
 func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return nil
+	return cli.GetQueryCmd(cdc)
 }
 
 //___________________________
@@ -100,9 +101,7 @@ func (AppModule) QuerierRoute() string {
 
 // module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
-		return nil, nil
-	}
+	return keepers.NewQuerier(am.incentiveKeeper)
 }
 
 // module init-genesis
