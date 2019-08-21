@@ -15,7 +15,7 @@ var (
 	KeyMinSelfDelegation          = []byte("MinSelfDelegation")
 	KeyMinMandatoryCommissionRate = []byte("MinMandatoryCommissionRate")
 
-	DefaultMinMandatoryCommissionRate = sdk.NewDecWithPrec(5, 2)
+	DefaultMinMandatoryCommissionRate = sdk.NewDecWithPrec(1, 1)
 )
 
 var _ params.ParamSet = &Params{}
