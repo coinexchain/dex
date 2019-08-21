@@ -235,7 +235,11 @@ func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height i
 	for ; iter.Valid(); iter.Next() {
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
-		result = append(result, keeper.getOrder(ctx, orderID))
+		order := keeper.getOrder(ctx, orderID)
+		if order != nil {
+			result = append(result, order)
+		}
+
 	}
 	return result
 }
@@ -315,7 +319,11 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*t
 	}
 	result := make([]*types.Order, 0, len(orderIDList))
 	for _, orderID := range orderIDList {
-		result = append(result, keeper.getOrder(ctx, orderID))
+		order := keeper.getOrder(ctx, orderID)
+		if order != nil {
+			result = append(result, order)
+		}
+
 	}
 	return result
 }
