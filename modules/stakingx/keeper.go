@@ -7,20 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	"github.com/coinexchain/dex/modules/stakingx/internal/types"
 	dex "github.com/coinexchain/dex/types"
-)
-
-const (
-	// ModuleKey is the name of the module
-	ModuleName = "stakingx"
-
-	StoreKey = ModuleName
-
-	// DefaultParamspace defines the default stakingx module parameter subspace
-	DefaultParamspace = ModuleName
-
-	// QuerierRoute is the querier route for stakingx
-	QuerierRoute = ModuleName
 )
 
 var (
@@ -56,7 +44,7 @@ func NewKeeper(key sdk.StoreKey, cdc *codec.Codec,
 	return Keeper{
 		key:              key,
 		cdc:              cdc,
-		paramSubspace:    paramSubspace.WithKeyTable(ParamKeyTable()),
+		paramSubspace:    paramSubspace.WithKeyTable(types.ParamKeyTable()),
 		assetViewKeeper:  assetViewKeeper,
 		sk:               sk,
 		dk:               dk,
@@ -71,18 +59,18 @@ func NewKeeper(key sdk.StoreKey, cdc *codec.Codec,
 // Params
 
 // SetParams sets the asset module's parameters.
-func (k Keeper) SetParams(ctx sdk.Context, params Params) {
+func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
 // GetParams gets the asset module's parameters.
-func (k Keeper) GetParams(ctx sdk.Context) (params Params) {
+func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	k.paramSubspace.GetParamSet(ctx, &params)
 	return
 }
 
 func (k Keeper) GetMinMandatoryCommissionRate(ctx sdk.Context) (rate sdk.Dec) {
-	k.paramSubspace.Get(ctx, KeyMinMandatoryCommissionRate, &rate)
+	k.paramSubspace.Get(ctx, types.KeyMinMandatoryCommissionRate, &rate)
 	return
 }
 

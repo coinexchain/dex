@@ -9,7 +9,8 @@ import (
 
 // Query endpoints supported by the slashing querier
 const (
-	QueryPool = "pool"
+	QueryPool       = "pool"
+	QueryParameters = "parameters"
 )
 
 type BondPool struct {
@@ -25,6 +26,8 @@ func NewQuerier(k Keeper, cdc *codec.Codec) sdk.Querier {
 		switch path[0] {
 		case QueryPool:
 			return queryBondPool(ctx, cdc, k)
+		case QueryParameters:
+			return queryParameters(ctx, cdc, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown stakingx query endpoint")
 		}
@@ -37,6 +40,17 @@ func queryBondPool(ctx sdk.Context, cdc *codec.Codec, k Keeper) ([]byte, sdk.Err
 	res, err := codec.MarshalJSONIndent(cdc, bondPool)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to marshal JSON", err.Error()))
+	}
+
+	return res, nil
+}
+
+func queryParameters(ctx sdk.Context, cdc *codec.Codec, k Keeper) ([]byte, sdk.Error) {
+	params := k.GetParams(ctx)
+
+	res, err := codec.MarshalJSONIndent(cdc, params)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
 
 	return res, nil
