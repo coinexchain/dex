@@ -23,7 +23,7 @@ func SimulateMsgIssueToken(k asset.Keeper) simulation.Operation {
 		msg := asset.NewMsgIssueToken(tokenName, tokenSymbol, issueAmount, acc.Address,
 			true, true, true, true, tokenURL, tokenDescrip, tokenIdentify)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -62,12 +62,15 @@ func SimulateMsgTransferOwnership(k asset.Keeper) simulation.Operation {
 		symbol := RandStringBytes(r, SymbolLenth)
 		originOwner := simulation.RandomAcc(r, accounts)
 		newOwner := simulation.RandomAcc(r, accounts)
+		if len(accounts) <= 1 {
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
+		}
 		for newOwner.Equals(originOwner) {
 			newOwner = simulation.RandomAcc(r, accounts)
 		}
 		msg := asset.NewMsgTransferOwnership(symbol, originOwner.Address, newOwner.Address)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -89,7 +92,7 @@ func SimulateMsgMintToken(k asset.Keeper) simulation.Operation {
 		mintAmount := r.Intn(50000000) + 100000
 		msg := asset.NewMsgMintToken(symbol, sdk.NewInt(int64(mintAmount)), acc.Address)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -111,7 +114,7 @@ func SimulateMsgBurnToken(k asset.Keeper) simulation.Operation {
 		mintAmount := r.Intn(5000000) + 100000
 		msg := asset.NewMsgBurnToken(symbol, sdk.NewInt(int64(mintAmount)), acc.Address)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -132,7 +135,7 @@ func SimulateMsgForbidToken(k asset.Keeper) simulation.Operation {
 		symbol := RandStringBytes(r, SymbolLenth)
 		msg := asset.NewMsgForbidToken(symbol, acc.Address)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -153,7 +156,7 @@ func SimulateMsgUnForbidToken(k asset.Keeper) simulation.Operation {
 		symbol := RandStringBytes(r, SymbolLenth)
 		msg := asset.NewMsgUnForbidToken(symbol, acc.Address)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -178,7 +181,7 @@ func SimulateMsgAddTokenWhitelist(k asset.Keeper) simulation.Operation {
 		}
 		msg := asset.NewMsgAddTokenWhitelist(symbol, acc.Address, whiteList)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -203,7 +206,7 @@ func SimulateMsgRemoveTokenWhitelist(k asset.Keeper) simulation.Operation {
 		}
 		msg := asset.NewMsgRemoveTokenWhitelist(symbol, acc.Address, whiteList)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -228,7 +231,7 @@ func SimulateMsgForbidAddr(k asset.Keeper) simulation.Operation {
 		}
 		msg := asset.NewMsgForbidAddr(symbol, acc.Address, forbidList)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -253,7 +256,7 @@ func SimulateMsgUnForbidAddr(k asset.Keeper) simulation.Operation {
 		}
 		msg := asset.NewMsgUnForbidAddr(symbol, acc.Address, forbidList)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
@@ -276,7 +279,7 @@ func SimulateMsgModifyTokenInfo(k asset.Keeper) simulation.Operation {
 		describe := fmt.Sprintf("simulation modify info %s", symbol)
 		msg := asset.NewMsgModifyTokenInfo(symbol, url, describe, acc.Address)
 		if msg.ValidateBasic() != nil {
-			return simulation.NoOpMsg(asset.ModuleName), nil, fmt.Errorf("expected msg to pass ValidateBasic: %s", msg.GetSignBytes())
+			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
 		ctx, write := ctx.CacheContext()
