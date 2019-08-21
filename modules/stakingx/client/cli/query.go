@@ -23,12 +23,12 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	paramsCmd := client.GetCommands(GetCmdQueryParams(cdc))[0]
 
 	//replace pool cmd with new bondPoolCmd which can also show the non-bondable-cet-tokens in locked positions
-	cmd := replacePoolCmd(stakingQueryCmd, "pool", bondPoolCmd)
-	cmd = replacePoolCmd(stakingQueryCmd, "params", paramsCmd)
-	return cmd
+	replacePoolCmd(stakingQueryCmd, "pool", bondPoolCmd)
+	replacePoolCmd(stakingQueryCmd, "params", paramsCmd)
+	return stakingQueryCmd
 }
 
-func replacePoolCmd(stakingQueryCmd *cobra.Command, use string, BondPoolCmd *cobra.Command) *cobra.Command {
+func replacePoolCmd(stakingQueryCmd *cobra.Command, use string, BondPoolCmd *cobra.Command) {
 	var oldPoolCmd *cobra.Command
 	for _, cmd := range stakingQueryCmd.Commands() {
 		if cmd.Use == use {
@@ -38,8 +38,6 @@ func replacePoolCmd(stakingQueryCmd *cobra.Command, use string, BondPoolCmd *cob
 
 	stakingQueryCmd.RemoveCommand(oldPoolCmd)
 	stakingQueryCmd.AddCommand(BondPoolCmd)
-
-	return stakingQueryCmd
 }
 
 // GetCmdQueryPool implements the pool query command.

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// nolint
 func TestGenesisState_Validate(t *testing.T) {
 	type fields struct {
 		State incentive.State
