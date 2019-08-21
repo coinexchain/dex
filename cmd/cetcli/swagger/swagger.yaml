@@ -2329,6 +2329,42 @@ paths:
                     type: string
         500:
           description: Internal Server Error
+  /incentive/parameters:
+    get:
+      operationId: getIncentiveParams
+      summary: Get the current incentive parameters
+      tags:
+        - Incentive
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: object
+                properties:
+                  default_reward_per_block:
+                    type: string
+                  plans:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        start_height:
+                          type: string
+                        end_height:
+                          type: string
+                        reward_per_block:
+                          type: string
+                        total_incentive:
+                          type: string
+        500:
+          description: Internal Server Error
   /asset/parameters:
     get:
       operationId: getAssetParams

@@ -13,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/coinexchain/dex/modules/incentive/client/cli"
+	"github.com/coinexchain/dex/modules/incentive/client/rest"
 	"github.com/coinexchain/dex/modules/incentive/internal/keepers"
 	"github.com/coinexchain/dex/modules/incentive/internal/types"
 )
@@ -53,7 +54,9 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 }
 
 // register rest routes
-func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {}
+func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr)
+}
 
 // get the root tx command of this module
 func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
