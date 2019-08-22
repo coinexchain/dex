@@ -17,8 +17,8 @@ import (
 func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	// Group asset queries under a subcommand
 	assQueryCmd := &cobra.Command{
-		Use:   types.ModuleName,
-		Short: "Querying commands for the authx module",
+		Use:   auth.ModuleName,
+		Short: "Querying commands for the auth module",
 	}
 
 	assQueryCmd.AddCommand(client.GetCommands(

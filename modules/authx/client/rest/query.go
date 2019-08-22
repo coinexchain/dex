@@ -18,7 +18,7 @@ import (
 // register REST routes
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router) {
 	r.HandleFunc("/auth/accounts/{address}", QueryAccountRequestHandlerFn(cliCtx)).Methods("GET")
-	r.HandleFunc("/authx/parameters", QueryParamsHandlerFn(cliCtx)).Methods("GET")
+	r.HandleFunc("/auth/parameters", QueryParamsHandlerFn(cliCtx)).Methods("GET")
 }
 
 // query accountREST Handler

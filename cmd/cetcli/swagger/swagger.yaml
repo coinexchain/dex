@@ -2304,12 +2304,12 @@ paths:
                     type: string
         500:
           description: Internal Server Error
-  /authx/parameters:
+  /auth/parameters:
     get:
-      operationId: getAuthxParams
-      summary: Get the current bankx parameters
+      operationId: getAuthParams
+      summary: Get the current auth parameters
       tags:
-        - AuthX
+        - Auth
       produces:
         - application/json
       responses:
@@ -2337,12 +2337,12 @@ paths:
                     type: string
         500:
           description: Internal Server Error
-  /bankx/parameters:
+  /bank/parameters:
     get:
-      operationId: getBankxParams
+      operationId: getBankParams
       summary: Get the current bankx parameters
       tags:
-        - BankX
+        - Bank
       produces:
         - application/json
       responses:
