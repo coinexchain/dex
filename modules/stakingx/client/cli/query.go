@@ -13,7 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	staking_cli "github.com/cosmos/cosmos-sdk/x/staking/client/cli"
 
-	helper "github.com/coinexchain/dex/modules/stakingx/client"
 	"github.com/coinexchain/dex/modules/stakingx/internal/types"
 )
 
@@ -82,17 +81,14 @@ $ %s query staking params
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			params, err := helper.QueryStakingParams(cdc, cliCtx)
+			route := fmt.Sprintf("custom/%s/%s", types.StoreKey, staking.QueryParameters)
+			bz, _, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err
 			}
 
-			paramsx, err := helper.QueryStakingXParams(cdc, cliCtx)
-			if err != nil {
-				return err
-			}
-
-			mergedParams := types.NewMergedParams(params, paramsx)
+			var mergedParams types.MergedParams
+			cdc.MustUnmarshalJSON(bz, &mergedParams)
 			return cliCtx.PrintOutput(mergedParams)
 		},
 	}

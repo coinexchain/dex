@@ -1,16 +1,15 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	helper "github.com/coinexchain/dex/modules/stakingx/client"
 	"github.com/coinexchain/dex/modules/stakingx/internal/types"
 )
 
@@ -44,27 +43,14 @@ func paramsHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		cdc := staking.ModuleCdc
-
-		params, err := helper.QueryStakingParams(cdc, cliCtx)
+		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, staking.QueryParameters)
+		res, height, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		paramsx, err := helper.QueryStakingXParams(cdc, cliCtx)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		mergedParams := types.NewMergedParams(params, paramsx)
-		res, err := codec.MarshalJSONIndent(cdc, mergedParams)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
+		cliCtx = cliCtx.WithHeight(height)
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }

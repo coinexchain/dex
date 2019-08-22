@@ -1,6 +1,7 @@
 package stakingx
 
 import (
+	"github.com/coinexchain/dex/modules/stakingx/internal/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -46,9 +47,11 @@ func queryBondPool(ctx sdk.Context, cdc *codec.Codec, k Keeper) ([]byte, sdk.Err
 }
 
 func queryParameters(ctx sdk.Context, cdc *codec.Codec, k Keeper) ([]byte, sdk.Error) {
-	params := k.GetParams(ctx)
+	params := k.sk.GetParams(ctx)
+	paramsx := k.GetParams(ctx)
+	mergedParams := types.NewMergedParams(params, paramsx)
 
-	res, err := codec.MarshalJSONIndent(cdc, params)
+	res, err := codec.MarshalJSONIndent(cdc, mergedParams)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}
