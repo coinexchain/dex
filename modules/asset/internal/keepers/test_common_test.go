@@ -1,4 +1,4 @@
-package keeper_test
+package keepers_test
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -16,7 +16,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/coinexchain/dex/modules/asset/internal/keeper"
+	"github.com/coinexchain/dex/modules/asset/internal/keepers"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -27,7 +27,7 @@ import (
 type testInput struct {
 	cdc *codec.Codec
 	ctx sdk.Context
-	tk  keeper.BaseKeeper
+	tk  keepers.BaseKeeper
 }
 
 func createTestInput() testInput {
@@ -66,9 +66,9 @@ func createTestInput() testInput {
 	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, map[string]bool{})
 	sk := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
 	axk := authx.NewKeeper(cdc, keyAuthx, pk.Subspace(authx.DefaultParamspace), sk, ak, "")
-	ask := keeper.NewBaseTokenKeeper(cdc, keyAsset)
+	ask := keepers.NewBaseTokenKeeper(cdc, keyAsset)
 	bkx := bankx.NewKeeper(pk.Subspace(bankx.DefaultParamspace), axk, bk, ak, ask, sk, msgqueue.NewProducer())
-	tk := keeper.NewBaseKeeper(cdc, keyAsset, pk.Subspace(types.DefaultParamspace), bkx, sk)
+	tk := keepers.NewBaseKeeper(cdc, keyAsset, pk.Subspace(types.DefaultParamspace), bkx, sk)
 
 	tk.SetParams(ctx, types.DefaultParams())
 

@@ -1,7 +1,7 @@
 package asset
 
 import (
-	"github.com/coinexchain/dex/modules/asset/internal/keeper"
+	"github.com/coinexchain/dex/modules/asset/internal/keepers"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
@@ -26,9 +26,9 @@ const (
 var (
 	// functions aliases
 
-	NewQuerier                 = keeper.NewQuerier
-	NewBaseKeeper              = keeper.NewBaseKeeper
-	NewBaseTokenKeeper         = keeper.NewBaseTokenKeeper
+	NewQuerier                 = keepers.NewQuerier
+	NewBaseKeeper              = keepers.NewBaseKeeper
+	NewBaseTokenKeeper         = keepers.NewBaseTokenKeeper
 	RegisterCodec              = types.RegisterCodec
 	DefaultGenesisState        = types.DefaultGenesisState
 	NewGenesisState            = types.NewGenesisState
@@ -54,9 +54,9 @@ var (
 )
 
 type (
-	Keeper          = keeper.BaseKeeper
-	BaseTokenKeeper = keeper.BaseTokenKeeper
-	TokenKeeper     = keeper.TokenKeeper
+	Keeper          = keepers.BaseKeeper
+	BaseTokenKeeper = keepers.BaseTokenKeeper
+	TokenKeeper     = keepers.TokenKeeper
 	Params          = types.Params
 	GenesisState    = types.GenesisState
 	Token           = types.Token

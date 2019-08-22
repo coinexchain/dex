@@ -1,8 +1,8 @@
-package keeper_test
+package keepers_test
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset/internal/keeper"
+	"github.com/coinexchain/dex/modules/asset/internal/keepers"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"testing"
 
@@ -21,7 +21,7 @@ func Test_queryToken(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryToken}
-	query := keeper.NewQuerier(input.tk)
+	query := keepers.NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, path0, req)
@@ -68,7 +68,7 @@ func Test_queryAllTokenList(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryTokenList}
-	query := keeper.NewQuerier(input.tk)
+	query := keepers.NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.NoError(t, err)
@@ -106,7 +106,7 @@ func Test_queryWhitelist(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryWhitelist}
-	query := keeper.NewQuerier(input.tk)
+	query := keepers.NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, path0, req)
@@ -149,7 +149,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryForbiddenAddr}
-	query := keeper.NewQuerier(input.tk)
+	query := keepers.NewQuerier(input.tk)
 
 	// no token
 	res, err := query(input.ctx, path0, req)
@@ -190,7 +190,7 @@ func Test_queryReservedSymbols(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{types.QueryReservedSymbols}
-	query := keeper.NewQuerier(input.tk)
+	query := keepers.NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.NoError(t, err)
@@ -207,7 +207,7 @@ func Test_queryDefault(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{"unknown"}
-	query := keeper.NewQuerier(input.tk)
+	query := keepers.NewQuerier(input.tk)
 
 	res, err := query(input.ctx, path0, req)
 	require.Error(t, err)

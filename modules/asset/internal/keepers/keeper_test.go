@@ -1,4 +1,4 @@
-package keeper_test
+package keepers_test
 
 import (
 	"github.com/coinexchain/dex/modules/asset/internal/types"

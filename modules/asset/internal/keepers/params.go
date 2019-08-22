@@ -1,4 +1,4 @@
-package keeper
+package keepers
 
 import (
 	"github.com/coinexchain/dex/modules/asset/internal/types"
