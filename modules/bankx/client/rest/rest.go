@@ -10,5 +10,6 @@ import (
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router) {
 	r.HandleFunc("/bank/accounts/{address}/transfers", SendTxRequestHandlerFn(cliCtx.Codec, cliCtx)).Methods("POST")
 	r.HandleFunc("/bank/accounts/memo", SendRequestHandlerFn(cliCtx.Codec, cliCtx)).Methods("POST")
+	r.HandleFunc("/bank/balances/{address}", QueryBalancesRequestHandlerFn(cliCtx)).Methods("GET")
 	r.HandleFunc("/bankx/parameters", queryParamsHandlerFn(cliCtx)).Methods("GET")
 }
