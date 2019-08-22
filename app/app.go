@@ -438,7 +438,7 @@ func (app *CetChainApp) createAppModules() []module.AppModule {
 	return []module.AppModule{
 		genaccounts.NewAppModule(app.accountKeeper),
 		auth.NewAppModule(app.accountKeeper),
-		authx.NewAppModule(app.accountXKeeper, app.tokenKeeper),
+		authx.NewAppModule(app.accountXKeeper, app.accountKeeper, app.tokenKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		bankx.NewAppModule(app.bankxKeeper),
 		crisis.NewAppModule(&app.crisisKeeper),

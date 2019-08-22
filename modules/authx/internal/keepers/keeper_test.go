@@ -1,4 +1,4 @@
-package authx_test
+package keepers_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/authx/internal/keepers"
 	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
@@ -46,7 +46,7 @@ func TestAccountXGetSet(t *testing.T) {
 }
 
 func TestAddressStoreKey(t *testing.T) {
-	addrStoreKey := authx.AddressStoreKey(addr)
+	addrStoreKey := keepers.AddressStoreKey(addr)
 	expectedOutput := []byte{0x1, 0x73, 0x6f, 0x6d, 0x65, 0x2d, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73}
 	require.Equal(t, expectedOutput, addrStoreKey)
 }

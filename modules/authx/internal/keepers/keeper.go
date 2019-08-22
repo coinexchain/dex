@@ -1,4 +1,4 @@
-package authx
+package keepers
 
 import (
 	"bytes"
@@ -38,8 +38,8 @@ type AccountXKeeper struct {
 
 func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace, keeper SupplyKeeper, ak ExpectedAccountKeeper, eventTypeMsgQueue string) AccountXKeeper {
 	// ensure authx module account is set
-	if addr := keeper.GetModuleAddress(ModuleName); addr == nil {
-		panic(fmt.Sprintf("%s module account has not been set", ModuleName))
+	if addr := keeper.GetModuleAddress(types.ModuleName); addr == nil {
+		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
 
 	return AccountXKeeper{
@@ -59,16 +59,16 @@ func AddressStoreKey(addr sdk.AccAddress) []byte {
 // -----------------------------------------------------------------------------
 // AccountX
 
-func (axk AccountXKeeper) GetOrCreateAccountX(ctx sdk.Context, addr sdk.AccAddress) AccountX {
+func (axk AccountXKeeper) GetOrCreateAccountX(ctx sdk.Context, addr sdk.AccAddress) types.AccountX {
 	ax, ok := axk.GetAccountX(ctx, addr)
 	if !ok {
-		ax = AccountX{Address: addr}
+		ax = types.AccountX{Address: addr}
 		axk.SetAccountX(ctx, ax)
 	}
 	return ax
 }
 
-func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax AccountX, ok bool) {
+func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax types.AccountX, ok bool) {
 	store := ctx.KVStore(axk.key)
 	bz := store.Get(AddressStoreKey(addr))
 	if bz == nil {
@@ -79,7 +79,7 @@ func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax 
 	return acc, true
 }
 
-func (axk AccountXKeeper) SetAccountX(ctx sdk.Context, ax AccountX) {
+func (axk AccountXKeeper) SetAccountX(ctx sdk.Context, ax types.AccountX) {
 	addr := ax.Address
 	store := ctx.KVStore(axk.key)
 	bz, err := axk.cdc.MarshalBinaryBare(ax)
@@ -143,7 +143,7 @@ func (axk AccountXKeeper) GetParams(ctx sdk.Context) (params types.Params) {
 // -----------------------------------------------------------------------------
 // Codec
 
-func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax AccountX) {
+func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax types.AccountX) {
 	err := axk.cdc.UnmarshalBinaryBare(bz, &ax)
 
 	if err != nil {
@@ -157,12 +157,12 @@ func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax AccountX) {
 func (axk AccountXKeeper) PreTotalSupply(ctx sdk.Context) {
 	var expectedTotal sdk.Coins
 
-	axk.IterateAccounts(ctx, func(acc AccountX) bool {
+	axk.IterateAccounts(ctx, func(acc types.AccountX) bool {
 		expectedTotal = expectedTotal.Add(acc.GetAllCoins())
 		return false
 	})
 
-	authxMacc := axk.supplyKeeper.GetModuleAccount(ctx, ModuleName)
+	authxMacc := axk.supplyKeeper.GetModuleAccount(ctx, types.ModuleName)
 	_ = authxMacc.SetCoins(expectedTotal)
 	axk.supplyKeeper.SetModuleAccount(ctx, authxMacc)
 }

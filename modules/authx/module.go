@@ -14,6 +14,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/authx/client/cli"
 	"github.com/coinexchain/dex/modules/authx/client/rest"
+	"github.com/coinexchain/dex/modules/authx/internal/keepers"
 	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
@@ -71,13 +72,15 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	axk AccountXKeeper
+	ak  ExpectedAccountKeeper
 	tk  ExpectedTokenKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(axk AccountXKeeper, tk ExpectedTokenKeeper) AppModule {
+func NewAppModule(axk AccountXKeeper, ak ExpectedAccountKeeper, tk ExpectedTokenKeeper) AppModule {
 	return AppModule{
 		axk: axk,
+		ak:  ak,
 		tk:  tk,
 	}
 }
@@ -105,7 +108,7 @@ func (AppModule) QuerierRoute() string {
 
 // module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return NewQuerier(am.axk)
+	return keepers.NewQuerier(am.axk)
 }
 
 // module init-genesis
@@ -127,6 +130,6 @@ func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // module end-block
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	EndBlocker(ctx, am.axk, am.axk.ak, am.tk)
+	EndBlocker(ctx, am.axk, am.ak, am.tk)
 	return []abci.ValidatorUpdate{}
 }

@@ -1,4 +1,4 @@
-package authx_test
+package keepers_test
 
 import (
 	"fmt"
@@ -10,6 +10,8 @@ import (
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/authx/internal/keepers"
 )
 
 func Test_queryAccount(t *testing.T) {
@@ -19,7 +21,7 @@ func Test_queryAccount(t *testing.T) {
 		Data: []byte{},
 	}
 	path0 := []string{authx.QueryAccountX}
-	query := authx.NewQuerier(input.axk)
+	query := keepers.NewQuerier(input.axk)
 
 	res, err := query(input.ctx, path0, req)
 	require.NotNil(t, err)

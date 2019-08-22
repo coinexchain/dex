@@ -1,4 +1,4 @@
-package authx
+package keepers
 
 import (
 	"fmt"
@@ -8,13 +8,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
 // creates a querier for auth REST endpoints
 func NewQuerier(keeper AccountXKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
-		case QueryAccountX:
+		case types.QueryAccountX:
 			return queryAccountX(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown authx query endpoint")

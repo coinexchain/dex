@@ -1,4 +1,4 @@
-package authx
+package keepers
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"

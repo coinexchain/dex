@@ -1,6 +1,7 @@
 package authx
 
 import (
+	"github.com/coinexchain/dex/modules/authx/internal/keepers"
 	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
@@ -26,10 +27,14 @@ var (
 	DefaultParams              = types.DefaultParams
 	ModuleCdc                  = types.ModuleCdc
 	NewAccountXWithAddress     = types.NewAccountXWithAddress
+	NewKeeper                  = keepers.NewKeeper
 )
 
 type (
-	AccountX    = types.AccountX
-	LockedCoin  = types.LockedCoin
-	LockedCoins = types.LockedCoins
+	AccountX              = types.AccountX
+	LockedCoin            = types.LockedCoin
+	LockedCoins           = types.LockedCoins
+	AccountXKeeper        = keepers.AccountXKeeper
+	ExpectedAccountKeeper = keepers.ExpectedAccountKeeper
+	ExpectedTokenKeeper   = keepers.ExpectedTokenKeeper
 )
