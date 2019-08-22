@@ -157,7 +157,7 @@ func appStateRandomizedFn(
 	simapp.GenDistrGenesisState(cdc, r, appParams, genesisState)
 	stakingGen := GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState)
 	simapp.GenSlashingGenesisState(cdc, r, stakingGen, appParams, genesisState)
-	GenAssetGenesisState(cdc, accs, genesisState)
+	GenAssetGenesisState(cdc, accs, amount, numInitiallyBonded, genesisState)
 
 	appState, err := MakeCodec().MarshalJSON(genesisState)
 	if err != nil {
@@ -295,10 +295,10 @@ func GenGenesisAccounts(
 	genesisState[genaccounts.ModuleName] = cdc.MustMarshalJSON(genesisAccounts)
 }
 
-func GenAssetGenesisState(cdc *codec.Codec, accs []simulation.Account,
+func GenAssetGenesisState(cdc *codec.Codec, accs []simulation.Account, amount, numInitiallyBonded int64,
 	genesisState map[string]json.RawMessage) {
 
-	tokenTotalSupply := sdk.NewInt(588788547005740000)
+	tokenTotalSupply := sdk.NewInt(amount * (int64(len(accs)) + numInitiallyBonded))
 	assetGenesis := asset.DefaultGenesisState()
 	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
 		"cet",
