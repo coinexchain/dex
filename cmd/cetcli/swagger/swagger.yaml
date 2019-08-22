@@ -2304,6 +2304,39 @@ paths:
                     type: string
         500:
           description: Internal Server Error
+  /authx/parameters:
+    get:
+      operationId: getAuthxParams
+      summary: Get the current bankx parameters
+      tags:
+        - AuthX
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: object
+                properties:
+                  max_memo_characters:
+                    type: string
+                  tx_sig_limit:
+                    type: string
+                  tx_size_cost_per_byte:
+                    type: string
+                  sig_verify_cost_ed25519:
+                    type: string
+                  sig_verify_cost_secp256k1:
+                    type: string
+                  min_gas_price_limit:
+                    type: string
+        500:
+          description: Internal Server Error
   /bankx/parameters:
     get:
       operationId: getBankxParams
