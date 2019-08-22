@@ -18,7 +18,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/authx/types"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -95,10 +94,10 @@ func startAppWithAccountX(amount int64) GenesisState {
 	// app
 	app := initAppWithBaseAccounts(acc)
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight()})
-	accx := types.AccountX{
+	accx := authx.AccountX{
 		Address:      addr,
 		MemoRequired: true,
-		LockedCoins: []types.LockedCoin{
+		LockedCoins: []authx.LockedCoin{
 			{Coin: dex.NewCetCoin(10), UnlockTime: 10},
 		},
 		FrozenCoins: dex.NewCetCoins(1000),

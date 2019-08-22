@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
-	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
 var (
@@ -38,8 +38,8 @@ type AccountXKeeper struct {
 
 func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSubspace params.Subspace, keeper SupplyKeeper, ak ExpectedAccountKeeper, eventTypeMsgQueue string) AccountXKeeper {
 	// ensure authx module account is set
-	if addr := keeper.GetModuleAddress(types.ModuleName); addr == nil {
-		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
+	if addr := keeper.GetModuleAddress(ModuleName); addr == nil {
+		panic(fmt.Sprintf("%s module account has not been set", ModuleName))
 	}
 
 	return AccountXKeeper{
@@ -59,16 +59,16 @@ func AddressStoreKey(addr sdk.AccAddress) []byte {
 // -----------------------------------------------------------------------------
 // AccountX
 
-func (axk AccountXKeeper) GetOrCreateAccountX(ctx sdk.Context, addr sdk.AccAddress) types.AccountX {
+func (axk AccountXKeeper) GetOrCreateAccountX(ctx sdk.Context, addr sdk.AccAddress) AccountX {
 	ax, ok := axk.GetAccountX(ctx, addr)
 	if !ok {
-		ax = types.AccountX{Address: addr}
+		ax = AccountX{Address: addr}
 		axk.SetAccountX(ctx, ax)
 	}
 	return ax
 }
 
-func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax types.AccountX, ok bool) {
+func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax AccountX, ok bool) {
 	store := ctx.KVStore(axk.key)
 	bz := store.Get(AddressStoreKey(addr))
 	if bz == nil {
@@ -79,7 +79,7 @@ func (axk AccountXKeeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax 
 	return acc, true
 }
 
-func (axk AccountXKeeper) SetAccountX(ctx sdk.Context, ax types.AccountX) {
+func (axk AccountXKeeper) SetAccountX(ctx sdk.Context, ax AccountX) {
 	addr := ax.Address
 	store := ctx.KVStore(axk.key)
 	bz, err := axk.cdc.MarshalBinaryBare(ax)
@@ -143,7 +143,7 @@ func (axk AccountXKeeper) GetParams(ctx sdk.Context) (params types.Params) {
 // -----------------------------------------------------------------------------
 // Codec
 
-func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax types.AccountX) {
+func (axk AccountXKeeper) decodeAccountX(bz []byte) (ax AccountX) {
 	err := axk.cdc.UnmarshalBinaryBare(bz, &ax)
 
 	if err != nil {

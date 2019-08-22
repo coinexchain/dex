@@ -14,7 +14,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/authx/client/cli"
 	"github.com/coinexchain/dex/modules/authx/client/rest"
-	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
 var (

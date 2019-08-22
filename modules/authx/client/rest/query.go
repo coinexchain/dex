@@ -12,7 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/coinexchain/dex/modules/authx/client/cli"
-	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
 // register REST routes

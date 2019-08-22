@@ -2,13 +2,12 @@ package authx_test
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/authx"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 )
@@ -19,7 +18,7 @@ func Test_queryAccount(t *testing.T) {
 		Path: fmt.Sprintf("custom/%s/%s", authx.QuerierRoute, authx.QueryAccountX),
 		Data: []byte{},
 	}
-	path0 := []string{types.QueryAccountX}
+	path0 := []string{authx.QueryAccountX}
 	query := authx.NewQuerier(input.axk)
 
 	res, err := query(input.ctx, path0, req)
@@ -41,12 +40,12 @@ func Test_queryAccount(t *testing.T) {
 	acc := input.ak.NewAccountWithAddress(input.ctx, addr)
 
 	input.ak.SetAccount(input.ctx, acc)
-	input.axk.SetAccountX(input.ctx, types.NewAccountXWithAddress(addr))
+	input.axk.SetAccountX(input.ctx, authx.NewAccountXWithAddress(addr))
 	res, err = query(input.ctx, path0, req)
 	require.Nil(t, err)
 	require.NotNil(t, res)
 
-	var account types.AccountX
+	var account authx.AccountX
 	err2 := input.cdc.UnmarshalJSON(res, &account)
 	require.Nil(t, err2)
 }

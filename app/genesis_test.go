@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/authx/types"
 )
 
 func TestFromToMap(t *testing.T) {
@@ -75,6 +74,6 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// others
 	var authxData authx.GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(state[types.ModuleName], &authxData)
+	authx.ModuleCdc.MustUnmarshalJSON(state[authx.ModuleName], &authxData)
 	require.Equal(t, sdk.NewDec(20), authxData.Params.MinGasPriceLimit)
 }

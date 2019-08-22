@@ -1,7 +1,7 @@
 package authx
 
 import (
-	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
 const (
@@ -24,6 +24,8 @@ var (
 	NewParams                  = types.NewParams
 	NewAccountX                = types.NewAccountX
 	DefaultParams              = types.DefaultParams
+	ModuleCdc                  = types.ModuleCdc
+	NewAccountXWithAddress     = types.NewAccountXWithAddress
 )
 
 type (

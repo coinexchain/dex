@@ -2,9 +2,8 @@ package authx
 
 import (
 	"encoding/json"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/modules/authx/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeeper, tk ExpectedTokenKeeper) {
@@ -26,17 +25,17 @@ func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeepe
 }
 
 type NotificationUnlock struct {
-	Address     sdk.AccAddress    `json:"address" yaml:"address"`
-	Unlocked    sdk.Coins         `json:"unlocked"`
-	LockedCoins types.LockedCoins `json:"locked_coins"`
-	FrozenCoins sdk.Coins         `json:"frozen_coins"`
-	Coins       sdk.Coins         `json:"coins" yaml:"coins"`
-	Height      int64             `json:"height"`
+	Address     sdk.AccAddress `json:"address" yaml:"address"`
+	Unlocked    sdk.Coins      `json:"unlocked"`
+	LockedCoins LockedCoins    `json:"locked_coins"`
+	FrozenCoins sdk.Coins      `json:"frozen_coins"`
+	Coins       sdk.Coins      `json:"coins" yaml:"coins"`
+	Height      int64          `json:"height"`
 }
 
-func withdrawUnlockedCoins(accx *types.AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper, tk ExpectedTokenKeeper) {
+func withdrawUnlockedCoins(accx *AccountX, time int64, ctx sdk.Context, kx AccountXKeeper, keeper ExpectedAccountKeeper, tk ExpectedTokenKeeper) {
 	var unlocked = sdk.Coins{}
-	var stillLocked types.LockedCoins
+	var stillLocked LockedCoins
 	for _, c := range accx.LockedCoins {
 		if c.UnlockTime <= time {
 			unlocked = unlocked.Add(sdk.Coins{c.Coin})

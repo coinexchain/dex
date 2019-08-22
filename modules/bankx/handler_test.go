@@ -1,23 +1,26 @@
 package bankx_test
 
 import (
-	cetapp "github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
-	"github.com/stretchr/testify/require"
 	"testing"
 
-	types2 "github.com/coinexchain/dex/modules/authx/types"
-	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
-	"github.com/coinexchain/dex/testutil"
-	dex "github.com/coinexchain/dex/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/stretchr/testify/require"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+
+	cetapp "github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
+	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/coinexchain/dex/testutil"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var (
@@ -46,7 +49,7 @@ func TestHandlerMsgSend(t *testing.T) {
 	bkx, handle, ctx := defaultContext()
 
 	fromAccount := bkx.Ak.NewAccountWithAddress(ctx, fromAddr)
-	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
+	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(100000000)
 	_ = fromAccount.SetCoins(oneCoins)
@@ -101,7 +104,7 @@ func TestHandlerMsgSend(t *testing.T) {
 func TestHandlerMsgSendFail(t *testing.T) {
 	bkx, handle, ctx := defaultContext()
 	fromAccount := bkx.Ak.NewAccountWithAddress(ctx, fromAddr)
-	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
+	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(100000000)
 	_ = fromAccount.SetCoins(oneCoins)
@@ -124,7 +127,7 @@ func TestHandlerMsgSendFail(t *testing.T) {
 func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 	bkx, handle, ctx := defaultContext()
 	fromAccount := bkx.Ak.NewAccountWithAddress(ctx, fromAddr)
-	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
+	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
 	fee := bkx.GetParams(ctx).LockCoinsFee
 	Coins := dex.NewCetCoins(1000000000 + fee*2)
 	_ = fromAccount.SetCoins(Coins)
@@ -183,7 +186,7 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 func TestUnlockQueueNotAppend(t *testing.T) {
 	bkx, handle, ctx := defaultContext()
 	fromAccount := bkx.Ak.NewAccountWithAddress(ctx, fromAddr)
-	fromAccountX := types2.NewAccountXWithAddress(fromAddr)
+	fromAccountX := authx.NewAccountXWithAddress(fromAddr)
 
 	oneCoins := dex.NewCetCoins(10100000000)
 	_ = fromAccount.SetCoins(oneCoins)

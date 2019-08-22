@@ -11,8 +11,45 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	"github.com/coinexchain/dex/modules/authx/types"
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
+
+//
+//// get the root query command of this module
+//func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+//	// Group asset queries under a subcommand
+//	assQueryCmd := &cobra.Command{
+//		Use:   auth.ModuleName,
+//		Short: "Querying commands for the auth module",
+//	}
+//
+//	assQueryCmd.AddCommand(client.GetCommands(
+//		GetQueryParamsCmd(types.QuerierRoute, cdc),
+//	)...)
+//
+//	return assQueryCmd
+//}
+//
+//func GetQueryParamsCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+//	return &cobra.Command{
+//		Use:   "params",
+//		Args:  cobra.NoArgs,
+//		Short: "Query auth params",
+//		RunE: func(cmd *cobra.Command, args []string) error {
+//			cliCtx := context.NewCLIContext().WithCodec(cdc)
+//
+//			route := fmt.Sprintf("custom/%s/%s", auth.QuerierRoute, auth.QueryParameters)
+//			res, _, err := cliCtx.QueryWithData(route, nil)
+//			if err != nil {
+//				return err
+//			}
+//
+//			var params types.Params
+//			cdc.MustUnmarshalJSON(res, &params)
+//			return cliCtx.PrintOutput(params)
+//		},
+//	}
+//}
 
 func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{

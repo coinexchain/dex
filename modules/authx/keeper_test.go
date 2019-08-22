@@ -1,13 +1,14 @@
 package authx_test
 
 import (
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/authx/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
 var addr = sdk.AccAddress([]byte("some-address"))

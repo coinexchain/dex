@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/authx/types"
 	"os"
 	"path/filepath"
 
@@ -14,6 +13,7 @@ import (
 	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/config"
 
+	"github.com/coinexchain/dex/modules/authx"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -54,7 +54,7 @@ func adjustAppConfig() error {
 
 	appConf, _ := config.ParseConfig()
 	// use network_min_gas_price as default value for node_mini_gas_price
-	appConf.MinGasPrices = fmt.Sprintf("%s%s", types.DefaultMinGasPriceLimit, dex.DefaultBondDenom)
+	appConf.MinGasPrices = fmt.Sprintf("%s%s", authx.DefaultMinGasPriceLimit, dex.DefaultBondDenom)
 	config.WriteConfigFile(appConfigFilePath, appConf)
 	return nil
 }
