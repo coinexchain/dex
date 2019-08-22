@@ -2,7 +2,7 @@ package keepers
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	auth "github.com/cosmos/cosmos-sdk/x/auth/exported"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	supply "github.com/cosmos/cosmos-sdk/x/supply/exported"
 )
 
@@ -18,6 +18,7 @@ type SupplyKeeper interface {
 type ExpectedAccountKeeper interface {
 	GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account
 	SetAccount(ctx sdk.Context, acc auth.Account)
+	GetParams(ctx sdk.Context) (params auth.Params)
 }
 
 type ExpectedTokenKeeper interface {

@@ -16,6 +16,8 @@ import (
 func NewQuerier(keeper AccountXKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
+		case types.QueryParameters:
+			return queryParameters(ctx, keeper)
 		case types.QueryAccountX:
 			return queryAccountX(ctx, req, keeper)
 		default:
@@ -42,4 +44,17 @@ func queryAccountX(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper
 	}
 
 	return bz, nil
+}
+
+func queryParameters(ctx sdk.Context, k AccountXKeeper) ([]byte, sdk.Error) {
+	params := k.ak.GetParams(ctx)
+	paramsx := k.GetParams(ctx)
+	mergedParams := types.NewMergedParams(params, paramsx)
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, mergedParams)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return res, nil
 }

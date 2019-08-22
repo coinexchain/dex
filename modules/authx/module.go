@@ -64,7 +64,7 @@ func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 
 // get the root query command of this module
 func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetAccountXCmd(cdc)
+	return cli.GetQueryCmd(cdc)
 }
 
 //___________________________

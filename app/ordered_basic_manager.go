@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/modules/authx"
 	distrx "github.com/coinexchain/dex/modules/distributionx/types"
 )
 
@@ -70,8 +69,7 @@ func (bm OrderedBasicManager) AddQueryCommands(rootQueryCmd *cobra.Command, cdc 
 
 func isDuplicatedQueryCmd(module string) bool {
 	return module == auth.ModuleName || //overwritten
-		module == staking.ModuleName || //overwritten
-		module == authx.ModuleName //mounted
+		module == staking.ModuleName //overwritten
 }
 
 func (bm OrderedBasicManager) ValidateGenesis(genesis map[string]json.RawMessage) error {
