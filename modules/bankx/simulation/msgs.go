@@ -3,6 +3,7 @@ package simulation
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/tendermint/tendermint/crypto"
 
@@ -62,8 +63,13 @@ func createMsgSend(r *rand.Rand, ctx sdk.Context, accs []simulation.Account, map
 		return fromAcc, "skipping bank send due to account having no coins of denomination " + initFromCoins[denomIndex].Denom, msg, false
 	}
 
+	var unlockTime int64
+	if r.Intn(10) > 0 { // 10% of sends are locked within 1 minute
+		unlockTime = time.Now().Unix() + r.Int63n(60) + 1
+	}
+
 	coins := sdk.Coins{sdk.NewCoin(initFromCoins[denomIndex].Denom, amt)}
-	msg = bankx.NewMsgSend(fromAcc.Address, toAcc.Address, coins, 0)
+	msg = bankx.NewMsgSend(fromAcc.Address, toAcc.Address, coins, unlockTime)
 	return fromAcc, "", msg, true
 }
 
@@ -105,7 +111,7 @@ func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg t
 		return fmt.Errorf("fromAddress %s had an incorrect amount of coins", fromAcc.GetAddress())
 	}
 
-	if !initialToAddrCoins.Add(msg.Amount).IsEqual(toAcc.GetCoins()) {
+	if msg.UnlockTime == 0 && !initialToAddrCoins.Add(msg.Amount).IsEqual(toAcc.GetCoins()) {
 		return fmt.Errorf("toAddress %s had an incorrect amount of coins", toAcc.GetAddress())
 	}
 
