@@ -2,10 +2,8 @@ package simulation
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
-
 	"github.com/tendermint/tendermint/crypto"
+	"math/rand"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -65,7 +63,7 @@ func createMsgSend(r *rand.Rand, ctx sdk.Context, accs []simulation.Account, map
 
 	var unlockTime int64
 	if r.Intn(10) > 0 { // 10% of sends are locked within 1 minute
-		unlockTime = time.Now().Unix() + r.Int63n(60) + 1
+		unlockTime = ctx.BlockHeader().Time.Unix() + r.Int63n(60) + 1
 	}
 
 	coins := sdk.Coins{sdk.NewCoin(initFromCoins[denomIndex].Denom, amt)}

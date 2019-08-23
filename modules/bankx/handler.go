@@ -109,7 +109,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	time := msg.UnlockTime
 	if time != 0 {
 		if time < ctx.BlockHeader().Time.Unix() {
-			return types.ErrUnlockTime("Invalid Unlock Time").Result()
+			return types.ErrUnlockTime("Invalid Unlock Time:" + fmt.Sprintf("%d < %d", time, ctx.BlockHeader().Time.Unix())).Result()
 		}
 		return sendLockedCoins(ctx, k, msg.FromAddress, msg.ToAddress, amt, time)
 	}
