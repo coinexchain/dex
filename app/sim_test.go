@@ -546,6 +546,10 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 			Weight: getWeightOrDefault(OpWeightMsgCancelOrder, 100),
 			Op:     marketsim.SimulateMsgCancelOrder(app.marketKeeper),
 		},
+		{
+			Weight: getWeightOrDefault(OpWeightMsgSetMemoRequired, 2),
+			Op:     bankxsim.SimulateMsgSetMemoRequired(app.bankxKeeper),
+		},
 	}
 }
 

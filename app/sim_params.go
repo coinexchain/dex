@@ -19,6 +19,8 @@ const (
 	OpWeightMsgBancorInit   = "op_weight_msg_bancor_init"
 	OpWeightMsgBancorTrade  = "op_weight_msg_bancor_trade"
 	OpWeightMsgBancorCancel = "op_weight_msg_bancor_cancel"
+	// bankx
+	OpWeightMsgSetMemoRequired = "op_weight_msg_set_memo_required"
 	//comment
 	OpWeightCreateNewThread   = "op_weight_create_new_thread"
 	OpWeightCreateCommentRefs = "op_weight_create_comment_refs"
