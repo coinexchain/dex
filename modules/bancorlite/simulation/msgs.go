@@ -29,7 +29,7 @@ func SimulateMsgBancorInit(assetKeeper asset.Keeper, blk bancorlite.Keeper) simu
 		// issue new token
 		issueTokenMsg := createMsgIssueToken(newSymbol, amount, addr)
 		issueTokenOK := dexsim.SimulateHandleMsg(issueTokenMsg, asset.NewHandler(assetKeeper), ctx)
-		if issueTokenOK {
+		if !issueTokenOK {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
