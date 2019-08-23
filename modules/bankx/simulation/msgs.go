@@ -2,8 +2,9 @@ package simulation
 
 import (
 	"fmt"
-	"github.com/tendermint/tendermint/crypto"
 	"math/rand"
+
+	"github.com/tendermint/tendermint/crypto"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,6 +16,7 @@ import (
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	dexsim "github.com/coinexchain/dex/simulation"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // SendTx tests and runs a single msg send where both
@@ -24,12 +26,15 @@ func SimulateMsgSend(mapper auth.AccountKeeper, bk bankx.Keeper) simulation.Oper
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account) (
 		opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
 
-		fromAcc, comment, msg, ok := createMsgSend(r, ctx, accs, mapper)
+		lockCoinsFee := dex.NewCetCoins(bk.GetParams(ctx).LockCoinsFee)
+
+		fromAcc, comment, msg, ok := createMsgSend(r, ctx, accs, mapper, lockCoinsFee)
 		opMsg = simulation.NewOperationMsg(msg, ok, comment)
 		if !ok {
 			return opMsg, nil, nil
 		}
-		err = sendAndVerifyMsgSend(app, mapper, msg, ctx, []crypto.PrivKey{fromAcc.PrivKey}, handler)
+
+		err = sendAndVerifyMsgSend(app, mapper, msg, ctx, []crypto.PrivKey{fromAcc.PrivKey}, handler, lockCoinsFee)
 		if err != nil {
 			return opMsg, nil, err
 		}
@@ -37,7 +42,7 @@ func SimulateMsgSend(mapper auth.AccountKeeper, bk bankx.Keeper) simulation.Oper
 	}
 }
 
-func createMsgSend(r *rand.Rand, ctx sdk.Context, accs []simulation.Account, mapper auth.AccountKeeper) (
+func createMsgSend(r *rand.Rand, ctx sdk.Context, accs []simulation.Account, mapper auth.AccountKeeper, lockCoinsFee sdk.Coins) (
 	fromAcc simulation.Account, comment string, msg types.MsgSend, ok bool) {
 
 	fromAcc = simulation.RandomAcc(r, accs)
@@ -61,18 +66,21 @@ func createMsgSend(r *rand.Rand, ctx sdk.Context, accs []simulation.Account, map
 		return fromAcc, "skipping bank send due to account having no coins of denomination " + initFromCoins[denomIndex].Denom, msg, false
 	}
 
+	coins := sdk.Coins{sdk.NewCoin(initFromCoins[denomIndex].Denom, amt)}
+
 	var unlockTime int64
-	if r.Intn(10) > 0 { // 10% of sends are locked within 1 minute
-		unlockTime = ctx.BlockHeader().Time.Unix() + r.Int63n(60) + 1
+	if initFromCoins.Sub(coins).IsAllGT(lockCoinsFee) {
+		if r.Intn(10) > 0 { // 10% of sends are locked within 1 minute
+			unlockTime = ctx.BlockHeader().Time.Unix() + r.Int63n(60) + 1
+		}
 	}
 
-	coins := sdk.Coins{sdk.NewCoin(initFromCoins[denomIndex].Denom, amt)}
 	msg = bankx.NewMsgSend(fromAcc.Address, toAcc.Address, coins, unlockTime)
 	return fromAcc, "", msg, true
 }
 
 // Sends and verifies the transition of a msg send.
-func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg types.MsgSend, ctx sdk.Context, privkeys []crypto.PrivKey, handler sdk.Handler) error {
+func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg types.MsgSend, ctx sdk.Context, privkeys []crypto.PrivKey, handler sdk.Handler, lockCoinsFee sdk.Coins) error {
 	fromAcc := mapper.GetAccount(ctx, msg.FromAddress)
 	AccountNumbers := []uint64{fromAcc.GetAccountNumber()}
 	SequenceNumbers := []uint64{fromAcc.GetSequence()}
@@ -105,12 +113,18 @@ func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg t
 	fromAcc = mapper.GetAccount(ctx, msg.FromAddress)
 	toAcc = mapper.GetAccount(ctx, msg.ToAddress)
 
-	if !initialFromAddrCoins.Sub(msg.Amount).IsEqual(fromAcc.GetCoins()) {
-		return fmt.Errorf("fromAddress %s had an incorrect amount of coins", fromAcc.GetAddress())
-	}
+	if msg.UnlockTime == 0 {
+		if !initialFromAddrCoins.Sub(msg.Amount).IsEqual(fromAcc.GetCoins()) {
+			return fmt.Errorf("fromAddress %s had an incorrect amount of coins", fromAcc.GetAddress())
+		}
 
-	if msg.UnlockTime == 0 && !initialToAddrCoins.Add(msg.Amount).IsEqual(toAcc.GetCoins()) {
-		return fmt.Errorf("toAddress %s had an incorrect amount of coins", toAcc.GetAddress())
+		if !initialToAddrCoins.Add(msg.Amount).IsEqual(toAcc.GetCoins()) {
+			return fmt.Errorf("toAddress %s had an incorrect amount of coins", toAcc.GetAddress())
+		}
+	} else {
+		if !initialFromAddrCoins.Sub(msg.Amount).Sub(lockCoinsFee).IsEqual(fromAcc.GetCoins()) {
+			return fmt.Errorf("toAddress %s had an incorrect amount of coins", toAcc.GetAddress())
+		}
 	}
 
 	return nil
