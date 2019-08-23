@@ -33,13 +33,21 @@ import (
 	stakingsim "github.com/cosmos/cosmos-sdk/x/staking/simulation"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	"github.com/coinexchain/dex/modules/alias"
 	aliassim "github.com/coinexchain/dex/modules/alias/simulation"
 	"github.com/coinexchain/dex/modules/asset"
 	assetsim "github.com/coinexchain/dex/modules/asset/simulation"
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bancorlite"
 	bancorsim "github.com/coinexchain/dex/modules/bancorlite/simulation"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/comment"
 	commentsim "github.com/coinexchain/dex/modules/comment/simulation"
 	distrxim "github.com/coinexchain/dex/modules/distributionx/simulation"
+	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/coinexchain/dex/modules/market"
 	marketsim "github.com/coinexchain/dex/modules/market/simulation"
+	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/types"
 )
 
@@ -131,7 +139,7 @@ func appStateRandomizedFn(
 
 	appParams.GetOrGenerate(cdc, simapp.StakePerAccount, &amount, r,
 		func(r *rand.Rand) { amount = int64(r.Intn(1e12)) + 1e13 })
-	appParams.GetOrGenerate(cdc, simapp.InitiallyBondedValidators, &amount, r,
+	appParams.GetOrGenerate(cdc, simapp.InitiallyBondedValidators, &numInitiallyBonded, r,
 		func(r *rand.Rand) { numInitiallyBonded = int64(r.Intn(250)) })
 
 	numAccs := int64(len(accs))
@@ -148,16 +156,25 @@ func appStateRandomizedFn(
 `, amount, numInitiallyBonded,
 	)
 
-	GenGenesisAccounts(cdc, r, accs, genesisTimestamp, amount, numInitiallyBonded, genesisState)
 	simapp.GenAuthGenesisState(cdc, r, appParams, genesisState)
 	simapp.GenBankGenesisState(cdc, r, appParams, genesisState)
-	GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState)
 	simapp.GenGovGenesisState(cdc, r, appParams, genesisState)
-	//simapp.GenMintGenesisState(cdc, r, appParams, genesisState)
 	simapp.GenDistrGenesisState(cdc, r, appParams, genesisState)
 	stakingGen := GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded, appParams, genesisState)
 	simapp.GenSlashingGenesisState(cdc, r, stakingGen, appParams, genesisState)
-	GenAssetGenesisState(cdc, accs, amount, numInitiallyBonded, genesisState)
+
+	GenGenesisAccounts(cdc, r, accs, genesisTimestamp, amount, numInitiallyBonded, genesisState)
+	GenSupplyGenesisState(cdc, amount, numInitiallyBonded, int64(len(accs)), genesisState)
+
+	GenAliasDefaultGenesisState(cdc, genesisState)
+	GenAssetDefaultGenesisState(cdc, accs, amount, numInitiallyBonded, genesisState)
+	GenAuthxDefaultGenesisState(cdc, genesisState)
+	GenBancorliteDefaultGenesisState(cdc, genesisState)
+	GenBankxDefaultGenesisState(cdc, genesisState)
+	GenCommentDefaultGenesisState(cdc, genesisState)
+	GenIncentiveDefaultGenesisState(cdc, genesisState)
+	GenMarketDefaultGenesisState(cdc, genesisState)
+	GenStakingxDefaultGenesisState(cdc, genesisState)
 
 	appState, err := MakeCodec().MarshalJSON(genesisState)
 	if err != nil {
@@ -295,7 +312,47 @@ func GenGenesisAccounts(
 	genesisState[genaccounts.ModuleName] = cdc.MustMarshalJSON(genesisAccounts)
 }
 
-func GenAssetGenesisState(cdc *codec.Codec, accs []simulation.Account, amount, numInitiallyBonded int64,
+func GenAliasDefaultGenesisState(cdc *codec.Codec, genesisState map[string]json.RawMessage) {
+	aliasGenesis := alias.DefaultGenesisState()
+	genesisState[alias.ModuleName] = cdc.MustMarshalJSON(aliasGenesis)
+}
+
+func GenAuthxDefaultGenesisState(cdc *codec.Codec, genesisState map[string]json.RawMessage) {
+	authxGenesis := authx.DefaultGenesisState()
+	genesisState[authx.ModuleName] = cdc.MustMarshalJSON(authxGenesis)
+}
+
+func GenBankxDefaultGenesisState(cdc *codec.Codec, genesisState map[string]json.RawMessage) {
+	bankxGenesis := bankx.DefaultGenesisState()
+	genesisState[bankx.ModuleName] = cdc.MustMarshalJSON(bankxGenesis)
+}
+
+func GenBancorliteDefaultGenesisState(cdc *codec.Codec, genesisState map[string]json.RawMessage) {
+	bancorliteGenesis := bancorlite.DefaultGenesisState()
+	genesisState[bancorlite.ModuleName] = cdc.MustMarshalJSON(bancorliteGenesis)
+}
+
+func GenCommentDefaultGenesisState(cdc *codec.Codec, genesisState map[string]json.RawMessage) {
+	commentGenesis := comment.DefaultGenesisState()
+	genesisState[comment.ModuleName] = cdc.MustMarshalJSON(commentGenesis)
+}
+
+func GenIncentiveDefaultGenesisState(cdc *codec.Codec, genesisState map[string]json.RawMessage) {
+	incentiveGenesis := incentive.DefaultGenesisState()
+	genesisState[incentive.ModuleName] = cdc.MustMarshalJSON(incentiveGenesis)
+}
+
+func GenMarketDefaultGenesisState(cdc *codec.Codec, genesisState map[string]json.RawMessage) {
+	marketGenesis := market.DefaultGenesisState()
+	genesisState[market.ModuleName] = cdc.MustMarshalJSON(marketGenesis)
+}
+
+func GenStakingxDefaultGenesisState(cdc *codec.Codec, genesisState map[string]json.RawMessage) {
+	stakingxGenesis := stakingx.DefaultGenesisState()
+	genesisState[stakingx.ModuleName] = cdc.MustMarshalJSON(stakingxGenesis)
+}
+
+func GenAssetDefaultGenesisState(cdc *codec.Codec, accs []simulation.Account, amount, numInitiallyBonded int64,
 	genesisState map[string]json.RawMessage) {
 
 	tokenTotalSupply := sdk.NewInt(amount * (int64(len(accs)) + numInitiallyBonded))

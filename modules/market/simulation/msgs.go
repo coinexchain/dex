@@ -260,9 +260,11 @@ func createMsgCreateOrder(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ak au
 	//generate from account
 	var fromCoins sdk.Coins
 	var fromAddr sdk.AccAddress
+	var fromAcc auth.Account
 	for {
 		fromAddr = simulation.RandomAcc(r, accs).Address
-		fromCoins = ak.GetAccount(ctx, fromAddr).GetCoins()
+		fromAcc = ak.GetAccount(ctx, fromAddr)
+		fromCoins = fromAcc.GetCoins()
 		if !fromCoins.AmountOf(denom).IsZero() {
 			break
 		}
@@ -297,6 +299,7 @@ func createMsgCreateOrder(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ak au
 		Quantity:       quantity,
 		Side:           byte(side),
 		TimeInForce:    timeInforce,
+		Sequence:       r.Uint64(),
 	}
 	if msg.ValidateBasic() != nil {
 		return types.MsgCreateOrder{}, fmt.Errorf("msg expected to pass validation check")
