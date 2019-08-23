@@ -28,6 +28,7 @@ const (
 	FlagOrderID   = "order-id"
 	FlagBlocks    = "blocks"
 	FlagTime      = "time"
+	FlagIdentify  = "identify"
 )
 
 var createOrderFlags = []string{
@@ -37,6 +38,7 @@ var createOrderFlags = []string{
 	FlagQuantity,
 	FlagSide,
 	FlagPricePrecision,
+	FlagIdentify,
 }
 
 func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
@@ -48,7 +50,7 @@ func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 Example: 
 	 cetcli tx market create-ioc-order --trading-pair=btc/cet 
 	--order-type=2 --price=520 --quantity=10000000 
-	--side=1 --price-precision=10 --from=bob 
+	--side=1 --price-precision=10 --from=bob --identify=1
 	--chain-id=coinexdex --gas=10000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, false)
@@ -68,8 +70,8 @@ func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 Example:
 	cetcli tx market create-gte-order --trading-pair=btc/cet 
 	--order-type=2 --price=520 --quantity=10000000 --side=1 
-	--price-precision=10 --blocks=<100000> --from=bob --chain-id=coinexdex 
-	--gas=10000 --fees=1000cet`,
+	--price-precision=10 --blocks=<100000> --from=bob --identify=1
+	--chain-id=coinexdex --gas=10000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, true)
 		},
@@ -87,12 +89,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 
 	accRetriever := auth.NewAccountRetriever(cliCtx)
 	sender := cliCtx.GetFromAddress()
-	_, sequence, err := accRetriever.GetAccountNumberSequence(sender)
-	if err != nil {
-		return err
-	}
-
-	msg, err := parseCreateOrderFlags(sender, sequence)
+	msg, err := parseCreateOrderFlags(sender)
 	if err != nil {
 		if isGTE {
 			return errors.Errorf("tx flag is error, please see help : " +
@@ -126,7 +123,7 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
 
-func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*types.MsgCreateOrder, error) {
+func parseCreateOrderFlags(sender sdk.AccAddress) (*types.MsgCreateOrder, error) {
 	for _, flag := range createOrderFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop" + flag)
@@ -139,13 +136,13 @@ func parseCreateOrderFlags(sender sdk.AccAddress, sequence uint64) (*types.MsgCr
 
 	msg := &types.MsgCreateOrder{
 		Sender:         sender,
+		Identify:       byte(viper.GetInt(FlagIdentify)),
 		TradingPair:    viper.GetString(FlagSymbol),
 		OrderType:      byte(viper.GetInt(FlagOrderType)),
 		Side:           byte(viper.GetInt(FlagSide)),
 		Price:          viper.GetInt64(FlagPrice),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
 		Quantity:       viper.GetInt64(FlagQuantity),
-		Sequence:       sequence,
 		ExistBlocks:    blocks,
 	}
 
@@ -159,6 +156,9 @@ func markCreateOrderFlags(cmd *cobra.Command) {
 	cmd.Flags().Int(FlagQuantity, -1, "The number of tokens will be trade in the order ")
 	cmd.Flags().Int(FlagSide, -1, "The side in the order")
 	cmd.Flags().Int(FlagPricePrecision, -1, "The price precision in order")
+	cmd.Flags().Int(FlagIdentify, 0, "Because a transaction can contain multiple order "+
+		"creation messages, the identify field was added to the order creation message to give each "+
+		"order a unique ID. So the order ID consists of user address, user sequence, identify,")
 
 	for _, flag := range createOrderFlags {
 		cmd.MarkFlagRequired(flag)

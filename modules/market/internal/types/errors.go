@@ -33,6 +33,9 @@ const (
 	CodeInvalidBancorExist    sdk.CodeType = 625
 	CodeInvalidExistBlocks    sdk.CodeType = 626
 	CodeInvalidTimeInforce    sdk.CodeType = 627
+	CodeFailedUnmarshal       sdk.CodeType = 628
+	CodeInvalidSequence       sdk.CodeType = 629
+	CodeInvalidOrderExist     sdk.CodeType = 630
 )
 
 func ErrTokenNoExist() sdk.Error {

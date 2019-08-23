@@ -3,8 +3,11 @@ package keepers
 import (
 	"bytes"
 
+	abci "github.com/tendermint/tendermint/abci/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/coinexchain/dex/modules/asset"
@@ -92,13 +95,15 @@ type Keeper struct {
 	gmk           GlobalMarketInfoKeeper
 	msgProducer   msgqueue.MsgSender
 	bancorK       types.ExpectedBancorKeeper
+	ak            auth.AccountKeeper
 }
 
 func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 	bnkVal types.ExpectedBankxKeeper, cdcVal *codec.Codec,
 	msgKeeperVal msgqueue.MsgSender,
 	paramstore params.Subspace,
-	bancor types.ExpectedBancorKeeper) Keeper {
+	bancor types.ExpectedBancorKeeper,
+	ak auth.AccountKeeper) Keeper {
 
 	return Keeper{
 		paramSubspace: paramstore.WithKeyTable(types.ParamKeyTable()),
@@ -110,7 +115,27 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
 		msgProducer:   msgKeeperVal,
 		bancorK:       bancor,
+		ak:            ak,
 	}
+}
+
+func (k Keeper) QuerySeqWithAddr(ctx sdk.Context, addr sdk.AccAddress) (uint64, sdk.Error) {
+	bz, err := k.cdc.MarshalJSON(auth.QueryAccountParams{Address: addr})
+	if err != nil {
+		return 0, sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidAddress, err.Error())
+	}
+	res, sdkErr := auth.NewQuerier(k.ak)(ctx, []string{auth.QueryAccount}, abci.RequestQuery{
+		Data: bz,
+	})
+	if sdkErr != nil {
+		return 0, sdkErr
+	}
+
+	var acc auth.Account
+	if err := k.cdc.UnmarshalJSON(res, &acc); err != nil {
+		return 0, sdk.NewError(types.CodeSpaceMarket, types.CodeFailedUnmarshal, err.Error())
+	}
+	return acc.GetSequence(), nil
 }
 
 func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {

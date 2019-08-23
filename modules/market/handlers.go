@@ -234,6 +234,10 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The order amount is too large").Result()
 	}
 
+	seq, err := keeper.QuerySeqWithAddr(ctx, msg.Sender)
+	if err != nil {
+		return err.Result()
+	}
 	marketParams := keeper.GetParams(ctx)
 	frozenFee, err := calFrozenFeeInOrder(ctx, marketParams, keeper, msg)
 	if err != nil {
@@ -241,7 +245,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	}
 
 	featureFee := calFeatureFeeForExistBlocks(msg, marketParams)
-	if ret := checkMsgCreateOrder(ctx, keeper, msg, frozenFee+featureFee, amount, denom); !ret.IsOK() {
+	if ret := checkMsgCreateOrder(ctx, keeper, msg, frozenFee+featureFee, amount, denom, seq); !ret.IsOK() {
 		return ret
 	}
 	existBlocks := msg.ExistBlocks
@@ -251,7 +255,8 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 
 	order := types.Order{
 		Sender:      msg.Sender,
-		Sequence:    msg.Sequence,
+		Sequence:    seq,
+		Identify:    msg.Identify,
 		TradingPair: msg.TradingPair,
 		OrderType:   msg.OrderType,
 		Price:       sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision))))),
@@ -291,24 +296,18 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	}
 }
 
-func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCreateOrder, cetFee int64, amount int64, denom string) sdk.Result {
-	var (
-		stock, money string
-	)
-	values := strings.Split(msg.TradingPair, types.SymbolSeparator)
-	stock, money = values[0], values[1]
-
+func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCreateOrder, cetFee int64, amount int64, denom string, seq uint64) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
-
 	if cetFee != 0 {
 		frozenFeeAsCet := sdk.Coins{sdk.NewCoin(dex.CET, sdk.NewInt(cetFee))}
 		if !keeper.HasCoins(ctx, msg.Sender, frozenFeeAsCet) {
 			return types.ErrInsufficientCoins().Result()
 		}
 	}
-
+	values := strings.Split(msg.TradingPair, types.SymbolSeparator)
+	stock, money := values[0], values[1]
 	totalAmount := amount
 	if (stock == dex.CET && msg.Side == types.SELL) ||
 		(money == dex.CET && msg.Side == types.BUY) {
@@ -318,6 +317,14 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 		return types.ErrInsufficientCoins().Result()
 	}
 
+	orderID, err := types.AssemblyOrderID(msg.Sender.String(), seq, msg.Identify)
+	if err != nil {
+		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidSequence, err.Error()).Result()
+	}
+	globalKeeper := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc)
+	if globalKeeper.QueryOrder(ctx, orderID) != nil {
+		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderExist, fmt.Sprintf("the order [%s] have exist", orderID)).Result()
+	}
 	marketInfo, err := keeper.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
 		return types.ErrInvalidSymbol().Result()
@@ -325,11 +332,9 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 	if msg.PricePrecision > marketInfo.PricePrecision {
 		return types.ErrInvalidPricePrecision().Result()
 	}
-
 	if keeper.IsTokenForbidden(ctx, stock) || keeper.IsTokenForbidden(ctx, money) {
 		return types.ErrTokenForbidByIssuer().Result()
 	}
-
 	if keeper.IsForbiddenByTokenIssuer(ctx, stock, msg.Sender) || keeper.IsForbiddenByTokenIssuer(ctx, money, msg.Sender) {
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeAddressForbidByIssuer, "The sender is forbidden by token issuer").Result()
 	}

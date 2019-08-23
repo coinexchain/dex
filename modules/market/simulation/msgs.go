@@ -292,6 +292,7 @@ func createMsgCreateOrder(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ak au
 
 	msg = types.MsgCreateOrder{
 		Sender:         fromAddr,
+		Identify:       byte(r.Intn(255 + 1)),
 		TradingPair:    tradingPair.Stock + types.SymbolSeparator + tradingPair.Money,
 		OrderType:      types.LimitOrder,
 		PricePrecision: precision,
@@ -324,9 +325,12 @@ func randomExistedTradingPair(r *rand.Rand, ctx sdk.Context, k keepers.Keeper) (
 func verifyCreateOrder(ctx sdk.Context, k keepers.Keeper, msg types.MsgCreateOrder) bool {
 
 	ork := keepers.NewGlobalOrderKeeper(k.GetMarketKey(), types.ModuleCdc)
-	order := ork.QueryOrder(ctx, fmt.Sprintf("%s-%d", msg.Sender, msg.Sequence))
+	orderID, err := types.AssemblyOrderID(msg.Sender.String(), 0, msg.Identify)
+	if err != nil {
+		return false
+	}
+	order := ork.QueryOrder(ctx, orderID)
 	return order.Sender.Equals(msg.Sender) &&
-		order.Sequence == msg.Sequence &&
 		order.TimeInForce == msg.TimeInForce &&
 		order.Side == msg.Side &&
 		order.Quantity == msg.Quantity &&
@@ -366,7 +370,7 @@ func createMsgCancelOrder(r *rand.Rand, ctx sdk.Context, k keepers.Keeper) (type
 	orderToCancel := orders[r.Intn(len(orders))]
 	msg := types.MsgCancelOrder{
 		Sender:  orderToCancel.Sender,
-		OrderID: fmt.Sprintf("%s-%d", orderToCancel.Sender, orderToCancel.Sequence),
+		OrderID: orderToCancel.OrderID(),
 	}
 	if msg.ValidateBasic() != nil {
 		return types.MsgCancelOrder{}, fmt.Errorf("msg expected to pass validation check")

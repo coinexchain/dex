@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -26,7 +27,7 @@ var msgCdc = types.ModuleCdc
 var unitTestChainID = "coinex-test"
 
 // TODO: duplicated code, copied from order_keeper_test.go
-func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int, h int64) *types.Order {
+func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int, h int64, identify int) *types.Order {
 	addr, _ := simpleAddr(sender)
 	decPrice := sdk.NewDec(price).QuoInt(sdk.NewInt(10000))
 	freeze := qua
@@ -36,6 +37,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 	return &types.Order{
 		Sender:      addr,
 		Sequence:    seq,
+		Identify:    byte(identify),
 		TradingPair: "cet/usdt",
 		OrderType:   types.LIMIT,
 		Price:       decPrice,
@@ -148,7 +150,7 @@ func (k *mockFeeColletKeeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk
 func TestUnfreezeCoinsForOrder(t *testing.T) {
 	bxKeeper := &mocBankxKeeper{records: make([]string, 0, 10)}
 	mockFeeK := &mockFeeColletKeeper{}
-	order := newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998)
+	order := newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998, 3)
 	order.Freeze = 50
 	order.FrozenFee = 10
 	order.DealStock = 20
@@ -171,7 +173,7 @@ func TestRemoveOrders(t *testing.T) {
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey(unitTestChainID)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(types.StoreKey)
-	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace, mockBancorKeeper{})
+	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace, mockBancorKeeper{}, auth.AccountKeeper{})
 	keeper.SetUnixTime(ctx, time.Now().Unix())
 	ctx = ctx.WithBlockTime(time.Unix(time.Now().Unix()+int64(25*60*60), 0))
 	parameters := types.Params{}
@@ -194,17 +196,17 @@ func TestRemoveOrders(t *testing.T) {
 
 	cetKeeper := keepers.NewOrderKeeper(keys.marketKey, "cet/usdt", msgCdc)
 	btcKeeper := keepers.NewOrderKeeper(keys.marketKey, "btc/usdt", msgCdc)
-	order := newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 98)
+	order := newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 98, 1)
 	order.TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, order)
-	order = newTO("00005", 5, 12039, 120, types.SELL, types.GTE, 96)
+	order = newTO("00005", 5, 12039, 120, types.SELL, types.GTE, 96, 2)
 	order.TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, order)
-	order = newTO("00002", 2, 11080, 50, types.BUY, types.GTE, 98)
+	order = newTO("00002", 2, 11080, 50, types.BUY, types.GTE, 98, 3)
 	cetKeeper.Add(ctx, order)
-	order = newTO("00002", 3, 10900, 50, types.BUY, types.GTE, 92)
+	order = newTO("00002", 3, 10900, 50, types.BUY, types.GTE, 92, 4)
 	cetKeeper.Add(ctx, order)
-	order = newTO("00004", 4, 11032, 60, types.SELL, types.GTE, 90)
+	order = newTO("00004", 4, 11032, 60, types.SELL, types.GTE, 90, 5)
 	cetKeeper.Add(ctx, order)
 
 	EndBlocker(ctx, keeper)
@@ -236,7 +238,7 @@ func TestDelist(t *testing.T) {
 	bnk := &mocBankxKeeper{}
 	ctx, keys := newContextAndMarketKey(unitTestChainID)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(types.StoreKey)
-	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace, mockBancorKeeper{})
+	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(), subspace, mockBancorKeeper{}, auth.AccountKeeper{})
 	delistKeeper := keepers.NewDelistKeeper(keys.marketKey)
 	delistKeeper.AddDelistRequest(ctx, ctx.BlockHeight(), "btc/usdt")
 	// currDay := ctx.BlockHeader().Time.Unix()
@@ -276,39 +278,39 @@ func TestDelist(t *testing.T) {
 	cetKeeper := keepers.NewOrderKeeper(keys.marketKey, "cet/usdt", msgCdc)
 	btcKeeper := keepers.NewOrderKeeper(keys.marketKey, "btc/usdt", msgCdc)
 	orders := make([]*types.Order, 10)
-	orders[0] = newTO("00001", 1, 11051, 60, types.BUY, types.GTE, 98)
+	orders[0] = newTO("00001", 1, 11051, 60, types.BUY, types.GTE, 98, 1)
 	orders[0].TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, orders[0])
-	orders[1] = newTO("00005", 5, 12039, 120, types.SELL, types.IOC, 1000)
+	orders[1] = newTO("00005", 5, 12039, 120, types.SELL, types.IOC, 1000, 2)
 	orders[1].TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, orders[1])
-	orders[2] = newTO("00020", 6, 11039, 100, types.SELL, types.IOC, 1000)
+	orders[2] = newTO("00020", 6, 11039, 100, types.SELL, types.IOC, 1000, 1)
 	orders[2].TradingPair = "btc/usdt"
 	btcKeeper.Add(ctx, orders[2])
 
-	orders[3] = newTO("00202", 2, 11080, 50, types.BUY, types.GTE, 98)
+	orders[3] = newTO("00202", 2, 11080, 50, types.BUY, types.GTE, 98, 3)
 	cetKeeper.Add(ctx, orders[3])
-	orders[4] = newTO("00102", 3, 10900, 50, types.BUY, types.GTE, 92)
+	orders[4] = newTO("00102", 3, 10900, 50, types.BUY, types.GTE, 92, 4)
 	cetKeeper.Add(ctx, orders[4])
-	orders[5] = newTO("00004", 4, 11032, 30, types.SELL, types.GTE, 90)
+	orders[5] = newTO("00004", 4, 11032, 30, types.SELL, types.GTE, 90, 5)
 	cetKeeper.Add(ctx, orders[5])
-	orders[6] = newTO("00009", 9, 11032, 30, types.SELL, types.GTE, 90)
+	orders[6] = newTO("00009", 9, 11032, 30, types.SELL, types.GTE, 90, 6)
 	cetKeeper.Add(ctx, orders[6])
-	orders[7] = newTO("00002", 8, 11085, 5, types.BUY, types.GTE, 98)
+	orders[7] = newTO("00002", 8, 11085, 5, types.BUY, types.GTE, 98, 7)
 	cetKeeper.Add(ctx, orders[7])
 
-	orders[8] = newTO("00001", 10, 11000, 15, types.BUY, types.GTE, 998)
+	orders[8] = newTO("00001", 10, 11000, 15, types.BUY, types.GTE, 998, 8)
 	orders[8].TradingPair = "bch/usdt"
 	cetKeeper.Add(ctx, orders[8])
 
-	orders[9] = newTO("00001", 7, 11000, 15, types.BUY, types.GTE, 998)
+	orders[9] = newTO("00001", 7, 11000, 15, types.BUY, types.GTE, 998, 9)
 	orders[9].TradingPair = "bsv/usdt"
 	cetKeeper.Add(ctx, orders[9])
 
 	EndBlocker(ctx, keeper)
 	gKeeper := keepers.NewGlobalOrderKeeper(keys.marketKey, msgCdc)
 	allOrders := gKeeper.GetAllOrders(ctx)
-	subList := []int{4, 6, 8, 9}
+	subList := []int{4, 6, 9, 8}
 	if len(allOrders) != 4 {
 		t.Errorf("Incorrect remain orders.")
 	}

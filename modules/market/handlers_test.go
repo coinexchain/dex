@@ -2,7 +2,6 @@ package market
 
 import (
 	"bytes"
-	"fmt"
 	"math"
 	"testing"
 	"time"
@@ -80,13 +79,14 @@ func (t testInput) hasCoins(addr sdk.AccAddress, coins sdk.Coins) bool {
 }
 
 var (
-	haveCetAddress            = getAddr("000001")
-	notHaveCetAddress         = getAddr("000002")
-	forbidAddr                = getAddr("000003")
+	haveCetAddress      sdk.AccAddress
+	notHaveCetAddress   sdk.AccAddress
+	forbidAddr          sdk.AccAddress
 	stock                     = "tusdt"
 	money                     = "teos"
 	OriginHaveCetAmount int64 = 1E13
 	issueAmount         int64 = 210000000000
+	Bech32MainPrefix          = "coinex"
 )
 
 type storeKeys struct {
@@ -108,7 +108,13 @@ func (mbk mockBancorKeeper) IsBancorExist(ctx sdk.Context, stock string) bool {
 	return false
 }
 
-func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) types.ExpectedAssetStatusKeeper {
+func initAddress() {
+	haveCetAddress, _ = simpleAddr("00001")
+	notHaveCetAddress, _ = simpleAddr("00002")
+	forbidAddr, _ = simpleAddr("00003")
+}
+
+func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) (types.ExpectedAssetStatusKeeper, auth.AccountKeeper) {
 	asset.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
@@ -218,7 +224,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		tk.ForbidAddress(ctx, msgForbidAddr.Symbol, msgForbidAddr.OwnerAddr, msgForbidAddr.Addresses)
 	}
 
-	return tk
+	return tk, ak
 }
 
 func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) types.ExpectedBankxKeeper {
@@ -254,6 +260,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	cdc := codec.New()
 	db := dbm.NewMemDB()
 	ms := store.NewCommitMultiStore(db)
+	initAddress()
 
 	keys := storeKeys{}
 	keys.marketKey = sdk.NewKVStoreKey(types.StoreKey)
@@ -277,15 +284,15 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-	ak := prepareAssetKeeper(t, keys, cdc, ctx, addrForbid, tokenForbid)
+	ak, akp := prepareAssetKeeper(t, keys, cdc, ctx, addrForbid, tokenForbid)
 	bk := prepareBankxKeeper(keys, cdc, ctx)
-
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
+	// akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	mk := keepers.NewKeeper(keys.marketKey, ak, bk, cdc,
-		msgqueue.NewProducer(), paramsKeeper.Subspace(types.StoreKey), mockBancorKeeper{})
+		msgqueue.NewProducer(), paramsKeeper.Subspace(types.StoreKey), mockBancorKeeper{}, akp)
 	types.RegisterCodec(cdc)
 
-	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
+	// akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	// subspace := paramsKeeper.Subspace(StoreKey)
 	// keeper := NewKeeper(keys.marketKey, ak, bk, mockFeeKeeper{}, msgCdc, msgqueue.NewProducer(), subspace)
 	parameters := types.DefaultParams()
@@ -389,7 +396,6 @@ func TestCreateOrderFailed(t *testing.T) {
 	input := prepareMockInput(t, false, true)
 	msgOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
-		Sequence:       1,
 		TradingPair:    stock + types.SymbolSeparator + money,
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
@@ -453,6 +459,15 @@ func TestCreateOrderFailed(t *testing.T) {
 	require.Equal(t, types.CodeInvalidOrderAmount, ret.Code, "create GTE order should failed by token forbidden by issuer")
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 
+	ret = input.handler(input.ctx, msgOrder)
+	require.Equal(t, true, ret.IsOK(), "create order should succeed")
+
+	failedOrderHaveExist := msgOrder
+	newCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
+	ret = input.handler(input.ctx, failedOrderHaveExist)
+	oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
+	require.Equal(t, types.CodeInvalidOrderExist, ret.Code, "create order should failed by order exist")
+	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 }
 
 func TestCalculateAmount(t *testing.T) {
@@ -471,7 +486,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	msgGteOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
-		Sequence:       1,
+		Identify:       1,
 		TradingPair:    stock + types.SymbolSeparator + "cet",
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
@@ -486,6 +501,8 @@ func TestCreateOrderSuccess(t *testing.T) {
 	ret := createCetMarket(input, stock)
 	require.Equal(t, true, ret.IsOK(), "create market should succeed")
 
+	seq, err := input.mk.QuerySeqWithAddr(input.ctx, msgGteOrder.Sender)
+	require.Equal(t, nil, err)
 	oldCoin := input.getCoinFromAddr(haveCetAddress, stock)
 	ret = input.handler(input.ctx, msgGteOrder)
 	newCoin := input.getCoinFromAddr(haveCetAddress, stock)
@@ -494,12 +511,14 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, frozenMoney), "The amount is error")
 
 	glk := keepers.NewGlobalOrderKeeper(input.keys.marketKey, input.cdc)
-	order := glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 1))
+	orderID, err2 := types.AssemblyOrderID(msgGteOrder.Sender.String(), seq, msgGteOrder.Identify)
+	require.Equal(t, nil, err2)
+	order := glk.QueryOrder(input.ctx, orderID)
 	require.Equal(t, true, isSameOrderAndMsg(order, msgGteOrder), "order should equal msg")
 
 	msgIOCOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
-		Sequence:       2,
+		Identify:       2,
 		TradingPair:    stock + types.SymbolSeparator + "cet",
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
@@ -509,6 +528,8 @@ func TestCreateOrderSuccess(t *testing.T) {
 		TimeInForce:    types.IOC,
 	}
 
+	seq, err = input.mk.QuerySeqWithAddr(input.ctx, msgGteOrder.Sender)
+	require.Equal(t, nil, err)
 	oldCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
 	ret = input.handler(input.ctx, msgIOCOrder)
 	newCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
@@ -518,24 +539,23 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, totalFrozen), "The amount is error")
 
-	order = glk.QueryOrder(input.ctx, assemblyOrderID(haveCetAddress, 2))
+	orderID, err2 = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
+	require.Equal(t, nil, err2)
+	order = glk.QueryOrder(input.ctx, orderID)
 	require.Equal(t, true, isSameOrderAndMsg(order, msgIOCOrder), "order should equal msg")
-}
-
-func assemblyOrderID(addr sdk.AccAddress, seq uint64) string {
-	return fmt.Sprintf("%s-%d", addr, seq)
 }
 
 func isSameOrderAndMsg(order *types.Order, msg types.MsgCreateOrder) bool {
 	p := sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision)))))
 	samePrice := order.Price.Equal(p)
-	return bytes.Equal(order.Sender, msg.Sender) && order.Sequence == msg.Sequence &&
-		order.TradingPair == msg.TradingPair && order.OrderType == msg.OrderType && samePrice &&
-		order.Quantity == msg.Quantity && order.Side == msg.Side && order.TimeInForce == msg.TimeInForce
+	return bytes.Equal(order.Sender, msg.Sender) && order.TradingPair ==
+		msg.TradingPair && order.OrderType == msg.OrderType && samePrice &&
+		order.Quantity == msg.Quantity && order.Side == msg.Side &&
+		order.TimeInForce == msg.TimeInForce
 }
 
 func getAddr(input string) sdk.AccAddress {
-	addr, err := sdk.AccAddressFromHex(input)
+	addr, err := sdk.AccAddressFromBech32(input)
 	if err != nil {
 		panic(err)
 	}
@@ -546,18 +566,18 @@ func TestCancelOrderFailed(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	createCetMarket(input, stock)
 	cancelOrder := types.MsgCancelOrder{
-		Sender:  haveCetAddress,
-		OrderID: assemblyOrderID(haveCetAddress, 1),
+		Sender: haveCetAddress,
 	}
 
-	failedOrderNotExist := cancelOrder
-	ret := input.handler(input.ctx, failedOrderNotExist)
+	failedInvalidOrderID := cancelOrder
+	failedInvalidOrderID.OrderID, _ = types.AssemblyOrderID(haveCetAddress.String(), 1, 2)
+	ret := input.handler(input.ctx, failedInvalidOrderID)
 	require.Equal(t, types.CodeNotFindOrder, ret.Code, "cancel order should failed by not exist ")
 
 	// create order
 	msgIOCOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
-		Sequence:       2,
+		Identify:       1,
 		TradingPair:    stock + types.SymbolSeparator + "cet",
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
@@ -569,10 +589,13 @@ func TestCancelOrderFailed(t *testing.T) {
 	ret = input.handler(input.ctx, msgIOCOrder)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 
+	seq, err := input.mk.QuerySeqWithAddr(input.ctx, msgIOCOrder.Sender)
+	require.Equal(t, nil, err)
 	failedNotOrderSender := cancelOrder
-	failedNotOrderSender.OrderID = assemblyOrderID(notHaveCetAddress, 2)
+	failedNotOrderSender.OrderID, _ = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
+	failedNotOrderSender.Sender = notHaveCetAddress
 	ret = input.handler(input.ctx, failedNotOrderSender)
-	require.Equal(t, types.CodeNotFindOrder, ret.Code, "cancel order should failed by not match order sender")
+	require.Equal(t, types.CodeNotMatchSender, ret.Code, "cancel order should failed by not match order sender")
 }
 
 func TestCancelOrderSuccess(t *testing.T) {
@@ -582,7 +605,7 @@ func TestCancelOrderSuccess(t *testing.T) {
 	// create order
 	msgIOCOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
-		Sequence:       2,
+		Identify:       2,
 		TradingPair:    stock + types.SymbolSeparator + "cet",
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
@@ -591,13 +614,15 @@ func TestCancelOrderSuccess(t *testing.T) {
 		Side:           types.BUY,
 		TimeInForce:    types.IOC,
 	}
+	seq, err := input.mk.QuerySeqWithAddr(input.ctx, msgIOCOrder.Sender)
+	require.Equal(t, nil, err)
 	ret := input.handler(input.ctx, msgIOCOrder)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 
 	cancelOrder := types.MsgCancelOrder{
-		Sender:  haveCetAddress,
-		OrderID: assemblyOrderID(haveCetAddress, 2),
+		Sender: haveCetAddress,
 	}
+	cancelOrder.OrderID, _ = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
 	ret = input.handler(input.ctx, cancelOrder)
 	require.Equal(t, true, ret.IsOK(), "cancel order should succeed ; ", ret.Log)
 
@@ -661,7 +686,7 @@ func TestChargeOrderFee(t *testing.T) {
 
 	msgOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
-		Sequence:       2,
+		Identify:       1,
 		TradingPair:    stock + types.SymbolSeparator + dex.CET,
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
@@ -685,6 +710,7 @@ func TestChargeOrderFee(t *testing.T) {
 	ret = createImpMarket(input, dex.CET, stock)
 	require.Equal(t, true, ret.IsOK(), "create market should success")
 	stockIsCetOrder := msgOrder
+	stockIsCetOrder.Identify = 2
 	stockIsCetOrder.TradingPair = dex.CET + types.SymbolSeparator + stock
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	ret = input.handler(input.ctx, stockIsCetOrder)
@@ -701,6 +727,7 @@ func TestChargeOrderFee(t *testing.T) {
 	require.Equal(t, nil, err, "set %s market failed", msgOrder.TradingPair)
 
 	// Freeze fee at market execution prices
+	msgOrder.Identify = 3
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	ret = input.handler(input.ctx, msgOrder)
 	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)

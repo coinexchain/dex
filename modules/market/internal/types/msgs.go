@@ -88,7 +88,7 @@ var _ sdk.Msg = MsgCreateOrder{}
 
 type MsgCreateOrder struct {
 	Sender         sdk.AccAddress `json:"sender"`
-	Sequence       uint64         `json:"sequence"`
+	Identify       byte           `json:"identify"`
 	TradingPair    string         `json:"trading_pair"`
 	OrderType      byte           `json:"order_type"`
 	PricePrecision byte           `json:"price_precision"`
@@ -119,7 +119,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
 		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [0, 18]. actual : %d", msg.PricePrecision))
 	}
-	if msg.Price <= 0 || msg.Price > 1E18 {
+	if msg.Price <= 0 {
 		return ErrInvalidPrice(msg.Price)
 	}
 	if msg.Quantity < 0 {
@@ -133,6 +133,9 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	}
 	if msg.ExistBlocks < 0 {
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", msg.ExistBlocks))
+	}
+	if msg.Identify < 0 || msg.Identify > 255 {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderExist, fmt.Sprintf("invalid identify : %d, expected range [0, 255]", msg.Identify))
 	}
 
 	return nil

@@ -3849,6 +3849,7 @@ definitions:
       - price
       - quantity
       - side
+      - identify
     properties:
       order_type:
         type: integer
@@ -3866,6 +3867,9 @@ definitions:
         type: string
         example: "12320"
       side:
+        type: integer
+        example: "1"
+      identify:
         type: integer
         example: "1"
 
@@ -3901,6 +3905,7 @@ definitions:
           DealMoney:
             type: string
             example: 100
+
   Order-Ids:
     type: array
     items:

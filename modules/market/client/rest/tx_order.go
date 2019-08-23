@@ -20,6 +20,7 @@ type createOrderReq struct {
 	BaseReq        rest.BaseReq `json:"base_req"`
 	OrderType      int          `json:"order_type"`
 	TradingPair    string       `json:"trading_pair"`
+	Identify       int          `json:"identify"`
 	PricePrecision int          `json:"price_precision"`
 	Price          int64        `json:"price"`
 	Quantity       int64        `json:"quantity"`
@@ -72,46 +73,30 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 	if !rest.ReadRESTReq(w, r, cdc, &req) {
 		return
 	}
-
 	req.BaseReq = req.BaseReq.Sanitize()
 	if !req.BaseReq.ValidateBasic(w) {
 		return
 	}
-
 	if req.ExistBlocks <= 0 {
 		req.ExistBlocks = types.DefaultGTEOrderLifetime
 	}
-
 	creator, err := sdk.AccAddressFromBech32(req.BaseReq.From)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
 	if _, _, err := queryMarketInfo(cdc, cliCtx, req.TradingPair); err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
 	force := types.GTE
 	if !isGTE {
 		force = types.IOC
 	}
-
-	accRetriever := auth.NewAccountRetriever(cliCtx)
-	sequence := req.BaseReq.Sequence
-	if sequence == 0 {
-		_, sequence, err = accRetriever.GetAccountNumberSequence(creator)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "Don't get sequence from blockchain.")
-			return
-		}
-	}
-
 	msg := types.MsgCreateOrder{
 		Sender:         creator,
-		Sequence:       sequence,
 		TradingPair:    req.TradingPair,
+		Identify:       byte(req.Identify),
 		OrderType:      byte(req.OrderType),
 		PricePrecision: byte(req.PricePrecision),
 		Price:          req.Price,
@@ -131,6 +116,7 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		userToken = symbols[1]
 	}
 
+	accRetriever := auth.NewAccountRetriever(cliCtx)
 	account, err := accRetriever.GetAccount(creator)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, "No have insufficient cet to create market in blockchain")

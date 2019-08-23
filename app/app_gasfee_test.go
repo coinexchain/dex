@@ -161,7 +161,6 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 	//create trading pair
 	msgCreateOrder := market.MsgCreateOrder{
 		Sender:         acc.Address,
-		Sequence:       2,
 		TradingPair:    stock + market.SymbolSeparator + money,
 		OrderType:      market.LimitOrder,
 		PricePrecision: 8,
@@ -177,7 +176,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 83512, int(result.GasUsed))
+	require.Equal(t, 85866, int(result.GasUsed))
 }
 
 func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
@@ -214,7 +213,6 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 	//create trading pair
 	msgCreateOrder := market.MsgCreateOrder{
 		Sender:         acc.Address,
-		Sequence:       2,
 		TradingPair:    stock + market.SymbolSeparator + money,
 		OrderType:      market.LimitOrder,
 		PricePrecision: 8,
@@ -230,5 +228,5 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 83512, int(result.GasUsed))
+	require.Equal(t, 85866, int(result.GasUsed))
 }

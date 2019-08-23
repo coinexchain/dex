@@ -106,6 +106,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 	return &types.Order{
 		Sender:      addr,
 		Sequence:    seq,
+		Identify:    0,
 		TradingPair: "cet/usdt",
 		OrderType:   types.LIMIT,
 		Price:       decPrice,
@@ -180,9 +181,13 @@ func TestOrderBook1(t *testing.T) {
 	if !(sameTO(orders2[0], orders[0]) && sameTO(orders2[1], orders[1])) {
 		t.Errorf("Error in GetOrdersAtHeight")
 	}
+	orders3 := keeper.GetOrdersAtHeight(ctx, 1000)
+	if orders3 != nil {
+		t.Errorf("Error in GetOrdersAtHeight")
+	}
 	addr, _ := simpleAddr("00002")
 	orderList := gkeeper.GetOrdersFromUser(ctx, addr.String())
-	refOrderList := []string{addr.String() + "-3", addr.String() + "-2"}
+	refOrderList := []string{addr.String() + fmt.Sprintf("-%d", 3*256), addr.String() + fmt.Sprintf("-%d", 2*256)}
 	if orderList[0] != refOrderList[1] || orderList[1] != refOrderList[0] {
 		t.Errorf("Error in GetOrdersFromUser")
 	}

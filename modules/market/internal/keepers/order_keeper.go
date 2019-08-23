@@ -236,10 +236,7 @@ func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height i
 		ikey := iter.Key()
 		orderID := string(ikey[len(end):])
 		order := keeper.getOrder(ctx, orderID)
-		if order != nil {
-			result = append(result, order)
-		}
-
+		result = append(result, order)
 	}
 	return result
 }

@@ -9,6 +9,7 @@ import (
 type Order struct {
 	Sender      sdk.AccAddress `json:"sender"`
 	Sequence    uint64         `json:"sequence"`
+	Identify    byte           `json:"identify"`
 	TradingPair string         `json:"trading_pair"`
 	OrderType   byte           `json:"order_type"`
 	Price       sdk.Dec        `json:"price"`
@@ -27,8 +28,8 @@ type Order struct {
 }
 
 func (or *Order) OrderID() string {
-	// TODO. will remove the third param, ChainIDVersion
-	return fmt.Sprintf("%s-%d", or.Sender, or.Sequence)
+	orderID, _ := AssemblyOrderID(or.Sender.String(), or.Sequence, or.Identify)
+	return orderID
 }
 
 func (or *Order) CalOrderFee(feeForZeroDeal int64) sdk.Dec {
@@ -37,6 +38,15 @@ func (or *Order) CalOrderFee(feeForZeroDeal int64) sdk.Dec {
 		actualFee = sdk.NewDec(feeForZeroDeal)
 	}
 	return actualFee.TruncateDec()
+}
+
+func AssemblyOrderID(userAddr string, seq uint64, identify byte) (string, error) {
+	seqInt, ok := sdk.NewIntFromString(fmt.Sprintf("%d", seq))
+	if !ok {
+		return "", fmt.Errorf("invalid sequence : %d", seq)
+	}
+	orderID := userAddr + OrderIDSeparator + seqInt.MulRaw(256).AddRaw(int64(identify)).String()
+	return orderID, nil
 }
 
 type PricePoint struct {
