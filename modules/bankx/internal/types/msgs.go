@@ -47,8 +47,8 @@ type MsgSend struct {
 	UnlockTime  int64          `json:"unlock_time"`
 }
 
-func NewMsgSend(fromAddr, toAddr sdk.AccAddress, amount sdk.Coins, time int64) MsgSend {
-	return MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: amount, UnlockTime: time}
+func NewMsgSend(fromAddr, toAddr sdk.AccAddress, amount sdk.Coins, unlockTime int64) MsgSend {
+	return MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: amount, UnlockTime: unlockTime}
 }
 
 func (msg MsgSend) Route() string {

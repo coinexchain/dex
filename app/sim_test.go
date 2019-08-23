@@ -22,7 +22,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authsim "github.com/cosmos/cosmos-sdk/x/auth/simulation"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	distrsim "github.com/cosmos/cosmos-sdk/x/distribution/simulation"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	govsim "github.com/cosmos/cosmos-sdk/x/gov/simulation"
@@ -41,6 +40,7 @@ import (
 	"github.com/coinexchain/dex/modules/bancorlite"
 	bancorsim "github.com/coinexchain/dex/modules/bancorlite/simulation"
 	"github.com/coinexchain/dex/modules/bankx"
+	bankxsim "github.com/coinexchain/dex/modules/bankx/simulation"
 	"github.com/coinexchain/dex/modules/comment"
 	commentsim "github.com/coinexchain/dex/modules/comment/simulation"
 	distrxim "github.com/coinexchain/dex/modules/distributionx/simulation"
@@ -396,11 +396,11 @@ func testAndRunTxs(app *CetChainApp) []simulation.WeightedOperation {
 		},
 		{
 			Weight: getWeightOrDefault(simapp.OpWeightMsgSend, 100),
-			Op:     bank.SimulateMsgSend(app.accountKeeper, app.bankKeeper),
+			Op:     bankxsim.SimulateMsgSend(app.accountKeeper, app.bankxKeeper),
 		},
 		{
 			Weight: getWeightOrDefault(simapp.OpWeightSingleInputMsgMultiSend, 10),
-			Op:     bank.SimulateSingleInputMsgMultiSend(app.accountKeeper, app.bankKeeper),
+			Op:     bankxsim.SimulateSingleInputMsgMultiSend(app.accountKeeper, app.bankxKeeper),
 		},
 		{
 			Weight: getWeightOrDefault(simapp.OpWeightMsgSetWithdrawAddress, 50),
