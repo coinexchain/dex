@@ -300,7 +300,6 @@ func createMsgCreateOrder(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ak au
 		Quantity:       quantity,
 		Side:           byte(side),
 		TimeInForce:    timeInforce,
-		Sequence:       r.Uint64(),
 	}
 	if msg.ValidateBasic() != nil {
 		return types.MsgCreateOrder{}, fmt.Errorf("msg expected to pass validation check")
