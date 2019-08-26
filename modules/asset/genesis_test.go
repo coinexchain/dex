@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/coinexchain/dex/types"
 	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -36,6 +35,7 @@ func TestGenesis(t *testing.T) {
 		TotalBurn:        sdk.NewInt(411211452994260000),
 		TotalMint:        sdk.ZeroInt(),
 		IsForbidden:      false,
+		Identity:         asset.TestIdentityString,
 	}
 	abc := &asset.BaseToken{
 		Name:             "ABC Chain Native Token",
@@ -50,6 +50,7 @@ func TestGenesis(t *testing.T) {
 		TotalBurn:        sdk.NewInt(411211452994260000),
 		TotalMint:        sdk.ZeroInt(),
 		IsForbidden:      false,
+		Identity:         asset.TestIdentityString,
 	}
 	abcDump := &asset.BaseToken{
 		Name:             "ABC Chain Native Token",
@@ -64,6 +65,7 @@ func TestGenesis(t *testing.T) {
 		TotalBurn:        sdk.NewInt(411211452994260000),
 		TotalMint:        sdk.ZeroInt(),
 		IsForbidden:      false,
+		Identity:         asset.TestIdentityString,
 	}
 	abcInvalid := &asset.BaseToken{
 		Name:             "ABC Chain Native Token",
@@ -78,6 +80,7 @@ func TestGenesis(t *testing.T) {
 		TotalBurn:        sdk.NewInt(411211452994260000),
 		TotalMint:        sdk.ZeroInt(),
 		IsForbidden:      false,
+		Identity:         asset.TestIdentityString,
 	}
 	state.Tokens = append(state.Tokens, cet, abc, abcDump, abcInvalid)
 	require.Error(t, asset.ValidateGenesis(state))
@@ -101,8 +104,8 @@ func TestGenesis(t *testing.T) {
 	require.Equal(t, "coinex1p9ek7d3r9z4l288v4lrkwwrnh9k5htezk2q68g", res[0].String())
 
 	export := asset.ExportGenesis(input.ctx, input.tk)
-	require.Equal(t, types.NewCetCoins(asset.IssueTokenFee), export.Params.IssueTokenFee)
-	require.Equal(t, types.NewCetCoins(asset.IssueRareTokenFee), export.Params.IssueRareTokenFee)
+	require.Equal(t, dex.NewCetCoins(asset.IssueTokenFee), export.Params.IssueTokenFee)
+	require.Equal(t, dex.NewCetCoins(asset.IssueRareTokenFee), export.Params.IssueRareTokenFee)
 	require.Equal(t, 2, len(export.Tokens))
 	require.Equal(t, whitelist, export.Whitelist)
 	require.Equal(t, forbiddenList, export.ForbiddenAddresses)

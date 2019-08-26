@@ -135,6 +135,7 @@ func cetToken() asset.Token {
 		TotalBurn:        sdk.NewInt(411211452994260000),
 		TotalMint:        sdk.ZeroInt(),
 		IsForbidden:      false,
+		Identity:         asset.TestIdentityString,
 	}
 }
 

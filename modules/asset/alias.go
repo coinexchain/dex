@@ -45,6 +45,7 @@ var (
 	NewMsgForbidAddr           = types.NewMsgForbidAddr
 	NewMsgUnForbidAddr         = types.NewMsgUnForbidAddr
 	NewMsgModifyTokenInfo      = types.NewMsgModifyTokenInfo
+	TestIdentityString         = types.TestIdentityString
 
 	DefaultParams = types.DefaultParams
 

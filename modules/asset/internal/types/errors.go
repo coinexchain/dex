@@ -36,6 +36,7 @@ const (
 	CodeInvalidTokenIdentity         sdk.CodeType = 526
 	CodeInvalidSendLockAmt           sdk.CodeType = 527
 	CodeAddrInBlackList              sdk.CodeType = 528
+	CodeNilTokenIdentity             sdk.CodeType = 529
 )
 
 func ErrInvalidTokenName(name string) sdk.Error {
@@ -93,6 +94,10 @@ func ErrInvalidTokenDescription(description string) sdk.Error {
 func ErrInvalidTokenIdentity(identity string) sdk.Error {
 	msg := fmt.Sprintf("invalid identity %s : token identity is limited to %d", identity, MaxTokenIdentityLength)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenIdentity, msg)
+}
+func ErrNilTokenIdentity() sdk.Error {
+	msg := fmt.Sprintf("token identity is nil")
+	return sdk.NewError(CodeSpaceAsset, CodeNilTokenIdentity, msg)
 }
 
 // -----------------------------------------------------------------------------

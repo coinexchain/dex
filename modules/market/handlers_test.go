@@ -191,11 +191,11 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 
 	// issue tokens
 	msgStock := asset.NewMsgIssueToken(stock, stock, sdk.NewInt(issueAmount), haveCetAddress,
-		false, false, addrForbid, tokenForbid, "", "", "")
+		false, false, addrForbid, tokenForbid, "", "", asset.TestIdentityString)
 	msgMoney := asset.NewMsgIssueToken(money, money, sdk.NewInt(issueAmount), notHaveCetAddress,
-		false, false, addrForbid, tokenForbid, "", "", "")
+		false, false, addrForbid, tokenForbid, "", "", asset.TestIdentityString)
 	msgCet := asset.NewMsgIssueToken("cet", "cet", sdk.NewInt(issueAmount), haveCetAddress,
-		false, false, addrForbid, tokenForbid, "", "", "")
+		false, false, addrForbid, tokenForbid, "", "", asset.TestIdentityString)
 	handler := asset.NewHandler(tk)
 	ret := handler(ctx, msgStock)
 	require.Equal(t, true, ret.IsOK(), "issue token should succeed", ret)

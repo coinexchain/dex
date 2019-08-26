@@ -86,7 +86,7 @@ func TestSmallAccountGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 90000, int(result.GasWanted))
-	require.Equal(t, 57380, int(result.GasUsed))
+	require.Equal(t, 57434, int(result.GasUsed))
 }
 
 func TestBigAccountGasCost(t *testing.T) {
@@ -113,7 +113,7 @@ func TestBigAccountGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 3569210, int(result.GasUsed))
+	require.Equal(t, 3569264, int(result.GasUsed))
 }
 
 func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
@@ -140,7 +140,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 
 	// issue tokens
 	msgStock := asset.NewMsgIssueToken(stock, stock, sdk.NewInt(issueAmount), acc.Address,
-		false, false, false, false, "", "", "")
+		false, false, false, false, "", "", asset.TestIdentityString)
 	tx := newStdTxBuilder().
 		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
 	res := app.Deliver(tx)
@@ -176,7 +176,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 85866, int(result.GasUsed))
+	require.Equal(t, 86082, int(result.GasUsed))
 }
 
 func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
@@ -197,7 +197,7 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 
 	// issue tokens
 	msgStock := asset.NewMsgIssueToken(stock, stock, sdk.NewInt(issueAmount), acc.Address,
-		false, false, false, false, "", "", "")
+		false, false, false, false, "", "", asset.TestIdentityString)
 	tx := newStdTxBuilder().
 		Msgs(msgStock).GasAndFee(9000000, 100).AccNumSeqKey(0, 0, key).Build()
 	res := app.Deliver(tx)
@@ -228,5 +228,5 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 85866, int(result.GasUsed))
+	require.Equal(t, 86082, int(result.GasUsed))
 }

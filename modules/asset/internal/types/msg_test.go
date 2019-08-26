@@ -17,68 +17,74 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 		{
 			"base-case",
 			NewMsgIssueToken("ABC Token", "abc", sdk.NewInt(10000), testAddr,
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			nil,
 		},
 		{
 			"case-name",
 			NewMsgIssueToken(string(make([]byte, 32+1)), "abc", sdk.NewInt(10000), testAddr,
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			ErrInvalidTokenName(string(make([]byte, 32+1))),
 		},
 		{
 			"case-owner",
 			NewMsgIssueToken("ABC Token", "abc", sdk.NewInt(10000), sdk.AccAddress{},
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			ErrNilTokenOwner(),
 		},
 		{
 			"case-symbol1",
 			NewMsgIssueToken("ABC Token", "1aa", sdk.NewInt(10000), testAddr,
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			ErrInvalidTokenSymbol("1aa"),
 		},
 		{
 			"case-symbol2",
 			NewMsgIssueToken("ABC Token", "A999", sdk.NewInt(10000), testAddr,
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			ErrInvalidTokenSymbol("A999"),
 		},
 		{
 			"case-symbol3",
 			NewMsgIssueToken("ABC Token", "aa1234567", sdk.NewInt(10000), testAddr,
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			ErrInvalidTokenSymbol("aa1234567"),
 		},
 		{
 			"case-symbol4",
 			NewMsgIssueToken("ABC Token", "a*aa", sdk.NewInt(10000), testAddr,
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			ErrInvalidTokenSymbol("a*aa"),
 		},
 		{
 			"case-totalSupply",
 			NewMsgIssueToken("ABC Token", "abc", sdk.NewInt(-1), testAddr,
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			ErrInvalidTokenSupply(sdk.NewInt(-1).String()),
 		},
 		{
 			"case-url",
 			NewMsgIssueToken("name", "coin", sdk.NewInt(10000), testAddr,
-				false, false, false, false, string(make([]byte, MaxTokenURLLength+1)), "", ""),
+				false, false, false, false, string(make([]byte, MaxTokenURLLength+1)), "", TestIdentityString),
 			ErrInvalidTokenURL(string(make([]byte, MaxTokenURLLength+1))),
 		},
 		{
 			"case-description",
 			NewMsgIssueToken("name", "coin", sdk.NewInt(10000), testAddr,
-				false, false, false, false, "", string(make([]byte, MaxTokenDescriptionLength+1)), ""),
+				false, false, false, false, "", string(make([]byte, MaxTokenDescriptionLength+1)), TestIdentityString),
 			ErrInvalidTokenDescription(string(make([]byte, MaxTokenDescriptionLength+1))),
 		},
 		{
-			"case-identity",
+			"case-identity1",
 			NewMsgIssueToken("name", "coin", sdk.NewInt(10000), testAddr,
 				false, false, false, false, "", "", string(make([]byte, MaxTokenIdentityLength+1))),
 			ErrInvalidTokenIdentity(string(make([]byte, MaxTokenIdentityLength+1))),
+		},
+		{
+			"case-identity2",
+			NewMsgIssueToken("name", "coin", sdk.NewInt(10000), testAddr,
+				false, false, false, false, "", "", ""),
+			ErrNilTokenIdentity(),
 		},
 	}
 
@@ -608,7 +614,7 @@ func TestMsg_GetSigners(t *testing.T) {
 		{
 			"issue-token",
 			NewMsgIssueToken("ABC Token", "abc", sdk.NewInt(10000), testAddr,
-				false, false, false, false, "", "", ""),
+				false, false, false, false, "", "", TestIdentityString),
 			[]sdk.AccAddress{testAddr},
 		},
 		{
@@ -688,8 +694,8 @@ func TestMsg_GetSignBytes(t *testing.T) {
 		{
 			"issue-token",
 			NewMsgIssueToken("ABC Token", "abc", sdk.NewInt(10000), owner,
-				false, false, false, false, "", "", ""),
-			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"description":"","identity":"","mintable":false,"name":"ABC Token","owner":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","token_forbiddable":false,"total_supply":"10000","url":""}}`,
+				false, false, false, false, "", "", TestIdentityString),
+			`{"type":"asset/MsgIssueToken","value":{"addr_forbiddable":false,"burnable":false,"description":"","identity":"552A83BA62F9B1F8","mintable":false,"name":"ABC Token","owner":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","token_forbiddable":false,"total_supply":"10000","url":""}}`,
 		},
 		{
 			"transfer-ownership",

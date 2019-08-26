@@ -1,6 +1,7 @@
 package authx_test
 
 import (
+	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"testing"
 
@@ -26,7 +27,7 @@ func TestEndBlocker(t *testing.T) {
 	_ = acc1.SetCoins(sdk.Coins{coin})
 	input.ak.SetAccount(input.ctx, acc1)
 	err := input.tk.IssueToken(input.ctx, "CET token", "cet", sdk.NewInt(20), addr1,
-		true, true, false, true, "", "", "")
+		true, true, false, true, "", "", asset.TestIdentityString)
 	require.NoError(t, err)
 
 	addr2 := sdk.AccAddress("addr2")

@@ -317,6 +317,9 @@ func (t *BaseToken) SetIdentity(identity string) sdk.Error {
 	if len(identity) > MaxTokenIdentityLength {
 		return ErrInvalidTokenIdentity(identity)
 	}
+	if identity == "" {
+		return ErrNilTokenIdentity()
+	}
 	t.Identity = identity
 	return nil
 }

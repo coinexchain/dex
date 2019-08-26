@@ -55,6 +55,7 @@ func TestParseTokenInfo(t *testing.T) {
 	viper.Set(flagTotalSupply, "100")
 	viper.Set(flagTotalBurn, "100")
 	viper.Set(flagTotalMint, "100")
+	viper.Set(flagTokenIdentity, "552A83BA62F9B1F8")
 	token, _ := parseTokenInfo()
 	require.Equal(t, "aaa", token.GetSymbol())
 }

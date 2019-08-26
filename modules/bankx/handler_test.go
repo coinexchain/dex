@@ -39,7 +39,7 @@ func defaultContext() (*keeper.Keeper, sdk.Handler, sdk.Context) {
 	handler := bankx.NewHandler(app.BankxKeeper)
 	cet, _ := asset.NewToken("cet", "cet", sdk.NewInt(200000000000000), owner,
 		false, false, false, false,
-		"", "", "")
+		"", "", asset.TestIdentityString)
 	_ = app.AssetKeeper.SetToken(ctx, cet)
 	return &app.BankxKeeper, handler, ctx
 }
