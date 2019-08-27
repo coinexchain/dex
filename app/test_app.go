@@ -1,18 +1,11 @@
 package app
 
 import (
-	"github.com/coinexchain/dex/modules/alias"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bancorlite"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/comment"
-	"github.com/coinexchain/dex/modules/distributionx"
-	"github.com/coinexchain/dex/modules/incentive"
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/stakingx"
-	"github.com/coinexchain/dex/modules/supplyx"
-	"github.com/coinexchain/dex/msgqueue"
+	"time"
+
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -29,7 +22,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
-	dbm "github.com/tendermint/tm-db"
+	"github.com/coinexchain/dex/modules/alias"
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bancorlite"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/comment"
+	"github.com/coinexchain/dex/modules/distributionx"
+	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/dex/modules/supplyx"
+	"github.com/coinexchain/dex/msgqueue"
 )
 
 type TestApp struct {
@@ -82,7 +86,7 @@ func NewTestApp() *TestApp {
 	Cdc := MakeCodec()
 	app := newTestApp(Cdc)
 	app.initKeepers(0)
-	app.mountApp()
+	app.mountStores()
 	return app
 }
 
@@ -290,7 +294,7 @@ func (app *TestApp) ModuleAccountAddrs() map[string]bool {
 	return modAccAddrs
 }
 
-func (app *TestApp) mountApp() {
+func (app *TestApp) mountStores() {
 	db := dbm.NewMemDB()
 	cms := store.NewCommitMultiStore(db)
 	cms.MountStoreWithDB(app.keyMain, sdk.StoreTypeIAVL, db)
@@ -313,4 +317,10 @@ func (app *TestApp) mountApp() {
 	cms.MountStoreWithDB(app.tkeyStaking, sdk.StoreTypeTransient, db)
 	_ = cms.LoadLatestVersion()
 	app.Cms = cms
+}
+
+func (app *TestApp) NewCtx() sdk.Context {
+	return sdk.NewContext(app.Cms,
+		abci.Header{ChainID: "test-chain-id", Time: time.Now()},
+		false, log.NewNopLogger())
 }
