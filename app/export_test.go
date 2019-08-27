@@ -203,7 +203,7 @@ func prepareCreateValidatorTx(addr sdk.AccAddress, app *CetChainApp, ctx sdk.Con
 
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, pk).
 		MinSelfDelegation(minSelfDelegate.Int64()).SelfDelegation(minSelfDelegate.Int64()).
-		Commission("0.05", "0.1", "0.01").
+		Commission("0.1", "0.1", "0.01").
 		Build()
 	createValTx := newStdTxBuilder().
 		Msgs(createValMsg).
