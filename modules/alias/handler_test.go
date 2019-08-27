@@ -78,7 +78,7 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	paramsKeeper := params.NewKeeper(types.ModuleCdc, keyParams, tkeyParams, params.DefaultCodespace)
 	keeper := keepers.NewKeeper(key,
 		&mocBankxKeeper{
-			maxAmount: sdk.NewInt(1000000),
+			maxAmount: sdk.NewInt(913000000000),
 		},
 		&mocAssetKeeper{
 			tokenIssuer: map[string]sdk.AccAddress{"cet": simpleAddr("00000")},
@@ -158,10 +158,10 @@ func Test1(t *testing.T) {
 	handlerFunc := NewHandler(*keeper)
 
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "supergirl", IsAdd: true, AsDefault: false})
-	refLog := "Deduct 70cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
+	refLog := "Deduct 1000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
 	require.Equal(t, refLog, logStr)
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: bob, Alias: "superman", IsAdd: true, AsDefault: false})
-	refLog = "Deduct 70cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
+	refLog = "Deduct 1000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
 	require.Equal(t, refLog, logStr)
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: tom, Alias: "tom", IsAdd: false, AsDefault: false})
 
@@ -185,7 +185,7 @@ func Test1(t *testing.T) {
 	require.Equal(t, types.ErrCanOnlyBeUsedByCetOwner(aliasCet).Result(), res)
 
 	cetOwner := simpleAddr("00000")
-	refLog = "Deduct 70cet from cosmos1qy352eufqy352eufqy352eufqy35qqqqkc9q90"
+	refLog = "Deduct 1000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqqkc9q90"
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: cetOwner, Alias: aliasCet, IsAdd: true, AsDefault: true})
 	addr, isDefault := keeper.AliasKeeper.GetAddressFromAlias(ctx, aliasCet)
 	require.Equal(t, cetOwner, sdk.AccAddress(addr))
@@ -193,22 +193,22 @@ func Test1(t *testing.T) {
 	require.Equal(t, refLog, logStr)
 
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "sup", IsAdd: true, AsDefault: false})
-	refLog = "Deduct 300000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
+	refLog = "Deduct 500000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
 	require.Equal(t, refLog, logStr)
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "supe", IsAdd: true, AsDefault: false})
-	refLog = "Deduct 40000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
+	refLog = "Deduct 200000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
 	require.Equal(t, refLog, logStr)
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "super", IsAdd: true, AsDefault: false})
-	refLog = "Deduct 5000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
+	refLog = "Deduct 100000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqrctskts"
 	require.Equal(t, refLog, logStr)
 	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: alice, Alias: "superg", IsAdd: true, AsDefault: false})
 	require.Equal(t, types.ErrMaxAliasCountReached().Result(), res)
 
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: bob, Alias: "12345", IsAdd: true, AsDefault: false})
-	refLog = "Deduct 5000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
+	refLog = "Deduct 100000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
 	require.Equal(t, refLog, logStr)
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: bob, Alias: "123456", IsAdd: true, AsDefault: false})
-	refLog = "Deduct 600cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
+	refLog = "Deduct 10000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqz9ayrkz"
 	require.Equal(t, refLog, logStr)
 	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: bob, Alias: "12", IsAdd: true, AsDefault: false})
 	require.Equal(t, sdk.NewError(types.CodeSpaceAlias, 1199, "Not enough coins").Result(), res)
