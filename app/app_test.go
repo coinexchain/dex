@@ -610,3 +610,12 @@ func TestMultiSendMemoRequired(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, bankx.CodeMemoMissing, result.Code)
 }
+
+func TestBlackListedAddr(t *testing.T) {
+	db := dbm.NewMemDB()
+	app := NewCetChainApp(log.NewTMLogger(log.NewSyncWriter(os.Stdout)), db, nil, true, 0)
+
+	for acc := range maccPerms {
+		require.True(t, app.bankKeeper.BlacklistedAddr(app.supplyKeeper.GetModuleAddress(acc)))
+	}
+}
