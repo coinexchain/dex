@@ -2015,6 +2015,7 @@ paths:
     post:
       summary: Withdraw a delegation reward
       description: Withdraw a delegator's delegation reward from a single validator
+      operationId: withdrawRewardsByValidator
       tags:
         - Distribution
       consumes:
