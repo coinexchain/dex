@@ -8,8 +8,9 @@ const (
 	CodeSpaceStakingX sdk.CodespaceType = "stakingx"
 
 	// 401 ~ 499
-	CodeInvalidMinSelfDelegation       sdk.CodeType = 401
-	CodeMinSelfDelegationBelowRequired sdk.CodeType = 402
+	CodeInvalidMinSelfDelegation        sdk.CodeType = 401
+	CodeMinSelfDelegationBelowRequired  sdk.CodeType = 402
+	CodeBelowMinMandatoryCommissionRate sdk.CodeType = 403
 )
 
 func ErrInvalidMinSelfDelegation(val sdk.Int) sdk.Error {
@@ -23,6 +24,6 @@ func ErrMinSelfDelegationBelowRequired(expected, actual sdk.Int) sdk.Error {
 }
 
 func ErrRateBelowMinMandatoryCommissionRate(expected, actual sdk.Dec) sdk.Error {
-	return sdk.NewError(CodeSpaceStakingX, CodeMinSelfDelegationBelowRequired,
+	return sdk.NewError(CodeSpaceStakingX, CodeBelowMinMandatoryCommissionRate,
 		"commission rate is %v, less than min mandatory commission rate %v", actual, expected)
 }

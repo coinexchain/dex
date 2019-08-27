@@ -282,6 +282,35 @@ func TestMinSelfDelegation(t *testing.T) {
 	require.Equal(t, stakingx.CodeMinSelfDelegationBelowRequired, result.Code)
 }
 
+func TestMinMandatoryCommissionRate(t *testing.T) {
+	key0, pubKey0, addr0 := testutil.KeyPubAddr()
+	coins := dex.NewCetCoins(1000)
+	acc0 := auth.BaseAccount{Address: addr0, Coins: coins}
+	val0 := sdk.ValAddress(addr0)
+
+	// init app
+	app := initApp(func(genState *GenesisState) {
+		genState.Accounts = append(genState.Accounts, genaccounts.NewGenesisAccount(&acc0))
+		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1)
+		addAccountForDanglingCET(1000, genState)
+	})
+
+	// begin block
+	header := abci.Header{Height: 1}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	// deliver
+	msg := testutil.NewMsgCreateValidatorBuilder(val0, pubKey0).
+		MinSelfDelegation(1).SelfDelegation(1).
+		Commission("0.09", "0.1", "0.01").
+		Build()
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key0).Build()
+
+	result := app.Deliver(tx)
+	require.Equal(t, stakingx.CodeBelowMinMandatoryCommissionRate, result.Code)
+}
+
 func TestDelegatorShares(t *testing.T) {
 	// prepare accounts
 	amountVal := cetToken().GetTotalSupply().Int64() - 20000
