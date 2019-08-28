@@ -316,7 +316,6 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 	if !keeper.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(denom, sdk.NewInt(totalAmount))}) {
 		return types.ErrInsufficientCoins().Result()
 	}
-
 	orderID, err := types.AssemblyOrderID(msg.Sender.String(), seq, msg.Identify)
 	if err != nil {
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidSequence, err.Error()).Result()

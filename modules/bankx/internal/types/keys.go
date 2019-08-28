@@ -8,4 +8,6 @@ const (
 
 	AttributeKeyAddr         = "address"
 	AttributeKeyMemoRequired = "memo-required"
+
+	Topic = ModuleName
 )
