@@ -1,6 +1,8 @@
 package shorthanzi
 
-import "github.com/pierrec/lz4"
+import (
+	"github.com/hungys/go-lz4"
+)
 
 var charMap map[rune]rune
 
@@ -59,9 +61,9 @@ func DecodeHanzi(in []byte) (string, bool) {
 }
 
 func compressText(data string) ([]byte, bool) {
-	buf := make([]byte, len(data))
+	buf := make([]byte, len(data)*2)
 
-	n, err := lz4.CompressBlockHC([]byte(data), buf, 0)
+	n, err := lz4.CompressDefault([]byte(data), buf)
 	if err != nil {
 		return nil, false
 	}
@@ -72,8 +74,9 @@ func compressText(data string) ([]byte, bool) {
 }
 
 func decompressText(buf []byte) (string, bool) {
-	out := make([]byte, 10*len(buf))
-	n, err := lz4.UncompressBlock(buf, out)
+	outSize := 10 * len(buf)
+	out := make([]byte, outSize)
+	n, err := lz4.DecompressSafe(buf, out)
 	if err != nil {
 		return "", false
 	}
