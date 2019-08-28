@@ -29,7 +29,7 @@ func TestQueryParams(t *testing.T) {
 	require.True(t, params.Equal(types.DefaultParams()))
 }
 
-func TestQuery(t *testing.T) {
+func TestQueryAliasInfo(t *testing.T) {
 	testApp := app.NewTestApp()
 	ctx := testApp.NewCtx()
 
