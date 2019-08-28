@@ -100,7 +100,13 @@ func queryForbiddenAddr(ctx sdk.Context, req abci.RequestQuery, keeper TokenKeep
 }
 
 func queryReservedSymbols() ([]byte, sdk.Error) {
-	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, types.GetReservedSymbols())
+	reserved := types.GetReservedSymbols()
+	var s = ""
+	for _, symbol := range reserved {
+		s = s + symbol + ", "
+	}
+	res := "[" + s + "]"
+	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, res)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

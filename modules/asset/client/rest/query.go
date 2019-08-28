@@ -167,11 +167,8 @@ func QueryReservedSymbolsRequestHandlerFn(
 			return
 		}
 
-		if len(res) == 0 {
-			res = []byte("[]")
-		}
 		cliCtx = cliCtx.WithHeight(height)
-		rest.PostProcessResponse(w, cliCtx, res)
+		rest.PostProcessResponse(w, cliCtx, string(res))
 	}
 }
 
