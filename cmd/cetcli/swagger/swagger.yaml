@@ -338,6 +338,7 @@ paths:
         - Transactions
       summary: Encode a transaction to the Amino wire format
       description: Encode a transaction (signed or not) from JSON to base64-encoded Amino serialized bytes
+      operationId: encodeTx
       consumes:
         - application/json
       produces:

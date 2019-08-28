@@ -6,8 +6,6 @@ import (
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -195,9 +193,6 @@ func Test_queryReservedSymbols(t *testing.T) {
 	res, err := query(input.ctx, path0, req)
 	require.NoError(t, err)
 	require.NotNil(t, res)
-
-	bz, _ := codec.MarshalJSONIndent(types.ModuleCdc, types.GetReservedSymbols())
-	require.Equal(t, bz, res)
 }
 
 func Test_queryDefault(t *testing.T) {
