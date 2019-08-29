@@ -11,6 +11,11 @@ var (
 	Bech32MainPrefix = "coinex"
 )
 
+const (
+	CetCoinType           = 688
+	CetFullFundraiserPath = "44'/688'/0'/0/0"
+)
+
 // Read in the configuration file for the sdk
 func InitSdkConfig() {
 
@@ -31,5 +36,8 @@ func InitSdkConfig() {
 	config.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
 	config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
 	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+
+	config.SetFullFundraiserPath(CetFullFundraiserPath)
+	config.SetCoinType(CetCoinType)
 	config.Seal()
 }
