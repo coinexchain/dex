@@ -6,9 +6,12 @@ import (
 	"github.com/coinexchain/dex/modules/comment/shorthanzi"
 	"log"
 	"math/rand"
+	"unicode/utf8"
 	"os"
 	"strings"
 )
+
+const BufSize = 64*1024*1024
 
 func testShortHanzi(seed int64, n int32) {
 	r := rand.New(rand.NewSource(seed))
@@ -24,17 +27,24 @@ func testShortHanzi(seed int64, n int32) {
 
 	lineCount := 0
 	scanner := bufio.NewScanner(file)
+	scanner.Buffer(make([]byte,BufSize), BufSize)
 	for {
 		randN := r.Int31n(n) + 1
 		ok, text := getText(scanner, randN)
 		if !ok {
 			break
 		}
+		if !utf8.ValidString(text) || len(text)==0 {
+			continue
+		}
 		testText(text, lineCount)
 
 		lineCount += int(randN)
-		if lineCount%10000 == 0 {
-			fmt.Printf("Line:%d\n", lineCount)
+		for i:=0; i<int(randN); i++ {
+			lineCount++
+			if lineCount%100000 == 0 {
+				fmt.Printf("Line:%d\n", lineCount)
+			}
 		}
 	}
 
@@ -66,11 +76,12 @@ func testText(line string, lineCount int) {
 
 	bz, ok := shorthanzi.EncodeHanzi(line)
 	if !ok {
-		fmt.Printf("EN %d: %s\n", lineCount, line)
+		return //When line is too short, it will fail. It is just normal.
 	}
 	ttline, ok = shorthanzi.DecodeHanzi(bz)
 	if !ok {
-		fmt.Printf("DE %d: %s\n", lineCount, line)
+		fmt.Printf("DE0 %d: %s\n", lineCount, line)
+		fmt.Printf("DE1 %d: %s\n", lineCount, ttline)
 	}
 	if ttline != line {
 		fmt.Printf("== %d\n", lineCount)
