@@ -2,15 +2,33 @@ package keepers_test
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset/internal/keepers"
-	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
+
+	"github.com/coinexchain/dex/modules/asset/internal/keepers"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
+
+func Test_queryParams(t *testing.T) {
+	input := createTestInput()
+	req := abci.RequestQuery{
+		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, types.QueryToken),
+		Data: []byte{},
+	}
+	path0 := []string{types.QueryParameters}
+	query := keepers.NewQuerier(input.tk)
+
+	res, err := query(input.ctx, path0, req)
+	require.NoError(t, err)
+
+	params := types.Params{}
+	input.cdc.MustUnmarshalJSON(res, &params)
+	require.Equal(t, params, types.DefaultParams())
+}
 
 func Test_queryToken(t *testing.T) {
 	input := createTestInput()
