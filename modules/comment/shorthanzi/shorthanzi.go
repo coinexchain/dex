@@ -4,12 +4,13 @@ package shorthanzi
 // #include "lz4.h"
 import "C"
 import (
+	"errors"
 	"fmt"
 	"unsafe"
-	"errors"
 )
 
-const maxOutputSize=160*1024
+const maxOutputSize = 160 * 1024
+
 var charMap map[rune]rune
 
 func init() {

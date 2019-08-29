@@ -6,12 +6,12 @@ import (
 	"github.com/coinexchain/dex/modules/comment/shorthanzi"
 	"log"
 	"math/rand"
-	"unicode/utf8"
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
-const BufSize = 64*1024*1024
+const BufSize = 64 * 1024 * 1024
 
 func testShortHanzi(seed int64, n int32) {
 	r := rand.New(rand.NewSource(seed))
@@ -27,20 +27,20 @@ func testShortHanzi(seed int64, n int32) {
 
 	lineCount := 0
 	scanner := bufio.NewScanner(file)
-	scanner.Buffer(make([]byte,BufSize), BufSize)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
 	for {
 		randN := r.Int31n(n) + 1
 		ok, text := getText(scanner, randN)
 		if !ok {
 			break
 		}
-		if !utf8.ValidString(text) || len(text)==0 {
+		if !utf8.ValidString(text) || len(text) == 0 {
 			continue
 		}
 		testText(text, lineCount)
 
 		lineCount += int(randN)
-		for i:=0; i<int(randN); i++ {
+		for i := 0; i < int(randN); i++ {
 			lineCount++
 			if lineCount%100000 == 0 {
 				fmt.Printf("Line:%d\n", lineCount)
