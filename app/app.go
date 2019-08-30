@@ -5,6 +5,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/coinexchain/dex/app/plugin"
+
+	"github.com/coinexchain/dex/types"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/libs/log"
@@ -172,6 +176,8 @@ type CetChainApp struct {
 
 	// the module manager
 	mm *module.Manager
+
+	plugin.Holder
 }
 
 // NewCetChainApp returns a reference to an initialized CetChainApp.
@@ -189,6 +195,9 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	app.initKeepers(invCheckPeriod)
 	app.initModules()
 	app.mountStores()
+
+	app.LoadPlugin(logger)
+	app.WaitPluginToggleSignal(logger)
 
 	ah := authx.NewAnteHandler(app.accountKeeper, app.supplyKeeper, app.accountXKeeper,
 		newAnteHelper(app.accountXKeeper, app.stakingXKeeper))
@@ -575,6 +584,15 @@ func (app *CetChainApp) ModuleAccountAddrs() map[string]bool {
 }
 
 // "override" ABCI methods
+func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) (res abci.ResponseCheckTx) {
+	if p := app.GetPlugin(); p != nil {
+		if err := p.PreCheckTx(req, app.txDecoder, app.Logger()); err != nil {
+			return types.ResponseFrom(err)
+		}
+	}
+
+	return app.BaseApp.CheckTx(req)
+}
 
 func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx {
 	ret := app.BaseApp.DeliverTx(req)
