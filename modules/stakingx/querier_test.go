@@ -29,5 +29,4 @@ func TestNewQuerier(t *testing.T) {
 	failPath := "fake"
 	_, err = querier(ctx, []string{failPath}, abci.RequestQuery{})
 	require.Equal(t, sdk.CodeUnknownRequest, err.Code())
-
 }
