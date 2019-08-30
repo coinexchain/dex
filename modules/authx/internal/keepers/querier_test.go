@@ -11,8 +11,29 @@ import (
 	"github.com/coinexchain/dex/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
+	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/authx/internal/keepers"
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
+
+func Test_queryParams(t *testing.T) {
+	testApp := app.NewTestApp()
+	ctx := testApp.NewCtx()
+	params := auth.DefaultParams()
+	paramsx := types.DefaultParams()
+	testApp.AccountKeeper.SetParams(ctx, params)
+	testApp.AccountXKeeper.SetParams(ctx, paramsx)
+
+	querier := keepers.NewQuerier(testApp.AccountXKeeper)
+	res, err := querier(ctx, []string{types.QueryParameters}, abci.RequestQuery{})
+	require.NoError(t, err)
+
+	var mergedParams types.MergedParams
+	testApp.Cdc.MustUnmarshalJSON(res, &mergedParams)
+	require.Equal(t,
+		string(testApp.Cdc.MustMarshalJSON(mergedParams)),
+		string(testApp.Cdc.MustMarshalJSON(types.NewMergedParams(params, paramsx))))
+}
 
 func Test_queryAccount(t *testing.T) {
 	input := setupTestInput()
