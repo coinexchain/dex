@@ -196,7 +196,6 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	app.initModules()
 	app.mountStores()
 
-	app.LoadPlugin(logger)
 	app.WaitPluginToggleSignal(logger)
 
 	ah := authx.NewAnteHandler(app.accountKeeper, app.supplyKeeper, app.accountXKeeper,

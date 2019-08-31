@@ -15,49 +15,6 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-type Holder struct {
-	isLoadedFlag int32
-
-	pluginInstance AppPlugin
-}
-
-func (loader *Holder) GetPlugin() AppPlugin {
-	isLoaded := atomic.LoadInt32(&loader.isLoadedFlag)
-	if isLoaded == 0 {
-		return nil
-	}
-
-	return loader.pluginInstance
-}
-
-func (loader *Holder) togglePlugin(logger log.Logger) {
-	defer func() {
-		if r := recover(); r != nil {
-			logger.Error(fmt.Sprintf("toggle plugin failed: %s", string(debug.Stack())))
-		}
-	}()
-
-	p := loader.GetPlugin()
-	if p != nil {
-		loader.disablePlugin(p, logger)
-	} else {
-		loader.enablePlugin(logger)
-	}
-}
-
-func (loader *Holder) enablePlugin(logger log.Logger) {
-	atomic.StoreInt32(&loader.isLoadedFlag, 1)
-	p := loader.GetPlugin()
-	if p != nil {
-		logger.Info(fmt.Sprintf("plugin %s enabled", p.Name()))
-	}
-}
-
-func (loader *Holder) disablePlugin(p AppPlugin, logger log.Logger) {
-	atomic.StoreInt32(&loader.isLoadedFlag, 0)
-	logger.Info(fmt.Sprintf("plugin %s disabled", p.Name()))
-}
-
 func (loader *Holder) WaitPluginToggleSignal(logger log.Logger) {
 	togglePlugin := func(c chan os.Signal) {
 		for {
@@ -71,7 +28,61 @@ func (loader *Holder) WaitPluginToggleSignal(logger log.Logger) {
 	go togglePlugin(c)
 }
 
-func (loader *Holder) LoadPlugin(logger log.Logger) {
+type Holder struct {
+	isEnabled      int32
+	pluginInstance AppPlugin
+}
+
+func (loader *Holder) isPluginLoaded() bool {
+	return loader.pluginInstance != nil
+}
+
+func (loader *Holder) GetPlugin() AppPlugin {
+	isEnabled := atomic.LoadInt32(&loader.isEnabled) == 1
+	if isEnabled {
+		return loader.pluginInstance
+	}
+
+	return nil
+}
+
+func (loader *Holder) togglePlugin(logger log.Logger) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error(fmt.Sprintf("toggle plugin failed: %s", string(debug.Stack())))
+		}
+	}()
+
+	if !loader.isPluginLoaded() {
+		loader.loadAndEnablePlugin(logger)
+		return
+	}
+
+	isEnabled := atomic.LoadInt32(&loader.isEnabled) == 1
+	if isEnabled {
+		loader.disablePlugin(logger)
+	} else {
+		loader.enablePlugin(logger)
+	}
+}
+
+func (loader *Holder) enablePlugin(logger log.Logger) {
+	atomic.StoreInt32(&loader.isEnabled, 1)
+
+	if p := loader.GetPlugin(); p != nil {
+		logger.Info(fmt.Sprintf("plugin %s isEnabled", p.Name()))
+	}
+}
+
+func (loader *Holder) disablePlugin(logger log.Logger) {
+	atomic.StoreInt32(&loader.isEnabled, 0)
+
+	if loader.isPluginLoaded() {
+		logger.Info(fmt.Sprintf("plugin %s disabled", loader.pluginInstance.Name()))
+	}
+}
+
+func (loader *Holder) loadAndEnablePlugin(logger log.Logger) {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error(fmt.Sprintf("load plugin failed: %s", string(debug.Stack())))
@@ -82,6 +93,7 @@ func (loader *Holder) LoadPlugin(logger log.Logger) {
 	pluginPath := path.Join(rootDir, "data/plugin.so")
 
 	if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
+		logger.Info(fmt.Sprintf("plugin %s not exists", pluginPath))
 		return
 	}
 
