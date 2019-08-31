@@ -73,7 +73,6 @@ func (loader *Holder) LoadPlugin(logger log.Logger) {
 	pluginPath := path.Join(rootDir, "data/plugin.so")
 
 	if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
-		logger.Info(fmt.Sprintf("plugin %s does not exist", pluginPath))
 		return
 	}
 
