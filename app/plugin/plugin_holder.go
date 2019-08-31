@@ -9,26 +9,25 @@ import (
 	"runtime/debug"
 	"sync/atomic"
 	"syscall"
-	"unsafe"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-var loadedPlugin AppPlugin
-
 type Holder struct {
-	plugin unsafe.Pointer
+	isLoadedFlag int32
+
+	pluginInstance AppPlugin
 }
 
 func (loader *Holder) GetPlugin() AppPlugin {
-	p := (*AppPlugin)(atomic.LoadPointer(&loader.plugin))
-	if p == nil {
+	isLoaded := atomic.LoadInt32(&loader.isLoadedFlag)
+	if isLoaded == 0 {
 		return nil
 	}
 
-	return *p
+	return loader.pluginInstance
 }
 
 func (loader *Holder) togglePlugin(logger log.Logger) {
@@ -40,13 +39,23 @@ func (loader *Holder) togglePlugin(logger log.Logger) {
 
 	p := loader.GetPlugin()
 	if p != nil {
-		name := p.Name()
-		atomic.StorePointer(&loader.plugin, unsafe.Pointer(nil))
-		loadedPlugin = nil
-		logger.Info(fmt.Sprintf("plugin %s unloaded", name))
+		loader.disablePlugin(p, logger)
 	} else {
-		loader.LoadPlugin(logger)
+		loader.enablePlugin(logger)
 	}
+}
+
+func (loader *Holder) enablePlugin(logger log.Logger) {
+	atomic.StoreInt32(&loader.isLoadedFlag, 1)
+	p := loader.GetPlugin()
+	if p != nil {
+		logger.Info(fmt.Sprintf("plugin %s enabled", p.Name()))
+	}
+}
+
+func (loader *Holder) disablePlugin(p AppPlugin, logger log.Logger) {
+	atomic.StoreInt32(&loader.isLoadedFlag, 0)
+	logger.Info(fmt.Sprintf("plugin %s disabled", p.Name()))
 }
 
 func (loader *Holder) WaitPluginToggleSignal(logger log.Logger) {
@@ -88,8 +97,12 @@ func (loader *Holder) LoadPlugin(logger log.Logger) {
 		return
 	}
 
-	loadedPlugin = symbol.(AppPlugin)
-	atomic.StorePointer(&loader.plugin, unsafe.Pointer(&loadedPlugin))
+	instance, ok := symbol.(AppPlugin)
+	if !ok {
+		logger.Error(fmt.Sprintf("Instance in plugin %s is invalid", pluginPath))
+		return
+	}
 
-	logger.Info(fmt.Sprintf("plugin %v loaded", loader.GetPlugin().Name()))
+	loader.pluginInstance = instance
+	loader.enablePlugin(logger)
 }
