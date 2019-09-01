@@ -2,6 +2,7 @@ module github.com/coinexchain/dex
 
 require (
 	github.com/cosmos/cosmos-sdk v0.37.0
+	github.com/emirpasic/gods v1.12.0
 	github.com/gorilla/mux v1.7.0
 	github.com/hungys/go-lz4 v0.0.0-20170805124057-19ff7f07f099
 	github.com/kr/pretty v0.1.0 // indirect
