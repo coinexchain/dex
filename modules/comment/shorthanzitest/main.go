@@ -67,7 +67,11 @@ func getText(scanner *bufio.Scanner, randN int32) (bool, string) {
 	return ok, strings.Join(res, "")
 }
 
+var TotalCharCount int64
+var TotalByteCount int64
+
 func testText(line string, lineCount int) {
+	TotalCharCount += int64(len([]rune(line)))
 	tline := shorthanzi.Transform(line)
 	ttline := shorthanzi.Transform(tline)
 	if ttline != line {
@@ -75,6 +79,7 @@ func testText(line string, lineCount int) {
 	}
 
 	bz, ok := shorthanzi.EncodeHanzi(line)
+	TotalByteCount += int64(len(bz))
 	if !ok {
 		return //When line is too short, it will fail. It is just normal.
 	}
@@ -91,5 +96,8 @@ func testText(line string, lineCount int) {
 }
 
 func main() {
+	TotalCharCount = 0
+	TotalByteCount = 0
 	testShortHanzi(0, 10)
+	fmt.Printf("Bytes Per Char: %d/%d=%.02f\n", TotalByteCount, TotalCharCount, float64(TotalByteCount)/float64(TotalCharCount))
 }
