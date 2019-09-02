@@ -12,6 +12,7 @@ import (
 
 	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/config"
+	"github.com/cosmos/cosmos-sdk/version"
 
 	"github.com/coinexchain/dex/modules/authx"
 	dex "github.com/coinexchain/dex/types"
@@ -20,6 +21,10 @@ import (
 func PersistentPreRunEFn(context *sdkserver.Context) func(*cobra.Command, []string) error {
 	fn := sdkserver.PersistentPreRunEFn(context)
 	return func(cmd *cobra.Command, args []string) error {
+		if cmd.Name() == version.Cmd.Name() {
+			return nil
+		}
+
 		if err := fn(cmd, args); err != nil {
 			return err
 		}
