@@ -6,15 +6,16 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
+	simulation2 "github.com/coinexchain/dex/simulation"
 )
 
 func SimulateMsgIssueToken(k asset.Keeper) simulation.Operation {
-	return func(r *rand.Rand, app *baseapp.BaseApp, ctx types.Context, accounts []simulation.Account) (
+	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
 		acc := simulation.RandomAcc(r, accounts)
@@ -46,7 +47,7 @@ func SimulateMsgIssueToken(k asset.Keeper) simulation.Operation {
 }
 
 func checkIssueTokenValid(k asset.Keeper, symbol string) simulation.Operation {
-	return func(r *rand.Rand, app *baseapp.BaseApp, ctx types.Context, accounts []simulation.Account) (
+	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
 		// check the token have succeed issue
@@ -59,30 +60,48 @@ func SimulateMsgTransferOwnership(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		symbol := RandStringBytes(r, SymbolLenth)
-		originOwner := simulation.RandomAcc(r, accounts)
-		newOwner := simulation.RandomAcc(r, accounts)
-		if len(accounts) <= 1 {
+		token := RandomTokenAndOwner(r, ctx, k)
+		if len(accounts) <= 1 || token == nil {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
+
+		symbol := token.GetSymbol()
+		originOwner := token.GetOwner()
+		newOwner := simulation.RandomAcc(r, accounts).Address
+
 		for newOwner.Equals(originOwner) {
-			newOwner = simulation.RandomAcc(r, accounts)
+			newOwner = simulation.RandomAcc(r, accounts).Address
 		}
-		msg := asset.NewMsgTransferOwnership(symbol, originOwner.Address, newOwner.Address)
+		msg := asset.NewMsgTransferOwnership(symbol, originOwner, newOwner)
 		if msg.ValidateBasic() != nil {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
-		ctx, write := ctx.CacheContext()
-		ok := asset.NewHandler(k)(ctx, msg).IsOK()
-		if ok {
-			write()
+		handler := asset.NewHandler(k)
+		ok := simulation2.SimulateHandleMsg(msg, handler, ctx)
+		if !ok {
+			return simulation.NewOperationMsg(msg, ok, ""), nil, nil
 		}
-		opMsg := simulation.NewOperationMsg(msg, ok, "")
-		return opMsg, nil, nil
+
+		ok = VerifyTokenOwnerTransfer(ctx, k, msg)
+		if !ok {
+			return simulation.NewOperationMsg(msg, ok, ""), nil, fmt.Errorf("token ownership transfer falied")
+		}
+		return simulation.NewOperationMsg(msg, ok, ""), nil, nil
 	}
 }
+func RandomTokenAndOwner(r *rand.Rand, ctx sdk.Context, k asset.Keeper) asset.Token {
+	tokenList := k.GetAllTokens(ctx)
+	if len(tokenList) == 0 {
+		return nil
+	}
+	return tokenList[simulation2.GetRandomElemIndex(r, len(tokenList))]
 
+}
+func VerifyTokenOwnerTransfer(ctx sdk.Context, k asset.Keeper, msg types.MsgTransferOwnership) bool {
+	token := k.GetToken(ctx, msg.Symbol)
+	return token.GetOwner().Equals(msg.NewOwner)
+}
 func SimulateMsgMintToken(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
@@ -175,7 +194,7 @@ func SimulateMsgAddTokenWhitelist(k asset.Keeper) simulation.Operation {
 
 		acc := simulation.RandomAcc(r, accounts)
 		symbol := RandStringBytes(r, SymbolLenth)
-		whiteList := make([]types.AccAddress, len(accounts)/2)
+		whiteList := make([]sdk.AccAddress, len(accounts)/2)
 		for i := 0; i < len(whiteList); i++ {
 			whiteList[i] = simulation.RandomAcc(r, accounts).Address
 		}
@@ -200,7 +219,7 @@ func SimulateMsgRemoveTokenWhitelist(k asset.Keeper) simulation.Operation {
 
 		acc := simulation.RandomAcc(r, accounts)
 		symbol := RandStringBytes(r, SymbolLenth)
-		whiteList := make([]types.AccAddress, len(accounts)/3)
+		whiteList := make([]sdk.AccAddress, len(accounts)/3)
 		for i := 0; i < len(whiteList); i++ {
 			whiteList[i] = simulation.RandomAcc(r, accounts).Address
 		}
@@ -225,7 +244,7 @@ func SimulateMsgForbidAddr(k asset.Keeper) simulation.Operation {
 
 		acc := simulation.RandomAcc(r, accounts)
 		symbol := RandStringBytes(r, SymbolLenth)
-		forbidList := make([]types.AccAddress, len(accounts)/4)
+		forbidList := make([]sdk.AccAddress, len(accounts)/4)
 		for i := 0; i < len(forbidList); i++ {
 			forbidList[i] = simulation.RandomAcc(r, accounts).Address
 		}
@@ -250,7 +269,7 @@ func SimulateMsgUnForbidAddr(k asset.Keeper) simulation.Operation {
 
 		acc := simulation.RandomAcc(r, accounts)
 		symbol := RandStringBytes(r, SymbolLenth)
-		forbidList := make([]types.AccAddress, len(accounts)/4)
+		forbidList := make([]sdk.AccAddress, len(accounts)/4)
 		for i := 0; i < len(forbidList); i++ {
 			forbidList[i] = simulation.RandomAcc(r, accounts).Address
 		}
