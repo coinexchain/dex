@@ -92,7 +92,7 @@ func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg t
 	if handler != nil {
 		res := handler(ctx, msg)
 		if !res.IsOK() {
-			if res.Code == bank.CodeSendDisabled {
+			if res.Code == bank.CodeSendDisabled || res.Code == types.CodeTokenForbiddenByOwner {
 				return nil
 			}
 			// TODO: Do this in a more 'canonical' way
@@ -206,7 +206,7 @@ func sendAndVerifyMsgMultiSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, 
 	if handler != nil {
 		res := handler(ctx, msg)
 		if !res.IsOK() {
-			if res.Code == bank.CodeSendDisabled {
+			if res.Code == bank.CodeSendDisabled || res.Code == types.CodeTokenForbiddenByOwner {
 				return nil
 			}
 			// TODO: Do this in a more 'canonical' way
