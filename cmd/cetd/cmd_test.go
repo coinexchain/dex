@@ -44,3 +44,20 @@ func TestInitCmd(t *testing.T) {
 	err := executor.Execute()
 	require.Nil(t, err)
 }
+
+func TestVersionCmd(t *testing.T) {
+	testHmoe := "./testhome"
+	_, err := os.Stat(testHmoe)
+	require.True(t, os.IsNotExist(err))
+
+	rootCmd := createCetdCmd()
+	executor := cli.PrepareBaseCmd(rootCmd, "GA", "here")
+
+	os.Args = []string{"cetd", "version"}
+	viper.Set("home", testHmoe)
+	err = executor.Execute()
+	require.Nil(t, err)
+
+	_, err = os.Stat(testHmoe)
+	require.True(t, os.IsNotExist(err))
+}
