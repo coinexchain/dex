@@ -1,17 +1,19 @@
 package main
 
 import (
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strings"
-	"encoding/json"
-	"encoding/binary"
+
+	"github.com/emirpasic/gods/maps/treemap"
+	"golang.org/x/crypto/blake2b"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/market/match"
-	"github.com/emirpasic/gods/maps/treemap"
-	"golang.org/x/crypto/blake2b"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 var LastPrice sdk.Dec
@@ -29,11 +31,11 @@ func (acc Account) String() string {
 }
 
 type Order struct {
-	Price sdk.Dec `json:"price"`
-	Amount int64 `json:"amount"`
-	Height int64 `json:"height"`
-	ID int64 `json:"id"`
-	Side int `json:"side"`
+	Price  sdk.Dec `json:"price"`
+	Amount int64   `json:"amount"`
+	Height int64   `json:"height"`
+	ID     int64   `json:"id"`
+	Side   int     `json:"side"`
 }
 
 func RandOrder(r *rand.Rand, priceRange int64, amountRange int64) *Order {
@@ -43,11 +45,11 @@ func RandOrder(r *rand.Rand, priceRange int64, amountRange int64) *Order {
 		side = market.BUY
 	}
 	return &Order{
-		Price: sdk.NewDec(r.Int63n(priceRange)),
+		Price:  sdk.NewDec(r.Int63n(priceRange)),
 		Amount: r.Int63n(amountRange),
 		Height: Height,
-		ID: OrderCount,
-		Side: side,
+		ID:     OrderCount,
+		Side:   side,
 	}
 }
 
@@ -62,7 +64,7 @@ func (order *Order) GetHeight() int64 {
 }
 func (order *Order) GetHash() []byte {
 	bz, err := json.Marshal(order)
-	if err!=nil {
+	if err != nil {
 		panic(err.Error())
 	}
 	res := blake2b.Sum256(bz)
@@ -72,7 +74,7 @@ func (order *Order) GetSide() int {
 	return order.Side
 }
 func (order *Order) GetOwner() match.Account {
-	return &Account{ID: order.ID%10000}
+	return &Account{ID: order.ID % 10000}
 }
 func (order *Order) String() string {
 	return fmt.Sprintf("%d", order.ID)
@@ -85,8 +87,8 @@ func (order *Order) Key() string {
 }
 
 type OrderKeeper struct {
-	sellMap   *treemap.Map //map[string]*Order
-	buyMap   *treemap.Map //map[string]*Order
+	sellMap *treemap.Map //map[string]*Order
+	buyMap  *treemap.Map //map[string]*Order
 }
 
 func removeEntriesRandomly(m *treemap.Map, r *rand.Rand, step int32) {
@@ -97,7 +99,7 @@ func removeEntriesRandomly(m *treemap.Map, r *rand.Rand, step int32) {
 		if ok := iter.Next(); !ok {
 			break
 		}
-		if r.Int31n(step)==0 {
+		if r.Int31n(step) == 0 {
 			keysToRemove = append(keysToRemove, iter.Key().(string))
 		}
 	}
@@ -111,7 +113,7 @@ func (keeper *OrderKeeper) Size() int {
 }
 
 func (keeper *OrderKeeper) AddOrder(order *Order) {
-	if order.Side==market.SELL {
+	if order.Side == market.SELL {
 		keeper.sellMap.Put(order.Key(), order)
 	} else {
 		keeper.buyMap.Put(order.Key(), order)
@@ -119,15 +121,15 @@ func (keeper *OrderKeeper) AddOrder(order *Order) {
 }
 
 func (keeper *OrderKeeper) RemoveOrder(order *Order) {
-	if order.Side==market.SELL {
+	if order.Side == market.SELL {
 		ptr, ok := keeper.sellMap.Get(order.Key())
-		if !ok || ptr!=order {
+		if !ok || ptr != order {
 			panic("Order not exist")
 		}
 		keeper.sellMap.Remove(order.Key())
 	} else {
 		ptr, ok := keeper.buyMap.Get(order.Key())
-		if !ok || ptr!=order {
+		if !ok || ptr != order {
 			panic("Order not exist")
 		}
 		keeper.buyMap.Remove(order.Key())
@@ -155,7 +157,7 @@ func (keeper *OrderKeeper) GetHighestBuy() *Order {
 }
 
 func (keeper *OrderKeeper) GetLowestSellUntil(until string) []match.OrderForTrade {
-	tail := string([]byte{0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF})
+	tail := string([]byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF})
 	until = until + tail
 
 	res := make([]match.OrderForTrade, 0, 1000)
@@ -190,10 +192,10 @@ func (keeper *OrderKeeper) GetHighestBuyUntil(until string) []match.OrderForTrad
 }
 
 func (order *Order) checkPrice(price sdk.Dec) {
-	if order.Side==market.SELL && price.LT(order.Price) {
+	if order.Side == market.SELL && price.LT(order.Price) {
 		panic("Can not sell at a lower price")
 	}
-	if order.Side==market.BUY && price.GT(order.Price) {
+	if order.Side == market.BUY && price.GT(order.Price) {
 		panic("Can not buy at a higher price")
 	}
 }
@@ -202,10 +204,10 @@ func (order *Order) Deal(otherSide match.OrderForTrade, amount int64, price sdk.
 	otherOrder := otherSide.(*Order)
 	order.checkPrice(price)
 	otherOrder.checkPrice(price)
-	if otherOrder.Amount<amount {
+	if otherOrder.Amount < amount {
 		panic("amount not enough")
 	}
-	if order.Amount<amount {
+	if order.Amount < amount {
 		panic("amount not enough")
 	}
 	otherOrder.Amount -= amount
@@ -225,13 +227,13 @@ func runTest(seed int64, priceRange int64, amountRange int64, delStep int32, liv
 	LastPrice = sdk.ZeroDec()
 	Keeper = &OrderKeeper{
 		sellMap: treemap.NewWithStringComparator(),
-		buyMap: treemap.NewWithStringComparator(),
+		buyMap:  treemap.NewWithStringComparator(),
 	}
 	Height = 0
 	OrderCount = 0
 
 	r := rand.New(rand.NewSource(seed))
-	for Height:=0; Height<heightLimit; Height++ {
+	for Height := 0; Height < heightLimit; Height++ {
 		//if height%1000==0 {
 		//	fmt.Printf("Height: %d\n", Height)
 		//}
@@ -267,6 +269,6 @@ func runTest(seed int64, priceRange int64, amountRange int64, delStep int32, liv
 }
 
 func main() {
-	  //     seed, priceRange, amountRange, delStep, liveOrderUpper, liveOrderLower, heightLimit
-	runTest(    0,    100,      1000,        3,       8000,           6000,           1000)
+	//     seed, priceRange, amountRange, delStep, liveOrderUpper, liveOrderLower, heightLimit
+	runTest(0, 100, 1000, 3, 8000, 6000, 1000)
 }
