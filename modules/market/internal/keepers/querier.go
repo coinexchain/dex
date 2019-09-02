@@ -14,6 +14,7 @@ import (
 
 const (
 	QueryMarket            = "market-info"
+	QueryMarkets           = "market-list"
 	QueryOrder             = "order-info"
 	QueryUserOrders        = "user-order-list"
 	QueryWaitCancelMarkets = "wait-cancel-markets"
@@ -28,6 +29,8 @@ func NewQuerier(mk Keeper) sdk.Querier {
 			return queryParameters(ctx, mk)
 		case QueryMarket:
 			return queryMarket(ctx, req, mk)
+		case QueryMarkets:
+			return queryMarketList(ctx, req, mk)
 		case QueryOrder:
 			return queryOrder(ctx, req, mk)
 		case QueryUserOrders:
@@ -88,6 +91,28 @@ func queryMarket(ctx sdk.Context, req abci.RequestQuery, mk Keeper) ([]byte, sdk
 		LastExecutedPrice: info.LastExecutedPrice,
 	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, queryInfo)
+	if err != nil {
+		return nil, sdk.NewError(types.CodeSpaceMarket, types.CodeMarshalFailed, "could not marshal result to JSON")
+	}
+	return bz, nil
+}
+
+type MarketInfoList []QueryMarketInfo
+
+func queryMarketList(ctx sdk.Context, req abci.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
+	infos := mk.GetAllMarketInfos(ctx)
+	mInfoList := make([]QueryMarketInfo, len(infos))
+
+	for i, info := range infos {
+		mInfoList[i] = QueryMarketInfo{
+			Creator:           mk.MarketOwner(ctx, info),
+			Stock:             info.Stock,
+			Money:             info.Money,
+			PricePrecision:    strconv.Itoa(int(info.PricePrecision)),
+			LastExecutedPrice: info.LastExecutedPrice,
+		}
+	}
+	bz, err := codec.MarshalJSONIndent(mk.cdc, mInfoList)
 	if err != nil {
 		return nil, sdk.NewError(types.CodeSpaceMarket, types.CodeMarshalFailed, "could not marshal result to JSON")
 	}

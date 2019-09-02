@@ -3128,6 +3128,31 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /market/exist-trading-pairs:
+    get:
+      summary: Query all trading-pair infos in blockchain
+      tags:
+        - Market
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      operationId: queryTradingPairs
+      responses:
+        200:
+          description: All trading-pairs in blockchain
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                $ref: "#/definitions/MarketInfos"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
+
   /market/trading-pairs/{stock}/{money}:
     get:
       summary: Query trading-pair info
@@ -3843,6 +3868,10 @@ definitions:
           creator:
             type: string
             example: "coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj"
+  MarketInfos:
+    type: array
+    items:
+      $ref: "#/definitions/MarketInfo"
   Order:
     type: object
     required:

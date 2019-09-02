@@ -39,6 +39,36 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 	}
 }
 
+func queryMarketsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+		if !ok {
+			return
+		}
+		res, height, err := queryMarketInfos(cdc, cliCtx)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		var queryInfo keepers.MarketInfoList
+		if err := cdc.UnmarshalJSON(res, &queryInfo); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		cliCtx = cliCtx.WithHeight(height)
+		rest.PostProcessResponse(w, cliCtx, queryInfo)
+	}
+}
+
+func queryMarketInfos(cdc *codec.Codec, cliCtx context.CLIContext) ([]byte, int64, error) {
+	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarkets)
+	res, height, err := cliCtx.QueryWithData(query, nil)
+	if err != nil {
+		return nil, height, err
+	}
+	return res, height, nil
+}
+
 func queryMarketInfo(cdc *codec.Codec, cliCtx context.CLIContext, symbol string) ([]byte, int64, error) {
 	bz, err := cdc.MarshalJSON(keepers.NewQueryMarketParam(symbol))
 	if err != nil {

@@ -28,6 +28,7 @@ func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 	mktQueryCmd.AddCommand(client.GetCommands(
 		QueryParamsCmd(cdc),
 		QueryMarketCmd(cdc),
+		QueryMarketListCmd(cdc),
 		QueryOrderCmd(cdc),
 		QueryUserOrderList(cdc))...)
 	// cli.QueryWaitCancelMarkets(mc.cdc))...)
@@ -51,6 +52,29 @@ func QueryParamsCmd(cdc *codec.Codec) *cobra.Command {
 			var params types.Params
 			cdc.MustUnmarshalJSON(res, &params)
 			return cliCtx.PrintOutput(params)
+		},
+	}
+}
+
+func QueryMarketListCmd(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "trading-pairs",
+		Short: "query all trading-pair infos in blockchain",
+		Long: `query all trading-pair infos in blockchain.
+
+Example :
+	cetcli query market trading-pairs
+	--trust-node=true --chain-id=coinexdex`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
+			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarkets)
+			res, _, err := cliCtx.QueryWithData(query, nil)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(res))
+			return nil
 		},
 	}
 }
