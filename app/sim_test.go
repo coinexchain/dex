@@ -357,7 +357,7 @@ func GenAssetDefaultGenesisState(cdc *codec.Codec, accs []simulation.Account, am
 
 	tokenTotalSupply := sdk.NewInt(amount * (int64(len(accs)) + numInitiallyBonded))
 	assetGenesis := asset.DefaultGenesisState()
-	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
+	baseToken, err := asset.NewToken("CoinEx Chain Native Token",
 		"cet",
 		tokenTotalSupply,
 		accs[0].Address,
@@ -369,7 +369,9 @@ func GenAssetDefaultGenesisState(cdc *codec.Codec, accs []simulation.Account, am
 		"A public chain built for the decentralized exchange",
 		"552A83BA62F9B1F8",
 	)
-	assetGenesis.Tokens = append(assetGenesis.Tokens, baseToken)
+	if err != nil {
+		assetGenesis.Tokens = append(assetGenesis.Tokens, baseToken)
+	}
 
 	genesisState[asset.ModuleName] = cdc.MustMarshalJSON(assetGenesis)
 }
