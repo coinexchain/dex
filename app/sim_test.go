@@ -367,7 +367,7 @@ func GenAssetDefaultGenesisState(cdc *codec.Codec, accs []simulation.Account, am
 		false,
 		"www.coinex.org",
 		"A public chain built for the decentralized exchange",
-		"",
+		"552A83BA62F9B1F8",
 	)
 	assetGenesis.Tokens = append(assetGenesis.Tokens, baseToken)
 
