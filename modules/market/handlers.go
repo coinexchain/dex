@@ -160,7 +160,7 @@ func calFrozenFeeInOrder(ctx sdk.Context, marketParams types.Params, keeper keep
 		}
 	}
 	if frozenFee < marketParams.MarketFeeMin {
-		return 0, types.ErrOrderQuantityToSmall()
+		return 0, types.ErrOrderQuantityToSmall(fmt.Sprintf("%d", frozenFee))
 	}
 
 	return frozenFee, nil

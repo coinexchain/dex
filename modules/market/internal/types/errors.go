@@ -86,6 +86,6 @@ func ErrTokenForbidByIssuer() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeTokenForbidByIssuer, "Token is frozen by the issuer")
 }
 
-func ErrOrderQuantityToSmall() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityToSmall, "the order's amount(price * quantity) is too small")
+func ErrOrderQuantityToSmall(err string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityToSmall, "the order commission (%s) too small", err)
 }
