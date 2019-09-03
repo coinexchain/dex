@@ -68,7 +68,7 @@ func ErrNonOwnerIsProhibited() sdk.Error {
 }
 
 func ErrNonMarketExist() sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite, CodeNonMarketExist, "Non corresponding market exist")
+	return sdk.NewError(CodeSpaceBancorlite, CodeNonMarketExist, "No corresponding market exist")
 }
 
 func ErrNoBancorExists() sdk.Error {
@@ -84,7 +84,7 @@ func ErrNotBancorOwner() sdk.Error {
 }
 
 func ErrEarliestCancelTimeNotArrive() sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite, CodeCancelTimeNotArrived, "The time which bancor can be canceled has not arrived")
+	return sdk.NewError(CodeSpaceBancorlite, CodeCancelTimeNotArrived, "The time when bancor can be canceled has not arrived")
 }
 
 func ErrStockInPoolOutofBound() sdk.Error {
@@ -100,7 +100,7 @@ func ErrGetMarketPrice(err string) sdk.Error {
 }
 
 func ErrPriceConfiguration() sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite, CodeInitPriceBigThanMaxPrice, "The init price is big than max price")
+	return sdk.NewError(CodeSpaceBancorlite, CodeInitPriceBigThanMaxPrice, "The init price is bigger than max price")
 }
 
 func ErrEarliestCancelTimeIsNegative() sdk.Error {
