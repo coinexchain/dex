@@ -87,5 +87,5 @@ func ErrTokenForbidByIssuer() sdk.Error {
 }
 
 func ErrOrderQuantityToSmall() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityToSmall, "the order's quantity is too small")
+	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityToSmall, "the order's amount(price * quantity) is too small")
 }
