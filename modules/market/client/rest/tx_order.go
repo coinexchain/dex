@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"math"
 	"net/http"
 	"strings"
 
@@ -112,18 +113,20 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 
 	symbols := strings.Split(msg.TradingPair, types.SymbolSeparator)
 	userToken := symbols[0]
+	amount := msg.Quantity
 	if msg.Side == types.BUY {
 		userToken = symbols[1]
+		amount = sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision))))).Mul(sdk.NewDec(msg.Quantity)).RoundInt64()
 	}
 
 	accRetriever := auth.NewAccountRetriever(cliCtx)
 	account, err := accRetriever.GetAccount(creator)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "No have insufficient cet to create market in blockchain")
+		rest.WriteErrorResponse(w, http.StatusBadRequest, "Query address failed in blockchain")
 		return
 	}
-	if !account.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(msg.Quantity))}) {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "No have insufficient cet to create market in blockchain")
+	if !account.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(amount))}) {
+		rest.WriteErrorResponse(w, http.StatusBadRequest, "No have insufficient token to create order in blockchain")
 		return
 	}
 
