@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	dex "github.com/coinexchain/dex/types"
@@ -60,4 +61,20 @@ func GetRandomElemIndex(r *rand.Rand, length int) int {
 
 func RandomBool(r *rand.Rand) bool {
 	return r.Uint32()%2 == 0
+}
+
+func ReplaceDenom(gacc genaccounts.GenesisAccount, fromDenom, toDenom string) {
+	replaceCoinsDenom(gacc.Coins, fromDenom, toDenom)
+	replaceCoinsDenom(gacc.OriginalVesting, fromDenom, toDenom)
+	replaceCoinsDenom(gacc.DelegatedFree, fromDenom, toDenom)
+	replaceCoinsDenom(gacc.DelegatedVesting, fromDenom, toDenom)
+}
+
+func replaceCoinsDenom(coins sdk.Coins, fromDenom, toDenom string) {
+	for i, coin := range coins {
+		if coin.Denom == fromDenom {
+			coin.Denom = toDenom
+		}
+		coins[i] = coin
+	}
 }

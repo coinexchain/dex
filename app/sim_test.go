@@ -20,7 +20,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	authsim "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	distrsim "github.com/cosmos/cosmos-sdk/x/distribution/simulation"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
@@ -48,7 +47,8 @@ import (
 	"github.com/coinexchain/dex/modules/market"
 	marketsim "github.com/coinexchain/dex/modules/market/simulation"
 	"github.com/coinexchain/dex/modules/stakingx"
-	"github.com/coinexchain/dex/types"
+	dexsim "github.com/coinexchain/dex/simulation"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func init() {
@@ -192,7 +192,7 @@ func GenStakingGenesisState(
 
 	stakingGenesis := simapp.GenStakingGenesisState(cdc, r, accs, amount, numAccs, numInitiallyBonded,
 		ap, genesisState)
-	stakingGenesis.Params.BondDenom = types.CET
+	stakingGenesis.Params.BondDenom = dex.CET // replace stake with cet
 	genesisState[staking.ModuleName] = cdc.MustMarshalJSON(stakingGenesis)
 
 	return stakingGenesis
@@ -202,7 +202,7 @@ func GenStakingGenesisState(
 func GenSupplyGenesisState(cdc *codec.Codec, amount, numInitiallyBonded, numAccs int64, genesisState map[string]json.RawMessage) {
 	totalSupply := sdk.NewInt(amount * (numAccs + numInitiallyBonded))
 	supplyGenesis := supply.NewGenesisState(
-		sdk.NewCoins(sdk.NewCoin(types.CET, totalSupply)),
+		sdk.NewCoins(sdk.NewCoin(dex.CET, totalSupply)),
 	)
 
 	fmt.Printf("Generated supply parameters:\n%s\n", codec.MustMarshalJSONIndent(cdc, supplyGenesis))
@@ -215,54 +215,14 @@ func GenGenesisAccounts(
 	genesisState map[string]json.RawMessage,
 ) {
 
+	simapp.GenGenesisAccounts(cdc, r, accs, genesisTimestamp, amount, numInitiallyBonded, genesisState)
+
 	var genesisAccounts []genaccounts.GenesisAccount
+	cdc.MustUnmarshalJSON(genesisState[genaccounts.ModuleName], &genesisAccounts)
 
-	fmt.Println("total amount : ", amount*int64(len(accs)), "; accounts : ", len(accs))
-	// randomly generate some genesis accounts
-	for i, acc := range accs {
-		coins := sdk.Coins{sdk.NewCoin(types.CET, sdk.NewInt(amount))}
-		bacc := auth.NewBaseAccountWithAddress(acc.Address)
-		bacc.SetCoins(coins)
-
-		var gacc genaccounts.GenesisAccount
-
-		// Only consider making a vesting account once the initial bonded validator
-		// set is exhausted due to needing to track DelegatedVesting.
-		if int64(i) > numInitiallyBonded && r.Intn(100) < 50 {
-			var (
-				vacc    auth.VestingAccount
-				endTime int64
-			)
-
-			startTime := genesisTimestamp.Unix()
-
-			// Allow for some vesting accounts to vest very quickly while others very slowly.
-			if r.Intn(100) < 50 {
-				endTime = int64(simulation.RandIntBetween(r, int(startTime), int(startTime+(60*60*24*30))))
-			} else {
-				endTime = int64(simulation.RandIntBetween(r, int(startTime), int(startTime+(60*60*12))))
-			}
-
-			if startTime == endTime {
-				endTime++
-			}
-
-			if r.Intn(100) < 50 {
-				vacc = auth.NewContinuousVestingAccount(&bacc, startTime, endTime)
-			} else {
-				vacc = auth.NewDelayedVestingAccount(&bacc, endTime)
-			}
-
-			var err error
-			gacc, err = genaccounts.NewGenesisAccountI(vacc)
-			if err != nil {
-				panic(err)
-			}
-		} else {
-			gacc = genaccounts.NewGenesisAccount(&bacc)
-		}
-
-		genesisAccounts = append(genesisAccounts, gacc)
+	// replace stake with cet
+	for _, gacc := range genesisAccounts {
+		dexsim.ReplaceDenom(gacc, sdk.DefaultBondDenom, dex.CET)
 	}
 
 	genesisState[genaccounts.ModuleName] = cdc.MustMarshalJSON(genesisAccounts)
