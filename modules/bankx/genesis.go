@@ -7,13 +7,13 @@ import (
 
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
-	Param types.Params `json:"params"`
+	Params types.Params `json:"params"`
 }
 
 // NewGenesisState - Create a new genesis state
 func NewGenesisState(param types.Params) GenesisState {
 	return GenesisState{
-		Param: param,
+		Params: param,
 	}
 }
 
@@ -24,7 +24,7 @@ func DefaultGenesisState() GenesisState {
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
-	keeper.SetParams(ctx, data.Param)
+	keeper.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
@@ -36,11 +36,11 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) ValidateGenesis() error {
-	activationFee := data.Param.ActivationFee
+	activationFee := data.Params.ActivationFee
 	if activationFee < 0 {
 		return sdk.NewError(types.CodeSpaceBankx, types.CodeInvalidActivationFee, "invalid activated fees")
 	}
-	if lockCoinsFee := data.Param.LockCoinsFee; lockCoinsFee < 0 {
+	if lockCoinsFee := data.Params.LockCoinsFee; lockCoinsFee < 0 {
 		return sdk.NewError(types.CodeSpaceBankx, types.CodeInvalidLockCoinsFee, "invalid lock coins fee")
 	}
 	return nil

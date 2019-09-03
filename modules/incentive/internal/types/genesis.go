@@ -6,8 +6,8 @@ import (
 
 // GenesisState - all asset state that must be provided at genesis
 type GenesisState struct {
-	State State  `json:"state"`
-	Param Params `json:"params"`
+	State  State  `json:"state"`
+	Params Params `json:"params"`
 }
 
 type State struct {
@@ -17,8 +17,8 @@ type State struct {
 // NewGenesisState - Create a new genesis state
 func NewGenesisState(state State, param Params) GenesisState {
 	return GenesisState{
-		State: state,
-		Param: param,
+		State:  state,
+		Params: param,
 	}
 }
 
@@ -34,7 +34,7 @@ func (data GenesisState) ValidateGenesis() error {
 	if state.HeightAdjustment < 0 {
 		return sdk.NewError(CodeSpaceIncentive, CodeInvalidAdjustmentHeight, "invalid adjustment Height")
 	}
-	param := data.Param
+	param := data.Params
 	if param.DefaultRewardPerBlock < 0 {
 		return sdk.NewError(CodeSpaceIncentive, CodeInvalidDefaultRewardPerBlock, "invalid default reward per block")
 	}

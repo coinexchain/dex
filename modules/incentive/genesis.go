@@ -9,7 +9,7 @@ import (
 
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper keepers.Keeper, data types.GenesisState) {
-	keeper.SetParams(ctx, data.Param)
+	keeper.SetParams(ctx, data.Params)
 	err := keeper.SetState(ctx, data.State)
 	if err != nil {
 		panic(err)

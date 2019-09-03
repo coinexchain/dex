@@ -63,8 +63,8 @@ func TestGenesisState_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := incentive.GenesisState{
-				State: tt.fields.State,
-				Param: tt.fields.Param,
+				State:  tt.fields.State,
+				Params: tt.fields.Param,
 			}
 			if err := data.ValidateGenesis(); (err != nil) != tt.wantErr {
 				t.Errorf("GenesisState.Validate() error = %v, wantErr %v", err, tt.wantErr)
@@ -76,7 +76,7 @@ func TestGenesisState_Validate(t *testing.T) {
 func TestDefaultGenesisState(t *testing.T) {
 	state := incentive.DefaultGenesisState()
 	require.Equal(t, int64(0), state.State.HeightAdjustment)
-	require.Equal(t, int64(10e8), state.Param.Plans[0].RewardPerBlock)
+	require.Equal(t, int64(10e8), state.Params.Plans[0].RewardPerBlock)
 }
 
 func TestExportGenesis(t *testing.T) {
@@ -86,6 +86,6 @@ func TestExportGenesis(t *testing.T) {
 	incentive.InitGenesis(input.ctx, input.keeper, genesis)
 	input.keeper.AddNewPlan(input.ctx, plan)
 	gen := incentive.ExportGenesis(input.ctx, input.keeper)
-	genesis.Param.Plans = append(genesis.Param.Plans, plan)
+	genesis.Params.Plans = append(genesis.Params.Plans, plan)
 	require.Equal(t, genesis, gen)
 }
