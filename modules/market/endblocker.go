@@ -225,6 +225,9 @@ func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64,
 	for id, order := range ordersForUpdate {
 		oldDeal := orderOldDeal[id]
 		oldMoney := orderOldMoneys[id]
+		if (order.DealStock-oldDeal == 0) || (order.DealMoney-oldMoney == 0) {
+			continue
+		}
 		msgInfo := types.FillOrderInfo{
 			OrderID:     id,
 			Height:      height,
