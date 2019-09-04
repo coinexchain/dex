@@ -11,6 +11,7 @@ import (
 	stypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 type NewHeightInfo struct {
@@ -131,7 +132,7 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, events []abci.Event)
 		TxJSON:       string(bytes),
 		MsgTypes:     msgTypes,
 		Height:       app.height,
-		Hash:         req.Tx.Hash(),
+		Hash:         tmtypes.Tx(req.Tx).Hash(),
 	}
 
 	bytes, errJSON = json.Marshal(n4s)
