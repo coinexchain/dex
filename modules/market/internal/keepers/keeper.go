@@ -211,6 +211,10 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 	return
 }
 
+func (k Keeper) GetMarketFeeMin(ctx sdk.Context) int64 {
+	return k.GetParams(ctx).MarketFeeMin
+}
+
 // -----------------------------------------------------------------------------
 // Order
 

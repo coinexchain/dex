@@ -66,35 +66,8 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	}
 	k.Bik.Save(ctx, bi)
 
-	//m := types.MsgBancorCreateForKafka{
-	//	Owner:            msg.Owner,
-	//	Stock:            msg.Stock,
-	//	Money:            msg.Money,
-	//	InitPrice:        msg.InitPrice,
-	//	MaxSupply:        msg.MaxSupply,
-	//	MaxPrice:         msg.MaxPrice,
-	//	EarliestCancelTime: msg.EarliestCancelTime,
-	//	BlockHeight:      ctx.BlockHeight(),
-	//}
-
-	//fillMsgQueue(ctx, k, KafkaBancorCreate, m)
 	fillMsgQueue(ctx, k, KafkaBancorInfo, *bi)
-	//ctx.EventManager().EmitEvents(sdk.Events{
-	//	sdk.NewEvent(
-	//		EventTypeBancorlite,
-	//		sdk.NewAttribute(AttributeKeyCreateFor, bi.Token),
-	//	),
-	//	sdk.NewEvent(
-	//		sdk.EventTypeMessage,
-	//		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-	//		sdk.NewAttribute(AttributeOwner, bi.Owner.String()),
-	//		sdk.NewAttribute(AttributeMaxSupply, bi.MaxSupply.String()),
-	//	),
-	//})
-	//
-	//return sdk.Result{
-	//	Events: ctx.EventManager().Events(),
-	//}
+
 	return sdk.Result{}
 }
 
@@ -123,13 +96,7 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
 		return err.Result()
 	}
-	//m := types.MsgBancorCancelForKafka{
-	//	Owner:       msg.Owner,
-	//	Stock:       msg.Stock,
-	//	Money:       msg.Money,
-	//	BlockHeight: ctx.BlockHeight(),
-	//}
-	//fillMsgQueue(ctx, k, KafkaBancorCancel, m)
+
 	return sdk.Result{}
 }
 
@@ -172,7 +139,13 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	if err != nil {
 		return types.ErrGetMarketPrice(err.Error()).Result()
 	}
+
 	commission := price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
+
+	if commission.Int64() < k.Mk.GetMarketFeeMin(ctx) {
+		return types.ErrTradeQuantityToSmall(commission.Int64()).Result()
+	}
+
 	if err := k.Bxk.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin("cet", commission))); err != nil {
 		return err.Result()
 	}

@@ -23,4 +23,5 @@ type ExpectedAssetStatusKeeper interface {
 type ExpectedMarketKeeper interface {
 	GetMarketLastExePrice(ctx sdk.Context, symbol string) (sdk.Dec, error)
 	IsMarketExist(ctx sdk.Context, symbol string) bool
+	GetMarketFeeMin(ctx sdk.Context) int64
 }

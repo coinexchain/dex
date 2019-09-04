@@ -29,12 +29,14 @@ type MsgBancorCancel struct {
 }
 
 type MsgBancorTrade struct {
-	Sender     sdk.AccAddress `json:"sender"`
-	Stock      string         `json:"stock"`
-	Money      string         `json:"money"`
-	Amount     int64          `json:"amount"`
-	IsBuy      bool           `json:"is_buy"`
-	MoneyLimit int64          `json:"money_limit"`
+	Sender sdk.AccAddress `json:"sender"`
+	Stock  string         `json:"stock"`
+	Money  string         `json:"money"`
+	//stock amount
+	Amount int64 `json:"amount"`
+	IsBuy  bool  `json:"is_buy"`
+	//money up limit
+	MoneyLimit int64 `json:"money_limit"`
 }
 
 // --------------------------------------------------------
