@@ -1,5 +1,7 @@
 module github.com/coinexchain/dex
 
+go 1.12
+
 require (
 	github.com/cosmos/cosmos-sdk v0.37.0
 	github.com/emirpasic/gods v1.12.0
