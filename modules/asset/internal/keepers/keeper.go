@@ -591,7 +591,7 @@ func (keeper BaseTokenKeeper) ExportGenesisAddrKeys(ctx sdk.Context, prefix []by
 	keeper.iterateAddrKey(ctx, prefix, func(key []byte) (stop bool) {
 
 		// prefix | symbol | : | address
-		split := bytes.SplitAfter(key, types.SeparateKey)
+		split := bytes.SplitAfterN(key, types.SeparateKey, 2)
 		addrBech32, err := bech32.ConvertAndEncode(bech32AccountAddrPrefix, split[1])
 		if err != nil {
 			panic(err)
