@@ -2,6 +2,7 @@ package keepers
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 
 	"github.com/tendermint/tendermint/libs/bech32"
@@ -573,7 +574,10 @@ func (keeper BaseTokenKeeper) ImportGenesisAddrKeys(ctx sdk.Context, prefix []by
 	store := ctx.KVStore(keeper.storeKey)
 
 	// symbol | : | address
-	split := strings.SplitAfter(addr, string(types.SeparateKey))
+	split := strings.SplitAfterN(addr, string(types.SeparateKey), 2)
+	if len(split) != 2 {
+		return errors.New("Genesis Address Err ")
+	}
 	addrBech32, err := sdk.AccAddressFromBech32(split[1])
 	if err != nil {
 		return err
@@ -592,6 +596,9 @@ func (keeper BaseTokenKeeper) ExportGenesisAddrKeys(ctx sdk.Context, prefix []by
 
 		// prefix | symbol | : | address
 		split := bytes.SplitAfterN(key, types.SeparateKey, 2)
+		if len(split) != 2 {
+			panic(errors.New("Genesis Addr Err "))
+		}
 		addrBech32, err := bech32.ConvertAndEncode(bech32AccountAddrPrefix, split[1])
 		if err != nil {
 			panic(err)
