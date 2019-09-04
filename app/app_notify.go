@@ -45,6 +45,7 @@ type NotificationTx struct {
 	MsgTypes     []string         `json:"msg_types"`
 	TxJSON       string           `json:"tx_json"`
 	Height       int64            `json:"height"`
+	Hash         []byte           `json:"hash"`
 }
 
 func getTransferRecord(dualEvent []abci.Event) TransferRecord {
@@ -130,6 +131,7 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, events []abci.Event)
 		TxJSON:       string(bytes),
 		MsgTypes:     msgTypes,
 		Height:       app.height,
+		Hash:         req.Tx.Hash(),
 	}
 
 	bytes, errJSON = json.Marshal(n4s)
