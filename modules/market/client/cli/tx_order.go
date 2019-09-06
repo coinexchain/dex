@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 
@@ -88,7 +87,6 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 	cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
 
-	accRetriever := auth.NewAccountRetriever(cliCtx)
 	sender := cliCtx.GetFromAddress()
 	msg, err := parseCreateOrderFlags(sender)
 	if err != nil {
@@ -105,21 +103,6 @@ func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
 	}
 	if err = msg.ValidateBasic(); err != nil {
 		return err
-	}
-
-	symbols := strings.Split(msg.TradingPair, types.SymbolSeparator)
-	userToken := symbols[0]
-	amount := msg.Quantity
-	if msg.Side == types.BUY {
-		userToken = symbols[1]
-		amount = sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision))))).Mul(sdk.NewDec(msg.Quantity)).RoundInt64()
-	}
-	account, err := accRetriever.GetAccount(sender)
-	if err != nil {
-		return err
-	}
-	if !account.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(amount))}) {
-		return errors.New("No have insufficient token to create order in blockchain")
 	}
 
 	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
