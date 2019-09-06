@@ -1140,6 +1140,8 @@ paths:
                   - unbonding_time
                   - max_validators
                   - bond_denom
+                  - min_self_delegation
+                  - min_mandatory_commission_rate
                 properties:
                   max_entries:
                     type: integer
@@ -1148,6 +1150,10 @@ paths:
                   max_validators:
                     type: integer
                   bond_denom:
+                    type: string
+                  min_self_delegation:
+                    type: string
+                  min_mandatory_commission_rate:
                     type: string
                 additionalProperties: false
         500:
