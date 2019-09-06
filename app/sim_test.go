@@ -273,7 +273,7 @@ func GenAssetDefaultGenesisState(cdc *codec.Codec, accs []simulation.Account, am
 
 	tokenTotalSupply := sdk.NewInt(amount * (int64(len(accs)) + numInitiallyBonded))
 	assetGenesis := asset.DefaultGenesisState()
-	baseToken, err := asset.NewToken("CoinEx Chain Native Token",
+	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
 		"cet",
 		tokenTotalSupply,
 		accs[0].Address,
@@ -285,7 +285,7 @@ func GenAssetDefaultGenesisState(cdc *codec.Codec, accs []simulation.Account, am
 		"A public chain built for the decentralized exchange",
 		"552A83BA62F9B1F8",
 	)
-	if err != nil {
+	if baseToken != nil {
 		assetGenesis.Tokens = append(assetGenesis.Tokens, baseToken)
 	}
 
