@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/asset/internal/types"
-	dex "github.com/coinexchain/dex/types"
 )
 
 var issueTokenFlags = []string{
@@ -96,19 +95,6 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 				return fmt.Errorf("token symbol already exists，please query tokens and issue another symbol")
 			}
 
-			// ensure account has enough coins
-			account, err := auth.NewAccountRetriever(cliCtx).GetAccount(tokenOwner)
-			if err != nil {
-				return err
-			}
-			issueFee := dex.NewCetCoins(types.IssueTokenFee)
-			//if len(msg.Symbol) == types.RareSymbolLength {
-			//	issueFee = dex.NewCetCoins(types.IssueRareTokenFee)
-			//}
-			if !account.GetCoins().IsAllGTE(issueFee) {
-				return fmt.Errorf("address %s doesn't have enough cet to issue token", tokenOwner)
-			}
-
 			// build and sign the transaction, then broadcast to Tendermint
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
@@ -163,10 +149,6 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 				return err
 			}
 
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(originalOwner); err != nil {
-				return err
-			}
-
 			// build and sign the transaction, then broadcast to Tendermint
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
@@ -211,10 +193,6 @@ $ cetcli tx asset mint-token --symbol="abc" \
 			}
 
 			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -265,10 +243,6 @@ $ cetcli tx asset burn-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
-				return err
-			}
-
 			// build and sign the transaction, then broadcast to Tendermint
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
@@ -314,10 +288,6 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 				return err
 			}
 
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
-				return err
-			}
-
 			// build and sign the transaction, then broadcast to Tendermint
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
@@ -355,10 +325,6 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 			}
 
 			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -409,10 +375,6 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 				return err
 			}
 
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
-				return err
-			}
-
 			// build and sign the transaction, then broadcast to Tendermint
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
@@ -453,10 +415,6 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 			}
 
 			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -508,10 +466,6 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 				return err
 			}
 
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
-				return err
-			}
-
 			// build and sign the transaction, then broadcast to Tendermint
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
@@ -552,10 +506,6 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 			}
 
 			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 
@@ -605,10 +555,6 @@ $ cetcli tx asset modify-token-info --symbol="abc" \
 			}
 
 			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			if _, err = auth.NewAccountRetriever(cliCtx).GetAccount(owner); err != nil {
 				return err
 			}
 

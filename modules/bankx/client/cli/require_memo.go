@@ -31,10 +31,6 @@ func RequireMemoCmd(cdc *codec.Codec) *cobra.Command {
 				WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			addr := cliCtx.GetFromAddress()
-			_, err = auth.NewAccountRetriever(cliCtx).GetAccount(addr)
-			if err != nil {
-				return err
-			}
 
 			// build and sign the transaction, then broadcast to Tendermint
 			msg := types.NewMsgSetTransferMemoRequired(addr, required)
