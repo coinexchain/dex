@@ -21,6 +21,7 @@ bash script/init.sh
 
 echo "Test begin"
 
+cd func_test
 bash ./ft.sh
 
 echo "Test end"
