@@ -22,7 +22,7 @@ popd
 
 echo "Test begin"
 echo "$(pwd)"
-tree .
+ls -la
 cd func_test
 bash script/ft.sh
 echo "Test end"
