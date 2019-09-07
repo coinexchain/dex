@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM frolvlad/alpine-glibc
 LABEL maintainer="dev@coinex.org"
 
 RUN apk update && \
