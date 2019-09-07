@@ -16,12 +16,11 @@ docker pull coinexchain/walle
 docker run --rm -v $(pwd)/func_test:/test:Z coinexchain/walle /data/script/cp_data.sh
 
 mkdir func_test/run
-cd func_test
+pushd func_test
 bash script/init.sh
+popd
 
 echo "Test begin"
-
 cd func_test
 bash ./ft.sh
-
 echo "Test end"
