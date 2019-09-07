@@ -21,6 +21,8 @@ bash script/init.sh
 popd
 
 echo "Test begin"
+echo "$(pwd)"
+tree .
 cd func_test
-bash ./ft.sh
+bash script/ft.sh
 echo "Test end"
