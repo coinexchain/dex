@@ -598,7 +598,7 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 	if app.msgQueProducer.IsOpenToggle() {
 		if ret.Code == uint32(sdk.CodeOK) {
 			ret.Events = FilterMsgsOnlyKafka(ret.Events)
-			app.notifyTx(req, ret.Events)
+			app.notifyTx(req, ret)
 		} else {
 			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
 		}

@@ -74,7 +74,8 @@ func getType(myvar interface{}) string {
 	return t.Name()
 }
 
-func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, events []abci.Event) {
+func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDeliverTx) {
+	events := ret.Events
 	transfers := make([]TransferRecord, 0, 10)
 	for i := 0; i < len(events); i++ {
 		if events[i].Type == stypes.EventTypeUnbond {
@@ -141,6 +142,10 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, events []abci.Event)
 	}
 
 	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx"), Value: bytes})
+
+	if ret.Code == uint32(sdk.CodeOutOfGas) {
+		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx_outofgas"), Value: bytes})
+	}
 }
 
 //type WithdrawRewardInfo struct {
