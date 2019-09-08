@@ -45,6 +45,10 @@ matrix:
     - language: python
       python: 3.7
       dist: xenial
+      addons:
+        apt:
+          packages:
+            - parallel
 
       cache:
         directories:

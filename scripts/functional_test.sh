@@ -24,5 +24,5 @@ echo "Test begin"
 echo "$(pwd)"
 ls -la
 cd func_test
-bash script/ft.sh
+bash script/run_ft_in_parallel.sh
 echo "Test end"
