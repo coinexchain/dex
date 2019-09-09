@@ -77,7 +77,8 @@ func getType(myvar interface{}) string {
 func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDeliverTx) {
 	events := ret.Events
 	transfers := make([]TransferRecord, 0, 10)
-	for i := 0; i < len(events); i++ {
+	ok := ret.Code == uint32(sdk.CodeOK)
+	for i := 0; ok && i < len(events); i++ {
 		if events[i].Type == stypes.EventTypeUnbond {
 			if i+1 <= len(events) {
 				val := getNotificationBeginUnbonding(events[i : i+2])
