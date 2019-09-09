@@ -141,9 +141,9 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDel
 		return
 	}
 
-	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx"), Value: bytes})
-
-	if ret.Code == uint32(sdk.CodeInsufficientFunds) {
+	if ret.Code == uint32(sdk.CodeOK) {
+		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx"), Value: bytes})
+	} else if ret.Code == uint32(sdk.CodeInsufficientFunds) {
 		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("funds_not_enough"), Value: bytes})
 	}
 }
@@ -313,4 +313,3 @@ func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
 		}
 	}
 }
-
