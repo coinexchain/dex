@@ -42,7 +42,8 @@ matrix:
       script:
         - ./scripts/check.sh
 
-    - language: python
+    - &ft_job
+      language: python
       python: 3.7
       dist: xenial
       addons:
@@ -68,35 +69,22 @@ matrix:
           - CACHE_DIR=$HOME/.cache/docker
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 1
+        - scripts/functional_test.sh 4 0
 
-    - language: python
-      python: 3.7
-      dist: xenial
-      addons:
-        apt:
-          packages:
-            - parallel
-
-      cache:
-        directories:
-          - $CACHE_DIR
-
-      services:
-        - docker
-
-      before_script:
-        - chmod +x ./scripts/functional_test.sh
-
-      after_success:
-        - rm ~/.docker/config.json
-
-      env:
-        global:
-          - CACHE_DIR=$HOME/.cache/docker
+    - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 2
+        - scripts/functional_test.sh 4 1
+
+    - <<: *ft_job
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh 4 2
+
+    - <<: *ft_job
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh 4 3
 
 notifications:
   email:
