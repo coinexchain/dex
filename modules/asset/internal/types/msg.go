@@ -529,14 +529,16 @@ type MsgModifyTokenInfo struct {
 	Symbol       string         `json:"symbol" yaml:"symbol"`
 	URL          string         `json:"url" yaml:"url"`
 	Description  string         `json:"description" yaml:"description"`
+	Identity     string         `json:"identity" yaml:"identity"`
 	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"` //token owner address
 }
 
-func NewMsgModifyTokenInfo(symbol string, url string, description string, owner sdk.AccAddress) MsgModifyTokenInfo {
+func NewMsgModifyTokenInfo(symbol string, url string, description string, identity string, owner sdk.AccAddress) MsgModifyTokenInfo {
 	return MsgModifyTokenInfo{
 		symbol,
 		url,
 		description,
+		identity,
 		owner,
 	}
 }
@@ -568,6 +570,11 @@ func (msg MsgModifyTokenInfo) ValidateBasic() sdk.Error {
 	if len(msg.Description) > MaxTokenDescriptionLength {
 		return ErrInvalidTokenDescription(msg.Description)
 	}
+
+	if len(msg.Identity) > MaxTokenIdentityLength {
+		return ErrInvalidTokenIdentity(msg.Identity)
+	}
+
 	return nil
 }
 

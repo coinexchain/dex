@@ -323,7 +323,7 @@ func handleMsgModifyTokenInfo(ctx sdk.Context, keeper Keeper, msg types.MsgModif
 		return err.Result()
 	}
 
-	if err := keeper.ModifyTokenInfo(ctx, msg.Symbol, msg.OwnerAddress, msg.URL, msg.Description); err != nil {
+	if err := keeper.ModifyTokenInfo(ctx, msg.Symbol, msg.OwnerAddress, msg.URL, msg.Description, msg.Identity); err != nil {
 		return err.Result()
 	}
 
@@ -337,6 +337,10 @@ func handleMsgModifyTokenInfo(ctx sdk.Context, keeper Keeper, msg types.MsgModif
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
 			sdk.NewAttribute(types.AttributeKeyDescription, msg.Description),
+		),
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyIdentity, msg.Identity),
 		),
 	})
 	return sdk.Result{

@@ -2952,6 +2952,8 @@ paths:
                 type: string
               description:
                 type: string
+              identity:
+                type: string
       responses:
         200:
           description: Modify token info result

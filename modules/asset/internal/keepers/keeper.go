@@ -34,7 +34,7 @@ type Keeper interface {
 	RemoveTokenWhitelist(ctx sdk.Context, symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) sdk.Error
 	ForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
 	UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
-	ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string) sdk.Error
+	ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string, identity string) sdk.Error
 
 	SetParams(ctx sdk.Context, params types.Params)
 	GetParams(ctx sdk.Context) (params types.Params)
@@ -296,7 +296,7 @@ func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner s
 }
 
 // ModifyTokenInfo - modify token info property
-func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string) sdk.Error {
+func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string, identity string) sdk.Error {
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
 		return err
@@ -310,6 +310,12 @@ func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner s
 
 	if description != types.DoNotModifyTokenInfo {
 		if err := token.SetDescription(description); err != nil {
+			return err
+		}
+	}
+
+	if identity != types.DoNotModifyTokenInfo {
+		if err := token.SetIdentity(identity); err != nil {
 			return err
 		}
 	}

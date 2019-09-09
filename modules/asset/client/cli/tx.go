@@ -530,6 +530,7 @@ var modifyTokenURLFlags = []string{
 	flagSymbol,
 	flagTokenURL,
 	flagTokenDescription,
+	flagTokenIdentity,
 }
 
 // GetCmdModifyTokenInfo will create a modify token info tx and sign.
@@ -544,6 +545,7 @@ Example:
 $ cetcli tx asset modify-token-info --symbol="abc" \
 	--url="www.abc.com" \
 	--description="abc example description" \
+	--identity="552A83BA62F9B1F8" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -567,6 +569,7 @@ $ cetcli tx asset modify-token-info --symbol="abc" \
 	cmd.Flags().String(flagSymbol, "", "which token will be modify")
 	cmd.Flags().String(flagTokenURL, types.DoNotModifyTokenInfo, "the url of token")
 	cmd.Flags().String(flagTokenDescription, types.DoNotModifyTokenInfo, "the description of token")
+	cmd.Flags().String(flagTokenIdentity, types.DoNotModifyTokenInfo, "the identity of token")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 

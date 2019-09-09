@@ -86,6 +86,7 @@ type (
 		BaseReq     rest.BaseReq `json:"base_req" yaml:"base_req"`
 		URL         *string      `json:"url,omitempty" yaml:"url,omitempty"`
 		Description *string      `json:"description,omitempty" yaml:"description,omitempty"`
+		Identity    *string      `json:"identity,omitempty" yaml:"identity,omitempty"`
 	}
 )
 
@@ -451,8 +452,13 @@ func modifyTokenInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			description = *req.Description
 		}
 
+		identity := types.DoNotModifyTokenInfo
+		if req.Identity != nil {
+			identity = *req.Identity
+		}
+
 		symbol := getSymbol(r)
-		msg := types.NewMsgModifyTokenInfo(symbol, url, description, owner)
+		msg := types.NewMsgModifyTokenInfo(symbol, url, description, identity, owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

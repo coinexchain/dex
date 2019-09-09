@@ -438,28 +438,33 @@ func TestMsgModifyTokenURL_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", TestIdentityString, testAddr),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgModifyTokenInfo("a😃", "www.abc.org", "abc example description", testAddr),
+			NewMsgModifyTokenInfo("a😃", "www.abc.org", "abc example description", TestIdentityString, testAddr),
 			ErrInvalidTokenSymbol("a😃"),
 		},
 		{
 			"case-invalidOwner",
-			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", sdk.AccAddress{}),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", TestIdentityString, sdk.AccAddress{}),
 			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidURL",
-			NewMsgModifyTokenInfo("abc", string(make([]byte, MaxTokenURLLength+1)), "abc example description", testAddr),
+			NewMsgModifyTokenInfo("abc", string(make([]byte, MaxTokenURLLength+1)), "abc example description", TestIdentityString, testAddr),
 			ErrInvalidTokenURL(string(make([]byte, MaxTokenURLLength+1))),
 		},
 		{
 			"case-invalidDescription",
-			NewMsgModifyTokenInfo("abc", "www.abc.org", string(make([]byte, MaxTokenDescriptionLength+1)), testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", string(make([]byte, MaxTokenDescriptionLength+1)), TestIdentityString, testAddr),
 			ErrInvalidTokenDescription(string(make([]byte, MaxTokenDescriptionLength+1))),
+		},
+		{
+			"case-invalidIdentity",
+			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", string(make([]byte, MaxTokenIdentityLength+1)), testAddr),
+			ErrInvalidTokenIdentity(string(make([]byte, MaxTokenIdentityLength+1))),
 		},
 	}
 
@@ -664,7 +669,7 @@ func TestMsg_GetSigners(t *testing.T) {
 		},
 		{
 			"modify-token-url",
-			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", TestIdentityString, testAddr),
 			[]sdk.AccAddress{testAddr},
 		},
 	}
@@ -744,8 +749,8 @@ func TestMsg_GetSignBytes(t *testing.T) {
 		},
 		{
 			"modify-token-info",
-			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", owner),
-			`{"type":"asset/MsgModifyTokenInfo","value":{"description":"abc example description","owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","url":"www.abc.com"}}`,
+			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", TestIdentityString, owner),
+			`{"type":"asset/MsgModifyTokenInfo","value":{"description":"abc example description","identity":"552A83BA62F9B1F8","owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","url":"www.abc.com"}}`,
 		},
 	}
 

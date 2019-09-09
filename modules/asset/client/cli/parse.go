@@ -230,6 +230,7 @@ func parseModifyTokenInfoFlags(owner sdk.AccAddress) (*types.MsgModifyTokenInfo,
 		viper.GetString(flagSymbol),
 		viper.GetString(flagTokenURL),
 		viper.GetString(flagTokenDescription),
+		viper.GetString(flagTokenIdentity),
 		owner,
 	)
 

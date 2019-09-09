@@ -12,4 +12,5 @@ const (
 	AttributeKeyAddr            = "address"
 	AttributeKeyURL             = "url"
 	AttributeKeyDescription     = "description"
+	AttributeKeyIdentity        = "identity"
 )

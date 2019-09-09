@@ -138,17 +138,22 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"modify_token_info",
-			asset.NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", owner),
+			asset.NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", types.TestIdentityString, owner),
 			true,
 		},
 		{
 			"modify_token_url_invalid",
-			asset.NewMsgModifyTokenInfo("abc", string(make([]byte, types.MaxTokenURLLength+1)), "abc example description", owner),
+			asset.NewMsgModifyTokenInfo("abc", string(make([]byte, types.MaxTokenURLLength+1)), "abc example description", types.TestIdentityString, owner),
 			false,
 		},
 		{
 			"modify_token_description_invalid",
-			asset.NewMsgModifyTokenInfo("abc", "www.abc.com", string(make([]byte, types.MaxTokenDescriptionLength+1)), owner),
+			asset.NewMsgModifyTokenInfo("abc", "www.abc.com", string(make([]byte, types.MaxTokenDescriptionLength+1)), types.TestIdentityString, owner),
+			false,
+		},
+		{
+			"modify_token_identity_invalid",
+			asset.NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", string(make([]byte, types.MaxTokenIdentityLength+1)), owner),
 			false,
 		},
 	}

@@ -551,6 +551,7 @@ func TestTokenKeeper_ModifyTokenInfo(t *testing.T) {
 	var addr, _ = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	url := "www.abc.com"
 	description := "token abc is a example token"
+	identity := types.TestIdentityString
 
 	//case 1: base-case ok
 	// set token
@@ -558,28 +559,35 @@ func TestTokenKeeper_ModifyTokenInfo(t *testing.T) {
 		true, false, false, false, "www.abc.org", "abc example description", types.TestIdentityString)
 	require.NoError(t, err)
 
-	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, url, description)
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, url, description, identity)
 	require.NoError(t, err)
 	token := input.tk.GetToken(input.ctx, symbol)
 	require.Equal(t, url, token.GetURL())
 	require.Equal(t, description, token.GetDescription())
 
 	//case 2: only token owner can modify token info
-	err = input.tk.ModifyTokenInfo(input.ctx, symbol, addr, "www.abc.org", "token abc is a example token")
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, addr, "www.abc.org", "token abc is a example token", identity)
 	require.Error(t, err)
 	token = input.tk.GetToken(input.ctx, symbol)
 	require.Equal(t, url, token.GetURL())
 	require.Equal(t, description, token.GetDescription())
 
 	//case 3: invalid url
-	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, string(make([]byte, types.MaxTokenURLLength+1)), types.DoNotModifyTokenInfo)
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, string(make([]byte, types.MaxTokenURLLength+1)), types.DoNotModifyTokenInfo, types.DoNotModifyTokenInfo)
 	require.Error(t, err)
 	token = input.tk.GetToken(input.ctx, symbol)
 	require.Equal(t, url, token.GetURL())
 	require.Equal(t, description, token.GetDescription())
 
 	//case 4: invalid description
-	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, types.DoNotModifyTokenInfo, string(make([]byte, types.MaxTokenDescriptionLength+1)))
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, types.DoNotModifyTokenInfo, string(make([]byte, types.MaxTokenDescriptionLength+1)), types.DoNotModifyTokenInfo)
+	require.Error(t, err)
+	token = input.tk.GetToken(input.ctx, symbol)
+	require.Equal(t, url, token.GetURL())
+	require.Equal(t, description, token.GetDescription())
+
+	//case 4: invalid identity
+	err = input.tk.ModifyTokenInfo(input.ctx, symbol, testAddr, types.DoNotModifyTokenInfo, types.DoNotModifyTokenInfo, string(make([]byte, types.MaxTokenIdentityLength+1)))
 	require.Error(t, err)
 	token = input.tk.GetToken(input.ctx, symbol)
 	require.Equal(t, url, token.GetURL())
