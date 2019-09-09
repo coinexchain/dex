@@ -135,12 +135,16 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return types.ErrMoneyCrossLimit(moneyErr).Result()
 	}
 
-	price, err := k.Mk.GetMarketLastExePrice(ctx, msg.Stock+keepers.SymbolSeparator+"cet")
-	if err != nil {
-		return types.ErrGetMarketPrice(err.Error()).Result()
+	var commission sdk.Int
+	if bi.Money == "cet" {
+		commission = diff.Mul(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).Quo(sdk.NewInt(10000))
+	} else {
+		price, err := k.Mk.GetMarketLastExePrice(ctx, msg.Stock+keepers.SymbolSeparator+"cet")
+		if err != nil {
+			return types.ErrGetMarketPrice(err.Error()).Result()
+		}
+		commission = price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
 	}
-
-	commission := price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
 
 	if commission.Int64() < k.Mk.GetMarketFeeMin(ctx) {
 		return types.ErrTradeQuantityToSmall(commission.Int64()).Result()
@@ -177,7 +181,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		Amount:      msg.Amount,
 		Side:        byte(side),
 		MoneyLimit:  msg.MoneyLimit,
-		TxPrice:     price,
+		TxPrice:     biNew.Price.Add(bi.Price).QuoInt64(2),
 		BlockHeight: ctx.BlockHeight(),
 	}
 	fillMsgQueue(ctx, k, KafkaBancorTrade, m)
@@ -193,7 +197,6 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 			sdk.NewAttribute(AttributeNewStockInPool, biNew.StockInPool.String()),
 			sdk.NewAttribute(AttributeNewMoneyInPool, biNew.MoneyInPool.String()),
-			sdk.NewAttribute(AttributeNewPrice, biNew.Price.String()),
 			sdk.NewAttribute(AttributeNewPrice, biNew.Price.String()),
 			sdk.NewAttribute(AttributeTradeSide, sideStr),
 			sdk.NewAttribute(AttributeCoinsFromPool, coinsFromPool.String()),
