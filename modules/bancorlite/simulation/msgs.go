@@ -24,10 +24,11 @@ func SimulateMsgBancorInit(assetKeeper asset.Keeper, blk bancorlite.Keeper) simu
 
 		addr := simulation.RandomAcc(r, accs).Address
 		newSymbol := dexsim.RandomSymbol(r, symbolPrefix, 3)
+		identity := dexsim.RandomSymbol(r, "", 30)
 		amount := 1e10 + r.Int63n(1e12)
 
 		// issue new token
-		issueTokenMsg := createMsgIssueToken(newSymbol, amount, addr)
+		issueTokenMsg := createMsgIssueToken(newSymbol, amount, addr, identity)
 		issueTokenOK := dexsim.SimulateHandleMsg(issueTokenMsg, asset.NewHandler(assetKeeper), ctx)
 		if !issueTokenOK {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
@@ -41,9 +42,9 @@ func SimulateMsgBancorInit(assetKeeper asset.Keeper, blk bancorlite.Keeper) simu
 	}
 }
 
-func createMsgIssueToken(newSymbol string, amount int64, tokenOwner sdk.AccAddress) asset.MsgIssueToken {
+func createMsgIssueToken(newSymbol string, amount int64, tokenOwner sdk.AccAddress, identity string) asset.MsgIssueToken {
 	return asset.NewMsgIssueToken(newSymbol, newSymbol, sdk.NewInt(amount), tokenOwner,
-		false, false, false, false, "", "", "")
+		false, false, false, false, "", "", identity)
 }
 
 func createMsgBancorInit(r *rand.Rand,
@@ -54,7 +55,7 @@ func createMsgBancorInit(r *rand.Rand,
 	if initPrice > 0 {
 		initPrice = r.Int63n(1000)
 	}
-	maxPrice := initPrice * 1000
+	maxPrice := (initPrice + 1) * 1000 //  make maxPrice not 0 when initPrice is 0
 
 	return bancorlite.MsgBancorInit{
 		Owner:              owner,
