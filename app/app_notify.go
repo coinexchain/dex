@@ -143,37 +143,10 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDel
 
 	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx"), Value: bytes})
 
-	if ret.Code == uint32(sdk.CodeOutOfGas) {
-		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx_outofgas"), Value: bytes})
+	if ret.Code == uint32(sdk.CodeInsufficientFunds) {
+		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("funds_not_enough"), Value: bytes})
 	}
 }
-
-//type WithdrawRewardInfo struct {
-//	Delegator string `json:"delegator"`
-//	Validator string `json:"validator"`
-//	Amount    string `json:"amount"`
-//}
-//
-//func getWithdrawRewardInfo(dualEvent []abci.Event) []byte {
-//	var res WithdrawRewardInfo
-//	for _, attr := range dualEvent[0].Attributes {
-//		if string(attr.Key) == dtypes.AttributeKeyValidator {
-//			res.Validator = string(attr.Value)
-//		} else if string(attr.Key) == dtypes.AttributeKeyAmount {
-//			res.Amount = string(attr.Value)
-//		}
-//	}
-//	for _, attr := range dualEvent[1].Attributes {
-//		if string(attr.Key) == sdk.AttributeKeySender {
-//			res.Delegator = string(attr.Value)
-//		}
-//	}
-//	bytes, errJSON := json.Marshal(res)
-//	if errJSON != nil {
-//		return []byte{}
-//	}
-//	return bytes
-//}
 
 type NotificationBeginRedelegation struct {
 	Delegator      string `json:"delegator"`
@@ -341,62 +314,3 @@ func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
 	}
 }
 
-//		sdk.NewEvent(
-//			types.EventTypeWithdrawRewards,
-//			sdk.NewAttribute(types.AttributeKeyAmount, rewards.String()),
-//			sdk.NewAttribute(types.AttributeKeyValidator, valAddr.String()),
-//		),
-//		sdk.NewEvent(
-//			sdk.EventTypeMessage,
-//			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-//			sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddress.String()),
-//		),
-//		sdk.NewEvent(
-//			stypes.EventTypeUnbond,
-//			sdk.NewAttribute(stypes.AttributeKeyValidator, msg.ValidatorAddress.String()),
-//			sdk.NewAttribute(stypes.AttributeKeyAmount, msg.Amount.Amount.String()),
-//			sdk.NewAttribute(stypes.AttributeKeyCompletionTime, completionTime.Format(time.RFC3339)),
-//		),
-//		sdk.NewEvent(
-//			sdk.EventTypeMessage,
-//			sdk.NewAttribute(sdk.AttributeKeyModule, stypes.AttributeValueCategory),
-//			sdk.NewAttribute(sdk.AttributeKeySender, msg.DelegatorAddress.String()),
-//		),
-//		sdk.NewEvent(
-//			stypes.EventTypeRedelegate,
-//			sdk.NewAttribute(stypes.AttributeKeySrcValidator, msg.ValidatorSrcAddress.String()),
-//			sdk.NewAttribute(stypes.AttributeKeyDstValidator, msg.ValidatorDstAddress.String()),
-//			sdk.NewAttribute(stypes.AttributeKeyAmount, msg.Amount.Amount.String()),
-//			sdk.NewAttribute(stypes.AttributeKeyCompletionTime, completionTime.Format(time.RFC3339)),
-//		),
-//		sdk.NewEvent(
-//			sdk.EventTypeMessage,
-//			sdk.NewAttribute(sdk.AttributeKeyModule, stypes.AttributeValueCategory),
-//			sdk.NewAttribute(sdk.AttributeKeySender, msg.DelegatorAddress.String()),
-//		),
-//			sdk.NewEvent(
-//				stypes.EventTypeCompleteUnbonding,
-//				sdk.NewAttribute(stypes.AttributeKeyValidator, dvPair.ValidatorAddress.String()),
-//				sdk.NewAttribute(stypes.AttributeKeyDelegator, dvPair.DelegatorAddress.String()),
-//			),
-//			sdk.NewEvent(
-//				stypes.EventTypeCompleteRedelegation,
-//				sdk.NewAttribute(stypes.AttributeKeyDelegator, dvvTriplet.DelegatorAddress.String()),
-//				sdk.NewAttribute(stypes.AttributeKeySrcValidator, dvvTriplet.ValidatorSrcAddress.String()),
-//				sdk.NewAttribute(stypes.AttributeKeyDstValidator, dvvTriplet.ValidatorDstAddress.String()),
-//			),
-//		sdk.NewEvent(
-//			types.EventTypeTransfer,
-//			sdk.NewAttribute(types.AttributeKeyRecipient, toAddr.String()),
-//			sdk.NewAttribute(sdk.AttributeKeyAmount, amt.String()),
-//		),
-//		sdk.NewEvent(
-//			sdk.EventTypeMessage,
-//			sdk.NewAttribute(types.AttributeKeySender, fromAddr.String()),
-//		),
-
-//					types.EventTypeSlash,
-//					sdk.NewAttribute(types.AttributeKeyAddress, consAddr.String()),
-//					sdk.NewAttribute(types.AttributeKeyPower, fmt.Sprintf("%d", power)),
-//					sdk.NewAttribute(types.AttributeKeyReason, types.AttributeValueMissingSignature),
-//					sdk.NewAttribute(types.AttributeKeyJailed, consAddr.String()),
