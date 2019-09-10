@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	DefaultCreateBancorFee = 1E10 // 100 * 10 ^8
-	DefaultCancelBancorFee = 1E10 // 100 * 10 ^8
+	DefaultCreateBancorFee = 1e10 // 100 * 10 ^8
+	DefaultCancelBancorFee = 1e10 // 100 * 10 ^8
 	TradeFeeRatePrecision  = 4
 	DefaultTradeFeeRate    = 10
 )

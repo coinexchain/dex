@@ -84,7 +84,7 @@ var (
 	forbidAddr          sdk.AccAddress
 	stock                     = "tusdt"
 	money                     = "teos"
-	OriginHaveCetAmount int64 = 1E13
+	OriginHaveCetAmount int64 = 1e13
 	issueAmount         int64 = 210000000000
 	Bech32MainPrefix          = "coinex"
 )

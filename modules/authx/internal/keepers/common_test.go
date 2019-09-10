@@ -30,8 +30,8 @@ func setupTestInput() testInput {
 	testApp := app.NewTestApp()
 	ctx := sdk.NewContext(testApp.Cms, abci.Header{ChainID: "test-chain-id", Time: time.Unix(1560334620, 0)}, false, log.NewNopLogger())
 	initSupply := dex.NewCetCoinsE8(10000)
-	testApp.SupplyKeeper.SetSupply(ctx, supply.NewSupply(initSupply))
+	testApp.SupplyKeeper().SetSupply(ctx, supply.NewSupply(initSupply))
 
-	return testInput{ctx: ctx, axk: testApp.AccountXKeeper, ak: testApp.AccountKeeper,
-		sk: testApp.SupplyKeeper, cdc: testApp.Cdc, tk: testApp.AssetKeeper}
+	return testInput{ctx: ctx, axk: testApp.AccountXKeeper(), ak: testApp.AccountKeeper(),
+		sk: testApp.SupplyKeeper(), cdc: testApp.Cdc(), tk: testApp.AssetKeeper()}
 }

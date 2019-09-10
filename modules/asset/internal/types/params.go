@@ -12,11 +12,11 @@ import (
 
 // DefaultParamspace defines the default asset module parameter subspace
 const (
-	MaxTokenAmount   = 5E76 // 57896044618658097711785492504343953926634992332820282019728792003956564819967
+	MaxTokenAmount   = 5e76 // 57896044618658097711785492504343953926634992332820282019728792003956564819967
 	RareSymbolLength = 2
 
-	IssueTokenFee     = 1E12 // 10000 * 10 ^8
-	IssueRareTokenFee = 1E13 // 100000 * 10 ^8
+	IssueTokenFee     = 1e12 // 10000 * 10 ^8
+	IssueRareTokenFee = 1e13 // 100000 * 10 ^8
 )
 
 // Parameter keys

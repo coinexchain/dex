@@ -34,14 +34,15 @@ var (
 func defaultContext() (*keeper.Keeper, sdk.Handler, sdk.Context) {
 	app := cetapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{}, false, log.NewNopLogger())
-	app.BankxKeeper.SetParams(ctx, bx.DefaultParams())
-	app.BankxKeeper.Bk.SetSendEnabled(ctx, true)
-	handler := bankx.NewHandler(app.BankxKeeper)
+	app.BankXKeeper().SetParams(ctx, bx.DefaultParams())
+	app.BankXKeeper().Bk.SetSendEnabled(ctx, true)
+	handler := bankx.NewHandler(app.BankXKeeper())
 	cet, _ := asset.NewToken("cet", "cet", sdk.NewInt(200000000000000), owner,
 		false, false, false, false,
 		"", "", asset.TestIdentityString)
-	_ = app.AssetKeeper.SetToken(ctx, cet)
-	return &app.BankxKeeper, handler, ctx
+	_ = app.AssetKeeper().SetToken(ctx, cet)
+	bxk := app.BankXKeeper()
+	return &bxk, handler, ctx
 }
 
 func TestHandlerMsgSend(t *testing.T) {
