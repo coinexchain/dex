@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/market"
 )
 
 func TestFromToMap(t *testing.T) {
@@ -76,4 +77,14 @@ func TestDefaultGenesisState(t *testing.T) {
 	var authxData authx.GenesisState
 	authx.ModuleCdc.MustUnmarshalJSON(state[authx.ModuleName], &authxData)
 	require.Equal(t, sdk.NewDec(20), authxData.Params.MinGasPriceLimit)
+
+	// market
+	var marketData market.GenesisState
+	market.ModuleCdc.MustUnmarshalJSON(state[market.ModuleName], &marketData)
+	require.Equal(t, 0, len(marketData.MarketInfos))
+	require.Equal(t, 0, len(marketData.Orders))
+	require.Equal(t, int64(0), marketData.OrderCleanTime)
+	require.Equal(t, 10000, marketData.Params.GTEOrderLifetime)
+	require.Equal(t, int64(6000000), marketData.Params.GTEOrderFeatureFeeByBlocks)
+	require.Equal(t, int64(1E12), marketData.Params.CreateMarketFee)
 }

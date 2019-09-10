@@ -10,23 +10,25 @@ import (
 )
 
 type GenesisState struct {
-	Params      types.Params       `json:"params"`
-	Orders      []*types.Order     `json:"orders"`
-	MarketInfos []types.MarketInfo `json:"market_infos"`
+	Params         types.Params       `json:"params"`
+	Orders         []*types.Order     `json:"orders"`
+	MarketInfos    []types.MarketInfo `json:"market_infos"`
+	OrderCleanTime int64              `json:"order_clean_time"`
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params types.Params, orders []*types.Order, infos []types.MarketInfo) GenesisState {
+func NewGenesisState(params types.Params, orders []*types.Order, infos []types.MarketInfo, cleanTime int64) GenesisState {
 	return GenesisState{
-		Params:      params,
-		Orders:      orders,
-		MarketInfos: infos,
+		Params:         params,
+		Orders:         orders,
+		MarketInfos:    infos,
+		OrderCleanTime: cleanTime,
 	}
 }
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(types.DefaultParams(), []*types.Order{}, []types.MarketInfo{})
+	return NewGenesisState(types.DefaultParams(), []*types.Order{}, []types.MarketInfo{}, 0)
 }
 
 // InitGenesis - Init store state from genesis data
@@ -40,11 +42,12 @@ func InitGenesis(ctx sdk.Context, keeper keepers.Keeper, data GenesisState) {
 	for _, info := range data.MarketInfos {
 		keeper.SetMarket(ctx, info)
 	}
+	keeper.SetOrderCleanTime(ctx, data.OrderCleanTime)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, k keepers.Keeper) GenesisState {
-	return NewGenesisState(k.GetParams(ctx), k.GetAllOrders(ctx), k.GetAllMarketInfos(ctx))
+	return NewGenesisState(k.GetParams(ctx), k.GetAllOrders(ctx), k.GetAllMarketInfos(ctx), k.GetOrderCleanTime(ctx))
 }
 
 // ValidateGenesis performs basic validation of market genesis data returning an
