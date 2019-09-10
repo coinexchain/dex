@@ -14,14 +14,14 @@ matrix:
       cache:
         apt: true
         directories:
-          - ${TRAVIS_BUILD_DIR}/vendor
-          - $GOPATH/src
-          - $GOPATH/pkg
+#          - ${TRAVIS_BUILD_DIR}/vendor
+#          - $GOPATH/src
+#          - $GOPATH/pkg
 
       before_cache:
-        - find $HOME/.glide/cache -name ORIG_HEAD -exec rm {} \;
-        - rm -rf $GOPATH/src/github.com/coinexchain/dex/*
-        - rm -rf $GOPATH/pkg/**/github.com/coinexchain/dex
+#        - find $HOME/.glide/cache -name ORIG_HEAD -exec rm {} \;
+#        - rm -rf $GOPATH/src/github.com/coinexchain/dex/*
+#        - rm -rf $GOPATH/pkg/**/github.com/coinexchain/dex
 
       after_success:
         - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
