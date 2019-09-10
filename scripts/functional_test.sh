@@ -12,7 +12,11 @@ set -e
 mkdir func_test
 
 echo "$DPW" | docker login -u "$DUN" --password-stdin
+echo "begin pull walle"
+date +%s
 docker pull coinexchain/walle
+echo "end pull walle"
+date +%s
 docker run --rm -v $(pwd)/func_test:/test:Z coinexchain/walle /data/script/cp_data.sh
 
 mkdir func_test/run
