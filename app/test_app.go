@@ -26,6 +26,7 @@ import (
 	"github.com/coinexchain/dex/modules/stakingx"
 )
 
+// Fake App for unit tests
 type TestApp struct {
 	*CetChainApp
 	Cms types.MultiStore
