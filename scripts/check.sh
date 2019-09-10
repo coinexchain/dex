@@ -38,7 +38,7 @@ test -z "$(golangci-lint  run -j 4 --disable-all \
 --exclude='and that stutters;' \
 --deadline=10m $linter_targets 2>&1 | grep -v 'ALL_CAPS\|OP_' 2>&1 | tee /dev/stderr)"
 date +%s
-go test -cpu=4 -p 4 -covermode=atomic -coverprofile=coverage.out -race -tags rpctest $linter_targets
+go test -covermode=atomic -coverprofile=coverage.out -race -tags rpctest $linter_targets
 date +%s
 
 
