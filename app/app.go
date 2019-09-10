@@ -177,6 +177,7 @@ type CetChainApp struct {
 	// the module manager
 	mm *module.Manager
 
+	pubMsgs []PubMsg
 	plugin.Holder
 }
 
@@ -192,6 +193,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	bApp.SetAppVersion(version.Version)
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod, txDecoder)
+	app.initPubMsgBuf()
 	app.initKeepers(invCheckPeriod)
 	app.initModules()
 	app.mountStores()
@@ -531,14 +533,14 @@ func (app *CetChainApp) mountStores() {
 // application updates every begin block
 func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	app.height = ctx.BlockHeight()
-	PubMsgs = make([]PubMsg, 0, 10000)
+	app.resetPubMsgBuf()
 	if app.msgQueProducer.IsOpenToggle() {
 		app.txCount = req.Header.TotalTxs - req.Header.NumTxs
 		app.pushNewHeightInfo(ctx)
 	}
 	ret := app.mm.BeginBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
-		ret.Events = FilterMsgsOnlyKafka(ret.Events)
+		ret.Events = FilterMsgsOnlyKafka(ret.Events, app)
 		app.notifyBeginBlock(ret.Events)
 	}
 	return ret
@@ -549,7 +551,7 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 func (app *CetChainApp) endBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	ret := app.mm.EndBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
-		ret.Events = FilterMsgsOnlyKafka(ret.Events)
+		ret.Events = FilterMsgsOnlyKafka(ret.Events, app)
 		app.notifyEndBlock(ret.Events)
 	}
 	return ret
@@ -598,7 +600,7 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 	if app.msgQueProducer.IsOpenToggle() {
 		app.notifyTx(req, ret)
 		if ret.Code == uint32(sdk.CodeOK) {
-			ret.Events = FilterMsgsOnlyKafka(ret.Events)
+			ret.Events = FilterMsgsOnlyKafka(ret.Events, app)
 		} else {
 			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
 		}
@@ -607,9 +609,19 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 }
 
 func (app *CetChainApp) Commit() abci.ResponseCommit {
-	for _, msg := range PubMsgs {
+	for _, msg := range app.pubMsgs {
 		app.msgQueProducer.SendMsg(msg.Key, msg.Value)
 	}
 	app.msgQueProducer.SendMsg([]byte("commit"), []byte("{}"))
 	return app.BaseApp.Commit()
+}
+
+func (app *CetChainApp) initPubMsgBuf() {
+	app.pubMsgs = make([]PubMsg, 0, 10000)
+}
+func (app *CetChainApp) resetPubMsgBuf() {
+	app.pubMsgs = app.pubMsgs[0:0]
+}
+func (app *CetChainApp) appendPubMsg(msg PubMsg) {
+	app.pubMsgs = append(app.pubMsgs, msg)
 }

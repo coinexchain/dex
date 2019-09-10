@@ -30,7 +30,7 @@ func (app *CetChainApp) pushNewHeightInfo(ctx sdk.Context) {
 	if errJSON != nil {
 		bytes = []byte{}
 	}
-	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("height_info"), Value: bytes})
+	app.appendPubMsg(PubMsg{Key: []byte("height_info"), Value: bytes})
 }
 
 type TransferRecord struct {
@@ -82,19 +82,19 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDel
 		if events[i].Type == stypes.EventTypeUnbond {
 			if i+1 <= len(events) {
 				val := getNotificationBeginUnbonding(events[i : i+2])
-				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_unbonding"), Value: val})
+				app.appendPubMsg(PubMsg{Key: []byte("begin_unbonding"), Value: val})
 				i++
 			}
 		} else if events[i].Type == stypes.EventTypeRedelegate {
 			if i+1 <= len(events) {
 				val := getNotificationBeginRedelegation(events[i : i+2])
-				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_redelegation"), Value: val})
+				app.appendPubMsg(PubMsg{Key: []byte("begin_redelegation"), Value: val})
 				i++
 			}
 			//} else if events[i].Type == dtypes.EventTypeWithdrawRewards {
 			//	if i+1 <= len(events) {
 			//		val := getWithdrawRewardInfo(events[i : i+2])
-			//		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("withdraw_reward"), Value: val})
+			//		app.appendPubMsg(PubMsg{Key: []byte("withdraw_reward"), Value: val})
 			//		i++
 			//	}
 		} else if events[i].Type == "transfer" && i+1 <= len(events) {
@@ -143,9 +143,9 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDel
 	}
 
 	if ret.Code == uint32(sdk.CodeOK) {
-		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx"), Value: bytes})
+		app.appendPubMsg(PubMsg{Key: []byte("notify_tx"), Value: bytes})
 	} else if ret.Code == uint32(sdk.CodeInsufficientFunds) {
-		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("funds_not_enough"), Value: bytes})
+		app.appendPubMsg(PubMsg{Key: []byte("funds_not_enough"), Value: bytes})
 	}
 }
 
@@ -293,7 +293,7 @@ func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {
 		//}
 		if event.Type == sltypes.EventTypeSlash {
 			val := getNotificationSlash(event)
-			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("slash"), Value: val})
+			app.appendPubMsg(PubMsg{Key: []byte("slash"), Value: val})
 		}
 	}
 }
@@ -307,10 +307,10 @@ func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
 		//}
 		if event.Type == stypes.EventTypeCompleteUnbonding {
 			val := getNotificationCompleteUnbonding(event)
-			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_unbonding"), Value: val})
+			app.appendPubMsg(PubMsg{Key: []byte("complete_unbonding"), Value: val})
 		} else if event.Type == stypes.EventTypeCompleteRedelegation {
 			val := getNotificationCompleteRedelegation(event)
-			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_redelegation"), Value: val})
+			app.appendPubMsg(PubMsg{Key: []byte("complete_redelegation"), Value: val})
 		}
 	}
 }

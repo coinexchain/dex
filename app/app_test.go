@@ -619,3 +619,15 @@ func TestBlackListedAddr(t *testing.T) {
 		require.True(t, app.bankKeeper.BlacklistedAddr(app.supplyKeeper.GetModuleAddress(acc)))
 	}
 }
+
+func TestPubMsgBuf(t *testing.T) {
+	app := NewCetChainApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, 0)
+	app.initPubMsgBuf()
+	require.Equal(t, 10000, cap(app.pubMsgs))
+	require.Equal(t, 0, len(app.pubMsgs))
+	app.appendPubMsg(PubMsg{Key: []byte("foo"), Value: []byte("bar")})
+	require.Equal(t, 1, len(app.pubMsgs))
+	app.resetPubMsgBuf()
+	require.Equal(t, 10000, cap(app.pubMsgs))
+	require.Equal(t, 0, len(app.pubMsgs))
+}
