@@ -14,10 +14,11 @@ matrix:
       cache:
         apt: true
         directories:
-          - $GOPATH/src
+          - $HOME/.cache/go-build
+          - $HOME/gopath/pkg/mod
 
       before_cache:
-        - rm -rf $GOPATH/src/github.com/coinexchain/dex/*
+        #- rm -rf $GOPATH/src/github.com/coinexchain/dex/*
 
       after_success:
         - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
