@@ -21,18 +21,18 @@ func Test_queryParams(t *testing.T) {
 	ctx := testApp.NewCtx()
 	params := auth.DefaultParams()
 	paramsx := types.DefaultParams()
-	testApp.AccountKeeper.SetParams(ctx, params)
-	testApp.AccountXKeeper.SetParams(ctx, paramsx)
+	testApp.AccountKeeper().SetParams(ctx, params)
+	testApp.AccountXKeeper().SetParams(ctx, paramsx)
 
-	querier := keepers.NewQuerier(testApp.AccountXKeeper)
+	querier := keepers.NewQuerier(testApp.AccountXKeeper())
 	res, err := querier(ctx, []string{types.QueryParameters}, abci.RequestQuery{})
 	require.NoError(t, err)
 
 	var mergedParams types.MergedParams
-	testApp.Cdc.MustUnmarshalJSON(res, &mergedParams)
+	testApp.Cdc().MustUnmarshalJSON(res, &mergedParams)
 	require.Equal(t,
-		string(testApp.Cdc.MustMarshalJSON(mergedParams)),
-		string(testApp.Cdc.MustMarshalJSON(types.NewMergedParams(params, paramsx))))
+		string(testApp.Cdc().MustMarshalJSON(mergedParams)),
+		string(testApp.Cdc().MustMarshalJSON(types.NewMergedParams(params, paramsx))))
 }
 
 func Test_queryAccount(t *testing.T) {

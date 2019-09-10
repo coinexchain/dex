@@ -22,7 +22,7 @@ var myaddr = testutil.ToAccAddress("myaddr")
 func defaultContext() (keeper.Keeper, sdk.Context) {
 	app := cetapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{}, false, log.NewNopLogger())
-	return app.BankxKeeper, ctx
+	return app.BankXKeeper(), ctx
 }
 
 func givenAccountWith(ctx sdk.Context, keeper keeper.Keeper, addr sdk.AccAddress, coinsString string) {

@@ -18,16 +18,16 @@ func TestQueryParams(t *testing.T) {
 	ctx := testApp.NewCtx()
 	params := staking.DefaultParams()
 	paramsx := types.DefaultParams()
-	testApp.StakingKeeper.SetParams(ctx, params)
-	testApp.StakingXKeeper.SetParams(ctx, paramsx)
+	testApp.StakingKeeper().SetParams(ctx, params)
+	testApp.StakingXKeeper().SetParams(ctx, paramsx)
 
-	querier := stakingx.NewQuerier(testApp.StakingXKeeper, testApp.Cdc)
+	querier := stakingx.NewQuerier(testApp.StakingXKeeper(), testApp.Cdc())
 	res, err := querier(ctx, []string{stakingx.QueryParameters}, abci.RequestQuery{})
 	require.NoError(t, err)
 
 	var mergedParams types.MergedParams
-	testApp.Cdc.MustUnmarshalJSON(res, &mergedParams)
+	testApp.Cdc().MustUnmarshalJSON(res, &mergedParams)
 	require.Equal(t,
-		string(testApp.Cdc.MustMarshalJSON(mergedParams)),
-		string(testApp.Cdc.MustMarshalJSON(types.NewMergedParams(params, paramsx))))
+		string(testApp.Cdc().MustMarshalJSON(mergedParams)),
+		string(testApp.Cdc().MustMarshalJSON(types.NewMergedParams(params, paramsx))))
 }

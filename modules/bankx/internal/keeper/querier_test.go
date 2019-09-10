@@ -15,13 +15,13 @@ func Test_queryParams(t *testing.T) {
 	testApp := app.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := types.DefaultParams()
-	testApp.BankxKeeper.SetParams(ctx, params)
+	testApp.BankXKeeper().SetParams(ctx, params)
 
-	querier := keeper.NewQuerier(testApp.BankxKeeper)
+	querier := keeper.NewQuerier(testApp.BankXKeeper())
 	res, err := querier(ctx, []string{keeper.QueryParameters}, abci.RequestQuery{})
 	require.NoError(t, err)
 
 	var params2 types.Params
-	testApp.Cdc.MustUnmarshalJSON(res, &params2)
+	testApp.Cdc().MustUnmarshalJSON(res, &params2)
 	require.Equal(t, params, params2)
 }

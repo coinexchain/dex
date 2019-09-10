@@ -26,7 +26,7 @@ func Test_handleMsg(t *testing.T) {
 	h := asset.NewHandler(input.tk)
 	owner, _ := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 
-	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1e18))
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -178,14 +178,14 @@ func Test_IssueToken_DeductFee(t *testing.T) {
 	require.False(t, res.IsOK())
 
 	// issue token deduct fee
-	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1e18))
 	require.NoError(t, err)
 	res = h(input.ctx, msg)
 	require.True(t, res.IsOK())
 
 	coins := input.tk.GetAccTotalToken(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(2100), coins.AmountOf(symbol))
-	require.Equal(t, sdk.NewInt(1E18-1E12), coins.AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e18-1e12), coins.AmountOf("cet"))
 
 }
 
@@ -197,7 +197,7 @@ func Test_BurnToken_SubtractCoins(t *testing.T) {
 	// issue token
 	msgIssue := asset.NewMsgIssueToken("ABC Token", symbol, sdk.NewInt(2100), testAddr,
 		true, true, false, false, "", "", types.TestIdentityString)
-	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1e18))
 	require.NoError(t, err)
 	res := h(input.ctx, msgIssue)
 	require.True(t, res.IsOK())
@@ -219,7 +219,7 @@ func Test_MintToken_AddCoins(t *testing.T) {
 	// issue token
 	msgIssue := asset.NewMsgIssueToken("ABC Token", symbol, sdk.NewInt(2100), testAddr,
 		true, true, false, false, "", "", types.TestIdentityString)
-	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1E18))
+	err := input.tk.AddToken(input.ctx, testAddr, dex.NewCetCoins(1e18))
 	require.NoError(t, err)
 	res := h(input.ctx, msgIssue)
 	require.True(t, res.IsOK())
