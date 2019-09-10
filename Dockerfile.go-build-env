@@ -3,3 +3,10 @@ LABEL maintainer="dev@coinex.org"
 
 RUN apk --no-cache add build-base git bzr mercurial gcc && \
     go get github.com/rakyll/statik
+
+ADD . $GOPATH/src/github.com/coinexchain/dex
+
+RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
+    export GO111MODULE=on && \
+    go mod tidy && \
+    go mod vendor
