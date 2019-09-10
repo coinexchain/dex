@@ -12,6 +12,7 @@ matrix:
             - gcc-6
             - glide
       cache:
+        apt: true
         directories:
           - ${TRAVIS_BUILD_DIR}/vendor
           - $GOPATH/src
@@ -52,6 +53,7 @@ matrix:
             - parallel
 
       cache:
+        apt: true
         directories:
           - $CACHE_DIR
           - $HOME/.cache/pip
