@@ -4,7 +4,7 @@ LABEL maintainer="dev@coinex.org"
 ADD . $GOPATH/src/github.com/coinexchain/dex
 
 RUN echo "begin depend"
-RUN date +%s3
+RUN date +%s
 
 RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
     export GO111MODULE=on && \
@@ -12,7 +12,7 @@ RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
     go mod vendor
 
 RUN echo "begin packag"
-RUN date +%s3
+RUN date +%s
 
 RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
     make statik-swagger && \
@@ -21,7 +21,7 @@ RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
     cp build/cetcli /tmp/
 
 RUN echo "begin python evn"
-RUN date +%s3
+RUN date +%s
 
 FROM alpine:3.7
 
@@ -30,7 +30,7 @@ RUN apk update && \
     apk --no-cache add curl jq file
 
 RUN echo "begin testing"
-RUN date +%s3
+RUN date +%s
 
 VOLUME [ /cetd ]
 WORKDIR /cetd
