@@ -26,10 +26,7 @@ func (app *CetChainApp) pushNewHeightInfo(ctx sdk.Context) {
 		TimeStamp:     ctx.BlockHeader().Time,
 		LastBlockHash: ctx.BlockHeader().LastBlockId.Hash,
 	}
-	bytes, errJSON := json.Marshal(msg)
-	if errJSON != nil {
-		bytes = []byte{}
-	}
+	bytes := safeMarshal(msg)
 	app.appendPubMsgKV("height_info", bytes)
 }
 
@@ -175,11 +172,7 @@ func getNotificationBeginRedelegation(dualEvent []abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 type NotificationBeginUnbonding struct {
@@ -205,11 +198,7 @@ func getNotificationBeginUnbonding(dualEvent []abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 type NotificationCompleteRedelegation struct {
@@ -229,11 +218,7 @@ func getNotificationCompleteRedelegation(event abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 type NotificationCompleteUnbonding struct {
@@ -250,11 +235,7 @@ func getNotificationCompleteUnbonding(event abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 type NotificationSlash struct {
@@ -277,11 +258,7 @@ func getNotificationSlash(event abci.Event) []byte {
 			res.Jailed = true
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {
@@ -313,4 +290,12 @@ func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
 			app.appendPubMsgKV("complete_redelegation", val)
 		}
 	}
+}
+
+func safeMarshal(msg interface{}) []byte {
+	bytes, errJSON := json.Marshal(msg)
+	if errJSON != nil {
+		bytes = []byte{}
+	}
+	return bytes
 }

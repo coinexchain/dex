@@ -12,7 +12,7 @@ type PubMsg struct {
 }
 
 func collectKafkaEvents(events []abci.Event, app *CetChainApp) []abci.Event {
-	nonKafkaEvents := make([]abci.Event, 0, len(events))
+	nonKafkaEvents := make([]abci.Event, 0, len(events)) // TODO: no need to make new slice
 	for _, event := range events {
 		if event.Type == msgqueue.EventTypeMsgQueue {
 			for _, attr := range event.Attributes {
