@@ -2,7 +2,6 @@ package market
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"strings"
 	"time"
 
