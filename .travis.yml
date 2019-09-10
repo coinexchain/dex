@@ -54,6 +54,7 @@ matrix:
       cache:
         directories:
           - $CACHE_DIR
+          - $HOME/.cache/pip
 
       services:
         - docker
