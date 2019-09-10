@@ -25,8 +25,12 @@ bash script/init.sh
 popd
 
 echo "Test begin"
+date +%s
+
 echo "$(pwd)"
 ls -la
 cd func_test
 bash script/run_ft_in_parallel.sh $1 $2
+
+date +%s
 echo "Test end"

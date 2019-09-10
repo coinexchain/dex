@@ -1,4 +1,7 @@
 matrix:
+  stages:
+    - package
+    - ft
   include:
     - language: go
       go: 1.12.x
