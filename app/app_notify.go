@@ -26,11 +26,8 @@ func (app *CetChainApp) pushNewHeightInfo(ctx sdk.Context) {
 		TimeStamp:     ctx.BlockHeader().Time,
 		LastBlockHash: ctx.BlockHeader().LastBlockId.Hash,
 	}
-	bytes, errJSON := json.Marshal(msg)
-	if errJSON != nil {
-		bytes = []byte{}
-	}
-	PubMsgs = append(PubMsgs, PubMsg{Key: []byte("height_info"), Value: bytes})
+	bytes := safeMarshal(msg)
+	app.appendPubMsgKV("height_info", bytes)
 }
 
 type TransferRecord struct {
@@ -82,19 +79,19 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDel
 		if events[i].Type == stypes.EventTypeUnbond {
 			if i+1 <= len(events) {
 				val := getNotificationBeginUnbonding(events[i : i+2])
-				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_unbonding"), Value: val})
+				app.appendPubMsgKV("begin_unbonding", val)
 				i++
 			}
 		} else if events[i].Type == stypes.EventTypeRedelegate {
 			if i+1 <= len(events) {
 				val := getNotificationBeginRedelegation(events[i : i+2])
-				PubMsgs = append(PubMsgs, PubMsg{Key: []byte("begin_redelegation"), Value: val})
+				app.appendPubMsgKV("begin_redelegation", val)
 				i++
 			}
 			//} else if events[i].Type == dtypes.EventTypeWithdrawRewards {
 			//	if i+1 <= len(events) {
 			//		val := getWithdrawRewardInfo(events[i : i+2])
-			//		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("withdraw_reward"), Value: val})
+			//		app.appendPubMsgKV("withdraw_reward", val})
 			//		i++
 			//	}
 		} else if events[i].Type == "transfer" && i+1 <= len(events) {
@@ -143,9 +140,9 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDel
 	}
 
 	if ret.Code == uint32(sdk.CodeOK) {
-		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("notify_tx"), Value: bytes})
+		app.appendPubMsgKV("notify_tx", bytes)
 	} else if ret.Code == uint32(sdk.CodeInsufficientFunds) {
-		PubMsgs = append(PubMsgs, PubMsg{Key: []byte("funds_not_enough"), Value: bytes})
+		app.appendPubMsgKV("funds_not_enough", bytes)
 	}
 }
 
@@ -175,11 +172,7 @@ func getNotificationBeginRedelegation(dualEvent []abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 type NotificationBeginUnbonding struct {
@@ -205,11 +198,7 @@ func getNotificationBeginUnbonding(dualEvent []abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 type NotificationCompleteRedelegation struct {
@@ -229,11 +218,7 @@ func getNotificationCompleteRedelegation(event abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 type NotificationCompleteUnbonding struct {
@@ -250,11 +235,7 @@ func getNotificationCompleteUnbonding(event abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 type NotificationSlash struct {
@@ -277,11 +258,7 @@ func getNotificationSlash(event abci.Event) []byte {
 			res.Jailed = true
 		}
 	}
-	bytes, errJSON := json.Marshal(res)
-	if errJSON != nil {
-		return []byte{}
-	}
-	return bytes
+	return safeMarshal(res)
 }
 
 func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {
@@ -293,7 +270,7 @@ func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {
 		//}
 		if event.Type == sltypes.EventTypeSlash {
 			val := getNotificationSlash(event)
-			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("slash"), Value: val})
+			app.appendPubMsgKV("slash", val)
 		}
 	}
 }
@@ -307,10 +284,18 @@ func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
 		//}
 		if event.Type == stypes.EventTypeCompleteUnbonding {
 			val := getNotificationCompleteUnbonding(event)
-			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_unbonding"), Value: val})
+			app.appendPubMsgKV("complete_unbonding", val)
 		} else if event.Type == stypes.EventTypeCompleteRedelegation {
 			val := getNotificationCompleteRedelegation(event)
-			PubMsgs = append(PubMsgs, PubMsg{Key: []byte("complete_redelegation"), Value: val})
+			app.appendPubMsgKV("complete_redelegation", val)
 		}
 	}
+}
+
+func safeMarshal(msg interface{}) []byte {
+	bytes, errJSON := json.Marshal(msg)
+	if errJSON != nil {
+		bytes = []byte{}
+	}
+	return bytes
 }

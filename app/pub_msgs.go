@@ -6,33 +6,31 @@ import (
 	"github.com/coinexchain/dex/msgqueue"
 )
 
-var PubMsgs []PubMsg
-
 type PubMsg struct {
 	Key   []byte
 	Value []byte
 }
 
-func FilterMsgsOnlyKafka(events []abci.Event) []abci.Event {
-	evs := make([]abci.Event, 0, len(events))
+func collectKafkaEvents(events []abci.Event, app *CetChainApp) []abci.Event {
+	nonKafkaEvents := make([]abci.Event, 0, len(events)) // TODO: no need to make new slice
 	for _, event := range events {
 		if event.Type == msgqueue.EventTypeMsgQueue {
 			for _, attr := range event.Attributes {
-				PubMsgs = append(PubMsgs, PubMsg{Key: attr.Key, Value: attr.Value})
+				app.appendPubMsg(PubMsg{Key: attr.Key, Value: attr.Value})
 			}
 		} else {
-			evs = append(evs, event)
+			nonKafkaEvents = append(nonKafkaEvents, event)
 		}
 	}
-	return evs
+	return nonKafkaEvents
 }
 
-func RemoveMsgsOnlyKafka(events []abci.Event) []abci.Event {
-	evs := make([]abci.Event, 0, len(events))
+func discardKafkaEvents(events []abci.Event) []abci.Event {
+	nonKafkaEvents := make([]abci.Event, 0, len(events)) // TODO: no need to make new slice
 	for _, event := range events {
 		if event.Type != msgqueue.EventTypeMsgQueue {
-			evs = append(evs, event)
+			nonKafkaEvents = append(nonKafkaEvents, event)
 		}
 	}
-	return evs
+	return nonKafkaEvents
 }
