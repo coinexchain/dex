@@ -540,7 +540,7 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 	}
 	ret := app.mm.BeginBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
-		ret.Events = FilterMsgsOnlyKafka(ret.Events, app)
+		ret.Events = collectKafkaEvents(ret.Events, app)
 		app.notifyBeginBlock(ret.Events)
 	}
 	return ret
@@ -551,7 +551,7 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 func (app *CetChainApp) endBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	ret := app.mm.EndBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
-		ret.Events = FilterMsgsOnlyKafka(ret.Events, app)
+		ret.Events = collectKafkaEvents(ret.Events, app)
 		app.notifyEndBlock(ret.Events)
 	}
 	return ret
@@ -600,9 +600,9 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 	if app.msgQueProducer.IsOpenToggle() {
 		app.notifyTx(req, ret)
 		if ret.Code == uint32(sdk.CodeOK) {
-			ret.Events = FilterMsgsOnlyKafka(ret.Events, app)
+			ret.Events = collectKafkaEvents(ret.Events, app)
 		} else {
-			ret.Events = RemoveMsgsOnlyKafka(ret.Events)
+			ret.Events = discardKafkaEvents(ret.Events)
 		}
 	}
 	return ret
