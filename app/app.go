@@ -565,7 +565,6 @@ func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 	if err := ModuleBasics.ValidateGenesis(genesisState); err != nil {
 		panic(err)
 	}
-
 	return app.mm.InitGenesis(ctx, genesisState)
 }
 

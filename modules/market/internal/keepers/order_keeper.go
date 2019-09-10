@@ -34,7 +34,7 @@ func (keeper *OrderCleanUpDayKeeper) GetUnixTime(ctx sdk.Context) int64 {
 	store := ctx.KVStore(keeper.marketKey)
 	value := store.Get(LastOrderCleanUpDayKey)
 	if len(value) == 0 {
-		return ctx.BlockHeader().Time.Unix()
+		return 0
 	}
 	return int64(binary.BigEndian.Uint64(value))
 }

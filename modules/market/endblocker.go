@@ -319,7 +319,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 			needRemove = true
 		}
 	} else {
-		if time.Unix(recordTime, 0).Minute() != time.Unix(currTime, 0).Minute() {
+		if time.Unix(recordTime, 0).Second() != time.Unix(currTime, 0).Second() {
 			needRemove = true
 		}
 	}

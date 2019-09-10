@@ -136,11 +136,11 @@ func parseCreateOrderFlags(sender sdk.AccAddress) (*types.MsgCreateOrder, error)
 
 func markCreateOrderFlags(cmd *cobra.Command) {
 	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
-	cmd.Flags().Int(FlagOrderType, -1, "The order type limited to 2")
-	cmd.Flags().Int(FlagPrice, -1, "The price in the order")
-	cmd.Flags().Int(FlagQuantity, -1, "The number of tokens will be trade in the order ")
-	cmd.Flags().Int(FlagSide, -1, "The side in the order")
-	cmd.Flags().Int(FlagPricePrecision, -1, "The price precision in order")
+	cmd.Flags().Int(FlagOrderType, 2, "The identify of the price limit : 2; (Currently, only price limit orders are supported)")
+	cmd.Flags().Int(FlagPrice, 100, "The price of the order")
+	cmd.Flags().Int(FlagQuantity, 100, "The number of tokens will be trade in the order ")
+	cmd.Flags().Int(FlagSide, 1, "The buying or selling direction of an order.(buy : 1; sell : 2)")
+	cmd.Flags().Int(FlagPricePrecision, 8, "The price precision in the order")
 	cmd.Flags().Int(FlagIdentify, 0, "Because a transaction can contain multiple order "+
 		"creation messages, the identify field was added to the order creation message to give each "+
 		"order a unique ID. So the order ID consists of user address, user sequence, identify,")

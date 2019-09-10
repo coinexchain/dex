@@ -27,6 +27,7 @@ var (
 	NewBaseKeeper       = keepers.NewKeeper
 	DefaultParams       = types.DefaultParams
 	DecToBigEndianBytes = types.DecToBigEndianBytes
+	ModuleCdc           = types.ModuleCdc
 )
 
 type (

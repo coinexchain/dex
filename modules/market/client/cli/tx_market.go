@@ -55,15 +55,6 @@ Example :
 					"$ cetcli tx market createmarket -h")
 			}
 
-			//TODO we must cache the fee rates locally
-			//accout, err := cliCtx.GetAccount(msg.Creator)
-			//if err != nil {
-			//	return errors.Errorf("Not find account with the addr : %s", msg.Creator)
-			//}
-			//if !accout.GetCoins().IsAllGTE(sdk.Coins{market.CreateMarketSpendCet}) {
-			//	return errors.New("No have insufficient cet to create market in blockchain")
-			//}
-
 			if err := hasTokens(cliCtx, cdc, msg.Stock, msg.Money); err != nil {
 				return err
 			}
@@ -80,7 +71,7 @@ Example :
 
 	cmd.Flags().String(FlagStock, "", "The exist token symbol as stock")
 	cmd.Flags().String(FlagMoney, "", "The exist token symbol as money")
-	cmd.Flags().Int(FlagPricePrecision, -1, "The trading-pair price precision")
+	cmd.Flags().Int(FlagPricePrecision, 1, "The trading-pair price precision")
 
 	for _, flag := range createMarketFlags {
 		cmd.MarkFlagRequired(flag)
@@ -152,7 +143,7 @@ Example
 	}
 
 	cmd.Flags().String(FlagSymbol, "btc/cet", "The market trading-pair")
-	cmd.Flags().Int64(FlagTime, -1, "The block height")
+	cmd.Flags().Int64(FlagTime, 100, "The trading pair on expired unix timestamp. (timestamp - time.Now() > 7days)")
 	cmd.MarkFlagRequired(FlagSymbol)
 	cmd.MarkFlagRequired(FlagTime)
 
