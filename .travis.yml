@@ -76,9 +76,10 @@ matrix:
         - ./scripts/check.sh
 
     - &ft_job
-      language: go python
+      language: go
       go: 1.12.x
-      python: 3.7
+      python:
+        - 3.7
       dist: xenial
       addons:
         apt:
