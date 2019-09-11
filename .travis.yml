@@ -79,7 +79,7 @@ matrix:
         - pip3 --version
         - go get github.com/rakyll/statik
         - go mod tidy
-        - go mod vendor    dd
+        - go mod vendor
         - make statik-swagger
         - make build-linux
       services:
