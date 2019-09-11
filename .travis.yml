@@ -108,6 +108,7 @@ matrix:
         - pip3 install --upgrade pip
         - python3 --version
         - pip3 --version
+        - go env
         - go get github.com/rakyll/statik
         - go mod tidy
         - go mod vendor
