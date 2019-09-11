@@ -14,7 +14,12 @@ matrix:
             - g++-6
             - gcc-6
             - glide
+            - git
+            - bzr
+            - mercurial
+            - build-base
       cache:
+        apt: true
         directories:
           - $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
@@ -26,6 +31,7 @@ matrix:
 
       install:
         - cd -
+        - go get github.com/rakyll/statik
         - go mod tidy
         - go mod vendor
         - make statik-swagger
