@@ -26,7 +26,7 @@ rm $CETCLI_PATH || true
 
 
 # find correct library version by go.mod
-TENDERMINT_VERSION=`grep tendermint/tendermint go.mod | sed -r -e 's/(.*) (v[^ ]*)/\2/g'`
+TENDERMINT_VERSION=`grep tendermint/tendermint go.mod | sed -E 's/(.*) (v[^ ]*)/\2/g'`
 SECP256K1_PATH="$GOPATH/pkg/mod/github.com/tendermint/tendermint@$TENDERMINT_VERSION/crypto/secp256k1/internal/secp256k1/libsecp256k1"
 
 TMP_DIR=/tmp/libsecp256k1
@@ -36,6 +36,7 @@ chmod a+w -R $TMP_DIR
 cd $TMP_DIR
 
 # build cgo libsecp256k1
+chmod a+x ./autogen.sh
 ./autogen.sh
 ./configure --with-bignum=gmp --enable-endomorphism --prefix=$TMP_DIR/output
 
