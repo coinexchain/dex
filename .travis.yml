@@ -86,6 +86,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - python3.7
             - parallel
             - g++-6
             - gcc-6
