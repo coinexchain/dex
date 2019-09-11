@@ -38,21 +38,21 @@ cetd init ${GENESIS_NODE_MONIKER} --chain-id=${CHAIN_ID} --home ${OUTPUT_DIR}/.c
 # date: 2019/08/06 total:5,877,675,270.61317189
 # 5,877,675,270.61317189 - 300000000000000000 = 287767527061317189
 
-cetd add-genesis-account ${INCENTIVE_POOL_ADDR}                    31536000000000000cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account $(cetcli keys show circulation -a)       287767527061317189cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account $(cetcli keys show coinex_foundation -a)  88464000000000000cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account $(cetcli keys show vesting2020 -a)        36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1577836800  --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account $(cetcli keys show vesting2021 -a)        36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1609459200  --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account $(cetcli keys show vesting2022 -a)        36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1640995200  --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account $(cetcli keys show vesting2023 -a)        36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1672531200  --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account $(cetcli keys show vesting2024 -a)        36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1704067200  --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${INCENTIVE_POOL_ADDR}  31536000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${circulation}          287767527061317189cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${coinex_foundation}     88464000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${vesting2020}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1577836800  --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${vesting2021}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1609459200  --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${vesting2022}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1640995200  --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${vesting2023}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1672531200  --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${vesting2024}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1704067200  --home ${OUTPUT_DIR}/.cetd
 
 
 CET_TOKEN_DESCRIPTION="Decentralized public chain ecosystem, Born for financial liberalization"
 
 cetd add-genesis-token --name="CoinEx Chain Native Token"               \
     --symbol="${TOKEN_SYMBOL}"                                          \
-    --owner=$(cetcli keys show coinex_foundation -a)                    \
+    --owner=${coinex_foundation}                                        \
     --total-supply=587767527061317189                                   \
     --mintable=false                                                    \
     --burnable=true                                                     \
