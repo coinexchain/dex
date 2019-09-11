@@ -82,20 +82,38 @@ matrix:
       dist: xenial
       addons:
         apt:
+          sources:
+            - ubuntu-toolchain-r-test
           packages:
             - parallel
+            - g++-6
+            - gcc-6
+            - bzr
+            - build-essential
 
       cache:
         apt: true
         directories:
           - $CACHE_DIR
           - $HOME/.cache/pip
-
+          - $HOME/gopath/pkg/mod
+      before_install:
+        - export GO111MODULE=on
+        - export GOROOT=$(go env GOROOT)
+        - export CXX="g++-6" CC="gcc-6"
+        - export PATH=$PATH:$HOME/gopath/bin
+      install:
+        - cd -
+        - go get github.com/rakyll/statik
+        - go mod tidy
+        - go mod vendor
+        - make statik-swagger
+        - make build-linux
       services:
         - docker
 
       before_script:
-        - chmod +x ./scripts/functional_test.sh
+#        - chmod +x ./scripts/functional_test.sh
 
       after_success:
         - rm ~/.docker/config.json
