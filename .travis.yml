@@ -1,40 +1,6 @@
 matrix:
-#  stages:
-#    - package
-#    - ft
+
   include:
-#    - language: go
-#      go: 1.12.x
-#      addons:
-#        apt:
-#          sources:
-#            - ubuntu-toolchain-r-test
-#          packages:
-#            - g++-6
-#            - gcc-6
-#            - bzr
-#            - build-essential
-#      cache:
-#        apt: true
-#        directories:
-##          - $HOME/.cache/go-build
-#          - $HOME/gopath/pkg/mod
-#      before_install:
-#        - export GO111MODULE=on
-#        - export GOROOT=$(go env GOROOT)
-#        - export CXX="g++-6" CC="gcc-6"
-#        - export PATH=$PATH:$HOME/gopath/bin
-#
-#      install:
-#        - cd -
-#        - go get github.com/rakyll/statik
-#        - go mod tidy
-#        - go mod vendor
-#        - make statik-swagger
-#        - make build-linux
-#
-#      script:
-#        - ./scripts/pack.sh
     - language: go
       go: 1.12.x
       addons:
@@ -84,7 +50,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:longsleep/golang-backports'
+            #- sourceline: 'ppa:longsleep/golang-backports'
           packages:
             #- golang-1.12
             - python3-pip
