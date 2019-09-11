@@ -15,7 +15,7 @@ matrix:
       cache:
         apt: true
         directories:
-          - $HOME/.cache/go-build
+          #- $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
 
       before_cache:
