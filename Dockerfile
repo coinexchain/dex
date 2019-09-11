@@ -1,36 +1,39 @@
-FROM coinexchain/go-build-env:latest AS build-env
+#FROM coinexchain/go-build-env:latest AS build-env
+#LABEL maintainer="dev@coinex.org"
+#
+#ADD . $GOPATH/src/github.com/coinexchain/dex
+#
+#RUN echo "begin depend"
+#RUN date +%s
+#
+#RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
+#    export GO111MODULE=on && \
+#    go mod tidy && \
+#    go mod vendor
+#
+#RUN echo "begin packag"
+#RUN date +%s
+#
+#RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
+#    make statik-swagger && \
+#    make build-linux && \
+#    cp build/cetd /tmp/ && \
+#    cp build/cetcli /tmp/
+#
+#RUN echo "begin python evn"
+#RUN date +%s
+#
+#FROM alpine:3.7
+#
+#RUN apk update && \
+#    apk upgrade && \
+#    apk --no-cache add curl jq file
+#
+#RUN echo "begin testing"
+#RUN date +%s
+
+FROM golang:1.12-alpine
 LABEL maintainer="dev@coinex.org"
-
-ADD . $GOPATH/src/github.com/coinexchain/dex
-
-RUN echo "begin depend"
-RUN date +%s
-
-RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
-    export GO111MODULE=on && \
-    go mod tidy && \
-    go mod vendor
-
-RUN echo "begin packag"
-RUN date +%s
-
-RUN set -ex; cd $GOPATH/src/github.com/coinexchain/dex && \
-    make statik-swagger && \
-    make build-linux && \
-    cp build/cetd /tmp/ && \
-    cp build/cetcli /tmp/
-
-RUN echo "begin python evn"
-RUN date +%s
-
-FROM alpine:3.7
-
-RUN apk update && \
-    apk upgrade && \
-    apk --no-cache add curl jq file
-
-RUN echo "begin testing"
-RUN date +%s
 
 VOLUME [ /cetd ]
 WORKDIR /cetd

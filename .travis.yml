@@ -12,9 +12,7 @@ matrix:
           packages:
             - g++-6
             - gcc-6
-            - git
             - bzr
-            - mercurial
             - build-essential
       cache:
         apt: true
