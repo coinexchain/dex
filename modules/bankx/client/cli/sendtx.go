@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
+	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )
 
@@ -57,6 +58,10 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 
 			// build and sign the transaction, then broadcast to Tendermint
 			msg := types.NewMsgSend(from, to, coins, unlockTime)
+			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
+			if generateUnsignedTx {
+				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, from)
+			}
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
@@ -64,6 +69,6 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd = client.PostCommands(cmd)[0]
 	cmd.MarkFlagRequired(client.FlagFrom)
 	cmd.Flags().Int64(FlagUnlockTime, 0, "The unix timestamp when tokens can transfer again")
-
+	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 	return cmd
 }
