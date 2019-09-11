@@ -9,15 +9,13 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:masterminds/glide'
           packages:
             - g++-6
             - gcc-6
-            - glide
             - git
             - bzr
             - mercurial
-            - build-base
+            - build-essential
       cache:
         apt: true
         directories:
