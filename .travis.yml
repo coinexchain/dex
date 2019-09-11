@@ -85,7 +85,7 @@ matrix:
             - ubuntu-toolchain-r-test
             - sourceline: 'ppa:longsleep/golang-backports'
           packages:
-            - golang-1.12
+            #- golang-1.12
             - parallel
             - g++-6
             - gcc-6
@@ -105,10 +105,10 @@ matrix:
         - export PATH=$PATH:$HOME/gopath/bin
       install:
         - cd -
+        - go env
         - pip3 install --upgrade pip
         - python3 --version
         - pip3 --version
-        - go env
         - go get github.com/rakyll/statik
         - go mod tidy
         - go mod vendor
