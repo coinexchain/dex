@@ -85,6 +85,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - ppa:deadsnakes/ppa
           packages:
             - python3.7
             - parallel
