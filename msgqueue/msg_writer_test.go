@@ -17,13 +17,25 @@ func TestCreateMsgWriter(t *testing.T) {
 	w, err = createMsgWriter("file:messages.txt")
 	require.NoError(t, err)
 	defer os.Remove("messages.txt")
+	require.NoError(t, w.Close())
+
+	w, err = createMsgWriter("file:messages.txt")
+	require.NoError(t, err)
 	require.Equal(t, "file", w.String())
 	require.NoError(t, w.Close())
 
-	w, err = createMsgWriter("db:mongo")
+	w, err = createMsgWriter(".")
 	require.Error(t, err)
 
-	require.Equal(t, "nop", nopMsgWriter{}.String())
+	w, err = createMsgWriter("db:mongo")
+	require.Error(t, err)
+}
+
+func TestNopMsgWriter(t *testing.T) {
+	w := NewNopMsgWriter()
+	require.Equal(t, "nop", w.String())
+	require.NoError(t, w.WriteKV(nil, nil))
+	require.NoError(t, w.Close())
 }
 
 func TestFileMsgWriter(t *testing.T) {
