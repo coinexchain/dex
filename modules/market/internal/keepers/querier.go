@@ -160,11 +160,14 @@ func queryUserOrderList(ctx sdk.Context, req abci.RequestQuery, mk Keeper) ([]by
 
 	okp := NewGlobalOrderKeeper(mk.marketKey, mk.cdc)
 	orders := okp.GetOrdersFromUser(ctx, param.User)
-
+	if len(orders) == 0 {
+		orders = append(orders, "")
+	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, orders)
 	if err != nil {
 		return nil, sdk.NewError(types.CodeSpaceMarket, types.CodeMarshalFailed, "could not marshal result to JSON")
 	}
+
 	return bz, nil
 }
 
