@@ -1,7 +1,7 @@
 matrix:
-  stages:
-    - package
-    - ft
+#  stages:
+#    - package
+#    - ft
   include:
 #    - language: go
 #      go: 1.12.x
@@ -78,7 +78,7 @@ matrix:
     - &ft_job
       language: go
       go: 1.12.x
-#      python: 3.7
+      python: 3.7
       dist: xenial
       addons:
         apt:
