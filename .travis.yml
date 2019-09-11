@@ -78,6 +78,7 @@ matrix:
     - &ft_job
       language: python
       python: 3.7
+      go: 1.12.x
       dist: xenial
       addons:
         apt:
@@ -105,7 +106,6 @@ matrix:
         - export PATH=$PATH:$HOME/gopath/bin
       install:
         - cd -
-        - apt upgrade
         - go env
         - pip3 install --upgrade pip
         - python3 --version
