@@ -87,6 +87,7 @@ matrix:
             - sourceline: 'ppa:longsleep/golang-backports'
           packages:
             #- golang-1.12
+            - python3-pip
             - parallel
             - g++-6
             - gcc-6
