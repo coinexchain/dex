@@ -86,5 +86,5 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, int64(0), marketData.OrderCleanTime)
 	require.Equal(t, 10000, marketData.Params.GTEOrderLifetime)
 	require.Equal(t, int64(6000000), marketData.Params.GTEOrderFeatureFeeByBlocks)
-	require.Equal(t, int64(1E12), marketData.Params.CreateMarketFee)
+	require.Equal(t, int64(1e12), marketData.Params.CreateMarketFee)
 }

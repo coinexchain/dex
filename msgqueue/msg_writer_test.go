@@ -1,0 +1,41 @@
+package msgqueue
+
+import (
+	"io/ioutil"
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
+
+func TestCreateMsgWriter(t *testing.T) {
+	w, err := createMsgWriter("os:stdout")
+	require.NoError(t, err)
+	require.Equal(t, "stdout", w.String())
+	require.NoError(t, w.Close())
+
+	w, err = createMsgWriter("file:messages.txt")
+	require.NoError(t, err)
+	defer os.Remove("messages.txt")
+	require.Equal(t, "file", w.String())
+	require.NoError(t, w.Close())
+
+	w, err = createMsgWriter("db:mongo")
+	require.Error(t, err)
+
+	require.Equal(t, "nop", nopMsgWriter{}.String())
+}
+
+func TestFileMsgWriter(t *testing.T) {
+	w, err := createMsgWriter("file:messages.txt")
+	require.NoError(t, err)
+	defer os.Remove("messages.txt")
+
+	require.NoError(t, w.WriteKV([]byte("k1"), []byte("v1")))
+	require.NoError(t, w.WriteKV([]byte("k2"), []byte("v2")))
+	require.NoError(t, w.Close())
+
+	data, err := ioutil.ReadFile("messages.txt")
+	require.NoError(t, err)
+	require.Equal(t, "k1#v1\r\nk2#v2\r\n", string(data))
+}
