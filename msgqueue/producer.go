@@ -32,36 +32,34 @@ type producer struct {
 	msgWriter MsgWriter
 }
 
-type config struct {
-	Brokers string
-	Topics  string
+func NewProducer() MsgSender {
+	brokers := viper.GetString(FlagBrokers)
+	topics := viper.GetString(FlagTopics)
+	return newProducerFromConfig(brokers, topics)
 }
 
-func NewProducer() MsgSender {
+func newProducerFromConfig(brokers, topics string) MsgSender {
 	p := producer{
 		subTopics: make(map[string]struct{}),
 		msgWriter: NewNopMsgWriter(),
 	}
 
-	p.setParam(config{
-		Brokers: viper.GetString(FlagBrokers),
-		Topics:  viper.GetString(FlagTopics),
-	})
+	p.init(brokers, topics)
 	return p
 }
 
-func (p *producer) setParam(cfg config) {
-	if len(cfg.Brokers) == 0 || len(cfg.Topics) == 0 {
+func (p *producer) init(brokers, topics string) {
+	if len(brokers) == 0 || len(topics) == 0 {
 		return
 	}
 
-	msgWriter, err := createMsgWriter(cfg.Brokers)
+	msgWriter, err := createMsgWriter(brokers)
 	if err != nil {
 		return // TODO log?
 	}
 	p.msgWriter = msgWriter
 
-	ts := strings.Split(cfg.Topics, ",")
+	ts := strings.Split(topics, ",")
 	for _, topic := range ts {
 		p.subTopics[topic] = struct{}{}
 	}

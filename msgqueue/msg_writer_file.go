@@ -25,20 +25,12 @@ func NewFileMsgWriter(filePath string) (MsgWriter, error) {
 }
 
 func openFile(filePath string) (*os.File, error) {
-	if s, err := os.Stat(filePath); !os.IsExist(err) {
-		file, err := os.Create(filePath)
-		if err != nil {
-			return nil, err
-		}
-		return file, nil
+	if s, err := os.Stat(filePath); os.IsNotExist(err) {
+		return os.Create(filePath)
 	} else if s.IsDir() {
 		return nil, fmt.Errorf("Need to give the file path ")
 	} else {
-		file, err := os.OpenFile(filePath, os.O_RDWR|os.O_APPEND, 0666)
-		if err != nil {
-			return nil, err
-		}
-		return file, nil
+		return os.OpenFile(filePath, os.O_RDWR|os.O_APPEND, 0666)
 	}
 }
 

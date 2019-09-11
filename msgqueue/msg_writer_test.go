@@ -53,4 +53,5 @@ func TestFileMsgWriter(t *testing.T) {
 	// dir
 	w, err = NewFileMsgWriter(".")
 	require.Error(t, err)
+	//require.Equal(t, "Need to give the file path ", err.Error())
 }
