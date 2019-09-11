@@ -20,9 +20,8 @@ func NewFileMsgWriter(filePath string) (MsgWriter, error) {
 	file, err := openFile(filePath)
 	if err != nil {
 		return fileMsgWriter{}, err
-	} else {
-		return fileMsgWriter{file}, nil
 	}
+	return fileMsgWriter{file}, nil
 }
 
 func openFile(filePath string) (*os.File, error) {
@@ -30,9 +29,8 @@ func openFile(filePath string) (*os.File, error) {
 		file, err := os.Create(filePath)
 		if err != nil {
 			return nil, err
-		} else {
-			return file, nil
 		}
+		return file, nil
 	} else if s.IsDir() {
 		return nil, fmt.Errorf("Need to give the file path ")
 	} else {
@@ -67,7 +65,6 @@ func (w fileMsgWriter) Close() error {
 func (w fileMsgWriter) String() string {
 	if w.WriteCloser == os.Stdout {
 		return "stdout"
-	} else {
-		return "file"
 	}
+	return "file"
 }
