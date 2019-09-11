@@ -107,7 +107,8 @@ matrix:
         - export PATH=$PATH:$HOME/gopath/bin
       install:
         - cd -
-        - python --version
+        - python3 --version
+        - pip3 --version
         - go get github.com/rakyll/statik
         - go mod tidy
         - go mod vendor
