@@ -17,15 +17,8 @@ func TestCreateMsgWriter(t *testing.T) {
 	w, err = createMsgWriter("file:messages.txt")
 	require.NoError(t, err)
 	defer os.Remove("messages.txt")
-	require.NoError(t, w.Close())
-
-	w, err = createMsgWriter("file:messages.txt")
-	require.NoError(t, err)
 	require.Equal(t, "file", w.String())
 	require.NoError(t, w.Close())
-
-	w, err = createMsgWriter(".")
-	require.Error(t, err)
 
 	w, err = createMsgWriter("db:mongo")
 	require.Error(t, err)
@@ -39,7 +32,8 @@ func TestNopMsgWriter(t *testing.T) {
 }
 
 func TestFileMsgWriter(t *testing.T) {
-	w, err := createMsgWriter("file:messages.txt")
+	// new file
+	w, err := NewFileMsgWriter("messages.txt")
 	require.NoError(t, err)
 	defer os.Remove("messages.txt")
 
@@ -50,4 +44,13 @@ func TestFileMsgWriter(t *testing.T) {
 	data, err := ioutil.ReadFile("messages.txt")
 	require.NoError(t, err)
 	require.Equal(t, "k1#v1\r\nk2#v2\r\n", string(data))
+
+	// existed file
+	w, err = NewFileMsgWriter("messages.txt")
+	require.NoError(t, err)
+	require.NoError(t, w.Close())
+
+	// dir
+	w, err = NewFileMsgWriter(".")
+	require.Error(t, err)
 }
