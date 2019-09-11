@@ -27,7 +27,7 @@ mkdir -p ${OUTPUT_DIR}
 # assure cetd and cetcli exists
 which cetd
 which cetcli
-which jq || echo "No jq found, install jq by: 'brew install jq' or 'sudo apt-get install jq'"
+which jq || sudo apt-get install -y jq
 
 # generate initial genesis.json
 cd ${OUTPUT_DIR}
@@ -40,7 +40,8 @@ cetd init ${GENESIS_NODE_MONIKER} --chain-id=${CHAIN_ID} --home ${OUTPUT_DIR}/.c
 
 cetd add-genesis-account ${INCENTIVE_POOL_ADDR}  31536000000000000cet --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${circulation}          287767527061317189cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account ${coinex_foundation}     88464000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${coinex_foundation}     87464000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${genesis_node}           1000000000000000cet --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2020}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1577836800  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2021}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1609459200  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2022}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1640995200  --home ${OUTPUT_DIR}/.cetd
@@ -71,14 +72,14 @@ cetd add-genesis-token --name="CoinEx Chain Native Token"               \
 mkdir ${OUTPUT_DIR}/gentx
 
 cetd gentx                                \
---name coinex_foundation                  \
+--name genesis_node                       \
 --website www.coinex.org                  \
 --details "Network Genesis Node"          \
---amount=200000000000000cet               \
+--amount=1000000000000000cet              \
 --commission-rate=0.2                     \
 --commission-max-rate=1                   \
 --commission-max-change-rate=0.1          \
---min-self-delegation=100000000000000     \
+--min-self-delegation=1000000000000000    \
 --home ${OUTPUT_DIR}/.cetd                \
 --output-document ${OUTPUT_DIR}/gentx/gentx.json
 
@@ -113,4 +114,6 @@ cp `which cetcli` ${OUTPUT_DIR}
 cp `which cetd` ${OUTPUT_DIR}
 md5sum * > md5
 
+ls ${OUTPUT_DIR}
+cat ${OUTPUT_DIR}/md5
 echo "prepare testnet release package succeeded: $(pwd)"
