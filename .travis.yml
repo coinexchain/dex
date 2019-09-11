@@ -19,7 +19,7 @@ matrix:
       cache:
         apt: true
         directories:
-          - $HOME/.cache/go-build
+#          - $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
       before_install:
         - export GO111MODULE=on
