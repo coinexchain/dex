@@ -77,8 +77,8 @@ matrix:
 
     - &ft_job
       language: golang
-      python: 3.7
       go: 1.12.x
+      python: 3.7
       dist: xenial
       addons:
         apt:
