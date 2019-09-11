@@ -105,6 +105,7 @@ matrix:
       install:
         - cd -
         - go env
+        - go version
         - go get github.com/rakyll/statik
         - go mod tidy
         - go mod vendor
