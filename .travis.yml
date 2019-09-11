@@ -76,20 +76,16 @@ matrix:
         - ./scripts/check.sh
 
     - &ft_job
-      language: go
-      go: 1.12.x
-      python:
-        - 3.7
+      language: python
+      python: 3.7
       dist: xenial
-      sudo: true
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:deadsnakes/ppa'
+            - sourceline: 'ppa:longsleep/golang-backports'
           packages:
-            - python3.7
-            - python3-pip
+            - golang-1.12
             - parallel
             - g++-6
             - gcc-6
