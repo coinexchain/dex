@@ -16,7 +16,7 @@ matrix:
       cache:
         apt: true
         directories:
-          #- $HOME/.cache/go-build
+          - $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
 
       before_cache:
@@ -65,6 +65,7 @@ matrix:
         directories:
           - $CACHE_DIR
           - $HOME/.cache/pip
+          - $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
       before_install:
         - export GO111MODULE=on
@@ -79,7 +80,7 @@ matrix:
         - pip3 --version
         - go get github.com/rakyll/statik
         - go mod tidy
-        - go mod vendor
+        - go mod vendor    dd
         - make statik-swagger
         - make build-linux
       services:
