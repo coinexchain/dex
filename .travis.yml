@@ -108,6 +108,7 @@ matrix:
         - export PATH=$PATH:$HOME/gopath/bin
       install:
         - cd -
+        - pip3 install --upgrade pip
         - python3 --version
         - pip3 --version
         - go get github.com/rakyll/statik
