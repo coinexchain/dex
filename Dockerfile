@@ -10,5 +10,5 @@ ENTRYPOINT ["/usr/bin/wrapper.sh"]
 CMD ["start"]
 STOPSIGNAL SIGTERM
 
-RUN ["chmod", "+x", "networks/test/cetdnode/wrapper.sh"]
 COPY networks/test/cetdnode/wrapper.sh networks/test/cetdnode/rest_start.sh build/cetcli build/cetd /usr/bin/
+RUN ["chmod", "+x", "/usr/bin/wrapper.sh"]
