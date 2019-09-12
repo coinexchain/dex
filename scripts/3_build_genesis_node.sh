@@ -112,7 +112,14 @@ tar cvf ./package.tar ./.cetd
 cp ./.cetd/config/genesis.json .
 cp `which cetcli` ${OUTPUT_DIR}
 cp `which cetd` ${OUTPUT_DIR}
-md5sum * > md5
+
+MD5=md5sum
+if [ "${OSTYPE//[0-9.]/}" == "darwin" ]
+then
+    MD5=md5
+fi
+
+$MD5 * > md5
 
 ls ${OUTPUT_DIR}
 cat ${OUTPUT_DIR}/md5
