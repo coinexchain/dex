@@ -71,6 +71,6 @@ type (
 	MsgUnForbidToken        = types.MsgUnForbidToken
 	MsgAddTokenWhitelist    = types.MsgAddTokenWhitelist
 	MsgRemoveTokenWhitelist = types.MsgRemoveTokenWhitelist
-	MsgUnForbidAddr         = types.MsgUnForbidToken
+	MsgUnForbidAddr         = types.MsgUnForbidAddr
 	MsgModifyTokenInfo      = types.MsgModifyTokenInfo
 )
