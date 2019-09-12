@@ -16,11 +16,6 @@ if ! [[ -f "${BINARY}" ]]; then
 	cp /usr/bin/cetcli ${BINARY_CLI}
 	echo "Copy binary to work dirctory."
 fi
-BINARY_CHECK="$(file "$BINARY" | grep 'ELF 64-bit LSB executable, x86-64')"
-if [[ -z "${BINARY_CHECK}" ]]; then
-	echo "Binary needs to be OS linux, ARCH amd64"
-	exit 1
-fi
 
 ##
 ## Run binary with all parameters
