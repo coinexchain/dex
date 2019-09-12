@@ -1,4 +1,4 @@
-FROM golang:1.12-alpine
+FROM frolvlad/alpine-glibc
 LABEL maintainer="dev@coinex.org"
 
 COPY networks/test/cetdnode/wrapper.sh    /usr/bin/
