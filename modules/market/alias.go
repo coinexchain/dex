@@ -31,15 +31,15 @@ var (
 )
 
 type (
-	Keeper = keepers.Keeper
-	Order = types.Order
-	MarketInfo = types.MarketInfo
-	MsgCreateOrder = types.MsgCreateOrder
-	MsgCreateTradingPair = types.MsgCreateTradingPair
-	MsgCancelOrder = types.MsgCancelOrder
-	MsgCancelTradingPair = types.MsgCancelTradingPair
+	Keeper                  = keepers.Keeper
+	Order                   = types.Order
+	MarketInfo              = types.MarketInfo
+	MsgCreateOrder          = types.MsgCreateOrder
+	MsgCreateTradingPair    = types.MsgCreateTradingPair
+	MsgCancelOrder          = types.MsgCancelOrder
+	MsgCancelTradingPair    = types.MsgCancelTradingPair
 	MsgModifyPricePrecision = types.MsgModifyPricePrecision
-	CreateOrderInfo = types.CreateOrderInfo
-	FillOrderInfo = types.FillOrderInfo
-	CancelOrderInfo = types.CancelOrderInfo
+	CreateOrderInfo         = types.CreateOrderInfo
+	FillOrderInfo           = types.FillOrderInfo
+	CancelOrderInfo         = types.CancelOrderInfo
 )

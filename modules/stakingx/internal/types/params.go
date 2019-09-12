@@ -7,7 +7,7 @@ import (
 
 // Default parameter values
 const (
-	DefaultMinSelfDelegation = 1000000e8
+	DefaultMinSelfDelegation = 10000000e8
 )
 
 // Parameter keys
