@@ -14,10 +14,15 @@ func TestCreateMsgWriter(t *testing.T) {
 	require.Equal(t, "stdout", w.String())
 	require.NoError(t, w.Close())
 
+	defer os.Remove("messages.txt")
 	w, err = createMsgWriter("file:messages.txt")
 	require.NoError(t, err)
-	defer os.Remove("messages.txt")
 	require.Equal(t, "file", w.String())
+	require.NoError(t, w.Close())
+
+	w, err = createMsgWriter("kafka:a,b,c")
+	require.NoError(t, err)
+	require.Equal(t, "kafka", w.String())
 	require.NoError(t, w.Close())
 
 	w, err = createMsgWriter("db:mongo")
@@ -33,9 +38,9 @@ func TestNopMsgWriter(t *testing.T) {
 
 func TestFileMsgWriter(t *testing.T) {
 	// new file
+	defer os.Remove("messages.txt")
 	w, err := NewFileMsgWriter("messages.txt")
 	require.NoError(t, err)
-	defer os.Remove("messages.txt")
 
 	require.NoError(t, w.WriteKV([]byte("k1"), []byte("v1")))
 	require.NoError(t, w.WriteKV([]byte("k2"), []byte("v2")))
