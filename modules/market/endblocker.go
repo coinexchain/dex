@@ -127,13 +127,6 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, 
 	}
 }
 
-// remove the orders whose age are older than height
-func removeOrderOlderThan(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper, feeK types.ExpectedChargeFeeKeeper, height int64, feeForZeroDeal int64) {
-	for _, order := range orderKeeper.GetOlderThan(ctx, height) {
-		removeOrder(ctx, orderKeeper, bxKeeper, feeK, order, feeForZeroDeal)
-	}
-}
-
 // unfreeze the frozen token in the order and remove it from the market
 func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper, feeK types.ExpectedChargeFeeKeeper, order *types.Order, feeForZeroDeal int64) {
 
@@ -297,7 +290,26 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 	delistSymbols := delistKeeper.GetDelistSymbolsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
 	for _, symbol := range delistSymbols {
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
-		removeOrderOlderThan(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, currHeight+1, marketParams.FeeForZeroDeal)
+		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight+1)
+		for _, ord := range oldOrders {
+			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, ord, marketParams.FeeForZeroDeal)
+			if keeper.IsSubScribe(types.Topic) {
+				msgInfo := types.CancelOrderInfo{
+					OrderID:        ord.OrderID(),
+					TradingPair:    ord.TradingPair,
+					Height:         ctx.BlockHeight(),
+					Side:           ord.Side,
+					Price:          ord.Price,
+					DelReason:      types.CancelOrderByGteTimeOut,
+					UsedCommission: ord.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+					LeftStock:      ord.LeftStock,
+					RemainAmount:   ord.Freeze,
+					DealStock:      ord.DealStock,
+					DealMoney:      ord.DealMoney,
+				}
+				fillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
+			}
+		}
 		keeper.RemoveMarket(ctx, symbol)
 	}
 	delistKeeper.RemoveDelistRequestsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
