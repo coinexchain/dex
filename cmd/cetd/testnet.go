@@ -241,7 +241,7 @@ func initTestnetNode(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Cod
 		return testnetNodeInfo{}, err
 	}
 
-	minSelfDel := stakingx.DefaultParams().MinSelfDelegation.Quo(sdk.NewInt(100))
+	minSelfDel := stakingx.DefaultParams().MinSelfDelegation.Quo(sdk.NewInt(1000))
 	accStakingTokens := minSelfDel.MulRaw(10)
 	acc := genaccounts.GenesisAccount{
 		Address: addr,
