@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -46,11 +47,17 @@ Example:
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
+			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
+			if generateUnsignedTx {
+				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
+			}
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
 	cmd.Flags().String(FlagAsDefault, "yes", "This alias will be used as a default alias or not")
+	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+
 	//cmd.MarkFlagRequired(FlagAsDefault)
 	return cmd
 }
@@ -77,9 +84,14 @@ Example:
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
+			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
+			if generateUnsignedTx {
+				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
+			}
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
+	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 
 	return cmd
 }

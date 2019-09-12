@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -81,6 +82,10 @@ Example:
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
+			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
+			if generateUnsignedTx {
+				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
+			}
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
@@ -89,6 +94,7 @@ Example:
 	cmd.Flags().String(FlagMaxPrice, "0", "The maximum reachable price when all the supply are sold out")
 	cmd.Flags().String(FlagEarliestCancelTime, "0", "The time that bancor can be canceled")
 	cmd.Flags().String(FlagInitPrice, "0", "The init price of this bancor")
+	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 	for _, flag := range bancorInitFlags {
 		cmd.MarkFlagRequired(flag)
 	}
@@ -130,6 +136,10 @@ Example:
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
+			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
+			if generateUnsignedTx {
+				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
+			}
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
@@ -137,6 +147,7 @@ Example:
 	cmd.Flags().Int(FlagAmount, 0, "The amount of tokens to be traded.")
 	cmd.Flags().Int(FlagMoneyLimit, 0, "The upper bound of money you want to pay when buying, or the lower bound of money you want to get when selling. Specify zero or negative value if you do not want a such a limit.")
 	cmd.Flags().String(FlagSide, "", "the side of the trade, 'buy' or 'sell'.")
+	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 
 	for _, flag := range bancorTradeFlags {
 		cmd.MarkFlagRequired(flag)
@@ -167,8 +178,14 @@ Example:
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
+			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
+			if generateUnsignedTx {
+				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
+			}
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
+	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+
 	return cmd
 }
