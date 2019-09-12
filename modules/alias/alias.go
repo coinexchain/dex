@@ -17,4 +17,5 @@ var (
 
 type (
 	Keeper = keepers.Keeper
+	MsgAliasUpdate = types.MsgAliasUpdate
 )
