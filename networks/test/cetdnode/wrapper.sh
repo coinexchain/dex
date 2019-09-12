@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eux
+
 ##
 ## Input parameters
 ##
