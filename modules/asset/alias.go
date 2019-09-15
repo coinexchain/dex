@@ -55,14 +55,22 @@ var (
 )
 
 type (
-	Keeper          = keepers.BaseKeeper
-	BaseTokenKeeper = keepers.BaseTokenKeeper
-	TokenKeeper     = keepers.TokenKeeper
-	Params          = types.Params
-	GenesisState    = types.GenesisState
-	Token           = types.Token
-	BaseToken       = types.BaseToken
-	MsgForbidToken  = types.MsgForbidToken
-	MsgForbidAddr   = types.MsgForbidAddr
-	MsgIssueToken   = types.MsgIssueToken
+	Keeper                  = keepers.BaseKeeper
+	BaseTokenKeeper         = keepers.BaseTokenKeeper
+	TokenKeeper             = keepers.TokenKeeper
+	Params                  = types.Params
+	GenesisState            = types.GenesisState
+	Token                   = types.Token
+	BaseToken               = types.BaseToken
+	MsgForbidToken          = types.MsgForbidToken
+	MsgForbidAddr           = types.MsgForbidAddr
+	MsgIssueToken           = types.MsgIssueToken
+	MsgTransferOwnership    = types.MsgTransferOwnership
+	MsgMintToken            = types.MsgMintToken
+	MsgBurnToken            = types.MsgBurnToken
+	MsgUnForbidToken        = types.MsgUnForbidToken
+	MsgAddTokenWhitelist    = types.MsgAddTokenWhitelist
+	MsgRemoveTokenWhitelist = types.MsgRemoveTokenWhitelist
+	MsgUnForbidAddr         = types.MsgUnForbidAddr
+	MsgModifyTokenInfo      = types.MsgModifyTokenInfo
 )

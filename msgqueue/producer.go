@@ -24,6 +24,7 @@ type MsgSender interface {
 	IsSubscribed(topic string) bool
 	IsOpenToggle() bool
 	GetMode() string
+	Close()
 }
 
 type producer struct {
@@ -35,20 +36,21 @@ type producer struct {
 func NewProducer() MsgSender {
 	brokers := viper.GetString(FlagBrokers)
 	topics := viper.GetString(FlagTopics)
-	return newProducerFromConfig(brokers, topics)
+	featureToggle := viper.GetBool(FlagFeatureToggle)
+	return newProducerFromConfig(brokers, topics, featureToggle)
 }
 
-func newProducerFromConfig(brokers, topics string) MsgSender {
+func newProducerFromConfig(brokers, topics string, featureToggle bool) MsgSender {
 	p := producer{
 		subTopics: make(map[string]struct{}),
 		msgWriter: NewNopMsgWriter(),
 	}
 
-	p.init(brokers, topics)
+	p.init(brokers, topics, featureToggle)
 	return p
 }
 
-func (p *producer) init(brokers, topics string) {
+func (p *producer) init(brokers, topics string, featureToggle bool) {
 	if len(brokers) == 0 || len(topics) == 0 {
 		return
 	}
@@ -63,7 +65,7 @@ func (p *producer) init(brokers, topics string) {
 	for _, topic := range ts {
 		p.subTopics[topic] = struct{}{}
 	}
-	p.toggle = viper.GetBool(FlagFeatureToggle)
+	p.toggle = featureToggle
 }
 
 func (p producer) Close() {

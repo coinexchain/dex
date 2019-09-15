@@ -1,13 +1,7 @@
-
-
-FROM golang:1.12-alpine
+FROM frolvlad/alpine-glibc
 LABEL maintainer="dev@coinex.org"
 
-
-COPY networks/test/cetdnode/wrapper.sh    /usr/bin/
-COPY networks/test/cetdnode/rest_start.sh /usr/bin/
-COPY  build/cetd   /usr/bin/
-COPY  build/cetd   /usr/bin/
+RUN apk --no-cache add curl
 
 VOLUME [ /cetd ]
 WORKDIR /cetd
@@ -16,5 +10,5 @@ ENTRYPOINT ["/usr/bin/wrapper.sh"]
 CMD ["start"]
 STOPSIGNAL SIGTERM
 
-
+COPY networks/test/cetdnode/wrapper.sh networks/test/cetdnode/rest_start.sh build/cetcli build/cetd /usr/bin/
 RUN ["chmod", "+x", "/usr/bin/wrapper.sh"]
