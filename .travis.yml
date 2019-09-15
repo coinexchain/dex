@@ -1,6 +1,46 @@
 matrix:
 
   include:
+    - language: go
+      go: 1.12.x
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:masterminds/glide'
+          packages:
+            - g++-6
+            - gcc-6
+            - glide
+      cache:
+        apt: true
+        directories:
+          - $HOME/.cache/go-build
+          - $HOME/gopath/pkg/mod
+
+      before_cache:
+      #- rm -rf $GOPATH/src/github.com/coinexchain/dex/*
+
+      after_success:
+        - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
+
+      before_install:
+        - export GO111MODULE=on
+        - export GOROOT=$(go env GOROOT)
+        - export CXX="g++-6" CC="gcc-6"
+        - export PATH=$PATH:$HOME/gopath/bin
+
+      install:
+        - cd -
+        - go mod tidy
+        - go mod vendor
+        - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
+        - go get golang.org/x/tools/cmd/cover
+        - go get github.com/mattn/goveralls
+
+      script:
+        - ./scripts/check.sh
+
     - &ft_job
       language: go
       go: 1.12.x
@@ -56,68 +96,44 @@ matrix:
           - CACHE_DIR=$HOME/.cache/docker
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 0
+        - scripts/functional_test.sh 7 0
 
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 1 -1
-
+        - scripts/functional_test.sh 7 1
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 1
-
+        - scripts/functional_test.sh 7 2
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 2
-
+        - scripts/functional_test.sh 7 3
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 3
-
-    - language: go
-      go: 1.12.x
-      dist: bionic
-      addons:
-        apt:
-          sources:
-            - sourceline: 'ppa:masterminds/glide'
-          packages:
-            - g++-6
-            - gcc-6
-            - glide
-      cache:
-        apt: true
-        directories:
-          - $HOME/.cache/go-build
-          - $HOME/gopath/pkg/mod
-
-      before_cache:
-      #- rm -rf $GOPATH/src/github.com/coinexchain/dex/*
-
-      after_success:
-        - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
-
-      before_install:
-        - export GO111MODULE=on
-        - export GOROOT=$(go env GOROOT)
-        - export CXX="g++-6" CC="gcc-6"
-        - export PATH=$PATH:$HOME/gopath/bin
-
-      install:
-        - cd -
-        - go mod tidy
-        - go mod vendor
-        - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
-        - go get golang.org/x/tools/cmd/cover
-        - go get github.com/mattn/goveralls
-
+        - scripts/functional_test.sh 7 4
+    - <<: *ft_job
       script:
-        - ./scripts/check.sh
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh 7 5
+    - <<: *ft_job
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh 7 6
 
+    #run_ft_non_parallel.sh
+    - <<: *ft_job
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh 2 0
+
+    #run_ft_non_parallel.sh
+    - <<: *ft_job
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh 2 1
 notifications:
   email:
     on_success: change
