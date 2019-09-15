@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"strconv"
 
 	"github.com/coinexchain/dex/app/plugin"
 
@@ -12,6 +13,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/libs/log"
+	tmtypes "github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
@@ -174,6 +176,10 @@ type CetChainApp struct {
 	aliasKeeper     alias.Keeper
 	commentKeeper   comment.Keeper
 
+	latestBlockTime        int64
+	enableUnconfirmedLimit bool
+	account2UnconfirmedTx  *Account2UnconfirmedTx
+
 	// the module manager
 	mm *module.Manager
 
@@ -215,6 +221,23 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 		}
 	}
 
+	unconfirmedTxLimitTime, ok := os.LookupEnv("COINEX_UNCONFIRMED_TX_LIMIT_TIME")
+	var limitTime int64
+	var err error
+	if ok {
+		limitTime, err = strconv.ParseInt(unconfirmedTxLimitTime, 10, 31)
+		if err != nil {
+			limitTime = -1
+		}
+	} else {
+		limitTime = -1
+	}
+	if limitTime > 0 {
+		app.enableUnconfirmedLimit = true
+		app.account2UnconfirmedTx = NewAccount2UnconfirmedTx(100)
+	} else {
+		app.enableUnconfirmedLimit = false
+	}
 	return app
 }
 
@@ -543,6 +566,10 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 		ret.Events = collectKafkaEvents(ret.Events, app)
 		app.notifyBeginBlock(ret.Events)
 	}
+	if app.enableUnconfirmedLimit {
+		app.latestBlockTime = req.Header.Time.Unix()
+		app.account2UnconfirmedTx.ClearRemoveList()
+	}
 	return ret
 }
 
@@ -584,25 +611,87 @@ func (app *CetChainApp) ModuleAccountAddrs() map[string]bool {
 }
 
 // "override" ABCI methods
-func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) (res abci.ResponseCheckTx) {
+func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 	if p := app.GetPlugin(); p != nil {
 		if err := p.PreCheckTx(req, app.txDecoder, app.Logger()); err != nil {
 			return types.ResponseFrom(err)
 		}
 	}
 
-	return app.BaseApp.CheckTx(req)
+	if !app.enableUnconfirmedLimit {
+		return app.BaseApp.CheckTx(req)
+	}
+
+	var result sdk.Result
+	tx, err := app.txDecoder(req.Tx)
+	if err != nil {
+		result = err.Result()
+	}
+	stdTx, ok := tx.(auth.StdTx)
+	if !ok {
+		result = sdk.ErrInternal("tx must be StdTx").Result()
+	}
+
+	if err != nil || !ok {
+		return abci.ResponseCheckTx{
+			Code:   uint32(result.Code),
+			Data:   result.Data,
+			Log:    result.Log,
+			Events: result.Events.ToABCIEvents(),
+		}
+	}
+
+	otherTxExist := false
+	hashid := tmtypes.Tx(req.Tx).Hash()
+	signers := stdTx.GetSigners()
+	for _, signer := range signers {
+		res := app.account2UnconfirmedTx.Lookup(signer, hashid, app.latestBlockTime)
+		if res == OtherTxExist {
+			otherTxExist = true
+			break
+		}
+	}
+
+	if otherTxExist {
+		return types.ResponseFrom(errTooManyUnconfirmedTx)
+	}
+	ret := app.BaseApp.CheckTx(req)
+	if ret.IsOK() {
+		for _, signer := range signers {
+			app.account2UnconfirmedTx.Add(signer, hashid, app.latestBlockTime)
+		}
+	}
+	return ret
 }
 
 func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx {
+	formatOK := true
+	tx, err := app.txDecoder(req.Tx)
+	if err != nil {
+		formatOK = false
+	}
+
+	stdTx, ok := tx.(auth.StdTx)
+	if !ok {
+		formatOK = false
+	}
+
 	ret := app.BaseApp.DeliverTx(req)
+
 	if app.msgQueProducer.IsOpenToggle() {
-		app.notifyTx(req, ret)
+		if formatOK {
+			app.notifyTx(req, stdTx, ret)
+		}
 		if ret.Code == uint32(sdk.CodeOK) {
 			ret.Events = collectKafkaEvents(ret.Events, app)
 		} else {
 			ret.Events = discardKafkaEvents(ret.Events)
 		}
+	}
+
+	if formatOK && app.enableUnconfirmedLimit {
+		signers := stdTx.GetSigners()
+		app.account2UnconfirmedTx.AddToRemoveList(signers)
 	}
 	return ret
 }
@@ -612,6 +701,9 @@ func (app *CetChainApp) Commit() abci.ResponseCommit {
 		app.msgQueProducer.SendMsg(msg.Key, msg.Value)
 	}
 	app.msgQueProducer.SendMsg([]byte("commit"), []byte("{}"))
+	if app.enableUnconfirmedLimit {
+		app.account2UnconfirmedTx.CommitRemove(app.latestBlockTime)
+	}
 	return app.BaseApp.Commit()
 }
 

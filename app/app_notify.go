@@ -71,7 +71,7 @@ func getType(myvar interface{}) string {
 	return t.Name()
 }
 
-func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDeliverTx) {
+func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, ret abci.ResponseDeliverTx) {
 	events := ret.Events
 	transfers := make([]TransferRecord, 0, 10)
 	ok := ret.Code == uint32(sdk.CodeOK)
@@ -88,12 +88,6 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDel
 				app.appendPubMsgKV("begin_redelegation", val)
 				i++
 			}
-			//} else if events[i].Type == dtypes.EventTypeWithdrawRewards {
-			//	if i+1 <= len(events) {
-			//		val := getWithdrawRewardInfo(events[i : i+2])
-			//		app.appendPubMsgKV("withdraw_reward", val})
-			//		i++
-			//	}
 		} else if events[i].Type == "transfer" && i+1 <= len(events) {
 			val := getTransferRecord(events[i : i+2])
 			transfers = append(transfers, val)
@@ -105,15 +99,6 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, ret abci.ResponseDel
 		app.txCount++
 	}()
 
-	tx, err := app.txDecoder(req.Tx)
-	if err != nil {
-		return
-	}
-
-	stdTx, ok := tx.(auth.StdTx)
-	if !ok {
-		return
-	}
 	msgTypes := make([]string, len(stdTx.Msgs))
 	for i, msg := range stdTx.Msgs {
 		msgTypes[i] = getType(msg)
