@@ -176,8 +176,8 @@ type CetChainApp struct {
 	aliasKeeper     alias.Keeper
 	commentKeeper   comment.Keeper
 
-	latestBlockTime        int64
 	enableUnconfirmedLimit bool
+	currBlockTime          int64
 	account2UnconfirmedTx  *Account2UnconfirmedTx
 
 	// the module manager
@@ -230,7 +230,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 			limitTime = -1
 		}
 	} else {
-		limitTime = -1
+		limitTime = DefaultLimitTime
 	}
 	if limitTime > 0 {
 		app.enableUnconfirmedLimit = true
@@ -567,7 +567,7 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 		app.notifyBeginBlock(ret.Events)
 	}
 	if app.enableUnconfirmedLimit {
-		app.latestBlockTime = req.Header.Time.Unix()
+		app.currBlockTime = req.Header.Time.Unix()
 		app.account2UnconfirmedTx.ClearRemoveList()
 	}
 	return ret
@@ -645,7 +645,7 @@ func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 	hashid := tmtypes.Tx(req.Tx).Hash()
 	signers := stdTx.GetSigners()
 	for _, signer := range signers {
-		res := app.account2UnconfirmedTx.Lookup(signer, hashid, app.latestBlockTime)
+		res := app.account2UnconfirmedTx.Lookup(signer, hashid, app.currBlockTime)
 		if res == OtherTxExist {
 			otherTxExist = true
 			break
@@ -658,7 +658,7 @@ func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 	ret := app.BaseApp.CheckTx(req)
 	if ret.IsOK() {
 		for _, signer := range signers {
-			app.account2UnconfirmedTx.Add(signer, hashid, app.latestBlockTime)
+			app.account2UnconfirmedTx.Add(signer, hashid, app.currBlockTime)
 		}
 	}
 	return ret
@@ -697,12 +697,14 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 }
 
 func (app *CetChainApp) Commit() abci.ResponseCommit {
-	for _, msg := range app.pubMsgs {
-		app.msgQueProducer.SendMsg(msg.Key, msg.Value)
+	if app.msgQueProducer.IsOpenToggle() {
+		for _, msg := range app.pubMsgs {
+			app.msgQueProducer.SendMsg(msg.Key, msg.Value)
+		}
+		app.msgQueProducer.SendMsg([]byte("commit"), []byte("{}"))
 	}
-	app.msgQueProducer.SendMsg([]byte("commit"), []byte("{}"))
 	if app.enableUnconfirmedLimit {
-		app.account2UnconfirmedTx.CommitRemove(app.latestBlockTime)
+		app.account2UnconfirmedTx.CommitRemove(app.currBlockTime)
 	}
 	return app.BaseApp.Commit()
 }
