@@ -5,18 +5,15 @@ matrix:
       language: go
       go: 1.12.x
       dist: bionic
-#      addons:
-#        apt:
-#          sources:
-#            #- sourceline: 'ppa:longsleep/golang-backports'
-#          packages:
-#            #- golang-1.12
-#            - python3-pip
-#            - parallel
-#            - g++-6
-#            - gcc-6
-#            - bzr
-#            - build-essential
+      addons:
+        apt:
+          packages:
+            - python3-pip
+            - parallel
+            - g++-6
+            - gcc-6
+            - bzr
+            - build-essential
 
       cache:
         apt: true
@@ -44,10 +41,6 @@ matrix:
         - make build-linux
       services:
         - docker
-
-      before_script:
-#        - chmod +x ./scripts/functional_test.sh
-
       after_success:
         - rm ~/.docker/config.json
 
@@ -71,7 +64,6 @@ matrix:
         - docker build . --tag=coinexchain/cetdtest
         - scripts/functional_test.sh 4 3
 
-    #run_ft_non_parallel.sh
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
@@ -80,30 +72,24 @@ matrix:
     - language: go
       go: 1.12.x
       dist: bionic
-#      addons:
-#        apt:
-#          sources:
-#            - sourceline: 'ppa:masterminds/glide'
-#          packages:
-#            - g++-6
-#            - gcc-6
-#            - glide
+      addons:
+        apt:
+          packages:
+            - g++-6
+            - gcc-6
       cache:
         apt: true
         directories:
           - $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
-
-      before_cache:
-      #- rm -rf $GOPATH/src/github.com/coinexchain/dex/*
-
       after_success:
         - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
 
       before_install:
         - curl https://glide.sh/get | sh
         - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
-        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install g++-6 gcc-6
+# todo cache apt package
+#        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install g++-6 gcc-6
         - export GO111MODULE=on
         - export GOROOT=$(go env GOROOT)
         - export CXX="g++-6" CC="gcc-6"
