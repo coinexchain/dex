@@ -9,7 +9,11 @@ import (
 )
 
 func TestCreateMsgWriter(t *testing.T) {
-	w, err := createMsgWriter("os:stdout")
+	w, err := createMsgWriter("nop")
+	require.NoError(t, err)
+	require.Equal(t, "nop", w.String())
+
+	w, err = createMsgWriter("os:stdout")
 	require.NoError(t, err)
 	require.Equal(t, "stdout", w.String())
 	require.NoError(t, w.Close())

@@ -15,7 +15,9 @@ type MsgWriter interface {
 // file:path/to/file
 // os:stdout
 func createMsgWriter(cfg string) (MsgWriter, error) {
-	if strings.HasPrefix(cfg, CfgPrefixKafka) {
+	if cfg == "nop" {
+		return NewNopMsgWriter(), nil
+	} else if strings.HasPrefix(cfg, CfgPrefixKafka) {
 		brokers := strings.TrimPrefix(cfg, CfgPrefixKafka)
 		return NewKafkaMsgWriter(brokers), nil
 	} else if strings.HasPrefix(cfg, CfgPrefixFile) {

@@ -29,6 +29,7 @@ import (
 	types2 "github.com/coinexchain/dex/modules/distributionx/types"
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/dex/msgqueue"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -44,7 +45,9 @@ func newStdTxBuilder() *testutil.StdTxBuilder {
 func newApp() *CetChainApp {
 	logger := log.NewNopLogger()
 	db := dbm.NewMemDB()
-	return NewCetChainApp(logger, db, nil, true, 10000)
+	app := NewCetChainApp(logger, db, nil, true, 10000)
+	app.msgQueProducer = msgqueue.NewProducerFromConfig("nop", "auth,bank", true)
+	return app
 }
 
 func initAppWithBaseAccounts(accs ...auth.BaseAccount) *CetChainApp {

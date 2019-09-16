@@ -37,10 +37,10 @@ func NewProducer() MsgSender {
 	brokers := viper.GetString(FlagBrokers)
 	topics := viper.GetString(FlagTopics)
 	featureToggle := viper.GetBool(FlagFeatureToggle)
-	return newProducerFromConfig(brokers, topics, featureToggle)
+	return NewProducerFromConfig(brokers, topics, featureToggle)
 }
 
-func newProducerFromConfig(brokers, topics string, featureToggle bool) MsgSender {
+func NewProducerFromConfig(brokers, topics string, featureToggle bool) MsgSender {
 	p := producer{
 		subTopics: make(map[string]struct{}),
 		msgWriter: NewNopMsgWriter(),
