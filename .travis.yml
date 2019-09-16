@@ -23,7 +23,6 @@ matrix:
           - $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
       before_install:
-        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install python3-pip parallel g++-6 gcc-6 bzr build-essential
         - export GO111MODULE=on
         - export GOROOT=$(go env GOROOT)
         - export CXX="g++-6" CC="gcc-6"
