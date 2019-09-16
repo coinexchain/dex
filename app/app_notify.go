@@ -14,6 +14,17 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
+type TxExtraInfo struct {
+	Code      uint32       `json:"code,omitempty"`
+	Data      []byte       `json:"data,omitempty"`
+	Log       string       `json:"log,omitempty"`
+	Info      string       `json:"info,omitempty"`
+	GasWanted int64        `json:"gas_wanted,omitempty"`
+	GasUsed   int64        `json:"gas_used,omitempty"`
+	Events    []abci.Event `json:"events,omitempty"`
+	Codespace string       `json:"codespace,omitempty"`
+}
+
 type NewHeightInfo struct {
 	Height        int64        `json:"height"`
 	TimeStamp     time.Time    `json:"timestamp"`
@@ -44,6 +55,7 @@ type NotificationTx struct {
 	TxJSON       string           `json:"tx_json"`
 	Height       int64            `json:"height"`
 	Hash         []byte           `json:"hash"`
+	ExtraInfo    string           `json:"extra_info,omitempty"`
 }
 
 func getTransferRecord(dualEvent []abci.Event) TransferRecord {
@@ -119,16 +131,30 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, re
 		Hash:         tmtypes.Tx(req.Tx).Hash(),
 	}
 
+	if ret.Code != uint32(sdk.CodeOK) {
+		txExtraInfo := &TxExtraInfo{
+			Code:      ret.Code,
+			Data:      ret.Data,
+			Log:       ret.Log,
+			Info:      ret.Info,
+			GasWanted: ret.GasWanted,
+			GasUsed:   ret.GasUsed,
+			Events:    ret.Events,
+			Codespace: ret.Codespace,
+		}
+		bytes, errJSON = json.Marshal(txExtraInfo)
+		if errJSON == nil {
+			n4s.ExtraInfo = string(bytes)
+		}
+	}
+
 	bytes, errJSON = json.Marshal(n4s)
 	if errJSON != nil {
 		return
 	}
 
-	if ret.Code == uint32(sdk.CodeOK) {
-		app.appendPubMsgKV("notify_tx", bytes)
-	} else if ret.Code == uint32(sdk.CodeInsufficientFunds) {
-		app.appendPubMsgKV("funds_not_enough", bytes)
-	}
+	app.appendPubMsgKV("notify_tx", bytes)
+
 }
 
 type NotificationBeginRedelegation struct {
