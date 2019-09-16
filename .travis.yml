@@ -5,18 +5,18 @@ matrix:
       language: go
       go: 1.12.x
       dist: bionic
-      addons:
-        apt:
-          sources:
-            #- sourceline: 'ppa:longsleep/golang-backports'
-          packages:
-            #- golang-1.12
-            - python3-pip
-            - parallel
-            - g++-6
-            - gcc-6
-            - bzr
-            - build-essential
+#      addons:
+#        apt:
+#          sources:
+#            #- sourceline: 'ppa:longsleep/golang-backports'
+#          packages:
+#            #- golang-1.12
+#            - python3-pip
+#            - parallel
+#            - g++-6
+#            - gcc-6
+#            - bzr
+#            - build-essential
 
       cache:
         apt: true
@@ -26,6 +26,7 @@ matrix:
           - $HOME/.cache/go-build
           - $HOME/gopath/pkg/mod
       before_install:
+        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install python3-pip parallel g++-6 gcc-6 bzr build-essential
         - export GO111MODULE=on
         - export GOROOT=$(go env GOROOT)
         - export CXX="g++-6" CC="gcc-6"
@@ -79,14 +80,14 @@ matrix:
     - language: go
       go: 1.12.x
       dist: bionic
-      addons:
-        apt:
-          sources:
-            - sourceline: 'ppa:masterminds/glide'
-          packages:
-            - g++-6
-            - gcc-6
-            - glide
+#      addons:
+#        apt:
+#          sources:
+#            - sourceline: 'ppa:masterminds/glide'
+#          packages:
+#            - g++-6
+#            - gcc-6
+#            - glide
       cache:
         apt: true
         directories:
@@ -100,6 +101,8 @@ matrix:
         - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
 
       before_install:
+        - sudo add-apt-repository ppa:masterminds/glide
+        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install glide g++-6 gcc-6
         - export GO111MODULE=on
         - export GOROOT=$(go env GOROOT)
         - export CXX="g++-6" CC="gcc-6"
