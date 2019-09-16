@@ -101,8 +101,9 @@ matrix:
         - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
 
       before_install:
-        - sudo add-apt-repository ppa:masterminds/glide
-        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install glide g++-6 gcc-6
+        - curl https://glide.sh/get | sh
+        - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
+        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install g++-6 gcc-6
         - export GO111MODULE=on
         - export GOROOT=$(go env GOROOT)
         - export CXX="g++-6" CC="gcc-6"
@@ -112,7 +113,6 @@ matrix:
         - cd -
         - go mod tidy
         - go mod vendor
-        - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
         - go get golang.org/x/tools/cmd/cover
         - go get github.com/mattn/goveralls
 
