@@ -8,7 +8,6 @@ matrix:
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
             #- sourceline: 'ppa:longsleep/golang-backports'
           packages:
             #- golang-1.12
