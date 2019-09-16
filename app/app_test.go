@@ -38,6 +38,14 @@ const testChainID = "c1"
 
 type genesisStateCallback func(state *GenesisState)
 
+// wrap DeliverTx()
+func (app *CetChainApp) Deliver2(tx sdk.Tx) sdk.Result {
+	txBytes, _ := auth.DefaultTxEncoder(app.cdc)(tx)
+	req := abci.RequestDeliverTx{Tx: txBytes}
+	rsp := app.DeliverTx(req)
+	return sdk.Result{Code: sdk.CodeType(rsp.Code)}
+}
+
 func newStdTxBuilder() *testutil.StdTxBuilder {
 	return testutil.NewStdTxBuilder(testChainID)
 }
@@ -166,14 +174,14 @@ func TestSend(t *testing.T) {
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
-	result := app.Deliver(tx)
-	require.Equal(t, sdk.CodeType(0), result.Code)
+	result := app.Deliver2(tx)
+	require.Equal(t, errors.CodeOK, result.Code)
 
 	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
 	tx = newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
-	result = app.Deliver(tx)
+	result = app.Deliver2(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
 }
 
@@ -445,7 +453,7 @@ func TestDonateToCommunityPool(t *testing.T) {
 
 	// deliver tx
 	result := app.Deliver(tx)
-	require.Equal(t, sdk.CodeType(0), result.Code)
+	require.Equal(t, sdk.CodeOK, result.Code)
 
 	//check account
 	acc := app.accountKeeper.GetAccount(ctx, fromAddr)
@@ -478,7 +486,7 @@ func TestTotalSupplyInvariant(t *testing.T) {
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
-	require.Equal(t, sdk.CodeType(0), result.Code)
+	require.Equal(t, sdk.CodeOK, result.Code)
 
 	authxMacc := app.supplyKeeper.GetModuleAccount(ctx, authx.ModuleName)
 	require.True(t, authxMacc.GetCoins().Empty())
@@ -562,7 +570,7 @@ func TestMultiSend(t *testing.T) {
 		AccNumSeqKey(0, 0, key1).AccNumSeqKey(1, 0, key2).Build()
 
 	result := app.Deliver(tx)
-	require.Equal(t, sdk.CodeType(0), result.Code)
+	require.Equal(t, sdk.CodeOK, result.Code)
 
 	app.EndBlock(abci.RequestEndBlock{Height: 1})
 	app.Commit()
