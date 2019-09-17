@@ -166,7 +166,7 @@ func (k Keeper) IsTokenExists(ctx sdk.Context, symbol string) bool {
 	return k.axk.IsTokenExists(ctx, symbol)
 }
 
-func (k Keeper) IsSubScribe(topic string) bool {
+func (k Keeper) IsSubScribed(topic string) bool {
 	return k.msgProducer.IsSubscribed(topic)
 }
 

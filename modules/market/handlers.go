@@ -91,7 +91,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 }
 
 func fillMsgQueue(ctx sdk.Context, keeper keepers.Keeper, key string, msg interface{}) {
-	if keeper.IsSubScribe(types.Topic) {
+	if keeper.IsSubScribed(types.Topic) {
 		fillMsgs(ctx, key, msg)
 	}
 }

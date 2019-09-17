@@ -204,7 +204,7 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 		}
 	}
 
-	if keeper.IsSubScribe(types.Topic) {
+	if keeper.IsSubScribed(types.Topic) {
 		sendFillMsg(ctx, orderOldDeals, orderOldMoneys, ordersForUpdate, ctx.BlockHeight())
 	}
 	return ordersForUpdate, infoForDeal.lastPrice
@@ -261,7 +261,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 
 		for _, order := range filterOrders {
 			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
-			if keeper.IsSubScribe(types.Topic) {
+			if keeper.IsSubScribed(types.Topic) {
 				msgInfo := types.CancelOrderInfo{
 					OrderID:        order.OrderID(),
 					TradingPair:    order.TradingPair,
@@ -293,7 +293,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight+1)
 		for _, ord := range oldOrders {
 			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, ord, marketParams.FeeForZeroDeal)
-			if keeper.IsSubScribe(types.Topic) {
+			if keeper.IsSubScribed(types.Topic) {
 				msgInfo := types.CancelOrderInfo{
 					OrderID:        ord.OrderID(),
 					TradingPair:    ord.TradingPair,
@@ -370,7 +370,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 		for _, order := range ordersForUpdateList[idx] {
 			orderKeeper.Add(ctx, order)
 			if order.TimeInForce == types.IOC || order.LeftStock == 0 || notEnoughMoney(order) {
-				if keeper.IsSubScribe(types.Topic) {
+				if keeper.IsSubScribed(types.Topic) {
 					sendOrderMsg(ctx, order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, keeper)
 				}
 				removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
