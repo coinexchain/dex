@@ -16,7 +16,6 @@ import (
 
 	stakingx_cli "github.com/coinexchain/dex/modules/stakingx/client/cli"
 	stakingx_rest "github.com/coinexchain/dex/modules/stakingx/client/rest"
-	"github.com/coinexchain/dex/types"
 )
 
 var (
@@ -25,9 +24,7 @@ var (
 )
 
 // app module basics object
-type AppModuleBasic struct {
-	apc types.ModuleClient
-}
+type AppModuleBasic struct{}
 
 // module name
 func (AppModuleBasic) Name() string {
