@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/incentive/internal/keepers"
 	"github.com/coinexchain/dex/modules/incentive/internal/types"
+	"github.com/coinexchain/dex/testapp"
 )
 
 func TestQueryParams(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := types.DefaultParams()
 	testApp.IncentiveKeeper.SetParams(ctx, params)

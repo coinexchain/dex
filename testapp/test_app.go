@@ -1,4 +1,4 @@
-package app
+package testapp
 
 import (
 	"time"
@@ -22,6 +22,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	dexapp "github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/alias"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
@@ -84,7 +85,7 @@ type TestApp struct {
 }
 
 func NewTestApp() *TestApp {
-	Cdc := MakeCodec()
+	Cdc := dexapp.MakeCodec()
 	app := newTestApp(Cdc)
 	app.initKeepers(0)
 	app.mountStores()
@@ -133,7 +134,7 @@ func (app *TestApp) initKeepers(invCheckPeriod uint) {
 	)
 
 	app.SupplyKeeper = supply.NewKeeper(app.Cdc, app.keySupply, app.AccountKeeper,
-		app.BankKeeper, maccPerms)
+		app.BankKeeper, dexapp.MaccPerms)
 
 	var StakingKeeper staking.Keeper
 
@@ -289,7 +290,7 @@ func (app *TestApp) initKeepers(invCheckPeriod uint) {
 
 func (app *TestApp) ModuleAccountAddrs() map[string]bool {
 	modAccAddrs := make(map[string]bool)
-	for acc := range maccPerms {
+	for acc := range dexapp.MaccPerms {
 		modAccAddrs[app.SupplyKeeper.GetModuleAddress(acc).String()] = true
 	}
 	return modAccAddrs

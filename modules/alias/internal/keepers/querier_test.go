@@ -9,14 +9,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
+	"github.com/coinexchain/dex/testapp"
 	"github.com/coinexchain/dex/testutil"
 )
 
 func TestQueryParams(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.AliasKeeper.SetParams(ctx, types.DefaultParams())
 
@@ -30,7 +30,7 @@ func TestQueryParams(t *testing.T) {
 }
 
 func TestQueryAliasInfo(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 
 	_, _, addr := testutil.KeyPubAddr()
@@ -43,7 +43,7 @@ func TestQueryAliasInfo(t *testing.T) {
 	testQueryAliases(t, testApp, ctx, addr, alias)
 }
 
-func testQueryAddresses(t *testing.T, testApp *app.TestApp, ctx sdk.Context, addr sdk.AccAddress, alias string) {
+func testQueryAddresses(t *testing.T, testApp *testapp.TestApp, ctx sdk.Context, addr sdk.AccAddress, alias string) {
 	reqParams := keepers.QueryAliasInfoParam{
 		QueryOp: keepers.GetAddressFromAlias,
 		Alias:   alias,
@@ -60,7 +60,7 @@ func testQueryAddresses(t *testing.T, testApp *app.TestApp, ctx sdk.Context, add
 	require.Equal(t, addr.String(), addrs[0])
 }
 
-func testQueryAliases(t *testing.T, testApp *app.TestApp, ctx sdk.Context, addr sdk.AccAddress, alias string) {
+func testQueryAliases(t *testing.T, testApp *testapp.TestApp, ctx sdk.Context, addr sdk.AccAddress, alias string) {
 	reqParams := keepers.QueryAliasInfoParam{
 		QueryOp: keepers.ListAliasOfAccount,
 		Owner:   addr,

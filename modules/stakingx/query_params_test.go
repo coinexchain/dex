@@ -8,13 +8,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/modules/stakingx/internal/types"
+	"github.com/coinexchain/dex/testapp"
 )
 
 func TestQueryParams(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := staking.DefaultParams()
 	paramsx := types.DefaultParams()

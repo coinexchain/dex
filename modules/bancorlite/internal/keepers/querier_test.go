@@ -9,14 +9,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
+	"github.com/coinexchain/dex/testapp"
 	"github.com/coinexchain/dex/testutil"
 )
 
 func TestQueryParams(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.BancorKeeper.Bik.SetParams(ctx, types.DefaultParams())
 
@@ -30,7 +30,7 @@ func TestQueryParams(t *testing.T) {
 }
 
 func TestQueryBancorInfo(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 
 	_, _, addr := testutil.KeyPubAddr()

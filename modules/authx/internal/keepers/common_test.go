@@ -11,9 +11,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx/internal/keepers"
+	"github.com/coinexchain/dex/testapp"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -27,7 +27,7 @@ type testInput struct {
 }
 
 func setupTestInput() testInput {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := sdk.NewContext(testApp.Cms, abci.Header{ChainID: "test-chain-id", Time: time.Unix(1560334620, 0)}, false, log.NewNopLogger())
 	initSupply := dex.NewCetCoinsE8(10000)
 	testApp.SupplyKeeper.SetSupply(ctx, supply.NewSupply(initSupply))

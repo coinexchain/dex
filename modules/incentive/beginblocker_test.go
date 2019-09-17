@@ -12,8 +12,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	cetapp "github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/coinexchain/dex/testapp"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -25,7 +25,7 @@ type TestInput struct {
 }
 
 func SetupTestInput() TestInput {
-	app := cetapp.NewTestApp()
+	app := testapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 	return TestInput{ctx: ctx, cdc: app.Cdc, keeper: app.IncentiveKeeper, ak: app.AccountKeeper}
 }

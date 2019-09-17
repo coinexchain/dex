@@ -8,15 +8,15 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
+	"github.com/coinexchain/dex/testapp"
 	"github.com/coinexchain/dex/testutil"
 )
 
 func TestQueryParams(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.MarketKeeper.SetParams(ctx, types.DefaultParams())
 
@@ -31,7 +31,7 @@ func TestQueryParams(t *testing.T) {
 
 func TestQueryMarketInfo(t *testing.T) {
 	// setup
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.MarketKeeper.SetParams(ctx, types.DefaultParams())
 	createMarket(ctx, testApp, "foo", "bar", 8, sdk.NewDec(10))
@@ -55,7 +55,7 @@ func TestQueryMarketInfo(t *testing.T) {
 	require.Equal(t, "bar", res.Money)
 }
 
-func createMarket(ctx sdk.Context, testApp *app.TestApp,
+func createMarket(ctx sdk.Context, testApp *testapp.TestApp,
 	stock, money string, prec byte, lep sdk.Dec) {
 
 	_ = testApp.AssetKeeper.SetToken(ctx, &asset.BaseToken{Name: stock, Symbol: stock})
@@ -70,7 +70,7 @@ func createMarket(ctx sdk.Context, testApp *app.TestApp,
 
 func TestQueryOrder(t *testing.T) {
 	// setup
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.MarketKeeper.SetParams(ctx, types.DefaultParams())
 	_, _, addr := testutil.KeyPubAddr()
@@ -94,7 +94,7 @@ func TestQueryOrder(t *testing.T) {
 	require.Equal(t, order.OrderID(), res.OrderID())
 }
 
-func createOrder(ctx sdk.Context, testApp *app.TestApp,
+func createOrder(ctx sdk.Context, testApp *testapp.TestApp,
 	sender sdk.AccAddress, seq uint64, id byte) types.Order {
 
 	order := types.Order{
@@ -108,7 +108,7 @@ func createOrder(ctx sdk.Context, testApp *app.TestApp,
 
 func TestQueryOrderList(t *testing.T) {
 	// setup
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.MarketKeeper.SetParams(ctx, types.DefaultParams())
 	_, _, addr := testutil.KeyPubAddr()
@@ -139,7 +139,7 @@ func TestQueryOrderList(t *testing.T) {
 
 func TestQueryWaitCancelMarkets(t *testing.T) {
 	// setup
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.MarketKeeper.SetParams(ctx, types.DefaultParams())
 	dlk := keepers.NewDelistKeeper(testApp.MarketKeeper.GetMarketKey())

@@ -8,16 +8,16 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/testapp"
 	"github.com/coinexchain/dex/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/authx/internal/keepers"
 	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
 func Test_queryParams(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := auth.DefaultParams()
 	paramsx := types.DefaultParams()

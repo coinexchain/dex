@@ -13,12 +13,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	cetapp "github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 	bx "github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/coinexchain/dex/testapp"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -32,7 +32,7 @@ var (
 )
 
 func defaultContext() (*keeper.Keeper, sdk.Handler, sdk.Context) {
-	app := cetapp.NewTestApp()
+	app := testapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{}, false, log.NewNopLogger())
 	app.BankxKeeper.SetParams(ctx, bx.DefaultParams())
 	app.BankxKeeper.Bk.SetSendEnabled(ctx, true)

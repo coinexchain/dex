@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/coinexchain/dex/testapp"
 )
 
 func Test_queryParams(t *testing.T) {
-	testApp := app.NewTestApp()
+	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := types.DefaultParams()
 	testApp.BankxKeeper.SetParams(ctx, params)

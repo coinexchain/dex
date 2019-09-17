@@ -2,25 +2,28 @@ package keeper_test
 
 import (
 	"fmt"
-	cetapp "github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
-	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
-	"testing"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
+	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
+	"github.com/coinexchain/dex/testapp"
+	"github.com/coinexchain/dex/testutil"
+	"github.com/coinexchain/dex/types"
 )
 
 var myaddr = testutil.ToAccAddress("myaddr")
 
 func defaultContext() (keeper.Keeper, sdk.Context) {
-	app := cetapp.NewTestApp()
+	app := testapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{}, false, log.NewNopLogger())
 	return app.BankxKeeper, ctx
 }

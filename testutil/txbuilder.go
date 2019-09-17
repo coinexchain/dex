@@ -1,10 +1,10 @@
 package testutil
 
 import (
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/tendermint/tendermint/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	dex "github.com/coinexchain/dex/types"
 )

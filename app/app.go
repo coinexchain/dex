@@ -69,7 +69,7 @@ var (
 	ModuleBasics OrderedBasicManager
 
 	// account permissions
-	maccPerms = map[string][]string{
+	MaccPerms = map[string][]string{
 		auth.FeeCollectorName:     nil,
 		distr.ModuleName:          nil,
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
@@ -286,7 +286,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	)
 
 	app.supplyKeeper = supply.NewKeeper(app.cdc, app.keySupply, app.accountKeeper,
-		app.bankKeeper, maccPerms)
+		app.bankKeeper, MaccPerms)
 
 	var stakingKeeper staking.Keeper
 
@@ -603,7 +603,7 @@ func (app *CetChainApp) LoadHeight(height int64) error {
 // ModuleAccountAddrs returns all the app's module account addresses.
 func (app *CetChainApp) ModuleAccountAddrs() map[string]bool {
 	modAccAddrs := make(map[string]bool)
-	for acc := range maccPerms {
+	for acc := range MaccPerms {
 		modAccAddrs[supply.NewModuleAddress(acc).String()] = true
 	}
 
