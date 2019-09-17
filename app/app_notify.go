@@ -5,13 +5,14 @@ import (
 	"reflect"
 	"time"
 
+	abci "github.com/tendermint/tendermint/abci/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	tmtypes "github.com/tendermint/tendermint/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	sltypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
-	cmn "github.com/tendermint/tendermint/libs/common"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 type TxExtraInfo struct {
@@ -154,7 +155,6 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, re
 	}
 
 	app.appendPubMsgKV("notify_tx", bytes)
-
 }
 
 type NotificationBeginRedelegation struct {

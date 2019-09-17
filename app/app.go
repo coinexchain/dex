@@ -6,10 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/coinexchain/dex/app/plugin"
-
-	"github.com/coinexchain/dex/types"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/libs/log"
@@ -35,6 +31,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	"github.com/coinexchain/dex/app/plugin"
 	"github.com/coinexchain/dex/modules/alias"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
@@ -47,6 +44,7 @@ import (
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/modules/supplyx"
 	"github.com/coinexchain/dex/msgqueue"
+	"github.com/coinexchain/dex/types"
 )
 
 const (

@@ -2,8 +2,9 @@ package app
 
 import (
 	"bytes"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"sync"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (
