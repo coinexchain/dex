@@ -39,11 +39,16 @@ const testChainID = "c1"
 type genesisStateCallback func(state *GenesisState)
 
 // wrap DeliverTx()
-func (app *CetChainApp) Deliver2(tx sdk.Tx) sdk.Result {
+func (app *CetChainApp) Deliver(tx sdk.Tx) sdk.Result {
+	//return app.BaseApp.Deliver(tx)
 	txBytes, _ := auth.DefaultTxEncoder(app.cdc)(tx)
 	req := abci.RequestDeliverTx{Tx: txBytes}
 	rsp := app.DeliverTx(req)
-	return sdk.Result{Code: sdk.CodeType(rsp.Code)}
+	return sdk.Result{
+		Code:      sdk.CodeType(rsp.Code),
+		GasUsed:   uint64(rsp.GasUsed),
+		GasWanted: uint64(rsp.GasWanted),
+	}
 }
 
 func newStdTxBuilder() *testutil.StdTxBuilder {
@@ -174,14 +179,14 @@ func TestSend(t *testing.T) {
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
-	result := app.Deliver2(tx)
+	result := app.Deliver(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
 
 	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
 	tx = newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
-	result = app.Deliver2(tx)
+	result = app.Deliver(tx)
 	require.Equal(t, errors.CodeOK, result.Code)
 }
 
