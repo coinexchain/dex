@@ -10,8 +10,8 @@ import (
 )
 
 func TestValidate(t *testing.T) {
-	addr1, err := sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
-	addr2, err := sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
+	var addr1, _ = sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
+	var addr2, err = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	require.NoError(t, err)
 
 	genState := authx.DefaultGenesisState()
