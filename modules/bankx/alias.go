@@ -20,6 +20,7 @@ var (
 	RegisterCodec                        = types.RegisterCodec
 	ParamKeyTable                        = types.ParamKeyTable
 	DefaultParams                        = types.DefaultParams
+	NewParams                            = types.NewParams
 	NewKeeper                            = keeper.NewKeeper
 	NewMsgSend                           = types.NewMsgSend
 	NewMsgSetTransferMemoRequired        = types.NewMsgSetTransferMemoRequired
@@ -34,8 +35,8 @@ var (
 )
 
 type (
-	Keeper             = keeper.Keeper
-	MsgSend            = types.MsgSend
+	Keeper = keeper.Keeper
+	MsgSend = types.MsgSend
 	MsgSetMemoRequired = types.MsgSetMemoRequired
-	MsgMultiSend       = types.MsgMultiSend
+	MsgMultiSend = types.MsgMultiSend
 )

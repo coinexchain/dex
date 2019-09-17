@@ -18,6 +18,12 @@ type Params struct {
 	LockCoinsFee  int64 `json:"lock_coins_fee"`
 }
 
+func NewParams(activation int64, lock int64) Params {
+	return Params{
+		ActivationFee: activation,
+		LockCoinsFee:  lock,
+	}
+}
 func DefaultParams() Params {
 	return Params{
 		ActivationFee: 100000000,
