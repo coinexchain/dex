@@ -1,8 +1,8 @@
 package types
 
 import (
-	"fmt"
 	"os"
+	"reflect"
 	"testing"
 	"time"
 
@@ -119,8 +119,9 @@ func TestMsgSendGetSignBytes(t *testing.T) {
 }
 
 func TestMsgSendGetSigners(t *testing.T) {
-	var msg = NewMsgSend(sdk.AccAddress([]byte("input1")), sdk.AccAddress{}, sdk.NewCoins(), 0)
-	res := msg.GetSigners()
-	// TODO: fix this !
-	require.Equal(t, fmt.Sprintf("%v", res), "[696E70757431]")
+	addr := sdk.AccAddress([]byte("input1"))
+	var msg = NewMsgSend(addr, sdk.AccAddress{}, sdk.NewCoins(), 0)
+	if actual := msg.GetSigners(); !reflect.DeepEqual(actual, []sdk.AccAddress{addr}) {
+		t.Errorf("Msg.GetSigners() = %v, want %v", actual, []sdk.AccAddress{addr})
+	}
 }
