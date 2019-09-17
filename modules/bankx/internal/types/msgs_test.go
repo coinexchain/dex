@@ -6,13 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/stretchr/testify/require"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 // MsgSetMemoRequired tests
@@ -124,4 +123,54 @@ func TestMsgSendGetSigners(t *testing.T) {
 	if actual := msg.GetSigners(); !reflect.DeepEqual(actual, []sdk.AccAddress{addr}) {
 		t.Errorf("Msg.GetSigners() = %v, want %v", actual, []sdk.AccAddress{addr})
 	}
+}
+
+func TestMsgMultiSend_ValidateBasic(t *testing.T) {
+	addr1 := sdk.AccAddress(crypto.AddressHash([]byte("input")))
+	addr2 := sdk.AccAddress(crypto.AddressHash([]byte("output")))
+	cet123 := sdk.NewCoins(sdk.NewInt64Coin("cet", 123))
+	cet111 := sdk.NewCoins(sdk.NewInt64Coin("cet", 111))
+
+	tests := []struct {
+		name string
+		msg  MsgMultiSend
+		want sdk.Error
+	}{
+		{
+			"base_case",
+			NewMsgMultiSend([]bank.Input{bank.NewInput(addr1, cet123)}, []bank.Output{bank.NewOutput(addr2, cet123)}),
+			nil,
+		},
+		{
+			"no_input",
+			NewMsgMultiSend([]bank.Input{}, []bank.Output{bank.NewOutput(addr2, cet123)}),
+			ErrNoInputs("no inputs in multisend"),
+		},
+		{
+			"no_output",
+			NewMsgMultiSend([]bank.Input{bank.NewInput(addr1, cet123)}, []bank.Output{}),
+			ErrNoOutputs("no outputs in multisend"),
+		},
+		{
+			"err_coin",
+			NewMsgMultiSend([]bank.Input{bank.NewInput(addr1, cet123)}, []bank.Output{bank.NewOutput(addr2, cet111)}),
+			ErrInputOutputMismatch("inputs outputs mismatch"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgMultiSend.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+func TestMsgMultiSend(t *testing.T) {
+	addr := sdk.AccAddress(crypto.AddressHash([]byte("address")))
+	cet123 := sdk.NewCoins(sdk.NewInt64Coin("cet", 123))
+
+	msg := NewMsgMultiSend([]bank.Input{bank.NewInput(sdk.AccAddress{}, cet123)}, []bank.Output{bank.NewOutput(addr, cet123)})
+	require.Error(t, msg.ValidateBasic())
+	msg = NewMsgMultiSend([]bank.Input{bank.NewInput(addr, cet123)}, []bank.Output{bank.NewOutput(sdk.AccAddress{}, cet123)})
+	require.Error(t, msg.ValidateBasic())
 }
