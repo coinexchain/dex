@@ -66,7 +66,22 @@ matrix:
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh -1 0
+        - scripts/functional_test.sh -4 0
+
+    - <<: *ft_job
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh -4 1
+
+    - <<: *ft_job
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh -4 2
+
+    - <<: *ft_job
+      script:
+        - docker build . --tag=coinexchain/cetdtest
+        - scripts/functional_test.sh -4 3
 
     - language: go
       go: 1.12.x

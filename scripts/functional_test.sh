@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+abs() {
+    [[ $[ $@ ] -lt 0 ]] && echo "$[ ($@) * -1 ]" || echo "$[ $@ ]"
+}
+
 image_check=$(docker images | grep coinexchain/cetdtest)
 if [[ ! ${image_check} ]]
 then
@@ -29,8 +33,8 @@ date +%s
 
 echo "$(pwd)"
 cd func_test
-if [[ $1 == -1 ]]; then
-    bash script/run_ft_non_parallel.sh $1 $2
+if [[ $1 -lt 0 ]]; then
+    bash script/run_ft_non_parallel.sh $(abs $1) $2
 else
     bash script/run_ft_in_parallel.sh $1 $2
 fi
