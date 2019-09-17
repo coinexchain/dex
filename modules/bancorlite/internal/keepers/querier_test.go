@@ -18,14 +18,14 @@ import (
 func TestQueryParams(t *testing.T) {
 	testApp := app.NewTestApp()
 	ctx := testApp.NewCtx()
-	testApp.BancorKeeper().Bik.SetParams(ctx, types.DefaultParams())
+	testApp.BancorKeeper.Bik.SetParams(ctx, types.DefaultParams())
 
-	querier := keepers.NewQuerier(testApp.BancorKeeper())
+	querier := keepers.NewQuerier(testApp.BancorKeeper)
 	res, err := querier(ctx, []string{keepers.QueryParameters}, abci.RequestQuery{})
 	require.NoError(t, err)
 
 	var params types.Params
-	testApp.Cdc().MustUnmarshalJSON(res, &params)
+	testApp.Cdc.MustUnmarshalJSON(res, &params)
 	require.True(t, params.Equal(types.DefaultParams()))
 }
 
@@ -46,19 +46,19 @@ func TestQueryBancorInfo(t *testing.T) {
 		MoneyInPool:        sdk.NewInt(10000),
 		EarliestCancelTime: 0,
 	}
-	testApp.BancorKeeper().Bik.Save(ctx, &bi)
+	testApp.BancorKeeper.Bik.Save(ctx, &bi)
 
 	reqParams := keepers.QueryBancorInfoParam{
 		Symbol: "foo/bar",
 	}
-	reqData := testApp.Cdc().MustMarshalJSON(reqParams)
+	reqData := testApp.Cdc.MustMarshalJSON(reqParams)
 
-	querier := keepers.NewQuerier(testApp.BancorKeeper())
+	querier := keepers.NewQuerier(testApp.BancorKeeper)
 	res, err := querier(ctx, []string{keepers.QueryBancorInfo}, abci.RequestQuery{Data: reqData})
 	require.NoError(t, err)
 
 	var bid keepers.BancorInfoDisplay
-	testApp.Cdc().MustUnmarshalJSON(res, &bid)
+	testApp.Cdc.MustUnmarshalJSON(res, &bid)
 	require.Equal(t, "foo", bid.Stock)
 	require.Equal(t, "bar", bid.Money)
 }

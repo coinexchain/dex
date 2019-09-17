@@ -27,7 +27,7 @@ type TestInput struct {
 func SetupTestInput() TestInput {
 	app := cetapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-	return TestInput{ctx: ctx, cdc: app.Cdc(), keeper: app.IncentiveKeeper(), ak: app.AccountKeeper()}
+	return TestInput{ctx: ctx, cdc: app.Cdc, keeper: app.IncentiveKeeper, ak: app.AccountKeeper}
 }
 
 func TestBeginBlockerInvalidCoin(t *testing.T) {
