@@ -58,6 +58,9 @@ func (data GenesisState) ValidateGenesis() error {
 	addrMap := make(map[string]bool, len(data.AccountXs))
 	for _, accx := range data.AccountXs {
 		addrStr := accx.Address.String()
+		if addrStr == "" {
+			return fmt.Errorf("nil accountX found in genesis state; address: %s", addrStr)
+		}
 
 		if _, exists := addrMap[addrStr]; exists {
 			return fmt.Errorf("duplicate accountX found in genesis state; address: %s", addrStr)

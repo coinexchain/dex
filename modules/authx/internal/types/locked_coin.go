@@ -31,10 +31,11 @@ func (coin LockedCoin) String() string {
 type LockedCoins []LockedCoin
 
 func (coins LockedCoins) String() string {
-	if len(coins) == 0 {
-		return ""
-	}
 	out := ""
+	if len(coins) == 0 {
+		return out
+	}
+
 	for _, coin := range coins {
 		out += coin.String()
 	}
