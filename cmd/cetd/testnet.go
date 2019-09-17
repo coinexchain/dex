@@ -68,7 +68,7 @@ type GenesisAccountsIterator interface {
 
 // get cmd to initialize all files for tendermint testnet and application
 func testnetCmd(ctx *server.Context, cdc *codec.Codec,
-	mbm app.OrderedBasicManager, genAccIterator GenesisAccountsIterator) *cobra.Command {
+	mbm dex.OrderedBasicManager, genAccIterator GenesisAccountsIterator) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "testnet",
@@ -124,7 +124,7 @@ func prepareFlagsForTestnetCmd(cmd *cobra.Command) {
 }
 
 func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
-	mbm app.OrderedBasicManager, genAccIterator GenesisAccountsIterator,
+	mbm dex.OrderedBasicManager, genAccIterator GenesisAccountsIterator,
 	outputDir, chainID, minGasPrices, nodeDirPrefix, nodeDaemonHome,
 	nodeCLIHome, startingIPAddress string, numValidators int) error {
 
@@ -308,7 +308,7 @@ func mkNodeHomeDirs(outputDir, nodeDir, clientDir string) error {
 	return nil
 }
 
-func initGenFiles(cdc *codec.Codec, mbm app.OrderedBasicManager, chainID string,
+func initGenFiles(cdc *codec.Codec, mbm dex.OrderedBasicManager, chainID string,
 	accs []genaccounts.GenesisAccount, genFiles []string, numValidators int) error {
 
 	appGenState := mbm.DefaultGenesis()

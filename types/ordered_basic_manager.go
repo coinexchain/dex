@@ -1,4 +1,4 @@
-package app
+package types
 
 import (
 	"encoding/json"
@@ -13,8 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-
-	distrx "github.com/coinexchain/dex/modules/distributionx/types"
 )
 
 type OrderedBasicManager struct {
@@ -50,8 +48,8 @@ func (bm OrderedBasicManager) AddTxCommands(rootTxCmd *cobra.Command, cdc *codec
 }
 
 func isDuplicatedTxCmd(module string) bool {
-	return module == auth.ModuleName || //mounted
-		module == distrx.ModuleName || //mounted
+	return module == "distrx" || //mounted (do not use distrx.ModuleName to prevent circle import)
+		module == auth.ModuleName || //mounted
 		module == bank.ModuleName || //overwritten
 		module == staking.ModuleName //overwritten
 }

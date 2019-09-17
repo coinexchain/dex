@@ -44,7 +44,7 @@ import (
 	"github.com/coinexchain/dex/modules/stakingx"
 	"github.com/coinexchain/dex/modules/supplyx"
 	"github.com/coinexchain/dex/msgqueue"
-	"github.com/coinexchain/dex/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 const (
@@ -64,7 +64,7 @@ var (
 	// The ModuleBasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
 	// and genesis verification.
-	ModuleBasics OrderedBasicManager
+	ModuleBasics dex.OrderedBasicManager
 
 	// account permissions
 	MaccPerms = map[string][]string{
@@ -108,7 +108,7 @@ func init() {
 		supply.AppModuleBasic{},
 	}
 
-	ModuleBasics = NewOrderedBasicManager(modules)
+	ModuleBasics = dex.NewOrderedBasicManager(modules)
 }
 
 // custom tx codec
@@ -626,7 +626,7 @@ func (app *CetChainApp) appendPubMsgKV(key string, val []byte) {
 func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 	if p := app.GetPlugin(); p != nil {
 		if err := p.PreCheckTx(req, app.txDecoder, app.Logger()); err != nil {
-			return types.ResponseFrom(err)
+			return dex.ResponseFrom(err)
 		}
 	}
 
@@ -665,7 +665,7 @@ func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 	}
 
 	if otherTxExist {
-		return types.ResponseFrom(errTooManyUnconfirmedTx)
+		return dex.ResponseFrom(errTooManyUnconfirmedTx)
 	}
 	ret := app.BaseApp.CheckTx(req)
 	if ret.IsOK() {
