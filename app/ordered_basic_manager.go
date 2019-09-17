@@ -54,7 +54,6 @@ func isDuplicatedTxCmd(module string) bool {
 		module == distrx.ModuleName || //mounted
 		module == bank.ModuleName || //overwritten
 		module == staking.ModuleName //overwritten
-
 }
 
 func (bm OrderedBasicManager) AddQueryCommands(rootQueryCmd *cobra.Command, cdc *codec.Codec) {

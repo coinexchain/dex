@@ -610,7 +610,21 @@ func (app *CetChainApp) ModuleAccountAddrs() map[string]bool {
 	return modAccAddrs
 }
 
-// "override" ABCI methods
+func (app *CetChainApp) initPubMsgBuf() {
+	app.pubMsgs = make([]PubMsg, 0, 10000)
+}
+func (app *CetChainApp) resetPubMsgBuf() {
+	app.pubMsgs = app.pubMsgs[0:0]
+}
+func (app *CetChainApp) appendPubMsg(msg PubMsg) {
+	app.pubMsgs = append(app.pubMsgs, msg)
+}
+func (app *CetChainApp) appendPubMsgKV(key string, val []byte) {
+	app.pubMsgs = append(app.pubMsgs, PubMsg{Key: []byte(key), Value: val})
+}
+
+/* "override" ABCI methods */
+
 func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 	if p := app.GetPlugin(); p != nil {
 		if err := p.PreCheckTx(req, app.txDecoder, app.Logger()); err != nil {
@@ -707,17 +721,4 @@ func (app *CetChainApp) Commit() abci.ResponseCommit {
 		app.account2UnconfirmedTx.CommitRemove(app.currBlockTime)
 	}
 	return app.BaseApp.Commit()
-}
-
-func (app *CetChainApp) initPubMsgBuf() {
-	app.pubMsgs = make([]PubMsg, 0, 10000)
-}
-func (app *CetChainApp) resetPubMsgBuf() {
-	app.pubMsgs = app.pubMsgs[0:0]
-}
-func (app *CetChainApp) appendPubMsg(msg PubMsg) {
-	app.pubMsgs = append(app.pubMsgs, msg)
-}
-func (app *CetChainApp) appendPubMsgKV(key string, val []byte) {
-	app.pubMsgs = append(app.pubMsgs, PubMsg{Key: []byte(key), Value: val})
 }
