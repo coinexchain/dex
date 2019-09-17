@@ -59,7 +59,8 @@ func newApp() *CetChainApp {
 	logger := log.NewNopLogger()
 	db := dbm.NewMemDB()
 	app := NewCetChainApp(logger, db, nil, true, 10000)
-	app.msgQueProducer = msgqueue.NewProducerFromConfig("nop", "auth,bank", true)
+	topics := "auth,authx,bancorlite,bank,comment,market"
+	app.msgQueProducer = msgqueue.NewProducerFromConfig("nop", topics, true)
 	return app
 }
 
