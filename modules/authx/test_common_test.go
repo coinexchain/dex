@@ -1,6 +1,8 @@
 package authx_test
 
 import (
+	"os"
+	"testing"
 	"time"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -16,6 +18,11 @@ import (
 	"github.com/coinexchain/dex/testapp"
 	dex "github.com/coinexchain/dex/types"
 )
+
+func TestMain(m *testing.M) {
+	dex.InitSdkConfig()
+	os.Exit(m.Run())
+}
 
 type testInput struct {
 	ctx sdk.Context
