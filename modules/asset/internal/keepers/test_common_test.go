@@ -6,6 +6,8 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+	"os"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -24,6 +26,11 @@ import (
 	"github.com/coinexchain/dex/msgqueue"
 	dex "github.com/coinexchain/dex/types"
 )
+
+func TestMain(m *testing.M) {
+	dex.InitSdkConfig()
+	os.Exit(m.Run())
+}
 
 type testInput struct {
 	cdc *codec.Codec

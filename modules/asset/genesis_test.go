@@ -2,18 +2,12 @@ package asset_test
 
 import (
 	"github.com/coinexchain/dex/modules/asset"
-	"os"
 	"testing"
 
 	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
-
-func TestMain(m *testing.M) {
-	dex.InitSdkConfig()
-	os.Exit(m.Run())
-}
 
 func TestGenesis(t *testing.T) {
 	input := createTestInput()
