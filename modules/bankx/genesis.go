@@ -36,12 +36,11 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 // ValidateGenesis performs basic validation of asset genesis data returning an
 // error for any failed validation criteria.
 func (data GenesisState) ValidateGenesis() error {
-	activationFee := data.Params.ActivationFee
-	if activationFee < 0 {
-		return sdk.NewError(types.CodeSpaceBankx, types.CodeInvalidActivationFee, "invalid activated fees")
+	if activationFee := data.Params.ActivationFee; activationFee < 0 {
+		return types.ErrorInvalidActivatingFee()
 	}
 	if lockCoinsFee := data.Params.LockCoinsFee; lockCoinsFee < 0 {
-		return sdk.NewError(types.CodeSpaceBankx, types.CodeInvalidLockCoinsFee, "invalid lock coins fee")
+		return types.ErrorInvalidLockCoinsFee()
 	}
 	return nil
 }

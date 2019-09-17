@@ -41,3 +41,10 @@ func ErrNoOutputs(msg string) sdk.Error {
 func ErrInputOutputMismatch(msg string) sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInputOutputMismatch, msg)
 }
+func ErrorInvalidActivatingFee() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeInvalidActivationFee, "invalid activated fees")
+}
+
+func ErrorInvalidLockCoinsFee() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeInvalidLockCoinsFee, "invalid lock coins fee")
+}
