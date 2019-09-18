@@ -44,7 +44,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		!k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
 		return types.ErrNonMarketExist().Result()
 	}
-	suppliedCoins := sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: msg.MaxSupply}}
+	suppliedCoins := sdk.Coins{sdk.NewCoin(msg.Stock, msg.MaxSupply)}
 	if err := k.Bxk.FreezeCoins(ctx, msg.Owner, suppliedCoins); err != nil {
 		return err.Result()
 	}
@@ -119,14 +119,14 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	}
 
 	diff := bi.MoneyInPool.Sub(biNew.MoneyInPool)
-	coinsFromPool := sdk.Coins{sdk.Coin{Denom: msg.Money, Amount: diff}}
-	coinsToPool := sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: sdk.NewInt(msg.Amount)}}
+	coinsFromPool := sdk.Coins{sdk.NewCoin(msg.Money, diff)}
+	coinsToPool := sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
 	moneyCrossLimit := msg.MoneyLimit > 0 && diff.LT(sdk.NewInt(msg.MoneyLimit))
 	moneyErr := "less than"
 	if msg.IsBuy {
 		diff = biNew.MoneyInPool.Sub(bi.MoneyInPool)
-		coinsToPool = sdk.Coins{sdk.Coin{Denom: msg.Money, Amount: diff}}
-		coinsFromPool = sdk.Coins{sdk.Coin{Denom: msg.Stock, Amount: sdk.NewInt(msg.Amount)}}
+		coinsToPool = sdk.Coins{sdk.NewCoin(msg.Money, diff)}
+		coinsFromPool = sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
 		moneyCrossLimit = msg.MoneyLimit > 0 && diff.GT(sdk.NewInt(msg.MoneyLimit))
 		moneyErr = "more than"
 	}

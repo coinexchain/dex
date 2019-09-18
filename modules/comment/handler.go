@@ -27,7 +27,7 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 		return types.ErrNoSuchAsset().Result()
 	}
 	if msg.Donation > 0 {
-		donatedCoin := sdk.Coins{sdk.Coin{Denom: "cet", Amount: sdk.NewInt(msg.Donation)}}
+		donatedCoin := sdk.Coins{sdk.NewCoin("cet", sdk.NewInt(msg.Donation))}
 		res := k.Dk.DonateToCommunityPool(ctx, msg.Sender, donatedCoin)
 		if res != nil {
 			return res.Result()
@@ -38,7 +38,7 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 		if ref.RewardAmount <= 0 {
 			continue
 		}
-		rewardCoin := sdk.Coin{Denom: ref.RewardToken, Amount: sdk.NewInt(ref.RewardAmount)}
+		rewardCoin := sdk.NewCoin(ref.RewardToken, sdk.NewInt(ref.RewardAmount))
 		res := k.Bxk.SendCoins(ctx, msg.Sender, ref.RewardTarget, sdk.Coins{rewardCoin})
 		if res != nil {
 			return res.Result()

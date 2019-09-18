@@ -127,8 +127,9 @@ func TestGetTotalCoins(t *testing.T) {
 		authx.NewLockedCoin("eth", sdk.NewInt(30), 2000),
 	}
 
-	frozenCoins := sdk.NewCoins(sdk.Coin{Denom: "btc", Amount: sdk.NewInt(50)},
-		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(10)},
+	frozenCoins := sdk.NewCoins(
+		sdk.NewCoin("btc", sdk.NewInt(50)),
+		sdk.NewCoin("eth", sdk.NewInt(10)),
 	)
 
 	accX := authx.AccountX{
@@ -140,10 +141,10 @@ func TestGetTotalCoins(t *testing.T) {
 	bkx.Axk.SetAccountX(ctx, accX)
 
 	expected := sdk.NewCoins(
-		sdk.Coin{Denom: "bch", Amount: sdk.NewInt(40)},
-		sdk.Coin{Denom: "btc", Amount: sdk.NewInt(80)},
-		sdk.Coin{Denom: "cet", Amount: sdk.NewInt(100)},
-		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(40)},
+		sdk.NewCoin("bch", sdk.NewInt(40)),
+		sdk.NewCoin("btc", sdk.NewInt(80)),
+		sdk.NewCoin("cet", sdk.NewInt(100)),
+		sdk.NewCoin("eth", sdk.NewInt(40)),
 	)
 	expected = expected.Sort()
 	coins := bkx.GetTotalCoins(ctx, myaddr)
@@ -162,7 +163,7 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 	lockedCoins := authx.LockedCoins{
 		authx.NewLockedCoin("cet", sdk.NewInt(100), 1000),
 	}
-	frozenCoins := sdk.NewCoins(sdk.Coin{Denom: "cet", Amount: sdk.NewInt(100)})
+	frozenCoins := sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(100)))
 
 	accX := authx.AccountX{
 		Address:     myaddr,
@@ -177,13 +178,13 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 func TestKeeper_AddCoins(t *testing.T) {
 	bkx, ctx := defaultContext()
 	coins := sdk.NewCoins(
-		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(10)},
-		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(20)},
+		sdk.NewCoin("aaa", sdk.NewInt(10)),
+		sdk.NewCoin("bbb", sdk.NewInt(20)),
 	)
 
 	coins2 := sdk.NewCoins(
-		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(5)},
-		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(10)},
+		sdk.NewCoin("aaa", sdk.NewInt(5)),
+		sdk.NewCoin("bbb", sdk.NewInt(10)),
 	)
 
 	err := bkx.AddCoins(ctx, myaddr, coins)
@@ -194,8 +195,8 @@ func TestKeeper_AddCoins(t *testing.T) {
 	require.Equal(t, coins2, cs)
 
 	coins3 := sdk.NewCoins(
-		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(15)},
-		sdk.Coin{Denom: "bbb", Amount: sdk.NewInt(10)},
+		sdk.NewCoin("aaa", sdk.NewInt(15)),
+		sdk.NewCoin("bbb", sdk.NewInt(10)),
 	)
 	err = bkx.SubtractCoins(ctx, myaddr, coins3)
 	require.Error(t, err)
@@ -218,7 +219,7 @@ func TestParamGetSet(t *testing.T) {
 func TestKeeper_SendCoins(t *testing.T) {
 	bkx, ctx := defaultContext()
 	coins := sdk.NewCoins(
-		sdk.Coin{Denom: "aaa", Amount: sdk.NewInt(10)},
+		sdk.NewCoin("aaa", sdk.NewInt(10)),
 	)
 	addr2 := testutil.ToAccAddress("addr2")
 	_ = bkx.AddCoins(ctx, myaddr, coins)

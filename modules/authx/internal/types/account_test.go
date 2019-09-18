@@ -146,13 +146,16 @@ func TestAccountX_GetAllCoins(t *testing.T) {
 		NewLockedCoin("eos", sdk.NewInt(40), 3000),
 	}
 	acc.LockedCoins = coins
-	acc.FrozenCoins = sdk.NewCoins(sdk.Coin{Denom: "bch", Amount: sdk.NewInt(50)},
-		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(10)})
+	acc.FrozenCoins = sdk.NewCoins(
+		sdk.NewCoin("bch", sdk.NewInt(50)),
+		sdk.NewCoin("eth", sdk.NewInt(10)),
+	)
 
 	res := acc.GetAllCoins()
-	expected := sdk.NewCoins(sdk.Coin{Denom: "bch", Amount: sdk.NewInt(70)},
-		sdk.Coin{Denom: "eth", Amount: sdk.NewInt(40)},
-		sdk.Coin{Denom: "eos", Amount: sdk.NewInt(40)},
+	expected := sdk.NewCoins(
+		sdk.NewCoin("bch", sdk.NewInt(70)),
+		sdk.NewCoin("eth", sdk.NewInt(40)),
+		sdk.NewCoin("eos", sdk.NewInt(40)),
 	)
 
 	require.Equal(t, expected, res)
