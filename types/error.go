@@ -1,13 +1,14 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	"github.com/cosmos/cosmos-sdk/types"
 )
 
 func ResponseFrom(err types.Error) abci.ResponseCheckTx {
 	result := err.Result()
-	ret := abci.ResponseCheckTx{
+	return abci.ResponseCheckTx{
 		Code:      uint32(result.Code),
 		Data:      result.Data,
 		Log:       result.Log,
@@ -15,5 +16,4 @@ func ResponseFrom(err types.Error) abci.ResponseCheckTx {
 		GasUsed:   int64(result.GasUsed),
 		Events:    result.Events.ToABCIEvents(),
 	}
-	return ret
 }
