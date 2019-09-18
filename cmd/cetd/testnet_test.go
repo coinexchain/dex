@@ -24,12 +24,14 @@ func TestTestnetCmd(t *testing.T) {
 }
 
 func TestInitTestnet(t *testing.T) {
-	defer os.RemoveAll("testhome")
-	defer os.RemoveAll("testnetdata")
+	testHmoe := "./testhome"
+	testDataDir := "./testnetdata"
+	defer os.RemoveAll(testHmoe)
+	defer os.RemoveAll(testDataDir)
 
-	os.Args = []string{"cetd", "testnet", "--v", "2", "-o", "testnetdata"}
+	os.Args = []string{"cetd", "testnet", "--v", "2", "-o", testDataDir}
 	cetdCmd := createCetdCmd()
-	executor := cli.PrepareBaseCmd(cetdCmd, "GA", "testhome")
+	executor := cli.PrepareBaseCmd(cetdCmd, "GA", testHmoe)
 
 	err := executor.Execute()
 	require.NoError(t, err)
