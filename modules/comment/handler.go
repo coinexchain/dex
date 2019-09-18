@@ -48,7 +48,7 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 
 	if len(k.EventTypeMsgQueue) != 0 {
 		tokenComment := types.NewTokenComment(&msg, lastCount, ctx.BlockHeight())
-		bytes := dex.SafeJsonMarshal(tokenComment)
+		bytes := dex.SafeJSONMarshal(tokenComment)
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				k.EventTypeMsgQueue,

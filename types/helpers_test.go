@@ -15,6 +15,6 @@ func TestResponseFrom(t *testing.T) {
 }
 
 func TestSafeJsonMarshal(t *testing.T) {
-	require.Equal(t, []byte("1"), SafeJsonMarshal(1))
-	require.Equal(t, []byte{}, SafeJsonMarshal(TestSafeJsonMarshal))
+	require.Equal(t, []byte("1"), SafeJSONMarshal(1))
+	require.Equal(t, []byte{}, SafeJSONMarshal(TestSafeJsonMarshal))
 }

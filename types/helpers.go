@@ -21,7 +21,7 @@ func ResponseFrom(err sdk.Error) abci.ResponseCheckTx {
 	}
 }
 
-func SafeJsonMarshal(msg interface{}) []byte {
+func SafeJSONMarshal(msg interface{}) []byte {
 	bytes, errJSON := json.Marshal(msg)
 	if errJSON != nil {
 		bytes = []byte{}

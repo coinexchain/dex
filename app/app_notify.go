@@ -40,7 +40,7 @@ func (app *CetChainApp) pushNewHeightInfo(ctx sdk.Context) {
 		TimeStamp:     ctx.BlockHeader().Time,
 		LastBlockHash: ctx.BlockHeader().LastBlockId.Hash,
 	}
-	bytes := dex.SafeJsonMarshal(msg)
+	bytes := dex.SafeJSONMarshal(msg)
 	app.appendPubMsgKV("height_info", bytes)
 }
 
@@ -185,7 +185,7 @@ func getNotificationBeginRedelegation(dualEvent []abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	return dex.SafeJsonMarshal(res)
+	return dex.SafeJSONMarshal(res)
 }
 
 type NotificationBeginUnbonding struct {
@@ -211,7 +211,7 @@ func getNotificationBeginUnbonding(dualEvent []abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	return dex.SafeJsonMarshal(res)
+	return dex.SafeJSONMarshal(res)
 }
 
 type NotificationCompleteRedelegation struct {
@@ -231,7 +231,7 @@ func getNotificationCompleteRedelegation(event abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	return dex.SafeJsonMarshal(res)
+	return dex.SafeJSONMarshal(res)
 }
 
 type NotificationCompleteUnbonding struct {
@@ -248,7 +248,7 @@ func getNotificationCompleteUnbonding(event abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	return dex.SafeJsonMarshal(res)
+	return dex.SafeJSONMarshal(res)
 }
 
 type NotificationSlash struct {
@@ -271,7 +271,7 @@ func getNotificationSlash(event abci.Event) []byte {
 			res.Jailed = true
 		}
 	}
-	return dex.SafeJsonMarshal(res)
+	return dex.SafeJSONMarshal(res)
 }
 
 func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {

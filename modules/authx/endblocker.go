@@ -65,7 +65,7 @@ func withdrawUnlockedCoins(accx *AccountX, time int64, ctx sdk.Context, kx Accou
 			Coins:       newCoins,
 			Height:      ctx.BlockHeight(),
 		}
-		bytes := dex.SafeJsonMarshal(notifyUnlock)
+		bytes := dex.SafeJSONMarshal(notifyUnlock)
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				kx.EventTypeMsgQueue,
