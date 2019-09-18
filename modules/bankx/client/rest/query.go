@@ -2,7 +2,6 @@ package rest
 
 import (
 	"fmt"
-
 	"github.com/gorilla/mux"
 	"net/http"
 
@@ -54,29 +53,28 @@ func QueryBalancesRequestHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		accRetriever := auth.NewAccountRetriever(cliCtx)
-		if err = accRetriever.EnsureExists(addr); err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		acc, height, err := accRetriever.GetAccountWithHeight(addr)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		cliCtx = cliCtx.WithHeight(height)
-		lockedCoins := make(authx.LockedCoins, 0)
-		aux, err := cli.GetAccountX(cliCtx, addr)
-		if err == nil {
-			lockedCoins = aux.GetAllLockedCoins()
-		}
-
 		all := struct {
 			C sdk.Coins         `json:"coins"`
 			L authx.LockedCoins `json:"locked_coins"`
-		}{acc.GetCoins(), lockedCoins}
+		}{sdk.Coins{}, authx.LockedCoins{}}
+		accRetriever := auth.NewAccountRetriever(cliCtx)
+		acc, height, err := accRetriever.GetAccountWithHeight(addr)
+		if err != nil {
+			if err := accRetriever.EnsureExists(addr); err != nil {
+				cliCtx = cliCtx.WithHeight(height)
+				rest.PostProcessResponse(w, cliCtx, all)
+				return
+			}
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		all.C = acc.GetCoins()
 
+		cliCtx = cliCtx.WithHeight(height)
+		aux, err := cli.GetAccountX(cliCtx, addr)
+		if err == nil {
+			all.L = aux.GetAllLockedCoins()
+		}
 		rest.PostProcessResponse(w, cliCtx, all)
 	}
 }

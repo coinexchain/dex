@@ -37,13 +37,13 @@ func QueryAccountRequestHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 		accRetriever := auth.NewAccountRetriever(cliCtx)
-		if err = accRetriever.EnsureExists(addr); err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
 		acc, height, err := accRetriever.GetAccountWithHeight(addr)
 		if err != nil {
+			if err := accRetriever.EnsureExists(addr); err != nil {
+				cliCtx = cliCtx.WithHeight(height)
+				rest.PostProcessResponse(w, cliCtx, types.AccountMix{})
+				return
+			}
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
