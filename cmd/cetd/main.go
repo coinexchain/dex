@@ -71,7 +71,7 @@ func createCetdCmd() *cobra.Command {
 }
 
 func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Command) {
-	rawBasicManager := app.ModuleBasics.RawBasicManager()
+	rawBasicManager := app.ModuleBasics.BasicManager
 
 	initCmd := genutilcli.InitCmd(ctx, cdc, rawBasicManager, app.DefaultNodeHome)
 	initCmd.PreRun = func(cmd *cobra.Command, args []string) {

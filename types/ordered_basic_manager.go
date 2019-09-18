@@ -27,10 +27,6 @@ func NewOrderedBasicManager(modules []module.AppModuleBasic) OrderedBasicManager
 	}
 }
 
-func (bm OrderedBasicManager) RawBasicManager() module.BasicManager {
-	return bm.BasicManager
-}
-
 func (bm OrderedBasicManager) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
 	for _, m := range bm.modules {
 		m.RegisterRESTRoutes(ctx, rtr)
