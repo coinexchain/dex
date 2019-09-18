@@ -2,15 +2,15 @@ package types
 
 import (
 	"encoding/json"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/types/module"
 )
 
 type mockModuleBasic struct {
