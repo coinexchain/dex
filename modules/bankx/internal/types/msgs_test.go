@@ -144,12 +144,12 @@ func TestMsgMultiSend_ValidateBasic(t *testing.T) {
 		{
 			"no_input",
 			NewMsgMultiSend([]bank.Input{}, []bank.Output{bank.NewOutput(addr2, cet123)}),
-			ErrNoInputs("no inputs in multisend"),
+			ErrNoInputs(),
 		},
 		{
 			"no_output",
 			NewMsgMultiSend([]bank.Input{bank.NewInput(addr1, cet123)}, []bank.Output{}),
-			ErrNoOutputs("no outputs in multisend"),
+			ErrNoOutputs(),
 		},
 		{
 			"err_coin",

@@ -29,14 +29,14 @@ func ErrUnlockTime(msg string) sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInvalidUnlockTime, msg)
 }
 
-func ErrTokenForbiddenByOwner(msg string) sdk.Error {
-	return sdk.NewError(CodeSpaceBankx, CodeTokenForbiddenByOwner, msg)
+func ErrTokenForbiddenByOwner() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeTokenForbiddenByOwner, "transfer has been forbidden by token owner")
 }
-func ErrNoInputs(msg string) sdk.Error {
-	return sdk.NewError(CodeSpaceBankx, CodeNoInputs, msg)
+func ErrNoInputs() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeNoInputs, "no inputs in multisend")
 }
-func ErrNoOutputs(msg string) sdk.Error {
-	return sdk.NewError(CodeSpaceBankx, CodeNoOutputs, msg)
+func ErrNoOutputs() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeNoOutputs, "no outputs in multisend")
 }
 func ErrInputOutputMismatch(msg string) sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInputOutputMismatch, msg)

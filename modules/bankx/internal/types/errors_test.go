@@ -12,6 +12,6 @@ func TestErrMsg(t *testing.T) {
 	require.Equal(t, CodeInsufficientCETForActivationFee, err.Code())
 	err = ErrUnlockTime("")
 	require.Equal(t, CodeInvalidUnlockTime, err.Code())
-	err = ErrTokenForbiddenByOwner("")
+	err = ErrTokenForbiddenByOwner()
 	require.Equal(t, CodeTokenForbiddenByOwner, err.Code())
 }

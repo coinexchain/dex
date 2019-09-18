@@ -80,7 +80,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	}
 
 	if k.IsSendForbidden(ctx, msg.Amount, msg.FromAddress) {
-		return types.ErrTokenForbiddenByOwner("transfer has been forbidden by token owner").Result()
+		return types.ErrTokenForbiddenByOwner().Result()
 	}
 
 	fromAccount := k.Ak.GetAccount(ctx, msg.FromAddress)
@@ -232,7 +232,7 @@ func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 func checkInputs(ctx sdk.Context, k Keeper, inputs []bank.Input) sdk.Error {
 	for _, input := range inputs {
 		if k.IsSendForbidden(ctx, input.Coins, input.Address) {
-			return types.ErrTokenForbiddenByOwner("transfer has been forbidden by token owner")
+			return types.ErrTokenForbiddenByOwner()
 		}
 
 		fromAccount := k.Ak.GetAccount(ctx, input.Address)

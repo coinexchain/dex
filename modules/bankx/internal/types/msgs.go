@@ -111,10 +111,10 @@ func (msg MsgMultiSend) ValidateBasic() sdk.Error {
 	// this just makes sure all the inputs and outputs are properly formatted,
 	// not that they actually have the money inside
 	if len(msg.Inputs) == 0 {
-		return ErrNoInputs("no inputs in multisend")
+		return ErrNoInputs()
 	}
 	if len(msg.Outputs) == 0 {
-		return ErrNoOutputs("no outputs in multisend")
+		return ErrNoOutputs()
 	}
 
 	return ValidateInputsOutputs(msg.Inputs, msg.Outputs)
