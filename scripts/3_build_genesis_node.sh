@@ -1,11 +1,13 @@
 #!/bin/bash
 #(3/3) generate genesis.json
 
+#for testnet: CHAIN_ID=coinexdex-test1000 ./scripts/3_build_genesis_node.sh
+#for mainnet: ./scripts/3_build_genesis_node.sh
+
 set -eux;
 
 if [ "${IS_TESTNET:-false}" == "true" ]; then
     echo "---compile for testnet---"
-    CHAIN_ID=coinexdex-test2000
     TOKEN_IDENTITY=CF1FAAA36A78BE02
     INCENTIVE_POOL_ADDR=cettest1gc5t98jap4zyhmhmyq5af5s7pyv57w566ewmx0
 else
@@ -106,6 +108,7 @@ cetd collect-gentxs --gentx-dir ${OUTPUT_DIR}/gentx  --home ${OUTPUT_DIR}/.cetd
 #clean up
 rm -rdf ${OUTPUT_DIR}/gentx
 
+
 #make data dir tarball
 cd ${OUTPUT_DIR}
 tar cvf ./package.tar ./.cetd
@@ -124,3 +127,5 @@ $MD5 * > md5
 ls ${OUTPUT_DIR}
 cat ${OUTPUT_DIR}/md5
 echo "prepare testnet release package succeeded: $(pwd)"
+
+
