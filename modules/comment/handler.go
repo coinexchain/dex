@@ -2,8 +2,10 @@ package comment
 
 import (
 	"encoding/json"
-	"github.com/coinexchain/dex/modules/comment/internal/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
@@ -14,7 +16,7 @@ func NewHandler(k Keeper) sdk.Handler {
 		case types.MsgCommentToken:
 			return handleMsgCommentToken(ctx, k, msg)
 		default:
-			errMsg := "Unrecognized comment Msg type: %s" + msg.Type()
+			errMsg := "Unrecognized comment Msg type: " + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}

@@ -32,7 +32,7 @@ func NewHandler(k keepers.Keeper) sdk.Handler {
 		case types.MsgModifyPricePrecision:
 			return handleMsgModifyPricePrecision(ctx, msg, k)
 		default:
-			errMsg := "Unrecognized market Msg type: %s" + msg.Type()
+			errMsg := "Unrecognized market Msg type: " + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}

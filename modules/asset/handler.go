@@ -36,7 +36,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgModifyTokenInfo(ctx, keeper, msg)
 
 		default:
-			errMsg := "Unrecognized asset Msg type: %s" + msg.Type()
+			errMsg := "Unrecognized asset Msg type: " + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}

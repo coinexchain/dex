@@ -3,8 +3,10 @@ package alias
 import (
 	"bytes"
 	"fmt"
-	"github.com/coinexchain/dex/modules/alias/internal/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/alias/internal/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
@@ -15,7 +17,7 @@ func NewHandler(k Keeper) sdk.Handler {
 		case types.MsgAliasUpdate:
 			return handleMsgAliasUpdate(ctx, k, msg)
 		default:
-			errMsg := "Unrecognized alias Msg type: %s" + msg.Type()
+			errMsg := "Unrecognized alias Msg type: " + msg.Type()
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
