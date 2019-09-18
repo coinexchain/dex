@@ -1,6 +1,7 @@
-package stakingx
+package stakingx_test
 
 import (
+	"github.com/coinexchain/dex/modules/stakingx"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,11 +17,11 @@ func TestNewQuerier(t *testing.T) {
 	sxk, ctx, _ := setUpInput()
 	cdc := codec.New()
 
-	sxk.SetParams(ctx, DefaultParams())
+	sxk.SetParams(ctx, stakingx.DefaultParams())
 
 	//query succeed
-	querier := NewQuerier(sxk, cdc)
-	path := QueryPool
+	querier := stakingx.NewQuerier(sxk.Keeper, cdc)
+	path := stakingx.QueryPool
 
 	_, err := querier(ctx, []string{path}, abci.RequestQuery{})
 	require.Nil(t, err)

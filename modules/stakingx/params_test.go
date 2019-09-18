@@ -1,6 +1,7 @@
-package stakingx
+package stakingx_test
 
 import (
+	"github.com/coinexchain/dex/modules/stakingx"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -19,7 +20,7 @@ import (
 )
 
 func TestDefaultParams(t *testing.T) {
-	params := DefaultParams()
+	params := stakingx.DefaultParams()
 	require.Equal(t, "1000000000000000", params.MinSelfDelegation.String())
 }
 
@@ -42,12 +43,12 @@ func defaultContext() (sdk.Context, params.Keeper) {
 
 func TestParamGetSet(t *testing.T) {
 	ctx, paramsKeeper := defaultContext()
-	subspace := paramsKeeper.Subspace(DefaultParamspace)
-	sxk := NewKeeper(sdk.NewKVStoreKey("test"), codec.New(), subspace, nil, &staking.Keeper{}, distribution.Keeper{}, auth.AccountKeeper{}, nil, nil, "")
+	subspace := paramsKeeper.Subspace(stakingx.DefaultParamspace)
+	sxk := stakingx.NewKeeper(sdk.NewKVStoreKey("test"), codec.New(), subspace, nil, &staking.Keeper{}, distribution.Keeper{}, auth.AccountKeeper{}, nil, nil, "")
 
-	testParam := Params{
+	testParam := stakingx.Params{
 		MinSelfDelegation:          sdk.ZeroInt(),
-		MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
+		MinMandatoryCommissionRate: stakingx.DefaultMinMandatoryCommissionRate,
 	}
 
 	//expect SetParam don't panic

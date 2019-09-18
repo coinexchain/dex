@@ -1,6 +1,9 @@
-package stakingx
+package stakingx_test
 
 import (
+	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/dex/testapp"
+
 	"math"
 	"testing"
 
@@ -15,18 +18,28 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
+func setUpInput() (stakingx.MockKeeper, sdk.Context, auth.AccountKeeper) {
+	testApp := testapp.NewTestApp()
+	ctx := testApp.NewCtx()
+	testApp.BankKeeper.SetSendEnabled(ctx, true)
+
+	keeper := stakingx.InitStates(ctx, testApp.StakingXKeeper, testApp.AccountKeeper, testApp.SupplyKeeper)
+
+	return keeper, ctx, testApp.AccountKeeper
+}
+
 func TestInitExportGenesis(t *testing.T) {
 	sxk, ctx, _ := setUpInput()
 
-	genesisState := GenesisState{
-		Params: Params{
-			MinSelfDelegation:          sdk.NewInt(DefaultMinSelfDelegation),
-			MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
+	genesisState := stakingx.GenesisState{
+		Params: stakingx.Params{
+			MinSelfDelegation:          sdk.NewInt(stakingx.DefaultMinSelfDelegation),
+			MinMandatoryCommissionRate: stakingx.DefaultMinMandatoryCommissionRate,
 		},
 	}
 
-	InitGenesis(ctx, sxk, genesisState)
-	exportGenesis := ExportGenesis(ctx, sxk)
+	stakingx.InitGenesis(ctx, sxk.Keeper, genesisState)
+	exportGenesis := stakingx.ExportGenesis(ctx, sxk.Keeper)
 	require.Equal(t, genesisState, exportGenesis)
 }
 
@@ -35,7 +48,7 @@ func TestCalcBondPoolStatus(t *testing.T) {
 	sxk, ctx, _ := setUpInput()
 
 	_, _, addr := testutil.KeyPubAddr()
-	testParam := Params{
+	testParam := stakingx.Params{
 		MinSelfDelegation: sdk.ZeroInt(),
 	}
 	acc := auth.BaseAccount{
@@ -43,22 +56,22 @@ func TestCalcBondPoolStatus(t *testing.T) {
 		Coins:   dex.NewCetCoins(1e8),
 	}
 	vacc := auth.NewDelayedVestingAccount(&acc, math.MaxInt64)
-	sxk.ak.SetAccount(ctx, vacc)
-	InitGenesis(ctx, sxk, GenesisState{Params: testParam})
+	sxk.Ak.SetAccount(ctx, vacc)
+	stakingx.InitGenesis(ctx, sxk.Keeper, stakingx.GenesisState{Params: testParam})
 
 	feePool := types.FeePool{
 		CommunityPool: sdk.NewDecCoins(dex.NewCetCoins(1000)),
 	}
-	sxk.dk.SetFeePool(ctx, feePool)
+	sxk.Dk.SetFeePool(ctx, feePool)
 
-	bondedAcc := sxk.supplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName)
+	bondedAcc := sxk.SupplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName)
 	bondedAcc.SetCoins(dex.NewCetCoins(1000))
-	sxk.ak.SetAccount(ctx, bondedAcc)
+	sxk.Ak.SetAccount(ctx, bondedAcc)
 
-	bondedAcc = sxk.supplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName)
-	notBondedAcc := sxk.supplyKeeper.GetModuleAccount(ctx, staking.NotBondedPoolName)
+	bondedAcc = sxk.SupplyKeeper.GetModuleAccount(ctx, staking.BondedPoolName)
+	notBondedAcc := sxk.SupplyKeeper.GetModuleAccount(ctx, staking.NotBondedPoolName)
 	expectedNonBondableTokens := feePool.CommunityPool.AmountOf("cet").Add(acc.Coins.AmountOf("cet").ToDec())
-	expectedTotalSupply := sxk.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf("cet")
+	expectedTotalSupply := sxk.SupplyKeeper.GetSupply(ctx).GetTotal().AmountOf("cet")
 	expectedBondRatio := bondedAcc.GetCoins().AmountOf("cet").ToDec().QuoInt(expectedTotalSupply.Sub(expectedNonBondableTokens.RoundInt()))
 
 	//test
@@ -72,22 +85,22 @@ func TestCalcBondPoolStatus(t *testing.T) {
 }
 
 func TestCalcBondedRatio(t *testing.T) {
-	bondPool := BondPool{
+	bondPool := stakingx.BondPool{
 		BondedTokens:      sdk.NewInt(10e8),
 		NotBondedTokens:   sdk.NewInt(500e8),
 		NonBondableTokens: sdk.NewInt(10000),
 		TotalSupply:       sdk.NewInt(510e8),
 	}
 	expectedBondRatio := bondPool.BondedTokens.ToDec().QuoInt(bondPool.TotalSupply.Sub(bondPool.NonBondableTokens))
-	require.Equal(t, expectedBondRatio, calcBondedRatio(&bondPool))
+	require.Equal(t, expectedBondRatio, stakingx.CalcBondedRatio(&bondPool))
 }
 
 func TestCalcBondedRatioNegative(t *testing.T) {
-	bondPool := BondPool{
+	bondPool := stakingx.BondPool{
 		BondedTokens:      sdk.NewInt(-10e8),
 		NotBondedTokens:   sdk.NewInt(500e8),
 		NonBondableTokens: sdk.NewInt(10000),
 		TotalSupply:       sdk.NewInt(510e8),
 	}
-	require.Equal(t, sdk.ZeroDec(), calcBondedRatio(&bondPool))
+	require.Equal(t, sdk.ZeroDec(), stakingx.CalcBondedRatio(&bondPool))
 }

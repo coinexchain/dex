@@ -1,6 +1,7 @@
-package stakingx
+package stakingx_test
 
 import (
+	"github.com/coinexchain/dex/modules/stakingx"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,14 +11,14 @@ import (
 
 func TestGenesisState_Validate(t *testing.T) {
 	//valid state
-	validState := GenesisState{
-		Params: DefaultParams(),
+	validState := stakingx.GenesisState{
+		Params: stakingx.DefaultParams(),
 	}
 	require.Nil(t, validState.ValidateGenesis())
 
 	//invalidMinSelfDelegation
-	invalidMinSelfDelegation := GenesisState{
-		Params: Params{
+	invalidMinSelfDelegation := stakingx.GenesisState{
+		Params: stakingx.Params{
 			MinSelfDelegation: sdk.ZeroInt(),
 		},
 	}
@@ -25,6 +26,6 @@ func TestGenesisState_Validate(t *testing.T) {
 }
 
 func TestDefaultGenesisState(t *testing.T) {
-	defaultGenesisState := DefaultGenesisState()
-	require.Equal(t, DefaultParams(), defaultGenesisState.Params)
+	defaultGenesisState := stakingx.DefaultGenesisState()
+	require.Equal(t, stakingx.DefaultParams(), defaultGenesisState.Params)
 }
