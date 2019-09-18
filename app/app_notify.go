@@ -13,6 +13,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	sltypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 type TxExtraInfo struct {
@@ -38,7 +40,7 @@ func (app *CetChainApp) pushNewHeightInfo(ctx sdk.Context) {
 		TimeStamp:     ctx.BlockHeader().Time,
 		LastBlockHash: ctx.BlockHeader().LastBlockId.Hash,
 	}
-	bytes := safeMarshal(msg)
+	bytes := dex.SafeJsonMarshal(msg)
 	app.appendPubMsgKV("height_info", bytes)
 }
 
@@ -183,7 +185,7 @@ func getNotificationBeginRedelegation(dualEvent []abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	return safeMarshal(res)
+	return dex.SafeJsonMarshal(res)
 }
 
 type NotificationBeginUnbonding struct {
@@ -209,7 +211,7 @@ func getNotificationBeginUnbonding(dualEvent []abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	return safeMarshal(res)
+	return dex.SafeJsonMarshal(res)
 }
 
 type NotificationCompleteRedelegation struct {
@@ -229,7 +231,7 @@ func getNotificationCompleteRedelegation(event abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	return safeMarshal(res)
+	return dex.SafeJsonMarshal(res)
 }
 
 type NotificationCompleteUnbonding struct {
@@ -246,7 +248,7 @@ func getNotificationCompleteUnbonding(event abci.Event) []byte {
 			res.Delegator = string(attr.Value)
 		}
 	}
-	return safeMarshal(res)
+	return dex.SafeJsonMarshal(res)
 }
 
 type NotificationSlash struct {
@@ -269,7 +271,7 @@ func getNotificationSlash(event abci.Event) []byte {
 			res.Jailed = true
 		}
 	}
-	return safeMarshal(res)
+	return dex.SafeJsonMarshal(res)
 }
 
 func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {
@@ -301,12 +303,4 @@ func (app *CetChainApp) notifyEndBlock(events []abci.Event) {
 			app.appendPubMsgKV("complete_redelegation", val)
 		}
 	}
-}
-
-func safeMarshal(msg interface{}) []byte {
-	bytes, errJSON := json.Marshal(msg)
-	if errJSON != nil {
-		bytes = []byte{}
-	}
-	return bytes
 }

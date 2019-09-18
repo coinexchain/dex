@@ -1,14 +1,17 @@
 package types
 
 import (
+	"encoding/json"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func ResponseFrom(err types.Error) abci.ResponseCheckTx {
+func ResponseFrom(err sdk.Error) abci.ResponseCheckTx {
 	result := err.Result()
 	return abci.ResponseCheckTx{
+		Codespace: string(result.Codespace),
 		Code:      uint32(result.Code),
 		Data:      result.Data,
 		Log:       result.Log,
@@ -16,4 +19,12 @@ func ResponseFrom(err types.Error) abci.ResponseCheckTx {
 		GasUsed:   int64(result.GasUsed),
 		Events:    result.Events.ToABCIEvents(),
 	}
+}
+
+func SafeJsonMarshal(msg interface{}) []byte {
+	bytes, errJSON := json.Marshal(msg)
+	if errJSON != nil {
+		bytes = []byte{}
+	}
+	return bytes
 }

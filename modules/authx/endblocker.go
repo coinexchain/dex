@@ -1,9 +1,9 @@
 package authx
 
 import (
-	"encoding/json"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 func EndBlocker(ctx sdk.Context, aux AccountXKeeper, keeper ExpectedAccountKeeper, tk ExpectedTokenKeeper) {
@@ -65,10 +65,7 @@ func withdrawUnlockedCoins(accx *AccountX, time int64, ctx sdk.Context, kx Accou
 			Coins:       newCoins,
 			Height:      ctx.BlockHeight(),
 		}
-		bytes, err := json.Marshal(notifyUnlock)
-		if err != nil {
-			bytes = []byte{}
-		}
+		bytes := dex.SafeJsonMarshal(notifyUnlock)
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				kx.EventTypeMsgQueue,

@@ -168,7 +168,7 @@ func Test1(t *testing.T) {
 	res := msgHandler(ctx, msgCTP)
 	require.Equal(t, uint64(100), keeper.Cck.GetCommentCount(ctx, "cet"))
 	require.Equal(t, false, res.IsOK())
-	s := `{"codespace":"sdk","code":6,"message":"Unrecognized comment Msg type: %!s(MISSING)create_market_info"}`
+	s := `{"codespace":"sdk","code":6,"message":"Unrecognized comment Msg type: create_market_info"}`
 	require.Equal(t, s, res.Log)
 
 	s = "http://google.com"
