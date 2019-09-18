@@ -135,36 +135,19 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return types.ErrMoneyCrossLimit(moneyErr).Result()
 	}
 
-	var commission sdk.Int
-	if bi.Money == "cet" {
-		commission = diff.Mul(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).Quo(sdk.NewInt(10000))
-	} else {
-		price, err := k.Mk.GetMarketLastExePrice(ctx, msg.Stock+keepers.SymbolSeparator+"cet")
-		if err != nil {
-			return types.ErrGetMarketPrice(err.Error()).Result()
-		}
-		commission = price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
-	}
-
-	if commission.Int64() < k.Mk.GetMarketFeeMin(ctx) {
-		return types.ErrTradeQuantityToSmall(commission.Int64()).Result()
+	commission, err := getTradeFee(ctx, k, msg, diff)
+	if err != nil {
+		return err.Result()
 	}
 
 	if err := k.Bxk.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin("cet", commission))); err != nil {
 		return err.Result()
 	}
-	if err := k.Bxk.SendCoins(ctx, msg.Sender, bi.Owner, coinsToPool); err != nil {
+
+	if err = swapStockAndMoney(ctx, k, msg.Sender, bi.Owner, coinsFromPool, coinsToPool); err != nil {
 		return err.Result()
 	}
-	if err := k.Bxk.FreezeCoins(ctx, bi.Owner, coinsToPool); err != nil {
-		return err.Result()
-	}
-	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, coinsFromPool); err != nil {
-		return err.Result()
-	}
-	if err := k.Bxk.SendCoins(ctx, bi.Owner, msg.Sender, coinsFromPool); err != nil {
-		return err.Result()
-	}
+
 	k.Bik.Save(ctx, &biNew)
 
 	sideStr := "sell"
@@ -218,4 +201,39 @@ func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
 			sdk.NewAttribute(key, string(b))))
 	}
+}
+
+func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade, amountOfMoney sdk.Int) (sdk.Int, sdk.Error) {
+
+	var commission sdk.Int
+	if msg.Money == "cet" {
+		commission = amountOfMoney.Mul(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).Quo(sdk.NewInt(10000))
+	} else {
+		price, err := k.Mk.GetMarketLastExePrice(ctx, msg.Stock+keepers.SymbolSeparator+"cet")
+		if err != nil {
+			return commission, types.ErrGetMarketPrice(err.Error())
+		}
+		commission = price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
+	}
+
+	if commission.Int64() < k.Mk.GetMarketFeeMin(ctx) {
+		return commission, types.ErrTradeQuantityToSmall(commission.Int64())
+	}
+	return commission, nil
+}
+
+func swapStockAndMoney(ctx sdk.Context, k keepers.Keeper, trader sdk.AccAddress, owner sdk.AccAddress, coinsFromPool sdk.Coins, coinsToPool sdk.Coins) sdk.Error {
+	if err := k.Bxk.SendCoins(ctx, trader, owner, coinsToPool); err != nil {
+		return err
+	}
+	if err := k.Bxk.FreezeCoins(ctx, owner, coinsToPool); err != nil {
+		return err
+	}
+	if err := k.Bxk.UnFreezeCoins(ctx, owner, coinsFromPool); err != nil {
+		return err
+	}
+	if err := k.Bxk.SendCoins(ctx, owner, trader, coinsFromPool); err != nil {
+		return err
+	}
+	return nil
 }

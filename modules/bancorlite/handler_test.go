@@ -330,6 +330,58 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 			}
 		})
 	}
+
+}
+func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
+	type args struct {
+		ctx      sdk.Context
+		k        Keeper
+		msgTrade types.MsgBancorTrade
+	}
+	input := prepareMockInput(t, false, false)
+
+	msgInit := types.MsgBancorInit{
+		Owner:              haveCetAddress,
+		Stock:              stock,
+		Money:              money,
+		InitPrice:          sdk.NewDec(0),
+		MaxSupply:          sdk.NewInt(100),
+		MaxPrice:           sdk.NewDec(10),
+		EarliestCancelTime: 0,
+	}
+	initRes := handleMsgBancorInit(input.ctx, input.bik, msgInit)
+	require.True(t, initRes.IsOK())
+
+	tests := []struct {
+		name string
+		args args
+		want sdk.Result
+	}{
+		{
+			name: "negative token",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgTrade: types.MsgBancorTrade{
+					Sender:     haveCetAddress,
+					Stock:      stock,
+					Money:      money,
+					Amount:     10,
+					IsBuy:      true,
+					MoneyLimit: 100,
+				},
+			},
+			want: types.ErrOwnerIsProhibited().Result(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := handleMsgBancorTrade(tt.args.ctx, tt.args.k, tt.args.msgTrade); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("handleMsgBancorTrade() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func TestKeeper(t *testing.T) {
