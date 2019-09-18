@@ -6,6 +6,9 @@ import (
 
 const (
 	E8 = 100000000
+
+	CET              = "cet"
+	DefaultBondDenom = CET // default bond denomination
 )
 
 func NewCetCoin(amount int64) sdk.Coin {
@@ -18,7 +21,6 @@ func NewCetCoinE8(amount int64) sdk.Coin {
 func NewCetCoins(amount int64) sdk.Coins {
 	return sdk.NewCoins(NewCetCoin(amount))
 }
-
 func NewCetCoinsE8(amount int64) sdk.Coins {
 	return sdk.NewCoins(NewCetCoin(amount * E8))
 }
