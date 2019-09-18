@@ -62,6 +62,16 @@ var (
 	money                     = "teos"
 	OriginHaveCetAmount int64 = 1e13
 	issueAmount         int64 = 210000000000
+	// account permissions
+	maccPerms = map[string][]string{
+		auth.FeeCollectorName:     nil,
+		authx.ModuleName:          nil,
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+		asset.ModuleName:          {supply.Minter},
+		ModuleName:                nil,
+	}
 )
 
 func getAddr(input string) sdk.AccAddress {
@@ -73,10 +83,6 @@ func getAddr(input string) sdk.AccAddress {
 }
 
 func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.Context, addrForbid, tokenForbid bool) asset.Keeper {
-	asset.RegisterCodec(cdc)
-	auth.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-	supply.RegisterCodec(cdc)
 
 	//create auth, asset keeper
 	ak := auth.NewAccountKeeper(
@@ -90,16 +96,6 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		sdk.CodespaceRoot, map[string]bool{},
 	)
 
-	// account permissions
-	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     nil,
-		authx.ModuleName:          nil,
-		staking.BondedPoolName:    {supply.Burner, supply.Staking},
-		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
-		gov.ModuleName:            {supply.Burner},
-		asset.ModuleName:          {supply.Minter},
-		ModuleName:                nil,
-	}
 	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, maccPerms)
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
@@ -190,15 +186,7 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) bankx
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot, map[string]bool{})
-	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     nil,
-		authx.ModuleName:          nil,
-		staking.BondedPoolName:    {supply.Burner, supply.Staking},
-		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
-		gov.ModuleName:            {supply.Burner},
-		types.ModuleName:          nil,
-		asset.ModuleName:          {supply.Minter},
-	}
+
 	sk := supply.NewKeeper(cdc, keys.keySupply, ak, bk, maccPerms)
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
 	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
@@ -212,10 +200,21 @@ func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) bankx
 	return bxkKeeper
 }
 
-func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
+func prepareCodec() *codec.Codec {
 	cdc := codec.New()
+	types.RegisterCodec(cdc)
+	asset.RegisterCodec(cdc)
+	auth.RegisterCodec(cdc)
+	codec.RegisterCrypto(cdc)
+	supply.RegisterCodec(cdc)
+
+	return cdc
+}
+func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
+
 	db := dbm.NewMemDB()
 	ms := store.NewCommitMultiStore(db)
+	cdc := prepareCodec()
 
 	keys := storeKeys{}
 	keys.assetCapKey = sdk.NewKVStoreKey(asset.StoreKey)
@@ -243,7 +242,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	ak := prepareAssetKeeper(t, keys, cdc, ctx, addrForbid, tokenForbid)
 	bk := prepareBankxKeeper(keys, cdc, ctx)
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
-	types.RegisterCodec(cdc)
+
 	akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	mk := market.NewBaseKeeper(keys.marketKey, ak, bk, cdc,
 		msgqueue.NewProducer(), paramsKeeper.Subspace(market.StoreKey), Keeper{}, akp)
@@ -383,7 +382,67 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 		})
 	}
 }
+func Test_BancorCancel(t *testing.T) {
+	type args struct {
+		ctx       sdk.Context
+		k         Keeper
+		msgCancel types.MsgBancorCancel
+	}
+	input := prepareMockInput(t, false, false)
 
+	msgInit := types.MsgBancorInit{
+		Owner:              haveCetAddress,
+		Stock:              stock,
+		Money:              money,
+		InitPrice:          sdk.NewDec(0),
+		MaxSupply:          sdk.NewInt(100),
+		MaxPrice:           sdk.NewDec(10),
+		EarliestCancelTime: 0,
+	}
+	initRes := handleMsgBancorInit(input.ctx, input.bik, msgInit)
+	require.True(t, initRes.IsOK())
+
+	tests := []struct {
+		name string
+		args args
+		want sdk.Result
+	}{
+		{
+			name: "negative token",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgCancel: types.MsgBancorCancel{
+					Owner: haveCetAddress,
+					Stock: stock,
+					Money: money,
+				},
+			},
+			want: types.ErrEarliestCancelTimeNotArrive().Result(),
+		},
+		{
+			name: "negative token",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgCancel: types.MsgBancorCancel{
+					Owner: notHaveCetAddress,
+					Stock: stock,
+					Money: money,
+				},
+			},
+			want: types.ErrNotBancorOwner().Result(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := handleMsgBancorCancel(tt.args.ctx, tt.args.k, tt.args.msgCancel); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("handleMsgBancorTrade() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 func TestKeeper(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	ctx := input.ctx
