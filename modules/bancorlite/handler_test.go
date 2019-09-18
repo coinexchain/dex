@@ -266,6 +266,23 @@ func Test_handleMsgBancorInit(t *testing.T) {
 		want sdk.Result
 	}{
 		{
+			name: "not stock owner",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msg: types.MsgBancorInit{
+					Owner:              notHaveCetAddress,
+					Stock:              stock,
+					Money:              money,
+					InitPrice:          sdk.NewDec(0),
+					MaxSupply:          sdk.NewInt(100),
+					MaxPrice:           sdk.NewDec(10),
+					EarliestCancelTime: 0,
+				},
+			},
+			want: types.ErrNonOwnerIsProhibited().Result(),
+		},
+		{
 			name: "positive",
 			args: args{
 				ctx: input.ctx,
@@ -281,6 +298,57 @@ func Test_handleMsgBancorInit(t *testing.T) {
 				},
 			},
 			want: sdk.Result{},
+		},
+		{
+			name: "money is cet",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msg: types.MsgBancorInit{
+					Owner:              haveCetAddress,
+					Stock:              stock,
+					Money:              dex.CET,
+					InitPrice:          sdk.NewDec(0),
+					MaxSupply:          sdk.NewInt(100),
+					MaxPrice:           sdk.NewDec(10),
+					EarliestCancelTime: 0,
+				},
+			},
+			want: sdk.Result{},
+		},
+		{
+			name: "stock not exist",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msg: types.MsgBancorInit{
+					Owner:              haveCetAddress,
+					Stock:              "abc",
+					Money:              money,
+					InitPrice:          sdk.NewDec(0),
+					MaxSupply:          sdk.NewInt(100),
+					MaxPrice:           sdk.NewDec(10),
+					EarliestCancelTime: 0,
+				},
+			},
+			want: types.ErrNoSuchToken().Result(),
+		},
+		{
+			name: "trading pair already exist",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msg: types.MsgBancorInit{
+					Owner:              haveCetAddress,
+					Stock:              stock,
+					Money:              money,
+					InitPrice:          sdk.NewDec(0),
+					MaxSupply:          sdk.NewInt(100),
+					MaxPrice:           sdk.NewDec(10),
+					EarliestCancelTime: 0,
+				},
+			},
+			want: types.ErrBancorAlreadyExists().Result(),
 		},
 	}
 	for _, tt := range tests {
@@ -357,7 +425,7 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 		want sdk.Result
 	}{
 		{
-			name: "negative token",
+			name: "owner is prohibted from trading",
 			args: args{
 				ctx: input.ctx,
 				k:   input.bik,
