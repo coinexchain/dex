@@ -68,7 +68,11 @@ endif
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
 
-BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)' -gcflags "all=-N -l" 
+BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
+
+ifeq ($(DEBUG), 1)
+  BUILD_FLAGS += -gcflags "all=-N -l"
+endif
 
 # The below include contains the tools target.
 include contrib/devtools/Makefile
