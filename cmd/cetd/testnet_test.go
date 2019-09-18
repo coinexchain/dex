@@ -1,10 +1,12 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
@@ -22,15 +24,16 @@ func TestTestnetCmd(t *testing.T) {
 }
 
 func TestInitTestnet(t *testing.T) {
-	//viper.Set(flagNumValidators, 2)
-	//cdc := app.MakeCodec()
-	//ctx := server.NewDefaultContext()
-	//err := initTestnet(ctx.Config, cdc)
-	//_ = os.RemoveAll("./0")
-	//_ = os.RemoveAll("./1")
-	//_ = os.RemoveAll("./keys")
-	//_ = os.RemoveAll("./gentxs")
-	//require.Equal(t, nil, err)
+	defer os.RemoveAll("testhome")
+	defer os.RemoveAll("testnetdata")
+
+	os.Args = []string{"cetd", "testnet", "--v", "2", "-o", "testnetdata"}
+	cetdCmd := createCetdCmd()
+	executor := cli.PrepareBaseCmd(cetdCmd, "GA", "testhome")
+
+	err := executor.Execute()
+	require.NoError(t, err)
+	// TODO: more asserts
 }
 
 func TestInitGenFiles(t *testing.T) {
