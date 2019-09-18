@@ -18,6 +18,7 @@ type mockModuleBasic struct {
 	restRoutesOrder *string
 	txCmdsOrder     *string
 	queryCmdsOrder  *string
+	genesisOrder    *string
 }
 
 func (m mockModuleBasic) Name() string {
@@ -33,6 +34,7 @@ func (m mockModuleBasic) DefaultGenesis() json.RawMessage {
 	return nil
 }
 func (m mockModuleBasic) ValidateGenesis(json.RawMessage) error {
+	*(m.genesisOrder) += m.name
 	return nil
 }
 
@@ -53,12 +55,14 @@ func TestOrders(t *testing.T) {
 	restRoutesOrder := ""
 	txCmdsOrder := ""
 	queryCmdsOrder := ""
+	genesisOrder := ""
 	newMockModuleBasic := func(name string) mockModuleBasic {
 		return mockModuleBasic{
 			name:            name,
 			restRoutesOrder: &restRoutesOrder,
 			txCmdsOrder:     &txCmdsOrder,
 			queryCmdsOrder:  &queryCmdsOrder,
+			genesisOrder:    &genesisOrder,
 		}
 	}
 
@@ -75,4 +79,7 @@ func TestOrders(t *testing.T) {
 
 	obm.AddQueryCommands(&cobra.Command{}, nil)
 	require.Equal(t, "cab", queryCmdsOrder)
+
+	_ = obm.ValidateGenesis(nil)
+	require.Equal(t, "cab", genesisOrder)
 }
