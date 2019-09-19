@@ -26,8 +26,7 @@ func (keeper Keeper) AddCoinsToFeePool(ctx sdk.Context, coins sdk.Coins) {
 }
 
 func (keeper Keeper) DonateToCommunityPool(ctx sdk.Context, fromAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	err := keeper.bxk.Sk.SendCoinsFromAccountToModule(ctx, fromAddr, distribution.ModuleName, amt)
-	if err != nil {
+	if err := keeper.bxk.DonateCoins(ctx, fromAddr, amt); err != nil {
 		return err
 	}
 

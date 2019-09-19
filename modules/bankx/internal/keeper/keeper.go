@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/coinexchain/dex/modules/authx"
@@ -156,6 +157,10 @@ func (k Keeper) DeductActivationFeeForOutputs(ctx sdk.Context, outputs []bank.Ou
 
 func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	return k.sk.SendCoinsFromAccountToModule(ctx, addr, auth.FeeCollectorName, amt)
+}
+
+func (k Keeper) DonateCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return k.sk.SendCoinsFromAccountToModule(ctx, addr, distribution.ModuleName, amt)
 }
 
 func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddress) bool {
