@@ -119,12 +119,14 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	}
 
 	diff := bi.MoneyInPool.Sub(biNew.MoneyInPool)
+	if msg.IsBuy {
+		diff = biNew.MoneyInPool.Sub(bi.MoneyInPool)
+	}
 	coinsFromPool := sdk.Coins{sdk.NewCoin(msg.Money, diff)}
 	coinsToPool := sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
 	moneyCrossLimit := msg.MoneyLimit > 0 && diff.LT(sdk.NewInt(msg.MoneyLimit))
 	moneyErr := "less than"
 	if msg.IsBuy {
-		diff = biNew.MoneyInPool.Sub(bi.MoneyInPool)
 		coinsToPool = sdk.Coins{sdk.NewCoin(msg.Money, diff)}
 		coinsFromPool = sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
 		moneyCrossLimit = msg.MoneyLimit > 0 && diff.GT(sdk.NewInt(msg.MoneyLimit))
