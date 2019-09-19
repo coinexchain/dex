@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -56,6 +55,37 @@ func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddres
 	return ret
 }
 
+func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Error {
+	if k.ak.GetAccount(ctx, toAddr) == nil {
+		if err := k.AddCoins(ctx, toAddr, sdk.Coins{}); err != nil {
+			return err
+		}
+	}
+
+	lockCoinsFee := dex.NewCetCoins(k.GetParams(ctx).LockCoinsFee)
+	if err := k.DeductFee(ctx, fromAddr, lockCoinsFee); err != nil {
+		return err
+	}
+
+	if err := k.SubtractCoins(ctx, fromAddr, amt); err != nil {
+		return err
+	}
+
+	ax := k.axk.GetOrCreateAccountX(ctx, toAddr)
+	for _, coin := range amt {
+		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
+		if err := k.tk.UpdateTokenSendLock(ctx, coin.Denom, coin.Amount, true); err != nil {
+			return err
+		}
+	}
+	k.axk.SetAccountX(ctx, ax)
+
+	if !amt.Empty() {
+		k.axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
+	}
+	return nil
+}
+
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	_, err := k.bk.SubtractCoins(ctx, addr, amt)
 	if err != nil {
@@ -102,12 +132,16 @@ func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int6
 	return k.DeductFee(ctx, addr, dex.NewCetCoins(amt))
 }
 
-func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	err := k.sk.SendCoinsFromAccountToModule(ctx, addr, auth.FeeCollectorName, amt)
-	if err != nil {
-		return err
+func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, fee sdk.Coins) sdk.Error {
+	//toAccount doesn't exist yet
+	if k.ak.GetAccount(ctx, to) == nil {
+		return k.DeductFee(ctx, from, fee)
 	}
 	return nil
+}
+
+func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return k.sk.SendCoinsFromAccountToModule(ctx, addr, auth.FeeCollectorName, amt)
 }
 
 func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddress) bool {
@@ -117,6 +151,10 @@ func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddr
 		}
 	}
 	return false
+}
+
+func (k Keeper) GetCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+	return k.bk.GetCoins(ctx, addr)
 }
 
 func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
@@ -158,4 +196,11 @@ func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int {
 
 func (k Keeper) BlacklistedAddr(addr sdk.AccAddress) bool {
 	return k.bk.BlacklistedAddr(addr)
+}
+
+func (k Keeper) GetSendEnabled(ctx sdk.Context) sdk.Error {
+	if !k.bk.GetSendEnabled(ctx) {
+		return bank.ErrSendDisabled(k.bk.Codespace())
+	}
+	return nil
 }

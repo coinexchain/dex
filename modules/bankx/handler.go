@@ -5,10 +5,8 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
 	dex "github.com/coinexchain/dex/types"
@@ -71,8 +69,8 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 
 }
 func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
-	if !k.Bk.GetSendEnabled(ctx) {
-		return bank.ErrSendDisabled(k.Bk.Codespace()).Result()
+	if err := k.GetSendEnabled(ctx); err != nil {
+		return err.Result()
 	}
 
 	if k.BlacklistedAddr(msg.ToAddress) {
@@ -83,23 +81,23 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 		return types.ErrTokenForbiddenByOwner().Result()
 	}
 
-	fromAccount := k.Ak.GetAccount(ctx, msg.FromAddress)
-	toAccount := k.Ak.GetAccount(ctx, msg.ToAddress)
-
 	//TODO: add codes to check whether fromAccount & toAccount is moduleAccount
 
 	amt := msg.Amount
-	if !fromAccount.GetCoins().IsAllGTE(amt) {
+	if k.GetCoins(ctx, msg.FromAddress).IsAllLT(amt) {
 		return sdk.ErrInsufficientCoins("sender has insufficient coins for the transfer").Result()
 	}
 
-	//toAccount doesn't exist yet
-	if toAccount == nil {
-		var err sdk.Error
-		amt, err = deductActivationFee(ctx, k, fromAccount, amt)
-		if err != nil {
-			return err.Result()
-		}
+	activationFee := dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
+	//check whether the first transfer contains at least activationFee cet
+	amt, neg := amt.SafeSub(activationFee)
+	if neg {
+		return types.ErrorInsufficientCETForActivatingFee().Result()
+	}
+
+	//check whether toAccount exist
+	if err := k.DeductActivationFee(ctx, msg.FromAddress, msg.ToAddress, activationFee); err != nil {
+		return err.Result()
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -110,60 +108,19 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 
 	time := msg.UnlockTime
 	if time != 0 {
-		if time < ctx.BlockHeader().Time.Unix() {
-			return types.ErrUnlockTime("Invalid Unlock Time:" + fmt.Sprintf("%d < %d", time, ctx.BlockHeader().Time.Unix())).Result()
-		}
-		return sendLockedCoins(ctx, k, msg.FromAddress, msg.ToAddress, amt, time)
+		return lockedSend(ctx, k, msg.FromAddress, msg.ToAddress, amt, time)
 	}
 	return normalSend(ctx, k, msg.FromAddress, msg.ToAddress, amt)
 }
 
-func deductActivationFee(ctx sdk.Context, k Keeper,
-	fromAccount auth.Account, sendAmt sdk.Coins) (sdk.Coins, sdk.Error) {
-
-	activationFee := k.GetParams(ctx).ActivationFee
-
-	//check whether the first transfer contains at least activationFee cet
-	sendAmt, neg := sendAmt.SafeSub(dex.NewCetCoins(activationFee))
-	if neg {
-		return sendAmt, types.ErrorInsufficientCETForActivatingFee()
+func lockedSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Result {
+	if unlockTime < ctx.BlockHeader().Time.Unix() {
+		return types.ErrUnlockTime("Invalid Unlock Time:" +
+			fmt.Sprintf("%d < %d", unlockTime, ctx.BlockHeader().Time.Unix())).Result()
 	}
 
-	err := k.DeductInt64CetFee(ctx, fromAccount.GetAddress(), activationFee)
-	if err != nil {
-		return sendAmt, err
-	}
-
-	return sendAmt, nil
-}
-
-func sendLockedCoins(ctx sdk.Context, k Keeper,
-	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Result {
-
-	if k.Ak.GetAccount(ctx, toAddr) == nil {
-		_, _ = k.Bk.AddCoins(ctx, toAddr, sdk.Coins{})
-	}
-
-	if err := k.DeductInt64CetFee(ctx, fromAddr, k.GetParams(ctx).LockCoinsFee); err != nil {
+	if err := k.SendLockedCoins(ctx, fromAddr, toAddr, amt, unlockTime); err != nil {
 		return err.Result()
-	}
-
-	_, err := k.Bk.SubtractCoins(ctx, fromAddr, amt)
-	if err != nil {
-		return err.Result()
-	}
-
-	ax := k.Axk.GetOrCreateAccountX(ctx, toAddr)
-	for _, coin := range amt {
-		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{Coin: coin, UnlockTime: unlockTime})
-		if err := k.Tk.UpdateTokenSendLock(ctx, coin.Denom, coin.Amount, true); err != nil {
-			return err.Result()
-		}
-	}
-	k.Axk.SetAccountX(ctx, ax)
-
-	if !amt.Empty() {
-		k.Axk.InsertUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 	}
 
 	fillMsgQueue(ctx, k, "send_lock_coins", types.NewMsgSend(fromAddr, toAddr, amt, unlockTime))
@@ -173,13 +130,12 @@ func sendLockedCoins(ctx sdk.Context, k Keeper,
 	}
 }
 
-func normalSend(ctx sdk.Context, k Keeper,
-	fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) sdk.Result {
-
-	err := k.Bk.SendCoins(ctx, fromAddr, toAddr, amt)
+func normalSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) sdk.Result {
+	err := k.SendCoins(ctx, fromAddr, toAddr, amt)
 	if err != nil {
 		return err.Result()
 	}
+
 	//fillMsgQueue(ctx, k, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
 
 	return sdk.Result{
