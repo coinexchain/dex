@@ -90,17 +90,19 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, re
 	events := ret.Events
 	transfers := make([]TransferRecord, 0, 10)
 	ok := ret.Code == uint32(sdk.CodeOK)
+	unbondingMsgList := make([][]byte, 0, 10)
+	redelegationMsgList := make([][]byte, 0, 10)
 	for i := 0; ok && i < len(events); i++ {
 		if events[i].Type == stypes.EventTypeUnbond {
 			if i+1 <= len(events) {
 				val := getNotificationBeginUnbonding(events[i : i+2])
-				app.appendPubMsgKV("begin_unbonding", val)
+				unbondingMsgList = append(unbondingMsgList, val)
 				i++
 			}
 		} else if events[i].Type == stypes.EventTypeRedelegate {
 			if i+1 <= len(events) {
 				val := getNotificationBeginRedelegation(events[i : i+2])
-				app.appendPubMsgKV("begin_redelegation", val)
+				redelegationMsgList = append(redelegationMsgList, val)
 				i++
 			}
 		} else if events[i].Type == "transfer" && i+1 <= len(events) {
@@ -157,6 +159,12 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, re
 	}
 
 	app.appendPubMsgKV("notify_tx", bytes)
+	for _, val := range unbondingMsgList {
+		app.appendPubMsgKV("begin_unbonding", val)
+	}
+	for _, val := range redelegationMsgList {
+		app.appendPubMsgKV("begin_redelegation", val)
+	}
 }
 
 type NotificationBeginRedelegation struct {
