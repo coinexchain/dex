@@ -4,26 +4,17 @@ import (
 	"os"
 	"testing"
 
+	"github.com/coinexchain/dex/testapp"
+
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
-	"github.com/cosmos/cosmos-sdk/x/supply/exported"
-	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	"github.com/tendermint/tendermint/libs/log"
-	dbm "github.com/tendermint/tm-db"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/msgqueue"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -40,69 +31,17 @@ type testInput struct {
 
 func createTestInput() testInput {
 
-	keyAsset := sdk.NewKVStoreKey(types.StoreKey)
-	keyAuth := sdk.NewKVStoreKey(auth.StoreKey)
-	keyAuthx := sdk.NewKVStoreKey(authx.StoreKey)
-	keyParams := sdk.NewKVStoreKey(params.StoreKey)
-	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
-	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
-
-	db := dbm.NewMemDB()
-	ms := store.NewCommitMultiStore(db)
-	ms.MountStoreWithDB(keyAsset, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keyAuth, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keyAuthx, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
-	ms.MountStoreWithDB(keySupply, sdk.StoreTypeIAVL, db)
-	_ = ms.LoadLatestVersion()
-
-	ctx := sdk.NewContext(ms, abci.Header{ChainID: "foochainid"}, false, log.NewNopLogger())
-	cdc := makeTestCodec()
-	types.RegisterCodec(cdc)
-
-	// account permissions
-	maccPerms := map[string][]string{
-		auth.FeeCollectorName:     nil,
-		authx.ModuleName:          nil,
-		staking.BondedPoolName:    {supply.Burner, supply.Staking},
-		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
-		types.ModuleName:          {supply.Burner, supply.Minter},
-	}
-	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
-	ak := auth.NewAccountKeeper(cdc, keyAuth, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, map[string]bool{})
-	sk := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
-	axk := authx.NewKeeper(cdc, keyAuthx, pk.Subspace(authx.DefaultParamspace), sk, ak, "")
-	ask := asset.NewBaseTokenKeeper(cdc, keyAsset)
-	bkx := bankx.NewKeeper(pk.Subspace(bankx.DefaultParamspace), axk, bk, ak, ask, sk, msgqueue.NewProducer())
-	tk := asset.NewBaseKeeper(cdc, keyAsset, pk.Subspace(types.DefaultParamspace), bkx, sk)
-
-	tk.SetParams(ctx, types.DefaultParams())
+	app := testapp.NewTestApp()
+	ctx := app.NewCtx()
+	app.AssetKeeper.SetParams(ctx, types.DefaultParams())
 
 	initSupply := dex.NewCetCoinsE8(10000)
-	sk.SetSupply(ctx, supply.NewSupply(initSupply))
+	app.SupplyKeeper.SetSupply(ctx, supply.NewSupply(initSupply))
 	notBondedPool := supply.NewEmptyModuleAccount(staking.NotBondedPoolName, supply.Burner, supply.Staking)
 	_ = notBondedPool.SetCoins(initSupply)
-	sk.SetModuleAccount(ctx, notBondedPool)
+	app.SupplyKeeper.SetModuleAccount(ctx, notBondedPool)
 
-	return testInput{cdc, ctx, tk}
-}
-
-// create a codec used only for testing
-func makeTestCodec() *codec.Codec {
-	var cdc = codec.New()
-
-	// Register AppAccount
-	cdc.RegisterInterface((*auth.Account)(nil), nil)
-	cdc.RegisterConcrete(&auth.BaseAccount{}, "test/staking/BaseAccount", nil)
-	cdc.RegisterInterface((*exported.ModuleAccountI)(nil), nil)
-	cdc.RegisterConcrete(&supply.ModuleAccount{}, "test/staking/ModuleAccount", nil)
-	codec.RegisterCrypto(cdc)
-	cdc.RegisterInterface((*exported.SupplyI)(nil), nil)
-	cdc.RegisterConcrete(&supply.Supply{}, "test/supply/supply", nil)
-
-	return cdc
+	return testInput{app.Cdc, ctx, app.AssetKeeper}
 }
 
 var _, _, testAddr = keyPubAddr()
