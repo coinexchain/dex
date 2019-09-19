@@ -72,7 +72,7 @@ Example:
 				MaxPrice:           maxPrice,
 				EarliestCancelTime: time,
 			}
-			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -115,7 +115,7 @@ Example:
 				IsBuy:      isBuy,
 				MoneyLimit: viper.GetInt64(FlagMoneyLimit),
 			}
-			return cliutil.CliRunCommand(cdc, &msg.Sender, msg)
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -145,7 +145,7 @@ Example:
 				Stock: args[0],
 				Money: args[1],
 			}
-			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")

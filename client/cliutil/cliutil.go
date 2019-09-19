@@ -12,6 +12,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 )
 
+type MsgWithAccAddress interface {
+	sdk.Msg
+	SetAccAddress(address sdk.AccAddress)
+}
+
 var CliQuery = func(cdc *codec.Codec, query string, param interface{}) error {
 	var bz []byte
 	var err error
@@ -32,16 +37,17 @@ var CliQuery = func(cdc *codec.Codec, query string, param interface{}) error {
 	return nil
 }
 
-var CliRunCommand = func(cdc *codec.Codec, senderPtr *sdk.AccAddress, msg sdk.Msg) error {
+var CliRunCommand = func(cdc *codec.Codec, msg MsgWithAccAddress) error {
 	cliCtx := context.NewCLIContext().WithCodec(cdc)
-	*senderPtr = cliCtx.GetFromAddress()
+	senderAddr := cliCtx.GetFromAddress()
+	msg.SetAccAddress(senderAddr)
 	if err := msg.ValidateBasic(); err != nil {
 		return err
 	}
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 	generateUnsignedTx := viper.GetBool(FlagGenerateUnsignedTx)
 	if generateUnsignedTx {
-		return PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, *senderPtr)
+		return PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, senderAddr)
 	}
 	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }

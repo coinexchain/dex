@@ -128,3 +128,16 @@ func (msg MsgBancorTrade) GetSignBytes() []byte {
 func (msg MsgBancorTrade) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{[]byte(msg.Sender)}
 }
+
+// --------------------------------------------------------
+// SetAccAddress
+
+func (msg *MsgBancorInit) SetAccAddress(addr sdk.AccAddress) {
+	msg.Owner = addr
+}
+func (msg *MsgBancorTrade) SetAccAddress(addr sdk.AccAddress) {
+	msg.Sender = addr
+}
+func (msg *MsgBancorCancel) SetAccAddress(addr sdk.AccAddress) {
+	msg.Owner = addr
+}

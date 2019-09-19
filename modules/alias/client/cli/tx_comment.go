@@ -38,7 +38,7 @@ Example:
 				AsDefault: asDefault,
 			}
 
-			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -64,7 +64,7 @@ Example:
 				Alias: args[0],
 				IsAdd: false,
 			}
-			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")

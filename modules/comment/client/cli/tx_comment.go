@@ -151,7 +151,7 @@ func createAndBroadcastComment(cdc *codec.Codec, subcmd string, rewardsArrayPtr 
 		msg.Content = []byte("No-Content")
 	}
 
-	return cliutil.CliRunCommand(cdc, &msg.Sender, msg)
+	return cliutil.CliRunCommand(cdc, msg)
 }
 
 func parseRewardLine(line string) (*types.CommentRef, error) {

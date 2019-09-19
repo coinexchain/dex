@@ -185,6 +185,10 @@ func NewTokenComment(msg *MsgCommentToken, id uint64, height int64) *TokenCommen
 	return tokenComment
 }
 
+func (msg *MsgCommentToken) SetAccAddress(addr sdk.AccAddress) {
+	msg.Sender = addr
+}
+
 // --------------------------------------------------------
 // sdk.Msg Implementation
 

@@ -53,6 +53,10 @@ type MsgAliasUpdate struct {
 	AsDefault bool           `json:"as_default"`
 }
 
+func (msg *MsgAliasUpdate) SetAccAddress(addr sdk.AccAddress) {
+	msg.Owner = addr
+}
+
 // --------------------------------------------------------
 // sdk.Msg Implementation
 
@@ -78,5 +82,5 @@ func (msg MsgAliasUpdate) GetSignBytes() []byte {
 }
 
 func (msg MsgAliasUpdate) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{[]byte(msg.Owner)}
+	return []sdk.AccAddress{msg.Owner}
 }
