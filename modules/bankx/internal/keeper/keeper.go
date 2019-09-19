@@ -140,6 +140,20 @@ func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk
 	return nil
 }
 
+func (k Keeper) DeductActivationFeeForOutputs(ctx sdk.Context, outputs []bank.Output, fee sdk.Coins) sdk.Error {
+	for _, output := range outputs {
+		//toAccount doesn't exist yet
+		if k.ak.GetAccount(ctx, output.Address) == nil {
+			err := k.DeductFee(ctx, output.Address, fee)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	return k.sk.SendCoinsFromAccountToModule(ctx, addr, auth.FeeCollectorName, amt)
 }
@@ -203,6 +217,10 @@ func (k Keeper) GetSendEnabled(ctx sdk.Context) sdk.Error {
 		return bank.ErrSendDisabled(k.bk.Codespace())
 	}
 	return nil
+}
+
+func (k Keeper) InputOutputCoins(ctx sdk.Context, inputs []bank.Input, outputs []bank.Output) sdk.Error {
+	return k.bk.InputOutputCoins(ctx, inputs, outputs)
 }
 
 func (k Keeper) SetMemoRequired(ctx sdk.Context, addr sdk.AccAddress, required bool) sdk.Error {

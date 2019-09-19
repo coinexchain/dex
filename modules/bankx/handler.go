@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
 	dex "github.com/coinexchain/dex/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
@@ -31,8 +29,8 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.Result {
-	if !k.Bk.GetSendEnabled(ctx) {
-		return bank.ErrSendDisabled(k.Bk.Codespace()).Result()
+	if err := k.GetSendEnabled(ctx); err != nil {
+		return err.Result()
 	}
 
 	for _, out := range msg.Outputs {
@@ -41,17 +39,18 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 		}
 	}
 
-	if err := checkInputs(ctx, k, msg.Inputs); err != nil {
+	for _, input := range msg.Inputs {
+		if k.IsSendForbidden(ctx, input.Coins, input.Address) {
+			return types.ErrTokenForbiddenByOwner().Result()
+		}
+	}
+
+	if err := k.InputOutputCoins(ctx, msg.Inputs, msg.Outputs); err != nil {
 		return err.Result()
 	}
 
-	addrs := precheckFreshAccounts(ctx, k, msg.Outputs)
-
-	if err := k.Bk.InputOutputCoins(ctx, msg.Inputs, msg.Outputs); err != nil {
-		return err.Result()
-	}
-
-	if err := deductActivationFeeForFreshAccount(ctx, k, addrs); err != nil {
+	activationFee := dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
+	if err := k.DeductActivationFeeForOutputs(ctx, msg.Outputs, activationFee); err != nil {
 		return err.Result()
 	}
 
@@ -68,6 +67,7 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 	}
 
 }
+
 func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	if err := k.GetSendEnabled(ctx); err != nil {
 		return err.Result()
@@ -179,44 +179,4 @@ func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
 			sdk.NewAttribute(key, string(bytes))))
 	}
-}
-
-func checkInputs(ctx sdk.Context, k Keeper, inputs []bank.Input) sdk.Error {
-	for _, input := range inputs {
-		if k.IsSendForbidden(ctx, input.Coins, input.Address) {
-			return types.ErrTokenForbiddenByOwner()
-		}
-
-		fromAccount := k.Ak.GetAccount(ctx, input.Address)
-		if !fromAccount.GetCoins().IsAllGTE(input.Coins) {
-			return sdk.ErrInsufficientCoins("sender has insufficient coins for the transfer")
-		}
-
-	}
-	return nil
-
-}
-
-func precheckFreshAccounts(ctx sdk.Context, k Keeper, outputs []bank.Output) []sdk.AccAddress {
-	addrs := make([]sdk.AccAddress, 0)
-	for _, output := range outputs {
-		toAccount := k.Ak.GetAccount(ctx, output.Address)
-
-		//toAccount doesn't exist yet
-		if toAccount == nil {
-			addrs = append(addrs, output.Address)
-		}
-	}
-	return addrs
-}
-func deductActivationFeeForFreshAccount(ctx sdk.Context, k Keeper, addrs []sdk.AccAddress) sdk.Error {
-	for _, addr := range addrs {
-		activationFee := k.GetParams(ctx).ActivationFee
-		err := k.DeductInt64CetFee(ctx, addr, activationFee)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
