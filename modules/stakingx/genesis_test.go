@@ -1,12 +1,12 @@
 package stakingx_test
 
 import (
-	"github.com/coinexchain/dex/modules/stakingx"
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/coinexchain/dex/modules/stakingx"
 )
 
 func TestGenesisState_Validate(t *testing.T) {

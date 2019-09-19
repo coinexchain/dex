@@ -2,9 +2,11 @@ package alias
 
 import (
 	"errors"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type GenesisState struct {

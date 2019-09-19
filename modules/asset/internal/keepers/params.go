@@ -1,9 +1,10 @@
 package keepers
 
 import (
-	"github.com/coinexchain/dex/modules/asset/internal/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 // ParamKeyTable for asset module

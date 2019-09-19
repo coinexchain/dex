@@ -2,19 +2,19 @@ package simulation
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/market/internal/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"math"
 	"math/rand"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 	simulationx "github.com/coinexchain/dex/simulation"
 	dex "github.com/coinexchain/dex/types"
 )

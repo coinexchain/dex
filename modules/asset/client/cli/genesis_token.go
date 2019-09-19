@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -15,6 +14,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 var tokenFlags = []string{

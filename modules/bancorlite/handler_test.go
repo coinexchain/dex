@@ -1,9 +1,6 @@
 package bancorlite_test
 
 import (
-	"github.com/coinexchain/dex/modules/bancorlite"
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/testapp"
 	"reflect"
 	"testing"
 
@@ -17,9 +14,12 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/authx"
+	"github.com/coinexchain/dex/modules/bancorlite"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/dex/testapp"
 	dex "github.com/coinexchain/dex/types"
 )
 

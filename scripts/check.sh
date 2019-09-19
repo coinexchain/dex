@@ -23,6 +23,7 @@ fi
 
 
 find . -name "*.go" -not -path "./vendor/*" -not -path "./git/*" | xargs gofmt -w
+find . -name "*.go" -not -path "./vendor/*" -not -path "./git/*" | xargs goimports -w -local github.com/coinexchain
 
 linter_targets=$(glide novendor)
 

@@ -1,14 +1,13 @@
 package authx_test
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/authx"
 	dex "github.com/coinexchain/dex/types"
 )
 

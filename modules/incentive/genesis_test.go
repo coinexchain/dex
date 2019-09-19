@@ -1,10 +1,11 @@
 package incentive_test
 
 import (
-	"github.com/coinexchain/dex/modules/incentive"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinexchain/dex/modules/incentive"
 )
 
 // nolint

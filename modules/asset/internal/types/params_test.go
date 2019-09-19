@@ -1,11 +1,13 @@
 package types
 
 import (
-	dex "github.com/coinexchain/dex/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestMain(m *testing.M) {

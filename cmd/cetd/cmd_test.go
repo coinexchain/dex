@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 
 	"github.com/coinexchain/dex/app"
 	dex "github.com/coinexchain/dex/types"
-	dbm "github.com/tendermint/tm-db"
 )
 
 func init() {

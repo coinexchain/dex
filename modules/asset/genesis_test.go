@@ -1,12 +1,13 @@
 package asset_test
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
 	"testing"
 
-	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinexchain/dex/modules/asset"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestGenesis(t *testing.T) {

@@ -1,15 +1,16 @@
 package asset_test
 
 import (
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/asset/internal/types"
-	dex "github.com/coinexchain/dex/types"
 	"reflect"
 	"strings"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestInvalidMsg(t *testing.T) {

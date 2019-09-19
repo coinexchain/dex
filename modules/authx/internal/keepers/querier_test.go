@@ -4,16 +4,15 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/testapp"
-	"github.com/coinexchain/dex/testutil"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
 	"github.com/coinexchain/dex/modules/authx/internal/keepers"
 	"github.com/coinexchain/dex/modules/authx/internal/types"
+	"github.com/coinexchain/dex/testapp"
+	"github.com/coinexchain/dex/testutil"
 )
 
 func Test_queryParams(t *testing.T) {

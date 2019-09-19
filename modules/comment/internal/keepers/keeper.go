@@ -2,9 +2,10 @@ package keepers
 
 import (
 	"encoding/binary"
-	"github.com/coinexchain/dex/modules/comment/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
 var (

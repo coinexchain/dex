@@ -1,12 +1,12 @@
 package authx_test
 
 import (
-	"github.com/coinexchain/dex/modules/authx"
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/coinexchain/dex/modules/authx"
 )
 
 func TestValidate(t *testing.T) {

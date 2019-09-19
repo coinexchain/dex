@@ -6,12 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coinexchain/dex/testutil"
-	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto"
+
+	"github.com/coinexchain/dex/testutil"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // MsgSetMemoRequired tests

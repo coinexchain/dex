@@ -1,11 +1,12 @@
 package bankx_test
 
 import (
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	"testing"
 
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/coinexchain/dex/modules/bankx"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )
 
 func TestValidate(t *testing.T) {

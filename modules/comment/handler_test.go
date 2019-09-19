@@ -5,8 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coinexchain/dex/modules/comment/internal/keepers"
-	"github.com/coinexchain/dex/modules/comment/internal/types"
 	"github.com/stretchr/testify/require"
 
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
@@ -14,6 +12,9 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+
+	"github.com/coinexchain/dex/modules/comment/internal/keepers"
+	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
 var logStrList = make([]string, 0, 100)

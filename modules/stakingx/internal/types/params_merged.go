@@ -2,10 +2,10 @@ package types
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 )
 
 // staking.Params & stakingx.Params

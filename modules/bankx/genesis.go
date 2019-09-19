@@ -1,8 +1,9 @@
 package bankx
 
 import (
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )
 
 // GenesisState - all asset state that must be provided at genesis

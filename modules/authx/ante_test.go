@@ -1,13 +1,13 @@
 package authx_test
 
 import (
-	"github.com/coinexchain/dex/modules/authx"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/stretchr/testify/require"
+
+	"github.com/coinexchain/dex/modules/authx"
 )
 
 func TestOriginalAnteHandlerError(t *testing.T) {

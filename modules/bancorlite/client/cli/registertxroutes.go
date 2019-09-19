@@ -1,10 +1,9 @@
 package cli
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/tendermint/go-amino"
-
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/spf13/cobra"
+	amino "github.com/tendermint/go-amino"
 
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 )

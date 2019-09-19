@@ -1,13 +1,15 @@
 package cli
 
 import (
-	"github.com/coinexchain/dex/modules/asset/internal/types"
-	dex "github.com/coinexchain/dex/types"
+	"os"
+	"testing"
+
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
+
+	"github.com/coinexchain/dex/modules/asset/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestMain(m *testing.M) {

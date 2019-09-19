@@ -1,15 +1,14 @@
 package stakingx_test
 
 import (
-	"github.com/coinexchain/dex/modules/stakingx"
 	"testing"
-
-	"github.com/stretchr/testify/require"
-
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
+	abci "github.com/tendermint/tendermint/abci/types"
+
+	"github.com/coinexchain/dex/modules/stakingx"
 )
 
 func TestNewQuerier(t *testing.T) {
