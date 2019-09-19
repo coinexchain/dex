@@ -76,12 +76,13 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			tokenOwner := cliCtx.GetFromAddress()
-			msg, err := parseIssueFlags(tokenOwner)
+			amt, err := parseIssueFlags()
 			if err != nil {
 				return err
 			}
 
+			tokenOwner := cliCtx.GetFromAddress()
+			msg := newMsgIssueToken(amt, tokenOwner)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}

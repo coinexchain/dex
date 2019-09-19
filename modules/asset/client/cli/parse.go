@@ -21,15 +21,19 @@ func checkFlags(flags []string, help string) error {
 	return nil
 }
 
-func parseIssueFlags(owner sdk.AccAddress) (*types.MsgIssueToken, error) {
+func parseIssueFlags() (sdk.Int, error) {
 	if err := checkFlags(issueTokenFlags, "$ cetcli tx asset issue-token -h"); err != nil {
-		return nil, err
+		return sdk.ZeroInt(), err
 	}
 	amt, ok := sdk.NewIntFromString(viper.GetString(flagTotalSupply))
 	if !ok {
-		return nil, types.ErrInvalidTokenSupply(flagTotalSupply)
+		return sdk.ZeroInt(), types.ErrInvalidTokenSupply(flagTotalSupply)
 	}
-	msg := types.NewMsgIssueToken(
+	return amt, nil
+}
+
+func newMsgIssueToken(amt sdk.Int, owner sdk.AccAddress) types.MsgIssueToken {
+	return types.NewMsgIssueToken(
 		viper.GetString(flagName),
 		viper.GetString(flagSymbol),
 		amt,
@@ -42,8 +46,6 @@ func parseIssueFlags(owner sdk.AccAddress) (*types.MsgIssueToken, error) {
 		viper.GetString(flagTokenDescription),
 		viper.GetString(flagTokenIdentity),
 	)
-
-	return &msg, nil
 }
 
 func parseTransferOwnershipFlags(orginalOwner sdk.AccAddress) (*types.MsgTransferOwnership, error) {
