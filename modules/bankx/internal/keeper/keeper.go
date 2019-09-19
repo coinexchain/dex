@@ -122,10 +122,33 @@ func (k Keeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 	_, err := k.bk.SubtractCoins(ctx, addr, amt)
 	return err
 }
+
 func (k Keeper) AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	if _, err := k.bk.AddCoins(ctx, addr, amt); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (k Keeper) AddLockedCoins(ctx sdk.Context, addr sdk.AccAddress, lockedCoins authx.LockedCoins) sdk.Error {
+	if k.ak.GetAccount(ctx, addr) == nil {
+		if err := k.AddCoins(ctx, addr, sdk.Coins{}); err != nil {
+			return err
+		}
+	}
+
+	ax := k.axk.GetOrCreateAccountX(ctx, addr)
+	ax.LockedCoins = append(ax.LockedCoins, lockedCoins...)
+	for _, locked := range lockedCoins {
+		if err := k.tk.UpdateTokenSendLock(ctx, locked.Coin.Denom, locked.Coin.Amount, true); err != nil {
+			return err
+		}
+		if !locked.Coin.IsZero() {
+			k.axk.InsertUnlockedCoinsQueue(ctx, locked.UnlockTime, addr)
+		}
+	}
+	k.axk.SetAccountX(ctx, ax)
+
 	return nil
 }
 
@@ -176,6 +199,16 @@ func (k Keeper) GetCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 	return k.bk.GetCoins(ctx, addr)
 }
 
+func (k Keeper) GetFrozenCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+	accX, _ := k.axk.GetAccountX(ctx, addr)
+	return accX.FrozenCoins
+}
+
+func (k Keeper) GetLockedCoins(ctx sdk.Context, addr sdk.AccAddress) authx.LockedCoins {
+	accX, _ := k.axk.GetAccountX(ctx, addr)
+	return accX.LockedCoins
+}
+
 func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 	acc := k.ak.GetAccount(ctx, addr)
 	accx, found := k.axk.GetAccountX(ctx, addr)
@@ -215,6 +248,10 @@ func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int {
 
 func (k Keeper) BlacklistedAddr(addr sdk.AccAddress) bool {
 	return k.bk.BlacklistedAddr(addr)
+}
+
+func (k Keeper) SetSendEnabled(ctx sdk.Context, enabled bool) {
+	k.bk.SetSendEnabled(ctx, enabled)
 }
 
 func (k Keeper) GetSendEnabled(ctx sdk.Context) sdk.Error {
