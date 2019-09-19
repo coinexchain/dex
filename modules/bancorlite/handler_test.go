@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/asset"
@@ -34,7 +35,7 @@ type testInput struct {
 var (
 	haveCetAddress            = getAddr("000001")
 	notHaveCetAddress         = getAddr("000002")
-	forbidAddr                = getAddr("000003")
+	tradeAddr                 = getAddr("000003")
 	stock                     = "tusdt"
 	money                     = "teos"
 	OriginHaveCetAmount int64 = 1e13
@@ -49,28 +50,21 @@ func getAddr(input string) sdk.AccAddress {
 	return addr
 }
 
-func prepareAsset(t *testing.T, app *testapp.TestApp, ctx sdk.Context, addrForbid, tokenForbid bool) {
-	ak := app.AccountKeeper
-	sk := app.SupplyKeeper
-	tk := app.AssetKeeper
-	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
-	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
-	sk.SetSupply(ctx, supply.Supply{Total: sdk.Coins{}})
-	tk.SetParams(ctx, asset.DefaultParams())
+func prepareApp() (testApp *testapp.TestApp, ctx sdk.Context) {
+	testApp = testapp.NewTestApp()
+	ctx = testApp.NewCtx()
+	return
+}
 
-	// create an account by auth keeper
-	cetacc := ak.NewAccountWithAddress(ctx, haveCetAddress)
-	coins := dex.NewCetCoins(OriginHaveCetAmount).
-		Add(sdk.NewCoins(sdk.NewCoin(stock, sdk.NewInt(issueAmount))))
-	_ = cetacc.SetCoins(coins)
-	ak.SetAccount(ctx, cetacc)
-	usdtacc := ak.NewAccountWithAddress(ctx, forbidAddr)
-	_ = usdtacc.SetCoins(sdk.NewCoins(sdk.NewCoin(stock, sdk.NewInt(issueAmount)),
-		sdk.NewCoin(dex.CET, sdk.NewInt(issueAmount))))
-	ak.SetAccount(ctx, usdtacc)
-	onlyIssueToken := ak.NewAccountWithAddress(ctx, notHaveCetAddress)
-	_ = onlyIssueToken.SetCoins(dex.NewCetCoins(asset.IssueTokenFee))
-	ak.SetAccount(ctx, onlyIssueToken)
+func prepareSupply(ctx sdk.Context, sk supply.Keeper) {
+	sk.SetSupply(ctx, supply.Supply{Total: sdk.Coins{}})
+}
+
+func prepareBancor(ctx sdk.Context, k keepers.Keeper) {
+	k.Bik.SetParams(ctx, bancorlite.DefaultParams())
+}
+func prepareAsset(t *testing.T, tk asset.Keeper, ctx sdk.Context, addrForbid, tokenForbid bool) {
+	tk.SetParams(ctx, asset.DefaultParams())
 
 	// issue tokens
 	msgStock := asset.NewMsgIssueToken(stock, stock, sdk.NewInt(issueAmount), haveCetAddress,
@@ -87,37 +81,54 @@ func prepareAsset(t *testing.T, app *testapp.TestApp, ctx sdk.Context, addrForbi
 	ret = handler(ctx, msgCet)
 	require.Equal(t, true, ret.IsOK(), "issue token should succeed", ret)
 
-	if tokenForbid {
-		msgForbidToken := asset.MsgForbidToken{
-			Symbol:       stock,
-			OwnerAddress: haveCetAddress,
-		}
-		tk.ForbidToken(ctx, msgForbidToken.Symbol, msgForbidToken.OwnerAddress)
-		msgForbidToken.Symbol = money
-		tk.ForbidToken(ctx, msgForbidToken.Symbol, msgForbidToken.OwnerAddress)
-	}
-	if addrForbid {
-		msgForbidAddr := asset.MsgForbidAddr{
-			Symbol:    money,
-			OwnerAddr: haveCetAddress,
-			Addresses: []sdk.AccAddress{forbidAddr},
-		}
-		tk.ForbidAddress(ctx, msgForbidAddr.Symbol, msgForbidAddr.OwnerAddr, msgForbidAddr.Addresses)
-		msgForbidAddr.Symbol = stock
-		tk.ForbidAddress(ctx, msgForbidAddr.Symbol, msgForbidAddr.OwnerAddr, msgForbidAddr.Addresses)
-	}
+}
+
+func prepareAccounts(ctx sdk.Context, ak auth.AccountKeeper) {
+	// create an account by auth keeper
+	cetacc := ak.NewAccountWithAddress(ctx, haveCetAddress)
+	coins := dex.NewCetCoins(OriginHaveCetAmount).
+		Add(sdk.NewCoins(sdk.NewCoin(stock, sdk.NewInt(issueAmount))))
+	_ = cetacc.SetCoins(coins)
+	ak.SetAccount(ctx, cetacc)
+	eosacc := ak.NewAccountWithAddress(ctx, tradeAddr)
+	_ = eosacc.SetCoins(sdk.NewCoins(sdk.NewCoin(money, sdk.NewInt(issueAmount)),
+		sdk.NewCoin(dex.CET, sdk.NewInt(issueAmount))))
+	ak.SetAccount(ctx, eosacc)
+	onlyIssueToken := ak.NewAccountWithAddress(ctx, notHaveCetAddress)
+	_ = onlyIssueToken.SetCoins(dex.NewCetCoins(asset.IssueTokenFee))
+	ak.SetAccount(ctx, onlyIssueToken)
+
+	//set module account
+	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
+	ak.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
+}
+
+func prepareBank(ctx sdk.Context, keeper bank.Keeper) {
+	keeper.SetSendEnabled(ctx, true)
+}
+
+func prepareBankx(ctx sdk.Context, keeper bankx.Keeper) {
+	keeper.SetParams(ctx, bankx.DefaultParams())
+}
+
+func prepareMarket(ctx sdk.Context, keeper market.Keeper) {
+	keeper.SetParams(ctx, market.DefaultParams())
+	_ = keeper.SetMarket(ctx, market.MarketInfo{Stock: stock, Money: "cet", LastExecutedPrice: sdk.NewDec(1e9)})
+
 }
 
 func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
-	testApp := testapp.NewTestApp()
-	ctx := testApp.NewCtx()
-	keeper := testApp.BancorKeeper
-	keeper.Bik.SetParams(ctx, bancorlite.DefaultParams())
-	prepareAsset(t, testApp, ctx, addrForbid, tokenForbid)
-	testApp.BankKeeper.SetSendEnabled(ctx, true)
-	testApp.BankxKeeper.SetParams(ctx, bankx.DefaultParams())
-	_ = testApp.MarketKeeper.SetMarket(ctx, market.MarketInfo{Stock: stock, Money: "cet"})
-	return testInput{ctx: ctx, bik: keeper, handler: bancorlite.NewHandler(keeper), akp: testApp.AccountKeeper, cdc: testApp.Cdc}
+	testApp, ctx := prepareApp()
+
+	prepareSupply(ctx, testApp.SupplyKeeper)
+	prepareAccounts(ctx, testApp.AccountKeeper)
+	prepareBancor(ctx, testApp.BancorKeeper)
+	prepareAsset(t, testApp.AssetKeeper, ctx, addrForbid, tokenForbid)
+	prepareBank(ctx, testApp.BankKeeper)
+	prepareBankx(ctx, testApp.BankxKeeper)
+	prepareMarket(ctx, testApp.MarketKeeper)
+
+	return testInput{ctx: ctx, bik: testApp.BancorKeeper, handler: bancorlite.NewHandler(testApp.BancorKeeper), akp: testApp.AccountKeeper, cdc: testApp.Cdc}
 }
 
 func Test_handleMsgBancorInit(t *testing.T) {
@@ -217,6 +228,23 @@ func Test_handleMsgBancorInit(t *testing.T) {
 			},
 			want: types.ErrBancorAlreadyExists().Result(),
 		},
+		{
+			name: "market trading pair not exist",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msg: types.MsgBancorInit{
+					Owner:              notHaveCetAddress,
+					Stock:              money,
+					Money:              stock,
+					InitPrice:          sdk.NewDec(0),
+					MaxSupply:          sdk.NewInt(100),
+					MaxPrice:           sdk.NewDec(10),
+					EarliestCancelTime: 0,
+				},
+			},
+			want: types.ErrNonMarketExist().Result(),
+		},
 	}
 
 	for _, tt := range tests {
@@ -267,14 +295,7 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 	}
 
 }
-func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
-	type args struct {
-		ctx      sdk.Context
-		k        bancorlite.Keeper
-		msgTrade types.MsgBancorTrade
-	}
-	input := prepareMockInput(t, false, false)
-
+func prepareBancorInit(input testInput) bool {
 	msgInit := types.MsgBancorInit{
 		Owner:              haveCetAddress,
 		Stock:              stock,
@@ -285,7 +306,16 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 		EarliestCancelTime: 0,
 	}
 	initRes := input.handler(input.ctx, msgInit)
-	require.True(t, initRes.IsOK())
+	return initRes.IsOK()
+}
+func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
+	type args struct {
+		ctx      sdk.Context
+		k        bancorlite.Keeper
+		msgTrade types.MsgBancorTrade
+	}
+	input := prepareMockInput(t, false, false)
+	require.True(t, prepareBancorInit(input))
 
 	tests := []struct {
 		name string
@@ -307,12 +337,27 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 				},
 			},
 			want: types.ErrOwnerIsProhibited().Result(),
+		}, {
+			name: "owner is prohibted from trading",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgTrade: types.MsgBancorTrade{
+					Sender:     tradeAddr,
+					Stock:      stock,
+					Money:      money,
+					Amount:     5,
+					IsBuy:      true,
+					MoneyLimit: 100,
+				},
+			},
+			want: sdk.Result{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := input.handler(tt.args.ctx, tt.args.msgTrade); !reflect.DeepEqual(got, tt.want) {
+			if got := input.handler(tt.args.ctx, tt.args.msgTrade); !reflect.DeepEqual(got, tt.want) && !got.IsOK() {
 				t.Errorf("handleMsgBancorTrade() = %v, want %v", got, tt.want)
 			}
 		})
@@ -325,18 +370,7 @@ func Test_BancorCancel(t *testing.T) {
 		msgCancel types.MsgBancorCancel
 	}
 	input := prepareMockInput(t, false, false)
-
-	msgInit := types.MsgBancorInit{
-		Owner:              haveCetAddress,
-		Stock:              stock,
-		Money:              money,
-		InitPrice:          sdk.NewDec(0),
-		MaxSupply:          sdk.NewInt(100),
-		MaxPrice:           sdk.NewDec(10),
-		EarliestCancelTime: 0,
-	}
-	initRes := input.handler(input.ctx, msgInit)
-	require.True(t, initRes.IsOK())
+	require.True(t, prepareBancorInit(input))
 
 	tests := []struct {
 		name string
