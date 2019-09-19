@@ -200,3 +200,57 @@ func TestMsgBancorTrade_ValidateBasic(t *testing.T) {
 		})
 	}
 }
+func TestMsgBancorCancel_ValidateBasic(t *testing.T) {
+	type fields struct {
+		Owner sdk.AccAddress
+		Stock string
+		Money string
+	}
+
+	tests := []struct {
+		name   string
+		fields fields
+		want   sdk.Error
+	}{
+		{
+			name: "positive",
+			fields: fields{
+				Owner: addrUser,
+				Stock: "abc",
+				Money: "cet",
+			},
+			want: nil,
+		},
+		{
+			name: "nil owner",
+			fields: fields{
+				Owner: addrNull,
+				Stock: "abc",
+				Money: "cet",
+			},
+			want: sdk.ErrInvalidAddress("missing owner address"),
+		},
+		{
+			name: "nil owner",
+			fields: fields{
+				Owner: addrUser,
+				Stock: "",
+				Money: "cet",
+			},
+			want: ErrInvalidSymbol(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg := MsgBancorCancel{
+				Owner: tt.fields.Owner,
+				Stock: tt.fields.Stock,
+				Money: tt.fields.Money,
+			}
+			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MsgBancorInit.ValidateBasic() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

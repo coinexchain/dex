@@ -1,13 +1,31 @@
-package keepers
+package keepers_test
 
 import (
+	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/log"
+
+	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
+	"github.com/coinexchain/dex/testapp"
 )
 
-var owner = sdk.AccAddress("user")
+var (
+	owner = sdk.AccAddress("user")
+	bch   = "bch"
+	cet   = "cet"
+	abc   = "abc"
+)
 
+func defaultContext() (keepers.Keeper, sdk.Context) {
+	app := testapp.NewTestApp()
+	ctx := sdk.NewContext(app.Cms, abci.Header{}, false, log.NewNopLogger())
+	return app.BancorKeeper, ctx
+}
 func TestBancorInfo_UpdateStockInPool(t *testing.T) {
 	type fields struct {
 		Owner              sdk.AccAddress
@@ -34,8 +52,8 @@ func TestBancorInfo_UpdateStockInPool(t *testing.T) {
 			name: "positive",
 			fields: fields{
 				Owner:              owner,
-				Stock:              "bch",
-				Money:              "cet",
+				Stock:              bch,
+				Money:              cet,
 				InitPrice:          sdk.NewDec(0),
 				MaxSupply:          sdk.NewInt(100),
 				MaxPrice:           sdk.NewDec(10),
@@ -50,7 +68,7 @@ func TestBancorInfo_UpdateStockInPool(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bi := &BancorInfo{
+			bi := &keepers.BancorInfo{
 				Owner:              tt.fields.Owner,
 				Stock:              tt.fields.Stock,
 				Money:              tt.fields.Money,
@@ -91,8 +109,8 @@ func TestBancorInfo_IsConsistent(t *testing.T) {
 			name: "positive",
 			fields: fields{
 				Owner:              owner,
-				Stock:              "bch",
-				Money:              "cet",
+				Stock:              bch,
+				Money:              cet,
 				InitPrice:          sdk.NewDec(0),
 				MaxSupply:          sdk.NewInt(100),
 				MaxPrice:           sdk.NewDec(10),
@@ -106,7 +124,7 @@ func TestBancorInfo_IsConsistent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bi := &BancorInfo{
+			bi := &keepers.BancorInfo{
 				Owner:              tt.fields.Owner,
 				Stock:              tt.fields.Stock,
 				Money:              tt.fields.Money,
@@ -123,4 +141,46 @@ func TestBancorInfo_IsConsistent(t *testing.T) {
 			}
 		})
 	}
+}
+func TestBancorInfoKeeper(t *testing.T) {
+	keeper, ctx := defaultContext()
+	bi := []keepers.BancorInfo{
+		{
+			Owner:              owner,
+			Stock:              bch,
+			Money:              cet,
+			InitPrice:          sdk.NewDec(0),
+			MaxSupply:          sdk.NewInt(100),
+			MaxPrice:           sdk.NewDec(10),
+			Price:              sdk.NewDec(1),
+			StockInPool:        sdk.NewInt(90),
+			MoneyInPool:        sdk.NewInt(5),
+			EarliestCancelTime: 100,
+		},
+		{
+			Owner:              owner,
+			Stock:              abc,
+			Money:              cet,
+			InitPrice:          sdk.NewDec(0),
+			MaxSupply:          sdk.NewInt(100),
+			MaxPrice:           sdk.NewDec(10),
+			Price:              sdk.NewDec(1),
+			StockInPool:        sdk.NewInt(90),
+			MoneyInPool:        sdk.NewInt(5),
+			EarliestCancelTime: 0,
+		},
+	}
+	for _, p := range bi {
+		keeper.Bik.Save(ctx, &p)
+	}
+
+	for i := range bi {
+		loadBI := keeper.Bik.Load(ctx, bi[i].Stock+keepers.SymbolSeparator+bi[i].Money)
+		require.True(t, reflect.DeepEqual(*loadBI, bi[i]))
+	}
+
+	keeper.Bik.Remove(ctx, &bi[0])
+	require.Nil(t, keeper.Bik.Load(ctx, bi[0].Stock+keepers.SymbolSeparator+bi[0].Money))
+	require.False(t, keeper.IsBancorExist(ctx, bch))
+	require.True(t, keeper.IsBancorExist(ctx, abc))
 }
