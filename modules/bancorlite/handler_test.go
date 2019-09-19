@@ -338,7 +338,7 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 			},
 			want: types.ErrOwnerIsProhibited().Result(),
 		}, {
-			name: "owner is prohibted from trading",
+			name: "trade succeed",
 			args: args{
 				ctx: input.ctx,
 				k:   input.bik,
@@ -391,7 +391,7 @@ func Test_BancorCancel(t *testing.T) {
 			want: types.ErrNotBancorOwner().Result(),
 		},
 		{
-			name: "negative token",
+			name: "cancel succeed",
 			args: args{
 				ctx: input.ctx,
 				k:   input.bik,
