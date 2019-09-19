@@ -151,14 +151,10 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.Address)).Result()
 	}
 
-	account := k.Ak.GetAccount(ctx, addr)
-	if account == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr)).Result()
+	if err := k.SetMemoRequired(ctx, addr, required); err != nil {
+		return err.Result()
 	}
 
-	accountX := k.Axk.GetOrCreateAccountX(ctx, addr)
-	accountX.MemoRequired = required
-	k.Axk.SetAccountX(ctx, accountX)
 	//fillMsgQueue(ctx, k, "send_memo_required", msg)
 
 	ctx.EventManager().EmitEvents(sdk.Events{

@@ -204,3 +204,15 @@ func (k Keeper) GetSendEnabled(ctx sdk.Context) sdk.Error {
 	}
 	return nil
 }
+
+func (k Keeper) SetMemoRequired(ctx sdk.Context, addr sdk.AccAddress, required bool) sdk.Error {
+	account := k.ak.GetAccount(ctx, addr)
+	if account == nil {
+		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
+	}
+	accountX := k.axk.GetOrCreateAccountX(ctx, addr)
+	accountX.MemoRequired = required
+	k.axk.SetAccountX(ctx, accountX)
+
+	return nil
+}
