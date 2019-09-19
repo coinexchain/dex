@@ -2,12 +2,13 @@ package cli
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"strings"
 
 	"github.com/spf13/viper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 func checkFlags(flags []string, help string) error {
@@ -225,7 +226,6 @@ func parseUnForbidAddrFlags(owner sdk.AccAddress) (*types.MsgUnForbidAddr, error
 }
 
 func parseModifyTokenInfoFlags(owner sdk.AccAddress) (*types.MsgModifyTokenInfo, error) {
-
 	msg := types.NewMsgModifyTokenInfo(
 		viper.GetString(flagSymbol),
 		viper.GetString(flagTokenURL),

@@ -7,9 +7,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
@@ -39,17 +39,8 @@ func GetCmdQueryParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		Short: "Query asset params",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryParameters)
-			res, _, err := cliCtx.QueryWithData(route, nil)
-			if err != nil {
-				return err
-			}
-
-			var params types.Params
-			cdc.MustUnmarshalJSON(res, &params)
-			return cliCtx.PrintOutput(params)
+			return cliutil.CliQuery(cdc, route, nil)
 		},
 	}
 }
@@ -70,23 +61,9 @@ $ cetcli query asset token abc
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
-			symbol := args[0]
-
-			bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(symbol))
-			if err != nil {
-				return err
-			}
-
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken)
-			res, _, err := cliCtx.QueryWithData(route, bz)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(string(res))
-			return nil
+			params := types.NewQueryAssetParams(args[0])
+			return cliutil.CliQuery(cdc, route, params)
 		},
 	}
 	return cmd
@@ -105,16 +82,8 @@ $ cetcli query asset tokens
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokenList)
-			res, _, err := cliCtx.QueryWithData(route, nil)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(string(res))
-			return nil
+			return cliutil.CliQuery(cdc, route, nil)
 		},
 	}
 	return cmd
@@ -135,23 +104,9 @@ $ cetcli query asset whitelist abc
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
-			symbol := args[0]
-
-			bz, err := cdc.MarshalJSON(types.NewQueryWhitelistParams(symbol))
-			if err != nil {
-				return err
-			}
-
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryWhitelist)
-			res, _, err := cliCtx.QueryWithData(route, bz)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(string(res))
-			return nil
+			params := types.NewQueryWhitelistParams(args[0])
+			return cliutil.CliQuery(cdc, route, params)
 		},
 	}
 	return cmd
@@ -172,23 +127,9 @@ $ cetcli query asset forbidden-addresses abc
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
-			symbol := args[0]
-
-			bz, err := cdc.MarshalJSON(types.NewQueryForbiddenAddrParams(symbol))
-			if err != nil {
-				return err
-			}
-
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryForbiddenAddr)
-			res, _, err := cliCtx.QueryWithData(route, bz)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(string(res))
-			return nil
+			params := types.NewQueryForbiddenAddrParams(args[0])
+			return cliutil.CliQuery(cdc, route, params)
 		},
 	}
 	return cmd
@@ -209,16 +150,8 @@ $ cetcli query asset reserved-symbols
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryReservedSymbols)
-			res, _, err := cliCtx.QueryWithData(route, nil)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(string(res))
-			return nil
+			return cliutil.CliQuery(cdc, route, nil)
 		},
 	}
 	return cmd
