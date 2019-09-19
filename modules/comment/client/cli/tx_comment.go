@@ -8,12 +8,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
+	"github.com/coinexchain/dex/modules/authx/client/cliutil"
 	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
@@ -140,12 +138,7 @@ Example:
 }
 
 func createAndBroadcastComment(cdc *codec.Codec, subcmd string, rewardsArrayPtr *[]string) error {
-	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-	cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
-
-	sender := cliCtx.GetFromAddress()
-
-	msg, err := parseFlags(sender, rewardsArrayPtr)
+	msg, err := parseFlags(rewardsArrayPtr)
 	if err != nil {
 		return errors.Errorf("tx flag is error (%v), please see help : "+
 			"$ cetcli tx comment %s -h", err, subcmd)
@@ -159,15 +152,7 @@ func createAndBroadcastComment(cdc *codec.Codec, subcmd string, rewardsArrayPtr 
 		msg.Content = []byte("No-Content")
 	}
 
-	if err = msg.ValidateBasic(); err != nil {
-		return err
-	}
-
-	generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
-	if generateUnsignedTx {
-		return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
-	}
-	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+	return cliutil.CliRunCommand(cdc, &msg.Sender, msg)
 }
 
 func parseRewardLine(line string) (*types.CommentRef, error) {
@@ -210,7 +195,7 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 	return cref, nil
 }
 
-func parseFlags(sender sdk.AccAddress, rewardsArrayPtr *[]string) (*types.MsgCommentToken, error) {
+func parseFlags(rewardsArrayPtr *[]string) (*types.MsgCommentToken, error) {
 	ctstr := viper.GetString(FlagContentType)
 	ct := types.ParseContentType(ctstr)
 	if ct < 0 {
@@ -240,5 +225,5 @@ func parseFlags(sender sdk.AccAddress, rewardsArrayPtr *[]string) (*types.MsgCom
 	donation := viper.GetInt64(FlagDonation)
 	title := viper.GetString(FlagTitle)
 	content := viper.GetString(FlagContent)
-	return types.NewMsgCommentToken(sender, token, donation, title, content, ct, references), nil
+	return types.NewMsgCommentToken(nil, token, donation, title, content, ct, references), nil
 }

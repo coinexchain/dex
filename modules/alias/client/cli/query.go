@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
+	"github.com/coinexchain/dex/modules/authx/client/cliutil"
 )
 
 func QueryParamsCmd(cdc *codec.Codec) *cobra.Command {
@@ -18,17 +18,8 @@ func QueryParamsCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		Short: "Query alias params",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
 			route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryParameters)
-			res, _, err := cliCtx.QueryWithData(route, nil)
-			if err != nil {
-				return err
-			}
-
-			var params types.Params
-			cdc.MustUnmarshalJSON(res, &params)
-			return cliCtx.PrintOutput(params)
+			return cliutil.CliQuery(cdc, route, nil)
 		},
 	}
 }
@@ -43,19 +34,9 @@ Example :
 	cetcli query alias address-of-alias super_super_boy`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryAliasInfo)
 			param := &keepers.QueryAliasInfoParam{Alias: args[0], QueryOp: keepers.GetAddressFromAlias}
-			bz, err := cdc.MarshalJSON(param)
-			if err != nil {
-				return err
-			}
-			res, _, err := cliCtx.QueryWithData(query, bz)
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(res))
-			return nil
+			return cliutil.CliQuery(cdc, query, param)
 		},
 	}
 }
@@ -70,23 +51,13 @@ Example :
 	cetcli query alias aliases-of-address coinex1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryAliasInfo)
 			acc, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
 			param := &keepers.QueryAliasInfoParam{Owner: acc, QueryOp: keepers.ListAliasOfAccount}
-			bz, err := cdc.MarshalJSON(param)
-			if err != nil {
-				return err
-			}
-			res, _, err := cliCtx.QueryWithData(query, bz)
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(res))
-			return nil
+			return cliutil.CliQuery(cdc, query, param)
 		},
 	}
 }

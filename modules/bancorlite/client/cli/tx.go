@@ -8,12 +8,10 @@ import (
 	"github.com/spf13/viper"
 
 	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
+	"github.com/coinexchain/dex/modules/authx/client/cliutil"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 )
 
@@ -51,9 +49,6 @@ Example:
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			sender := cliCtx.GetFromAddress()
 			maxPrice, err0 := sdk.NewDecFromStr(viper.GetString(FlagMaxPrice))
 			if err0 != nil || maxPrice.IsZero() {
 				return errors.New("max Price is Invalid or Zero")
@@ -71,7 +66,6 @@ Example:
 				return errors.New("bancor enable-cancel-time is invalid")
 			}
 			msg := &types.MsgBancorInit{
-				Owner:              sender,
 				Stock:              args[0],
 				Money:              args[1],
 				InitPrice:          initPrice,
@@ -79,14 +73,7 @@ Example:
 				MaxPrice:           maxPrice,
 				EarliestCancelTime: time,
 			}
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
-			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
-			if generateUnsignedTx {
-				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
-			}
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
 		},
 	}
 
@@ -113,9 +100,6 @@ Example:
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			sender := cliCtx.GetFromAddress()
 			var isBuy bool
 			switch viper.GetString(FlagSide) {
 			case "buy":
@@ -126,21 +110,13 @@ Example:
 				return errors.New("unknown Side. Please specify 'buy' or 'sell'")
 			}
 			msg := &types.MsgBancorTrade{
-				Sender:     sender,
 				Stock:      args[0],
 				Money:      args[1],
 				Amount:     viper.GetInt64(FlagAmount),
 				IsBuy:      isBuy,
 				MoneyLimit: viper.GetInt64(FlagMoneyLimit),
 			}
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
-			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
-			if generateUnsignedTx {
-				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
-			}
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, &msg.Sender, msg)
 		},
 	}
 
@@ -166,23 +142,11 @@ Example:
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			sender := cliCtx.GetFromAddress()
-
 			msg := &types.MsgBancorCancel{
-				Owner: sender,
 				Stock: args[0],
 				Money: args[1],
 			}
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
-			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
-			if generateUnsignedTx {
-				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
-			}
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
 		},
 	}
 	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")

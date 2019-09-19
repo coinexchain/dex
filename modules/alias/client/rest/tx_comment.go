@@ -5,11 +5,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"net/http"
 
 	"github.com/coinexchain/dex/modules/alias/internal/types"
+	"github.com/coinexchain/dex/modules/authx/client/restutil"
 )
 
 type AliasUpdateReq struct {
@@ -19,41 +18,23 @@ type AliasUpdateReq struct {
 	AsDefault bool         `json:"as_default"`
 }
 
-func aliasUpdateHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req AliasUpdateReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
+var _ restutil.RestReq = &AliasUpdateReq{}
 
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
+func (req *AliasUpdateReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
 
-		sender, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		sequence := req.BaseReq.Sequence
-		if sequence == 0 {
-			_, sequence, err = auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(sender)
-			if err != nil {
-				rest.WriteErrorResponse(w, http.StatusBadRequest, "Can not get sequence from blockchain.")
-				return
-			}
-		}
-		req.BaseReq.Sequence = sequence
-
-		msg := &types.MsgAliasUpdate{
-			Owner:     sender,
-			Alias:     req.Alias,
-			IsAdd:     req.IsAdd,
-			AsDefault: req.AsDefault,
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+func (req *AliasUpdateReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+	return &types.MsgAliasUpdate{
+		Owner:     sender,
+		Alias:     req.Alias,
+		IsAdd:     req.IsAdd,
+		AsDefault: req.AsDefault,
 	}
+}
+
+func aliasUpdateHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	var req AliasUpdateReq
+	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
+	return builder.Build()
 }

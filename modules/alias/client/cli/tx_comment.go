@@ -6,13 +6,10 @@ import (
 	"github.com/spf13/viper"
 
 	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/alias/internal/types"
+	"github.com/coinexchain/dex/modules/authx/client/cliutil"
 )
 
 const FlagAsDefault = "as-default"
@@ -28,9 +25,6 @@ Example:
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			sender := cliCtx.GetFromAddress()
 			asDefaultStr := viper.GetString(FlagAsDefault)
 			asDefault := true
 			if asDefaultStr == "no" {
@@ -39,19 +33,12 @@ Example:
 				return errors.New("Invalid value for --as-default, only 'yes' and 'no' are valid")
 			}
 			msg := &types.MsgAliasUpdate{
-				Owner:     sender,
 				Alias:     args[0],
 				IsAdd:     true,
 				AsDefault: asDefault,
 			}
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
-			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
-			if generateUnsignedTx {
-				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
-			}
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+
+			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
 		},
 	}
 
@@ -73,22 +60,11 @@ Example:
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			sender := cliCtx.GetFromAddress()
 			msg := &types.MsgAliasUpdate{
-				Owner: sender,
 				Alias: args[0],
 				IsAdd: false,
 			}
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
-			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
-			if generateUnsignedTx {
-				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, sender)
-			}
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
 		},
 	}
 	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
