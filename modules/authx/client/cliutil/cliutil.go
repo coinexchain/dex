@@ -2,13 +2,16 @@ package cliutil
 
 import (
 	"fmt"
-	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
+
+	"github.com/spf13/viper"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/spf13/viper"
+
+	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
 )
 
 var CliQuery = func(cdc *codec.Codec, query string, param interface{}) error {
