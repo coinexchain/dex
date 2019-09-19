@@ -15,12 +15,12 @@ import (
 )
 
 type Keeper struct {
-	ParamSubspace params.Subspace
-	Axk           types.ExpectedAccountXKeeper
-	Bk            bank.Keeper
-	Ak            auth.AccountKeeper
-	Tk            types.ExpectedAssetStatusKeeper
-	Sk            types.SupplyKeeper
+	paramSubspace params.Subspace
+	axk           types.ExpectedAccountXKeeper
+	bk            bank.Keeper
+	ak            auth.AccountKeeper
+	tk            types.ExpectedAssetStatusKeeper
+	sk            types.SupplyKeeper
 	MsgProducer   msgqueue.MsgSender
 }
 
@@ -29,48 +29,48 @@ func NewKeeper(paramSubspace params.Subspace, axk authx.AccountXKeeper,
 	tk types.ExpectedAssetStatusKeeper, sk types.SupplyKeeper, msgProducer msgqueue.MsgSender) Keeper {
 
 	return Keeper{
-		ParamSubspace: paramSubspace.WithKeyTable(types.ParamKeyTable()),
-		Axk:           axk,
-		Bk:            bk,
-		Ak:            ak,
-		Tk:            tk,
-		Sk:            sk,
+		paramSubspace: paramSubspace.WithKeyTable(types.ParamKeyTable()),
+		axk:           axk,
+		bk:            bk,
+		ak:            ak,
+		tk:            tk,
+		sk:            sk,
 		MsgProducer:   msgProducer,
 	}
 }
 
 func (k Keeper) GetParams(ctx sdk.Context) (param types.Params) {
-	k.ParamSubspace.GetParamSet(ctx, &param)
+	k.paramSubspace.GetParamSet(ctx, &param)
 	return
 }
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
-	k.ParamSubspace.SetParamSet(ctx, &params)
+	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
 func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
-	return k.Bk.HasCoins(ctx, addr, amt)
+	return k.bk.HasCoins(ctx, addr, amt)
 }
 
 func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	ret := k.Bk.SendCoins(ctx, from, to, amt)
+	ret := k.bk.SendCoins(ctx, from, to, amt)
 	return ret
 }
 
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	_, err := k.Bk.SubtractCoins(ctx, addr, amt)
+	_, err := k.bk.SubtractCoins(ctx, addr, amt)
 	if err != nil {
 		return err
 	}
-	accx := k.Axk.GetOrCreateAccountX(ctx, addr)
+	accx := k.axk.GetOrCreateAccountX(ctx, addr)
 	frozenCoins := accx.FrozenCoins.Add(amt)
 	accx.FrozenCoins = frozenCoins
-	k.Axk.SetAccountX(ctx, accx)
+	k.axk.SetAccountX(ctx, accx)
 
 	return nil
 }
 
 func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	accx, ok := k.Axk.GetAccountX(ctx, addr)
+	accx, ok := k.axk.GetAccountX(ctx, addr)
 	if !ok {
 		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
 	}
@@ -81,18 +81,18 @@ func (k Keeper) UnFreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 	}
 
 	accx.FrozenCoins = frozenCoins
-	k.Axk.SetAccountX(ctx, accx)
+	k.axk.SetAccountX(ctx, accx)
 
-	_, err := k.Bk.AddCoins(ctx, addr, amt)
+	_, err := k.bk.AddCoins(ctx, addr, amt)
 	return err
 }
 
 func (k Keeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	_, err := k.Bk.SubtractCoins(ctx, addr, amt)
+	_, err := k.bk.SubtractCoins(ctx, addr, amt)
 	return err
 }
 func (k Keeper) AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if _, err := k.Bk.AddCoins(ctx, addr, amt); err != nil {
+	if _, err := k.bk.AddCoins(ctx, addr, amt); err != nil {
 		return err
 	}
 	return nil
@@ -103,7 +103,7 @@ func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int6
 }
 
 func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	err := k.Sk.SendCoinsFromAccountToModule(ctx, addr, auth.FeeCollectorName, amt)
+	err := k.sk.SendCoinsFromAccountToModule(ctx, addr, auth.FeeCollectorName, amt)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (k Keeper) DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) s
 
 func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddress) bool {
 	for _, coin := range amt {
-		if k.Tk.IsForbiddenByTokenIssuer(ctx, coin.Denom, addr) {
+		if k.tk.IsForbiddenByTokenIssuer(ctx, coin.Denom, addr) {
 			return true
 		}
 	}
@@ -120,8 +120,8 @@ func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddr
 }
 
 func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
-	acc := k.Ak.GetAccount(ctx, addr)
-	accx, found := k.Axk.GetAccountX(ctx, addr)
+	acc := k.ak.GetAccount(ctx, addr)
+	accx, found := k.axk.GetAccountX(ctx, addr)
 	var coins = sdk.Coins{}
 	if acc != nil {
 		coins = acc.GetCoins()
@@ -150,12 +150,12 @@ func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int {
 		return false
 	}
 
-	k.Axk.IterateAccounts(ctx, axkProcess)
-	k.Ak.IterateAccounts(ctx, akProcess)
+	k.axk.IterateAccounts(ctx, axkProcess)
+	k.ak.IterateAccounts(ctx, akProcess)
 
 	return axkTotalAmount.Add(akTotalAmount)
 }
 
 func (k Keeper) BlacklistedAddr(addr sdk.AccAddress) bool {
-	return k.Bk.BlacklistedAddr(addr)
+	return k.bk.BlacklistedAddr(addr)
 }
