@@ -109,6 +109,16 @@ cetd collect-gentxs --gentx-dir ${OUTPUT_DIR}/gentx  --home ${OUTPUT_DIR}/.cetd
 rm -rdf ${OUTPUT_DIR}/gentx
 
 
+# generate secret_connection.key signing.key for tmkms
+tmkms version
+
+cd ${OUTPUT_DIR} && tmkms softsign keygen secret_connection.key
+cd ${OUTPUT_DIR} && tm-signer-harness extract_key -tmhome ${OUTPUT_DIR}/.cetd -output ./signing.key
+
+# move the priv_validator_key.json and do not upload it to cloud server
+# cause we'll use tmkms to sign the prevote and precommits
+mv ${OUTPUT_DIR}/.cetd/config/priv_validator_key.json ${OUTPUT_DIR}
+
 #make data dir tarball
 cd ${OUTPUT_DIR}
 tar cvf ./package.tar ./.cetd
