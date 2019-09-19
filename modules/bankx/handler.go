@@ -3,9 +3,11 @@ package bankx
 import (
 	"encoding/json"
 	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
