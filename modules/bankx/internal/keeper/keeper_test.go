@@ -27,10 +27,7 @@ func defaultContext() (keeper.Keeper, sdk.Context) {
 }
 
 func givenAccountWith(ctx sdk.Context, keeper keeper.Keeper, addr sdk.AccAddress, coinsString string) error {
-	coins, err := sdk.ParseCoins(coinsString)
-	if err == nil {
-		return err
-	}
+	coins, _ := sdk.ParseCoins(coinsString)
 	if err := keeper.AddCoins(ctx, addr, coins); err != nil {
 		return err
 	}
@@ -127,11 +124,8 @@ func TestGetTotalCoins(t *testing.T) {
 		sdk.NewCoin("eth", sdk.NewInt(10)),
 	)
 
-	err = bkx.AddLockedCoins(ctx, myaddr, lockedCoins)
-	require.NoError(t, err)
-	err = bkx.FreezeCoins(ctx, myaddr, frozenCoins)
-	require.NoError(t, err)
-
+	bkx.MockAddLockedCoins(ctx, myaddr, lockedCoins)
+	bkx.MockAddFrozenCoins(ctx, myaddr, frozenCoins)
 	expected := sdk.NewCoins(
 		sdk.NewCoin("bch", sdk.NewInt(40)),
 		sdk.NewCoin("btc", sdk.NewInt(80)),
@@ -158,10 +152,8 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 	}
 	frozenCoins := sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(100)))
 
-	err = bkx.AddLockedCoins(ctx, myaddr, lockedCoins)
-	require.NoError(t, err)
-	err = bkx.FreezeCoins(ctx, myaddr, frozenCoins)
-	require.NoError(t, err)
+	bkx.MockAddLockedCoins(ctx, myaddr, lockedCoins)
+	bkx.MockAddFrozenCoins(ctx, myaddr, frozenCoins)
 
 	amount = bkx.TotalAmountOfCoin(ctx, "cet")
 	require.Equal(t, int64(300), amount.Int64())

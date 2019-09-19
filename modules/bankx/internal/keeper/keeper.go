@@ -130,26 +130,16 @@ func (k Keeper) AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sd
 	return nil
 }
 
-func (k Keeper) AddLockedCoins(ctx sdk.Context, addr sdk.AccAddress, lockedCoins authx.LockedCoins) sdk.Error {
-	if k.ak.GetAccount(ctx, addr) == nil {
-		if err := k.AddCoins(ctx, addr, sdk.Coins{}); err != nil {
-			return err
-		}
-	}
-
+func (k Keeper) MockAddLockedCoins(ctx sdk.Context, addr sdk.AccAddress, lockedCoins authx.LockedCoins) {
 	ax := k.axk.GetOrCreateAccountX(ctx, addr)
 	ax.LockedCoins = append(ax.LockedCoins, lockedCoins...)
-	for _, locked := range lockedCoins {
-		if err := k.tk.UpdateTokenSendLock(ctx, locked.Coin.Denom, locked.Coin.Amount, true); err != nil {
-			return err
-		}
-		if !locked.Coin.IsZero() {
-			k.axk.InsertUnlockedCoinsQueue(ctx, locked.UnlockTime, addr)
-		}
-	}
 	k.axk.SetAccountX(ctx, ax)
+}
 
-	return nil
+func (k Keeper) MockAddFrozenCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) {
+	ax := k.axk.GetOrCreateAccountX(ctx, addr)
+	ax.FrozenCoins = ax.FrozenCoins.Add(amt)
+	k.axk.SetAccountX(ctx, ax)
 }
 
 func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
