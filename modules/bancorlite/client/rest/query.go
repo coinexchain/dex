@@ -27,13 +27,13 @@ func queryBancorInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 		query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryBancorInfo)
 		symbol := strings.Replace(vars["symbol"], "-", "/", 1)
 		param := &keepers.QueryBancorInfoParam{Symbol: symbol}
-		restutil.RestQuery(cdc, cliCtx, w, r, query, param)
+		restutil.RestQuery(cdc, cliCtx, w, r, query, param, nil)
 	}
 }
 
 func queryParamsHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryParameters)
-		restutil.RestQuery(nil, cliCtx, w, r, route, nil)
+		restutil.RestQuery(nil, cliCtx, w, r, route, nil, nil)
 	}
 }

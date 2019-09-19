@@ -78,7 +78,9 @@ func (rhb *RestHandlerBuilder) Build() http.HandlerFunc {
 	}
 }
 
-var RestQuery = func(cdc *codec.Codec, cliCtx context.CLIContext, w http.ResponseWriter, r *http.Request, query string, param interface{}) {
+var RestQuery = func(cdc *codec.Codec, cliCtx context.CLIContext, w http.ResponseWriter, r *http.Request,
+	query string, param interface{}, defaultRes []byte) {
+
 	var bz []byte
 	var err error
 	bz = nil
@@ -98,6 +100,11 @@ var RestQuery = func(cdc *codec.Codec, cliCtx context.CLIContext, w http.Respons
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
+
 	cliCtx = cliCtx.WithHeight(height)
-	rest.PostProcessResponse(w, cliCtx, res)
+	if len(res) == 0 && len(defaultRes) > 0 {
+		rest.PostProcessResponse(w, cliCtx, defaultRes)
+	} else {
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
 }

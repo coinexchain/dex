@@ -28,7 +28,7 @@ func queryAddressHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 		query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryAliasInfo)
 		param := &keepers.QueryAliasInfoParam{Alias: vars["alias"], QueryOp: keepers.GetAddressFromAlias}
 
-		restutil.RestQuery(cdc, cliCtx, w, r, query, param)
+		restutil.RestQuery(cdc, cliCtx, w, r, query, param, nil)
 	}
 }
 
@@ -42,7 +42,7 @@ func queryAliasesHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 		param := &keepers.QueryAliasInfoParam{Owner: acc, QueryOp: keepers.ListAliasOfAccount}
-		restutil.RestQuery(cdc, cliCtx, w, r, query, param)
+		restutil.RestQuery(cdc, cliCtx, w, r, query, param, nil)
 	}
 }
 
@@ -50,6 +50,6 @@ func queryAliasesHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 func queryParamsHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryParameters)
-		restutil.RestQuery(nil, cliCtx, w, r, route, nil)
+		restutil.RestQuery(nil, cliCtx, w, r, route, nil, nil)
 	}
 }
