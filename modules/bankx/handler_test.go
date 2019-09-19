@@ -142,20 +142,17 @@ func TestHandleMsgSetMemoRequiredAccountNotActivated(t *testing.T) {
 	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
 }
 
-//TODO
-//func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
-//	bkx, handle, ctx := defaultContext()
-//
-//	acc := auth.NewBaseAccountWithAddress(myaddr)
-//	bkx.Ak.SetAccount(ctx, &acc)
-//
-//	msg := bx.NewMsgSetTransferMemoRequired(myaddr, true)
-//	result := handle(ctx, msg)
-//	require.Equal(t, sdk.CodeOK, result.Code)
-//
-//	accX, _ := bkx.Axk.GetAccountX(ctx, myaddr)
-//	require.Equal(t, true, accX.MemoRequired)
-//}
+func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
+	bkx, handle, ctx := defaultContext()
+
+	err := bkx.AddCoins(ctx, myaddr, sdk.Coins{})
+	require.NoError(t, err)
+
+	msg := bx.NewMsgSetTransferMemoRequired(myaddr, true)
+	result := handle(ctx, msg)
+	require.Equal(t, sdk.CodeOK, result.Code)
+	require.Equal(t, true, bkx.GetMemoRequired(ctx, myaddr))
+}
 
 func TestUnlockQueueNotAppend(t *testing.T) {
 	bkx, handle, ctx := defaultContext()

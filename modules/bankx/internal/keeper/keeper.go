@@ -276,3 +276,10 @@ func (k Keeper) SetMemoRequired(ctx sdk.Context, addr sdk.AccAddress, required b
 
 	return nil
 }
+
+func (k Keeper) GetMemoRequired(ctx sdk.Context, addr sdk.AccAddress) bool {
+	if accX, ok := k.axk.GetAccountX(ctx, addr); ok {
+		return accX.MemoRequired
+	}
+	return false
+}
