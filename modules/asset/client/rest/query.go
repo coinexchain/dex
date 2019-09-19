@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	emptyJsonObj = []byte("{}")
-	emptyJsonArr = []byte("[]")
+	emptyJSONObj = []byte("{}")
+	emptyJSONArr = []byte("[]")
 )
 
 // register REST routes
@@ -41,7 +41,7 @@ func QueryTokenRequestHandlerFn(
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryToken)
 		symbol := mux.Vars(r)["symbol"]
 		params := types.NewQueryAssetParams(symbol)
-		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJsonObj)
+		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJSONObj)
 	}
 }
 
@@ -51,7 +51,7 @@ func QueryTokensRequestHandlerFn(
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryTokenList)
-		restutil.RestQuery(nil, cliCtx, w, r, route, nil, emptyJsonArr)
+		restutil.RestQuery(nil, cliCtx, w, r, route, nil, emptyJSONArr)
 	}
 }
 
@@ -63,7 +63,7 @@ func QueryWhitelistRequestHandlerFn(
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryWhitelist)
 		symbol := mux.Vars(r)["symbol"]
 		params := types.NewQueryWhitelistParams(symbol)
-		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJsonArr)
+		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJSONArr)
 	}
 }
 
@@ -75,7 +75,7 @@ func QueryForbiddenAddrRequestHandlerFn(
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryForbiddenAddr)
 		symbol := mux.Vars(r)["symbol"]
 		params := types.NewQueryForbiddenAddrParams(symbol)
-		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJsonArr)
+		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJSONArr)
 	}
 }
 
