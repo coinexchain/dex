@@ -156,12 +156,17 @@ func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int6
 	return k.DeductFee(ctx, addr, dex.NewCetCoins(amt))
 }
 
-func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, fee sdk.Coins) sdk.Error {
+func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, transfer sdk.Coins) (sdk.Coins, sdk.Error) {
 	//toAccount doesn't exist yet
 	if k.ak.GetAccount(ctx, to) == nil {
-		return k.DeductFee(ctx, from, fee)
+		activationFee := dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
+		amt, neg := transfer.SafeSub(activationFee)
+		if neg {
+			return transfer, types.ErrorInsufficientCETForActivatingFee()
+		}
+		return amt, k.DeductFee(ctx, from, activationFee)
 	}
-	return nil
+	return transfer, nil
 }
 
 func (k Keeper) DeductActivationFeeForOutputs(ctx sdk.Context, outputs []bank.Output, fee sdk.Coins) sdk.Error {

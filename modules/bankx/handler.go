@@ -88,15 +88,9 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 		return sdk.ErrInsufficientCoins("sender has insufficient coins for the transfer").Result()
 	}
 
-	activationFee := dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
-	//check whether the first transfer contains at least activationFee cet
-	amt, neg := amt.SafeSub(activationFee)
-	if neg {
-		return types.ErrorInsufficientCETForActivatingFee().Result()
-	}
-
 	//check whether toAccount exist
-	if err := k.DeductActivationFee(ctx, msg.FromAddress, msg.ToAddress, activationFee); err != nil {
+	amt, err := k.DeductActivationFee(ctx, msg.FromAddress, msg.ToAddress, amt)
+	if err != nil {
 		return err.Result()
 	}
 
