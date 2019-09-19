@@ -6,10 +6,11 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/coinexchain/dex/client/restutil"
-	"github.com/coinexchain/dex/modules/asset/internal/types"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
+
+	"github.com/coinexchain/dex/client/restutil"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 var (
