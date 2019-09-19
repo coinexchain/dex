@@ -5,8 +5,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/coinexchain/dex/modules/comment/shorthanzi"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/shorthanzi"
 )
 
 // RouterKey is the name of the market module
