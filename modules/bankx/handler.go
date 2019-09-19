@@ -3,10 +3,8 @@ package bankx
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
-	dex "github.com/coinexchain/dex/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -45,12 +43,13 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 		}
 	}
 
+	addrs := k.PreCheckFreshAccounts(ctx, msg.Outputs)
+
 	if err := k.InputOutputCoins(ctx, msg.Inputs, msg.Outputs); err != nil {
 		return err.Result()
 	}
 
-	activationFee := dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
-	if err := k.DeductActivationFeeForOutputs(ctx, msg.Outputs, activationFee); err != nil {
+	if err := k.DeductActivationFeeForFreshAccounts(ctx, addrs); err != nil {
 		return err.Result()
 	}
 
