@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,11 +14,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 	"github.com/coinexchain/dex/testapp"
 	"github.com/coinexchain/dex/testutil"
-	"github.com/coinexchain/dex/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var myaddr = testutil.ToAccAddress("myaddr")
@@ -75,7 +75,7 @@ func TestFreezeUnFreezeOK(t *testing.T) {
 
 	givenAccountWith(ctx, bkx, myaddr, "1000000000cet")
 
-	freezeCoins := types.NewCetCoins(300000000)
+	freezeCoins := dex.NewCetCoins(300000000)
 	err := bkx.FreezeCoins(ctx, myaddr, freezeCoins)
 
 	require.Nil(t, err)
@@ -93,7 +93,7 @@ func TestFreezeUnFreezeInvalidAccount(t *testing.T) {
 
 	bkx, ctx := defaultContext()
 
-	freezeCoins := types.NewCetCoins(500000000)
+	freezeCoins := dex.NewCetCoins(500000000)
 	err := bkx.FreezeCoins(ctx, myaddr, freezeCoins)
 	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds;  < 500000000cet"), err)
 
@@ -106,11 +106,11 @@ func TestFreezeUnFreezeInsufficientCoins(t *testing.T) {
 
 	givenAccountWith(ctx, bkx, myaddr, "10cet")
 
-	InvalidFreezeCoins := types.NewCetCoins(50)
+	InvalidFreezeCoins := dex.NewCetCoins(50)
 	err := bkx.FreezeCoins(ctx, myaddr, InvalidFreezeCoins)
 	require.Equal(t, sdk.ErrInsufficientCoins("insufficient account funds; 10cet < 50cet"), err)
 
-	freezeCoins := types.NewCetCoins(5)
+	freezeCoins := dex.NewCetCoins(5)
 	err = bkx.FreezeCoins(ctx, myaddr, freezeCoins)
 	require.Nil(t, err)
 
@@ -206,7 +206,7 @@ func TestParamGetSet(t *testing.T) {
 	bkx, ctx := defaultContext()
 
 	//expect DefaultActivationFees=1
-	defaultParam := bankx.DefaultParams()
+	defaultParam := types.DefaultParams()
 	require.Equal(t, int64(100000000), defaultParam.ActivationFee)
 
 	//expect SetParam don't panic
