@@ -21,15 +21,16 @@ func checkFlags(flags []string, help string) error {
 	return nil
 }
 
-func parseIssueFlags() (sdk.Int, error) {
+func parseIssueFlags(owner sdk.AccAddress) (*types.MsgIssueToken, error) {
 	if err := checkFlags(issueTokenFlags, "$ cetcli tx asset issue-token -h"); err != nil {
-		return sdk.ZeroInt(), err
+		return nil, err
 	}
 	amt, ok := sdk.NewIntFromString(viper.GetString(flagTotalSupply))
 	if !ok {
-		return sdk.ZeroInt(), types.ErrInvalidTokenSupply(flagTotalSupply)
+		return nil, types.ErrInvalidTokenSupply(flagTotalSupply)
 	}
-	return amt, nil
+	msg := newMsgIssueToken(amt, owner)
+	return &msg, nil
 }
 
 func newMsgIssueToken(amt sdk.Int, owner sdk.AccAddress) types.MsgIssueToken {

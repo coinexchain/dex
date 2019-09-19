@@ -98,6 +98,10 @@ func NewMsgTransferOwnership(symbol string, originalOwner sdk.AccAddress, newOwn
 	}
 }
 
+func (msg *MsgTransferOwnership) SetAccAddress(addr sdk.AccAddress) {
+	msg.OriginalOwner = addr
+}
+
 // Route Implements Msg.
 func (msg MsgTransferOwnership) Route() string {
 	return RouterKey
@@ -147,6 +151,10 @@ func NewMsgMintToken(symbol string, amt sdk.Int, owner sdk.AccAddress) MsgMintTo
 		amt,
 		owner,
 	}
+}
+
+func (msg *MsgMintToken) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddress = addr
 }
 
 // Route Implements Msg.
@@ -202,6 +210,10 @@ func NewMsgBurnToken(symbol string, amt sdk.Int, owner sdk.AccAddress) MsgBurnTo
 	}
 }
 
+func (msg *MsgBurnToken) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddress = addr
+}
+
 // Route Implements Msg.
 func (msg MsgBurnToken) Route() string {
 	return RouterKey
@@ -253,6 +265,10 @@ func NewMsgForbidToken(symbol string, owner sdk.AccAddress) MsgForbidToken {
 	}
 }
 
+func (msg *MsgForbidToken) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddress = addr
+}
+
 // Route Implements Msg.
 func (msg MsgForbidToken) Route() string {
 	return RouterKey
@@ -295,6 +311,10 @@ func NewMsgUnForbidToken(symbol string, owner sdk.AccAddress) MsgUnForbidToken {
 		symbol,
 		owner,
 	}
+}
+
+func (msg *MsgUnForbidToken) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddress = addr
 }
 
 // Route Implements Msg.
@@ -341,6 +361,10 @@ func NewMsgAddTokenWhitelist(symbol string, owner sdk.AccAddress, whitelist []sd
 		owner,
 		whitelist,
 	}
+}
+
+func (msg *MsgAddTokenWhitelist) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddress = addr
 }
 
 // Route Implements Msg.
@@ -392,6 +416,10 @@ func NewMsgRemoveTokenWhitelist(symbol string, owner sdk.AccAddress, whitelist [
 	}
 }
 
+func (msg *MsgRemoveTokenWhitelist) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddress = addr
+}
+
 // Route Implements Msg.
 func (msg MsgRemoveTokenWhitelist) Route() string {
 	return RouterKey
@@ -441,6 +469,10 @@ func NewMsgForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.AccAd
 	}
 }
 
+func (msg *MsgForbidAddr) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddr = addr
+}
+
 // Route Implements Msg.
 func (msg MsgForbidAddr) Route() string {
 	return RouterKey
@@ -488,6 +520,10 @@ func NewMsgUnForbidAddr(symbol string, owner sdk.AccAddress, addresses []sdk.Acc
 		owner,
 		addresses,
 	}
+}
+
+func (msg *MsgUnForbidAddr) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddr = addr
 }
 
 // Route Implements Msg.
@@ -541,6 +577,10 @@ func NewMsgModifyTokenInfo(symbol string, url string, description string, identi
 		identity,
 		owner,
 	}
+}
+
+func (msg *MsgModifyTokenInfo) SetAccAddress(addr sdk.AccAddress) {
+	msg.OwnerAddress = addr
 }
 
 // Route Implements Msg.

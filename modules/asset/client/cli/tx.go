@@ -13,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
@@ -76,13 +77,13 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			amt, err := parseIssueFlags()
+			tokenOwner := cliCtx.GetFromAddress()
+
+			msg, err := parseIssueFlags(tokenOwner)
 			if err != nil {
 				return err
 			}
 
-			tokenOwner := cliCtx.GetFromAddress()
-			msg := newMsgIssueToken(amt, tokenOwner)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -139,20 +140,11 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			originalOwner := cliCtx.GetFromAddress()
-			msg, err := parseTransferOwnershipFlags(originalOwner)
-			if err != nil {
+			if msg, err := parseTransferOwnershipFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -186,20 +178,11 @@ $ cetcli tx asset mint-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseMintTokenFlags(owner)
-			if err != nil {
+			if msg, err := parseMintTokenFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -233,20 +216,11 @@ $ cetcli tx asset burn-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseBurnTokenFlags(owner)
-			if err != nil {
+			if msg, err := parseBurnTokenFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -278,20 +252,11 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseForbidTokenFlags(owner)
-			if err != nil {
+			if msg, err := parseForbidTokenFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -318,20 +283,11 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseUnForbidTokenFlags(owner)
-			if err != nil {
+			if msg, err := parseUnForbidTokenFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -365,20 +321,11 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseAddWhitelistFlags(owner)
-			if err != nil {
+			if msg, err := parseAddWhitelistFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -408,20 +355,11 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseRemoveWhitelistFlags(owner)
-			if err != nil {
+			if msg, err := parseRemoveWhitelistFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -456,20 +394,11 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseForbidAddrFlags(owner)
-			if err != nil {
+			if msg, err := parseForbidAddrFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -499,20 +428,11 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseUnForbidAddrFlags(owner)
-			if err != nil {
+			if msg, err := parseUnForbidAddrFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
@@ -550,20 +470,11 @@ $ cetcli tx asset modify-token-info --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			owner := cliCtx.GetFromAddress()
-			msg, err := parseModifyTokenInfoFlags(owner)
-			if err != nil {
+			if msg, err := parseModifyTokenInfoFlags(nil); err != nil {
 				return err
+			} else {
+				return cliutil.CliRunCommand(cdc, msg)
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
