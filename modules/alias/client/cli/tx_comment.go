@@ -5,11 +5,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
-	"github.com/coinexchain/dex/modules/authx/client/cliutil"
 )
 
 const FlagAsDefault = "as-default"
@@ -43,7 +42,7 @@ Example:
 	}
 
 	cmd.Flags().String(FlagAsDefault, "yes", "This alias will be used as a default alias or not")
-	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 
 	//cmd.MarkFlagRequired(FlagAsDefault)
 	return cmd
@@ -67,7 +66,7 @@ Example:
 			return cliutil.CliRunCommand(cdc, &msg.Owner, msg)
 		},
 	}
-	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 
 	return cmd
 }

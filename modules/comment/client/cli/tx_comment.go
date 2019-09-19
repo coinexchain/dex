@@ -11,8 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/coinexchain/dex/modules/authx/client/cliutil"
-	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
@@ -73,7 +72,7 @@ func markCreateNewThreadFlags(cmd *cobra.Command) {
 	cmd.Flags().String(FlagTitle, "", "The comment's title")
 	cmd.Flags().String(FlagContent, "", "The comment's content")
 	cmd.Flags().String(FlagContentType, "UTF8Text", "The type of the comment's content (IPFS, Magnet, HTTP, UTF8Text, ShortHanzi or RawBytes)")
-	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 
 	for _, flag := range createNewThreadFlags {
 		cmd.MarkFlagRequired(flag)
@@ -106,7 +105,7 @@ func markCreateFollowupCommentFlags(cmd *cobra.Command) {
 	cmd.Flags().String(FlagTitle, "", "The comment's title")
 	cmd.Flags().String(FlagContent, "", "The comment's content")
 	cmd.Flags().String(FlagContentType, "UTF8Text", "The type of the comment's content (IPFS, Magnet, HTTP, UTF8Text, ShortHanzi or RawBytes)")
-	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 
 	for _, flag := range createFollowupCommentFlags {
 		cmd.MarkFlagRequired(flag)
@@ -130,7 +129,7 @@ Example:
 
 	cmd.Flags().String(FlagToken, "cet", "The token you want to comment about")
 	cmd.Flags().StringArrayVar(&rewardsArray, FlagRewardTo, nil, "You can use this option multiple times to reward multiple comments. This option specify some information about one comment you want to reward. Should be like this: \"<comment-id>;<the-sender-of-the-comment>;<reward-amount>;<reward-token>;<comma-separated-attitued-list>\". Valid attitudes include: like, dislike, laugh, cry, angry, surprise, heart, sweat, speechless, favorite, condolences.")
-	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 
 	cmd.MarkFlagRequired(FlagToken)
 	cmd.MarkFlagRequired(FlagRewardTo)

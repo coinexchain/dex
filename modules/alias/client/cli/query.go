@@ -7,9 +7,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
-	"github.com/coinexchain/dex/modules/authx/client/cliutil"
 )
 
 func QueryParamsCmd(cdc *codec.Codec) *cobra.Command {

@@ -10,8 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-
-	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
 )
 
 var CliQuery = func(cdc *codec.Codec, query string, param interface{}) error {
@@ -41,9 +39,9 @@ var CliRunCommand = func(cdc *codec.Codec, senderPtr *sdk.AccAddress, msg sdk.Ms
 		return err
 	}
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-	generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
+	generateUnsignedTx := viper.GetBool(FlagGenerateUnsignedTx)
 	if generateUnsignedTx {
-		return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, *senderPtr)
+		return PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, *senderPtr)
 	}
 	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }

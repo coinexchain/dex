@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 
-	"github.com/coinexchain/dex/modules/authx/client/restutil"
+	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 )

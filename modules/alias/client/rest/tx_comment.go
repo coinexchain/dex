@@ -1,14 +1,15 @@
 package rest
 
 import (
+	"net/http"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"net/http"
 
+	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
-	"github.com/coinexchain/dex/modules/authx/client/restutil"
 )
 
 type AliasUpdateReq struct {

@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
-	"github.com/coinexchain/dex/modules/authx/client/restutil"
+	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 

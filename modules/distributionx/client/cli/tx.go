@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
-	authxutils "github.com/coinexchain/dex/modules/authx/client/utils"
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/distributionx/types"
 )
 
@@ -40,9 +40,9 @@ func DonateTxCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			generateUnsignedTx := viper.GetBool(authxutils.FlagGenerateUnsignedTx)
+			generateUnsignedTx := viper.GetBool(cliutil.FlagGenerateUnsignedTx)
 			if generateUnsignedTx {
-				return authxutils.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, from)
+				return cliutil.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, from)
 			}
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
@@ -50,7 +50,7 @@ func DonateTxCmd(cdc *codec.Codec) *cobra.Command {
 
 	cmd = client.PostCommands(cmd)[0]
 	cmd.MarkFlagRequired(client.FlagFrom)
-	cmd.Flags().Bool(authxutils.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
 
 	return cmd
 }
