@@ -140,11 +140,11 @@ $ cetcli tx asset transfer-ownership --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseTransferOwnershipFlags(nil); err != nil {
+			msg, err := parseTransferOwnershipFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -178,11 +178,11 @@ $ cetcli tx asset mint-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseMintTokenFlags(nil); err != nil {
+			msg, err := parseMintTokenFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -216,11 +216,11 @@ $ cetcli tx asset burn-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseBurnTokenFlags(nil); err != nil {
+			msg, err := parseBurnTokenFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -252,11 +252,11 @@ $ cetcli tx asset forbid-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseForbidTokenFlags(nil); err != nil {
+			msg, err := parseForbidTokenFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -283,11 +283,11 @@ $ cetcli tx asset unforbid-token --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseUnForbidTokenFlags(nil); err != nil {
+			msg, err := parseUnForbidTokenFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -321,11 +321,11 @@ $ cetcli tx asset add-whitelist --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseAddWhitelistFlags(nil); err != nil {
+			msg, err := parseAddWhitelistFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -355,11 +355,11 @@ $ cetcli tx asset remove-whitelist --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseRemoveWhitelistFlags(nil); err != nil {
+			msg, err := parseRemoveWhitelistFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -394,11 +394,11 @@ $ cetcli tx asset forbid-addr --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseForbidAddrFlags(nil); err != nil {
+			msg, err := parseForbidAddrFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -428,11 +428,11 @@ $ cetcli tx asset unforbid-addr --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseUnForbidAddrFlags(nil); err != nil {
+			msg, err := parseUnForbidAddrFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -470,11 +470,11 @@ $ cetcli tx asset modify-token-info --symbol="abc" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if msg, err := parseModifyTokenInfoFlags(nil); err != nil {
+			msg, err := parseModifyTokenInfoFlags(nil)
+			if err != nil {
 				return err
-			} else {
-				return cliutil.CliRunCommand(cdc, msg)
 			}
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
