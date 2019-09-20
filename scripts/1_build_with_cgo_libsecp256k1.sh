@@ -4,7 +4,7 @@
 set -ex
 
 if [ ! -f "./go.mod" ]; then
-    echo "make sure ./scripts/build.sh executed under dex code root dir."
+    echo "make sure scripts executed under dex code root dir."
     exit 1
 fi
 
