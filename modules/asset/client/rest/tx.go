@@ -10,9 +10,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
@@ -38,49 +35,19 @@ func registerTXRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 
 // issueRequestHandlerFn - http request handler to issue new token.
 func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req issueReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+	checker := func(cdc *codec.Codec, cliCtx context.CLIContext, req restutil.RestReq) error {
+		symbol := req.(*issueReq).Symbol
+		bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(symbol))
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		amt, ok := sdk.NewIntFromString(req.TotalSupply)
-		if !ok {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrInvalidTokenSupply(req.TotalSupply).Error())
-			return
-		}
-
-		bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(req.Symbol))
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
+			return err
 		}
 		route := fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryToken)
 		if res, _, _ := cliCtx.QueryWithData(route, bz); res != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrDuplicateTokenSymbol(symbol).Error())
-			return
+			return types.ErrDuplicateTokenSymbol(symbol)
 		}
-
-		msg := types.NewMsgIssueToken(req.Name, req.Symbol, amt, owner,
-			req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable, req.URL, req.Description, req.Identity)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		return nil
 	}
+	return restutil.NewRestHandlerBuilder(cdc, cliCtx, new(issueReq)).Build(checker)
 }
 
 // transferOwnershipRequestHandlerFn - http request handler to transfer token owner ship.

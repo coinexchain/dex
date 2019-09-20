@@ -80,6 +80,22 @@ type (
 	}
 )
 
+func (req *issueReq) New() restutil.RestReq {
+	return new(issueReq)
+}
+func (req *issueReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *issueReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	amt, ok := sdk.NewIntFromString(req.TotalSupply)
+	if !ok {
+		return nil, types.ErrInvalidTokenSupply(req.TotalSupply)
+	}
+	return types.NewMsgIssueToken(req.Name, req.Symbol, amt, owner,
+		req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable,
+		req.URL, req.Description, req.Identity), nil
+}
+
 func (req *transferOwnerReq) New() restutil.RestReq {
 	return new(transferOwnerReq)
 }
@@ -87,6 +103,7 @@ func (req *transferOwnerReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 func (req *transferOwnerReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
 	return types.NewMsgTransferOwnership(symbol, owner, req.NewOwner), nil
 }
 

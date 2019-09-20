@@ -23,8 +23,10 @@ type RestHandlerBuilder struct {
 	reqPrototype RestReq
 }
 
+type MoreChecker func(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) error
+
 func NewRestHandler(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) http.HandlerFunc {
-	return NewRestHandlerBuilder(cdc, cliCtx, req).Build()
+	return NewRestHandlerBuilder(cdc, cliCtx, req).Build(nil)
 }
 
 func NewRestHandlerBuilder(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) *RestHandlerBuilder {
@@ -35,12 +37,13 @@ func NewRestHandlerBuilder(cdc *codec.Codec, cliCtx context.CLIContext, req Rest
 	}
 }
 
-func (rhb *RestHandlerBuilder) Build() http.HandlerFunc {
+func (rhb *RestHandlerBuilder) Build(checker MoreChecker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, sender, ok := rhb.preProc(w, r)
 		if !ok {
 			return
 		}
+
 		msg, err := req.GetMsg(r, sender)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -50,6 +53,15 @@ func (rhb *RestHandlerBuilder) Build() http.HandlerFunc {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
+
+		if checker != nil {
+			err := checker(rhb.cdc, rhb.cliCtx, req)
+			if err != nil {
+				rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+
 		utils.WriteGenerateStdTxResponse(w, rhb.cliCtx, *req.GetBaseReq(), []sdk.Msg{msg})
 	}
 }
