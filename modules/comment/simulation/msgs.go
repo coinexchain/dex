@@ -28,7 +28,7 @@ func SimulateCreateNewThread(k keepers.Keeper, ask asset.Keeper, ak auth.Account
 		}
 
 		//get #token-comment
-		lastCommnet := k.Cck.GetCommentCount(ctx, msg.Token)
+		lastCommnet := k.GetCommentCount(ctx, msg.Token)
 
 		//handle msg
 		handler := comment.NewHandler(k)
@@ -74,7 +74,7 @@ func createNewThread(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ask asset.
 }
 
 func verifyCreateNewThread(ctx sdk.Context, k keepers.Keeper, msg types.MsgCommentToken, lastComment uint64) bool {
-	comment := k.Cck.GetCommentCount(ctx, msg.Token)
+	comment := k.GetCommentCount(ctx, msg.Token)
 	return comment == lastComment+1
 
 }
@@ -89,7 +89,7 @@ func SimulateCreateCommentRefs(k keepers.Keeper, ask asset.Keeper, ak auth.Accou
 		}
 
 		//get #token-comment
-		lastCommnet := k.Cck.GetCommentCount(ctx, msg.Token)
+		lastCommnet := k.GetCommentCount(ctx, msg.Token)
 		oldCoins := make(map[string]sdk.Coins)
 		for _, ref := range msg.References {
 			oldAcc := ak.GetAccount(ctx, ref.RewardTarget)
@@ -136,7 +136,7 @@ func createCommentReferences(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, as
 
 func randomCommentRef(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ask asset.Keeper, fromAcc auth.Account, accs []simulation.Account) (token asset.Token, refs []types.CommentRef) {
 
-	totalComment := k.Cck.GetAllCommentCount(ctx)
+	totalComment := k.GetAllCommentCount(ctx)
 	if totalComment == nil {
 		return nil, []types.CommentRef{}
 	}
@@ -163,7 +163,7 @@ func randomCommentRef(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ask asset
 }
 
 func verifyCreateCommentRefs(ctx sdk.Context, k keepers.Keeper, ak auth.AccountKeeper, msg types.MsgCommentToken, lastComment uint64, oldCoins map[string]sdk.Coins) bool {
-	comment := k.Cck.GetCommentCount(ctx, msg.Token)
+	comment := k.GetCommentCount(ctx, msg.Token)
 	if comment != lastComment+1 {
 		return false
 	}

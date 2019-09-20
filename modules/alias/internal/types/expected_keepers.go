@@ -6,7 +6,6 @@ import (
 
 // Bankx Keeper will implement the interface
 type ExpectedBankxKeeper interface {
-	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error
 }
 

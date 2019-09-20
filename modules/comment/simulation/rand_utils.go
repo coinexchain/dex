@@ -54,7 +54,7 @@ func randomContent(r *rand.Rand) (contentType int8, content []byte) {
 }
 func randomTokenCommentRef(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ask asset.Keeper) (token asset.Token, ids []uint64) {
 
-	totalComment := k.Cck.GetAllCommentCount(ctx)
+	totalComment := k.GetAllCommentCount(ctx)
 	if len(totalComment) == 0 {
 		return nil, []uint64{}
 	}

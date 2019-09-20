@@ -47,13 +47,13 @@ func queryAliasInfo(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]by
 
 	res := []string{}
 	if param.QueryOp == GetAddressFromAlias {
-		addr, _ := keeper.AliasKeeper.GetAddressFromAlias(ctx, param.Alias)
+		addr, _ := keeper.GetAddressFromAlias(ctx, param.Alias)
 		acc := sdk.AccAddress(addr)
 		if len(acc) != 0 {
 			res = []string{acc.String()}
 		}
 	} else if param.QueryOp == ListAliasOfAccount {
-		res = keeper.AliasKeeper.GetAliasListOfAccount(ctx, param.Owner)
+		res = keeper.GetAliasListOfAccount(ctx, param.Owner)
 	} else {
 		return nil, sdk.NewError(types.CodeSpaceAlias, types.CodeUnknownOperation, "Unknown Operation")
 	}

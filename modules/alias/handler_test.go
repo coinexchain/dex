@@ -107,7 +107,7 @@ func Test1(t *testing.T) {
 	fmt.Printf("alice: %s\n", alice.String())
 	ctx, keeper := newContextAndKeeper("test-1")
 	InitGenesis(ctx, *keeper, DefaultGenesisState())
-	aliasEntryList := keeper.AliasKeeper.GetAllAlias(ctx)
+	aliasEntryList := keeper.GetAllAlias(ctx)
 	require.Equal(t, 0, len(aliasEntryList))
 
 	refList := []keepers.AliasEntry{
@@ -187,7 +187,7 @@ func Test1(t *testing.T) {
 	cetOwner := simpleAddr("00000")
 	refLog = "Deduct 1000000000cet from cosmos1qy352eufqy352eufqy352eufqy35qqqqkc9q90"
 	handlerFunc(ctx, types.MsgAliasUpdate{Owner: cetOwner, Alias: aliasCet, IsAdd: true, AsDefault: true})
-	addr, isDefault := keeper.AliasKeeper.GetAddressFromAlias(ctx, aliasCet)
+	addr, isDefault := keeper.GetAddressFromAlias(ctx, aliasCet)
 	require.Equal(t, cetOwner, sdk.AccAddress(addr))
 	require.Equal(t, true, isDefault)
 	require.Equal(t, refLog, logStr)

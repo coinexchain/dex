@@ -31,13 +31,13 @@ func DefaultGenesisState() GenesisState {
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 	for _, entry := range data.AliasEntryList {
-		keeper.AliasKeeper.AddAlias(ctx, entry.Alias, entry.Addr, entry.AsDefault, 0)
+		keeper.AddAlias(ctx, entry.Alias, entry.Addr, entry.AsDefault, 0)
 	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
-	return NewGenesisState(k.GetParams(ctx), k.AliasKeeper.GetAllAlias(ctx))
+	return NewGenesisState(k.GetParams(ctx), k.GetAllAlias(ctx))
 }
 
 func (data GenesisState) Validate() error {

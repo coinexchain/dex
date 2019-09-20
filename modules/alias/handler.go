@@ -25,15 +25,15 @@ func NewHandler(k Keeper) sdk.Handler {
 
 func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Result {
 	if msg.IsAdd {
-		if types.IsOnlyForCoinEx(msg.Alias) && !k.AssetKeeper.IsTokenIssuer(ctx, "cet", msg.Owner) {
+		if types.IsOnlyForCoinEx(msg.Alias) && !k.IsTokenIssuer(ctx, "cet", msg.Owner) {
 			return types.ErrCanOnlyBeUsedByCetOwner(msg.Alias).Result()
 		}
-		addr, asDefault := k.AliasKeeper.GetAddressFromAlias(ctx, msg.Alias)
+		addr, asDefault := k.GetAddressFromAlias(ctx, msg.Alias)
 		if len(addr) != 0 && asDefault == msg.AsDefault {
 			return types.ErrAliasAlreadyExists().Result()
 		}
 		aliasParams := k.GetParams(ctx)
-		ok, addNewAlias := k.AliasKeeper.AddAlias(ctx, msg.Alias, msg.Owner, msg.AsDefault, aliasParams.MaxAliasCount)
+		ok, addNewAlias := k.AddAlias(ctx, msg.Alias, msg.Owner, msg.AsDefault, aliasParams.MaxAliasCount)
 		if !ok {
 			return types.ErrMaxAliasCountReached().Result()
 		} else if addNewAlias {
@@ -51,18 +51,18 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 			} else {
 				fee = aliasParams.FeeForAliasLength7OrHigher
 			}
-			err := k.BankKeeper.DeductInt64CetFee(ctx, msg.Owner, fee)
+			err := k.DeductInt64CetFee(ctx, msg.Owner, fee)
 			if err != nil {
 				return err.Result()
 			}
 		}
 	} else {
-		addr, _ := k.AliasKeeper.GetAddressFromAlias(ctx, msg.Alias)
+		addr, _ := k.GetAddressFromAlias(ctx, msg.Alias)
 		if !bytes.Equal(addr, msg.Owner) {
 			//fmt.Printf("%x vs %x\n", addr, []byte(msg.Owner))
 			return types.ErrNoSuchAlias().Result()
 		}
-		k.AliasKeeper.RemoveAlias(ctx, msg.Alias, msg.Owner)
+		k.RemoveAlias(ctx, msg.Alias, msg.Owner)
 	}
 
 	ctx.EventManager().EmitEvent(

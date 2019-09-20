@@ -90,7 +90,7 @@ func handleAlias(ctx sdk.Context, app *baseapp.BaseApp, k keepers.Keeper, msg ty
 
 func verify(ctx sdk.Context, k keepers.Keeper, msg types.MsgAliasUpdate) error {
 
-	addr, asDefault := k.AliasKeeper.GetAddressFromAlias(ctx, msg.Alias)
+	addr, asDefault := k.GetAddressFromAlias(ctx, msg.Alias)
 
 	if msg.IsAdd {
 		if !msg.Owner.Equals(sdk.AccAddress(addr)) || asDefault != msg.AsDefault {
@@ -105,7 +105,7 @@ func verify(ctx sdk.Context, k keepers.Keeper, msg types.MsgAliasUpdate) error {
 	return nil
 }
 func getAccountAlias(ctx sdk.Context, k keepers.Keeper, addr sdk.AccAddress) []string {
-	return k.AliasKeeper.GetAliasListOfAccount(ctx, addr)
+	return k.GetAliasListOfAccount(ctx, addr)
 }
 func randomAlias(r *rand.Rand) string {
 	aliasLength := r.Intn(aliasMaxLength-1) + aliasMinLength

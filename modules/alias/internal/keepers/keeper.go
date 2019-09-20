@@ -126,9 +126,9 @@ func (keeper *AliasKeeper) RemoveAlias(ctx sdk.Context, alias string, addr sdk.A
 
 type Keeper struct {
 	paramSubspace params.Subspace
-	AliasKeeper   *AliasKeeper
-	BankKeeper    types.ExpectedBankxKeeper
-	AssetKeeper   types.ExpectedAssetStatusKeeper
+	aliasKeeper   *AliasKeeper
+	bankKeeper    types.ExpectedBankxKeeper
+	assetKeeper   types.ExpectedAssetStatusKeeper
 }
 
 func NewKeeper(key sdk.StoreKey,
@@ -138,10 +138,38 @@ func NewKeeper(key sdk.StoreKey,
 
 	return Keeper{
 		paramSubspace: paramstore.WithKeyTable(types.ParamKeyTable()),
-		AliasKeeper:   NewAliasKeeper(key),
-		BankKeeper:    bankKeeper,
-		AssetKeeper:   assetKeeper,
+		aliasKeeper:   NewAliasKeeper(key),
+		bankKeeper:    bankKeeper,
+		assetKeeper:   assetKeeper,
 	}
+}
+
+func (k *Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
+	return k.bankKeeper.DeductInt64CetFee(ctx, addr, amt)
+}
+
+func (k *Keeper) IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
+	return k.assetKeeper.IsTokenIssuer(ctx, denom, addr)
+}
+
+func (k *Keeper) GetAddressFromAlias(ctx sdk.Context, alias string) ([]byte, bool) {
+	return k.aliasKeeper.GetAddressFromAlias(ctx, alias)
+}
+
+func (k *Keeper) GetAliasListOfAccount(ctx sdk.Context, addr sdk.AccAddress) []string {
+	return k.aliasKeeper.GetAliasListOfAccount(ctx, addr)
+}
+
+func (k *Keeper) GetAllAlias(ctx sdk.Context) []AliasEntry {
+	return k.aliasKeeper.GetAllAlias(ctx)
+}
+
+func (k *Keeper) AddAlias(ctx sdk.Context, alias string, addr sdk.AccAddress, asDefault bool, maxCount int) (bool, bool) {
+	return k.aliasKeeper.AddAlias(ctx, alias, addr, asDefault, maxCount)
+}
+
+func (k *Keeper) RemoveAlias(ctx sdk.Context, alias string, addr sdk.AccAddress) {
+	k.aliasKeeper.RemoveAlias(ctx, alias, addr)
 }
 
 // -----------------------------------------------------------------------------

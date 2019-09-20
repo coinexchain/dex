@@ -37,7 +37,7 @@ func TestQueryAliasInfo(t *testing.T) {
 	alias := "spiderman"
 
 	testApp.AliasKeeper.SetParams(ctx, types.DefaultParams())
-	testApp.AliasKeeper.AliasKeeper.AddAlias(ctx, alias, addr, true, 10)
+	testApp.AliasKeeper.AddAlias(ctx, alias, addr, true, 10)
 
 	testQueryAddresses(t, testApp, ctx, addr, alias)
 	testQueryAliases(t, testApp, ctx, addr, alias)
