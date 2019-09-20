@@ -70,7 +70,9 @@ func NewAppModule(blKeeper keepers.Keeper) AppModule {
 }
 
 // registers
-func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
+func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
+	ir.RegisterRoute(ModuleName, "bancor-info-consistency", keepers.BancorInfoConsistencyInvariant(am.blKeeper))
+}
 
 // routes
 func (am AppModule) Route() string {

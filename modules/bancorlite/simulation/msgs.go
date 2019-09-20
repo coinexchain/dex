@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"strings"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bancorlite"
+	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	dexsim "github.com/coinexchain/dex/simulation"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -34,11 +36,20 @@ func SimulateMsgBancorInit(assetKeeper asset.Keeper, blk bancorlite.Keeper) simu
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
-		// create bancor
+		// init trading pair
 		bancorInitMsg := createMsgBancorInit(r, addr, newSymbol, amount)
 		bancorInitOk := dexsim.SimulateHandleMsg(bancorInitMsg, bancorlite.NewHandler(blk), ctx)
 		opMsg = simulation.NewOperationMsg(bancorInitMsg, bancorInitOk, "")
-		return opMsg, nil, nil
+		if !bancorInitOk {
+			return opMsg, nil, nil
+		}
+
+		//verify bancor init
+		ok := verifyBancorInit(ctx, blk, bancorInitMsg)
+		if !ok {
+			return simulation.NewOperationMsg(bancorInitMsg, ok, ""), nil, fmt.Errorf("bancor initialization failed")
+		}
+		return simulation.NewOperationMsg(bancorInitMsg, ok, ""), nil, nil
 	}
 }
 
@@ -66,6 +77,18 @@ func createMsgBancorInit(r *rand.Rand,
 		MaxSupply:          sdk.NewInt(maxSupply),
 		EarliestCancelTime: 0, // TODO
 	}
+}
+func verifyBancorInit(ctx sdk.Context, keeper bancorlite.Keeper, msg bancorlite.MsgBancorInit) bool {
+	return bancorInfo.Stock == msg.Stock &&
+		bancorInfo.Money == msg.Money &&
+		bancorInfo.Owner.Equals(msg.Owner) &&
+		bancorInfo.EarliestCancelTime == msg.EarliestCancelTime &&
+		bancorInfo.InitPrice.Equal(msg.InitPrice) &&
+		bancorInfo.MaxPrice.Equal(msg.MaxPrice) &&
+		bancorInfo.MaxSupply.Equal(msg.MaxSupply) &&
+		bancorInfo.StockInPool.Equal(msg.MaxSupply) &&
+		bancorInfo.MoneyInPool.IsZero() &&
+		bancorInfo.Price.Equal(msg.InitPrice)
 }
 
 func SimulateMsgBancorTrade(ak auth.AccountKeeper, blk bancorlite.Keeper) simulation.Operation {
@@ -96,12 +119,31 @@ func simulateMsgBancorSell(blk bancorlite.Keeper,
 		Amount:     amount,
 		MoneyLimit: 0, // TODO
 	}
+	oldBancorInfo := blk.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
 	ok := dexsim.SimulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
 	opMsg = simulation.NewOperationMsg(msg, ok, "")
-	return opMsg, nil, nil
-	// TODO
-}
+	if !ok {
+		return opMsg, nil, nil
+	}
+	ok = verifyBancorSellBuy(ctx, blk, oldBancorInfo, msg, false)
+	if !ok {
+		return simulation.NewOperationMsg(msg, ok, ""), nil, fmt.Errorf("bancor sell failed")
+	}
+	return simulation.NewOperationMsg(msg, ok, ""), nil, nil
 
+}
+func verifyBancorSellBuy(ctx sdk.Context, blk bancorlite.Keeper, oldBancorInfo *bancorlite.BancorInfo, msg bancorlite.MsgBancorTrade, isbuy bool) bool {
+	updatedBancorInfo := blk.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	stockInPool := oldBancorInfo.StockInPool.Add(sdk.NewInt(msg.Amount))
+	if isbuy {
+		stockInPool = oldBancorInfo.StockInPool.Sub(sdk.NewInt(msg.Amount))
+	}
+	ok := oldBancorInfo.UpdateStockInPool(stockInPool)
+	return ok &&
+		oldBancorInfo.StockInPool.Equal(updatedBancorInfo.StockInPool) &&
+		oldBancorInfo.MoneyInPool.Equal(updatedBancorInfo.MoneyInPool) &&
+		oldBancorInfo.Price.Equal(updatedBancorInfo.Price)
+}
 func simulateMsgBancorBuy(blk bancorlite.Keeper,
 	r *rand.Rand, ctx sdk.Context, addr sdk.AccAddress,
 ) (opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
@@ -120,9 +162,18 @@ func simulateMsgBancorBuy(blk bancorlite.Keeper,
 		Amount:     amount,
 		MoneyLimit: math.MaxInt64, // TODO
 	}
+	oldBancorInfo := blk.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
 	ok := dexsim.SimulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
 	opMsg = simulation.NewOperationMsg(msg, ok, "")
-	return opMsg, nil, nil
+	if !ok {
+		return opMsg, nil, nil
+	}
+	ok = verifyBancorSellBuy(ctx, blk, oldBancorInfo, msg, true)
+	if !ok {
+		return simulation.NewOperationMsg(msg, ok, ""), nil, fmt.Errorf("bancor buy failed")
+	}
+	return simulation.NewOperationMsg(msg, ok, ""), nil, nil
+
 }
 
 func getSaleableCoins(acc auth.Account) sdk.Coins {
@@ -172,6 +223,17 @@ func SimulateMsgBancorCancel(blk bancorlite.Keeper) simulation.Operation {
 
 		ok := dexsim.SimulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
 		opMsg = simulation.NewOperationMsg(msg, ok, "")
-		return opMsg, nil, nil
+		if !ok {
+			return opMsg, nil, nil
+		}
+		ok = verifyBancorCancel(ctx, blk, msg)
+		if !ok {
+			return simulation.NewOperationMsg(msg, ok, ""), nil, fmt.Errorf("bancor cancel failed")
+		}
+		return simulation.NewOperationMsg(msg, ok, ""), nil, nil
 	}
+}
+func verifyBancorCancel(ctx sdk.Context, blk bancorlite.Keeper, msg bancorlite.MsgBancorCancel) bool {
+	bancorInfo := blk.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	return bancorInfo == nil
 }
