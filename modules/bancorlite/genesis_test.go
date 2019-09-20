@@ -29,9 +29,9 @@ func TestGenesisState_Validate(t *testing.T) {
 			args{
 				bancorlite.GenesisState{
 					types.Params{
-						1,
-						-1,
-						0,
+						CreateBancorFee: 1,
+						CancelBancorFee: -1,
+						TradeFeeRate:    0,
 					},
 					make(map[string]bancorlite.BancorInfo),
 				},
@@ -42,9 +42,9 @@ func TestGenesisState_Validate(t *testing.T) {
 			args{
 				bancorlite.GenesisState{
 					types.Params{
-						1,
-						10,
-						100,
+						CreateBancorFee: 1,
+						CancelBancorFee: 10,
+						TradeFeeRate:    100,
 					},
 					make(map[string]bancorlite.BancorInfo),
 				},
