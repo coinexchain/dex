@@ -14,7 +14,7 @@ import (
 type RestReq interface {
 	New() RestReq
 	GetBaseReq() *rest.BaseReq
-	GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg
+	GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error)
 }
 
 type RestHandlerBuilder struct {
@@ -41,8 +41,9 @@ func (rhb *RestHandlerBuilder) Build() http.HandlerFunc {
 		if !ok {
 			return
 		}
-		msg := req.GetMsg(w, sender)
-		if msg == nil {
+		msg, err := req.GetMsg(r, sender)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 		if err := msg.ValidateBasic(); err != nil {

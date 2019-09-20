@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/coinexchain/dex/client/restutil"
+
 	"github.com/gorilla/mux"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -83,32 +85,7 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 // transferOwnershipRequestHandlerFn - http request handler to transfer token owner ship.
 func transferOwnerRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req transferOwnerReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		original, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-		msg := types.NewMsgTransferOwnership(symbol, original, req.NewOwner)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(transferOwnerReq))
 }
 
 // mintTokenHandlerFn - http request handler to mint token.

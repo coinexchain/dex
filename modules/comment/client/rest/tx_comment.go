@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -31,19 +32,17 @@ func (req *NewThreadReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 
-func (req *NewThreadReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *NewThreadReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	donation, err := strconv.ParseInt(req.Donation, 10, 63)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Donation Amount.")
-		return nil
+		return nil, errors.New("invalid donation amount")
 	}
 
 	if req.ContentType == types.ShortHanziLZ4 {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "ShortHanziLZ4 is not valid for rest.")
-		return nil
+		return nil, errors.New("ShortHanziLZ4 is not valid for rest")
 	}
 
-	return types.NewMsgCommentToken(sender, req.Token, donation, req.Title, req.Content, req.ContentType, nil)
+	return types.NewMsgCommentToken(sender, req.Token, donation, req.Title, req.Content, req.ContentType, nil), nil
 }
 
 func createNewThreadHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -73,28 +72,24 @@ func (req *FollowupCommentReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 
-func (req *FollowupCommentReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *FollowupCommentReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	donation, err := strconv.ParseInt(req.Donation, 10, 63)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Donation Amount.")
-		return nil
+		return nil, errors.New("invalid donation amount")
 	}
 
 	crefs := make([]types.CommentRef, 1)
 	idRewarded, err := strconv.ParseInt(req.IDRewarded, 10, 63)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Comment ID.")
-		return nil
+		return nil, errors.New("invalid comment ID")
 	}
 	rewardTarget, err := sdk.AccAddressFromBech32(req.RewardTarget)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return nil
+		return nil, err
 	}
 	rewardAmount, err := strconv.ParseInt(req.RewardAmount, 10, 63)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Reward Amount.")
-		return nil
+		return nil, errors.New("invalid reward amount")
 	}
 	crefs[0].ID = uint64(idRewarded)
 	crefs[0].RewardTarget = rewardTarget
@@ -103,11 +98,10 @@ func (req *FollowupCommentReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddre
 	crefs[0].Attitudes = req.Attitudes
 
 	if req.ContentType == types.ShortHanziLZ4 {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "ShortHanziLZ4 is not valid for rest.")
-		return nil
+		return nil, errors.New("ShortHanziLZ4 is not valid for rest")
 	}
 
-	return types.NewMsgCommentToken(sender, req.Token, donation, req.Title, req.Content, req.ContentType, crefs)
+	return types.NewMsgCommentToken(sender, req.Token, donation, req.Title, req.Content, req.ContentType, crefs), nil
 }
 
 func createFollowupCommentHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -136,23 +130,20 @@ func (req *RewardCommentsReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 
-func (req *RewardCommentsReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *RewardCommentsReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	crefs := make([]types.CommentRef, len(req.References))
 	for i, r := range req.References {
 		idRewarded, err := strconv.ParseInt(r.ID, 10, 63)
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Comment ID.")
-			return nil
+			return nil, errors.New("invalid comment ID")
 		}
 		rewardTarget, err := sdk.AccAddressFromBech32(r.RewardTarget)
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return nil
+			return nil, err
 		}
 		rewardAmount, err := strconv.ParseInt(r.RewardAmount, 10, 63)
 		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Reward Amount.")
-			return nil
+			return nil, errors.New("invalid reward amount")
 		}
 		crefs[i].ID = uint64(idRewarded)
 		crefs[i].RewardTarget = rewardTarget
@@ -168,7 +159,7 @@ func (req *RewardCommentsReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddres
 	if len(msg.Content) == 0 {
 		msg.Content = []byte("No-Content")
 	}
-	return msg
+	return msg, nil
 }
 
 func createRewardCommentsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {

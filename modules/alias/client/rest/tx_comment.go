@@ -28,13 +28,13 @@ func (req *AliasUpdateReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 
-func (req *AliasUpdateReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *AliasUpdateReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	return &types.MsgAliasUpdate{
 		Owner:     sender,
 		Alias:     req.Alias,
 		IsAdd:     req.IsAdd,
 		AsDefault: req.AsDefault,
-	}
+	}, nil
 }
 
 func aliasUpdateHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {

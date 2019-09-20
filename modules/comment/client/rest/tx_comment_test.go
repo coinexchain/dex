@@ -24,7 +24,8 @@ func Test1(t *testing.T) {
 		ContentType: types.UTF8Text,
 	}
 	addr, _ := sdk.AccAddressFromBech32("coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a")
-	msg := newThreadReq.GetMsg(respWr, addr).(*types.MsgCommentToken)
+	msg, _ := newThreadReq.GetMsg(nil, addr)
+	_ = msg.(*types.MsgCommentToken)
 	correct, _ := json.Marshal(&types.MsgCommentToken{
 		Sender:      addr,
 		Token:       "cet",
@@ -49,7 +50,8 @@ func Test1(t *testing.T) {
 		RewardAmount: "10",
 		Attitudes:    []int32{types.Like, types.Favorite},
 	}
-	msg = followupCommentReq.GetMsg(respWr, addr).(*types.MsgCommentToken)
+	msg, _ = followupCommentReq.GetMsg(nil, addr)
+	_ = msg.(*types.MsgCommentToken)
 	addr2, _ := sdk.AccAddressFromBech32("coinex1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8vc4efa")
 	correct, _ = json.Marshal(&types.MsgCommentToken{
 		Sender:      addr,
@@ -84,7 +86,8 @@ func Test1(t *testing.T) {
 			},
 		},
 	}
-	msg = rewardCommentsReq.GetMsg(respWr, addr).(*types.MsgCommentToken)
+	msg, _ = rewardCommentsReq.GetMsg(nil, addr)
+	_ = msg.(*types.MsgCommentToken)
 	correct, _ = json.Marshal(&types.MsgCommentToken{
 		Sender:      addr,
 		Token:       "cet",

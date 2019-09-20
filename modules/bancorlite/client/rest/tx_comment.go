@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -32,25 +33,22 @@ func (req *BancorInitReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 
-func (req *BancorInitReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *BancorInitReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	maxPrice, err := sdk.NewDecFromStr(req.MaxPrice)
 	if err != nil || maxPrice.IsZero() {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Max Price is Invalid or Zero")
-		return nil
+		return nil, errors.New("Max Price is Invalid or Zero")
 	}
 	initPrice, err := sdk.NewDecFromStr(req.InitPrice)
 	if err != nil || initPrice.IsNegative() {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Negative init price")
+		return nil, err
 	}
 	maxSupply, ok := sdk.NewIntFromString(req.MaxSupply)
 	if !ok {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Max Supply is Invalid")
-		return nil
+		return nil, errors.New("Max Supply is Invalid")
 	}
 	time, converr := strconv.ParseInt(req.EarliestCancelTime, 10, 64)
 	if converr != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid enable cancel time")
-		return nil
+		return nil, errors.New("Invalid enable cancel time")
 	}
 
 	return &types.MsgBancorInit{
@@ -61,7 +59,7 @@ func (req *BancorInitReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) s
 		MaxSupply:          maxSupply,
 		MaxPrice:           maxPrice,
 		EarliestCancelTime: time,
-	}
+	}, nil
 }
 
 func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -86,17 +84,15 @@ func (req *BancorTradeReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 
-func (req *BancorTradeReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *BancorTradeReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	amount, err := strconv.ParseInt(req.Amount, 10, 64)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Amount.")
-		return nil
+		return nil, errors.New("invalid amount")
 	}
 
 	moneyLimit, err := strconv.ParseInt(req.MoneyLimit, 10, 64)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Money Limit.")
-		return nil
+		return nil, errors.New("invalid money limit")
 	}
 
 	return &types.MsgBancorTrade{
@@ -106,7 +102,7 @@ func (req *BancorTradeReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) 
 		Amount:     amount,
 		IsBuy:      req.IsBuy,
 		MoneyLimit: moneyLimit,
-	}
+	}, nil
 }
 
 func bancorTradeHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -128,12 +124,12 @@ func (req *BancorCancelReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 
-func (req *BancorCancelReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *BancorCancelReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	return &types.MsgBancorCancel{
 		Owner: sender,
 		Stock: req.Stock,
 		Money: req.Money,
-	}
+	}, nil
 }
 
 func bancorCancelHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {

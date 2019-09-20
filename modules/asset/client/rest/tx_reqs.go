@@ -1,8 +1,13 @@
 package rest
 
 import (
+	"net/http"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+
+	"github.com/coinexchain/dex/client/restutil"
+	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 type (
@@ -60,3 +65,23 @@ type (
 		Identity    *string      `json:"identity,omitempty" yaml:"identity,omitempty"`
 	}
 )
+
+func (req *transferOwnerReq) New() restutil.RestReq {
+	return new(transferOwnerReq)
+}
+func (req *transferOwnerReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *transferOwnerReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
+	return types.NewMsgTransferOwnership(symbol, sender, req.NewOwner), nil
+}
+
+//func (req *mintTokenReq) New() restutil.RestReq {
+//	return new(mintTokenReq)
+//}
+//func (req *mintTokenReq) GetBaseReq() *rest.BaseReq {
+//	return &req.BaseReq
+//}
+//func (req *mintTokenReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
+//	return types.NewMsgMintToken(symbol, amt, owner)
+//}
