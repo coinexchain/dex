@@ -18,12 +18,6 @@ var (
 	emptyJSONArr = []byte("[]")
 )
 
-// register REST routes
-func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, storeName string) {
-	registerQueryRoutes(cliCtx, r, cdc, storeName)
-	registerTXRoutes(cliCtx, r, cdc)
-}
-
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, storeName string) {
 	r.HandleFunc("/asset/tokens/{symbol}", QueryTokenRequestHandlerFn(storeName, cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/asset/tokens", QueryTokensRequestHandlerFn(storeName, cliCtx)).Methods("GET")
