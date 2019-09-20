@@ -23,6 +23,10 @@ type RestHandlerBuilder struct {
 	reqPrototype RestReq
 }
 
+func NewRestHandler(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) http.HandlerFunc {
+	return NewRestHandlerBuilder(cdc, cliCtx, req).Build()
+}
+
 func NewRestHandlerBuilder(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) *RestHandlerBuilder {
 	return &RestHandlerBuilder{
 		cdc:          cdc,

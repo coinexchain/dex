@@ -38,7 +38,5 @@ func (req *AliasUpdateReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) 
 }
 
 func aliasUpdateHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	var req AliasUpdateReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return restutil.NewRestHandler(cdc, cliCtx, new(AliasUpdateReq))
 }

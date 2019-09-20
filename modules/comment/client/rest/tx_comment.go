@@ -47,9 +47,7 @@ func (req *NewThreadReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sd
 }
 
 func createNewThreadHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	var req NewThreadReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return restutil.NewRestHandler(cdc, cliCtx, new(NewThreadReq))
 }
 
 type FollowupCommentReq struct {
@@ -113,9 +111,7 @@ func (req *FollowupCommentReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddre
 }
 
 func createFollowupCommentHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	var req FollowupCommentReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return restutil.NewRestHandler(cdc, cliCtx, new(FollowupCommentReq))
 }
 
 type CommentRef struct {
@@ -176,7 +172,5 @@ func (req *RewardCommentsReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddres
 }
 
 func createRewardCommentsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	var req RewardCommentsReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return restutil.NewRestHandler(cdc, cliCtx, new(RewardCommentsReq))
 }

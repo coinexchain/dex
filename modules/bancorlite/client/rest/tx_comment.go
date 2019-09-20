@@ -65,9 +65,7 @@ func (req *BancorInitReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) s
 }
 
 func bancorInitHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	var req BancorInitReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return restutil.NewRestHandler(cdc, cliCtx, new(BancorInitReq))
 }
 
 type BancorTradeReq struct {
@@ -112,9 +110,7 @@ func (req *BancorTradeReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) 
 }
 
 func bancorTradeHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	var req BancorTradeReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return restutil.NewRestHandler(cdc, cliCtx, new(BancorTradeReq))
 }
 
 type BancorCancelReq struct {
@@ -141,7 +137,5 @@ func (req *BancorCancelReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress)
 }
 
 func bancorCancelHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	var req BancorCancelReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return restutil.NewRestHandler(cdc, cliCtx, new(BancorCancelReq))
 }
