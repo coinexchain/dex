@@ -90,306 +90,45 @@ func transferOwnerRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 
 // mintTokenHandlerFn - http request handler to mint token.
 func mintTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req mintTokenReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-		amt, ok := sdk.NewIntFromString(req.Amount)
-		if !ok {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrInvalidTokenMintAmt(req.Amount).Error())
-			return
-		}
-		msg := types.NewMsgMintToken(symbol, amt, owner)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(mintTokenReq))
 }
 
 // burnTokenHandlerFn - http request handler to burn token.
 func burnTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req burnTokenReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-		amt, ok := sdk.NewIntFromString(req.Amount)
-		if !ok {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrInvalidTokenBurnAmt(req.Amount).Error())
-			return
-		}
-		msg := types.NewMsgBurnToken(symbol, amt, owner)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(burnTokenReq))
 }
 
 // forbidTokenHandlerFn - http request handler to forbid token.
 func forbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req forbidTokenReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-
-		msg := types.NewMsgForbidToken(symbol, owner)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(forbidTokenReq))
 }
 
 // unForbidTokenHandlerFn - http request handler to unforbid token.
 func unForbidTokenHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req unForbidTokenReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-
-		msg := types.NewMsgUnForbidToken(symbol, owner)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(unForbidTokenReq))
 }
 
 // addWhitelistHandlerFn - http request handler to add whitelist.
 func addWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req addrListReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-
-		msg := types.NewMsgAddTokenWhitelist(symbol, owner, req.AddrList)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(addWhiteListReq))
 }
 
 // removeWhitelistHandlerFn - http request handler to add whitelist.
 func removeWhitelistHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req addrListReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-
-		msg := types.NewMsgRemoveTokenWhitelist(symbol, owner, req.AddrList)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(removeWhiteListReq))
 }
 
 // forbidAddrHandlerFn - http request handler to forbid addresses.
 func forbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req addrListReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-
-		msg := types.NewMsgForbidAddr(symbol, owner, req.AddrList)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(forbidAddrReq))
 }
 
 // unForbidAddrHandlerFn - http request handler to unforbid addresses.
 func unForbidAddrHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req addrListReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		symbol := getSymbol(r)
-
-		msg := types.NewMsgUnForbidAddr(symbol, owner, req.AddrList)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(unforbidAddrReq))
 }
 
 // modifyTokenInfoHandlerFn - http request handler to modify token url.
 func modifyTokenInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req modifyTokenInfoReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		url := types.DoNotModifyTokenInfo
-		if req.URL != nil {
-			url = *req.URL
-		}
-
-		description := types.DoNotModifyTokenInfo
-		if req.Description != nil {
-			description = *req.Description
-		}
-
-		identity := types.DoNotModifyTokenInfo
-		if req.Identity != nil {
-			identity = *req.Identity
-		}
-
-		symbol := getSymbol(r)
-		msg := types.NewMsgModifyTokenInfo(symbol, url, description, identity, owner)
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
-}
-
-func getSymbol(r *http.Request) string {
-	vars := mux.Vars(r)
-	return vars[symbol]
+	return restutil.NewRestHandler(cdc, cliCtx, new(modifyTokenInfoReq))
 }

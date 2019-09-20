@@ -3,6 +3,8 @@ package rest
 import (
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
@@ -52,8 +54,20 @@ type (
 	unForbidTokenReq struct {
 		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
 	}
-	// addrListReq defines the properties of a whitelist or forbidden addr request's body.
-	addrListReq struct {
+	// the flowing 4 reqs defines the properties of a whitelist or forbidden addr request's body.
+	addWhiteListReq struct {
+		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
+		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
+	}
+	removeWhiteListReq struct {
+		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
+		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
+	}
+	forbidAddrReq struct {
+		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
+		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
+	}
+	unforbidAddrReq struct {
 		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
 		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
 	}
@@ -72,16 +86,137 @@ func (req *transferOwnerReq) New() restutil.RestReq {
 func (req *transferOwnerReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
-func (req *transferOwnerReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
-	return types.NewMsgTransferOwnership(symbol, sender, req.NewOwner), nil
+func (req *transferOwnerReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	return types.NewMsgTransferOwnership(symbol, owner, req.NewOwner), nil
 }
 
-//func (req *mintTokenReq) New() restutil.RestReq {
-//	return new(mintTokenReq)
-//}
-//func (req *mintTokenReq) GetBaseReq() *rest.BaseReq {
-//	return &req.BaseReq
-//}
-//func (req *mintTokenReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
-//	return types.NewMsgMintToken(symbol, amt, owner)
-//}
+func (req *mintTokenReq) New() restutil.RestReq {
+	return new(mintTokenReq)
+}
+func (req *mintTokenReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *mintTokenReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
+	amt, ok := sdk.NewIntFromString(req.Amount)
+	if !ok {
+		return nil, types.ErrInvalidTokenMintAmt(req.Amount)
+	}
+	msg := types.NewMsgMintToken(symbol, amt, owner)
+	if err := msg.ValidateBasic(); err != nil {
+		return nil, err
+	}
+	return types.NewMsgMintToken(symbol, amt, owner), nil
+}
+
+func (req *burnTokenReq) New() restutil.RestReq {
+	return new(burnTokenReq)
+}
+func (req *burnTokenReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *burnTokenReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
+	amt, ok := sdk.NewIntFromString(req.Amount)
+	if !ok {
+		return nil, types.ErrInvalidTokenBurnAmt(req.Amount)
+	}
+	return types.NewMsgBurnToken(symbol, amt, owner), nil
+}
+
+func (req *forbidTokenReq) New() restutil.RestReq {
+	return new(forbidTokenReq)
+}
+func (req *forbidTokenReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *forbidTokenReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
+	return types.NewMsgForbidToken(symbol, owner), nil
+}
+
+func (req *unForbidTokenReq) New() restutil.RestReq {
+	return new(unForbidTokenReq)
+}
+func (req *unForbidTokenReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *unForbidTokenReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
+	return types.NewMsgUnForbidToken(symbol, owner), nil
+}
+
+func (req *addWhiteListReq) New() restutil.RestReq {
+	return new(addWhiteListReq)
+}
+func (req *addWhiteListReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *addWhiteListReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
+	return types.NewMsgAddTokenWhitelist(symbol, owner, req.AddrList), nil
+}
+
+func (req *removeWhiteListReq) New() restutil.RestReq {
+	return new(removeWhiteListReq)
+}
+func (req *removeWhiteListReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *removeWhiteListReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
+	return types.NewMsgRemoveTokenWhitelist(symbol, owner, req.AddrList), nil
+}
+
+func (req *forbidAddrReq) New() restutil.RestReq {
+	return new(forbidAddrReq)
+}
+func (req *forbidAddrReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *forbidAddrReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
+	return types.NewMsgForbidAddr(symbol, owner, req.AddrList), nil
+}
+
+func (req *unforbidAddrReq) New() restutil.RestReq {
+	return new(unforbidAddrReq)
+}
+func (req *unforbidAddrReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *unforbidAddrReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	symbol := getSymbol(r)
+	return types.NewMsgUnForbidAddr(symbol, owner, req.AddrList), nil
+}
+
+func (req *modifyTokenInfoReq) New() restutil.RestReq {
+	return new(modifyTokenInfoReq)
+}
+func (req *modifyTokenInfoReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *modifyTokenInfoReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
+	url := types.DoNotModifyTokenInfo
+	if req.URL != nil {
+		url = *req.URL
+	}
+
+	description := types.DoNotModifyTokenInfo
+	if req.Description != nil {
+		description = *req.Description
+	}
+
+	identity := types.DoNotModifyTokenInfo
+	if req.Identity != nil {
+		identity = *req.Identity
+	}
+
+	symbol := getSymbol(r)
+	return types.NewMsgModifyTokenInfo(symbol, url, description, identity, owner), nil
+}
+
+func getSymbol(r *http.Request) string {
+	vars := mux.Vars(r)
+	return vars[symbol]
+}
