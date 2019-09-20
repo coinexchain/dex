@@ -427,6 +427,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.keyComment,
 		app.bankxKeeper,
 		app.assetKeeper,
+		app.accountKeeper,
 		app.distrxKeeper,
 		eventTypeMsgQueue,
 	)

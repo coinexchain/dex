@@ -1,6 +1,7 @@
 package comment
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -9,6 +10,7 @@ import (
 
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -68,6 +70,17 @@ func (k *mocBankxKeeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.
 	return nil
 }
 
+type mocAccountKeeper struct {
+	nosuchAcc sdk.AccAddress
+}
+
+func (k *mocAccountKeeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account {
+	if bytes.Equal(addr, k.nosuchAcc) {
+		return nil
+	}
+	return &auth.BaseAccount{}
+}
+
 type mocAssetStatusKeeper struct {
 	assets map[string]bool
 }
@@ -117,6 +130,7 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	k := keepers.NewKeeper(key,
 		&mocBankxKeeper{maxAmount: sdk.NewInt(100)},
 		&mocAssetStatusKeeper{assets: map[string]bool{"usdt": true, "btc": true, "cet": true}},
+		&mocAccountKeeper{nosuchAcc: []byte{}},
 		&mocDistributionxKeeper{poolName: "comPool", maxAmount: sdk.NewInt(100)},
 		"",
 	)

@@ -76,6 +76,7 @@ type Keeper struct {
 	Cck               *CommentCountKeeper
 	Bxk               types.ExpectedBankxKeeper
 	Axk               types.ExpectedAssetStatusKeeper
+	Ak                types.ExpectedAccountKeeper
 	Dk                types.ExpectedDistributionxKeeper
 	EventTypeMsgQueue string
 }
@@ -83,12 +84,14 @@ type Keeper struct {
 func NewKeeper(key sdk.StoreKey,
 	bxk types.ExpectedBankxKeeper,
 	axk types.ExpectedAssetStatusKeeper,
+	ak types.ExpectedAccountKeeper,
 	dk types.ExpectedDistributionxKeeper,
 	et string) *Keeper {
 	return &Keeper{
 		Cck:               NewCommentCountKeeper(key),
 		Bxk:               bxk,
 		Axk:               axk,
+		Ak:                ak,
 		Dk:                dk,
 		EventTypeMsgQueue: et,
 	}

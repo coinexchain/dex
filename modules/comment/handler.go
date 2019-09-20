@@ -38,6 +38,10 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 			continue
 		}
 		rewardCoin := sdk.NewCoin(ref.RewardToken, sdk.NewInt(ref.RewardAmount))
+		acc := k.Ak.GetAccount(ctx, ref.RewardTarget)
+		if acc == nil {
+			return types.ErrNoSuchAccount(ref.RewardTarget.String()).Result()
+		}
 		res := k.Bxk.SendCoins(ctx, msg.Sender, ref.RewardTarget, sdk.Coins{rewardCoin})
 		if res != nil {
 			return res.Result()

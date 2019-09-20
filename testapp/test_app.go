@@ -277,6 +277,7 @@ func (app *TestApp) initKeepers(invCheckPeriod uint) {
 		app.keyComment,
 		app.BankxKeeper,
 		app.AssetKeeper,
+		app.AccountKeeper,
 		app.DistrxKeeper,
 		eventTypeMsgQueue,
 	)

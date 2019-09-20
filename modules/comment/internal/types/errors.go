@@ -20,6 +20,7 @@ const (
 	CodeNegativeReward     sdk.CodeType = 908
 	CodeNoSuchAsset        sdk.CodeType = 909
 	CodeTitleTooLarge      sdk.CodeType = 910
+	CodeNoSuchAccount      sdk.CodeType = 911
 	CodeMarshalFailed      sdk.CodeType = 914
 )
 
@@ -63,4 +64,8 @@ func ErrNegativeReward() sdk.Error {
 
 func ErrNoSuchAsset() sdk.Error {
 	return sdk.NewError(CodeSpaceComment, CodeNoSuchAsset, "No such asset")
+}
+
+func ErrNoSuchAccount(acc string) sdk.Error {
+	return sdk.NewError(CodeSpaceComment, CodeNoSuchAccount, fmt.Sprintf("No such account: %s", acc))
 }
