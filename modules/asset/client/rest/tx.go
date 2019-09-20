@@ -103,17 +103,6 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
-		bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(req.Symbol))
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		route := fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryToken)
-		if res, _, _ := cliCtx.QueryWithData(route, bz); res != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrDuplicateTokenSymbol(symbol).Error())
-			return
-		}
-
 		owner, err := sdk.AccAddressFromBech32(req.BaseReq.From)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -125,6 +114,18 @@ func issueRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrInvalidTokenSupply(req.TotalSupply).Error())
 			return
 		}
+
+		bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(req.Symbol))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		route := fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryToken)
+		if res, _, _ := cliCtx.QueryWithData(route, bz); res != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, types.ErrDuplicateTokenSymbol(symbol).Error())
+			return
+		}
+
 		msg := types.NewMsgIssueToken(req.Name, req.Symbol, amt, owner,
 			req.Mintable, req.Burnable, req.AddrForbiddable, req.TokenForbiddable, req.URL, req.Description, req.Identity)
 		if err := msg.ValidateBasic(); err != nil {
