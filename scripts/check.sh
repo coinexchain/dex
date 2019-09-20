@@ -23,7 +23,10 @@ fi
 
 
 find . -name "*.go" -not -path "./vendor/*" -not -path "./git/*" | xargs gofmt -w
-find . -name "*.go" -not -path "./vendor/*" -not -path "./git/*" | xargs goimports -w -local github.com/coinexchain
+
+if [ "$RUN_IN_TRAVIS" != "true" ]; then
+    find . -name "*.go" -not -path "./vendor/*" -not -path "./git/*" | xargs goimports -w -local github.com/coinexchain
+fi
 
 linter_targets=$(glide novendor)
 
@@ -38,8 +41,8 @@ test -z "$(golangci-lint  run -j 4 --disable-all \
 --exclude='should have comment' \
 --exclude='and that stutters;' \
 --deadline=10m $linter_targets 2>&1 | grep -v 'ALL_CAPS\|OP_' 2>&1 | tee /dev/stderr)"
-date +%s
-go test -covermode=atomic -coverprofile=coverage.out -race -tags rpctest $linter_targets
-date +%s
+
+time go test -covermode=atomic -coverprofile=coverage.out -race -tags rpctest $linter_targets
+
 
 

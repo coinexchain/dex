@@ -115,10 +115,9 @@ matrix:
         - go mod vendor
         - go get golang.org/x/tools/cmd/cover
         - go get github.com/mattn/goveralls
-        - go get golang.org/x/tools/cmd/goimports
 
       script:
-        - ./scripts/check.sh
+        - RUN_IN_TRAVIS=true ./scripts/check.sh
 
 notifications:
   email:
