@@ -62,3 +62,12 @@ func TestGenesisState_Validate(t *testing.T) {
 	}
 
 }
+func TestGenesis_ExportImport(t *testing.T) {
+	testApp, ctx := prepareApp()
+	genesisState := bancorlite.DefaultGenesisState()
+	bancorlite.InitGenesis(ctx, testApp.BancorKeeper, genesisState)
+
+	exportState := bancorlite.ExportGenesis(ctx, testApp.BancorKeeper)
+	require.Equal(t, genesisState, exportState)
+
+}

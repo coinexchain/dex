@@ -1,6 +1,7 @@
 package bancorlite_test
 
 import (
+	"math"
 	"reflect"
 	"testing"
 
@@ -245,6 +246,23 @@ func Test_handleMsgBancorInit(t *testing.T) {
 			},
 			want: types.ErrNonMarketExist().Result(),
 		},
+		{
+			name: "sender does not have enough stock to sell",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msg: types.MsgBancorInit{
+					Owner:              notHaveCetAddress,
+					Stock:              money,
+					Money:              stock,
+					InitPrice:          sdk.NewDec(0),
+					MaxSupply:          sdk.NewInt(issueAmount + 1),
+					MaxPrice:           sdk.NewDec(10),
+					EarliestCancelTime: 0,
+				},
+			},
+			want: types.ErrNonMarketExist().Result(),
+		},
 	}
 
 	for _, tt := range tests {
@@ -296,17 +314,32 @@ func Test_handleMsgBancorTrade(t *testing.T) {
 
 }
 func prepareBancorInit(input testInput) bool {
-	msgInit := types.MsgBancorInit{
-		Owner:              haveCetAddress,
-		Stock:              stock,
-		Money:              money,
-		InitPrice:          sdk.NewDec(0),
-		MaxSupply:          sdk.NewInt(100),
-		MaxPrice:           sdk.NewDec(10),
-		EarliestCancelTime: 0,
+	msgInit := []types.MsgBancorInit{
+		{
+			Owner:              haveCetAddress,
+			Stock:              stock,
+			Money:              money,
+			InitPrice:          sdk.NewDec(0),
+			MaxSupply:          sdk.NewInt(100),
+			MaxPrice:           sdk.NewDec(10),
+			EarliestCancelTime: 0,
+		}, {
+			Owner:              haveCetAddress,
+			Stock:              stock,
+			Money:              "cet",
+			InitPrice:          sdk.NewDec(10),
+			MaxSupply:          sdk.NewInt(issueAmount / 2),
+			MaxPrice:           sdk.NewDec(100),
+			EarliestCancelTime: 0,
+		},
 	}
-	initRes := input.handler(input.ctx, msgInit)
-	return initRes.IsOK()
+	for _, msg := range msgInit {
+		initRes := input.handler(input.ctx, msg)
+		if !initRes.IsOK() {
+			return false
+		}
+	}
+	return true
 }
 func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 	type args struct {
@@ -352,6 +385,69 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 				},
 			},
 			want: sdk.Result{},
+		}, {
+			name: "stock pool out of bond",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgTrade: types.MsgBancorTrade{
+					Sender:     tradeAddr,
+					Stock:      stock,
+					Money:      money,
+					Amount:     100,
+					IsBuy:      true,
+					MoneyLimit: 100,
+				},
+			},
+			want: types.ErrStockInPoolOutofBound().Result(),
+		},
+		{
+			name: "money cross limit",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgTrade: types.MsgBancorTrade{
+					Sender:     tradeAddr,
+					Stock:      stock,
+					Money:      money,
+					Amount:     5,
+					IsBuy:      false,
+					MoneyLimit: 200,
+				},
+			},
+			want: types.ErrMoneyCrossLimit("less than").Result(),
+		},
+		{
+			name: "Insufficient coins",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgTrade: types.MsgBancorTrade{
+					Sender:     tradeAddr,
+					Stock:      stock,
+					Money:      "cet",
+					Amount:     issueAmount / 2,
+					IsBuy:      true,
+					MoneyLimit: math.MaxInt64,
+				},
+			},
+			want: sdk.ErrInsufficientCoins("insufficient account funds; 204220000000cet,209999999999teos,5tusdt < 5775000000000cet").Result(),
+		},
+		{
+			name: "trade quantity too small",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgTrade: types.MsgBancorTrade{
+					Sender:     tradeAddr,
+					Stock:      stock,
+					Money:      "cet",
+					Amount:     1,
+					IsBuy:      true,
+					MoneyLimit: math.MaxInt64,
+				},
+			},
+			want: types.ErrTradeQuantityToSmall(0).Result(),
 		},
 	}
 
@@ -402,6 +498,19 @@ func Test_BancorCancel(t *testing.T) {
 				},
 			},
 			want: sdk.Result{},
+		},
+		{
+			name: "bancor does not exist",
+			args: args{
+				ctx: input.ctx,
+				k:   input.bik,
+				msgCancel: types.MsgBancorCancel{
+					Owner: haveCetAddress,
+					Stock: money,
+					Money: stock,
+				},
+			},
+			want: types.ErrNoBancorExists().Result(),
 		},
 	}
 

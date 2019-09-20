@@ -25,7 +25,7 @@ func NewGenesisState(params types.Params, bancorInfoMap map[string]keepers.Banco
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(types.DefaultParams(), nil)
+	return NewGenesisState(types.DefaultParams(), make(map[string]keepers.BancorInfo))
 }
 
 // InitGenesis - Init store state from genesis data
