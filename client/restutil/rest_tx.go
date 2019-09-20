@@ -12,39 +12,41 @@ import (
 )
 
 type RestReq interface {
+	New() RestReq
 	GetBaseReq() *rest.BaseReq
 	GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg
 }
 
 type RestHandlerBuilder struct {
-	cdc     *codec.Codec
-	cliCtx  context.CLIContext
-	restReq RestReq
+	cdc          *codec.Codec
+	cliCtx       context.CLIContext
+	reqPrototype RestReq
 }
 
 func NewRestHandlerBuilder(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) *RestHandlerBuilder {
 	return &RestHandlerBuilder{
-		cdc:     cdc,
-		cliCtx:  cliCtx,
-		restReq: req,
+		cdc:          cdc,
+		cliCtx:       cliCtx,
+		reqPrototype: req,
 	}
 }
 
-func (rhb *RestHandlerBuilder) preProc(w http.ResponseWriter, r *http.Request) (sdk.AccAddress, bool) {
-	if !rest.ReadRESTReq(w, r, rhb.cdc, rhb.restReq) {
-		return nil, false
+func (rhb *RestHandlerBuilder) preProc(w http.ResponseWriter, r *http.Request) (RestReq, sdk.AccAddress, bool) {
+	req := rhb.reqPrototype.New()
+	if !rest.ReadRESTReq(w, r, rhb.cdc, req) {
+		return nil, nil, false
 	}
 
-	baseReq := rhb.restReq.GetBaseReq()
+	baseReq := req.GetBaseReq()
 	*baseReq = baseReq.Sanitize()
 	if !baseReq.ValidateBasic(w) {
-		return nil, false
+		return nil, nil, false
 	}
 
 	sender, err := sdk.AccAddressFromBech32(baseReq.From)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return nil, false
+		return nil, nil, false
 	}
 
 	sequence := baseReq.Sequence
@@ -52,21 +54,21 @@ func (rhb *RestHandlerBuilder) preProc(w http.ResponseWriter, r *http.Request) (
 		_, sequence, err = auth.NewAccountRetriever(rhb.cliCtx).GetAccountNumberSequence(sender)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Can not get sequence from blockchain.")
-			return nil, false
+			return nil, nil, false
 		}
 	}
 	baseReq.Sequence = sequence
 
-	return sender, true
+	return req, sender, true
 }
 
 func (rhb *RestHandlerBuilder) Build() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		sender, ok := rhb.preProc(w, r)
+		req, sender, ok := rhb.preProc(w, r)
 		if !ok {
 			return
 		}
-		msg := rhb.restReq.GetMsg(w, sender)
+		msg := req.GetMsg(w, sender)
 		if msg == nil {
 			return
 		}
@@ -74,6 +76,6 @@ func (rhb *RestHandlerBuilder) Build() http.HandlerFunc {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		utils.WriteGenerateStdTxResponse(w, rhb.cliCtx, *rhb.restReq.GetBaseReq(), []sdk.Msg{msg})
+		utils.WriteGenerateStdTxResponse(w, rhb.cliCtx, *req.GetBaseReq(), []sdk.Msg{msg})
 	}
 }

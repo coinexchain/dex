@@ -21,6 +21,9 @@ type AliasUpdateReq struct {
 
 var _ restutil.RestReq = &AliasUpdateReq{}
 
+func (req *AliasUpdateReq) New() restutil.RestReq {
+	return new(AliasUpdateReq)
+}
 func (req *AliasUpdateReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }

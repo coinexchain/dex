@@ -25,6 +25,9 @@ type BancorInitReq struct {
 
 var _ restutil.RestReq = &BancorInitReq{}
 
+func (req *BancorInitReq) New() restutil.RestReq {
+	return new(BancorInitReq)
+}
 func (req *BancorInitReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
@@ -78,6 +81,9 @@ type BancorTradeReq struct {
 
 var _ restutil.RestReq = &BancorTradeReq{}
 
+func (req *BancorTradeReq) New() restutil.RestReq {
+	return new(BancorTradeReq)
+}
 func (req *BancorTradeReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
@@ -119,6 +125,9 @@ type BancorCancelReq struct {
 
 var _ restutil.RestReq = &BancorCancelReq{}
 
+func (req *BancorCancelReq) New() restutil.RestReq {
+	return new(BancorCancelReq)
+}
 func (req *BancorCancelReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }

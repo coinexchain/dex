@@ -156,8 +156,7 @@ func transferOwnerRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			return
 		}
 
-		vars := mux.Vars(r)
-		symbol := vars["symbol"]
+		symbol := getSymbol(r)
 		msg := types.NewMsgTransferOwnership(symbol, original, req.NewOwner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

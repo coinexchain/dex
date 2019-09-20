@@ -24,6 +24,9 @@ type NewThreadReq struct {
 
 var _ restutil.RestReq = &NewThreadReq{}
 
+func (req *NewThreadReq) New() restutil.RestReq {
+	return new(NewThreadReq)
+}
 func (req *NewThreadReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
@@ -65,6 +68,9 @@ type FollowupCommentReq struct {
 
 var _ restutil.RestReq = &FollowupCommentReq{}
 
+func (req *FollowupCommentReq) New() restutil.RestReq {
+	return new(FollowupCommentReq)
+}
 func (req *FollowupCommentReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
@@ -127,6 +133,9 @@ type RewardCommentsReq struct {
 
 var _ restutil.RestReq = &RewardCommentsReq{}
 
+func (req *RewardCommentsReq) New() restutil.RestReq {
+	return new(RewardCommentsReq)
+}
 func (req *RewardCommentsReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
