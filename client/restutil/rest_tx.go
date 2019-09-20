@@ -31,6 +31,24 @@ func NewRestHandlerBuilder(cdc *codec.Codec, cliCtx context.CLIContext, req Rest
 	}
 }
 
+func (rhb *RestHandlerBuilder) Build() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		req, sender, ok := rhb.preProc(w, r)
+		if !ok {
+			return
+		}
+		msg := req.GetMsg(w, sender)
+		if msg == nil {
+			return
+		}
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		utils.WriteGenerateStdTxResponse(w, rhb.cliCtx, *req.GetBaseReq(), []sdk.Msg{msg})
+	}
+}
+
 func (rhb *RestHandlerBuilder) preProc(w http.ResponseWriter, r *http.Request) (RestReq, sdk.AccAddress, bool) {
 	req := rhb.reqPrototype.New()
 	if !rest.ReadRESTReq(w, r, rhb.cdc, req) {
@@ -60,22 +78,4 @@ func (rhb *RestHandlerBuilder) preProc(w http.ResponseWriter, r *http.Request) (
 	baseReq.Sequence = sequence
 
 	return req, sender, true
-}
-
-func (rhb *RestHandlerBuilder) Build() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		req, sender, ok := rhb.preProc(w, r)
-		if !ok {
-			return
-		}
-		msg := req.GetMsg(w, sender)
-		if msg == nil {
-			return
-		}
-		if err := msg.ValidateBasic(); err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		utils.WriteGenerateStdTxResponse(w, rhb.cliCtx, *req.GetBaseReq(), []sdk.Msg{msg})
-	}
 }
