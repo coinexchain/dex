@@ -79,6 +79,7 @@ func createMsgBancorInit(r *rand.Rand,
 	}
 }
 func verifyBancorInit(ctx sdk.Context, keeper bancorlite.Keeper, msg bancorlite.MsgBancorInit) bool {
+	bancorInfo := keeper.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
 	return bancorInfo.Stock == msg.Stock &&
 		bancorInfo.Money == msg.Money &&
 		bancorInfo.Owner.Equals(msg.Owner) &&
