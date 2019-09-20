@@ -181,7 +181,7 @@ func Test1(t *testing.T) {
 	}
 
 	res := msgHandler(ctx, msgCTP)
-	require.Equal(t, uint64(100), keeper.Cck.GetCommentCount(ctx, "cet"))
+	require.Equal(t, uint64(100), keeper.GetCommentCount(ctx, "cet"))
 	require.Equal(t, false, res.IsOK())
 	s := `{"codespace":"sdk","code":6,"message":"Unrecognized comment Msg type: create_market_info"}`
 	require.Equal(t, s, res.Log)
@@ -192,7 +192,7 @@ func Test1(t *testing.T) {
 
 	res = msgHandler(ctx, *msg)
 	require.Equal(t, `Add 1cet to comPool`, logStrList[0])
-	require.Equal(t, uint64(100), keeper.Cck.GetCommentCount(ctx, "cet"))
+	require.Equal(t, uint64(100), keeper.GetCommentCount(ctx, "cet"))
 	s = `{"codespace":"comment","code":999,"message":"Not enough coins"}`
 	require.Equal(t, s, res.Log)
 	require.Equal(t, false, res.IsOK())
@@ -206,21 +206,21 @@ func Test1(t *testing.T) {
 	require.Equal(t, s, logStrList[1])
 	//s = `Msg(token_comment): {"id":100,"sender":"coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj","token":"cet","donation":1,"title":"First Comment","content":"http://google.com","content_type":2,"references":[{"id":900,"reward_target":"coinex1qy352eufqy352eufqy352eufqy35qqqzw64xkq","reward_token":"cet","reward_amount":0,"attitudes":[50,59]},{"id":901,"reward_target":"coinex1qy352eufqy352eufqy352eufqy35qqqrnvpntj","reward_token":"usdt","reward_amount":10,"attitudes":[52,59]}]}`
 	//require.Equal(t, s, logStrList[2])
-	require.Equal(t, uint64(101), keeper.Cck.GetCommentCount(ctx, "cet"))
+	require.Equal(t, uint64(101), keeper.GetCommentCount(ctx, "cet"))
 	require.Equal(t, "", res.Log)
 	require.Equal(t, true, res.IsOK())
 	logStrClear()
 
 	msg.Donation = 1000
 	res = msgHandler(ctx, *msg)
-	require.Equal(t, uint64(101), keeper.Cck.GetCommentCount(ctx, "cet"))
+	require.Equal(t, uint64(101), keeper.GetCommentCount(ctx, "cet"))
 	s = `{"codespace":"comment","code":999,"message":"Not enough coins"}`
 	require.Equal(t, s, res.Log)
 
 	msg.Donation = 10
 	msg.Token = "bnb"
 	res = msgHandler(ctx, *msg)
-	require.Equal(t, uint64(101), keeper.Cck.GetCommentCount(ctx, "cet"))
+	require.Equal(t, uint64(101), keeper.GetCommentCount(ctx, "cet"))
 	s = `{"codespace":"comment","code":909,"message":"No such asset"}`
 	require.Equal(t, s, res.Log)
 	require.Equal(t, false, res.IsOK())

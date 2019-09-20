@@ -22,12 +22,12 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken) sdk.Result {
-	if !k.Axk.IsTokenExists(ctx, msg.Token) {
+	if !k.IsTokenExists(ctx, msg.Token) {
 		return types.ErrNoSuchAsset().Result()
 	}
 	if msg.Donation > 0 {
 		donatedCoin := sdk.Coins{sdk.NewCoin("cet", sdk.NewInt(msg.Donation))}
-		res := k.Dk.DonateToCommunityPool(ctx, msg.Sender, donatedCoin)
+		res := k.DonateToCommunityPool(ctx, msg.Sender, donatedCoin)
 		if res != nil {
 			return res.Result()
 		}
@@ -38,24 +38,24 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 			continue
 		}
 		rewardCoin := sdk.NewCoin(ref.RewardToken, sdk.NewInt(ref.RewardAmount))
-		acc := k.Ak.GetAccount(ctx, ref.RewardTarget)
+		acc := k.GetAccount(ctx, ref.RewardTarget)
 		if acc == nil {
 			return types.ErrNoSuchAccount(ref.RewardTarget.String()).Result()
 		}
-		res := k.Bxk.SendCoins(ctx, msg.Sender, ref.RewardTarget, sdk.Coins{rewardCoin})
+		res := k.SendCoins(ctx, msg.Sender, ref.RewardTarget, sdk.Coins{rewardCoin})
 		if res != nil {
 			return res.Result()
 		}
 	}
 
-	lastCount := k.Cck.IncrCommentCount(ctx, msg.Token)
+	lastCount := k.IncrCommentCount(ctx, msg.Token)
 
-	if len(k.EventTypeMsgQueue) != 0 {
+	if len(k.GetEventTypeMsgQueue()) != 0 {
 		tokenComment := types.NewTokenComment(&msg, lastCount, ctx.BlockHeight())
 		bytes := dex.SafeJSONMarshal(tokenComment)
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				k.EventTypeMsgQueue,
+				k.GetEventTypeMsgQueue(),
 				sdk.NewAttribute(types.TokenCommentKey, string(bytes)),
 			),
 		)

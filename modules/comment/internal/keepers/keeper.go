@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
@@ -73,12 +74,12 @@ func (keeper *CommentCountKeeper) SetCommentCount(ctx sdk.Context, denorm string
 }
 
 type Keeper struct {
-	Cck               *CommentCountKeeper
-	Bxk               types.ExpectedBankxKeeper
-	Axk               types.ExpectedAssetStatusKeeper
-	Ak                types.ExpectedAccountKeeper
-	Dk                types.ExpectedDistributionxKeeper
-	EventTypeMsgQueue string
+	cck               *CommentCountKeeper
+	bxk               types.ExpectedBankxKeeper
+	axk               types.ExpectedAssetStatusKeeper
+	ak                types.ExpectedAccountKeeper
+	dk                types.ExpectedDistributionxKeeper
+	eventTypeMsgQueue string
 }
 
 func NewKeeper(key sdk.StoreKey,
@@ -88,11 +89,47 @@ func NewKeeper(key sdk.StoreKey,
 	dk types.ExpectedDistributionxKeeper,
 	et string) *Keeper {
 	return &Keeper{
-		Cck:               NewCommentCountKeeper(key),
-		Bxk:               bxk,
-		Axk:               axk,
-		Ak:                ak,
-		Dk:                dk,
-		EventTypeMsgQueue: et,
+		cck:               NewCommentCountKeeper(key),
+		bxk:               bxk,
+		axk:               axk,
+		ak:                ak,
+		dk:                dk,
+		eventTypeMsgQueue: et,
 	}
+}
+
+func (k *Keeper) GetEventTypeMsgQueue() string {
+	return k.eventTypeMsgQueue
+}
+
+func (k *Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return k.bxk.SendCoins(ctx, from, to, amt)
+}
+
+func (k *Keeper) IsTokenExists(ctx sdk.Context, denom string) bool {
+	return k.axk.IsTokenExists(ctx, denom)
+}
+
+func (k *Keeper) DonateToCommunityPool(ctx sdk.Context, fromAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return k.dk.DonateToCommunityPool(ctx, fromAddr, amt)
+}
+
+func (k *Keeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account {
+	return k.ak.GetAccount(ctx, addr)
+}
+
+func (k *Keeper) IncrCommentCount(ctx sdk.Context, denorm string) uint64 {
+	return k.cck.IncrCommentCount(ctx, denorm)
+}
+
+func (k *Keeper) GetAllCommentCount(ctx sdk.Context) map[string]uint64 {
+	return k.cck.GetAllCommentCount(ctx)
+}
+
+func (k *Keeper) GetCommentCount(ctx sdk.Context, denorm string) uint64 {
+	return k.cck.GetCommentCount(ctx, denorm)
+}
+
+func (k *Keeper) SetCommentCount(ctx sdk.Context, denorm string, count uint64) {
+	k.cck.SetCommentCount(ctx, denorm, count)
 }
