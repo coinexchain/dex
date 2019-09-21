@@ -75,6 +75,7 @@ type mocAccountKeeper struct {
 }
 
 func (k *mocAccountKeeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account {
+	fmt.Printf("= %s %s\n", addr.String(), k.nosuchAcc.String())
 	if bytes.Equal(addr, k.nosuchAcc) {
 		return nil
 	}
@@ -130,7 +131,7 @@ func newContextAndKeeper(chainid string) (sdk.Context, *Keeper) {
 	k := keepers.NewKeeper(key,
 		&mocBankxKeeper{maxAmount: sdk.NewInt(100)},
 		&mocAssetStatusKeeper{assets: map[string]bool{"usdt": true, "btc": true, "cet": true}},
-		&mocAccountKeeper{nosuchAcc: []byte{}},
+		&mocAccountKeeper{nosuchAcc: simpleAddr("00007")},
 		&mocDistributionxKeeper{poolName: "comPool", maxAmount: sdk.NewInt(100)},
 		"",
 	)
@@ -225,4 +226,10 @@ func Test1(t *testing.T) {
 	require.Equal(t, s, res.Log)
 	require.Equal(t, false, res.IsOK())
 
+	msg.Token = "cet"
+	msg.References[1].RewardTarget = simpleAddr("00007")
+	res = msgHandler(ctx, *msg)
+	s = `{"codespace":"comment","code":911,"message":"No such account: coinex1qy352eufqy352eufqy352eufqy35qqq8uxr4yg"}`
+	require.Equal(t, s, res.Log)
+	require.Equal(t, false, res.IsOK())
 }

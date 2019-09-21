@@ -172,7 +172,7 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 
 	amt, err := strconv.ParseInt(symbols[2], 10, 63)
 	if err != nil {
-		return nil, errors.Errorf("Not a valid amount: " + symbols[3])
+		return nil, errors.Errorf("Not a valid amount: " + symbols[2])
 	}
 
 	attitudes := strings.Split(symbols[4], ",")
