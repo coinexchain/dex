@@ -20,13 +20,15 @@ type createMarketReq struct {
 	PricePrecision int          `json:"price_precision"`
 }
 
+func (req *createMarketReq) New() restutil.RestReq {
+	return new(createMarketReq)
+}
 func (req *createMarketReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
-
-func (req *createMarketReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *createMarketReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	msg := types.NewMsgCreateTradingPair(req.Stock, req.Money, sender, byte(req.PricePrecision))
-	return msg
+	return msg, nil
 }
 
 type cancelMarketReq struct {
@@ -35,17 +37,19 @@ type cancelMarketReq struct {
 	Time        int64        `json:"time"`
 }
 
+func (req *cancelMarketReq) New() restutil.RestReq {
+	return new(cancelMarketReq)
+}
 func (req *cancelMarketReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
-
-func (req *cancelMarketReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *cancelMarketReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	msg := types.MsgCancelTradingPair{
 		Sender:        sender,
 		TradingPair:   req.TradingPair,
 		EffectiveTime: req.Time,
 	}
-	return msg
+	return msg, nil
 }
 
 type modifyPricePrecision struct {
@@ -54,33 +58,35 @@ type modifyPricePrecision struct {
 	PricePrecision int          `json:"price_precision"`
 }
 
+func (req *modifyPricePrecision) New() restutil.RestReq {
+	return new(modifyPricePrecision)
+}
 func (req *modifyPricePrecision) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
-
-func (req *modifyPricePrecision) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *modifyPricePrecision) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	msg := types.MsgModifyPricePrecision{
 		Sender:         sender,
 		TradingPair:    req.TradingPair,
 		PricePrecision: byte(req.PricePrecision),
 	}
-	return msg
+	return msg, nil
 }
 
 func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req createMarketReq
 	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return builder.Build(nil)
 }
 
 func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req cancelMarketReq
 	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return builder.Build(nil)
 }
 
 func modifyTradingPairPricePrecision(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req modifyPricePrecision
 	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return builder.Build(nil)
 }

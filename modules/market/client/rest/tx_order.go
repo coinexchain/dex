@@ -27,11 +27,13 @@ type createOrderReq struct {
 	TimeInForce    int          `json:"time_in_force"`
 }
 
+func (req *createOrderReq) New() restutil.RestReq {
+	return new(createOrderReq)
+}
 func (req *createOrderReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
-
-func (req *createOrderReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *createOrderReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	msg := types.MsgCreateOrder{
 		Sender:         sender,
 		TradingPair:    req.TradingPair,
@@ -41,10 +43,13 @@ func (req *createOrderReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) 
 		Price:          req.Price,
 		Quantity:       req.Quantity,
 		Side:           byte(req.Side),
-		TimeInForce:    req.TimeInForce,
+		TimeInForce:    types.IOC,
 		ExistBlocks:    req.ExistBlocks,
 	}
-	return msg
+	if r.URL.Path == "/market/gte-orders" {
+		msg.TimeInForce = types.GTE
+	}
+	return msg, nil
 }
 
 type cancelOrderReq struct {
@@ -52,16 +57,18 @@ type cancelOrderReq struct {
 	OrderID string       `json:"order_id"`
 }
 
+func (req *cancelOrderReq) New() restutil.RestReq {
+	return new(cancelOrderReq)
+}
 func (req *cancelOrderReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
-
-func (req *cancelOrderReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+func (req *cancelOrderReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	msg, err := cli.CheckSenderAndOrderID(req.OrderID)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return msg
+	return msg, nil
 }
 
 func createGTEOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -75,17 +82,11 @@ func createIOCOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req cancelOrderReq
 	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return builder.Build(nil)
 }
 
 func createOrderAndBroadCast(cdc *codec.Codec, cliCtx context.CLIContext, isGTE bool) http.HandlerFunc {
-	req := createOrderReq{
-		TimeInForce: types.IOC,
-	}
-	if isGTE {
-		req.TimeInForce = types.GTE
-	}
-
+	var req createOrderReq
 	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build()
+	return builder.Build(nil)
 }
