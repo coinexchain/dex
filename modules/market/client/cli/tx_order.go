@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -10,12 +9,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
@@ -48,9 +44,9 @@ func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Create an IOC order and sign tx, broadcast to nodes.
 
 Example: 
-	 cetcli tx market create-ioc-order --trading-pair=btc/cet 
-	--order-type=2 --price=520 --quantity=10000000 
-	--side=1 --price-precision=10 --from=bob --identify=1
+	 cetcli tx market create-ioc-order --trading-pair=btc/cet \
+	--order-type=2 --price=520 --quantity=10000000 \
+	--side=1 --price-precision=10 --from=bob --identify=1 \
 	--chain-id=coinexdex --gas=10000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, false)
@@ -68,9 +64,9 @@ func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Create an GTE order and sign tx, broadcast to nodes. 
 
 Example:
-	cetcli tx market create-gte-order --trading-pair=btc/cet 
-	--order-type=2 --price=520 --quantity=10000000 --side=1 
-	--price-precision=10 --blocks=<100000> --from=bob --identify=1
+	cetcli tx market create-gte-order --trading-pair=btc/cet \
+	--order-type=2 --price=520 --quantity=10000000 --side=1 \
+	--price-precision=10 --blocks=100000 --from=bob --identify=1 \
 	--chain-id=coinexdex --gas=10000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return createAndBroadCastOrder(cdc, true)
@@ -84,31 +80,19 @@ Example:
 }
 
 func createAndBroadCastOrder(cdc *codec.Codec, isGTE bool) error {
-	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-	cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
-
-	sender := cliCtx.GetFromAddress()
-	msg, err := parseCreateOrderFlags(sender)
+	msg, err := parseCreateOrderFlags(isGTE)
 	if err != nil {
 		if isGTE {
-			return errors.Errorf("tx flag is error, please see help : " +
-				"$ cetcli tx market create-gte-order -h")
+			return errors.Errorf("errors : %s, please see help : "+
+				"$ cetcli tx market create-gte-order -h", err.Error())
 		}
-		return errors.Errorf("tx flag is error, please see help : " +
-			"$ cetcli tx market create-ioc-order -h")
+		return errors.Errorf("errors : %s, please see help : "+
+			"$ cetcli tx market create-ioc-order -h", err.Error())
 	}
-	msg.TimeInForce = types.IOC
-	if isGTE {
-		msg.TimeInForce = types.GTE
-	}
-	if err = msg.ValidateBasic(); err != nil {
-		return err
-	}
-
-	return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+	return cliutil.CliRunCommand(cdc, msg)
 }
 
-func parseCreateOrderFlags(sender sdk.AccAddress) (*types.MsgCreateOrder, error) {
+func parseCreateOrderFlags(isGTE bool) (*types.MsgCreateOrder, error) {
 	for _, flag := range createOrderFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop" + flag)
@@ -120,7 +104,6 @@ func parseCreateOrderFlags(sender sdk.AccAddress) (*types.MsgCreateOrder, error)
 	}
 
 	msg := &types.MsgCreateOrder{
-		Sender:         sender,
 		Identify:       byte(viper.GetInt(FlagIdentify)),
 		TradingPair:    viper.GetString(FlagSymbol),
 		OrderType:      byte(viper.GetInt(FlagOrderType)),
@@ -129,6 +112,13 @@ func parseCreateOrderFlags(sender sdk.AccAddress) (*types.MsgCreateOrder, error)
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
 		Quantity:       viper.GetInt64(FlagQuantity),
 		ExistBlocks:    blocks,
+		TimeInForce:    types.IOC,
+	}
+	if isGTE {
+		msg.TimeInForce = types.GTE
+	}
+	if err := msg.ValidateBasic(); err != nil {
+		return nil, err
 	}
 
 	return msg, nil
@@ -160,18 +150,13 @@ Examples:
 	cetcli tx market cancel-order --order-id=[id] 
 	--trust-node=true --from=bob --chain-id=coinexdex`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
-
-			sender := cliCtx.GetFromAddress()
 			orderid := viper.GetString(FlagOrderID)
-			msg, err := CheckSenderAndOrderID(sender, orderid)
+			msg, err := CheckSenderAndOrderID(orderid)
 			if err != nil {
 				return err
 			}
 
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -179,31 +164,15 @@ Examples:
 	return cmd
 }
 
-func CheckSenderAndOrderID(sender []byte, orderID string) (types.MsgCancelOrder, error) {
-	var (
-		addr sdk.AccAddress
-		err  error
-		msg  types.MsgCancelOrder
-	)
-
+func CheckSenderAndOrderID(orderID string) (*types.MsgCancelOrder, error) {
 	contents := strings.Split(orderID, types.OrderIDSeparator)
 	if len(contents) != types.OrderIDPartsNum {
-		return msg, errors.Errorf(" illegal order-id")
+		return nil, errors.Errorf(" illegal order-id")
 	}
-
-	if addr, err = sdk.AccAddressFromBech32(contents[0]); err != nil {
-		return msg, err
+	if seqWithIdenti, err := strconv.Atoi(contents[1]); err != nil || seqWithIdenti < 0 {
+		return nil, errors.Errorf("illegal orderID")
 	}
-	if !bytes.Equal(addr, sender) {
-		return msg, errors.Errorf("sender address is not match order sender, sender : %s, order issuer : %s", sender, addr)
-	}
-
-	if sequence, err := strconv.Atoi(contents[1]); err != nil || sequence < 0 {
-		return msg, errors.Errorf("illegal order sequence, actual %d", sequence)
-	}
-
-	msg = types.MsgCancelOrder{
-		Sender:  sender,
+	msg := &types.MsgCancelOrder{
 		OrderID: orderID,
 	}
 

@@ -53,6 +53,10 @@ func NewMsgCreateTradingPair(stock, money string, crater sdk.AccAddress, pricePr
 // --------------------------------------------------------
 // sdk.Msg Implementation
 
+func (msg MsgCreateTradingPair) SetAccAddress(address sdk.AccAddress) {
+	msg.Creator = address
+}
+
 func (msg MsgCreateTradingPair) Route() string { return RouterKey }
 
 func (msg MsgCreateTradingPair) Type() string { return "create_market_info" }
@@ -97,6 +101,10 @@ type MsgCreateOrder struct {
 	Side           byte           `json:"side"`
 	TimeInForce    int            `json:"time_in_force"`
 	ExistBlocks    int            `json:"exist_blocks"`
+}
+
+func (msg MsgCreateOrder) SetAccAddress(address sdk.AccAddress) {
+	msg.Sender = address
 }
 
 func (msg MsgCreateOrder) Route() string { return RouterKey }
@@ -161,6 +169,10 @@ type MsgCancelOrder struct {
 	OrderID string         `json:"order_id"`
 }
 
+func (msg MsgCancelOrder) SetAccAddress(address sdk.AccAddress) {
+	msg.Sender = address
+}
+
 func (msg MsgCancelOrder) Route() string {
 	return StoreKey
 }
@@ -195,6 +207,10 @@ type MsgCancelTradingPair struct {
 	Sender        sdk.AccAddress `json:"sender"`
 	TradingPair   string         `json:"trading_pair"`
 	EffectiveTime int64          `json:"effective_height"`
+}
+
+func (msg MsgCancelTradingPair) SetAccAddress(address sdk.AccAddress) {
+	msg.Sender = address
 }
 
 func (msg MsgCancelTradingPair) Route() string {
@@ -234,6 +250,10 @@ type MsgModifyPricePrecision struct {
 	Sender         sdk.AccAddress `json:"sender"`
 	TradingPair    string         `json:"trading_pair"`
 	PricePrecision byte           `json:"price_precision"`
+}
+
+func (msg MsgModifyPricePrecision) SetAccAddress(address sdk.AccAddress) {
+	msg.Sender = address
 }
 
 func (msg MsgModifyPricePrecision) Route() string {

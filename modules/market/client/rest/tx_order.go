@@ -1,17 +1,14 @@
 package rest
 
 import (
-	"math"
 	"net/http"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
+	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/market/client/cli"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
@@ -27,75 +24,16 @@ type createOrderReq struct {
 	Quantity       int64        `json:"quantity"`
 	Side           int          `json:"side"`
 	ExistBlocks    int          `json:"exist_blocks"`
+	TimeInForce    int          `json:"time_in_force"`
 }
 
-type cancelOrderReq struct {
-	BaseReq rest.BaseReq `json:"base_req"`
-	OrderID string       `json:"order_id"`
+func (req *createOrderReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
 }
 
-func createGTEOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		createOrderAndBroadCast(w, r, cdc, cliCtx, true)
-	}
-}
-
-func createIOCOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		createOrderAndBroadCast(w, r, cdc, cliCtx, false)
-	}
-}
-
-func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req cancelOrderReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		sender, _ := sdk.AccAddressFromBech32(req.BaseReq.From)
-		msg, err := cli.CheckSenderAndOrderID(sender, req.OrderID)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
-}
-
-func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.Codec, cliCtx context.CLIContext, isGTE bool) {
-	var req createOrderReq
-	if !rest.ReadRESTReq(w, r, cdc, &req) {
-		return
-	}
-	req.BaseReq = req.BaseReq.Sanitize()
-	if !req.BaseReq.ValidateBasic(w) {
-		return
-	}
-	if req.ExistBlocks <= 0 {
-		req.ExistBlocks = types.DefaultGTEOrderLifetime
-	}
-	creator, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	if _, _, err := queryMarketInfo(cdc, cliCtx, req.TradingPair); err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	force := types.GTE
-	if !isGTE {
-		force = types.IOC
-	}
+func (req *createOrderReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
 	msg := types.MsgCreateOrder{
-		Sender:         creator,
+		Sender:         sender,
 		TradingPair:    req.TradingPair,
 		Identify:       byte(req.Identify),
 		OrderType:      byte(req.OrderType),
@@ -103,32 +41,51 @@ func createOrderAndBroadCast(w http.ResponseWriter, r *http.Request, cdc *codec.
 		Price:          req.Price,
 		Quantity:       req.Quantity,
 		Side:           byte(req.Side),
-		TimeInForce:    force,
+		TimeInForce:    req.TimeInForce,
 		ExistBlocks:    req.ExistBlocks,
 	}
-	if err := msg.ValidateBasic(); err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
+	return msg
+}
 
-	symbols := strings.Split(msg.TradingPair, types.SymbolSeparator)
-	userToken := symbols[0]
-	amount := msg.Quantity
-	if msg.Side == types.BUY {
-		userToken = symbols[1]
-		amount = sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision))))).Mul(sdk.NewDec(msg.Quantity)).RoundInt64()
-	}
+type cancelOrderReq struct {
+	BaseReq rest.BaseReq `json:"base_req"`
+	OrderID string       `json:"order_id"`
+}
 
-	accRetriever := auth.NewAccountRetriever(cliCtx)
-	account, err := accRetriever.GetAccount(creator)
+func (req *cancelOrderReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+
+func (req *cancelOrderReq) GetMsg(w http.ResponseWriter, sender sdk.AccAddress) sdk.Msg {
+	msg, err := cli.CheckSenderAndOrderID(req.OrderID)
 	if err != nil {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "Query address failed in blockchain")
-		return
+		return nil
 	}
-	if !account.GetCoins().IsAllGTE(sdk.Coins{sdk.NewCoin(userToken, sdk.NewInt(amount))}) {
-		rest.WriteErrorResponse(w, http.StatusBadRequest, "No have insufficient token to create order in blockchain")
-		return
+	return msg
+}
+
+func createGTEOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return createOrderAndBroadCast(cdc, cliCtx, true)
+}
+
+func createIOCOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return createOrderAndBroadCast(cdc, cliCtx, false)
+}
+
+func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	var req cancelOrderReq
+	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
+	return builder.Build()
+}
+
+func createOrderAndBroadCast(cdc *codec.Codec, cliCtx context.CLIContext, isGTE bool) http.HandlerFunc {
+	req := createOrderReq{
+		TimeInForce: types.IOC,
+	}
+	if isGTE {
+		req.TimeInForce = types.GTE
 	}
 
-	utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
+	return builder.Build()
 }

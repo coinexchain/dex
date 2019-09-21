@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -9,12 +8,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
@@ -39,33 +36,16 @@ func CreateMarketCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `generate a tx and sign it to create trading pair in dex blockchain. 
 
 Example : 
-	cetcli tx market create-trading-pair 
-	--from bob --chain-id=coinexdex 
-	--stock=eth --money=cet 
+	cetcli tx market create-trading-pair  \
+	--from bob --chain-id=coinexdex  \
+	--stock=eth --money=cet \
 	--price-precision=8 --gas 20000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
-
-			creator := cliCtx.GetFromAddress()
-			msg, err := parseCreateMarketFlags(creator)
+			msg, err := getCreateMarketMsg(cdc)
 			if err != nil {
-				return errors.Errorf("tx flag is error, please see help : " +
-					"$ cetcli tx market createmarket -h")
-			}
-
-			if err := hasTokens(cliCtx, cdc, msg.Stock, msg.Money); err != nil {
 				return err
 			}
-
-			if msg.PricePrecision < types.MinTokenPricePrecision ||
-				msg.PricePrecision > types.MaxTokenPricePrecision {
-				return errors.Errorf("price precision out of range [%d, %d]",
-					types.MinTokenPricePrecision, types.MaxTokenPricePrecision)
-			}
-
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -79,24 +59,36 @@ Example :
 	return cmd
 }
 
-func hasTokens(cliCtx context.CLIContext, cdc *codec.Codec, tokens ...string) error {
+func getCreateMarketMsg(cdc *codec.Codec) (*types.MsgCreateTradingPair, error) {
+	msg, err := parseCreateMarketFlags()
+	if err != nil {
+		return nil, errors.Errorf("tx flag is error, please see help : " +
+			"$ cetcli tx market createmarket -h")
+	}
+
+	if err := hasTokens(cdc, msg.Stock, msg.Money); err != nil {
+		return nil, err
+	}
+
+	if msg.PricePrecision < types.MinTokenPricePrecision ||
+		msg.PricePrecision > types.MaxTokenPricePrecision {
+		return nil, errors.Errorf("price precision out of range [%d, %d]",
+			types.MinTokenPricePrecision, types.MaxTokenPricePrecision)
+	}
+	return msg, nil
+}
+
+func hasTokens(cdc *codec.Codec, tokens ...string) error {
 	route := fmt.Sprintf("custom/%s/%s", asset.QuerierRoute, asset.QueryToken)
 	for _, token := range tokens {
-		bz, err := cdc.MarshalJSON(asset.NewQueryAssetParams(token))
-		if err != nil {
-			return err
-		}
-		fmt.Printf("token :%s\n ", token)
-		if _, _, err := cliCtx.QueryWithData(route, bz); err != nil {
-			fmt.Printf("route : %s\n", route)
+		if err := cliutil.CliQuery(cdc, route, asset.NewQueryAssetParams(token)); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
-func parseCreateMarketFlags(creator sdk.AccAddress) (*types.MsgCreateTradingPair, error) {
+func parseCreateMarketFlags() (*types.MsgCreateTradingPair, error) {
 	for _, flag := range createMarketFlags {
 		if viper.Get(flag) == nil {
 			return nil, fmt.Errorf("--%s flag is a noop, please see help : "+
@@ -108,7 +100,6 @@ func parseCreateMarketFlags(creator sdk.AccAddress) (*types.MsgCreateTradingPair
 		Stock:          viper.GetString(FlagStock),
 		Money:          viper.GetString(FlagMoney),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
-		Creator:        creator,
 	}
 	return msg, nil
 }
@@ -124,21 +115,11 @@ Example
 	--time=1000000 --trading-pair=etc/cet --from=bob --chain-id=coinexdex 
 	--gas=1000000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
-
-			creator := cliCtx.GetFromAddress()
-			msg := types.MsgCancelTradingPair{
-				Sender:        creator,
-				EffectiveTime: viper.GetInt64(FlagTime),
-				TradingPair:   viper.GetString(FlagSymbol),
-			}
-
-			if err := CheckCancelMarketMsg(cdc, cliCtx, msg); err != nil {
+			msg, err := getCancelMarketMsg(cdc)
+			if err != nil {
 				return err
 			}
-
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -150,30 +131,27 @@ Example
 	return cmd
 }
 
-func CheckCancelMarketMsg(cdc *codec.Codec, cliCtx context.CLIContext, msg types.MsgCancelTradingPair) error {
+func getCancelMarketMsg(cdc *codec.Codec) (*types.MsgCancelTradingPair, error) {
+	msg := types.MsgCancelTradingPair{
+		EffectiveTime: viper.GetInt64(FlagTime),
+		TradingPair:   viper.GetString(FlagSymbol),
+	}
+
+	if err := CheckCancelMarketMsg(cdc, msg); err != nil {
+		return nil, err
+	}
+
+	return &msg, nil
+}
+
+func CheckCancelMarketMsg(cdc *codec.Codec, msg types.MsgCancelTradingPair) error {
 	if err := msg.ValidateBasic(); err != nil {
 		return err
 	}
-
-	bz, err := cdc.MarshalJSON(keepers.NewQueryMarketParam(msg.TradingPair))
-	if err != nil {
-		return err
-	}
 	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
-	res, _, err := cliCtx.QueryWithData(query, bz)
-	if err != nil {
+	if err := cliutil.CliQuery(cdc, query, keepers.NewQueryMarketParam(msg.TradingPair)); err != nil {
 		return err
 	}
-
-	var msgMarket keepers.QueryMarketInfo
-	if err := cdc.UnmarshalJSON(res, &msgMarket); err != nil {
-		return err
-	}
-
-	if !bytes.Equal(msgMarket.Creator, msg.Sender) {
-		return errors.Errorf("Not match sender, actual : %s, expect : %s\n", msg.Sender, msgMarket.Creator)
-	}
-
 	return nil
 }
 
@@ -188,21 +166,11 @@ Example:
 	--price-precision=9 --from=bob --chain-id=coinexdex 
 	--gas=10000000 --fees=10000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc) //.WithAccountDecoder(cdc)
-
-			creator := cliCtx.GetFromAddress()
-			msg := types.MsgModifyPricePrecision{
-				Sender:         creator,
-				TradingPair:    viper.GetString(FlagSymbol),
-				PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
-			}
-
-			if err := CheckModifyPricePrecision(msg); err != nil {
+			msg, err := getModifyTradingPairPricePrecisionMsg(cdc)
+			if err != nil {
 				return err
 			}
-
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 
@@ -213,12 +181,30 @@ Example:
 	return cmd
 }
 
-func CheckModifyPricePrecision(msg types.MsgModifyPricePrecision) error {
+func getModifyTradingPairPricePrecisionMsg(cdc *codec.Codec) (*types.MsgModifyPricePrecision, error) {
+	msg := types.MsgModifyPricePrecision{
+		TradingPair:    viper.GetString(FlagSymbol),
+		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
+	}
+
+	if err := CheckModifyPricePrecision(cdc, msg); err != nil {
+		return nil, err
+	}
+
+	return &msg, nil
+}
+
+func CheckModifyPricePrecision(cdc *codec.Codec, msg types.MsgModifyPricePrecision) error {
 	if len(strings.Split(msg.TradingPair, types.SymbolSeparator)) != 2 {
 		return errors.Errorf("the invalid trading pair : %s ", viper.GetString(FlagSymbol))
 	}
 	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
 		return errors.Errorf("invalid price precision : %d, expect [0, 18]", msg.PricePrecision)
+	}
+
+	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
+	if err := cliutil.CliQuery(cdc, query, keepers.NewQueryMarketParam(msg.TradingPair)); err != nil {
+		return err
 	}
 	return nil
 }
