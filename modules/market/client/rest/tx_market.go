@@ -75,18 +75,15 @@ func (req *modifyPricePrecision) GetMsg(r *http.Request, sender sdk.AccAddress) 
 
 func createMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req createMarketReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build(nil)
+	return restutil.NewRestHandler(cdc, cliCtx, &req)
 }
 
 func cancelMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req cancelMarketReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build(nil)
+	return restutil.NewRestHandler(cdc, cliCtx, &req)
 }
 
 func modifyTradingPairPricePrecision(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req modifyPricePrecision
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build(nil)
+	return restutil.NewRestHandler(cdc, cliCtx, &req)
 }

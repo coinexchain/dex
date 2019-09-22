@@ -80,12 +80,10 @@ func createIOCOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 
 func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req cancelOrderReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build(nil)
+	return restutil.NewRestHandler(cdc, cliCtx, &req)
 }
 
 func createOrderAndBroadCast(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req createOrderReq
-	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
-	return builder.Build(nil)
+	return restutil.NewRestHandler(cdc, cliCtx, &req)
 }

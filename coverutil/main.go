@@ -27,7 +27,7 @@ var IgnoredFiles = []string{"module.go", "registertxroutes.go"}
 
 func calcCoverage(profileList []*Profile) {
 	totalLines := 0
-	coveredLines :=0
+	coveredLines := 0
 	for _, profile := range profileList {
 		ignore := false
 		for _, f := range IgnoredFiles {
@@ -159,4 +159,3 @@ func toInt(s string) int {
 	}
 	return i
 }
-

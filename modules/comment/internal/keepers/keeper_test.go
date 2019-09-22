@@ -44,4 +44,3 @@ func Test1(t *testing.T) {
 	require.Equal(t, uint64(3), m["btc"])
 	require.Equal(t, uint64(1), m["cet"])
 }
-
