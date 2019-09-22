@@ -2,8 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -52,7 +50,6 @@ Example:
 			return createAndBroadCastOrder(cdc, false)
 		},
 	}
-
 	markCreateOrderFlags(cmd)
 	return cmd
 }
@@ -72,10 +69,8 @@ Example:
 			return createAndBroadCastOrder(cdc, true)
 		},
 	}
-
 	markCreateOrderFlags(cmd)
 	cmd.Flags().Int(FlagBlocks, 10000, "the gte order will exist at least blocks in blockChain")
-
 	return cmd
 }
 
@@ -98,11 +93,6 @@ func parseCreateOrderFlags(isGTE bool) (*types.MsgCreateOrder, error) {
 			return nil, fmt.Errorf("--%s flag is a noop" + flag)
 		}
 	}
-	blocks := types.DefaultGTEOrderLifetime
-	if viper.GetInt(FlagBlocks) > 0 {
-		blocks = viper.GetInt(FlagBlocks)
-	}
-
 	msg := &types.MsgCreateOrder{
 		Identify:       byte(viper.GetInt(FlagIdentify)),
 		TradingPair:    viper.GetString(FlagSymbol),
@@ -111,21 +101,17 @@ func parseCreateOrderFlags(isGTE bool) (*types.MsgCreateOrder, error) {
 		Price:          viper.GetInt64(FlagPrice),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
 		Quantity:       viper.GetInt64(FlagQuantity),
-		ExistBlocks:    blocks,
+		ExistBlocks:    viper.GetInt(FlagBlocks),
 		TimeInForce:    types.IOC,
 	}
 	if isGTE {
 		msg.TimeInForce = types.GTE
 	}
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, err
-	}
-
 	return msg, nil
 }
 
 func markCreateOrderFlags(cmd *cobra.Command) {
-	cmd.Flags().String(FlagSymbol, "", "The trading market symbol")
+	cmd.Flags().String(FlagSymbol, "", "The trading pair symbol")
 	cmd.Flags().Int(FlagOrderType, 2, "The identify of the price limit : 2; (Currently, only price limit orders are supported)")
 	cmd.Flags().Int(FlagPrice, 100, "The price of the order")
 	cmd.Flags().Int(FlagQuantity, 100, "The number of tokens will be trade in the order ")
@@ -150,33 +136,14 @@ Examples:
 	cetcli tx market cancel-order --order-id=[id] 
 	--trust-node=true --from=bob --chain-id=coinexdex`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			orderid := viper.GetString(FlagOrderID)
-			msg, err := CheckSenderAndOrderID(orderid)
-			if err != nil {
-				return err
+			msg := &types.MsgCancelOrder{
+				OrderID: viper.GetString(FlagOrderID),
 			}
-
 			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
-
 	markQueryOrDelCmd(cmd)
 	return cmd
-}
-
-func CheckSenderAndOrderID(orderID string) (*types.MsgCancelOrder, error) {
-	contents := strings.Split(orderID, types.OrderIDSeparator)
-	if len(contents) != types.OrderIDPartsNum {
-		return nil, errors.Errorf(" illegal order-id")
-	}
-	if seqWithIdenti, err := strconv.Atoi(contents[1]); err != nil || seqWithIdenti < 0 {
-		return nil, errors.Errorf("illegal orderID")
-	}
-	msg := &types.MsgCancelOrder{
-		OrderID: orderID,
-	}
-
-	return msg, nil
 }
 
 func markQueryOrDelCmd(cmd *cobra.Command) {

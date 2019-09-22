@@ -9,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
 	"github.com/coinexchain/dex/client/restutil"
-	"github.com/coinexchain/dex/modules/market/client/cli"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
@@ -64,19 +63,19 @@ func (req *cancelOrderReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 func (req *cancelOrderReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
-	msg, err := cli.CheckSenderAndOrderID(req.OrderID)
-	if err != nil {
-		return nil, err
+	msg := &types.MsgCancelOrder{
+		OrderID: req.OrderID,
+		Sender:  sender,
 	}
 	return msg, nil
 }
 
 func createGTEOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return createOrderAndBroadCast(cdc, cliCtx, true)
+	return createOrderAndBroadCast(cdc, cliCtx)
 }
 
 func createIOCOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return createOrderAndBroadCast(cdc, cliCtx, false)
+	return createOrderAndBroadCast(cdc, cliCtx)
 }
 
 func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -85,7 +84,7 @@ func cancelOrderHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 	return builder.Build(nil)
 }
 
-func createOrderAndBroadCast(cdc *codec.Codec, cliCtx context.CLIContext, isGTE bool) http.HandlerFunc {
+func createOrderAndBroadCast(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	var req createOrderReq
 	builder := restutil.NewRestHandlerBuilder(cdc, cliCtx, &req)
 	return builder.Build(nil)

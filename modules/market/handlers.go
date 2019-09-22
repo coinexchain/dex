@@ -249,7 +249,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 		return ret
 	}
 	existBlocks := msg.ExistBlocks
-	if existBlocks == 0 {
+	if existBlocks == 0 && msg.TimeInForce == GTE {
 		existBlocks = marketParams.GTEOrderLifetime
 	}
 

@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -185,10 +186,13 @@ func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return ErrInvalidAddress()
 	}
-	if len(strings.Split(msg.OrderID, OrderIDSeparator)) != OrderIDPartsNum {
+	contents := strings.Split(msg.OrderID, OrderIDSeparator)
+	if len(contents) != OrderIDPartsNum {
 		return ErrInvalidOrderID()
 	}
-
+	if seqWithIdenti, err := strconv.Atoi(contents[1]); err != nil || seqWithIdenti < 0 {
+		return ErrInvalidOrderID()
+	}
 	return nil
 }
 
@@ -274,7 +278,6 @@ func (msg MsgModifyPricePrecision) ValidateBasic() sdk.Error {
 	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
 		return ErrInvalidPricePrecision()
 	}
-
 	return nil
 }
 

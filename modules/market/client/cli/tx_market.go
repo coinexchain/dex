@@ -2,14 +2,12 @@ package cli
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/asset"
@@ -65,15 +63,8 @@ func getCreateMarketMsg(cdc *codec.Codec) (*types.MsgCreateTradingPair, error) {
 		return nil, errors.Errorf("tx flag is error, please see help : " +
 			"$ cetcli tx market createmarket -h")
 	}
-
 	if err := hasTokens(cdc, msg.Stock, msg.Money); err != nil {
 		return nil, err
-	}
-
-	if msg.PricePrecision < types.MinTokenPricePrecision ||
-		msg.PricePrecision > types.MaxTokenPricePrecision {
-		return nil, errors.Errorf("price precision out of range [%d, %d]",
-			types.MinTokenPricePrecision, types.MaxTokenPricePrecision)
 	}
 	return msg, nil
 }
@@ -136,23 +127,11 @@ func getCancelMarketMsg(cdc *codec.Codec) (*types.MsgCancelTradingPair, error) {
 		EffectiveTime: viper.GetInt64(FlagTime),
 		TradingPair:   viper.GetString(FlagSymbol),
 	}
-
-	if err := CheckCancelMarketMsg(cdc, msg); err != nil {
-		return nil, err
-	}
-
-	return &msg, nil
-}
-
-func CheckCancelMarketMsg(cdc *codec.Codec, msg types.MsgCancelTradingPair) error {
-	if err := msg.ValidateBasic(); err != nil {
-		return err
-	}
 	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
 	if err := cliutil.CliQuery(cdc, query, keepers.NewQueryMarketParam(msg.TradingPair)); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &msg, nil
 }
 
 func ModifyTradingPairPricePrecision(cdc *codec.Codec) *cobra.Command {
@@ -186,25 +165,9 @@ func getModifyTradingPairPricePrecisionMsg(cdc *codec.Codec) (*types.MsgModifyPr
 		TradingPair:    viper.GetString(FlagSymbol),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
 	}
-
-	if err := CheckModifyPricePrecision(cdc, msg); err != nil {
-		return nil, err
-	}
-
-	return &msg, nil
-}
-
-func CheckModifyPricePrecision(cdc *codec.Codec, msg types.MsgModifyPricePrecision) error {
-	if len(strings.Split(msg.TradingPair, types.SymbolSeparator)) != 2 {
-		return errors.Errorf("the invalid trading pair : %s ", viper.GetString(FlagSymbol))
-	}
-	if msg.PricePrecision < 0 || msg.PricePrecision > sdk.Precision {
-		return errors.Errorf("invalid price precision : %d, expect [0, 18]", msg.PricePrecision)
-	}
-
 	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
 	if err := cliutil.CliQuery(cdc, query, keepers.NewQueryMarketParam(msg.TradingPair)); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &msg, nil
 }
