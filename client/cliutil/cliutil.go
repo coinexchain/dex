@@ -32,7 +32,7 @@ type MsgWithAccAddress interface {
 	SetAccAddress(address sdk.AccAddress)
 }
 
-var CliQuery = func(cdc *codec.Codec, query string, param interface{}) error {
+var CliQuery = func(cdc *codec.Codec, path string, param interface{}) error {
 	var bz []byte
 	var err error
 	bz = nil
@@ -44,7 +44,7 @@ var CliQuery = func(cdc *codec.Codec, query string, param interface{}) error {
 	}
 
 	cliCtx := context.NewCLIContext().WithCodec(cdc)
-	res, _, err := cliCtx.QueryWithData(query, bz)
+	res, _, err := cliCtx.QueryWithData(path, bz)
 	if err != nil {
 		return err
 	}
