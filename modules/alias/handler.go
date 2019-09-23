@@ -28,7 +28,7 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 		if types.IsOnlyForCoinEx(msg.Alias) && !k.IsTokenIssuer(ctx, "cet", msg.Owner) {
 			return types.ErrCanOnlyBeUsedByCetOwner(msg.Alias).Result()
 		}
-		addr, asDefault := k.AliasKeeper.GetAddressFromAlias(ctx, msg.Alias)
+		addr, asDefault := k.GetAddressFromAlias(ctx, msg.Alias)
 		if len(addr) != 0 &&
 			(!bytes.Equal(addr, msg.Owner) || asDefault == msg.AsDefault) {
 			return types.ErrAliasAlreadyExists().Result()
