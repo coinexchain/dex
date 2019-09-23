@@ -2,7 +2,6 @@ package cliutil
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/spf13/viper"
 
@@ -12,20 +11,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 )
-
-func SetViperWithArgs(args []string) {
-	viper.Reset()
-	for _, arg := range args {
-		if !strings.HasPrefix(arg, "--") {
-			continue
-		}
-		idx := strings.Index(arg, "=")
-		if idx < 0 {
-			continue
-		}
-		viper.Set(arg[2:idx], arg[idx+1:])
-	}
-}
 
 type MsgWithAccAddress interface {
 	sdk.Msg
