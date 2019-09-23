@@ -2,14 +2,16 @@ package rest
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/client/restutil"
+	"net/http"
+	"net/url"
+	"testing"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/url"
-	"testing"
+
+	"github.com/coinexchain/dex/client/restutil"
 )
 
 func TestTx(t *testing.T) {
