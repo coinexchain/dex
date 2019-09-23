@@ -25,7 +25,7 @@ type RestHandlerBuilder struct {
 
 type MoreChecker func(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) error
 
-func NewRestHandler(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) http.HandlerFunc {
+var NewRestHandler = func(cdc *codec.Codec, cliCtx context.CLIContext, req RestReq) http.HandlerFunc {
 	return NewRestHandlerBuilder(cdc, cliCtx, req).Build(nil)
 }
 

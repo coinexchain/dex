@@ -22,17 +22,18 @@ func TestQueryCmds(t *testing.T) {
 }
 
 func testQueryCmd(t *testing.T, args string, expectedPath string, expectedParam interface{}) {
-	executed := false
 	oldCliQuery := cliutil.CliQuery
+	defer func() {
+		cliutil.CliQuery = oldCliQuery
+	}()
+
+	executed := false
 	cliutil.CliQuery = func(cdc *codec.Codec, path string, param interface{}) error {
 		executed = true
 		require.Equal(t, path, expectedPath)
 		require.Equal(t, param, expectedParam)
 		return nil
 	}
-	defer func() {
-		cliutil.CliQuery = oldCliQuery
-	}()
 
 	cmd := GetQueryCmd(types.ModuleCdc)
 	cmd.SetArgs(strings.Split(args, " "))

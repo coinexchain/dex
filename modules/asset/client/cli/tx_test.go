@@ -51,16 +51,17 @@ func TestTxCmds(t *testing.T) {
 }
 
 func testTxCmd(t *testing.T, args string, expectedMsg interface{}) {
-	executed := false
 	oldCliRun := cliutil.CliRunCommand
+	defer func() {
+		cliutil.CliRunCommand = oldCliRun
+	}()
+
+	executed := false
 	cliutil.CliRunCommand = func(cdc *codec.Codec, msg cliutil.MsgWithAccAddress) error {
 		executed = true
 		require.Equal(t, val2ptr(expectedMsg), msg)
 		return nil
 	}
-	defer func() {
-		cliutil.CliRunCommand = oldCliRun
-	}()
 
 	args1 := strings.Replace(args, "{testAddrBech32}", testAddrBech32, -1)
 	argArr := strings.Split(args1, " ")
