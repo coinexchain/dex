@@ -21,7 +21,7 @@ func TestQueryCmds(t *testing.T) {
 	testQueryCmd(t, "reserved-symbols", "custom/asset/reserved-symbols", nil)
 }
 
-func testQueryCmd(t *testing.T, subCmds string, expectedPath string, expectedParam interface{}) {
+func testQueryCmd(t *testing.T, args string, expectedPath string, expectedParam interface{}) {
 	executed := false
 	oldCliQuery := cliutil.CliQuery
 	cliutil.CliQuery = func(cdc *codec.Codec, path string, param interface{}) error {
@@ -35,7 +35,7 @@ func testQueryCmd(t *testing.T, subCmds string, expectedPath string, expectedPar
 	}()
 
 	cmd := GetQueryCmd(types.ModuleCdc)
-	cmd.SetArgs(strings.Split(subCmds, " "))
+	cmd.SetArgs(strings.Split(args, " "))
 	err := cmd.Execute()
 	require.NoError(t, err)
 	require.True(t, executed)
