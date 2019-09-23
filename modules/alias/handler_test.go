@@ -180,6 +180,8 @@ func Test1(t *testing.T) {
 	require.Equal(t, types.ErrNoSuchAlias().Result(), res)
 	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: tom, Alias: "superman", IsAdd: true})
 	require.Equal(t, types.ErrAliasAlreadyExists().Result(), res)
+	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: tom, Alias: "superman", IsAdd: true, AsDefault:true})
+	require.Equal(t, types.ErrAliasAlreadyExists().Result(), res)
 	aliasCet := "coinex-usdt.t"
 	res = handlerFunc(ctx, types.MsgAliasUpdate{Owner: tom, Alias: aliasCet, IsAdd: true})
 	require.Equal(t, types.ErrCanOnlyBeUsedByCetOwner(aliasCet).Result(), res)
