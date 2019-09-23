@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/x/supply"
+
+	"github.com/coinexchain/dex/modules/asset"
+
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 
 	"github.com/stretchr/testify/assert"
@@ -21,10 +25,22 @@ import (
 )
 
 var myaddr = testutil.ToAccAddress("myaddr")
+var ownerAddr = testutil.ToAccAddress("owneraddr")
 
 func defaultContext() (keeper.Keeper, sdk.Context) {
 	app := testapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{}, false, log.NewNopLogger())
+	app.AccountKeeper.SetAccount(ctx, supply.NewEmptyModuleAccount(authx.ModuleName))
+	app.AccountKeeper.SetAccount(ctx, supply.NewEmptyModuleAccount(asset.ModuleName, supply.Minter))
+	app.SupplyKeeper.SetSupply(ctx, supply.NewSupply(sdk.Coins{sdk.Coin{Denom: "abc", Amount: sdk.NewInt(10e10)}}))
+	app.SupplyKeeper.SetSupply(ctx, supply.NewSupply(sdk.Coins{sdk.Coin{Denom: "cet", Amount: sdk.NewInt(10e10)}}))
+
+	_ = app.AssetKeeper.IssueToken(ctx, "abc", "abc", sdk.NewInt(100000000000), ownerAddr,
+		false, false, false, false,
+		"", "", "abc")
+	_ = app.AssetKeeper.IssueToken(ctx, "cet", "cet", sdk.NewInt(100000000000), ownerAddr,
+		false, false, false, false,
+		"", "", "cet")
 	return app.BankxKeeper, ctx
 }
 
@@ -144,7 +160,7 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 
 	bkx, ctx := defaultContext()
 	amount := bkx.TotalAmountOfCoin(ctx, "cet")
-	require.Equal(t, int64(0), amount.Int64())
+	require.Equal(t, int64(100000000000), amount.Int64())
 
 	err := givenAccountWith(ctx, bkx, myaddr, "100cet")
 	require.NoError(t, err)
@@ -158,7 +174,7 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 	bkx.MockAddFrozenCoins(ctx, myaddr, frozenCoins)
 
 	amount = bkx.TotalAmountOfCoin(ctx, "cet")
-	require.Equal(t, int64(300), amount.Int64())
+	require.Equal(t, int64(100000000300), amount.Int64())
 }
 
 func TestKeeper_AddCoins(t *testing.T) {
@@ -205,7 +221,7 @@ func TestParamGetSet(t *testing.T) {
 func TestKeeper_SendCoins(t *testing.T) {
 	bkx, ctx := defaultContext()
 	coins := sdk.NewCoins(
-		sdk.NewCoin("aaa", sdk.NewInt(10)),
+		sdk.NewCoin("abc", sdk.NewInt(10)),
 	)
 	addr2 := testutil.ToAccAddress("addr2")
 	_ = bkx.AddCoins(ctx, myaddr, coins)

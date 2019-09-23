@@ -53,11 +53,17 @@ func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bo
 }
 
 func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	if k.IsSendForbidden(ctx, amt, from) {
+		return types.ErrTokenForbiddenByOwner()
+	}
 	ret := k.bk.SendCoins(ctx, from, to, amt)
 	return ret
 }
 
 func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Error {
+	if k.IsSendForbidden(ctx, amt, fromAddr) {
+		return types.ErrTokenForbiddenByOwner()
+	}
 	if k.ak.GetAccount(ctx, toAddr) == nil {
 		if err := k.AddCoins(ctx, toAddr, sdk.Coins{}); err != nil {
 			return err
@@ -89,6 +95,9 @@ func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress
 }
 
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	if k.IsSendForbidden(ctx, amt, addr) {
+		return types.ErrTokenForbiddenByOwner()
+	}
 	_, err := k.bk.SubtractCoins(ctx, addr, amt)
 	if err != nil {
 		return err
