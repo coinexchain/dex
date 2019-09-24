@@ -1,15 +1,10 @@
 package cli
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	"github.com/spf13/cobra"
 
 	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/distributionx/types"
@@ -22,9 +17,6 @@ func DonateTxCmd(cdc *codec.Codec) *cobra.Command {
 		Short: "Donate to community pool",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc) //.WithAccountDecoder(cdc)
 
 			// parse coins trying to be sent
 			coins, err := sdk.ParseCoins(args[0])
@@ -32,19 +24,9 @@ func DonateTxCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			from := cliCtx.GetFromAddress()
+			msg := types.NewMsgDonateToCommunityPool(nil, coins)
+			return cliutil.CliRunCommand(cdc, &msg)
 
-			// build and sign the transaction, then broadcast to Tendermint
-			msg := types.NewMsgDonateToCommunityPool(from, coins)
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			generateUnsignedTx := viper.GetBool(cliutil.FlagGenerateUnsignedTx)
-			if generateUnsignedTx {
-				return cliutil.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, from)
-			}
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 

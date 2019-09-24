@@ -26,7 +26,9 @@ func NewMsgDonateToCommunityPool(addr sdk.AccAddress, amt sdk.Coins) MsgDonateTo
 		Amount:   amt,
 	}
 }
-
+func (msg *MsgDonateToCommunityPool) SetAccAddress(address sdk.AccAddress) {
+	msg.FromAddr = address
+}
 func (msg MsgDonateToCommunityPool) Route() string { return ModuleName }
 func (msg MsgDonateToCommunityPool) Type() string  { return "donate_to_community_pool" }
 

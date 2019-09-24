@@ -3,13 +3,14 @@ package rest
 import (
 	"net/http"
 
+	"github.com/coinexchain/dex/client/restutil"
+
 	"github.com/gorilla/mux"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/modules/distributionx/types"
 )
@@ -25,26 +26,22 @@ type SendReq struct {
 	Amount  sdk.Coins    `json:"amount"`
 }
 
+func (sr SendReq) New() restutil.RestReq {
+	return new(SendReq)
+}
+func (sr SendReq) GetBaseReq() *rest.BaseReq {
+	return &sr.BaseReq
+}
+func (sr SendReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
+
+	from, err := sdk.AccAddressFromBech32(sr.BaseReq.From)
+	if err != nil {
+		return types.MsgDonateToCommunityPool{}, err
+	}
+	return types.NewMsgDonateToCommunityPool(from, sr.Amount), nil
+}
+
 // SendRequestHandlerFn - http request handler to send coins to a address.
 func DonateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req SendReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
-
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
-
-		fromAddr, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		msg := types.NewMsgDonateToCommunityPool(fromAddr, req.Amount)
-		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
-	}
+	return restutil.NewRestHandler(cdc, cliCtx, new(SendReq))
 }
