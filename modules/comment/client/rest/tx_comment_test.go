@@ -7,14 +7,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
 func Test1(t *testing.T) {
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
-	respWr := restutil.NewResponseWriter4UT()
-	//respWr.ClearBody()
 
 	newThreadReq := &NewThreadReq{
 		Token:       "cet",
@@ -36,7 +33,6 @@ func Test1(t *testing.T) {
 	})
 	msgStr, _ := json.Marshal(msg)
 	assert.Equal(t, string(correct), string(msgStr))
-	assert.Equal(t, 0, len(respWr.GetBody()))
 
 	newThreadReq = &NewThreadReq{
 		Token:       "cet",
@@ -92,7 +88,6 @@ func Test1(t *testing.T) {
 	})
 	msgStr, _ = json.Marshal(msg)
 	assert.Equal(t, string(correct), string(msgStr))
-	assert.Equal(t, 0, len(respWr.GetBody()))
 
 	followupCommentReq = &FollowupCommentReq{
 		Token:        "btc",
@@ -202,7 +197,6 @@ func Test1(t *testing.T) {
 	})
 	msgStr, _ = json.Marshal(msg)
 	assert.Equal(t, string(correct), string(msgStr))
-	assert.Equal(t, 0, len(respWr.GetBody()))
 
 	rewardCommentsReq = &RewardCommentsReq{
 		Token: "cet",
