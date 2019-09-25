@@ -118,7 +118,7 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, 
 	bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 
 	if order.FrozenFee != 0 {
-		coins = sdk.Coins([]sdk.Coin{sdk.NewCoin(dex.CET, sdk.NewInt(order.FrozenFee))})
+		coins = []sdk.Coin{sdk.NewCoin(dex.CET, sdk.NewInt(order.FrozenFee))}
 		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 		actualFee := order.CalOrderFee(feeForZeroDeal)
 		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee.RoundInt64()); err != nil {
@@ -129,7 +129,6 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, 
 
 // unfreeze the frozen token in the order and remove it from the market
 func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper, feeK types.ExpectedChargeFeeKeeper, order *types.Order, feeForZeroDeal int64) {
-
 	if order.Freeze != 0 || order.FrozenFee != 0 {
 		unfreezeCoinsForOrder(ctx, bxKeeper, order, feeForZeroDeal, feeK)
 	}
@@ -316,7 +315,6 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 }
 
 func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
-
 	marketInfoList := keeper.GetAllMarketInfos(ctx)
 	currHeight := ctx.BlockHeight()
 	marketParams := keeper.GetParams(ctx)
@@ -382,7 +380,6 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 			keeper.SetMarket(ctx, mi)
 		}
 	}
-
 }
 
 func sendOrderMsg(ctx sdk.Context, order *types.Order, height int64, feeForZeroDeal int64, keeper keepers.Keeper) {

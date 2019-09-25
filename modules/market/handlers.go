@@ -221,7 +221,6 @@ func sendCreateOrderMsg(ctx sdk.Context, keeper keepers.Keeper, order types.Orde
 }
 
 func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keepers.Keeper) sdk.Result {
-
 	values := strings.Split(msg.TradingPair, types.SymbolSeparator)
 	stock, money := values[0], values[1]
 	denom := stock
@@ -342,7 +341,6 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 }
 
 func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepers.Keeper) sdk.Result {
-
 	if err := checkMsgCancelOrder(ctx, msg, keeper); !err.IsOK() {
 		return err
 	}
@@ -404,7 +402,6 @@ func checkMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepe
 }
 
 func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair, keeper keepers.Keeper) sdk.Result {
-
 	if err := checkMsgCancelTradingPair(keeper, msg, ctx); err != nil {
 		return err.Result()
 	}
@@ -439,7 +436,6 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair,
 }
 
 func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTradingPair, ctx sdk.Context) sdk.Error {
-
 	if err := msg.ValidateBasic(); err != nil {
 		return err
 	}
