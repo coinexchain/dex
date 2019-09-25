@@ -15,11 +15,6 @@ import (
 	"github.com/coinexchain/dex/msgqueue"
 )
 
-var (
-	MarketIdentifierPrefix = []byte{0x15}
-	DelistKey              = []byte{0x40}
-)
-
 type Keeper struct {
 	paramSubspace params.Subspace
 	marketKey     sdk.StoreKey
