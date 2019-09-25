@@ -6,12 +6,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )
 
@@ -25,16 +22,8 @@ func RequireMemoCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc) //.WithAccountDecoder(cdc)
-
-			addr := cliCtx.GetFromAddress()
-
-			// build and sign the transaction, then broadcast to Tendermint
-			msg := types.NewMsgSetTransferMemoRequired(addr, required)
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			msg := types.NewMsgSetTransferMemoRequired(nil, required)
+			return cliutil.CliRunCommand(cdc, &msg)
 		},
 	}
 

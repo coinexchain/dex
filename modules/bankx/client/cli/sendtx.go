@@ -8,11 +8,8 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
@@ -29,10 +26,6 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 		Short: "Create and sign a send tx",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc) //.WithAccountDecoder(cdc)
-
 			to, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
@@ -54,15 +47,9 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 				return fmt.Errorf("unlock time should be later than the current time")
 			}
 
-			from := cliCtx.GetFromAddress()
-
 			// build and sign the transaction, then broadcast to Tendermint
-			msg := types.NewMsgSend(from, to, coins, unlockTime)
-			generateUnsignedTx := viper.GetBool(cliutil.FlagGenerateUnsignedTx)
-			if generateUnsignedTx {
-				return cliutil.PrintUnsignedTx(cliCtx, txBldr, []sdk.Msg{msg}, from)
-			}
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			msg := types.NewMsgSend(nil, to, coins, unlockTime)
+			return cliutil.CliRunCommand(cdc, &msg)
 		},
 	}
 

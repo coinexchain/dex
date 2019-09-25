@@ -16,6 +16,10 @@ func NewMsgSetTransferMemoRequired(addr sdk.AccAddress, required bool) MsgSetMem
 	return MsgSetMemoRequired{Address: addr, Required: required}
 }
 
+func (msg *MsgSetMemoRequired) SetAccAddress(addr sdk.AccAddress) {
+	msg.Address = addr
+}
+
 // --------------------------------------------------------
 // sdk.Msg Implementation
 
@@ -45,6 +49,10 @@ type MsgSend struct {
 	ToAddress   sdk.AccAddress `json:"to_address"`
 	Amount      sdk.Coins      `json:"amount"`
 	UnlockTime  int64          `json:"unlock_time"`
+}
+
+func (msg *MsgSend) SetAccAddress(addr sdk.AccAddress) {
+	msg.FromAddress = addr
 }
 
 func NewMsgSend(fromAddr, toAddr sdk.AccAddress, amount sdk.Coins, unlockTime int64) MsgSend {
