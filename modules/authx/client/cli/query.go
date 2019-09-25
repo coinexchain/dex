@@ -73,12 +73,12 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			aux, err := GetAccountX(cliCtx, key)
+			accX, err := GetAccountX(cliCtx, key)
 			if err != nil { // it's ok
-				aux = types.AccountX{}
+				accX = types.AccountX{}
 			}
 
-			all := types.AccountAll{Account: acc, AccountX: aux}
+			all := types.AccountAll{Account: acc, AccountX: accX}
 
 			return cliCtx.PrintOutput(all)
 		},

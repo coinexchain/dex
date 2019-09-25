@@ -48,12 +48,12 @@ func QueryAccountRequestHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 		cliCtx = cliCtx.WithHeight(height)
-		aux, err := cli.GetAccountX(cliCtx, addr)
+		accX, err := cli.GetAccountX(cliCtx, addr)
 		if err != nil {
-			aux = types.AccountX{}
+			accX = types.AccountX{}
 		}
 
-		mix := types.NewAccountMix(acc, aux)
+		mix := types.NewAccountMix(acc, accX)
 
 		rest.PostProcessResponse(w, cliCtx, mix)
 	}
