@@ -46,8 +46,8 @@ func ErrInvalidOrderID() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderID, "Invalid order id")
 }
 
-func ErrInvalidPricePrecision() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price precision out of range")
+func ErrInvalidPricePrecision(precision byte) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price precision out of range [0, 18], actual: %d", precision)
 }
 
 func ErrInvalidPrice(price int64) sdk.Error {

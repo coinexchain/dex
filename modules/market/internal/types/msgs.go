@@ -69,8 +69,8 @@ func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 	if len(msg.Stock) == 0 || len(msg.Money) == 0 {
 		return ErrInvalidSymbol()
 	}
-	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
-		return ErrInvalidPricePrecision()
+	if p := msg.PricePrecision; p < MinTokenPricePrecision || p > MaxTokenPricePrecision {
+		return ErrInvalidPricePrecision(p)
 	}
 	if msg.Money == msg.Stock {
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "stock and money should be different")
@@ -125,8 +125,8 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if msg.OrderType != LimitOrder {
 		return ErrInvalidOrderType()
 	}
-	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
-		return sdk.ErrInvalidAddress(fmt.Sprintf("price precision value out of range [0, 18]. actual : %d", msg.PricePrecision))
+	if p := msg.PricePrecision; p < MinTokenPricePrecision || p > MaxTokenPricePrecision {
+		return ErrInvalidPricePrecision(p)
 	}
 	if msg.Price <= 0 {
 		return ErrInvalidPrice(msg.Price)
@@ -275,8 +275,8 @@ func (msg MsgModifyPricePrecision) ValidateBasic() sdk.Error {
 	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
 		return ErrInvalidSymbol()
 	}
-	if msg.PricePrecision < MinTokenPricePrecision || msg.PricePrecision > MaxTokenPricePrecision {
-		return ErrInvalidPricePrecision()
+	if p := msg.PricePrecision; p < MinTokenPricePrecision || p > MaxTokenPricePrecision {
+		return ErrInvalidPricePrecision(p)
 	}
 	return nil
 }

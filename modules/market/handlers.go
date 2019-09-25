@@ -128,8 +128,8 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 		}
 	}
 
-	if msg.PricePrecision < types.MinTokenPricePrecision || msg.PricePrecision > types.MaxTokenPricePrecision {
-		return types.ErrInvalidPricePrecision().Result()
+	if p := msg.PricePrecision; p < types.MinTokenPricePrecision || p > types.MaxTokenPricePrecision {
+		return types.ErrInvalidPricePrecision(p).Result()
 	}
 
 	marketParams := keeper.GetParams(ctx)
@@ -328,8 +328,8 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 	if err != nil {
 		return types.ErrInvalidSymbol().Result()
 	}
-	if msg.PricePrecision > marketInfo.PricePrecision {
-		return types.ErrInvalidPricePrecision().Result()
+	if p := msg.PricePrecision; p > marketInfo.PricePrecision {
+		return types.ErrInvalidPricePrecision(p).Result()
 	}
 	if keeper.IsTokenForbidden(ctx, stock) || keeper.IsTokenForbidden(ctx, money) {
 		return types.ErrTokenForbidByIssuer().Result()
