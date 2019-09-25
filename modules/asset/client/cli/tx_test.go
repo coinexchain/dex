@@ -5,9 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/spf13/cobra"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/client/cliutil"
@@ -51,27 +50,14 @@ func TestTxCmds(t *testing.T) {
 }
 
 func testTxCmd(t *testing.T, args string, expectedMsg interface{}) {
-	oldCliRun := cliutil.CliRunCommand
-	defer func() {
-		cliutil.CliRunCommand = oldCliRun
-	}()
-
-	executed := false
-	cliutil.CliRunCommand = func(cdc *codec.Codec, msg cliutil.MsgWithAccAddress) error {
-		executed = true
-		require.Equal(t, val2ptr(expectedMsg), msg)
-		return nil
+	cmdFactory := func() *cobra.Command {
+		return GetTxCmd(types.ModuleCdc)
 	}
 
-	args1 := strings.Replace(args, "{testAddrBech32}", testAddrBech32, -1)
-	argArr := strings.Split(args1, " ")
-	cliutil.SetViperWithArgs(argArr)
+	args = strings.Replace(args, "{testAddrBech32}", testAddrBech32, -1)
+	expectedMsg = val2ptr(expectedMsg)
 
-	cmd := GetTxCmd(types.ModuleCdc)
-	cmd.SetArgs(argArr)
-	err := cmd.Execute()
-	require.NoError(t, err)
-	require.True(t, executed)
+	cliutil.TestTxCmd(t, cmdFactory, args, expectedMsg)
 }
 
 func val2ptr(msg interface{}) cliutil.MsgWithAccAddress {
