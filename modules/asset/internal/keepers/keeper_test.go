@@ -4,10 +4,13 @@ import (
 	"reflect"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/supply"
+
 	"github.com/coinexchain/dex/modules/asset/internal/types"
+	"github.com/coinexchain/dex/modules/authx"
 )
 
 func TestTokenKeeper_IssueToken(t *testing.T) {
@@ -48,6 +51,24 @@ func TestTokenKeeper_IssueToken(t *testing.T) {
 					false, false, false, false, "", "", types.TestIdentityString),
 			},
 			types.ErrInvalidTokenSymbol("999"),
+		},
+		{
+			"invalid owner address",
+			args{
+				input.ctx,
+				types.NewMsgIssueToken("ABC Token", "add", sdk.NewInt(2100), supply.NewModuleAddress(authx.ModuleName),
+					false, false, false, false, "", "", types.TestIdentityString),
+			},
+			types.ErrAccInBlackList(supply.NewModuleAddress(authx.ModuleName)),
+		},
+		{
+			"suffix token symbol",
+			args{
+				input.ctx,
+				types.NewMsgIssueToken("ABC Token", "acd.ss", sdk.NewInt(2100), testAddr,
+					false, false, false, false, "", "", types.TestIdentityString),
+			},
+			types.ErrInvalidTokenSymbol("acd.ss"),
 		},
 	}
 	for _, tt := range tests {
@@ -163,6 +184,10 @@ func TestTokenKeeper_TransferOwnership(t *testing.T) {
 
 	//case4: invalid new owner
 	err = input.tk.TransferOwnership(input.ctx, symbol, addr1, sdk.AccAddress{})
+	require.Error(t, err)
+
+	//case5: invalid new owner
+	err = input.tk.TransferOwnership(input.ctx, symbol, addr1, supply.NewModuleAddress(authx.ModuleName))
 	require.Error(t, err)
 }
 
@@ -288,7 +313,7 @@ func TestTokenKeeper_BurnToken(t *testing.T) {
 
 	//case 5: token total supply limited to > 0
 	err = input.tk.IssueToken(input.ctx, "ABC token", symbol, sdk.NewInt(2100), testAddr,
-		true, false, false, false, "", "", types.TestIdentityString)
+		true, true, false, false, "", "", types.TestIdentityString)
 	require.NoError(t, err)
 	err = input.tk.BurnToken(input.ctx, symbol, testAddr, sdk.NewInt(2100))
 	require.Error(t, err)
@@ -309,11 +334,10 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 
 	err = input.tk.ForbidToken(input.ctx, symbol, testAddr)
 	require.NoError(t, err)
-
-	token := input.tk.GetToken(input.ctx, symbol)
-	require.Equal(t, true, token.GetIsForbidden())
+	require.True(t, input.tk.IsTokenForbidden(input.ctx, symbol))
 
 	// remove token
+	token := input.tk.GetToken(input.ctx, symbol)
 	input.tk.RemoveToken(input.ctx, token)
 
 	//case 2: un forbiddable token
@@ -324,6 +348,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 
 	err = input.tk.ForbidToken(input.ctx, symbol, testAddr)
 	require.Error(t, err)
+	require.False(t, input.tk.IsTokenForbidden(input.ctx, symbol))
 
 	// remove token
 	input.tk.RemoveToken(input.ctx, token)
@@ -337,6 +362,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 
 	err = input.tk.ForbidToken(input.ctx, symbol, testAddr)
 	require.Error(t, err)
+	require.True(t, input.tk.IsTokenForbidden(input.ctx, symbol))
 
 	// remove token
 	input.tk.RemoveToken(input.ctx, token)
@@ -347,6 +373,7 @@ func TestTokenKeeper_ForbidToken(t *testing.T) {
 	require.NoError(t, err)
 	err = input.tk.ForbidToken(input.ctx, symbol, testAddr)
 	require.Error(t, err)
+	require.False(t, input.tk.IsTokenForbidden(input.ctx, symbol))
 
 	// remove token
 	input.tk.RemoveToken(input.ctx, token)
@@ -408,6 +435,9 @@ func TestTokenKeeper_AddTokenWhitelist(t *testing.T) {
 		require.Contains(t, whitelist, addr)
 	}
 	require.Equal(t, len(whitelist), len(addresses))
+	for _, addr := range whitelist {
+		require.False(t, input.tk.IsForbiddenByTokenIssuer(input.ctx, symbol, addr))
+	}
 
 	// remove token
 	input.tk.RemoveToken(input.ctx, token)
@@ -486,7 +516,9 @@ func TestTokenKeeper_ForbidAddress(t *testing.T) {
 		require.Contains(t, mock, addr)
 	}
 	require.Equal(t, len(mock), len(forbidden))
-
+	for _, addr := range mock {
+		require.True(t, input.tk.IsForbiddenByTokenIssuer(input.ctx, symbol, addr))
+	}
 	// remove token
 	input.tk.RemoveToken(input.ctx, token)
 
@@ -528,6 +560,7 @@ func TestTokenKeeper_UnForbidAddress(t *testing.T) {
 	forbidden = input.tk.GetForbiddenAddresses(input.ctx, symbol)
 	require.Equal(t, len(mock)-1, len(forbidden))
 	require.NotContains(t, forbidden, mock[0])
+	require.False(t, input.tk.IsForbiddenByTokenIssuer(input.ctx, symbol, mock[0]))
 
 	// remove token
 	input.tk.RemoveToken(input.ctx, token)

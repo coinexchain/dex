@@ -86,6 +86,12 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 				false, false, false, false, "", "", ""),
 			ErrNilTokenIdentity(),
 		},
+		{
+			"nil name",
+			NewMsgIssueToken("", "coin", sdk.NewInt(10000), testAddr,
+				false, false, false, false, "", "", TestIdentityString),
+			nil,
+		},
 	}
 
 	for _, tt := range tests {
