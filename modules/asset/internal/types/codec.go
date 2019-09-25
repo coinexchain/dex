@@ -4,6 +4,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 )
 
+// ModuleCdc wide codec
+var ModuleCdc *codec.Codec
+
+func init() {
+	ModuleCdc = codec.New()
+	RegisterCodec(ModuleCdc)
+	codec.RegisterCrypto(ModuleCdc)
+	ModuleCdc.Seal()
+}
+
 // Register concrete types on codec codec
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterInterface((*Token)(nil), nil)
@@ -20,14 +30,4 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgForbidAddr{}, "asset/MsgForbidAddr", nil)
 	cdc.RegisterConcrete(MsgUnForbidAddr{}, "asset/MsgUnForbidAddr", nil)
 	cdc.RegisterConcrete(MsgModifyTokenInfo{}, "asset/MsgModifyTokenInfo", nil)
-}
-
-// ModuleCdc wide codec
-var ModuleCdc *codec.Codec
-
-func init() {
-	ModuleCdc = codec.New()
-	RegisterCodec(ModuleCdc)
-	codec.RegisterCrypto(ModuleCdc)
-	ModuleCdc.Seal()
 }

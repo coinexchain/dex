@@ -18,4 +18,3 @@ func concatCopyPreAllocate(slices [][]byte) []byte {
 	}
 	return tmp
 }
-
