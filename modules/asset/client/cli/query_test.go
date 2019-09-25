@@ -1,12 +1,9 @@
 package cli
 
 import (
-	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/spf13/cobra"
 
 	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
@@ -22,22 +19,8 @@ func TestQueryCmds(t *testing.T) {
 }
 
 func testQueryCmd(t *testing.T, args string, expectedPath string, expectedParam interface{}) {
-	oldCliQuery := cliutil.CliQuery
-	defer func() {
-		cliutil.CliQuery = oldCliQuery
-	}()
-
-	executed := false
-	cliutil.CliQuery = func(cdc *codec.Codec, path string, param interface{}) error {
-		executed = true
-		require.Equal(t, path, expectedPath)
-		require.Equal(t, param, expectedParam)
-		return nil
+	cmdFactory := func() *cobra.Command {
+		return GetQueryCmd(types.ModuleCdc)
 	}
-
-	cmd := GetQueryCmd(types.ModuleCdc)
-	cmd.SetArgs(strings.Split(args, " "))
-	err := cmd.Execute()
-	require.NoError(t, err)
-	require.True(t, executed)
+	cliutil.TestQueryCmd(t, cmdFactory, args, expectedPath, expectedParam)
 }
