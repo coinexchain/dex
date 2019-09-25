@@ -51,7 +51,7 @@ func ErrInvalidPricePrecision() sdk.Error {
 }
 
 func ErrInvalidPrice(price int64) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price out of range [0, 1E18], actual price :  ", price)
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price out of range [0, 1E18], actual price : %d", price)
 }
 
 func ErrInvalidTokenIssuer() sdk.Error {
