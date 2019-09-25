@@ -42,7 +42,7 @@ func CreateIOCOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Create an IOC order and sign tx, broadcast to nodes.
 
 Example: 
-	 cetcli tx market create-ioc-order --trading-pair=btc/cet \
+	 cetcli tx market create-ioc-order --trading-pair=btc/cet --identify=0 \
 	--order-type=2 --price=520 --quantity=10000000 \
 	--side=1 --price-precision=10 --from=bob --identify=1 \
 	--chain-id=coinexdex --gas=10000 --fees=1000cet`,
@@ -61,7 +61,7 @@ func CreateGTEOrderTxCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Create an GTE order and sign tx, broadcast to nodes. 
 
 Example:
-	cetcli tx market create-gte-order --trading-pair=btc/cet \
+	cetcli tx market create-gte-order --trading-pair=btc/cet --identify=0 \
 	--order-type=2 --price=520 --quantity=10000000 --side=1 \
 	--price-precision=10 --blocks=100000 --from=bob --identify=1 \
 	--chain-id=coinexdex --gas=10000 --fees=1000cet`,

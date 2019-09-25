@@ -3,11 +3,12 @@ package rest
 import (
 	"net/http"
 
-	"github.com/coinexchain/dex/client/restutil"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
+
+	"github.com/coinexchain/dex/client/restutil"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )
 
 type (
