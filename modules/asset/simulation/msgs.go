@@ -3,7 +3,6 @@ package simulation
 import (
 	"fmt"
 	"math/rand"
-	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -27,60 +26,67 @@ func SimulateMsgIssueToken(k asset.Keeper) simulation.Operation {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}
 
-		ctx, write := ctx.CacheContext()
-		ok := asset.NewHandler(k)(ctx, msg).IsOK()
-		if ok {
-			write()
-		}
+		ok := simulation2.SimulateHandleMsg(msg, asset.NewHandler(k), ctx)
 
 		opMsg := simulation.NewOperationMsg(msg, ok, "")
-		if ok {
-			future := simulation.FutureOperation{
-				BlockHeight: int(ctx.BlockHeight() + 1),
-				BlockTime:   ctx.BlockTime().Add(time.Duration(100)),
-				Op:          checkIssueTokenValid(k, tokenSymbol),
-			}
-			return opMsg, []simulation.FutureOperation{future}, nil
+		if !ok {
+			return opMsg, nil, nil
+		}
+		ok = checkIssueTokenValid(ctx, k, msg)
+		if !ok {
+			return simulation.NewOperationMsg(msg, ok, ""), nil, fmt.Errorf("issue token failed")
 		}
 		return opMsg, nil, nil
 	}
 }
 
-func checkIssueTokenValid(k asset.Keeper, symbol string) simulation.Operation {
-	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
-		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
+func checkIssueTokenValid(ctx sdk.Context, k asset.Keeper, msg types.MsgIssueToken) bool {
+	token := k.GetToken(ctx, msg.Symbol)
+	return token.GetBurnable() == msg.Burnable &&
+		token.GetMintable() == msg.Mintable &&
+		token.GetOwner().Equals(msg.Owner) &&
+		token.GetTotalBurn().IsZero() &&
+		token.GetTotalMint().IsZero() &&
+		token.GetSendLock().IsZero() &&
+		!token.GetIsForbidden() &&
+		token.GetTokenForbiddable() == msg.TokenForbiddable &&
+		token.GetAddrForbiddable() == msg.AddrForbiddable &&
+		token.GetDescription() == msg.Description &&
+		token.GetURL() == msg.URL &&
+		token.GetIdentity() == msg.Identity
 
-		// check the token have succeed issue
-		_ = k.GetToken(ctx, symbol)
-		return simulation.OperationMsg{}, nil, nil
-	}
 }
+func getOrGenSymbolOwner(r *rand.Rand, accounts []simulation.Account, ctx sdk.Context, k asset.Keeper) (types.Token, string, sdk.AccAddress) {
+	token := RandomToken(r, ctx, k)
 
+	var symbol string
+	var owner sdk.AccAddress
+	makeValid := simulation2.RandomBool(r)
+	if makeValid && token != nil {
+		symbol = token.GetSymbol()
+		owner = token.GetOwner()
+
+	} else {
+		owner = simulation.RandomAcc(r, accounts).Address
+		symbol = RandStringBytes(r, SymbolLenth)
+	}
+
+	return token, symbol, owner
+}
 func SimulateMsgTransferOwnership(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		token := RandomToken(r, ctx, k)
+		token, symbol, originOwner := getOrGenSymbolOwner(r, accounts, ctx, k)
 		if len(accounts) <= 1 || token == nil {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
-		}
-
-		var symbol string
-		var originOwner sdk.AccAddress
-		makeValid := simulation2.RandomBool(r)
-		if makeValid {
-			symbol = token.GetSymbol()
-			originOwner = token.GetOwner()
-
-		} else {
-			originOwner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
 		}
 
 		newOwner := simulation.RandomAcc(r, accounts).Address
 		for newOwner.Equals(originOwner) {
 			newOwner = simulation.RandomAcc(r, accounts).Address
 		}
+
 		msg := asset.NewMsgTransferOwnership(symbol, originOwner, newOwner)
 		if msg.ValidateBasic() != nil {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
@@ -115,20 +121,10 @@ func SimulateMsgMintToken(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		token := RandomToken(r, ctx, k)
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
 
-		var symbol string
-		var owner sdk.AccAddress
 		var oldMint sdk.Int
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
-		token = k.GetToken(ctx, symbol)
+		token := k.GetToken(ctx, symbol)
 		if token != nil {
 			oldMint = token.GetTotalMint()
 		}
@@ -159,21 +155,10 @@ func verifyTokenMint(ctx sdk.Context, k asset.Keeper, msg types.MsgMintToken, ol
 func SimulateMsgBurnToken(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
 
-		token := RandomToken(r, ctx, k)
-		var symbol string
-		var owner sdk.AccAddress
 		var oldBurn sdk.Int
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
-
-		token = k.GetToken(ctx, symbol)
+		token := k.GetToken(ctx, symbol)
 		if token != nil {
 			oldBurn = token.GetTotalBurn()
 		}
@@ -207,17 +192,8 @@ func SimulateMsgForbidToken(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		token := RandomToken(r, ctx, k)
-		var symbol string
-		var owner sdk.AccAddress
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
+
 		msg := asset.NewMsgForbidToken(symbol, owner)
 		if msg.ValidateBasic() != nil {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
@@ -244,17 +220,8 @@ func verifyForbidToken(ctx sdk.Context, k asset.Keeper, symbol string) bool {
 func SimulateMsgUnForbidToken(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
-		token := RandomToken(r, ctx, k)
-		var symbol string
-		var owner sdk.AccAddress
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
+
 		msg := asset.NewMsgUnForbidToken(symbol, owner)
 		if msg.ValidateBasic() != nil {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
@@ -278,17 +245,7 @@ func SimulateMsgAddTokenWhitelist(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		token := RandomToken(r, ctx, k)
-		var symbol string
-		var owner sdk.AccAddress
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
 
 		accLen := r.Intn(len(accounts))
 		whiteList := make([]sdk.AccAddress, accLen)
@@ -338,17 +295,7 @@ func SimulateMsgRemoveTokenWhitelist(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		token := RandomToken(r, ctx, k)
-		var symbol string
-		var owner sdk.AccAddress
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
 
 		whiteList := k.GetWhitelist(ctx, symbol)
 		removeList := randomSubsliceOfAddr(r, whiteList)
@@ -389,17 +336,7 @@ func SimulateMsgForbidAddr(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		token := RandomToken(r, ctx, k)
-		var symbol string
-		var owner sdk.AccAddress
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
 
 		accLen := r.Intn(len(accounts))
 		forbidList := make([]sdk.AccAddress, accLen)
@@ -448,17 +385,7 @@ func SimulateMsgUnForbidAddr(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		token := RandomToken(r, ctx, k)
-		var symbol string
-		var owner sdk.AccAddress
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
 
 		ForbiddenAddrs := k.GetForbiddenAddresses(ctx, symbol)
 		unforbidList := randomSubsliceOfAddr(r, ForbiddenAddrs)
@@ -486,17 +413,7 @@ func SimulateMsgModifyTokenInfo(k asset.Keeper) simulation.Operation {
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (
 		OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
 
-		token := RandomToken(r, ctx, k)
-		var symbol string
-		var owner sdk.AccAddress
-		makeValid := simulation2.RandomBool(r)
-		if makeValid && token != nil {
-			symbol = token.GetSymbol()
-			owner = token.GetOwner()
-		} else {
-			owner = simulation.RandomAcc(r, accounts).Address
-			symbol = RandStringBytes(r, SymbolLenth)
-		}
+		_, symbol, owner := getOrGenSymbolOwner(r, accounts, ctx, k)
 
 		url := fmt.Sprintf("www.%s.org", symbol)
 		describe := fmt.Sprintf("simulation modify info %s", symbol)
