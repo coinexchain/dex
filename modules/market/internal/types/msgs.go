@@ -83,7 +83,7 @@ func (msg MsgCreateTradingPair) GetSignBytes() []byte {
 }
 
 func (msg MsgCreateTradingPair) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{[]byte(msg.Creator)}
+	return []sdk.AccAddress{msg.Creator}
 }
 
 // /////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ func (msg MsgCreateOrder) GetSignBytes() []byte {
 }
 
 func (msg MsgCreateOrder) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{[]byte(msg.Sender)}
+	return []sdk.AccAddress{msg.Sender}
 }
 
 func (msg MsgCreateOrder) IsGTEOrder() bool {

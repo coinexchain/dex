@@ -76,7 +76,7 @@ func (msg MsgBancorInit) GetSignBytes() []byte {
 }
 
 func (msg MsgBancorInit) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{[]byte(msg.Owner)}
+	return []sdk.AccAddress{msg.Owner}
 }
 
 func (msg MsgBancorCancel) Route() string { return RouterKey }
@@ -98,7 +98,7 @@ func (msg MsgBancorCancel) GetSignBytes() []byte {
 }
 
 func (msg MsgBancorCancel) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{[]byte(msg.Owner)}
+	return []sdk.AccAddress{msg.Owner}
 }
 
 func (msg MsgBancorTrade) Route() string { return RouterKey }
@@ -126,7 +126,7 @@ func (msg MsgBancorTrade) GetSignBytes() []byte {
 }
 
 func (msg MsgBancorTrade) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{[]byte(msg.Sender)}
+	return []sdk.AccAddress{msg.Sender}
 }
 
 // --------------------------------------------------------

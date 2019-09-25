@@ -242,5 +242,5 @@ func (msg MsgCommentToken) GetSignBytes() []byte {
 }
 
 func (msg MsgCommentToken) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{[]byte(msg.Sender)}
+	return []sdk.AccAddress{msg.Sender}
 }

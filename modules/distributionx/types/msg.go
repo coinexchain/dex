@@ -34,7 +34,7 @@ func (msg MsgDonateToCommunityPool) Type() string  { return "donate_to_community
 
 // Return address that must sign over msg.GetSignBytes()
 func (msg MsgDonateToCommunityPool) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{sdk.AccAddress(msg.FromAddr.Bytes())}
+	return []sdk.AccAddress{msg.FromAddr}
 }
 
 // get the bytes for the message signer to sign on
