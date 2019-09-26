@@ -62,7 +62,7 @@ func queryAccountMix(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeep
 
 	aux, ok := keeper.GetAccountX(ctx, addr)
 	if !ok {
-		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("accountx %s does not exist", addr))
+		aux = types.AccountX{}
 	}
 
 	mix := types.NewAccountMix(au, aux)
