@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/coinexchain/dex/modules/market/internal/keepers"
-	"github.com/coinexchain/dex/modules/market/internal/types"
-
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/gorilla/mux"
 
 	"github.com/coinexchain/dex/client/restutil"
+	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
 func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
