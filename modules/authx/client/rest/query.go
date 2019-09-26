@@ -2,17 +2,20 @@ package rest
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/client/restutil"
+	"net/http"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"net/http"
+
+	"github.com/coinexchain/dex/client/restutil"
 
 	"github.com/gorilla/mux"
 
-	"github.com/coinexchain/dex/modules/authx/internal/types"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+
+	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
 
 // register REST routes

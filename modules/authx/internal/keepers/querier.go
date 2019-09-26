@@ -2,6 +2,7 @@ package keepers
 
 import (
 	"fmt"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -53,17 +54,18 @@ func queryAccountMix(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeep
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	au := keeper.ak.GetAccount(ctx, params.Address)
+	addr := params.Address
+	au := keeper.ak.GetAccount(ctx, addr)
 	if au == nil {
-		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", au))
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
 	}
 
-	aux, ok := keeper.GetAccountX(ctx, params.Address)
+	aux, ok := keeper.GetAccountX(ctx, addr)
 	if !ok {
-		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("accountx %s does not exist", params.Address))
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("accountx %s does not exist", addr))
 	}
-	mix := types.NewAccountMix(au, aux)
 
+	mix := types.NewAccountMix(au, aux)
 	bz, err := codec.MarshalJSONIndent(keeper.cdc, mix)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))

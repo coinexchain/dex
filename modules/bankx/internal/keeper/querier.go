@@ -2,10 +2,12 @@ package keeper
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/authx"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	"github.com/coinexchain/dex/modules/authx"
 
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )

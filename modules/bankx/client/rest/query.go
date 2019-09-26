@@ -2,17 +2,19 @@ package rest
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"net/http"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/gorilla/mux"
+
+	"github.com/cosmos/cosmos-sdk/client/context"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/rest"
 
 	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
-	"github.com/cosmos/cosmos-sdk/client/context"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/rest"
 )
 
 func queryParamsHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
