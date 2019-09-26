@@ -43,19 +43,7 @@ func QueryAccountRequestHandlerFn(cliCtx context.CLIContext, cdc *codec.Codec) h
 // HTTP request handler to query the authx params values
 func QueryParamsHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
-		if !ok {
-			return
-		}
-
 		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryParameters)
-		res, height, err := cliCtx.QueryWithData(route, nil)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		cliCtx = cliCtx.WithHeight(height)
-		rest.PostProcessResponse(w, cliCtx, res)
+		restutil.RestQuery(nil, cliCtx, w, r, route, nil, nil)
 	}
 }
