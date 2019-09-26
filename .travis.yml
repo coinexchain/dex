@@ -3,7 +3,7 @@ matrix:
   include:
     - &ft_job
       language: go
-      go: 1.12.x
+      go: 1.13.x
       dist: bionic
       addons:
         apt:
@@ -84,7 +84,7 @@ matrix:
         - scripts/functional_test.sh -4 3
 
     - language: go
-      go: 1.12.x
+      go: 1.13.x
       dist: bionic
       addons:
         apt:
