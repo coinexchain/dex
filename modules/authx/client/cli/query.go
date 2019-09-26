@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/client/cliutil"
+
 	"github.com/spf13/cobra"
+
+	"github.com/coinexchain/dex/client/cliutil"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -52,7 +54,6 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 			param := auth.NewQueryAccountParams(acc)
-
 			return cliutil.CliQuery(cdc, route, param)
 		},
 	}
