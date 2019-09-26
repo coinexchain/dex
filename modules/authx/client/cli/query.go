@@ -2,11 +2,10 @@ package cli
 
 import (
 	"fmt"
-
+	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -35,83 +34,26 @@ func GetQueryParamsCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		Short: "Query auth params",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
 			route := fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryParameters)
-			res, _, err := cliCtx.QueryWithData(route, nil)
-			if err != nil {
-				return err
-			}
-
-			var params types.MergedParams
-			cdc.MustUnmarshalJSON(res, &params)
-			return cliCtx.PrintOutput(params)
+			return cliutil.CliQuery(cdc, route, nil)
 		},
 	}
 }
 
 func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:   "account [address]",
 		Short: "Query account balance",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-
-			key, err := sdk.AccAddressFromBech32(args[0])
+			route := fmt.Sprintf("custom/%s/%s", types.QuerierRoute, types.QueryAccountMix)
+			acc, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
+			param := auth.NewQueryAccountParams(acc)
 
-			accRetriever := auth.NewAccountRetriever(cliCtx)
-			if err = accRetriever.EnsureExists(key); err != nil {
-				return err
-			}
-
-			acc, err := auth.NewAccountRetriever(cliCtx).GetAccount(key)
-			if err != nil {
-				return err
-			}
-
-			accX, err := GetAccountX(cliCtx, key)
-			if err != nil { // it's ok
-				accX = types.AccountX{}
-			}
-
-			all := types.AccountAll{Account: acc, AccountX: accX}
-
-			return cliCtx.PrintOutput(all)
+			return cliutil.CliQuery(cdc, route, param)
 		},
 	}
-	return client.GetCommands(cmd)[0]
-}
-
-func GetAccountX(ctx context.CLIContext, address []byte) (types.AccountX, error) {
-	res, err := queryAccountX(ctx, address)
-	if err != nil {
-		return types.AccountX{}, err
-	}
-
-	var accountX types.AccountX
-	if err := ctx.Codec.UnmarshalJSON(res, &accountX); err != nil {
-		return types.AccountX{}, err
-	}
-
-	return accountX, nil
-}
-
-func queryAccountX(ctx context.CLIContext, addr sdk.AccAddress) ([]byte, error) {
-	bz, err := ctx.Codec.MarshalJSON(auth.NewQueryAccountParams(addr))
-	if err != nil {
-		return nil, err
-	}
-
-	route := fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryAccountX)
-
-	res, _, err := ctx.QueryWithData(route, bz)
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
 }
