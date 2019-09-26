@@ -2,7 +2,6 @@ package keepers
 
 import (
 	"fmt"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -20,6 +19,8 @@ func NewQuerier(keeper AccountXKeeper) sdk.Querier {
 			return queryParameters(ctx, keeper)
 		case types.QueryAccountX:
 			return queryAccountX(ctx, req, keeper)
+		case types.QueryAccountMix:
+			return queryAccountMix(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown authx query endpoint")
 		}
@@ -46,6 +47,30 @@ func queryAccountX(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper
 	return bz, nil
 }
 
+func queryAccountMix(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper) ([]byte, sdk.Error) {
+	var params auth.QueryAccountParams
+	if err := keeper.cdc.UnmarshalJSON(req.Data, &params); err != nil {
+		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
+	}
+
+	au := keeper.ak.GetAccount(ctx, params.Address)
+	if au == nil {
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", au))
+	}
+
+	aux, ok := keeper.GetAccountX(ctx, params.Address)
+	if !ok {
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("accountx %s does not exist", params.Address))
+	}
+	mix := types.NewAccountMix(au, aux)
+
+	bz, err := codec.MarshalJSONIndent(keeper.cdc, mix)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return bz, nil
+}
 func queryParameters(ctx sdk.Context, k AccountXKeeper) ([]byte, sdk.Error) {
 	params := k.ak.GetParams(ctx)
 	paramsx := k.GetParams(ctx)

@@ -11,4 +11,5 @@ const (
 const (
 	QueryAccountX   = "accountx"
 	QueryParameters = "parameters"
+	QueryAccountMix = "accountMix"
 )
