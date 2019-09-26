@@ -52,12 +52,14 @@ func queryBalances(ctx sdk.Context, k Keeper, req abci.RequestQuery) ([]byte, sd
 	}{sdk.Coins{}, authx.LockedCoins{}}
 
 	acc := params.Acc
-	aux, ok := k.axk.GetAccountX(ctx, acc)
-	if ok {
+	if au := k.ak.GetAccount(ctx, acc); au == nil {
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", acc))
+	}
+	all.C = k.bk.GetCoins(ctx, acc)
+
+	if aux, ok := k.axk.GetAccountX(ctx, acc); ok {
 		all.L = aux.GetAllLockedCoins()
 	}
-
-	all.C = k.bk.GetCoins(ctx, acc)
 
 	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, all)
 	if err != nil {
