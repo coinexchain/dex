@@ -51,7 +51,7 @@ func queryBalances(ctx sdk.Context, k Keeper, req abci.RequestQuery) ([]byte, sd
 		L authx.LockedCoins `json:"locked_coins"`
 	}{sdk.Coins{}, authx.LockedCoins{}}
 
-	acc := params.Acc
+	acc := params.Addr
 	if au := k.ak.GetAccount(ctx, acc); au == nil {
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", acc))
 	}
@@ -70,11 +70,11 @@ func queryBalances(ctx sdk.Context, k Keeper, req abci.RequestQuery) ([]byte, sd
 }
 
 type QueryAddrBalances struct {
-	Acc sdk.AccAddress `json:"acc"`
+	Addr sdk.AccAddress `json:"addr"`
 }
 
-func NewQueryAddrBalances(acc sdk.AccAddress) QueryAddrBalances {
+func NewQueryAddrBalances(addr sdk.AccAddress) QueryAddrBalances {
 	return QueryAddrBalances{
-		Acc: acc,
+		Addr: addr,
 	}
 }
