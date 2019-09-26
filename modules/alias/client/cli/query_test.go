@@ -24,11 +24,12 @@ func TestQuery(t *testing.T) {
 	cliutil.CliQuery = CliQueryForTest
 
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
+	cmd := GetQueryCmd(nil)
 
 	args := []string{
+		"address-of-alias",
 		"super_super_boy",
 	}
-	cmd := QueryAddressCmd(nil)
 	cmd.SetArgs(args)
 	err := cmd.Execute()
 	assert.Equal(t, nil, err)
@@ -36,9 +37,9 @@ func TestQuery(t *testing.T) {
 	assert.Equal(t, &keepers.QueryAliasInfoParam{Alias: "super_super_boy", QueryOp: keepers.GetAddressFromAlias}, ResultParam)
 
 	args = []string{
+		"aliases-of-address",
 		"coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a",
 	}
-	cmd = QueryAliasCmd(nil)
 	cmd.SetArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
@@ -50,9 +51,9 @@ func TestQuery(t *testing.T) {
 	}, ResultParam)
 
 	args = []string{
+		"aliases-of-address",
 		"coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu",
 	}
-	cmd = QueryAliasCmd(nil)
 	cmd.SetArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, "decoding bech32 failed: checksum failed. Expected eqv7uv, got agaytu.", err.Error())

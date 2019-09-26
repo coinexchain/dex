@@ -27,13 +27,14 @@ func TestCmd(t *testing.T) {
 	cliutil.CliQuery = CliQueryNull
 
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
+	cmd := GetTxCmd(nil)
 
 	args := []string{
+		"create-trading-pair",
 		"--stock=eth",
 		"--money=cet",
 		"--price-precision=8",
 	}
-	cmd := CreateMarketCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err := cmd.Execute()
@@ -45,10 +46,31 @@ func TestCmd(t *testing.T) {
 	}, ResultMsg)
 
 	args = []string{
+		"create-trading-pair",
+		"--stock=eth",
+		"--money=cet",
+		"--price-precision=800",
+	}
+	cmd.SetArgs(args)
+	cliutil.SetViperWithArgs(args)
+	err = cmd.Execute()
+	assert.Equal(t, nil, err)
+
+	args = []string{
+		"create-trading-pair",
+		"--money=cet",
+		"--price-precision=800",
+	}
+	cmd.SetArgs(args)
+	cliutil.SetViperWithArgs(args)
+	err = cmd.Execute()
+	assert.Equal(t, "tx flag is error, please see help : $ cetcli tx market createmarket -h", err.Error())
+
+	args = []string{
+		"cancel-trading-pair",
 		"--trading-pair=etc/cet",
 		"--time=1234567",
 	}
-	cmd = CancelMarket(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -59,10 +81,10 @@ func TestCmd(t *testing.T) {
 	}, ResultMsg)
 
 	args = []string{
+		"modify-price-precision",
 		"--trading-pair=etc/cet",
 		"--price-precision=9",
 	}
-	cmd = ModifyTradingPairPricePrecision(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -73,6 +95,7 @@ func TestCmd(t *testing.T) {
 	}, ResultMsg)
 
 	args = []string{
+		"create-gte-order",
 		"--trading-pair=btc/cet",
 		"--price-precision=9",
 		"--order-type=2",
@@ -83,7 +106,6 @@ func TestCmd(t *testing.T) {
 		"--identify=0",
 		"--blocks=40000",
 	}
-	cmd = CreateGTEOrderTxCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -101,6 +123,7 @@ func TestCmd(t *testing.T) {
 	}, ResultMsg)
 
 	args = []string{
+		"create-ioc-order",
 		"--trading-pair=btc/cet",
 		"--price-precision=9",
 		"--order-type=2",
@@ -110,7 +133,6 @@ func TestCmd(t *testing.T) {
 		"--price-precision=10",
 		"--identify=1",
 	}
-	cmd = CreateIOCOrderTxCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -128,9 +150,9 @@ func TestCmd(t *testing.T) {
 	}, ResultMsg)
 
 	args = []string{
+		"cancel-order",
 		"--order-id=coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a-1025",
 	}
-	cmd = CancelOrder(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()

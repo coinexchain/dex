@@ -22,12 +22,13 @@ func TestCmd(t *testing.T) {
 	cliutil.CliRunCommand = CliRunCommandForTest
 
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
+	cmd := GetTxCmd(nil)
 
 	args := []string{
+		"add",
 		"super_super_boy",
 		"--as-default=yes",
 	}
-	cmd := AliasAddCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err := cmd.Execute()
@@ -40,10 +41,10 @@ func TestCmd(t *testing.T) {
 	assert.Equal(t, msg, ResultMsg)
 
 	args = []string{
+		"add",
 		"super_boy",
 		"--as-default=no",
 	}
-	cmd = AliasAddCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -56,19 +57,19 @@ func TestCmd(t *testing.T) {
 	assert.Equal(t, msg, ResultMsg)
 
 	args = []string{
+		"add",
 		"super_boy",
 		"--as-default=ok",
 	}
-	cmd = AliasAddCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, "Invalid value for --as-default, only 'yes' and 'no' are valid", err.Error())
 
 	args = []string{
+		"remove",
 		"super_boy",
 	}
-	cmd = AliasRemoveCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()

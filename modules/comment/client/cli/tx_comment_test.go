@@ -24,6 +24,7 @@ func Test1(t *testing.T) {
 	cliutil.CliRunCommand = CliRunCommandForTest
 
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
+	cmd := GetTxCmd(nil)
 
 	args := []string{
 		"new-thread",
@@ -33,7 +34,6 @@ func Test1(t *testing.T) {
 		`--content=CET to da moon!!!`,
 		"--content-type=UTF8Text",
 	}
-	cmd := CreateNewThreadCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err := cmd.Execute()
@@ -58,7 +58,6 @@ func Test1(t *testing.T) {
 		`--follow=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,favorite`,
 		"--content-type=UTF8Text",
 	}
-	cmd = CreateFollowupCommentCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -90,7 +89,6 @@ func Test1(t *testing.T) {
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,favorite`,
 		`--reward-to=20021;coinex1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8vc4efa;1;cet;like`,
 	}
-	cmd = RewardCommentsCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -128,7 +126,6 @@ func Test1(t *testing.T) {
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,favorite`,
 	}
-	cmd = RewardCommentsCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -161,7 +158,6 @@ func Test1(t *testing.T) {
 		`--content=CET to da moon!!!`,
 		"--content-type=Haha",
 	}
-	cmd = CreateNewThreadCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -173,7 +169,6 @@ func Test1(t *testing.T) {
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;2;cet;like,favorite`,
 	}
-	cmd = RewardCommentsCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -185,7 +180,6 @@ func Test1(t *testing.T) {
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=1a0001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,favorite`,
 	}
-	cmd = RewardCommentsCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -197,7 +191,6 @@ func Test1(t *testing.T) {
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdp;2;cet;like,favorite`,
 	}
-	cmd = RewardCommentsCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -209,7 +202,6 @@ func Test1(t *testing.T) {
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2a;cet;like,favorite`,
 	}
-	cmd = RewardCommentsCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -221,7 +213,6 @@ func Test1(t *testing.T) {
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,fuck`,
 	}
-	cmd = RewardCommentsCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
@@ -237,7 +228,6 @@ func Test1(t *testing.T) {
 		`--follow=10001;coinex1px8alypku5j8;2;cet;like,favorite`,
 		"--content-type=UTF8Text",
 	}
-	cmd = CreateFollowupCommentCmd(nil)
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()

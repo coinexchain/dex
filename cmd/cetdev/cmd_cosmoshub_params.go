@@ -12,7 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/go-amino"
+	amino "github.com/tendermint/go-amino"
 
 	"github.com/coinexchain/dex/app"
 )

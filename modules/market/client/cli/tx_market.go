@@ -29,7 +29,7 @@ var createMarketFlags = []string{
 
 func CreateMarketCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create-trading-pair ",
+		Use:   "create-trading-pair",
 		Short: "generate tx to create trading pair",
 		Long: `generate a tx and sign it to create trading pair in dex blockchain. 
 

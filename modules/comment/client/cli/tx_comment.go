@@ -123,7 +123,9 @@ Example:
 	 cetcli tx comment reward-comments --token=cet --reward-to="10001;coinex1qi598e62ejitdg4yur3zarvary0c5xw7kv8f3t4;2;cet;like,favorite" --reward-to="20021;coinex1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4;1;cet;like"
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return createAndBroadcastComment(cdc, "reward-comments", &rewardsArray)
+			err := createAndBroadcastComment(cdc, "reward-comments", &rewardsArray)
+			rewardsArray = rewardsArray[:0]
+			return err
 		},
 	}
 

@@ -3,7 +3,7 @@ package cli
 import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/go-amino"
+	amino "github.com/tendermint/go-amino"
 
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
