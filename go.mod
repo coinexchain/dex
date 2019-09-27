@@ -2,8 +2,6 @@ module github.com/coinexchain/dex
 
 go 1.12
 
-replace github.com/coinexchain/shorthanzi v0.1.0 => ../mygo/src/github.com/coinexchain/shorthanzi
-
 require (
 	github.com/coinexchain/shorthanzi v0.1.0
 	github.com/cosmos/cosmos-sdk v0.37.0
