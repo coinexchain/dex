@@ -2,18 +2,19 @@ package cli
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/client/cliutil"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/spf13/cobra"
-	"github.com/tendermint/go-amino"
+
+	"github.com/coinexchain/dex/client/cliutil"
+	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-
-	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	"github.com/tendermint/go-amino"
 )
 
 func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
