@@ -51,7 +51,8 @@ func queryBalances(ctx sdk.Context, k Keeper, req abci.RequestQuery) ([]byte, sd
 	all := struct {
 		C sdk.Coins         `json:"coins"`
 		L authx.LockedCoins `json:"locked_coins"`
-	}{sdk.Coins{}, authx.LockedCoins{}}
+		F sdk.Coins         `json:"frozen_coins"`
+	}{sdk.Coins{}, authx.LockedCoins{}, sdk.Coins{}}
 
 	acc := params.Addr
 	if au := k.ak.GetAccount(ctx, acc); au == nil {
@@ -61,6 +62,7 @@ func queryBalances(ctx sdk.Context, k Keeper, req abci.RequestQuery) ([]byte, sd
 
 	if aux, ok := k.axk.GetAccountX(ctx, acc); ok {
 		all.L = aux.GetAllLockedCoins()
+		all.F = aux.FrozenCoins
 	}
 
 	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, all)

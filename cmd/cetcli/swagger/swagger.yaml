@@ -397,6 +397,7 @@ paths:
                 required:
                   - coins
                   - locked_coins
+                  - frozen_coins
                 properties:
                   coins:
                     type: array
@@ -407,6 +408,10 @@ paths:
                     items:
                       $ref: "#/definitions/LockedCoin"
                     x-nullable: true
+                  frozen_coins:
+                    type: array
+                    items:
+                      $ref: "#/definitions/Coin"
                 additionalProperties: false
             additionalProperties: false
         204:
