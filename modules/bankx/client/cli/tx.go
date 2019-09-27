@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -54,8 +55,29 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	cmd = client.PostCommands(cmd)[0]
-	cmd.MarkFlagRequired(client.FlagFrom)
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
 	cmd.Flags().Int64(FlagUnlockTime, 0, "The unix timestamp when tokens can transfer again")
 	cmd.Flags().Bool(cliutil.FlagGenerateUnsignedTx, false, "Generate a unsigned tx")
+	return cmd
+}
+
+func RequireMemoCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "require-memo <bool>",
+		Short: "Mark if memo is required to receive coins",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			required, err := strconv.ParseBool(args[0])
+			if err != nil {
+				return err
+			}
+			msg := types.NewMsgSetTransferMemoRequired(nil, required)
+			return cliutil.CliRunCommand(cdc, &msg)
+		},
+	}
+
+	cmd = client.PostCommands(cmd)[0]
+	_ = cmd.MarkFlagRequired(client.FlagFrom)
+
 	return cmd
 }
