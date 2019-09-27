@@ -3,6 +3,7 @@ package simulation
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/tendermint/tendermint/crypto"
 
@@ -34,11 +35,11 @@ func SimulateMsgSend(mapper auth.AccountKeeper, bk bankx.Keeper) simulation.Oper
 			return opMsg, nil, nil
 		}
 
-		err = sendAndVerifyMsgSend(app, mapper, msg, ctx, []crypto.PrivKey{fromAcc.PrivKey}, handler, lockCoinsFee)
+		fOps, err = sendAndVerifyMsgSend(app, mapper, msg, ctx, []crypto.PrivKey{fromAcc.PrivKey}, handler, lockCoinsFee)
 		if err != nil {
-			return opMsg, nil, err
+			return opMsg, fOps, err
 		}
-		return opMsg, nil, nil
+		return opMsg, fOps, nil
 	}
 }
 
@@ -80,7 +81,7 @@ func createMsgSend(r *rand.Rand, ctx sdk.Context, accs []simulation.Account, map
 }
 
 // Sends and verifies the transition of a msg send.
-func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg types.MsgSend, ctx sdk.Context, privkeys []crypto.PrivKey, handler sdk.Handler, lockCoinsFee sdk.Coins) error {
+func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg types.MsgSend, ctx sdk.Context, privkeys []crypto.PrivKey, handler sdk.Handler, lockCoinsFee sdk.Coins) ([]simulation.FutureOperation, error) {
 	fromAcc := mapper.GetAccount(ctx, msg.FromAddress)
 	AccountNumbers := []uint64{fromAcc.GetAccountNumber()}
 	SequenceNumbers := []uint64{fromAcc.GetSequence()}
@@ -93,10 +94,10 @@ func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg t
 		res := handler(ctx, msg)
 		if !res.IsOK() {
 			if res.Code == bank.CodeSendDisabled || res.Code == types.CodeTokenForbiddenByOwner {
-				return nil
+				return nil, nil
 			}
 			// TODO: Do this in a more 'canonical' way
-			return fmt.Errorf("handling msg failed %v", res)
+			return nil, fmt.Errorf("handling msg failed %v", res)
 		}
 	} else {
 		tx := mock.GenTx([]sdk.Msg{msg},
@@ -106,7 +107,7 @@ func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg t
 		res := app.Deliver(tx)
 		if !res.IsOK() {
 			// TODO: Do this in a more 'canonical' way
-			return fmt.Errorf("Deliver failed %v", res)
+			return nil, fmt.Errorf("Deliver failed %v", res)
 		}
 	}
 
@@ -115,19 +116,33 @@ func sendAndVerifyMsgSend(app *baseapp.BaseApp, mapper auth.AccountKeeper, msg t
 
 	if msg.UnlockTime == 0 {
 		if !initialFromAddrCoins.Sub(msg.Amount).IsEqual(fromAcc.GetCoins()) {
-			return fmt.Errorf("fromAddress %s had an incorrect amount of coins", fromAcc.GetAddress())
+			return nil, fmt.Errorf("fromAddress %s had an incorrect amount of coins", fromAcc.GetAddress())
 		}
 
 		if !initialToAddrCoins.Add(msg.Amount).IsEqual(toAcc.GetCoins()) {
-			return fmt.Errorf("toAddress %s had an incorrect amount of coins", toAcc.GetAddress())
+			return nil, fmt.Errorf("toAddress %s had an incorrect amount of coins", toAcc.GetAddress())
 		}
 	} else {
-		if !initialFromAddrCoins.Sub(msg.Amount).Sub(lockCoinsFee).IsEqual(fromAcc.GetCoins()) {
-			return fmt.Errorf("toAddress %s had an incorrect amount of coins", toAcc.GetAddress())
+		fOps := []simulation.FutureOperation{
+			{
+				BlockTime: time.Unix(msg.UnlockTime, 0),
+				Op:        checkLockSend(mapper, initialToAddrCoins, msg),
+			},
 		}
+		return fOps, nil
 	}
 
-	return nil
+	return nil, nil
+}
+func checkLockSend(ak auth.AccountKeeper, oldAmt sdk.Coins, msg bankx.MsgSend) simulation.Operation {
+
+	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accounts []simulation.Account) (OperationMsg simulation.OperationMsg, futureOps []simulation.FutureOperation, err error) {
+		updatedAmt := ak.GetAccount(ctx, msg.ToAddress).GetCoins()
+		if updatedAmt.Sub(msg.Amount).IsAllGTE(oldAmt) {
+			return simulation.NoOpMsg(types.ModuleName), nil, nil
+		}
+		return simulation.NoOpMsg(types.ModuleName), nil, fmt.Errorf("lock send has failed")
+	}
 }
 
 // SingleInputSendMsg tests and runs a single msg multisend, with one input and one output, where both
