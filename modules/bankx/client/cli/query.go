@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/coinexchain/dex/client/cliutil"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/spf13/cobra"
 	"github.com/tendermint/go-amino"
@@ -22,6 +23,7 @@ func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
 	}
 	aliasQueryCmd.AddCommand(client.GetCommands(
 		QueryParamsCmd(cdc),
+		QueryBalancesCmd(cdc),
 	)...)
 	return aliasQueryCmd
 }
@@ -34,6 +36,23 @@ func QueryParamsCmd(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keeper.QueryParameters)
 			return cliutil.CliQuery(cdc, route, nil)
+		},
+	}
+}
+
+func QueryBalancesCmd(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "balances [address]",
+		Short: "Query account balance",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keeper.QueryBalances)
+			acc, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+			param := auth.NewQueryAccountParams(acc)
+			return cliutil.CliQuery(cdc, route, param)
 		},
 	}
 }
