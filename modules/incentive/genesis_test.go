@@ -85,7 +85,8 @@ func TestExportGenesis(t *testing.T) {
 	genesis := incentive.DefaultGenesisState()
 	plan := incentive.Plan{EndHeight: 10, RewardPerBlock: 1, TotalIncentive: 10}
 	incentive.InitGenesis(input.ctx, input.keeper, genesis)
-	input.keeper.AddNewPlan(input.ctx, plan)
+	err := input.keeper.AddNewPlan(input.ctx, plan)
+	require.Nil(t, err)
 	gen := incentive.ExportGenesis(input.ctx, input.keeper)
 	genesis.Params.Plans = append(genesis.Params.Plans, plan)
 	require.Equal(t, genesis, gen)

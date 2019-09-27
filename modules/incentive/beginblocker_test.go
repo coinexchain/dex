@@ -34,8 +34,7 @@ func TestBeginBlockerInvalidCoin(t *testing.T) {
 	input := SetupTestInput()
 	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: 10})
 	input.keeper.SetParams(input.ctx, incentive.DefaultParams())
-	err := incentive.BeginBlocker(input.ctx, input.keeper)
-	require.Equal(t, 0xa, int(err.Result().Code))
+	incentive.BeginBlocker(input.ctx, input.keeper)
 }
 
 func TestBeginBlocker(t *testing.T) {
@@ -45,8 +44,7 @@ func TestBeginBlocker(t *testing.T) {
 	acc := input.ak.NewAccountWithAddress(input.ctx, incentive.PoolAddr)
 	_ = acc.SetCoins(dex.NewCetCoins(10000 * 1e8))
 	input.ak.SetAccount(input.ctx, acc)
-	err := incentive.BeginBlocker(input.ctx, input.keeper)
-	require.Equal(t, nil, err)
+	incentive.BeginBlocker(input.ctx, input.keeper)
 }
 
 func TestIncentiveCoinsAddress(t *testing.T) {
