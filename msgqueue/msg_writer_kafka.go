@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	kafka "github.com/segmentio/kafka-go"
+	"github.com/segmentio/kafka-go"
 )
 
 var _ MsgWriter = kafkaMsgWriter{}
@@ -24,10 +24,11 @@ func NewKafkaMsgWriter(brokers string) MsgWriter {
 }
 
 func (w kafkaMsgWriter) WriteKV(k, v []byte) error {
-	return w.WriteMessages(context.Background(), kafka.Message{
+	err := w.WriteMessages(context.Background(), kafka.Message{
 		Key:   k,
 		Value: v,
 	})
+	return err
 }
 
 func (w kafkaMsgWriter) Close() error {

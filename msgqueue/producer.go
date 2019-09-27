@@ -2,6 +2,7 @@ package msgqueue
 
 import (
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -23,44 +24,45 @@ type MsgSender interface {
 	SendMsg(key []byte, v []byte)
 	IsSubscribed(topic string) bool
 	IsOpenToggle() bool
-	GetMode() string
+	GetMode() []string
 	Close()
 }
 
 type producer struct {
-	toggle    bool
-	subTopics map[string]struct{}
-	msgWriter MsgWriter
+	toggle     bool
+	subTopics  map[string]struct{}
+	msgWriters []MsgWriter
 }
 
 func NewProducer() MsgSender {
-	brokers := viper.GetString(FlagBrokers)
+	brokers := viper.GetStringSlice(FlagBrokers)
 	topics := viper.GetString(FlagTopics)
 	featureToggle := viper.GetBool(FlagFeatureToggle)
 	return NewProducerFromConfig(brokers, topics, featureToggle)
 }
 
-func NewProducerFromConfig(brokers, topics string, featureToggle bool) MsgSender {
+func NewProducerFromConfig(brokers []string, topics string, featureToggle bool) MsgSender {
 	p := producer{
-		subTopics: make(map[string]struct{}),
-		msgWriter: NewNopMsgWriter(),
+		subTopics:  make(map[string]struct{}),
+		msgWriters: nil,
 	}
 
 	p.init(brokers, topics, featureToggle)
 	return p
 }
 
-func (p *producer) init(brokers, topics string, featureToggle bool) {
+func (p *producer) init(brokers []string, topics string, featureToggle bool) {
 	if len(brokers) == 0 || len(topics) == 0 {
 		return
 	}
 
-	msgWriter, err := createMsgWriter(brokers)
-	if err != nil {
-		return // TODO log?
+	for _, broker := range brokers {
+		msgWriter, err := createMsgWriter(broker)
+		if err != nil {
+			return // TODO log?
+		}
+		p.msgWriters = append(p.msgWriters, msgWriter)
 	}
-	p.msgWriter = msgWriter
-
 	ts := strings.Split(topics, ",")
 	for _, topic := range ts {
 		p.subTopics[topic] = struct{}{}
@@ -69,11 +71,19 @@ func (p *producer) init(brokers, topics string, featureToggle bool) {
 }
 
 func (p producer) Close() {
-	_ = p.msgWriter.Close() // TODO: handle error
+	for _, w := range p.msgWriters {
+		_ = w.Close()
+	}
 }
 
 func (p producer) SendMsg(k []byte, v []byte) {
-	_ = p.msgWriter.WriteKV(k, v) // TODO: handle error
+	for _, w := range p.msgWriters {
+		err := Retry(100, time.Microsecond, func() error {
+			return w.WriteKV(k, v)
+		})
+		// TODO. will log
+		_ = err
+	}
 }
 
 func (p producer) IsSubscribed(topic string) bool {
@@ -88,6 +98,21 @@ func (p producer) IsOpenToggle() bool {
 	return p.toggle
 }
 
-func (p producer) GetMode() string {
-	return p.msgWriter.String()
+func (p producer) GetMode() []string {
+	tags := make([]string, 0, len(p.msgWriters))
+	for _, w := range p.msgWriters {
+		tags = append(tags, w.String())
+	}
+	return tags
+}
+
+func Retry(attempts int, sleep time.Duration, fn func() error) error {
+	if err := fn(); err != nil {
+		if attempts--; attempts > 0 {
+			time.Sleep(sleep)
+			return Retry(attempts, 2*sleep, fn)
+		}
+		return err
+	}
+	return nil
 }
