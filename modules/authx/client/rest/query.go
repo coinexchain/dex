@@ -36,7 +36,7 @@ func QueryAccountRequestHandlerFn(cliCtx context.CLIContext, cdc *codec.Codec) h
 		}
 		params := auth.NewQueryAccountParams(acc)
 
-		restutil.RestQuery(cdc, cliCtx, w, r, route, params, nil)
+		restutil.RestQuery(cdc, cliCtx, w, r, route, &params, nil)
 	}
 }
 

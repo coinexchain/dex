@@ -32,7 +32,6 @@ func (req *sendReq) GetBaseReq() *rest.BaseReq {
 }
 func (req *sendReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	toAddr := getAddr(r)
-
 	return types.NewMsgSend(sender, toAddr, req.Amount, req.UnlockTime), nil
 }
 

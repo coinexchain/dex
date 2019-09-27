@@ -36,6 +36,6 @@ func QueryBalancesRequestHandlerFn(cliCtx context.CLIContext, cdc *codec.Codec) 
 		}
 		params := keeper.NewQueryAddrBalances(acc)
 
-		restutil.RestQuery(cdc, cliCtx, w, r, route, params, nil)
+		restutil.RestQuery(cdc, cliCtx, w, r, route, &params, nil)
 	}
 }
