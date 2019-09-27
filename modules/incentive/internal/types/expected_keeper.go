@@ -12,6 +12,7 @@ type FeeCollectionKeeper interface {
 // expected bank keeper
 type BankKeeper interface {
 	SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, sdk.Error)
+	HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool
 }
 
 // SupplyKeeper defines the expected supply keeper (noalias)

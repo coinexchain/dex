@@ -123,7 +123,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 
 // module begin-block
 func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
-	_ = BeginBlocker(ctx, am.incentiveKeeper)
+	BeginBlocker(ctx, am.incentiveKeeper)
 }
 
 // module end-block

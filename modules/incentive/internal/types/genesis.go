@@ -39,22 +39,6 @@ func (data GenesisState) ValidateGenesis() error {
 		return sdk.NewError(CodeSpaceIncentive, CodeInvalidDefaultRewardPerBlock, "invalid default reward per block")
 	}
 
-	for _, plan := range param.Plans {
-		if plan.StartHeight < 0 || plan.EndHeight < 0 {
-			return sdk.NewError(CodeSpaceIncentive, CodeInvalidPlanHeight, "invalid incentive plan height")
-		}
-		if plan.EndHeight <= plan.StartHeight {
-			return sdk.NewError(CodeSpaceIncentive, CodeInvalidPlanHeight, "incentive plan end height should be greater than start height")
-		}
-		if plan.RewardPerBlock <= 0 {
-			return sdk.NewError(CodeSpaceIncentive, CodeInvalidRewardPerBlock, "invalid incentive plan reward per block")
-		}
-		if plan.TotalIncentive <= 0 {
-			return sdk.NewError(CodeSpaceIncentive, CodeInvalidTotalIncentive, "invalid incentive plan total incentive reward")
-		}
-		if (plan.EndHeight-plan.StartHeight)*plan.RewardPerBlock != plan.TotalIncentive {
-			return sdk.NewError(CodeSpaceIncentive, CodeInvalidTotalIncentive, "invalid incentive plan")
-		}
-	}
-	return nil
+	return CheckPlans(param.Plans)
+
 }

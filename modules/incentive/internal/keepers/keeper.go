@@ -65,12 +65,20 @@ func (k Keeper) SetState(ctx sdk.Context, state types.State) sdk.Error {
 	return nil
 }
 
-func (k Keeper) AddNewPlan(ctx sdk.Context, plan types.Plan) {
+func (k Keeper) AddNewPlan(ctx sdk.Context, plan types.Plan) sdk.Error {
+	err := types.CheckPlans([]types.Plan{plan})
+	if err != nil {
+		return sdk.NewError(types.CodeSpaceIncentive, types.CodeInvalidPlanToAdd, "new plan is invalid")
+	}
 	param := k.GetParams(ctx)
 	param.Plans = append(param.Plans, plan)
 	k.SetParams(ctx, param)
+	return nil
 }
 
 func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) sdk.Error {
 	return k.supplyKeeper.SendCoinsFromAccountToModule(ctx, senderAddr, recipientModule, amt)
+}
+func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
+	return k.bankKeeper.HasCoins(ctx, addr, amt)
 }

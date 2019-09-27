@@ -13,4 +13,5 @@ const (
 	CodeInvalidPlanHeight            sdk.CodeType = 703
 	CodeInvalidRewardPerBlock        sdk.CodeType = 704
 	CodeInvalidTotalIncentive        sdk.CodeType = 705
+	CodeInvalidPlanToAdd             sdk.CodeType = 706
 )

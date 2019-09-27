@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
@@ -14,7 +15,7 @@ var (
 )
 
 type Params struct {
-	DefaultRewardPerBlock uint16 `json:"default_reward_per_block"`
+	DefaultRewardPerBlock int64  `json:"default_reward_per_block"`
 	Plans                 []Plan `json:"plans"`
 }
 
@@ -27,7 +28,7 @@ type Plan struct {
 
 func DefaultParams() Params {
 	return Params{
-		DefaultRewardPerBlock: 0,
+		DefaultRewardPerBlock: 2e8,
 		Plans: []Plan{
 			{0, 10512000, 10e8, 105120000e8},
 			{10512000, 21024000, 8e8, 84096000e8},
@@ -61,4 +62,26 @@ func (p Params) String() string {
 	}
 
 	return s
+}
+
+func CheckPlans(plans []Plan) sdk.Error {
+
+	for _, plan := range plans {
+		if plan.StartHeight < 0 || plan.EndHeight < 0 {
+			return sdk.NewError(CodeSpaceIncentive, CodeInvalidPlanHeight, "invalid incentive plan height")
+		}
+		if plan.EndHeight <= plan.StartHeight {
+			return sdk.NewError(CodeSpaceIncentive, CodeInvalidPlanHeight, "incentive plan end height should be greater than start height")
+		}
+		if plan.RewardPerBlock <= 0 {
+			return sdk.NewError(CodeSpaceIncentive, CodeInvalidRewardPerBlock, "invalid incentive plan reward per block")
+		}
+		if plan.TotalIncentive <= 0 {
+			return sdk.NewError(CodeSpaceIncentive, CodeInvalidTotalIncentive, "invalid incentive plan total incentive reward")
+		}
+		if (plan.EndHeight-plan.StartHeight)*plan.RewardPerBlock != plan.TotalIncentive {
+			return sdk.NewError(CodeSpaceIncentive, CodeInvalidTotalIncentive, "invalid incentive plan")
+		}
+	}
+	return nil
 }
