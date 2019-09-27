@@ -1,15 +1,17 @@
 package rest
 
 import (
-	"github.com/coinexchain/dex/client/restutil"
-	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
+	"net/http"
+	"testing"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
+
+	"github.com/coinexchain/dex/client/restutil"
+	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 )
 
 var ResultParam *keeper.QueryAddrBalances
