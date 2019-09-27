@@ -41,6 +41,7 @@ func (wo *WrappedOrder) GetPrice() sdk.Dec {
 
 func (wo *WrappedOrder) GetAmount() int64 {
 	if notEnoughMoney(wo.order) {
+		// add this clause only for safe, should not reach here in production
 		return 0
 	}
 	return wo.order.LeftStock
@@ -122,7 +123,8 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, 
 		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
 		actualFee := order.CalOrderFee(feeForZeroDeal)
 		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee.RoundInt64()); err != nil {
-			panic(err)
+			//should not reach this clause in production
+			ctx.Logger().Debug("unfreezeCoinsForOrder: %s", err.Error())
 		}
 	}
 }
