@@ -27,14 +27,6 @@ func NewAccountX(address sdk.AccAddress, memoRequired bool, lockedCoins LockedCo
 	}
 }
 
-func (acc *AccountX) GetAddress() sdk.AccAddress {
-	return acc.Address
-}
-
-func (acc *AccountX) SetAddress(address sdk.AccAddress) {
-	acc.Address = address
-}
-
 func (acc *AccountX) SetMemoRequired(b bool) {
 	acc.MemoRequired = b
 }

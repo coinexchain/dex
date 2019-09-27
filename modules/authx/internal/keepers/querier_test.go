@@ -37,10 +37,10 @@ func Test_queryParams(t *testing.T) {
 func Test_queryAccount(t *testing.T) {
 	input := setupTestInput()
 	req := abci.RequestQuery{
-		Path: fmt.Sprintf("custom/%s/%s", authx.QuerierRoute, authx.QueryAccountX),
+		Path: fmt.Sprintf("custom/%s/%s", authx.QuerierRoute, types.QueryAccountMix),
 		Data: []byte{},
 	}
-	path0 := []string{authx.QueryAccountX}
+	path0 := []string{authx.QueryAccountMix}
 	query := keepers.NewQuerier(input.axk)
 
 	res, err := query(input.ctx, path0, req)
@@ -66,8 +66,4 @@ func Test_queryAccount(t *testing.T) {
 	res, err = query(input.ctx, path0, req)
 	require.Nil(t, err)
 	require.NotNil(t, res)
-
-	var account authx.AccountX
-	err2 := input.cdc.UnmarshalJSON(res, &account)
-	require.Nil(t, err2)
 }

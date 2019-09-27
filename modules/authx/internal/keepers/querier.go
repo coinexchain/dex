@@ -18,34 +18,12 @@ func NewQuerier(keeper AccountXKeeper) sdk.Querier {
 		switch path[0] {
 		case types.QueryParameters:
 			return queryParameters(ctx, keeper)
-		case types.QueryAccountX:
-			return queryAccountX(ctx, req, keeper)
 		case types.QueryAccountMix:
 			return queryAccountMix(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown authx query endpoint")
 		}
 	}
-}
-
-func queryAccountX(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper) ([]byte, sdk.Error) {
-	var params auth.QueryAccountParams
-
-	if err := keeper.cdc.UnmarshalJSON(req.Data, &params); err != nil {
-		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
-	}
-
-	aux, ok := keeper.GetAccountX(ctx, params.Address)
-	if !ok {
-		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("accountx %s does not exist", params.Address))
-	}
-
-	bz, err := codec.MarshalJSONIndent(keeper.cdc, aux)
-	if err != nil {
-		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
-	}
-
-	return bz, nil
 }
 
 func queryAccountMix(ctx sdk.Context, req abci.RequestQuery, keeper AccountXKeeper) ([]byte, sdk.Error) {

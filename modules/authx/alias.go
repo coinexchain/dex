@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	StoreKey      = types.StoreKey
-	QuerierRoute  = types.QuerierRoute
-	ModuleName    = types.ModuleName
-	QueryAccountX = types.QueryAccountX
+	StoreKey        = types.StoreKey
+	QuerierRoute    = types.QuerierRoute
+	ModuleName      = types.ModuleName
+	QueryAccountMix = types.QueryAccountMix
 
 	CodeSpaceAuthX     = types.CodeSpaceAuthX
 	CodeGasPriceTooLow = types.CodeGasPriceTooLow

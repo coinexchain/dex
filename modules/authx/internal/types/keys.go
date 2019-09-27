@@ -9,7 +9,6 @@ const (
 
 // query endpoints supported by the auth Querier
 const (
-	QueryAccountX   = "accountx"
 	QueryParameters = "parameters"
 	QueryAccountMix = "accountMix"
 )
