@@ -432,6 +432,21 @@ func TestCreateOrderFailed(t *testing.T) {
 	require.Equal(t, types.CodeInsufficientCoin, ret.Code, "create GTE order should failed by insufficient coin")
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 
+	failedInsufficientCoinOrder = msgOrder
+	failedInsufficientCoinOrder.Quantity = 0
+	ret = input.handler(input.ctx, failedInsufficientCoinOrder)
+	oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
+	require.Equal(t, types.CodeOrderQuantityTooSmall, ret.Code, "create GTE order should failed by too small commission coin")
+	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
+
+	failedInsufficientCoinOrder = msgOrder
+	failedInsufficientCoinOrder.Quantity = 0
+	failedInsufficientCoinOrder.Side = BUY
+	ret = input.handler(input.ctx, failedInsufficientCoinOrder)
+	oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
+	require.Equal(t, types.CodeOrderQuantityTooSmall, ret.Code, "create GTE order should failed by too small commission coin")
+	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
+
 	failedTokenForbidOrder := msgOrder
 	ret = input.handler(input.ctx, failedTokenForbidOrder)
 	oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
