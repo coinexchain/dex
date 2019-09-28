@@ -66,11 +66,15 @@ func (p *producer) init(brokers []string, topics string, featureToggle bool) {
 	for _, broker := range brokers {
 		msgWriter, err := createMsgWriter(broker)
 		if err != nil {
-			p.log.Error(fmt.Sprintf("create msgWrite : %s failed, err : %s\n", broker, err.Error()))
+			if p.log != nil {
+				p.log.Error(fmt.Sprintf("create msgWrite : %s failed, err : %s\n", broker, err.Error()))
+			}
 			return
 		}
 		p.msgWriters = append(p.msgWriters, msgWriter)
-		p.log.Info(fmt.Sprintf("create write : %s succueed", msgWriter.String()))
+		if p.log != nil {
+			p.log.Info(fmt.Sprintf("create write : %s succueed", msgWriter.String()))
+		}
 	}
 	ts := strings.Split(topics, ",")
 	for _, topic := range ts {
@@ -82,7 +86,9 @@ func (p *producer) init(brokers []string, topics string, featureToggle bool) {
 func (p producer) Close() {
 	for _, w := range p.msgWriters {
 		if err := w.Close(); err != nil {
-			p.log.Error(fmt.Sprintf("create msgWrite : %s failed, err : %s\n", w.String(), err.Error()))
+			if p.log != nil {
+				p.log.Error(fmt.Sprintf("create msgWrite : %s failed, err : %s\n", w.String(), err.Error()))
+			}
 		}
 	}
 }
@@ -92,7 +98,9 @@ func (p producer) SendMsg(k []byte, v []byte) {
 		if err := Retry(RetryNum, time.Microsecond, func() error {
 			return w.WriteKV(k, v)
 		}); err != nil {
-			p.log.Error(fmt.Sprintf("write msg to %s failed, err : %s\n", w.String(), err.Error()))
+			if p.log != nil {
+				p.log.Error(fmt.Sprintf("write msg to %s failed, err : %s\n", w.String(), err.Error()))
+			}
 		}
 	}
 }

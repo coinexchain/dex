@@ -10,7 +10,7 @@ import (
 
 func TestNewProducer(t *testing.T) {
 	defer os.Remove("messages.txt")
-	p := NewProducerFromConfig([]string{"file:messages.txt"}, "bank,auth", true)
+	p := NewProducerFromConfig([]string{"file:messages.txt"}, "bank,auth", true, nil)
 	require.True(t, p.IsOpenToggle())
 	require.True(t, p.IsSubscribed("bank"))
 	require.True(t, p.IsSubscribed("auth"))

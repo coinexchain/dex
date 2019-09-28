@@ -118,7 +118,7 @@ func newTestApp(Cdc *codec.Codec) *TestApp {
 
 func (app *TestApp) initKeepers(invCheckPeriod uint) {
 	app.ParamsKeeper = params.NewKeeper(app.Cdc, app.keyParams, app.tkeyParams, params.DefaultCodespace)
-	app.MsgQueProducer = msgqueue.NewProducer()
+	app.MsgQueProducer = msgqueue.NewProducer(nil)
 	// define the AccountKeeper
 	app.AccountKeeper = auth.NewAccountKeeper(
 		app.Cdc,
