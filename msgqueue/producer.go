@@ -1,8 +1,11 @@
 package msgqueue
 
 import (
+	"fmt"
 	"strings"
 	"time"
+
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/spf13/viper"
 )
@@ -20,6 +23,8 @@ const (
 	CfgPrefixOS    = "os:"
 )
 
+const RetryNum = 100
+
 type MsgSender interface {
 	SendMsg(key []byte, v []byte)
 	IsSubscribed(topic string) bool
@@ -32,19 +37,21 @@ type producer struct {
 	toggle     bool
 	subTopics  map[string]struct{}
 	msgWriters []MsgWriter
+	log        log.Logger
 }
 
-func NewProducer() MsgSender {
+func NewProducer(log log.Logger) MsgSender {
 	brokers := viper.GetStringSlice(FlagBrokers)
 	topics := viper.GetString(FlagTopics)
 	featureToggle := viper.GetBool(FlagFeatureToggle)
-	return NewProducerFromConfig(brokers, topics, featureToggle)
+	return NewProducerFromConfig(brokers, topics, featureToggle, log)
 }
 
-func NewProducerFromConfig(brokers []string, topics string, featureToggle bool) MsgSender {
+func NewProducerFromConfig(brokers []string, topics string, featureToggle bool, log log.Logger) MsgSender {
 	p := producer{
 		subTopics:  make(map[string]struct{}),
 		msgWriters: nil,
+		log:        log,
 	}
 
 	p.init(brokers, topics, featureToggle)
@@ -59,9 +66,11 @@ func (p *producer) init(brokers []string, topics string, featureToggle bool) {
 	for _, broker := range brokers {
 		msgWriter, err := createMsgWriter(broker)
 		if err != nil {
-			return // TODO log?
+			p.log.Error(fmt.Sprintf("create msgWrite : %s failed, err : %s\n", broker, err.Error()))
+			return
 		}
 		p.msgWriters = append(p.msgWriters, msgWriter)
+		p.log.Info(fmt.Sprintf("create write : %s succueed", msgWriter.String()))
 	}
 	ts := strings.Split(topics, ",")
 	for _, topic := range ts {
@@ -72,17 +81,19 @@ func (p *producer) init(brokers []string, topics string, featureToggle bool) {
 
 func (p producer) Close() {
 	for _, w := range p.msgWriters {
-		_ = w.Close()
+		if err := w.Close(); err != nil {
+			p.log.Error(fmt.Sprintf("create msgWrite : %s failed, err : %s\n", w.String(), err.Error()))
+		}
 	}
 }
 
 func (p producer) SendMsg(k []byte, v []byte) {
 	for _, w := range p.msgWriters {
-		err := Retry(100, time.Microsecond, func() error {
+		if err := Retry(RetryNum, time.Microsecond, func() error {
 			return w.WriteKV(k, v)
-		})
-		// TODO. will log
-		_ = err
+		}); err != nil {
+			p.log.Error(fmt.Sprintf("write msg to %s failed, err : %s\n", w.String(), err.Error()))
+		}
 	}
 }
 
