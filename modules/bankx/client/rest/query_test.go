@@ -17,14 +17,12 @@ import (
 var ResultParam *keeper.QueryAddrBalances
 var ResultPath string
 
-func RestQueryForTest(cdc *codec.Codec, cliCtx context.CLIContext, w http.ResponseWriter, r *http.Request,
-	query string, param interface{}, defaultRes []byte) {
-	ResultParam = param.(*keeper.QueryAddrBalances)
-	ResultPath = query
-}
-
 func TestQuery(t *testing.T) {
-	restutil.RestQuery = RestQueryForTest
+	restutil.RestQuery = func(cdc *codec.Codec, cliCtx context.CLIContext, w http.ResponseWriter, r *http.Request,
+		query string, param interface{}, defaultRes []byte) {
+		ResultParam = param.(*keeper.QueryAddrBalances)
+		ResultPath = query
+	}
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
 
 	router := mux.NewRouter()
@@ -36,4 +34,13 @@ func TestQuery(t *testing.T) {
 	addr, _ := sdk.AccAddressFromBech32("coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a")
 	assert.Equal(t, "custom/bankx/balances", ResultPath)
 	assert.Equal(t, &keeper.QueryAddrBalances{Addr: addr}, ResultParam)
+
+	restutil.RestQuery = func(cdc *codec.Codec, cliCtx context.CLIContext, w http.ResponseWriter, r *http.Request,
+		query string, param interface{}, defaultRes []byte) {
+		ResultParam = nil
+		ResultPath = query
+	}
+	req, _ = http.NewRequest("GET", "http://example.com/bank/parameters", nil)
+	router.ServeHTTP(respWr, req)
+	assert.Equal(t, "custom/bankx/parameters", ResultPath)
 }
