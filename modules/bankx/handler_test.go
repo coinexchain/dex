@@ -23,11 +23,12 @@ import (
 )
 
 var (
-	myaddr   = testutil.ToAccAddress("myaddr")
-	fromAddr = testutil.ToAccAddress("fromaddr")
-	toAddr   = testutil.ToAccAddress("toaddr")
-	feeAddr  = sdk.AccAddress(crypto.AddressHash([]byte(auth.FeeCollectorName)))
-	owner    = testutil.ToAccAddress("owner")
+	myaddr        = testutil.ToAccAddress("myaddr")
+	fromAddr      = testutil.ToAccAddress("fromaddr")
+	toAddr        = testutil.ToAccAddress("toaddr")
+	feeAddr       = sdk.AccAddress(crypto.AddressHash([]byte(auth.FeeCollectorName)))
+	owner         = testutil.ToAccAddress("owner")
+	forbiddenAddr = testutil.ToAccAddress("forbidden")
 )
 
 func defaultContext() (*keeper.Keeper, sdk.Handler, sdk.Context) {
@@ -40,6 +41,7 @@ func defaultContext() (*keeper.Keeper, sdk.Handler, sdk.Context) {
 		false, false, false, false,
 		"", "", asset.TestIdentityString)
 	_ = app.AssetKeeper.SetToken(ctx, cet)
+	_ = app.AssetKeeper.ForbidAddress(ctx, "cet", owner, []sdk.AccAddress{forbiddenAddr})
 	return &app.BankxKeeper, handler, ctx
 }
 
@@ -51,8 +53,8 @@ func TestHandlerMsgSend(t *testing.T) {
 	msgSend := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 0}
 	handle(ctx, msgSend)
 
-	require.Equal(t, sdk.NewInt(0).String(), bkx.GetCoins(ctx, fromAddr).AmountOf("cet").String())
-	require.Equal(t, sdk.NewInt(0).String(), bkx.GetCoins(ctx, toAddr).AmountOf("cet").String())
+	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(100000000), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
 
 	fee := bkx.GetParams(ctx).LockCoinsFee
@@ -166,4 +168,40 @@ func TestUnlockQueueNotAppend(t *testing.T) {
 	//to be consistent with cosmos-sdk
 	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+}
+
+func TestHandlerMsgMultiSend(t *testing.T) {
+	bkx, handle, ctx := defaultContext()
+	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(1000000000))
+	err = bkx.AddCoins(ctx, myaddr, dex.NewCetCoins(1000000000))
+	require.NoError(t, err)
+
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 300000000))
+	in := []bank.Input{bank.NewInput(fromAddr, coins), bank.NewInput(myaddr, coins)}
+	out := []bank.Output{bank.NewOutput(toAddr, coins), bank.NewOutput(toAddr, coins)}
+	msg := bankx.NewMsgMultiSend(in, out)
+
+	bkx.SetSendEnabled(ctx, false)
+	handle(ctx, msg)
+	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+
+	bkx.SetSendEnabled(ctx, true)
+	handle(ctx, msg)
+	require.Equal(t, sdk.NewInt(700000000), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(700000000), bkx.GetCoins(ctx, myaddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(400000000), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(200000000), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
+
+	in = []bank.Input{bank.NewInput(fromAddr, coins), bank.NewInput(forbiddenAddr, coins)}
+	msg = bankx.NewMsgMultiSend(in, out)
+	handle(ctx, msg)
+	require.Equal(t, sdk.NewInt(400000000).String(), bkx.GetCoins(ctx, toAddr).AmountOf("cet").String())
+
+	newAddr := testutil.ToAccAddress("newAddr")
+	invalid := sdk.NewCoins(sdk.NewInt64Coin("cet", 1000))
+	in = []bank.Input{bank.NewInput(fromAddr, invalid), bank.NewInput(myaddr, invalid)}
+	out = []bank.Output{bank.NewOutput(toAddr, invalid), bank.NewOutput(newAddr, invalid)}
+	msg = bankx.NewMsgMultiSend(in, out)
+	res := handle(ctx, msg)
+	require.False(t, res.IsOK())
 }
