@@ -51,6 +51,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 	}
 
 	if err := keeper.SetMarket(ctx, info); err != nil {
+		//SetMarket only returns marshal errors. Should not execute this clause in production
 		return err.Result()
 	}
 
@@ -160,7 +161,7 @@ func calFrozenFeeInOrder(ctx sdk.Context, marketParams types.Params, keeper keep
 		}
 	}
 	if frozenFee < marketParams.MarketFeeMin {
-		return 0, types.ErrOrderQuantityToSmall(fmt.Sprintf("%d", frozenFee))
+		return 0, types.ErrOrderQuantityTooSmall(fmt.Sprintf("%d", frozenFee))
 	}
 
 	return frozenFee, nil

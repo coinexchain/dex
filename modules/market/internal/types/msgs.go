@@ -132,7 +132,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidPrice(msg.Price)
 	}
 	if msg.Quantity < 0 {
-		return ErrOrderQuantityToSmall(fmt.Sprintf("%d", msg.Quantity))
+		return ErrOrderQuantityTooSmall(fmt.Sprintf("%d", msg.Quantity))
 	}
 	if msg.Side != BUY && msg.Side != SELL {
 		return ErrInvalidTradeSide()

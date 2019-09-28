@@ -25,7 +25,7 @@ const (
 	CodeNotMatchSender        sdk.CodeType = 617
 	CodeInvalidTime           sdk.CodeType = 618
 	CodeAddressForbidByIssuer sdk.CodeType = 619
-	CodeOrderQuantityToSmall  sdk.CodeType = 620
+	CodeOrderQuantityTooSmall sdk.CodeType = 620
 	CodeStockNoHaveCetTrade   sdk.CodeType = 621
 	CodeRepeatTrade           sdk.CodeType = 622
 	CodeNotAllowedOffline     sdk.CodeType = 623
@@ -86,6 +86,6 @@ func ErrTokenForbidByIssuer() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeTokenForbidByIssuer, "Token is frozen by the issuer")
 }
 
-func ErrOrderQuantityToSmall(err string) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityToSmall, "the order commission (%s) too small", err)
+func ErrOrderQuantityTooSmall(err string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityTooSmall, "the order commission (%s) too small", err)
 }
