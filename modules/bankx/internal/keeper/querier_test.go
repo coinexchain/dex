@@ -2,8 +2,9 @@ package keeper_test
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/authx"
 	"testing"
+
+	"github.com/coinexchain/dex/modules/authx"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"

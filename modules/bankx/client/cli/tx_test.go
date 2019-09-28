@@ -1,13 +1,15 @@
 package cli
 
 import (
-	"github.com/coinexchain/dex/client/cliutil"
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
-	dex "github.com/coinexchain/dex/types"
+	"testing"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
+
+	"github.com/coinexchain/dex/client/cliutil"
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestSendTxCmd(t *testing.T) {

@@ -1,13 +1,15 @@
 package rest
 
 import (
-	"github.com/coinexchain/dex/modules/bankx/internal/types"
-	dex "github.com/coinexchain/dex/types"
+	"net/http"
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
+
+	"github.com/coinexchain/dex/modules/bankx/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func TestCmd(t *testing.T) {
