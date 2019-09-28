@@ -53,7 +53,7 @@ func QueryBalancesCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 			param := auth.NewQueryAccountParams(acc)
-			return cliutil.CliQuery(cdc, route, param)
+			return cliutil.CliQuery(cdc, route, &param)
 		},
 	}
 }

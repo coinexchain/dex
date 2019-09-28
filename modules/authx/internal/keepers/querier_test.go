@@ -62,6 +62,10 @@ func Test_queryAccount(t *testing.T) {
 	acc := input.ak.NewAccountWithAddress(input.ctx, addr)
 
 	input.ak.SetAccount(input.ctx, acc)
+	res, err = query(input.ctx, path0, req)
+	require.Nil(t, err)
+	require.NotNil(t, res)
+
 	input.axk.SetAccountX(input.ctx, authx.NewAccountXWithAddress(addr))
 	res, err = query(input.ctx, path0, req)
 	require.Nil(t, err)
