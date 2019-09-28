@@ -164,7 +164,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(bankx.DefaultParamspace),
 		axk, bk, ak, ask,
 		sk,
-		msgqueue.NewProducer(),
+		msgqueue.NewProducer(nil),
 	)
 	tk := asset.NewBaseKeeper(
 		cdc,
@@ -229,7 +229,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 
 func prepareBankxKeeper(keys storeKeys, cdc *codec.Codec, ctx sdk.Context) types.ExpectedBankxKeeper {
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
-	producer := msgqueue.NewProducer()
+	producer := msgqueue.NewProducer(nil)
 	ak := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 
 	bk := bank.NewBaseKeeper(ak, paramsKeeper.Subspace(bank.DefaultParamspace), sdk.CodespaceRoot, map[string]bool{})
@@ -289,7 +289,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	// akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	mk := keepers.NewKeeper(keys.marketKey, ak, bk, cdc,
-		msgqueue.NewProducer(), paramsKeeper.Subspace(types.StoreKey), mockBancorKeeper{}, akp)
+		msgqueue.NewProducer(nil), paramsKeeper.Subspace(types.StoreKey), mockBancorKeeper{}, akp)
 	types.RegisterCodec(cdc)
 
 	// akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
@@ -475,10 +475,15 @@ func TestCalculateAmount(t *testing.T) {
 	items := [][]int64{{100, 10000, 2}, {300, 2000, 3}, {500, 4500, 2}}
 	results := []int64{10000, 600, 22500}
 	for i, item := range items {
-		ret := calculateAmount(item[0], item[1], byte(item[2]))
+		ret, _ := calculateAmount(item[0], item[1], byte(item[2]))
 		if ret.RoundInt64() != results[i] {
 			t.Errorf("amount is error, actual : %d, expect : %d", ret.RoundInt64(), results[i])
 		}
+	}
+
+	for i := 2; i <= 5; i++ {
+		_, err := calculateAmount(math.MaxInt64, int64(i), 0)
+		require.NotNil(t, err)
 	}
 }
 
@@ -533,7 +538,8 @@ func TestCreateOrderSuccess(t *testing.T) {
 	oldCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
 	ret = input.handler(input.ctx, msgIOCOrder)
 	newCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
-	frozenMoney = sdk.NewCoin(dex.CET, calculateAmount(msgIOCOrder.Price, msgIOCOrder.Quantity, msgIOCOrder.PricePrecision).RoundInt())
+	frozen, _ := calculateAmount(msgIOCOrder.Price, msgIOCOrder.Quantity, msgIOCOrder.PricePrecision)
+	frozenMoney = sdk.NewCoin(dex.CET, frozen.RoundInt())
 	frozenFee := sdk.NewCoin(dex.CET, sdk.NewInt(param.FixedTradeFee))
 	totalFrozen := frozenMoney.Add(frozenFee)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
@@ -552,14 +558,6 @@ func isSameOrderAndMsg(order *types.Order, msg types.MsgCreateOrder) bool {
 		msg.TradingPair && order.OrderType == msg.OrderType && samePrice &&
 		order.Quantity == msg.Quantity && order.Side == msg.Side &&
 		order.TimeInForce == msg.TimeInForce
-}
-
-func getAddr(input string) sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(input)
-	if err != nil {
-		panic(err)
-	}
-	return addr
 }
 
 func TestCancelOrderFailed(t *testing.T) {
@@ -700,7 +698,8 @@ func TestChargeOrderFee(t *testing.T) {
 	oldCetCoin := input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	ret = input.handler(input.ctx, msgOrder)
 	newCetCoin := input.getCoinFromAddr(msgOrder.Sender, dex.CET)
-	frozeCoin := dex.NewCetCoin(calculateAmount(msgOrder.Price, msgOrder.Quantity, msgOrder.PricePrecision).RoundInt64())
+	frozen, _ := calculateAmount(msgOrder.Price, msgOrder.Quantity, msgOrder.PricePrecision)
+	frozeCoin := dex.NewCetCoin(frozen.RoundInt64())
 	frozeFee := dex.NewCetCoin(param.FixedTradeFee)
 	totalFreeze := frozeCoin.Add(frozeFee)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)

@@ -51,7 +51,6 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 	}
 
 	if err := keeper.SetMarket(ctx, info); err != nil {
-		//SetMarket only returns marshal errors. Should not execute this clause in production
 		return err.Result()
 	}
 
@@ -228,7 +227,11 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	amount := msg.Quantity
 	if msg.Side == types.BUY {
 		denom = money
-		amount = calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision).RoundInt64()
+		tmpAmount, err := calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision)
+		if err != nil {
+			return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The order amount is too large").Result()
+		}
+		amount = tmpAmount.RoundInt64()
 	}
 	if amount > types.MaxOrderAmount {
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The order amount is too large").Result()
@@ -472,10 +475,13 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 	return nil
 }
 
-func calculateAmount(price, quantity int64, pricePrecision byte) sdk.Dec {
+func calculateAmount(price, quantity int64, pricePrecision byte) (sdk.Dec, error) {
 	actualPrice := sdk.NewDec(price).Quo(sdk.NewDec(int64(math.Pow10(int(pricePrecision)))))
-	money := actualPrice.Mul(sdk.NewDec(quantity))
-	return money.Add(sdk.NewDec(types.ExtraFrozenMoney)).Ceil()
+	money := actualPrice.Mul(sdk.NewDec(quantity)).Add(sdk.NewDec(types.ExtraFrozenMoney)).Ceil()
+	if money.GT(sdk.NewDec(math.MaxInt64)) {
+		return money, fmt.Errorf("exchange amount exceeds max int64 ")
+	}
+	return money, nil
 }
 
 func handleMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrecision, k keepers.Keeper) sdk.Result {
