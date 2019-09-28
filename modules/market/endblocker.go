@@ -239,18 +239,6 @@ func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64,
 	}
 }
 
-func filterOldOrders(oldOrders []*types.Order, currHeight int64, lifeTime int) []*types.Order {
-	orders := make([]*types.Order, 0, len(oldOrders))
-	for _, order := range oldOrders {
-		if currHeight-int64(lifeTime) < int64(order.ExistBlocks) {
-			continue
-		}
-		orders = append(orders, order)
-	}
-
-	return orders
-}
-
 func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList []types.MarketInfo, marketParams types.Params) {
 	lifeTime := marketParams.GTEOrderLifetime
 	currHeight := ctx.BlockHeight()
@@ -258,9 +246,11 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 		symbol := mi.Stock + types.SymbolSeparator + mi.Money
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
-		filterOrders := filterOldOrders(oldOrders, currHeight, lifeTime)
 
-		for _, order := range filterOrders {
+		for _, order := range oldOrders {
+			if order.Height+int64(order.ExistBlocks) > currHeight {
+				continue
+			}
 			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
 			if keeper.IsSubScribed(types.Topic) {
 				msgInfo := types.CancelOrderInfo{
