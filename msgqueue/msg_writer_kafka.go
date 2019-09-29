@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/segmentio/kafka-go"
+	kafka "github.com/segmentio/kafka-go"
 )
 
 var _ MsgWriter = kafkaMsgWriter{}

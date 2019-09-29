@@ -317,7 +317,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 
 	var needRemove bool
 	if !strings.Contains(chainID, IntegrationNetSubString) {
-		if time.Unix(recordTime, 0).Day() != time.Unix(currTime, 0).Day() {
+		if time.Unix(recordTime, 0).UTC().Day() != time.Unix(currTime, 0).UTC().Day() {
 			needRemove = true
 		}
 	} else {
