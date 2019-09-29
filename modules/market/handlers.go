@@ -251,7 +251,13 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	}
 
 	featureFee := calFeatureFeeForExistBlocks(msg, marketParams)
-	if ret := checkMsgCreateOrder(ctx, keeper, msg, frozenFee+featureFee, amount, denom, seq); !ret.IsOK() {
+	totalFee := frozenFee + featureFee
+	if featureFee > types.MaxOrderAmount ||
+		frozenFee > types.MaxOrderAmount ||
+		totalFee > types.MaxOrderAmount {
+		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The order amount is too large").Result()
+	}
+	if ret := checkMsgCreateOrder(ctx, keeper, msg, totalFee, amount, denom, seq); !ret.IsOK() {
 		return ret
 	}
 	existBlocks := msg.ExistBlocks
@@ -314,12 +320,12 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 	}
 	values := strings.Split(msg.TradingPair, types.SymbolSeparator)
 	stock, money := values[0], values[1]
-	totalAmount := amount
+	totalAmount := sdk.NewInt(amount)
 	if (stock == dex.CET && msg.Side == types.SELL) ||
 		(money == dex.CET && msg.Side == types.BUY) {
-		totalAmount += cetFee
+		totalAmount = totalAmount.AddRaw(cetFee)
 	}
-	if !keeper.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(denom, sdk.NewInt(totalAmount))}) {
+	if !keeper.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(denom, totalAmount)}) {
 		return types.ErrInsufficientCoins().Result()
 	}
 	orderID, err := types.AssemblyOrderID(msg.Sender.String(), seq, msg.Identify)
