@@ -3,7 +3,6 @@ package keepers
 import (
 	"bytes"
 	"encoding/binary"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -120,11 +119,12 @@ func NewOrderKeeper(key sdk.StoreKey, symbol string, codec *codec.Codec) OrderKe
 }
 
 func int64ToBigEndianBytes(n int64) []byte {
-	var result [8]byte
-	for i := 0; i < 8; i++ {
-		result[i] = byte(n >> (8 * uint(i)))
+	if n < 0 {
+		panic("n cannot be negative")
 	}
-	return result[:]
+	var v = make([]byte, 8)
+	binary.BigEndian.PutUint64(v[:], uint64(n))
+	return v
 }
 
 func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *types.Order) sdk.Error {
