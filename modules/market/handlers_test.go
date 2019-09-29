@@ -390,6 +390,10 @@ func TestMarketInfoSetSuccess(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create market info should succeed")
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, dex.NewCetCoin(params.CreateMarketFee)), "The amount is error")
 
+	ret = createCetMarket(input, stock)
+	require.Equal(t, types.CodeRepeatTrade, ret.Code)
+	require.Equal(t, false, ret.IsOK(), "repeatedly creating market would fail")
+
 }
 
 func TestCreateOrderFailed(t *testing.T) {

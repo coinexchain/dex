@@ -51,11 +51,14 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 	}
 
 	if err := keeper.SetMarket(ctx, info); err != nil {
+		// only MarshalBinaryBare can cause error here, which is impossible in production
 		return err.Result()
 	}
 
 	param := keeper.GetParams(ctx)
 	if err := keeper.SubtractFeeAndCollectFee(ctx, msg.Creator, param.CreateMarketFee); err != nil {
+		// CreateMarketFee has been checked with HasCoins in checkMsgCreateTradingPair
+		// this clause will not execute in production
 		return err.Result()
 	}
 
@@ -126,10 +129,6 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 		if _, err := keeper.GetMarketInfo(ctx, msg.Stock+types.SymbolSeparator+dex.CET); err != nil {
 			return sdk.NewError(types.CodeSpaceMarket, types.CodeStockNoHaveCetTrade, "The stock(%s) not have cet trade", msg.Stock).Result()
 		}
-	}
-
-	if p := msg.PricePrecision; p < types.MinTokenPricePrecision || p > types.MaxTokenPricePrecision {
-		return types.ErrInvalidPricePrecision(p).Result()
 	}
 
 	marketParams := keeper.GetParams(ctx)
