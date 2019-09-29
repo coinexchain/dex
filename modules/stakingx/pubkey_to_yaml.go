@@ -2,8 +2,9 @@ package stakingx
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"testing"
+
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/stretchr/testify/require"
 

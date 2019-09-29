@@ -78,19 +78,26 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	stock, money := stockAndMoney[0], stockAndMoney[1]
 	// buyer and seller will exchange stockCoins and moneyCoins
 	stockCoins := sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(amount))}
-	moneyAmount := price.MulInt(sdk.NewInt(amount)).TruncateInt64()
-	moneyCoins := sdk.Coins{sdk.NewCoin(money, sdk.NewInt(moneyAmount))}
+	moneyAmount := price.MulInt(sdk.NewInt(amount)).TruncateInt()
+	moneyCoins := sdk.Coins{sdk.NewCoin(money, moneyAmount)}
 	//fmt.Printf("here price:%s stock:%d money:%d seller.Freeze:%d buyer.Freeze:%d %d %s\n",
 	//price.String(), amount, moneyAmount, seller.Freeze, buyer.Freeze, buyer.Quantity, buyer.Price.String())
 
+	var moneyAmountInt64 int64
+	if moneyAmount.GT(sdk.NewInt(types.MaxOrderAmount)) {
+		// should not reach this clause in production
+		moneyAmountInt64 = 0
+	} else {
+		moneyAmountInt64 = moneyAmount.Int64()
+	}
 	buyer.LeftStock -= amount
 	seller.LeftStock -= amount
-	buyer.Freeze -= moneyAmount
+	buyer.Freeze -= moneyAmountInt64
 	seller.Freeze -= amount
 	buyer.DealStock += amount
 	seller.DealStock += amount
-	buyer.DealMoney += moneyAmount
-	seller.DealMoney += moneyAmount
+	buyer.DealMoney += moneyAmountInt64
+	seller.DealMoney += moneyAmountInt64
 	ctx := wo.infoForDeal.context
 	// exchange the coins
 	wo.infoForDeal.bxKeeper.UnFreezeCoins(ctx, seller.Sender, stockCoins)

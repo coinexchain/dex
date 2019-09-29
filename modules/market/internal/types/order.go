@@ -40,6 +40,18 @@ func (or *Order) CalOrderFee(feeForZeroDeal int64) sdk.Dec {
 	return actualFee.TruncateDec()
 }
 
+func (or *Order) CalOrderFeeInt64(feeForZeroDeal int64) int64 {
+	actualFee := sdk.NewDec(or.DealStock).Mul(sdk.NewDec(or.FrozenFee)).Quo(sdk.NewDec(or.Quantity))
+	if or.DealStock == 0 {
+		actualFee = sdk.NewDec(feeForZeroDeal)
+	}
+	if actualFee.GT(sdk.NewDec(MaxOrderAmount)) {
+		//should not reach this clause in production, add it for safety
+		actualFee = sdk.ZeroDec()
+	}
+	return actualFee.TruncateInt64()
+}
+
 func AssemblyOrderID(userAddr string, seq uint64, identify byte) (string, error) {
 	seqInt, ok := sdk.NewIntFromString(fmt.Sprintf("%d", seq))
 	if !ok {

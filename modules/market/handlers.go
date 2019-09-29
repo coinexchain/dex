@@ -140,24 +140,28 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 }
 
 func calFrozenFeeInOrder(ctx sdk.Context, marketParams types.Params, keeper keepers.Keeper, msg types.MsgCreateOrder) (int64, sdk.Error) {
-	var frozenFee int64
+	var frozenFeeDec sdk.Dec
 	stock := strings.Split(msg.TradingPair, types.SymbolSeparator)[0]
 
 	// Calculate the fee when stock is cet
 	rate := sdk.NewDec(marketParams.MarketFeeRate)
 	div := sdk.NewDec(int64(math.Pow10(types.MarketFeeRatePrecision)))
 	if stock == dex.CET {
-		frozenFee = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).Ceil().RoundInt64()
+		frozenFeeDec = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).Ceil()
 	} else {
 		stockSepCet := stock + types.SymbolSeparator + dex.CET
 		marketInfo, err := keeper.GetMarketInfo(ctx, stockSepCet)
 		if err != nil || marketInfo.LastExecutedPrice.IsZero() {
-			frozenFee = marketParams.FixedTradeFee
+			frozenFeeDec = sdk.NewDec(marketParams.FixedTradeFee)
 		} else {
 			totalPriceInCet := marketInfo.LastExecutedPrice.Mul(sdk.NewDec(msg.Quantity))
-			frozenFee = totalPriceInCet.Mul(rate).Quo(div).Ceil().RoundInt64()
+			frozenFeeDec = totalPriceInCet.Mul(rate).Quo(div).Ceil()
 		}
 	}
+	if frozenFeeDec.GT(sdk.NewDec(types.MaxOrderAmount)) {
+		return 0, sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The frozen fee is too large")
+	}
+	frozenFee := frozenFeeDec.RoundInt64()
 	if frozenFee < marketParams.MarketFeeMin {
 		return 0, types.ErrOrderQuantityTooSmall(fmt.Sprintf("%d", frozenFee))
 	}
@@ -362,7 +366,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 		Side:           order.Side,
 		Price:          order.Price,
 		DelReason:      types.CancelOrderByManual,
-		UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+		UsedCommission: order.CalOrderFeeInt64(marketParams.FeeForZeroDeal),
 		LeftStock:      order.LeftStock,
 		RemainAmount:   order.Freeze,
 		DealStock:      order.DealStock,
@@ -477,7 +481,7 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 func calculateAmount(price, quantity int64, pricePrecision byte) (sdk.Dec, error) {
 	actualPrice := sdk.NewDec(price).Quo(sdk.NewDec(int64(math.Pow10(int(pricePrecision)))))
 	money := actualPrice.Mul(sdk.NewDec(quantity)).Add(sdk.NewDec(types.ExtraFrozenMoney)).Ceil()
-	if money.GT(sdk.NewDec(math.MaxInt64)) {
+	if money.GT(sdk.NewDec(types.MaxOrderAmount)) {
 		return money, fmt.Errorf("exchange amount exceeds max int64 ")
 	}
 	return money, nil
