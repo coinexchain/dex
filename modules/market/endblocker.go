@@ -249,6 +249,9 @@ func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64,
 func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList []types.MarketInfo, marketParams types.Params) {
 	lifeTime := marketParams.GTEOrderLifetime
 	currHeight := ctx.BlockHeight()
+	if currHeight-int64(lifeTime) <= 0 {
+		return
+	}
 	for _, mi := range marketInfoList {
 		symbol := mi.Stock + types.SymbolSeparator + mi.Money
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
