@@ -182,7 +182,7 @@ func queryWaitCancelMarkets(ctx sdk.Context, req abci.RequestQuery, mk Keeper) (
 	}
 
 	dlk := NewDelistKeeper(mk.marketKey)
-	markets := dlk.GetDelistSymbolsBeforeTime(ctx, param.Time+1)
+	markets := dlk.GetDelistSymbolsBeforeTime(ctx, param.Time)
 	bz, err := codec.MarshalJSONIndent(mk.cdc, markets)
 	if err != nil {
 		return nil, sdk.NewError(types.CodeSpaceMarket, types.CodeMarshalFailed, "could not marshal result to JSON")

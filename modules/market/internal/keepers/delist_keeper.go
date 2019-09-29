@@ -28,6 +28,7 @@ func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, time int64, symbol
 	store.Set(getDelistKey(time, symbol), []byte{})
 }
 
+//include the specific time
 func (keeper *DelistKeeper) GetDelistSymbolsBeforeTime(ctx sdk.Context, time int64) []string {
 	store := ctx.KVStore(keeper.marketKey)
 	start := concatCopyPreAllocate([][]byte{
