@@ -278,7 +278,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 
 	// process the delist requests
 	delistKeeper := keepers.NewDelistKeeper(keeper.GetMarketKey())
-	delistSymbols := delistKeeper.GetDelistSymbolsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
+	delistSymbols := delistKeeper.GetDelistSymbolsBeforeTime(ctx, currTime)
 	for _, symbol := range delistSymbols {
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight+1)
@@ -303,7 +303,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 		}
 		keeper.RemoveMarket(ctx, symbol)
 	}
-	delistKeeper.RemoveDelistRequestsBeforeTime(ctx, currTime-marketParams.MarketMinExpiredTime+1)
+	delistKeeper.RemoveDelistRequestsBeforeTime(ctx, currTime)
 }
 
 func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
