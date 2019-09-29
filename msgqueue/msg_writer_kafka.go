@@ -18,7 +18,7 @@ func NewKafkaMsgWriter(brokers string) MsgWriter {
 	w := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: bs,
 		Topic:   KafkaPubTopic,
-		Async:   true,
+		Async:   false,
 	})
 	return kafkaMsgWriter{w}
 }
