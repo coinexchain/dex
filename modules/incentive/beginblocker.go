@@ -15,16 +15,10 @@ var (
 )
 
 func BeginBlocker(ctx sdk.Context, k keepers.Keeper) {
-	blockRewards, planned := calcRewardsInPlans(ctx, k)
-	if !planned {
-		blockRewards = calDefaultRewards(ctx, k)
-	}
-
-	if k.HasCoins(ctx, PoolAddr, blockRewards) {
-		if blockRewards != nil {
-			if err := collectRewardsFromPool(k, ctx, blockRewards); err != nil {
-				panic(err)
-			}
+	blockRewards := calcRewards(ctx, k)
+	if k.HasCoins(ctx, PoolAddr, blockRewards) && blockRewards != nil {
+		if err := collectRewardsFromPool(k, ctx, blockRewards); err != nil {
+			panic(err)
 		}
 	}
 
@@ -39,27 +33,27 @@ func collectRewardsFromPool(k keepers.Keeper, ctx sdk.Context, blockRewards sdk.
 	return nil
 }
 
-func calcRewardsInPlans(ctx sdk.Context, k keepers.Keeper) (sdk.Coins, bool) {
-	var rewardAmount int64
-	var heightInplan bool
+func calcRewards(ctx sdk.Context, k keepers.Keeper) sdk.Coins {
 	height := ctx.BlockHeader().Height
 	adjustmentHeight := k.GetState(ctx).HeightAdjustment
-	height = height + adjustmentHeight
+	height += adjustmentHeight
 
+	rewardAmount := int64(0)
+	inPlan := false
 	plans := k.GetParams(ctx).Plans
 
 	for _, plan := range plans {
 		if height > plan.StartHeight && height <= plan.EndHeight {
+			// the height may be in different plans, do not break
 			rewardAmount = rewardAmount + plan.RewardPerBlock
-			heightInplan = true
-			break
+			inPlan = true
 		}
 	}
+
+	if !inPlan {
+		rewardAmount = k.GetParams(ctx).DefaultRewardPerBlock
+	}
+
 	blockRewardsCoins := sdk.NewCoins(sdk.NewInt64Coin(dex.DefaultBondDenom, rewardAmount))
-	return blockRewardsCoins, heightInplan
-}
-func calDefaultRewards(ctx sdk.Context, k keepers.Keeper) (res sdk.Coins) {
-	defaultIncentive := k.GetParams(ctx).DefaultRewardPerBlock
-	res = sdk.NewCoins(sdk.NewInt64Coin(dex.CET, defaultIncentive))
-	return
+	return blockRewardsCoins
 }
