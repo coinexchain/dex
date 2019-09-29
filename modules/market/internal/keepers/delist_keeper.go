@@ -33,17 +33,19 @@ func (keeper *DelistKeeper) GetDelistSymbolsBeforeTime(ctx sdk.Context, time int
 	start := concatCopyPreAllocate([][]byte{
 		DelistKey,
 		int64ToBigEndianBytes(0),
+		{0},
 	})
 	end := concatCopyPreAllocate([][]byte{
 		DelistKey,
 		int64ToBigEndianBytes(time),
+		{0x1},
 	})
 	var result []string
 	iter := store.Iterator(start, end)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
-		result = append(result, string(key[len(start)+1:]))
+		result = append(result, string(key[len(start):]))
 	}
 	return result
 }
