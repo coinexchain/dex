@@ -172,9 +172,8 @@ func TestUnlockQueueNotAppend(t *testing.T) {
 
 func TestHandlerMsgMultiSend(t *testing.T) {
 	bkx, handle, ctx := defaultContext()
-	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(1000000000))
-	err = bkx.AddCoins(ctx, myaddr, dex.NewCetCoins(1000000000))
-	require.NoError(t, err)
+	_ = bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(1000000000))
+	_ = bkx.AddCoins(ctx, myaddr, dex.NewCetCoins(1000000000))
 
 	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 300000000))
 	in := []bank.Input{bank.NewInput(fromAddr, coins), bank.NewInput(myaddr, coins)}
