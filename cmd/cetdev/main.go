@@ -5,12 +5,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	amino "github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/codec"
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 
 	"github.com/coinexchain/dex/app"
@@ -36,7 +36,7 @@ func main() {
 	}
 }
 
-func createRootCmd(cdc *amino.Codec) *cobra.Command {
+func createRootCmd(cdc *codec.Codec) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "cetdev",
 		Short: "Command line tools for CoinEx Chain developers",

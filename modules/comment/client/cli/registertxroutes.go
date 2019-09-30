@@ -2,19 +2,19 @@ package cli
 
 import (
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/spf13/cobra"
-	amino "github.com/tendermint/go-amino"
 
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
 
 // GetQueryCmd returns the cli query commands for this module
-func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
+func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	return nil
 }
 
 // GetTxCmd returns the transaction commands for this module
-func GetTxCmd(cdc *amino.Codec) *cobra.Command {
+func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	commentTxCmd := &cobra.Command{
 		Use:   types.StoreKey,
 		Short: "comment transactions subcommands",

@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmconfig "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/cli"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/store"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
@@ -70,7 +70,7 @@ func createCetdCmd() *cobra.Command {
 	return rootCmd
 }
 
-func addInitCommands(ctx *server.Context, cdc *amino.Codec, rootCmd *cobra.Command) {
+func addInitCommands(ctx *server.Context, cdc *codec.Codec, rootCmd *cobra.Command) {
 	rawBasicManager := app.ModuleBasics.BasicManager
 
 	initCmd := genutilcli.InitCmd(ctx, cdc, rawBasicManager, app.DefaultNodeHome)

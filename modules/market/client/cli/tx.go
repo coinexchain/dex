@@ -1,8 +1,8 @@
 package cli
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/spf13/cobra"
-	amino "github.com/tendermint/go-amino"
 
 	"github.com/cosmos/cosmos-sdk/client"
 
@@ -10,7 +10,7 @@ import (
 )
 
 // GetTxCmd returns the transaction commands for this module
-func GetTxCmd(cdc *amino.Codec) *cobra.Command {
+func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	mktTxCmd := &cobra.Command{
 		Use:   types.StoreKey,
 		Short: "market transactions subcommands",

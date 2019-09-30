@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	amino "github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/crypto"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/libs/cli"
@@ -17,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
@@ -53,7 +53,7 @@ func main() {
 	}
 }
 
-func createRootCmd(cdc *amino.Codec) *cobra.Command {
+func createRootCmd(cdc *codec.Codec) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "cetcli",
 		Short: "Command line interface for interacting with cetd",
@@ -112,7 +112,7 @@ func initConfig(cmd *cobra.Command) error {
 	return bindSwaggerFlags(cmd)
 }
 
-func queryCmd(cdc *amino.Codec) *cobra.Command {
+func queryCmd(cdc *codec.Codec) *cobra.Command {
 	queryCmd := &cobra.Command{
 		Use:     "query",
 		Aliases: []string{"q"},
@@ -135,7 +135,7 @@ func queryCmd(cdc *amino.Codec) *cobra.Command {
 	return queryCmd
 }
 
-func txCmd(cdc *amino.Codec) *cobra.Command {
+func txCmd(cdc *codec.Codec) *cobra.Command {
 	txCmd := &cobra.Command{
 		Use:   "tx",
 		Short: "Transactions subcommands",

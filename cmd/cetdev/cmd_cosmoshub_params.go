@@ -9,10 +9,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	amino "github.com/tendermint/go-amino"
 
 	"github.com/coinexchain/dex/app"
 )
@@ -21,7 +21,7 @@ type genesisDoc struct {
 	AppState app.GenesisState `json:"app_state"`
 }
 
-func CosmosHubParamsCmd(cdc *amino.Codec) *cobra.Command {
+func CosmosHubParamsCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cosmos-hub-params",
 		Short: "Print default params",

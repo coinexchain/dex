@@ -14,10 +14,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	amino "github.com/tendermint/go-amino"
 )
 
-func GetQueryCmd(cdc *amino.Codec) *cobra.Command {
+func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	aliasQueryCmd := &cobra.Command{
 		Use:   bank.ModuleName,
 		Short: "Querying commands for the bank module",
