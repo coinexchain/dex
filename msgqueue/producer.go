@@ -2,6 +2,7 @@ package msgqueue
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -23,7 +24,7 @@ const (
 	CfgPrefixOS    = "os:"
 )
 
-const RetryNum = 100
+const RetryNum = math.MaxInt64
 
 type MsgSender interface {
 	SendMsg(key []byte, v []byte)
@@ -95,7 +96,7 @@ func (p producer) Close() {
 
 func (p producer) SendMsg(k []byte, v []byte) {
 	for _, w := range p.msgWriters {
-		if err := Retry(RetryNum, time.Microsecond, func() error {
+		if err := Retry(RetryNum, time.Millisecond, func() error {
 			return w.WriteKV(k, v)
 		}); err != nil {
 			if p.log != nil {
