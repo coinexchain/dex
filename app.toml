@@ -14,4 +14,7 @@ halt-height = 0
 
 feature-toggle = true
 subscribe-modules = "market,asset,bankx,bancorlite"
-brokers = "file:/Users/bitmain/cetchain/data/dex.out"
+brokers = [
+    "file:/cetchain/data/dex_tmp.out",
+    "kafka:127.0.0.1:9092"
+]

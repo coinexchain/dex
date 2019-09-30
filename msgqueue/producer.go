@@ -64,17 +64,30 @@ func (p *producer) init(brokers []string, topics string, featureToggle bool) {
 		return
 	}
 
+	var (
+		msgWriter MsgWriter
+		err       error
+	)
+
 	for _, broker := range brokers {
-		msgWriter, err := createMsgWriter(broker)
-		if err != nil {
+		if err := Retry(RetryNum, time.Millisecond, func() error {
+			msgWriter, err = createMsgWriter(broker)
+			if err != nil {
+				if p.log != nil {
+					p.log.Error(fmt.Sprintf("create msgWrite : %s failed, err : %s\n", broker, err.Error()))
+				}
+				return err
+			}
+			return nil
+		}); err != nil {
 			if p.log != nil {
 				p.log.Error(fmt.Sprintf("create msgWrite : %s failed, err : %s\n", broker, err.Error()))
 			}
-			return
-		}
-		p.msgWriters = append(p.msgWriters, msgWriter)
-		if p.log != nil {
-			p.log.Info(fmt.Sprintf("create write : %s succueed", msgWriter.String()))
+		} else {
+			p.msgWriters = append(p.msgWriters, msgWriter)
+			if p.log != nil {
+				p.log.Info(fmt.Sprintf("create write : %s succueed", msgWriter.String()))
+			}
 		}
 	}
 	ts := strings.Split(topics, ",")
