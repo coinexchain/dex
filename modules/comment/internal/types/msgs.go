@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	asset "github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/shorthanzi"
 )
 
@@ -203,6 +204,9 @@ func (msg MsgCommentToken) ValidateBasic() sdk.Error {
 	if len(msg.Token) == 0 {
 		return ErrInvalidSymbol()
 	}
+	if err := asset.ValidateTokenSymbol(msg.Token); err != nil {
+		return ErrInvalidSymbol()
+	}
 	if msg.Donation < 0 {
 		return ErrNegativeDonation()
 	}
@@ -232,6 +236,10 @@ func (msg MsgCommentToken) ValidateBasic() sdk.Error {
 		}
 		if ref.RewardAmount < 0 {
 			return ErrNegativeReward()
+		}
+
+		if err := asset.ValidateTokenSymbol(ref.RewardToken); err != nil {
+			return ErrInvalidSymbol()
 		}
 	}
 	return nil

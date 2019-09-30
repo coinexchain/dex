@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	asset "github.com/coinexchain/dex/modules/asset"
 )
 
 // RouterKey is the name of the market module
@@ -66,7 +68,7 @@ func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("missing creator address")
 	}
-	if len(msg.Stock) == 0 || len(msg.Money) == 0 {
+	if !IsValidTradingPair([]string{msg.Stock, msg.Money}) {
 		return ErrInvalidSymbol()
 	}
 	if p := msg.PricePrecision; p < MinTokenPricePrecision || p > MaxTokenPricePrecision {
@@ -119,7 +121,8 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if len(msg.TradingPair) == 0 {
 		return sdk.ErrInvalidAddress("missing GTE order TradingPair identifier")
 	}
-	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
+	tokens := strings.Split(msg.TradingPair, SymbolSeparator)
+	if !IsValidTradingPair(tokens) {
 		return ErrInvalidSymbol()
 	}
 	if msg.OrderType != LimitOrder {
@@ -182,16 +185,26 @@ func (msg MsgCancelOrder) Type() string {
 	return "cancel_order"
 }
 
-func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
-	if len(msg.Sender) == 0 {
-		return ErrInvalidAddress()
-	}
-	contents := strings.Split(msg.OrderID, OrderIDSeparator)
+func ValidateOrderID(id string) sdk.Error {
+	contents := strings.Split(id, OrderIDSeparator)
 	if len(contents) != OrderIDPartsNum {
 		return ErrInvalidOrderID()
 	}
 	if seqWithIdenti, err := strconv.Atoi(contents[1]); err != nil || seqWithIdenti < 0 {
 		return ErrInvalidOrderID()
+	}
+	if _, err := sdk.AccAddressFromBech32(contents[0]); err != nil {
+		return ErrInvalidAddress()
+	}
+	return nil
+}
+
+func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
+	if len(msg.Sender) == 0 {
+		return ErrInvalidAddress()
+	}
+	if err := ValidateOrderID(msg.OrderID); err != nil {
+		return err
 	}
 	return nil
 }
@@ -225,11 +238,24 @@ func (msg MsgCancelTradingPair) Type() string {
 	return "cancel_market"
 }
 
+func IsValidTradingPair(tokens []string) bool {
+	if len(tokens) != 2 {
+		return false
+	}
+	if err := asset.ValidateTokenSymbol(tokens[0]); err != nil {
+		return false
+	}
+	if err := asset.ValidateTokenSymbol(tokens[1]); err != nil {
+		return false
+	}
+	return true
+}
+
 func (msg MsgCancelTradingPair) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return ErrInvalidAddress()
 	}
-	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
+	if !IsValidTradingPair(strings.Split(msg.TradingPair, SymbolSeparator)) {
 		return ErrInvalidSymbol()
 	}
 	if msg.EffectiveTime < 0 {
@@ -272,7 +298,7 @@ func (msg MsgModifyPricePrecision) ValidateBasic() sdk.Error {
 	if len(msg.Sender) == 0 {
 		return ErrInvalidAddress()
 	}
-	if len(strings.Split(msg.TradingPair, SymbolSeparator)) != 2 {
+	if !IsValidTradingPair(strings.Split(msg.TradingPair, SymbolSeparator)) {
 		return ErrInvalidSymbol()
 	}
 	if p := msg.PricePrecision; p < MinTokenPricePrecision || p > MaxTokenPricePrecision {

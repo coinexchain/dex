@@ -2,6 +2,8 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/market"
 )
 
 // /////////////////////////////////////////////////////////
@@ -51,6 +53,9 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("missing owner address")
 	}
 	if len(msg.Stock) == 0 || len(msg.Money) == 0 || msg.Stock == "cet" {
+		return ErrInvalidSymbol()
+	}
+	if !market.IsValidTradingPair([]string{msg.Stock, msg.Money}) {
 		return ErrInvalidSymbol()
 	}
 	if !msg.MaxSupply.IsPositive() {
@@ -110,6 +115,9 @@ func (msg MsgBancorTrade) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("missing sender address")
 	}
 	if len(msg.Stock) == 0 || len(msg.Money) == 0 || msg.Stock == "cet" {
+		return ErrInvalidSymbol()
+	}
+	if !market.IsValidTradingPair([]string{msg.Stock, msg.Money}) {
 		return ErrInvalidSymbol()
 	}
 	if msg.Amount <= 0 {

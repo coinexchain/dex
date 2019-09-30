@@ -27,6 +27,8 @@ var (
 	NewBaseKeeper       = keepers.NewKeeper
 	DefaultParams       = types.DefaultParams
 	DecToBigEndianBytes = types.DecToBigEndianBytes
+	ValidateOrderID     = types.ValidateOrderID
+	IsValidTradingPair  = types.IsValidTradingPair
 	ModuleCdc           = types.ModuleCdc
 )
 

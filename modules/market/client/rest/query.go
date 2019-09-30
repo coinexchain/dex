@@ -6,6 +6,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
 
 	"github.com/coinexchain/dex/client/restutil"
@@ -17,6 +19,10 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
+		if !types.IsValidTradingPair([]string{vars["stock"], vars["money"]}) {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Trading pair")
+			return
+		}
 		param := keepers.NewQueryMarketParam(vars["stock"] + types.SymbolSeparator + vars["money"])
 		restutil.RestQuery(cdc, cliCtx, w, r, query, param, nil)
 	}
@@ -32,6 +38,10 @@ func queryMarketsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
+		if err := types.ValidateOrderID(vars["order-id"]); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Order ID")
+			return
+		}
 		param := keepers.NewQueryOrderParam(vars["order-id"])
 		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryOrder)
 		restutil.RestQuery(cdc, cliCtx, w, r, route, param, nil)
@@ -41,6 +51,10 @@ func queryOrderInfoHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 func queryUserOrderListHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
+		if _, err := sdk.AccAddressFromBech32(vars["address"]); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		param := keepers.QueryUserOrderList{User: vars["address"]}
 		route := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryUserOrders)
 		restutil.RestQuery(cdc, cliCtx, w, r, route, param, nil)

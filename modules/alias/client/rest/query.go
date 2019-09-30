@@ -26,6 +26,10 @@ func queryAddressHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryAliasInfo)
+		if !types.IsValidAlias(vars["alias"]) {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Alias")
+			return
+		}
 		param := &keepers.QueryAliasInfoParam{Alias: vars["alias"], QueryOp: keepers.GetAddressFromAlias}
 
 		restutil.RestQuery(cdc, cliCtx, w, r, query, param, nil)
