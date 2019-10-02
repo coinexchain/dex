@@ -16,7 +16,7 @@ var (
 
 func BeginBlocker(ctx sdk.Context, k keepers.Keeper) {
 	blockRewards := calcRewards(ctx, k)
-	if k.HasCoins(ctx, PoolAddr, blockRewards) && blockRewards != nil {
+	if k.HasCoins(ctx, PoolAddr, blockRewards) {
 		if err := collectRewardsFromPool(k, ctx, blockRewards); err != nil {
 			panic(err)
 		}
@@ -45,7 +45,7 @@ func calcRewards(ctx sdk.Context, k keepers.Keeper) sdk.Coins {
 	for _, plan := range plans {
 		if height > plan.StartHeight && height <= plan.EndHeight {
 			// the height may be in different plans, do not break
-			rewardAmount = rewardAmount + plan.RewardPerBlock
+			rewardAmount += plan.RewardPerBlock
 			inPlan = true
 		}
 	}
