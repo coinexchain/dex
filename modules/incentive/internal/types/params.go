@@ -70,13 +70,13 @@ func CheckPlans(plans []Plan) sdk.Error {
 		if plan.StartHeight < 0 || plan.EndHeight < 0 {
 			return sdk.NewError(CodeSpaceIncentive, CodeInvalidPlanHeight, "invalid incentive plan height")
 		}
-		if plan.EndHeight <= plan.StartHeight {
+		if plan.EndHeight < plan.StartHeight {
 			return sdk.NewError(CodeSpaceIncentive, CodeInvalidPlanHeight, "incentive plan end height should be greater than start height")
 		}
-		if plan.RewardPerBlock <= 0 {
+		if plan.RewardPerBlock < 0 {
 			return sdk.NewError(CodeSpaceIncentive, CodeInvalidRewardPerBlock, "invalid incentive plan reward per block")
 		}
-		if plan.TotalIncentive <= 0 {
+		if plan.TotalIncentive < 0 {
 			return sdk.NewError(CodeSpaceIncentive, CodeInvalidTotalIncentive, "invalid incentive plan total incentive reward")
 		}
 		if (plan.EndHeight-plan.StartHeight)*plan.RewardPerBlock != plan.TotalIncentive {
