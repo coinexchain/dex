@@ -160,13 +160,13 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	}
 
 	m := types.MsgBancorTradeInfoForKafka{
-		Sender:      msg.Sender,
-		Stock:       msg.Stock,
-		Money:       msg.Money,
-		Amount:      msg.Amount,
-		Side:        byte(side),
-		MoneyLimit:  msg.MoneyLimit,
-		TxPrice:     biNew.Price.Add(bi.Price).QuoInt64(2),
+		Sender:     msg.Sender,
+		Stock:      msg.Stock,
+		Money:      msg.Money,
+		Amount:     msg.Amount,
+		Side:       byte(side),
+		MoneyLimit: msg.MoneyLimit,
+		TxPrice: biNew.Price.Add(bi.Price).QuoInt64(2),
 		BlockHeight: ctx.BlockHeight(),
 	}
 	fillMsgQueue(ctx, k, KafkaBancorTrade, m)
@@ -205,17 +205,23 @@ func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 	}
 }
 
-func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade, amountOfMoney sdk.Int) (sdk.Int, sdk.Error) {
+func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
+	amountOfMoney sdk.Int) (sdk.Int, sdk.Error) {
 
 	var commission sdk.Int
 	if msg.Money == "cet" {
-		commission = amountOfMoney.Mul(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).Quo(sdk.NewInt(10000))
+		commission = amountOfMoney.
+			Mul(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).
+			Quo(sdk.NewInt(10000))
 	} else {
 		price, err := k.Mk.GetMarketLastExePrice(ctx, msg.Stock+keepers.SymbolSeparator+"cet")
 		if err != nil {
 			return commission, types.ErrGetMarketPrice(err.Error())
 		}
-		commission = price.MulInt(sdk.NewInt(msg.Amount)).MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).QuoInt(sdk.NewInt(10000)).RoundInt()
+		commission = price.
+			MulInt(sdk.NewInt(msg.Amount)).
+			MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).
+			QuoInt(sdk.NewInt(10000)).RoundInt()
 	}
 
 	if commission.Int64() < k.Mk.GetMarketFeeMin(ctx) {
@@ -224,7 +230,8 @@ func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade, am
 	return commission, nil
 }
 
-func swapStockAndMoney(ctx sdk.Context, k keepers.Keeper, trader sdk.AccAddress, owner sdk.AccAddress, coinsFromPool sdk.Coins, coinsToPool sdk.Coins) sdk.Error {
+func swapStockAndMoney(ctx sdk.Context, k keepers.Keeper, trader sdk.AccAddress, owner sdk.AccAddress,
+	coinsFromPool sdk.Coins, coinsToPool sdk.Coins) sdk.Error {
 	if err := k.Bxk.SendCoins(ctx, trader, owner, coinsToPool); err != nil {
 		return err
 	}
