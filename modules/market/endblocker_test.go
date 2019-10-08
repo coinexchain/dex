@@ -174,7 +174,7 @@ func TestRemoveOrders(t *testing.T) {
 	ctx, keys := newContextAndMarketKey(unitTestChainID)
 	subspace := params.NewKeeper(msgCdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace).Subspace(types.StoreKey)
 	keeper := keepers.NewKeeper(keys.marketKey, axk, bnk, msgCdc, msgqueue.NewProducer(nil), subspace, mockBancorKeeper{}, auth.AccountKeeper{})
-	keeper.SetUnixTime(ctx, time.Now().Unix())
+	keeper.SetOrderCleanTime(ctx, time.Now().Unix())
 	ctx = ctx.WithBlockTime(time.Unix(time.Now().Unix()+int64(25*60*60), 0))
 	parameters := types.Params{}
 	parameters.GTEOrderLifetime = 1
@@ -243,7 +243,7 @@ func TestDelist(t *testing.T) {
 	delistKeeper.AddDelistRequest(ctx, ctx.BlockHeight(), "btc/usdt")
 	// currDay := ctx.BlockHeader().Time.Unix()
 	// keeper.orderClean.SetUnixTime(ctx, currDay)
-	keeper.SetUnixTime(ctx, time.Now().Unix())
+	keeper.SetOrderCleanTime(ctx, time.Now().Unix())
 	ctx = ctx.WithBlockTime(time.Now())
 	parameters := types.Params{}
 	parameters.GTEOrderLifetime = 1

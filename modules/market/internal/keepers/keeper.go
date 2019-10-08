@@ -72,10 +72,6 @@ func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
 	return k.bancorK.IsBancorExist(ctx, stock)
 }
 
-func (k Keeper) SetUnixTime(ctx sdk.Context, unixTime int64) {
-	k.ock.SetUnixTime(ctx, unixTime)
-}
-
 func (k Keeper) GetToken(ctx sdk.Context, symbol string) asset.Token {
 	return k.axk.GetToken(ctx, symbol)
 }
