@@ -25,9 +25,8 @@ func TestCreateMsgWriter(t *testing.T) {
 	require.NoError(t, w.Close())
 
 	w, err = createMsgWriter("kafka:a,b,c")
-	require.NoError(t, err)
+	require.Error(t, err)
 	require.Equal(t, "kafka", w.String())
-	require.NoError(t, w.Close())
 
 	w, err = createMsgWriter("db:mongo")
 	require.Error(t, err)

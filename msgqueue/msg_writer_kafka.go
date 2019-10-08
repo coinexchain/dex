@@ -1,38 +1,38 @@
 package msgqueue
 
 import (
-	"context"
 	"strings"
+	"time"
 
-	kafka "github.com/segmentio/kafka-go"
+	"github.com/Shopify/sarama"
 )
 
 var _ MsgWriter = kafkaMsgWriter{}
 
 type kafkaMsgWriter struct {
-	*kafka.Writer
+	sarama.SyncProducer
 }
 
-func NewKafkaMsgWriter(brokers string) MsgWriter {
+func NewKafkaMsgWriter(brokers string) (MsgWriter, error) {
 	bs := strings.Split(brokers, ",")
-	w := kafka.NewWriter(kafka.WriterConfig{
-		Brokers: bs,
-		Topic:   KafkaPubTopic,
-		Async:   false,
-	})
-	return kafkaMsgWriter{w}
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	config.Producer.Timeout = 5 * time.Second
+	producer, err := sarama.NewSyncProducer(bs, config)
+	return kafkaMsgWriter{producer}, err
 }
 
 func (w kafkaMsgWriter) WriteKV(k, v []byte) error {
-	err := w.WriteMessages(context.Background(), kafka.Message{
-		Key:   k,
-		Value: v,
+	_, _, err := w.SyncProducer.SendMessage(&sarama.ProducerMessage{
+		Topic: KafkaPubTopic,
+		Key:   sarama.ByteEncoder(k),
+		Value: sarama.ByteEncoder(v),
 	})
 	return err
 }
 
 func (w kafkaMsgWriter) Close() error {
-	return w.Writer.Close()
+	return w.SyncProducer.Close()
 }
 
 func (w kafkaMsgWriter) String() string {
