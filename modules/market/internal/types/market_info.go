@@ -10,3 +10,7 @@ type MarketInfo struct {
 	PricePrecision    byte    `json:"price_precision"`
 	LastExecutedPrice sdk.Dec `json:"last_executed_price"`
 }
+
+func (msg MarketInfo) GetSymbol() string {
+	return GetSymbol(msg.Stock, msg.Money)
+}

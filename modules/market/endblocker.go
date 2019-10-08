@@ -253,8 +253,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 		return
 	}
 	for _, mi := range marketInfoList {
-		symbol := mi.Stock + types.SymbolSeparator + mi.Money
-		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
+		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), mi.GetSymbol(), types.ModuleCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
 
 		for _, order := range oldOrders {
@@ -352,7 +351,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 			keeper.IsTokenForbidden(ctx, mi.Money) {
 			continue
 		}
-		symbol := mi.Stock + types.SymbolSeparator + mi.Money
+		symbol := mi.GetSymbol()
 		dataHash := ctx.BlockHeader().DataHash
 		ratio := marketParams.MaxExecutedPriceChangeRatio
 		oUpdate, newPrice := runMatch(ctx, mi.LastExecutedPrice, ratio, symbol, keeper, dataHash, currHeight)

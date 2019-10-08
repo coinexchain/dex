@@ -68,7 +68,7 @@ func (data GenesisState) Validate() error {
 
 	infos := make(map[string]interface{})
 	for _, info := range data.MarketInfos {
-		symbol := info.Stock + types.SymbolSeparator + info.Money
+		symbol := info.GetSymbol()
 		if _, exists := infos[symbol]; exists {
 			return errors.New("duplicate market found during market ValidateGenesis")
 		}

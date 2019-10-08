@@ -225,7 +225,7 @@ func (k PersistentMarketInfoKeeper) SetMarket(ctx sdk.Context, info types.Market
 	if err != nil {
 		return sdk.ErrInternal(err.Error())
 	}
-	store.Set(marketStoreKey(MarketIdentifierPrefix, info.Stock+types.SymbolSeparator+info.Money), bz)
+	store.Set(marketStoreKey(MarketIdentifierPrefix, info.GetSymbol()), bz)
 	return nil
 }
 

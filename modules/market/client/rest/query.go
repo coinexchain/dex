@@ -23,7 +23,7 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Trading pair")
 			return
 		}
-		param := keepers.NewQueryMarketParam(vars["stock"] + types.SymbolSeparator + vars["money"])
+		param := keepers.NewQueryMarketParam(types.GetSymbol(vars["stock"], vars["money"]))
 		restutil.RestQuery(cdc, cliCtx, w, r, query, param, nil)
 	}
 }

@@ -53,6 +53,10 @@ func NewMsgCreateTradingPair(stock, money string, crater sdk.AccAddress, pricePr
 	}
 }
 
+func (msg MsgCreateTradingPair) GetSymbol() string {
+	return GetSymbol(msg.Stock, msg.Money)
+}
+
 // --------------------------------------------------------
 // sdk.Msg Implementation
 

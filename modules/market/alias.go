@@ -30,6 +30,7 @@ var (
 	ValidateOrderID     = types.ValidateOrderID
 	IsValidTradingPair  = types.IsValidTradingPair
 	ModuleCdc           = types.ModuleCdc
+	GetSymbol           = types.GetSymbol
 )
 
 type (

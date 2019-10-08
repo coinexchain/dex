@@ -400,7 +400,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	input := prepareMockInput(t, false, true)
 	msgOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
-		TradingPair:    stock + types.SymbolSeparator + money,
+		TradingPair:    GetSymbol(stock, money),
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
 		Price:          100,
@@ -415,7 +415,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	zeroCet := sdk.NewCoin("cet", sdk.NewInt(0))
 
 	failedSymbolOrder := msgOrder
-	failedSymbolOrder.TradingPair = stock + types.SymbolSeparator + "no exsit"
+	failedSymbolOrder.TradingPair = GetSymbol(stock, "no exsit")
 	oldCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
 	ret = input.handler(input.ctx, failedSymbolOrder)
 	newCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
@@ -511,7 +511,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	msgGteOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Identify:       1,
-		TradingPair:    stock + types.SymbolSeparator + "cet",
+		TradingPair:    GetSymbol(stock, "cet"),
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
 		Price:          100,
@@ -543,7 +543,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	msgIOCOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Identify:       2,
-		TradingPair:    stock + types.SymbolSeparator + "cet",
+		TradingPair:    GetSymbol(stock, "cet"),
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
@@ -595,7 +595,7 @@ func TestCancelOrderFailed(t *testing.T) {
 	msgIOCOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Identify:       1,
-		TradingPair:    stock + types.SymbolSeparator + "cet",
+		TradingPair:    GetSymbol(stock, "cet"),
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
@@ -623,7 +623,7 @@ func TestCancelOrderSuccess(t *testing.T) {
 	msgIOCOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Identify:       2,
-		TradingPair:    stock + types.SymbolSeparator + "cet",
+		TradingPair:    GetSymbol(stock, "cet"),
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
@@ -653,7 +653,7 @@ func TestCancelMarketFailed(t *testing.T) {
 
 	msgCancelMarket := types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
-		TradingPair:   stock + types.SymbolSeparator + "cet",
+		TradingPair:   GetSymbol(stock, "cet"),
 		EffectiveTime: time.Now().Unix() + types.DefaultMarketMinExpiredTime,
 	}
 
@@ -665,7 +665,7 @@ func TestCancelMarketFailed(t *testing.T) {
 	require.Equal(t, types.CodeInvalidTime, ret.Code, "cancel order should failed by invalid cancel time")
 
 	failedSymbol := msgCancelMarket
-	failedSymbol.TradingPair = stock + types.SymbolSeparator + "not exist"
+	failedSymbol.TradingPair = GetSymbol(stock, "not exist")
 	ret = input.handler(input.ctx, failedSymbol)
 	require.Equal(t, types.CodeInvalidSymbol, ret.Code, "cancel order should failed by invalid symbol")
 
@@ -681,7 +681,7 @@ func TestCancelMarketSuccess(t *testing.T) {
 
 	msgCancelMarket := types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
-		TradingPair:   stock + types.SymbolSeparator + "cet",
+		TradingPair:   GetSymbol(stock, "cet"),
 		EffectiveTime: types.DefaultMarketMinExpiredTime + 10,
 	}
 
@@ -690,7 +690,7 @@ func TestCancelMarketSuccess(t *testing.T) {
 
 	dlk := keepers.NewDelistKeeper(input.keys.marketKey)
 	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, types.DefaultMarketMinExpiredTime+10+1)[0]
-	if delSymbol != stock+types.SymbolSeparator+"cet" {
+	if delSymbol != GetSymbol(stock, "cet") {
 		t.Error("Not find del market in store")
 	}
 }
@@ -704,7 +704,7 @@ func TestChargeOrderFee(t *testing.T) {
 	msgOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
 		Identify:       1,
-		TradingPair:    stock + types.SymbolSeparator + dex.CET,
+		TradingPair:    GetSymbol(stock, dex.CET),
 		OrderType:      types.LimitOrder,
 		PricePrecision: 8,
 		Price:          300,
@@ -729,7 +729,7 @@ func TestChargeOrderFee(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create market should success")
 	stockIsCetOrder := msgOrder
 	stockIsCetOrder.Identify = 2
-	stockIsCetOrder.TradingPair = dex.CET + types.SymbolSeparator + stock
+	stockIsCetOrder.TradingPair = GetSymbol(dex.CET, stock)
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	ret = input.handler(input.ctx, stockIsCetOrder)
 	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
@@ -761,7 +761,7 @@ func TestModifyPricePrecisionFaild(t *testing.T) {
 
 	msg := types.MsgModifyPricePrecision{
 		Sender:         haveCetAddress,
-		TradingPair:    stock + types.SymbolSeparator + dex.CET,
+		TradingPair:    GetSymbol(stock, dex.CET),
 		PricePrecision: 12,
 	}
 
@@ -780,7 +780,7 @@ func TestModifyPricePrecisionFaild(t *testing.T) {
 	require.Equal(t, types.CodeInvalidPricePrecision, ret.Code, "the tx should failed, the price precision can only be increased")
 
 	msgFailedByInvalidSymbol := msg
-	msgFailedByInvalidSymbol.TradingPair = stock + types.SymbolSeparator + "not find"
+	msgFailedByInvalidSymbol.TradingPair = GetSymbol(stock, "not find")
 	ret = input.handler(input.ctx, msgFailedByInvalidSymbol)
 	require.Equal(t, types.CodeInvalidSymbol, ret.Code, "the tx should failed by dis match sender")
 }
@@ -791,7 +791,7 @@ func TestModifyPricePrecisionSuccess(t *testing.T) {
 
 	msg := types.MsgModifyPricePrecision{
 		Sender:         haveCetAddress,
-		TradingPair:    stock + types.SymbolSeparator + dex.CET,
+		TradingPair:    GetSymbol(stock, dex.CET),
 		PricePrecision: 12,
 	}
 

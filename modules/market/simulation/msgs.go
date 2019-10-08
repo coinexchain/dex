@@ -61,7 +61,7 @@ func createMsgCreateTradingPair(r *rand.Rand, ctx sdk.Context, k keepers.Keeper,
 	}
 
 	if money != dex.CET && stock != dex.CET {
-		if _, err := k.GetMarketInfo(ctx, stock+types.SymbolSeparator+dex.CET); err != nil {
+		if _, err := k.GetMarketInfo(ctx, types.GetSymbol(stock, dex.CET)); err != nil {
 			money = dex.CET
 		}
 	}
@@ -94,8 +94,7 @@ func randomTradingPair(r *rand.Rand, ctx sdk.Context, ask asset.Keeper) (stock, 
 }
 
 func verifyCreateTradingPair(ctx sdk.Context, k keepers.Keeper, msg types.MsgCreateTradingPair) bool {
-	marketKey := msg.Stock + types.SymbolSeparator + msg.Money
-	tradingPair, err := k.GetMarketInfo(ctx, marketKey)
+	tradingPair, err := k.GetMarketInfo(ctx, msg.GetSymbol())
 	return err == nil &&
 		tradingPair.PricePrecision == msg.PricePrecision
 }
@@ -140,7 +139,7 @@ func createMsgCancelTradingPair(r *rand.Rand, ctx sdk.Context, k keepers.Keeper,
 	timeStamp := simulation.RandTimestamp(r)
 	msg := types.MsgCancelTradingPair{
 		Sender:        fromAddr,
-		TradingPair:   tradingPair.Stock + types.SymbolSeparator + tradingPair.Money,
+		TradingPair:   tradingPair.GetSymbol(),
 		EffectiveTime: timeStamp.Unix(),
 	}
 	if msg.ValidateBasic() != nil {
@@ -196,7 +195,7 @@ func createMsgModifyPricePrecision(r *rand.Rand, ctx sdk.Context, k keepers.Keep
 	}
 	newPrecision := r.Intn(types.MaxTokenPricePrecision + 1)
 	msg := types.MsgModifyPricePrecision{
-		TradingPair:    tradingPair.Stock + types.SymbolSeparator + tradingPair.Money,
+		TradingPair:    tradingPair.GetSymbol(),
 		PricePrecision: byte(newPrecision),
 		Sender:         fromAddr,
 	}
@@ -293,7 +292,7 @@ func createMsgCreateOrder(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ak au
 	msg = types.MsgCreateOrder{
 		Sender:         fromAddr,
 		Identify:       byte(r.Intn(255 + 1)),
-		TradingPair:    tradingPair.Stock + types.SymbolSeparator + tradingPair.Money,
+		TradingPair:    tradingPair.GetSymbol(),
 		OrderType:      types.LimitOrder,
 		PricePrecision: precision,
 		Price:          price,

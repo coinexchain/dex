@@ -74,7 +74,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			EventTypeMarket,
-			sdk.NewAttribute(AttributeKeyTradingPair, msg.Stock+types.SymbolSeparator+msg.Money),
+			sdk.NewAttribute(AttributeKeyTradingPair, msg.GetSymbol()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -112,7 +112,7 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 		return err.Result()
 	}
 
-	if _, err := keeper.GetMarketInfo(ctx, msg.Stock+types.SymbolSeparator+msg.Money); err == nil {
+	if _, err := keeper.GetMarketInfo(ctx, msg.GetSymbol()); err == nil {
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeRepeatTrade, "The repeatedly created trading pairs").Result()
 	}
 
@@ -125,7 +125,7 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 	}
 
 	if msg.Money != dex.CET && msg.Stock != dex.CET {
-		if _, err := keeper.GetMarketInfo(ctx, msg.Stock+types.SymbolSeparator+dex.CET); err != nil {
+		if _, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.Stock, dex.CET)); err != nil {
 			return sdk.NewError(types.CodeSpaceMarket, types.CodeStockNoHaveCetTrade, "The stock(%s) not have cet trade", msg.Stock).Result()
 		}
 	}
@@ -148,7 +148,7 @@ func calFrozenFeeInOrder(ctx sdk.Context, marketParams types.Params, keeper keep
 	if stock == dex.CET {
 		frozenFeeDec = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).Ceil()
 	} else {
-		stockSepCet := stock + types.SymbolSeparator + dex.CET
+		stockSepCet := GetSymbol(stock, dex.CET)
 		marketInfo, err := keeper.GetMarketInfo(ctx, stockSepCet)
 		if err != nil || marketInfo.LastExecutedPrice.IsZero() {
 			frozenFeeDec = sdk.NewDec(marketParams.FixedTradeFee)
