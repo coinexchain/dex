@@ -31,7 +31,3 @@ const (
 	IntegrationNetSubString       = "coinex-integrationtest"
 	MaxOrderAmount          int64 = 1e18
 )
-
-func GetSymbol(stock, money string) string {
-	return stock + SymbolSeparator + money
-}

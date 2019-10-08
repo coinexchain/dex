@@ -31,6 +31,7 @@ var (
 	IsValidTradingPair  = types.IsValidTradingPair
 	ModuleCdc           = types.ModuleCdc
 	GetSymbol           = types.GetSymbol
+	SplitSymbol         = types.SplitSymbol
 )
 
 type (

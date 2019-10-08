@@ -74,8 +74,7 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	if buyer.Side == types.SELL {
 		buyer, seller = other.order, wo.order
 	}
-	stockAndMoney := strings.Split(buyer.TradingPair, "/")
-	stock, money := stockAndMoney[0], stockAndMoney[1]
+	stock, money := SplitSymbol(buyer.TradingPair)
 	// buyer and seller will exchange stockCoins and moneyCoins
 	stockCoins := sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(amount))}
 	moneyAmount := price.MulInt(sdk.NewInt(amount)).TruncateInt()
@@ -115,8 +114,7 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 
 // unfreeze an ask order's stock or a bid order's money
 func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, order *types.Order, feeForZeroDeal int64, feeK types.ExpectedChargeFeeKeeper) {
-	stockAndMoney := strings.Split(order.TradingPair, "/")
-	stock, money := stockAndMoney[0], stockAndMoney[1]
+	stock, money := SplitSymbol(order.TradingPair)
 	frozenToken := stock
 	if order.Side == types.BUY {
 		frozenToken = money
@@ -172,8 +170,7 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 	}
 
 	// from the order book, we fetch the candidate orders for matching and filter them
-	stockAndMoney := strings.Split(orderKeeper.GetSymbol(), "/")
-	stock, money := stockAndMoney[0], stockAndMoney[1]
+	stock, money := SplitSymbol(orderKeeper.GetSymbol())
 	orderCandidates := orderKeeper.GetMatchingCandidates(ctx)
 	orderCandidates = filterCandidates(ctx, asKeeper, orderCandidates, stock, money)
 	orderOldDeals := make(map[string]int64, len(orderCandidates))

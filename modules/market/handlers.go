@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"strconv"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -223,8 +222,7 @@ func sendCreateOrderMsg(ctx sdk.Context, keeper keepers.Keeper, order types.Orde
 }
 
 func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keepers.Keeper) sdk.Result {
-	values := strings.Split(msg.TradingPair, types.SymbolSeparator)
-	stock, money := values[0], values[1]
+	stock, money := SplitSymbol(msg.TradingPair)
 	denom := stock
 	amount := msg.Quantity
 	if msg.Side == types.BUY {
@@ -317,8 +315,7 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 			return types.ErrInsufficientCoins().Result()
 		}
 	}
-	values := strings.Split(msg.TradingPair, types.SymbolSeparator)
-	stock, money := values[0], values[1]
+	stock, money := SplitSymbol(msg.TradingPair)
 	totalAmount := sdk.NewInt(amount)
 	if (stock == dex.CET && msg.Side == types.SELL) ||
 		(money == dex.CET && msg.Side == types.BUY) {
@@ -549,7 +546,7 @@ func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePreci
 				info.PricePrecision, msg.PricePrecision)).Result()
 	}
 
-	stock := strings.Split(msg.TradingPair, types.SymbolSeparator)[0]
+	stock, _ := SplitSymbol(msg.TradingPair)
 	tokenInfo := k.GetToken(ctx, stock)
 	if !tokenInfo.GetOwner().Equals(msg.Sender) {
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeNotMatchSender, fmt.Sprintf(
