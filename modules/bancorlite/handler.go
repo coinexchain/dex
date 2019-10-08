@@ -10,6 +10,7 @@ import (
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/msgqueue"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
@@ -24,8 +25,7 @@ func NewHandler(k Keeper) sdk.Handler {
 		case types.MsgBancorCancel:
 			return handleMsgBancorCancel(ctx, k, msg)
 		default:
-			errMsg := "Unrecognized bancorlite Msg type: " + msg.Type()
-			return sdk.ErrUnknownRequest(errMsg).Result()
+			return dex.ErrUnknownRequest(ModuleName, msg)
 		}
 	}
 }
@@ -160,13 +160,13 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	}
 
 	m := types.MsgBancorTradeInfoForKafka{
-		Sender:     msg.Sender,
-		Stock:      msg.Stock,
-		Money:      msg.Money,
-		Amount:     msg.Amount,
-		Side:       byte(side),
-		MoneyLimit: msg.MoneyLimit,
-		TxPrice: biNew.Price.Add(bi.Price).QuoInt64(2),
+		Sender:      msg.Sender,
+		Stock:       msg.Stock,
+		Money:       msg.Money,
+		Amount:      msg.Amount,
+		Side:        byte(side),
+		MoneyLimit:  msg.MoneyLimit,
+		TxPrice:     biNew.Price.Add(bi.Price).QuoInt64(2),
 		BlockHeight: ctx.BlockHeight(),
 	}
 	fillMsgQueue(ctx, k, KafkaBancorTrade, m)

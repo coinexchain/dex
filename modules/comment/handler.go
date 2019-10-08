@@ -15,8 +15,7 @@ func NewHandler(k Keeper) sdk.Handler {
 		case types.MsgCommentToken:
 			return handleMsgCommentToken(ctx, k, msg)
 		default:
-			errMsg := "Unrecognized comment Msg type: " + msg.Type()
-			return sdk.ErrUnknownRequest(errMsg).Result()
+			return dex.ErrUnknownRequest(ModuleName, msg)
 		}
 	}
 }

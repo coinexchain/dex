@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/distributionx/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
@@ -14,8 +15,7 @@ func NewHandler(k Keeper) sdk.Handler {
 		case types.MsgDonateToCommunityPool:
 			return handleMsgDonateToCommunityPool(ctx, k, msg)
 		default:
-			errMsg := "Unrecognized distributionx Msg type: " + msg.Type()
-			return sdk.ErrUnknownRequest(errMsg).Result()
+			return dex.ErrUnknownRequest(ModuleName, msg)
 		}
 	}
 }

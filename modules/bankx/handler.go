@@ -8,6 +8,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
@@ -22,8 +23,7 @@ func NewHandler(k Keeper) sdk.Handler {
 		case types.MsgMultiSend:
 			return handleMsgMultiSend(ctx, k, msg)
 		default:
-			errMsg := "Unrecognized bank Msg type: " + msg.Type()
-			return sdk.ErrUnknownRequest(errMsg).Result()
+			return dex.ErrUnknownRequest(ModuleName, msg)
 		}
 	}
 }

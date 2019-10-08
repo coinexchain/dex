@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/asset/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // NewHandler returns a handler for "asset" type messages.
@@ -34,10 +35,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgUnForbidAddr(ctx, keeper, msg)
 		case types.MsgModifyTokenInfo:
 			return handleMsgModifyTokenInfo(ctx, keeper, msg)
-
 		default:
-			errMsg := "Unrecognized asset Msg type: " + msg.Type()
-			return sdk.ErrUnknownRequest(errMsg).Result()
+			return dex.ErrUnknownRequest(ModuleName, msg)
 		}
 	}
 }
