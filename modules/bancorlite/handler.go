@@ -109,6 +109,12 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	if bytes.Equal(bi.Owner, msg.Sender) {
 		return types.ErrOwnerIsProhibited().Result()
 	}
+	if k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Stock, msg.Sender) ||
+		k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Money, msg.Sender) ||
+		k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Stock, bi.Owner) ||
+		k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Money, bi.Owner) {
+		return types.ErrTokenForbiddenByOwner().Result()
+	}
 
 	stockInPool := bi.StockInPool.AddRaw(msg.Amount)
 	if msg.IsBuy {

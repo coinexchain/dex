@@ -30,6 +30,7 @@ const (
 	CodeInitPriceBigThanMaxPrice sdk.CodeType = 1020
 	CodeCancelEnableTimeNegative sdk.CodeType = 1021
 	CodeTradeQuantityToSmall     sdk.CodeType = 1022
+	CodeTokenForbiddenByOwner    sdk.CodeType = 1023
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -110,4 +111,8 @@ func ErrPriceConfiguration() sdk.Error {
 
 func ErrEarliestCancelTimeIsNegative() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeCancelEnableTimeNegative, "The cancellation enable time is negative")
+}
+
+func ErrTokenForbiddenByOwner() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeTokenForbiddenByOwner, "token is forbidden by its owner")
 }

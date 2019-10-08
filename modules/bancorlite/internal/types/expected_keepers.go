@@ -17,6 +17,7 @@ type ExpectedBankxKeeper interface {
 type ExpectedAssetStatusKeeper interface {
 	IsTokenExists(ctx sdk.Context, denom string) bool // check whether there is a coin named "denom"
 	IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool
+	IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool
 }
 
 // market keeper will implement the interface
