@@ -118,19 +118,26 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return types.ErrStockInPoolOutofBound().Result()
 	}
 
-	diff := bi.MoneyInPool.Sub(biNew.MoneyInPool)
+	var (
+		diff            sdk.Int
+		coinsFromPool   sdk.Coins
+		coinsToPool     sdk.Coins
+		moneyCrossLimit bool
+		moneyErr        string
+	)
+
 	if msg.IsBuy {
 		diff = biNew.MoneyInPool.Sub(bi.MoneyInPool)
-	}
-	coinsFromPool := sdk.Coins{sdk.NewCoin(msg.Money, diff)}
-	coinsToPool := sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
-	moneyCrossLimit := msg.MoneyLimit > 0 && diff.LT(sdk.NewInt(msg.MoneyLimit))
-	moneyErr := "less than"
-	if msg.IsBuy {
 		coinsToPool = sdk.Coins{sdk.NewCoin(msg.Money, diff)}
 		coinsFromPool = sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
 		moneyCrossLimit = msg.MoneyLimit > 0 && diff.GT(sdk.NewInt(msg.MoneyLimit))
 		moneyErr = "more than"
+	} else {
+		diff = bi.MoneyInPool.Sub(biNew.MoneyInPool)
+		coinsFromPool = sdk.Coins{sdk.NewCoin(msg.Money, diff)}
+		coinsToPool = sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
+		moneyCrossLimit = msg.MoneyLimit > 0 && diff.LT(sdk.NewInt(msg.MoneyLimit))
+		moneyErr = "less than"
 	}
 
 	if moneyCrossLimit {
@@ -200,8 +207,8 @@ func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 		if err != nil {
 			return
 		}
-		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
-			sdk.NewAttribute(key, string(b))))
+		ctx.EventManager().
+			EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue, sdk.NewAttribute(key, string(b))))
 	}
 }
 
