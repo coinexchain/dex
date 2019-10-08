@@ -37,8 +37,8 @@ func NewHandler(k keepers.Keeper) sdk.Handler {
 }
 
 func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, keeper keepers.Keeper) sdk.Result {
-	if ret := checkMsgCreateTradingPair(ctx, msg, keeper); !ret.IsOK() {
-		return ret
+	if err := checkMsgCreateTradingPair(ctx, msg, keeper); err != nil {
+		return err.Result()
 	}
 
 	info := types.MarketInfo{
@@ -106,40 +106,40 @@ func fillMsgs(ctx sdk.Context, key string, msg interface{}) {
 		sdk.NewAttribute(key, string(bytes))))
 }
 
-func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, keeper keepers.Keeper) sdk.Result {
+func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, keeper keepers.Keeper) sdk.Error {
 	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
+		return err
 	}
 
 	if _, err := keeper.GetMarketInfo(ctx, msg.GetSymbol()); err == nil {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeRepeatTrade, "The repeatedly created trading pairs").Result()
+		return sdk.NewError(types.CodeSpaceMarket, types.CodeRepeatTrade, "The repeatedly created trading pairs")
 	}
 
 	if !keeper.IsTokenExists(ctx, msg.Money) || !keeper.IsTokenExists(ctx, msg.Stock) {
-		return types.ErrTokenNoExist().Result()
+		return types.ErrTokenNoExist()
 	}
 
 	if !keeper.IsTokenIssuer(ctx, msg.Stock, []byte(msg.Creator)) {
-		return types.ErrInvalidTokenIssuer().Result()
+		return types.ErrInvalidTokenIssuer()
 	}
 
 	if msg.Money != dex.CET && msg.Stock != dex.CET {
 		if _, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.Stock, dex.CET)); err != nil {
-			return sdk.NewError(types.CodeSpaceMarket, types.CodeStockNoHaveCetTrade, "The stock(%s) not have cet trade", msg.Stock).Result()
+			return sdk.NewError(types.CodeSpaceMarket, types.CodeStockNoHaveCetTrade, "The stock(%s) not have cet trade", msg.Stock)
 		}
 	}
 
 	marketParams := keeper.GetParams(ctx)
 	if !keeper.HasCoins(ctx, msg.Creator, dex.NewCetCoins(marketParams.CreateMarketFee)) {
-		return types.ErrInsufficientCoins().Result()
+		return types.ErrInsufficientCoins()
 	}
 
-	return sdk.Result{}
+	return nil
 }
 
 func calFrozenFeeInOrder(ctx sdk.Context, marketParams types.Params, keeper keepers.Keeper, msg types.MsgCreateOrder) (int64, sdk.Error) {
 	var frozenFeeDec sdk.Dec
-	stock := strings.Split(msg.TradingPair, types.SymbolSeparator)[0]
+	stock, _ := SplitSymbol(msg.TradingPair)
 
 	// Calculate the fee when stock is cet
 	rate := sdk.NewDec(marketParams.MarketFeeRate)
@@ -350,8 +350,8 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 }
 
 func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepers.Keeper) sdk.Result {
-	if err := checkMsgCancelOrder(ctx, msg, keeper); !err.IsOK() {
-		return err
+	if err := checkMsgCancelOrder(ctx, msg, keeper); err != nil {
+		return err.Result()
 	}
 
 	order := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc).QueryOrder(ctx, msg.OrderID)
@@ -392,22 +392,22 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 	}
 }
 
-func checkMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepers.Keeper) sdk.Result {
+func checkMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepers.Keeper) sdk.Error {
 	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
+		return err
 	}
 
 	globalKeeper := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc)
 	order := globalKeeper.QueryOrder(ctx, msg.OrderID)
 	if order == nil {
-		return sdk.NewError(types.StoreKey, types.CodeNotFindOrder, "Not find order in blockchain").Result()
+		return sdk.NewError(types.StoreKey, types.CodeNotFindOrder, "Not find order in blockchain")
 	}
 
 	if !bytes.Equal(order.Sender, msg.Sender) {
-		return sdk.NewError(types.StoreKey, types.CodeNotMatchSender, "The cancel addr is not match order sender").Result()
+		return sdk.NewError(types.StoreKey, types.CodeNotMatchSender, "The cancel addr is not match order sender")
 	}
 
-	return sdk.Result{}
+	return nil
 }
 
 func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair, keeper keepers.Keeper) sdk.Result {
@@ -490,8 +490,8 @@ func calculateAmount(price, quantity int64, pricePrecision byte) (sdk.Dec, error
 }
 
 func handleMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrecision, k keepers.Keeper) sdk.Result {
-	if ret := checkMsgModifyPricePrecision(ctx, msg, k); !ret.IsOK() {
-		return ret
+	if err := checkMsgModifyPricePrecision(ctx, msg, k); err != nil {
+		return err.Result()
 	}
 
 	oldInfo, _ := k.GetMarketInfo(ctx, msg.TradingPair)
@@ -528,22 +528,22 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrec
 	}
 }
 
-func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrecision, k keepers.Keeper) sdk.Result {
+func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrecision, k keepers.Keeper) sdk.Error {
 	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
+		return err
 	}
 
 	info, err := k.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidSymbol,
-			fmt.Sprintf("Error retrieving trade pair information : %s", err.Error())).Result()
+			fmt.Sprintf("Error retrieving trade pair information : %s", err.Error()))
 	}
 
 	if info.PricePrecision > msg.PricePrecision {
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidPricePrecision,
 			fmt.Sprintf("Price Precision can only be increased; "+
 				"tradingPair price_precision : %d, msg price_precision : %d",
-				info.PricePrecision, msg.PricePrecision)).Result()
+				info.PricePrecision, msg.PricePrecision))
 	}
 
 	stock, _ := SplitSymbol(msg.TradingPair)
@@ -552,8 +552,8 @@ func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePreci
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeNotMatchSender, fmt.Sprintf(
 			"The sender of the transaction (%s) does not match "+
 				"the owner of the transaction pair (%s)",
-			tokenInfo.GetOwner().String(), msg.Sender.String())).Result()
+			tokenInfo.GetOwner().String(), msg.Sender.String()))
 	}
 
-	return sdk.Result{}
+	return nil
 }
