@@ -1,7 +1,7 @@
 FROM frolvlad/alpine-glibc
 LABEL maintainer="dev@coinex.org"
 
-RUN apk --no-cache add curl
+RUN apk --no-cache add curl tzdata
 
 VOLUME [ /cetd ]
 WORKDIR /cetd

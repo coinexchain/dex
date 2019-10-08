@@ -3,7 +3,7 @@ LABEL maintainer="dev@coinex.org"
 
 RUN apk update && \
     apk upgrade && \
-    apk --no-cache add curl jq file
+    apk --no-cache add curl jq file tzdata
 
 VOLUME [ /cetd ]
 WORKDIR /cetd
