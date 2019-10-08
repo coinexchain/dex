@@ -3,6 +3,7 @@ package market
 import (
 	"bytes"
 	"math"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -360,19 +361,28 @@ func TestMarketInfoSetFailed(t *testing.T) {
 	require.Equal(t, types.CodeStockNoHaveCetTrade, ret.Code, "create market info should failed")
 	require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
 
+	// failed by order precision
+	failedOrderPrecision := msgMarket
+	failedOrderPrecision.Money = dex.CET
+	for i := 0; i <= 10; i++ {
+		failedOrderPrecision.OrderPrecision = byte(rand.Intn(245) + 10)
+		ret = input.handler(input.ctx, failedOrderPrecision)
+		require.Equal(t, types.CodeInvalidOrderPrecision, ret.Code, "create market info should failed")
+		require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "invalid order precision, valid range[0, 9]")
+	}
 }
 
 func createMarket(input testInput) sdk.Result {
-	return createImpMarket(input, stock, money)
+	return createImpMarket(input, stock, money, 0)
 }
 
-func createImpMarket(input testInput, stock, money string) sdk.Result {
-	msgMarketInfo := types.MsgCreateTradingPair{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 8}
+func createImpMarket(input testInput, stock, money string, orderPrecision byte) sdk.Result {
+	msgMarketInfo := types.MsgCreateTradingPair{Stock: stock, Money: money, Creator: haveCetAddress, PricePrecision: 8, OrderPrecision: orderPrecision}
 	return input.handler(input.ctx, msgMarketInfo)
 }
 
-func createCetMarket(input testInput, stock string) sdk.Result {
-	return createImpMarket(input, stock, dex.CET)
+func createCetMarket(input testInput, stock string, orderPrecision byte) sdk.Result {
+	return createImpMarket(input, stock, dex.CET, orderPrecision)
 }
 
 func IsEqual(old, new sdk.Coin, diff sdk.Coin) bool {
@@ -381,19 +391,22 @@ func IsEqual(old, new sdk.Coin, diff sdk.Coin) bool {
 }
 
 func TestMarketInfoSetSuccess(t *testing.T) {
-	input := prepareMockInput(t, true, true)
-	oldCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
-	params := input.mk.GetParams(input.ctx)
+	for i := 0; i <= 9; i++ {
+		input := prepareMockInput(t, true, true)
+		oldCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
+		params := input.mk.GetParams(input.ctx)
 
-	ret := createCetMarket(input, stock)
-	newCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
-	require.Equal(t, true, ret.IsOK(), "create market info should succeed")
-	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, dex.NewCetCoin(params.CreateMarketFee)), "The amount is error")
+		ret := createCetMarket(input, stock, byte(i))
+		newCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
+		require.Equal(t, true, ret.IsOK(), "create market info should succeed")
+		require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, dex.NewCetCoin(params.CreateMarketFee)), "The amount is error")
 
-	ret = createCetMarket(input, stock)
-	require.Equal(t, types.CodeRepeatTrade, ret.Code)
-	require.Equal(t, false, ret.IsOK(), "repeatedly creating market would fail")
-
+		for i := 0; i <= 9; i++ {
+			ret = createCetMarket(input, stock, byte(i))
+			require.Equal(t, types.CodeRepeatTrade, ret.Code)
+			require.Equal(t, false, ret.IsOK(), "repeatedly creating market would fail")
+		}
+	}
 }
 
 func TestCreateOrderFailed(t *testing.T) {
@@ -408,7 +421,7 @@ func TestCreateOrderFailed(t *testing.T) {
 		Side:           types.SELL,
 		TimeInForce:    types.GTE,
 	}
-	ret := createCetMarket(input, stock)
+	ret := createCetMarket(input, stock, 1)
 	require.Equal(t, true, ret.IsOK(), "create market trade should success")
 	ret = createMarket(input)
 	require.Equal(t, true, ret.IsOK(), "create market trade should success")
@@ -458,7 +471,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 
 	input = prepareMockInput(t, true, false)
-	ret = createCetMarket(input, stock)
+	ret = createCetMarket(input, stock, 0)
 	require.Equal(t, true, ret.IsOK(), "create market failed")
 	ret = createMarket(input)
 	require.Equal(t, true, ret.IsOK(), "create market failed")
@@ -506,6 +519,38 @@ func TestCalculateAmount(t *testing.T) {
 	}
 }
 
+func TestCreateOrderFiledByOrderPrecision(t *testing.T) {
+	for i := 1; i <= 8; i++ {
+		input := prepareMockInput(t, false, false)
+		msgGteOrder := types.MsgCreateOrder{
+			Sender:         haveCetAddress,
+			Identify:       1,
+			TradingPair:    stock + types.SymbolSeparator + "cet",
+			OrderType:      types.LimitOrder,
+			PricePrecision: 8,
+			Price:          100,
+			Quantity:       10000000,
+			Side:           types.SELL,
+			TimeInForce:    types.GTE,
+		}
+
+		ret := createCetMarket(input, stock, byte(i))
+		require.Equal(t, true, ret.IsOK(), "create market should succeed")
+		failedorderPrecision := msgGteOrder
+		for j := 0; j < 10; j++ {
+			failedorderPrecision.Quantity = int64(rand.Intn(int(math.Pow10(9-i)) - 1))
+			if failedorderPrecision.Quantity == 0 {
+				failedorderPrecision.Quantity = 1
+			}
+			failedorderPrecision.TradingPair = stock + types.SymbolSeparator + dex.CET
+			ret = input.handler(input.ctx, failedorderPrecision)
+			require.Equal(t, false, ret.IsOK(), "create GTE order should failed")
+			require.Equal(t, types.CodeInvalidOrderAmount, ret.Code, "invalid order amount, must be a multiple of granularity ")
+		}
+	}
+
+}
+
 func TestCreateOrderSuccess(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	msgGteOrder := types.MsgCreateOrder{
@@ -522,7 +567,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 
 	param := input.mk.GetParams(input.ctx)
 
-	ret := createCetMarket(input, stock)
+	ret := createCetMarket(input, stock, 0)
 	require.Equal(t, true, ret.IsOK(), "create market should succeed")
 
 	seq, err := input.mk.QuerySeqWithAddr(input.ctx, msgGteOrder.Sender)
@@ -581,7 +626,7 @@ func isSameOrderAndMsg(order *types.Order, msg types.MsgCreateOrder) bool {
 
 func TestCancelOrderFailed(t *testing.T) {
 	input := prepareMockInput(t, false, false)
-	createCetMarket(input, stock)
+	createCetMarket(input, stock, 0)
 	cancelOrder := types.MsgCancelOrder{
 		Sender: haveCetAddress,
 	}
@@ -617,7 +662,7 @@ func TestCancelOrderFailed(t *testing.T) {
 
 func TestCancelOrderSuccess(t *testing.T) {
 	input := prepareMockInput(t, false, false)
-	createCetMarket(input, stock)
+	createCetMarket(input, stock, 0)
 
 	// create order
 	msgIOCOrder := types.MsgCreateOrder{
@@ -649,7 +694,7 @@ func TestCancelOrderSuccess(t *testing.T) {
 
 func TestCancelMarketFailed(t *testing.T) {
 	input := prepareMockInput(t, false, false)
-	createCetMarket(input, stock)
+	createCetMarket(input, stock, 0)
 
 	msgCancelMarket := types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
@@ -677,7 +722,7 @@ func TestCancelMarketFailed(t *testing.T) {
 
 func TestCancelMarketSuccess(t *testing.T) {
 	input := prepareMockInput(t, false, true)
-	createCetMarket(input, stock)
+	createCetMarket(input, stock, 0)
 
 	msgCancelMarket := types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
@@ -697,7 +742,7 @@ func TestCancelMarketSuccess(t *testing.T) {
 
 func TestChargeOrderFee(t *testing.T) {
 	input := prepareMockInput(t, false, false)
-	ret := createCetMarket(input, stock)
+	ret := createCetMarket(input, stock, 0)
 	require.Equal(t, true, ret.IsOK(), "create market should success")
 	param := input.mk.GetParams(input.ctx)
 
@@ -725,7 +770,7 @@ func TestChargeOrderFee(t *testing.T) {
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, totalFreeze), "The amount is error ")
 
 	// If stock is cet symbol, Charge a percentage of the transaction fee,
-	ret = createImpMarket(input, dex.CET, stock)
+	ret = createImpMarket(input, dex.CET, stock, 0)
 	require.Equal(t, true, ret.IsOK(), "create market should success")
 	stockIsCetOrder := msgOrder
 	stockIsCetOrder.Identify = 2
@@ -757,7 +802,7 @@ func TestChargeOrderFee(t *testing.T) {
 
 func TestModifyPricePrecisionFaild(t *testing.T) {
 	input := prepareMockInput(t, false, false)
-	createCetMarket(input, stock)
+	createCetMarket(input, stock, 0)
 
 	msg := types.MsgModifyPricePrecision{
 		Sender:         haveCetAddress,
@@ -787,7 +832,7 @@ func TestModifyPricePrecisionFaild(t *testing.T) {
 
 func TestModifyPricePrecisionSuccess(t *testing.T) {
 	input := prepareMockInput(t, false, false)
-	createCetMarket(input, stock)
+	createCetMarket(input, stock, 0)
 
 	msg := types.MsgModifyPricePrecision{
 		Sender:         haveCetAddress,
@@ -800,4 +845,14 @@ func TestModifyPricePrecisionSuccess(t *testing.T) {
 	newCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
 	require.Equal(t, true, ret.IsOK(), "the tx should success")
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, sdk.NewCoin(dex.CET, sdk.NewInt(0))), "the amount is error")
+}
+
+func TestGetGranularityOfOrder(t *testing.T) {
+	var expectValue = []float64{math.Pow10(0), math.Pow10(8), math.Pow10(7),
+		math.Pow10(6), math.Pow10(5), math.Pow10(4), math.Pow10(3),
+		math.Pow10(2), math.Pow10(1), math.Pow10(0)}
+	for i := 0; i <= 9; i++ {
+		ret := types.GetGranularityOfOrder(byte(i))
+		require.EqualValues(t, ret, expectValue[i])
+	}
 }

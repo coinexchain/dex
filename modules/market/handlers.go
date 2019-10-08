@@ -46,6 +46,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 		Money:             msg.Money,
 		PricePrecision:    msg.PricePrecision,
 		LastExecutedPrice: sdk.ZeroDec(),
+		OrderPrecision:    msg.OrderPrecision,
 	}
 
 	if err := keeper.SetMarket(ctx, info); err != nil {
@@ -344,6 +345,10 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 	}
 	if keeper.IsForbiddenByTokenIssuer(ctx, stock, msg.Sender) || keeper.IsForbiddenByTokenIssuer(ctx, money, msg.Sender) {
 		return sdk.NewError(types.CodeSpaceMarket, types.CodeAddressForbidByIssuer, "The sender is forbidden by token issuer").Result()
+	}
+	baseValue := types.GetGranularityOfOrder(marketInfo.OrderPrecision)
+	if amount%baseValue != 0 {
+		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The amount of tokens to trade should be a multiple of the order precision").Result()
 	}
 
 	return sdk.Result{}

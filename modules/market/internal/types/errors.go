@@ -36,6 +36,7 @@ const (
 	CodeFailedUnmarshal       sdk.CodeType = 628
 	CodeInvalidSequence       sdk.CodeType = 629
 	CodeInvalidOrderExist     sdk.CodeType = 630
+	CodeInvalidOrderPrecision sdk.CodeType = 631
 )
 
 func ErrTokenNoExist() sdk.Error {

@@ -42,6 +42,7 @@ type MsgCreateTradingPair struct {
 	Money          string         `json:"money"`
 	Creator        sdk.AccAddress `json:"creator"`
 	PricePrecision byte           `json:"price_precision"`
+	OrderPrecision byte           `json:"order_precision"`
 }
 
 func NewMsgCreateTradingPair(stock, money string, crater sdk.AccAddress, pricePrecision byte) MsgCreateTradingPair {
@@ -80,6 +81,9 @@ func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 	}
 	if msg.Money == msg.Stock {
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "stock and money should be different")
+	}
+	if msg.OrderPrecision > MaxOrderPrecision {
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderPrecision, "invalid order precision, valid range[0, 9]")
 	}
 	return nil
 }
