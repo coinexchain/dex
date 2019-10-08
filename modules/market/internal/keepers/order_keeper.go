@@ -119,6 +119,7 @@ func NewOrderKeeper(key sdk.StoreKey, symbol string, codec *codec.Codec) OrderKe
 	}
 }
 
+//todo: panic_for_test
 func int64ToBigEndianBytes(n int64) []byte {
 	if n < 0 {
 		panic("n cannot be negative")

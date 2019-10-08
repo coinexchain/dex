@@ -100,6 +100,10 @@ func CalDepthGraph(orderList []*Order) *DepthGraph {
 func DecToBigEndianBytes(d sdk.Dec) []byte {
 	var result [DecByteCount]byte
 	bytes := d.Int.Bytes() //  returns the absolute value of d as a big-endian byte slice.
+	//todo: panic_for_test
+	if len(bytes) > DecByteCount {
+		panic("dec length larger than 40")
+	}
 	for i := 1; i <= len(bytes); i++ {
 		result[DecByteCount-i] = bytes[len(bytes)-i]
 	}
