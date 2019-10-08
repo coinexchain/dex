@@ -19,7 +19,7 @@ func createMsgWriter(cfg string) (MsgWriter, error) {
 		return NewNopMsgWriter(), nil
 	} else if strings.HasPrefix(cfg, CfgPrefixKafka) {
 		brokers := strings.TrimPrefix(cfg, CfgPrefixKafka)
-		return NewKafkaMsgWriter(brokers), nil
+		return NewKafkaMsgWriter(brokers)
 	} else if strings.HasPrefix(cfg, CfgPrefixFile) {
 		filePath := strings.TrimPrefix(cfg, CfgPrefixFile)
 		return NewFileMsgWriter(filePath)
