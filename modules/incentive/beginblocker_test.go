@@ -48,8 +48,14 @@ func TestBeginBlockerInvalidCoin(t *testing.T) {
 
 func TestBeginBlockerInPlan(t *testing.T) {
 	input := SetupTestInput()
+	plans := types.Params{
+		DefaultRewardPerBlock: 2e8,
+		Plans: []types.Plan{
+			{0, 10, 10e8, 100e8},
+		},
+	}
 	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: 10})
-	input.keeper.SetParams(input.ctx, incentive.DefaultParams())
+	input.keeper.SetParams(input.ctx, plans)
 	acc := input.ak.NewAccountWithAddress(input.ctx, incentive.PoolAddr)
 	_ = acc.SetCoins(dex.NewCetCoins(10000 * 1e8))
 	input.ak.SetAccount(input.ctx, acc)
@@ -62,7 +68,7 @@ func TestBeginBlockerInPlan(t *testing.T) {
 	poolBalanceAfter := input.ak.GetAccount(input.ctx, incentive.PoolAddr).GetCoins().AmountOf(dex.CET).Int64()
 	feeBalanceAfter := input.sk.GetModuleAccount(input.ctx, auth.FeeCollectorName).GetCoins().AmountOf(dex.CET).Int64()
 
-	reward := incentive.DefaultParams().Plans[0].RewardPerBlock
+	reward := plans.Plans[0].RewardPerBlock
 	require.Equal(t, -reward, poolBalanceAfter-poolBalanceBefore)
 	require.Equal(t, reward, feeBalanceAfter-feeBalanceBefore)
 }
