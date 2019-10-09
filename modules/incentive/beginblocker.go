@@ -21,13 +21,11 @@ func BeginBlocker(ctx sdk.Context, k keepers.Keeper) {
 			panic(err)
 		}
 	}
-
 }
 
 func collectRewardsFromPool(k keepers.Keeper, ctx sdk.Context, blockRewards sdk.Coins) sdk.Error {
 	//transfer rewards into collected_fees for further distribution
-	err := k.SendCoinsFromAccountToModule(ctx, PoolAddr, auth.FeeCollectorName, blockRewards)
-	if err != nil {
+	if err := k.SendCoinsFromAccountToModule(ctx, PoolAddr, auth.FeeCollectorName, blockRewards); err != nil {
 		return err
 	}
 	return nil

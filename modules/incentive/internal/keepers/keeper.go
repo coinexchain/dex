@@ -66,8 +66,7 @@ func (k Keeper) SetState(ctx sdk.Context, state types.State) sdk.Error {
 }
 
 func (k Keeper) AddNewPlan(ctx sdk.Context, plan types.Plan) sdk.Error {
-	err := types.CheckPlans([]types.Plan{plan})
-	if err != nil {
+	if err := types.CheckPlans([]types.Plan{plan}); err != nil {
 		return sdk.NewError(types.CodeSpaceIncentive, types.CodeInvalidPlanToAdd, "new plan is invalid")
 	}
 	param := k.GetParams(ctx)

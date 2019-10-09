@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/testapp"
@@ -22,29 +23,70 @@ type TestInput struct {
 	cdc    *codec.Codec
 	keeper incentive.Keeper
 	ak     auth.AccountKeeper
+	sk     supply.Keeper
 }
 
 func SetupTestInput() TestInput {
 	app := testapp.NewTestApp()
 	ctx := sdk.NewContext(app.Cms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-	return TestInput{ctx: ctx, cdc: app.Cdc, keeper: app.IncentiveKeeper, ak: app.AccountKeeper}
+	return TestInput{ctx: ctx, cdc: app.Cdc, keeper: app.IncentiveKeeper, ak: app.AccountKeeper, sk: app.SupplyKeeper}
 }
 
 func TestBeginBlockerInvalidCoin(t *testing.T) {
 	input := SetupTestInput()
 	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: 10})
 	input.keeper.SetParams(input.ctx, incentive.DefaultParams())
+
+	feeBalanceBefore := input.sk.GetModuleAccount(input.ctx, auth.FeeCollectorName).GetCoins().AmountOf(dex.CET).Int64()
 	incentive.BeginBlocker(input.ctx, input.keeper)
+	feeBalanceAfter := input.sk.GetModuleAccount(input.ctx, auth.FeeCollectorName).GetCoins().AmountOf(dex.CET).Int64()
+
+	// no coins in pool
+	require.Equal(t, int64(0), feeBalanceAfter-feeBalanceBefore)
 }
 
-func TestBeginBlocker(t *testing.T) {
+func TestBeginBlockerInPlan(t *testing.T) {
 	input := SetupTestInput()
 	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: 10})
 	input.keeper.SetParams(input.ctx, incentive.DefaultParams())
 	acc := input.ak.NewAccountWithAddress(input.ctx, incentive.PoolAddr)
 	_ = acc.SetCoins(dex.NewCetCoins(10000 * 1e8))
 	input.ak.SetAccount(input.ctx, acc)
+
+	poolBalanceBefore := input.ak.GetAccount(input.ctx, incentive.PoolAddr).GetCoins().AmountOf(dex.CET).Int64()
+	feeBalanceBefore := input.sk.GetModuleAccount(input.ctx, auth.FeeCollectorName).GetCoins().AmountOf(dex.CET).Int64()
+
 	incentive.BeginBlocker(input.ctx, input.keeper)
+
+	poolBalanceAfter := input.ak.GetAccount(input.ctx, incentive.PoolAddr).GetCoins().AmountOf(dex.CET).Int64()
+	feeBalanceAfter := input.sk.GetModuleAccount(input.ctx, auth.FeeCollectorName).GetCoins().AmountOf(dex.CET).Int64()
+
+	reward := incentive.DefaultParams().Plans[0].RewardPerBlock
+	require.Equal(t, -reward, poolBalanceAfter-poolBalanceBefore)
+	require.Equal(t, reward, feeBalanceAfter-feeBalanceBefore)
+}
+
+func TestBeginBlockerNotInPlan(t *testing.T) {
+	input := SetupTestInput()
+	plans := incentive.DefaultParams().Plans
+	height := plans[len(plans)-1].EndHeight + 10
+	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: height})
+	input.keeper.SetParams(input.ctx, incentive.DefaultParams())
+	acc := input.ak.NewAccountWithAddress(input.ctx, incentive.PoolAddr)
+	_ = acc.SetCoins(dex.NewCetCoins(10000 * 1e8))
+	input.ak.SetAccount(input.ctx, acc)
+
+	poolBalanceBefore := input.ak.GetAccount(input.ctx, incentive.PoolAddr).GetCoins().AmountOf(dex.CET).Int64()
+	feeBalanceBefore := input.sk.GetModuleAccount(input.ctx, auth.FeeCollectorName).GetCoins().AmountOf(dex.CET).Int64()
+
+	incentive.BeginBlocker(input.ctx, input.keeper)
+
+	poolBalanceAfter := input.ak.GetAccount(input.ctx, incentive.PoolAddr).GetCoins().AmountOf(dex.CET).Int64()
+	feeBalanceAfter := input.sk.GetModuleAccount(input.ctx, auth.FeeCollectorName).GetCoins().AmountOf(dex.CET).Int64()
+
+	reward := incentive.DefaultParams().DefaultRewardPerBlock
+	require.Equal(t, -reward, poolBalanceAfter-poolBalanceBefore)
+	require.Equal(t, reward, feeBalanceAfter-feeBalanceBefore)
 }
 
 func TestIncentiveCoinsAddress(t *testing.T) {
