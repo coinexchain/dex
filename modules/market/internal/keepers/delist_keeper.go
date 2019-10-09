@@ -34,7 +34,7 @@ func (keeper *DelistKeeper) GetDelistSymbolsBeforeTime(ctx sdk.Context, time int
 	start := concatCopyPreAllocate([][]byte{
 		DelistKey,
 		int64ToBigEndianBytes(0),
-		{0},
+		{0x0},
 	})
 	end := concatCopyPreAllocate([][]byte{
 		DelistKey,

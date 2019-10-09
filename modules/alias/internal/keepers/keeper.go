@@ -73,7 +73,7 @@ func (keeper *AliasKeeper) GetAllAlias(ctx sdk.Context) []AliasEntry {
 	for ; iter.Valid(); iter.Next() {
 		res = append(res, AliasEntry{
 			Alias:     string(iter.Key()[1:]),
-			Addr:      sdk.AccAddress(iter.Value()[1:]),
+			Addr:      iter.Value()[1:],
 			AsDefault: iter.Value()[0] != 0,
 		})
 	}

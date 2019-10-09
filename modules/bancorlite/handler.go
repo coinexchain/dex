@@ -42,7 +42,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		return types.ErrNonOwnerIsProhibited().Result()
 	}
 	if msg.Money != "cet" &&
-		!k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, "cet")) {
+		!k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
 		return types.ErrNonMarketExist().Result()
 	}
 	suppliedCoins := sdk.Coins{sdk.NewCoin(msg.Stock, msg.MaxSupply)}
@@ -83,7 +83,7 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if ctx.BlockHeader().Time.Unix() < bi.EarliestCancelTime {
 		return types.ErrEarliestCancelTimeNotArrive().Result()
 	}
-	if !k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, "cet")) {
+	if !k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
 		return types.ErrNonMarketExist().Result()
 	}
 	fee := k.Bik.GetParams(ctx).CancelBancorFee
@@ -233,7 +233,7 @@ func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
 			Mul(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).
 			Quo(sdk.NewInt(10000))
 	} else {
-		price, err := k.Mk.GetMarketLastExePrice(ctx, dex.GetSymbol(msg.Stock, "cet"))
+		price, err := k.Mk.GetMarketLastExePrice(ctx, dex.GetSymbol(msg.Stock, dex.CET))
 		if err != nil {
 			return commission, types.ErrGetMarketPrice(err.Error())
 		}

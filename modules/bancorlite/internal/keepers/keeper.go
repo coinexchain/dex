@@ -57,12 +57,12 @@ func (keeper *BancorInfoKeeper) Remove(ctx sdk.Context, bi *BancorInfo) {
 //key: stock/money pair
 func (keeper *BancorInfoKeeper) Load(ctx sdk.Context, symbol string) *BancorInfo {
 	store := ctx.KVStore(keeper.biKey)
-	bi := &BancorInfo{}
 	key := append(BancorInfoKey, []byte(symbol)...)
 	biBytes := store.Get(key)
 	if biBytes == nil {
 		return nil
 	}
+	bi := &BancorInfo{}
 	keeper.codec.MustUnmarshalBinaryBare(biBytes, bi)
 	return bi
 }
