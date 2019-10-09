@@ -1,7 +1,6 @@
 package msgqueue
 
 import (
-	"fmt"
 	"io"
 	"os"
 )
@@ -24,16 +23,6 @@ func NewFileMsgWriter(filePath string) (MsgWriter, error) {
 	return fileMsgWriter{file}, nil
 }
 
-func openFile(filePath string) (*os.File, error) {
-	if s, err := os.Stat(filePath); os.IsNotExist(err) {
-		return os.Create(filePath)
-	} else if s.IsDir() {
-		return nil, fmt.Errorf("Need to give the file path ")
-	} else {
-		return os.OpenFile(filePath, os.O_RDWR|os.O_APPEND, 0666)
-	}
-}
-
 func (w fileMsgWriter) WriteKV(k, v []byte) error {
 	if _, err := w.WriteCloser.Write(k); err != nil {
 		return err
@@ -51,6 +40,9 @@ func (w fileMsgWriter) WriteKV(k, v []byte) error {
 }
 
 func (w fileMsgWriter) Close() error {
+	if w.WriteCloser == os.Stdout {
+		return nil
+	}
 	return w.WriteCloser.Close()
 }
 

@@ -10,12 +10,12 @@ import (
 
 func TestNewProducer(t *testing.T) {
 	defer os.Remove("messages.txt")
-	p := NewProducerFromConfig([]string{"file:messages.txt"}, "bank,auth", true, nil)
+	p := NewProducerFromConfig([]string{"file:messages.txt", "dir:tmp", "os:stdout"}, "bank,auth", true, nil)
 	require.True(t, p.IsOpenToggle())
 	require.True(t, p.IsSubscribed("bank"))
 	require.True(t, p.IsSubscribed("auth"))
 	require.False(t, p.IsSubscribed("gov"))
-	require.Equal(t, []string{"file"}, p.GetMode())
+	require.Equal(t, []string{"file", "dir", "stdout"}, p.GetMode())
 
 	p.SendMsg([]byte("foo"), []byte("bar"))
 	p.Close()

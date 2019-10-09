@@ -30,6 +30,12 @@ func TestCreateMsgWriter(t *testing.T) {
 
 	w, err = createMsgWriter("db:mongo")
 	require.Error(t, err)
+
+	w, err = createMsgWriter("dir:tmp")
+	require.NoError(t, err)
+	defer os.RemoveAll("tmp")
+	require.Equal(t, "dir", w.String())
+	require.NoError(t, w.Close())
 }
 
 func TestNopMsgWriter(t *testing.T) {
@@ -62,4 +68,41 @@ func TestFileMsgWriter(t *testing.T) {
 	w, err = NewFileMsgWriter(".")
 	require.Error(t, err)
 	//require.Equal(t, "Need to give the file path ", err.Error())
+}
+
+func TestDirMsgWriter(t *testing.T) {
+	w, err := NewdirMsgWriter("tmp")
+	require.NoError(t, err)
+	defer os.RemoveAll("tmp")
+
+	MaxFileSize = 20
+	err = w.WriteKV([]byte("hello world"), []byte("nihao"))
+	require.NoError(t, err)
+	err = w.WriteKV([]byte("hello world"), []byte("nihao"))
+	require.NoError(t, err)
+	err = w.WriteKV([]byte("hello world"), []byte("nihao"))
+	require.NoError(t, err)
+
+	info, err := os.Stat("tmp/" + filePrefix + "0")
+	require.NoError(t, err)
+	require.EqualValues(t, 11+5+3, info.Size())
+	bz, err := ioutil.ReadFile("tmp/" + filePrefix + "0")
+	require.NoError(t, err)
+	require.EqualValues(t, []byte("hello world#nihao\r\n"), bz)
+
+	info, err = os.Stat("tmp/" + filePrefix + "1")
+	require.NoError(t, err)
+	require.EqualValues(t, 11+5+3, info.Size())
+	bz, err = ioutil.ReadFile("tmp/" + filePrefix + "1")
+	require.NoError(t, err)
+	require.EqualValues(t, []byte("hello world#nihao\r\n"), bz)
+
+	info, err = os.Stat("tmp/" + filePrefix + "2")
+	require.NoError(t, err)
+	require.EqualValues(t, 11+5+3, info.Size())
+	bz, err = ioutil.ReadFile("tmp/" + filePrefix + "2")
+	require.NoError(t, err)
+	require.EqualValues(t, []byte("hello world#nihao\r\n"), bz)
+
+	require.Nil(t, w.Close())
 }

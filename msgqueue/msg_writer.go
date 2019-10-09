@@ -25,6 +25,9 @@ func createMsgWriter(cfg string) (MsgWriter, error) {
 		return NewFileMsgWriter(filePath)
 	} else if strings.TrimPrefix(cfg, CfgPrefixOS) == "stdout" {
 		return NewStdOutMsgWriter(), nil
+	} else if strings.HasPrefix(cfg, CfgPrefixDir) {
+		dirPath := strings.TrimPrefix(cfg, CfgPrefixDir)
+		return NewdirMsgWriter(dirPath)
 	} else {
 		return nil, fmt.Errorf("unsupported config: %s", cfg)
 	}

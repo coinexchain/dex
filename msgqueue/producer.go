@@ -22,6 +22,7 @@ const (
 	CfgPrefixFile  = "file:"
 	CfgPrefixKafka = "kafka:"
 	CfgPrefixOS    = "os:"
+	CfgPrefixDir   = "dir:"
 )
 
 const RetryNum = math.MaxInt64
