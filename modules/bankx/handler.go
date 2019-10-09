@@ -85,7 +85,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	//TODO: add codes to check whether fromAccount & toAccount is moduleAccount
 
 	amt := msg.Amount
-	if k.GetCoins(ctx, msg.FromAddress).IsAllLT(amt) {
+	if !k.GetCoins(ctx, msg.FromAddress).IsAllGTE(amt) {
 		return sdk.ErrInsufficientCoins("sender has insufficient coins for the transfer").Result()
 	}
 
