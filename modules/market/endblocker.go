@@ -10,6 +10,7 @@ import (
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 	"github.com/coinexchain/dex/modules/market/match"
+	"github.com/coinexchain/dex/msgqueue"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -239,7 +240,7 @@ func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64,
 			CurrStock:   order.DealStock - oldDeal,
 			CurrMoney:   order.DealMoney - oldMoney,
 		}
-		fillMsgs(ctx, types.FillOrderInfoKey, msgInfo)
+		msgqueue.FillMsgs(ctx, types.FillOrderInfoKey, msgInfo)
 	}
 }
 
@@ -272,7 +273,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 					DealStock:      order.DealStock,
 					DealMoney:      order.DealMoney,
 				}
-				fillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
+				msgqueue.FillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
 			}
 		}
 	}
@@ -304,7 +305,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 					DealStock:      ord.DealStock,
 					DealMoney:      ord.DealMoney,
 				}
-				fillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
+				msgqueue.FillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
 			}
 		}
 		keeper.RemoveMarket(ctx, symbol)
@@ -403,5 +404,5 @@ func sendOrderMsg(ctx sdk.Context, order *types.Order, height int64, feeForZeroD
 		msgInfo.DelReason = types.CancelOrderByNotKnow
 	}
 
-	fillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
+	msgqueue.FillMsgs(ctx, types.CancelOrderInfoKey, msgInfo)
 }
