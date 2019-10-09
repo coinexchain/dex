@@ -37,6 +37,7 @@ const (
 	CodeInvalidSequence       sdk.CodeType = 629
 	CodeInvalidOrderExist     sdk.CodeType = 630
 	CodeInvalidOrderPrecision sdk.CodeType = 631
+	CodeDelistRequestExist    sdk.CodeType = 632
 )
 
 func ErrTokenNoExist() sdk.Error {
@@ -89,4 +90,8 @@ func ErrTokenForbidByIssuer() sdk.Error {
 
 func ErrOrderQuantityTooSmall(err string) sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityTooSmall, "the order commission (%s) too small", err)
+}
+
+func ErrDelistRequestExist(market string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeDelistRequestExist, "the delist request for %s already exists", market)
 }

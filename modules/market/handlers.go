@@ -422,6 +422,12 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair,
 
 	// Add del request to store
 	dlk := keepers.NewDelistKeeper(keeper.GetMarketKey())
+	delistSymbols := dlk.GetDelistSymbolsBeforeTime(ctx, math.MaxInt64)
+	for _, sym := range delistSymbols {
+		if msg.TradingPair == sym {
+			return types.ErrDelistRequestExist(sym).Result()
+		}
+	}
 	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.TradingPair)
 
 	// send msg to kafka
