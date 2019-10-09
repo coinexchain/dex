@@ -37,31 +37,30 @@ cd ${OUTPUT_DIR}
 cetd init ${GENESIS_NODE_MONIKER} --chain-id=${CHAIN_ID} --home ${OUTPUT_DIR}/.cetd
 
 # https://etherscan.io/token/0x081f67afa0ccf8c7b17540767bbe95df2ba8d97f
-# date: 2019/08/06 total:5,877,675,270.61317189
-# 5,877,675,270.61317189 - 300000000000000000 = 287767527061317189
+# date: 2019/10/09 total: 5,868,849,037.61317189
+# 586884903761317189 - 300000000000000000 = 286884903761317189
 
-cetd add-genesis-account ${INCENTIVE_POOL_ADDR}  31536000000000000cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account ${circulation}          287767527061317189cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account ${coinex_foundation}     87464000000000000cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account ${genesis_node}           1000000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${INCENTIVE_POOL_ADDR}   31536000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${circulation}          286884903761317189cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${coinex_foundation}     87960000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${genesis_node}            504000000000000cet --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2020}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1577836800  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2021}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1609459200  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2022}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1640995200  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2023}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1672531200  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2024}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1704067200  --home ${OUTPUT_DIR}/.cetd
 
-
 CET_TOKEN_DESCRIPTION="Decentralized public chain ecosystem, Born for financial liberalization"
 
 cetd add-genesis-token --name="CoinEx Chain Native Token"               \
     --symbol="${TOKEN_SYMBOL}"                                          \
     --owner=${coinex_foundation}                                        \
-    --total-supply=587767527061317189                                   \
+    --total-supply=586884903761317189                                   \
     --mintable=false                                                    \
     --burnable=true                                                     \
     --addr-forbiddable=false                                            \
     --token-forbiddable=false                                           \
-    --total-burn=412232472938682811                                     \
+    --total-burn=413115096238682811                                     \
     --total-mint=0                                                      \
     --is-forbidden=false                                                \
     --url="www.coinex.org"                                              \
@@ -77,11 +76,11 @@ cetd gentx                                \
 --name genesis_node                       \
 --website www.coinex.org                  \
 --details "Network Genesis Node"          \
---amount=1000000000000000cet              \
+--amount=500000000000000cet               \
 --commission-rate=0.2                     \
 --commission-max-rate=1                   \
 --commission-max-change-rate=0.1          \
---min-self-delegation=1000000000000000    \
+--min-self-delegation=500000000000000     \
 --home ${OUTPUT_DIR}/.cetd                \
 --output-document ${OUTPUT_DIR}/gentx/gentx.json
 
