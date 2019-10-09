@@ -8,29 +8,30 @@ const (
 	CodeSpaceBancorlite sdk.CodespaceType = "bancorlite"
 
 	// 1001 ~ 1099
-	CodeInvalidSymbol            sdk.CodeType = 1001
-	CodeNonPositiveSupply        sdk.CodeType = 1002
-	CodeNonPositivePrice         sdk.CodeType = 1003
-	CodeNonPositiveAmount        sdk.CodeType = 1004
-	CodeTradeAmountIsTooLarge    sdk.CodeType = 1005
-	CodeBancorAlreadyExists      sdk.CodeType = 1006
-	CodeNoSuchToken              sdk.CodeType = 1007
-	CodeNonOwnerIsProhibited     sdk.CodeType = 1008
-	CodeNoBancorExists           sdk.CodeType = 1009
-	CodeOwnerIsProhibited        sdk.CodeType = 1010
-	CodeStockInPoolOutOfBound    sdk.CodeType = 1011
-	CodeMoneyCrossLimit          sdk.CodeType = 1012
-	CodeUnMarshalFailed          sdk.CodeType = 1013
-	CodeMarshalFailed            sdk.CodeType = 1014
-	CodeNegativeInitPrice        sdk.CodeType = 1015
-	CodeNonMarketExist           sdk.CodeType = 1016
-	CodeNotBancorOwner           sdk.CodeType = 1017
-	CodeCancelTimeNotArrived     sdk.CodeType = 1018
-	CodeGetMarketExePriceFailed  sdk.CodeType = 1019
-	CodeInitPriceBigThanMaxPrice sdk.CodeType = 1020
-	CodeCancelEnableTimeNegative sdk.CodeType = 1021
-	CodeTradeQuantityToSmall     sdk.CodeType = 1022
-	CodeTokenForbiddenByOwner    sdk.CodeType = 1023
+	CodeInvalidSymbol                sdk.CodeType = 1001
+	CodeNonPositiveSupply            sdk.CodeType = 1002
+	CodeNonPositivePrice             sdk.CodeType = 1003
+	CodeNonPositiveAmount            sdk.CodeType = 1004
+	CodeTradeAmountIsTooLarge        sdk.CodeType = 1005
+	CodeBancorAlreadyExists          sdk.CodeType = 1006
+	CodeNoSuchToken                  sdk.CodeType = 1007
+	CodeNonOwnerIsProhibited         sdk.CodeType = 1008
+	CodeNoBancorExists               sdk.CodeType = 1009
+	CodeOwnerIsProhibited            sdk.CodeType = 1010
+	CodeStockInPoolOutOfBound        sdk.CodeType = 1011
+	CodeMoneyCrossLimit              sdk.CodeType = 1012
+	CodeUnMarshalFailed              sdk.CodeType = 1013
+	CodeMarshalFailed                sdk.CodeType = 1014
+	CodeNegativeInitPrice            sdk.CodeType = 1015
+	CodeNonMarketExist               sdk.CodeType = 1016
+	CodeNotBancorOwner               sdk.CodeType = 1017
+	CodeCancelTimeNotArrived         sdk.CodeType = 1018
+	CodeGetMarketExePriceFailed      sdk.CodeType = 1019
+	CodeInitPriceBigThanMaxPrice     sdk.CodeType = 1020
+	CodeCancelEnableTimeNegative     sdk.CodeType = 1021
+	CodeTradeQuantityToSmall         sdk.CodeType = 1022
+	CodeTokenForbiddenByOwner        sdk.CodeType = 1023
+	CodeStockSupplyPrecisionNotMatch sdk.CodeType = 1024
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -115,4 +116,8 @@ func ErrEarliestCancelTimeIsNegative() sdk.Error {
 
 func ErrTokenForbiddenByOwner() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeTokenForbiddenByOwner, "token is forbidden by its owner")
+}
+
+func ErrStockSupplyPrecisionNotMatch() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeStockSupplyPrecisionNotMatch, "stock supply not match the precision")
 }

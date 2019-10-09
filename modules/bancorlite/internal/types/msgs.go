@@ -1,6 +1,8 @@
 package types
 
 import (
+	"math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/market"
@@ -22,6 +24,7 @@ type MsgBancorInit struct {
 	InitPrice          sdk.Dec        `json:"init_price"`
 	MaxSupply          sdk.Int        `json:"max_supply"`
 	MaxPrice           sdk.Dec        `json:"max_price"`
+	StockPrecision     byte           `json:"stock_precision"`
 	EarliestCancelTime int64          `json:"earliest_cancel_time"`
 }
 
@@ -81,10 +84,26 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 	if msg.InitPrice.GT(msg.MaxPrice) {
 		return ErrPriceConfiguration()
 	}
+	if !CheckStockPrecision(msg.MaxSupply, msg.StockPrecision) {
+		return ErrStockSupplyPrecisionNotMatch()
+	}
 	if msg.EarliestCancelTime < 0 {
 		return ErrEarliestCancelTimeIsNegative()
 	}
 	return nil
+}
+
+func CheckStockPrecision(amount sdk.Int, precision byte) bool {
+	if precision > 8 {
+		precision = 0
+	}
+	if precision != 0 {
+		mod := sdk.NewInt(int64(math.Pow10(int(precision))))
+		if !amount.Mod(mod).IsZero() {
+			return false
+		}
+	}
+	return true
 }
 
 func (msg MsgBancorInit) GetSignBytes() []byte {

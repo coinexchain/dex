@@ -52,12 +52,17 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	if err := k.Bxk.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
 		return err.Result()
 	}
+	var precision byte
+	if msg.StockPrecision <= 8 {
+		precision = msg.StockPrecision
+	}
 	bi := &keepers.BancorInfo{
 		Owner:              msg.Owner,
 		Stock:              msg.Stock,
 		Money:              msg.Money,
 		InitPrice:          msg.InitPrice,
 		MaxSupply:          msg.MaxSupply,
+		StockPrecision:     precision,
 		MaxPrice:           msg.MaxPrice,
 		Price:              msg.InitPrice,
 		StockInPool:        msg.MaxSupply,
@@ -114,7 +119,9 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Money, bi.Owner) {
 		return types.ErrTokenForbiddenByOwner().Result()
 	}
-
+	if !types.CheckStockPrecision(sdk.NewInt(msg.Amount), bi.StockPrecision) {
+		return types.ErrStockSupplyPrecisionNotMatch().Result()
+	}
 	stockInPool := bi.StockInPool.AddRaw(msg.Amount)
 	if msg.IsBuy {
 		stockInPool = bi.StockInPool.SubRaw(msg.Amount)
