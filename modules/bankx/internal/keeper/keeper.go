@@ -169,10 +169,12 @@ func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk
 	return transfer, nil
 }
 func (k Keeper) PreCheckFreshAccounts(ctx sdk.Context, outputs []bank.Output) (addrs []sdk.AccAddress) {
+	addrsMap := make(map[string]bool)
 	for _, output := range outputs {
 		//toAccount doesn't exist yet
-		if k.ak.GetAccount(ctx, output.Address) == nil {
+		if k.ak.GetAccount(ctx, output.Address) == nil && !addrsMap[output.Address.String()] {
 			addrs = append(addrs, output.Address)
+			addrsMap[output.Address.String()] = true
 		}
 	}
 	return addrs
@@ -180,8 +182,7 @@ func (k Keeper) PreCheckFreshAccounts(ctx sdk.Context, outputs []bank.Output) (a
 func (k Keeper) DeductActivationFeeForFreshAccounts(ctx sdk.Context, addrs []sdk.AccAddress) sdk.Error {
 	fee := dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
 	for _, addr := range addrs {
-		err := k.DeductFee(ctx, addr, fee)
-		if err != nil {
+		if err := k.DeductFee(ctx, addr, fee); err != nil {
 			return err
 		}
 	}

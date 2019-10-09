@@ -188,13 +188,13 @@ func TestHandlerMsgMultiSend(t *testing.T) {
 	handle(ctx, msg)
 	require.Equal(t, sdk.NewInt(700000000), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(700000000), bkx.GetCoins(ctx, myaddr).AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(400000000), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
-	require.Equal(t, sdk.NewInt(200000000), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(500000000), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
 
 	in = []bank.Input{bank.NewInput(fromAddr, coins), bank.NewInput(forbiddenAddr, coins)}
 	msg = bankx.NewMsgMultiSend(in, out)
 	handle(ctx, msg)
-	require.Equal(t, sdk.NewInt(400000000).String(), bkx.GetCoins(ctx, toAddr).AmountOf("cet").String())
+	require.Equal(t, sdk.NewInt(500000000).String(), bkx.GetCoins(ctx, toAddr).AmountOf("cet").String())
 
 	newAddr := testutil.ToAccAddress("newAddr")
 	invalid := sdk.NewCoins(sdk.NewInt64Coin("cet", 1000))
