@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/market"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // /////////////////////////////////////////////////////////
@@ -39,6 +40,16 @@ type MsgBancorTrade struct {
 	IsBuy  bool  `json:"is_buy"`
 	//money up limit
 	MoneyLimit int64 `json:"money_limit"`
+}
+
+func (msg MsgBancorInit) GetSymbol() string {
+	return dex.GetSymbol(msg.Stock, msg.Money)
+}
+func (msg MsgBancorCancel) GetSymbol() string {
+	return dex.GetSymbol(msg.Stock, msg.Money)
+}
+func (msg MsgBancorTrade) GetSymbol() string {
+	return dex.GetSymbol(msg.Stock, msg.Money)
 }
 
 // --------------------------------------------------------

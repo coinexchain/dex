@@ -9,6 +9,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var (
@@ -16,7 +17,7 @@ var (
 	BancorInfoKeyEnd = []byte{0x11}
 )
 
-const SymbolSeparator = "/"
+const SymbolSeparator = dex.SymbolSeparator
 
 type BancorInfo struct {
 	Owner              sdk.AccAddress `json:"sender"`
@@ -29,6 +30,10 @@ type BancorInfo struct {
 	StockInPool        sdk.Int        `json:"stock_in_pool"`
 	MoneyInPool        sdk.Int        `json:"money_in_pool"`
 	EarliestCancelTime int64          `json:"earliest_cancel_time"`
+}
+
+func (bi *BancorInfo) GetSymbol() string {
+	return dex.GetSymbol(bi.Stock, bi.Money)
 }
 
 func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
@@ -105,13 +110,13 @@ func (keeper *BancorInfoKeeper) GetParams(ctx sdk.Context) (param types.Params) 
 func (keeper *BancorInfoKeeper) Save(ctx sdk.Context, bi *BancorInfo) {
 	store := ctx.KVStore(keeper.biKey)
 	value := keeper.codec.MustMarshalBinaryBare(bi)
-	key := append(BancorInfoKey, []byte(bi.Stock+SymbolSeparator+bi.Money)...)
+	key := append(BancorInfoKey, []byte(bi.GetSymbol())...)
 	store.Set(key, value)
 }
 
 func (keeper *BancorInfoKeeper) Remove(ctx sdk.Context, bi *BancorInfo) {
 	store := ctx.KVStore(keeper.biKey)
-	key := append(BancorInfoKey, []byte(bi.Stock+SymbolSeparator+bi.Money)...)
+	key := append(BancorInfoKey, []byte(bi.GetSymbol())...)
 	value := store.Get(key)
 	if value != nil {
 		store.Delete(key)

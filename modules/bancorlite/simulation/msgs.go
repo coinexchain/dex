@@ -13,7 +13,6 @@ import (
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bancorlite"
-	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	dexsim "github.com/coinexchain/dex/simulation"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -79,7 +78,7 @@ func createMsgBancorInit(r *rand.Rand,
 	}
 }
 func verifyBancorInit(ctx sdk.Context, keeper bancorlite.Keeper, msg bancorlite.MsgBancorInit) bool {
-	bancorInfo := keeper.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	bancorInfo := keeper.Bik.Load(ctx, msg.GetSymbol())
 	return bancorInfo.Stock == msg.Stock &&
 		bancorInfo.Money == msg.Money &&
 		bancorInfo.Owner.Equals(msg.Owner) &&
@@ -120,7 +119,7 @@ func simulateMsgBancorSell(blk bancorlite.Keeper,
 		Amount:     amount,
 		MoneyLimit: 0, // TODO
 	}
-	oldBancorInfo := blk.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	oldBancorInfo := blk.Bik.Load(ctx, msg.GetSymbol())
 	ok := dexsim.SimulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
 	opMsg = simulation.NewOperationMsg(msg, ok, "")
 	if !ok {
@@ -134,7 +133,7 @@ func simulateMsgBancorSell(blk bancorlite.Keeper,
 
 }
 func verifyBancorSellBuy(ctx sdk.Context, blk bancorlite.Keeper, oldBancorInfo *bancorlite.BancorInfo, msg bancorlite.MsgBancorTrade, isbuy bool) bool {
-	updatedBancorInfo := blk.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	updatedBancorInfo := blk.Bik.Load(ctx, msg.GetSymbol())
 	stockInPool := oldBancorInfo.StockInPool.Add(sdk.NewInt(msg.Amount))
 	if isbuy {
 		stockInPool = oldBancorInfo.StockInPool.Sub(sdk.NewInt(msg.Amount))
@@ -163,7 +162,7 @@ func simulateMsgBancorBuy(blk bancorlite.Keeper,
 		Amount:     amount,
 		MoneyLimit: math.MaxInt64, // TODO
 	}
-	oldBancorInfo := blk.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	oldBancorInfo := blk.Bik.Load(ctx, msg.GetSymbol())
 	ok := dexsim.SimulateHandleMsg(msg, bancorlite.NewHandler(blk), ctx)
 	opMsg = simulation.NewOperationMsg(msg, ok, "")
 	if !ok {
@@ -235,6 +234,6 @@ func SimulateMsgBancorCancel(blk bancorlite.Keeper) simulation.Operation {
 	}
 }
 func verifyBancorCancel(ctx sdk.Context, blk bancorlite.Keeper, msg bancorlite.MsgBancorCancel) bool {
-	bancorInfo := blk.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	bancorInfo := blk.Bik.Load(ctx, msg.GetSymbol())
 	return bancorInfo == nil
 }

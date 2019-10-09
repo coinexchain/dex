@@ -175,12 +175,12 @@ func TestBancorInfoKeeper(t *testing.T) {
 	}
 
 	for i := range bi {
-		loadBI := keeper.Bik.Load(ctx, bi[i].Stock+keepers.SymbolSeparator+bi[i].Money)
+		loadBI := keeper.Bik.Load(ctx, bi[i].GetSymbol())
 		require.True(t, reflect.DeepEqual(*loadBI, bi[i]))
 	}
 
 	keeper.Bik.Remove(ctx, &bi[0])
-	require.Nil(t, keeper.Bik.Load(ctx, bi[0].Stock+keepers.SymbolSeparator+bi[0].Money))
+	require.Nil(t, keeper.Bik.Load(ctx, bi[0].GetSymbol()))
 	require.False(t, keeper.IsBancorExist(ctx, bch))
 	require.True(t, keeper.IsBancorExist(ctx, abc))
 }

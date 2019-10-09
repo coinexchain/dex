@@ -32,7 +32,7 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk.Result {
-	if bi := k.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money); bi != nil {
+	if bi := k.Bik.Load(ctx, msg.GetSymbol()); bi != nil {
 		return types.ErrBancorAlreadyExists().Result()
 	}
 	if !k.Axk.IsTokenExists(ctx, msg.Stock) || !k.Axk.IsTokenExists(ctx, msg.Money) {
@@ -42,7 +42,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		return types.ErrNonOwnerIsProhibited().Result()
 	}
 	if msg.Money != "cet" &&
-		!k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
+		!k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, "cet")) {
 		return types.ErrNonMarketExist().Result()
 	}
 	suppliedCoins := sdk.Coins{sdk.NewCoin(msg.Stock, msg.MaxSupply)}
@@ -73,7 +73,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 }
 
 func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel) sdk.Result {
-	bi := k.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	bi := k.Bik.Load(ctx, msg.GetSymbol())
 	if bi == nil {
 		return types.ErrNoBancorExists().Result()
 	}
@@ -83,7 +83,7 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if ctx.BlockHeader().Time.Unix() < bi.EarliestCancelTime {
 		return types.ErrEarliestCancelTimeNotArrive().Result()
 	}
-	if !k.Mk.IsMarketExist(ctx, msg.Stock+keepers.SymbolSeparator+"cet") {
+	if !k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, "cet")) {
 		return types.ErrNonMarketExist().Result()
 	}
 	fee := k.Bik.GetParams(ctx).CancelBancorFee
@@ -102,7 +102,7 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 }
 
 func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) sdk.Result {
-	bi := k.Bik.Load(ctx, msg.Stock+keepers.SymbolSeparator+msg.Money)
+	bi := k.Bik.Load(ctx, msg.GetSymbol())
 	if bi == nil {
 		return types.ErrNoBancorExists().Result()
 	}
@@ -194,7 +194,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			EventTypeBancorlite,
-			sdk.NewAttribute(AttributeKeyTradeFor, bi.Stock+keepers.SymbolSeparator+bi.Money),
+			sdk.NewAttribute(AttributeKeyTradeFor, bi.GetSymbol()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -233,7 +233,7 @@ func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
 			Mul(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).
 			Quo(sdk.NewInt(10000))
 	} else {
-		price, err := k.Mk.GetMarketLastExePrice(ctx, msg.Stock+keepers.SymbolSeparator+"cet")
+		price, err := k.Mk.GetMarketLastExePrice(ctx, dex.GetSymbol(msg.Stock, "cet"))
 		if err != nil {
 			return commission, types.ErrGetMarketPrice(err.Error())
 		}

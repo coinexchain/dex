@@ -40,7 +40,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	m := make(map[string]keepers.BancorInfo)
 	k.Bik.Iterate(ctx, func(bi *keepers.BancorInfo) {
-		m[bi.Stock+keepers.SymbolSeparator+bi.Money] = *bi
+		m[bi.GetSymbol()] = *bi
 	})
 	return NewGenesisState(k.Bik.GetParams(ctx), m)
 }
