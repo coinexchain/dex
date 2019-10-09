@@ -1,6 +1,7 @@
 package keepers
 
 import (
+	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,6 +15,7 @@ type BancorInfo struct {
 	Money              string         `json:"money"`
 	InitPrice          sdk.Dec        `json:"init_price"`
 	MaxSupply          sdk.Int        `json:"max_supply"`
+	StockPrecision     byte           `json:"stock_precision"`
 	MaxPrice           sdk.Dec        `json:"max_price"`
 	Price              sdk.Dec        `json:"price"`
 	StockInPool        sdk.Int        `json:"stock_in_pool"`
@@ -52,6 +54,7 @@ type BancorInfoDisplay struct {
 	Money              string `json:"money"`
 	InitPrice          string `json:"init_price"`
 	MaxSupply          string `json:"max_supply"`
+	StockPrecision     string `json:"stock_precision"`
 	MaxPrice           string `json:"max_price"`
 	CurrentPrice       string `json:"current_price"`
 	StockInPool        string `json:"stock_in_pool"`
@@ -65,6 +68,7 @@ func NewBancorInfoDisplay(bi *BancorInfo) BancorInfoDisplay {
 		Money:              bi.Money,
 		InitPrice:          bi.InitPrice.String(),
 		MaxSupply:          bi.MaxSupply.String(),
+		StockPrecision:     fmt.Sprintf("%d", bi.StockPrecision),
 		MaxPrice:           bi.MaxPrice.String(),
 		CurrentPrice:       bi.Price.String(),
 		StockInPool:        bi.StockInPool.String(),

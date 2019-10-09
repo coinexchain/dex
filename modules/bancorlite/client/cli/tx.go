@@ -16,6 +16,7 @@ import (
 
 const (
 	FlagMaxSupply          = "max-supply"
+	FlagStockPrecision     = "stock-precision"
 	FlagMaxPrice           = "max-price"
 	FlagSide               = "side"
 	FlagAmount             = "amount"
@@ -26,6 +27,7 @@ const (
 
 var bancorInitFlags = []string{
 	FlagMaxSupply,
+	FlagStockPrecision,
 	FlagMaxPrice,
 	FlagEarliestCancelTime,
 	FlagInitPrice,
@@ -44,13 +46,13 @@ func BancorInitCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Initialize a bancor pool for a stock/money pair, specifying the maximum supply of this pool and the maximum reachable price when all the supply are sold out, specifying the init price, and specifying the time before which no cancellation is allowed.
 
 Example: 
-	 cetcli tx bancorlite init stock money --max-supply=10000000000000 --max-price=5 --init-price=1 --earliest-cancel-time=1563954165
+	 cetcli tx bancorlite init stock money --max-supply=10000000000000 --stock-precision=3 --max-price=5 --init-price=1 --earliest-cancel-time=1563954165
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			maxPrice, err0 := sdk.NewDecFromStr(viper.GetString(FlagMaxPrice))
 			if err0 != nil || maxPrice.IsZero() {
-				return errors.New("max Price is Invalid or Zero")
+				return errors.New("max price is invalid or zero")
 			}
 			initPrice, err0 := sdk.NewDecFromStr(viper.GetString(FlagInitPrice))
 			if err0 != nil || initPrice.IsNegative() {
@@ -58,7 +60,11 @@ Example:
 			}
 			maxSupply, ok := sdk.NewIntFromString(viper.GetString(FlagMaxSupply))
 			if !ok {
-				return errors.New("max Supply is Invalid")
+				return errors.New("max supply is invalid")
+			}
+			precision, convertErr := strconv.Atoi(viper.GetString(FlagStockPrecision))
+			if convertErr != nil {
+				return errors.New("stock precision is invalid")
 			}
 			time, err := strconv.ParseInt(viper.GetString(FlagEarliestCancelTime), 10, 64)
 			if err != nil {
@@ -69,6 +75,7 @@ Example:
 				Money:              args[1],
 				InitPrice:          initPrice,
 				MaxSupply:          maxSupply,
+				StockPrecision:     byte(precision),
 				MaxPrice:           maxPrice,
 				EarliestCancelTime: time,
 			}
@@ -77,6 +84,7 @@ Example:
 	}
 
 	cmd.Flags().String(FlagMaxSupply, "0", "The maximum supply of this pool.")
+	cmd.Flags().String(FlagStockPrecision, "0", "The precision of stock")
 	cmd.Flags().String(FlagMaxPrice, "0", "The maximum reachable price when all the supply are sold out")
 	cmd.Flags().String(FlagEarliestCancelTime, "0", "The time that bancor can be canceled")
 	cmd.Flags().String(FlagInitPrice, "0", "The init price of this bancor")

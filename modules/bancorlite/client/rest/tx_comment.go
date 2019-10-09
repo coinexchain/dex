@@ -20,6 +20,7 @@ type BancorInitReq struct {
 	Money              string       `json:"money"`
 	InitPrice          string       `json:"init_price"`
 	MaxSupply          string       `json:"max_supply"`
+	StockPrecision     string       `json:"stock_precision"`
 	MaxPrice           string       `json:"max_price"`
 	EarliestCancelTime string       `json:"earliest_cancel_time"`
 }
@@ -46,9 +47,13 @@ func (req *BancorInitReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Ms
 	if !ok {
 		return nil, errors.New("Max Supply is Invalid")
 	}
-	time, converr := strconv.ParseInt(req.EarliestCancelTime, 10, 64)
-	if converr != nil {
+	time, convertErr := strconv.ParseInt(req.EarliestCancelTime, 10, 64)
+	if convertErr != nil {
 		return nil, errors.New("Invalid enable cancel time")
+	}
+	precision, convertErr := strconv.Atoi(req.StockPrecision)
+	if convertErr != nil {
+		return nil, errors.New("Invalid stock precision")
 	}
 
 	return &types.MsgBancorInit{
@@ -57,6 +62,7 @@ func (req *BancorInitReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Ms
 		Money:              req.Money,
 		InitPrice:          initPrice,
 		MaxSupply:          maxSupply,
+		StockPrecision:     byte(precision),
 		MaxPrice:           maxPrice,
 		EarliestCancelTime: time,
 	}, nil

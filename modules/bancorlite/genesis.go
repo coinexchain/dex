@@ -87,6 +87,9 @@ func (data GenesisState) Validate() error {
 		if bi.EarliestCancelTime < 0 {
 			return errors.New("EarliestCancelTime cannot be negative")
 		}
+		if bi.StockPrecision > 8 {
+			return errors.New("invalid stock precision")
+		}
 		if !bi.IsConsistent() {
 			return errors.New("BancorInfo is not consistent")
 		}
