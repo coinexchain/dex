@@ -3870,6 +3870,11 @@ definitions:
       price_precision:
         type: string
         example: "10"
+        description: "The trading-pair price precision, used to control the price accuracy of the order when token trades, valid range [0, 18]"
+      order_precision:
+        type: string
+        example: "0"
+        description: "To control the granularity of token trade, the token amount of trade must be a multiple of granularity, valid range [0, 9]"
   MarketInfo:
     allOf:
       - $ref: "#/definitions/BaseMarket"
@@ -3898,6 +3903,7 @@ definitions:
       order_type:
         type: integer
         example: "2"
+        description: "The identify of the price limit : 2; (Currently, only price limit orders are supported)"
       trading_pair:
         type: string
         example: "abc/cet"
@@ -3913,9 +3919,13 @@ definitions:
       side:
         type: integer
         example: "1"
+        description: "The buying or selling direction of an order.(buy : 1; sell : 2)"
       identify:
         type: integer
         example: "1"
+        description: "A transaction can contain multiple order creation messages, the identify field was
+         added to the order creation message to give each order a unique ID. So the order ID consists of
+          user address, user sequence, identify."
 
   OrderInfo:
     type: object

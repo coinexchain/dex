@@ -19,6 +19,7 @@ const (
 	FlagStock          = "stock"
 	FlagMoney          = "money"
 	FlagPricePrecision = "price-precision"
+	FlagOrderPrecision = "order-precision"
 )
 
 var createMarketFlags = []string{
@@ -36,7 +37,7 @@ func CreateMarketCmd(cdc *codec.Codec) *cobra.Command {
 Example : 
 	cetcli tx market create-trading-pair  \
 	--from bob --chain-id=coinexdex  \
-	--stock=eth --money=cet \
+	--stock=eth --money=cet --order-precision=8 \
 	--price-precision=8 --gas 20000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			msg, err := getCreateMarketMsg(cdc)
@@ -49,8 +50,10 @@ Example :
 
 	cmd.Flags().String(FlagStock, "", "The exist token symbol as stock")
 	cmd.Flags().String(FlagMoney, "", "The exist token symbol as money")
-	cmd.Flags().Int(FlagPricePrecision, 1, "The trading-pair price precision")
-
+	cmd.Flags().Int(FlagPricePrecision, 1, "The trading-pair price precision, used to"+
+		" control the price accuracy of the order when token trades")
+	cmd.Flags().Int(FlagOrderPrecision, 0, "To control the granularity of token trade, "+
+		"the token amount of trade must be a multiple of granularity, valid range [0, 9]")
 	for _, flag := range createMarketFlags {
 		cmd.MarkFlagRequired(flag)
 	}
@@ -91,6 +94,7 @@ func parseCreateMarketFlags() (*types.MsgCreateTradingPair, error) {
 		Stock:          viper.GetString(FlagStock),
 		Money:          viper.GetString(FlagMoney),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
+		OrderPrecision: byte(viper.GetInt(FlagOrderPrecision)),
 	}
 	return msg, nil
 }

@@ -117,9 +117,9 @@ func markCreateOrderFlags(cmd *cobra.Command) {
 	cmd.Flags().Int(FlagQuantity, 100, "The number of tokens will be trade in the order ")
 	cmd.Flags().Int(FlagSide, 1, "The buying or selling direction of an order.(buy : 1; sell : 2)")
 	cmd.Flags().Int(FlagPricePrecision, 8, "The price precision in the order")
-	cmd.Flags().Int(FlagIdentify, 0, "Because a transaction can contain multiple order "+
+	cmd.Flags().Int(FlagIdentify, 0, "A transaction can contain multiple order "+
 		"creation messages, the identify field was added to the order creation message to give each "+
-		"order a unique ID. So the order ID consists of user address, user sequence, identify,")
+		"order a unique ID. So the order ID consists of user address, user sequence, identify.")
 
 	for _, flag := range createOrderFlags {
 		cmd.MarkFlagRequired(flag)

@@ -46,12 +46,13 @@ type MsgCreateTradingPair struct {
 	OrderPrecision byte           `json:"order_precision"`
 }
 
-func NewMsgCreateTradingPair(stock, money string, crater sdk.AccAddress, pricePrecision byte) MsgCreateTradingPair {
+func NewMsgCreateTradingPair(stock, money string, crater sdk.AccAddress, pricePrecision byte, orderPrecision byte) MsgCreateTradingPair {
 	return MsgCreateTradingPair{
 		Stock:          stock,
 		Money:          money,
 		Creator:        crater,
 		PricePrecision: pricePrecision,
+		OrderPrecision: orderPrecision,
 	}
 }
 

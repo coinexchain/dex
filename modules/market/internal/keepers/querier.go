@@ -70,6 +70,7 @@ type QueryMarketInfo struct {
 	Money             string         `json:"money"`
 	PricePrecision    string         `json:"price_precision"`
 	LastExecutedPrice sdk.Dec        `json:"last_executed_price"`
+	OrderPrecision    string         `json:"order_precision"`
 }
 
 func queryMarket(ctx sdk.Context, req abci.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
@@ -89,6 +90,7 @@ func queryMarket(ctx sdk.Context, req abci.RequestQuery, mk Keeper) ([]byte, sdk
 		Money:             info.Money,
 		PricePrecision:    strconv.Itoa(int(info.PricePrecision)),
 		LastExecutedPrice: info.LastExecutedPrice,
+		OrderPrecision:    strconv.Itoa(int(info.OrderPrecision)),
 	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, queryInfo)
 	if err != nil {

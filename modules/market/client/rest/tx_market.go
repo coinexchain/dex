@@ -18,6 +18,7 @@ type createMarketReq struct {
 	Stock          string       `json:"stock"`
 	Money          string       `json:"money"`
 	PricePrecision int          `json:"price_precision"`
+	OrderPrecision int          `json:"order_precision"`
 }
 
 func (req *createMarketReq) New() restutil.RestReq {
@@ -27,7 +28,7 @@ func (req *createMarketReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 func (req *createMarketReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
-	msg := types.NewMsgCreateTradingPair(req.Stock, req.Money, sender, byte(req.PricePrecision))
+	msg := types.NewMsgCreateTradingPair(req.Stock, req.Money, sender, byte(req.PricePrecision), byte(req.OrderPrecision))
 	return msg, nil
 }
 
