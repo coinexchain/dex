@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/coinexchain/dex/modules/incentive/internal/types"
 	"github.com/coinexchain/dex/testapp"
 	dex "github.com/coinexchain/dex/types"
 )
@@ -68,10 +69,14 @@ func TestBeginBlockerInPlan(t *testing.T) {
 
 func TestBeginBlockerNotInPlan(t *testing.T) {
 	input := SetupTestInput()
-	plans := incentive.DefaultParams().Plans
-	height := plans[len(plans)-1].EndHeight + 10
-	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: height})
-	input.keeper.SetParams(input.ctx, incentive.DefaultParams())
+	plans := types.Params{
+		DefaultRewardPerBlock: 2e8,
+		Plans: []types.Plan{
+			{0, 10, 10e8, 100e8},
+		},
+	}
+	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: 20})
+	input.keeper.SetParams(input.ctx, plans)
 	acc := input.ak.NewAccountWithAddress(input.ctx, incentive.PoolAddr)
 	_ = acc.SetCoins(dex.NewCetCoins(10000 * 1e8))
 	input.ak.SetAccount(input.ctx, acc)
@@ -84,7 +89,7 @@ func TestBeginBlockerNotInPlan(t *testing.T) {
 	poolBalanceAfter := input.ak.GetAccount(input.ctx, incentive.PoolAddr).GetCoins().AmountOf(dex.CET).Int64()
 	feeBalanceAfter := input.sk.GetModuleAccount(input.ctx, auth.FeeCollectorName).GetCoins().AmountOf(dex.CET).Int64()
 
-	reward := incentive.DefaultParams().DefaultRewardPerBlock
+	reward := plans.DefaultRewardPerBlock
 	require.Equal(t, -reward, poolBalanceAfter-poolBalanceBefore)
 	require.Equal(t, reward, feeBalanceAfter-feeBalanceBefore)
 }
