@@ -23,18 +23,18 @@ cetd add-genesis-account $(cetcli keys show bob -a) 100000000000000000cet
 cetd add-genesis-token --name="CoinEx Chain Native Token" \
 	--symbol="cet" \
 	--owner=$(cetcli keys show bob -a)  \
-	--total-supply=100000000000000000 \
+	--total-supply=586884903761317189 \
 	--mintable=false \
 	--burnable=true \
 	--addr-forbiddable=false \
 	--token-forbiddable=false \
-	--total-burn=411211452994260000 \
+	--total-burn=413115096238682811 \
 	--total-mint=0 \
 	--is-forbidden=false \
 	--url="www.coinex.org" \
 	--description="A public chain built for the decentralized exchange" \
         --identity="552A83BA62F9B1F8"
-cetd gentx --amount=1000000000000000cet --min-self-delegation=1000000000000000 --name bob <<<$'12345678\n12345678\n'
+cetd gentx --amount=500000000000000cet --min-self-delegation=500000000000000 --name bob <<<$'12345678\n12345678\n'
 cetd collect-gentxs
 
 echo DONE!

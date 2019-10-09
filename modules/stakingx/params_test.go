@@ -21,7 +21,7 @@ import (
 
 func TestDefaultParams(t *testing.T) {
 	params := stakingx.DefaultParams()
-	require.Equal(t, "1000000000000000", params.MinSelfDelegation.String())
+	require.Equal(t, "500000000000000", params.MinSelfDelegation.String())
 }
 
 func defaultContext() (sdk.Context, params.Keeper) {
