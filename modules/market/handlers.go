@@ -2,7 +2,6 @@ package market
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
@@ -94,17 +93,8 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 
 func fillMsgQueue(ctx sdk.Context, keeper keepers.Keeper, key string, msg interface{}) {
 	if keeper.IsSubScribed(types.Topic) {
-		fillMsgs(ctx, key, msg)
+		msgqueue.FillMsgs(ctx, key, msg)
 	}
-}
-
-func fillMsgs(ctx sdk.Context, key string, msg interface{}) {
-	bytes, err := json.Marshal(msg)
-	if err != nil {
-		return
-	}
-	ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
-		sdk.NewAttribute(key, string(bytes))))
 }
 
 func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, keeper keepers.Keeper) sdk.Error {

@@ -2,15 +2,14 @@ package bancorlite
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/coinexchain/dex/msgqueue"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/msgqueue"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -215,12 +214,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 
 func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 	if keeper.MsgProducer.IsSubscribed(types.Topic) {
-		b, err := json.Marshal(msg)
-		if err != nil {
-			return
-		}
-		ctx.EventManager().
-			EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue, sdk.NewAttribute(key, string(b))))
+		msgqueue.FillMsgs(ctx, key, msg)
 	}
 }
 

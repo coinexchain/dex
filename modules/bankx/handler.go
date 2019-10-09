@@ -1,7 +1,6 @@
 package bankx
 
 import (
-	"encoding/json"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -167,11 +166,6 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 
 func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 	if keeper.MsgProducer.IsSubscribed(types.Topic) {
-		bytes, err := json.Marshal(msg)
-		if err != nil {
-			return
-		}
-		ctx.EventManager().EmitEvent(sdk.NewEvent(msgqueue.EventTypeMsgQueue,
-			sdk.NewAttribute(key, string(bytes))))
+		msgqueue.FillMsgs(ctx, key, msg)
 	}
 }
