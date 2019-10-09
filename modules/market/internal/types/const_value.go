@@ -1,12 +1,16 @@
 package types
 
+import (
+	dex "github.com/coinexchain/dex/types"
+)
+
 type OrderType = byte
 
 const (
 	MinTokenPricePrecision           = 0
 	MaxTokenPricePrecision           = 18
 	LimitOrder             OrderType = 2
-	SymbolSeparator                  = "/"
+	SymbolSeparator                  = dex.SymbolSeparator
 	OrderIDSeparator                 = "-"
 	ExtraFrozenMoney                 = 0 // 100
 	OrderIDPartsNum                  = 2

@@ -7,7 +7,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	asset "github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/asset"
+	dex "github.com/coinexchain/dex/types"
 )
 
 // RouterKey is the name of the market module
@@ -55,7 +56,7 @@ func NewMsgCreateTradingPair(stock, money string, crater sdk.AccAddress, pricePr
 }
 
 func (msg MsgCreateTradingPair) GetSymbol() string {
-	return GetSymbol(msg.Stock, msg.Money)
+	return dex.GetSymbol(msg.Stock, msg.Money)
 }
 
 // --------------------------------------------------------

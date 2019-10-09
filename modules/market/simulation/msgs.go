@@ -61,7 +61,7 @@ func createMsgCreateTradingPair(r *rand.Rand, ctx sdk.Context, k keepers.Keeper,
 	}
 
 	if money != dex.CET && stock != dex.CET {
-		if _, err := k.GetMarketInfo(ctx, types.GetSymbol(stock, dex.CET)); err != nil {
+		if _, err := k.GetMarketInfo(ctx, dex.GetSymbol(stock, dex.CET)); err != nil {
 			money = dex.CET
 		}
 	}

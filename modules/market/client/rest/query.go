@@ -13,6 +13,7 @@ import (
 	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -23,7 +24,7 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Trading pair")
 			return
 		}
-		param := keepers.NewQueryMarketParam(types.GetSymbol(vars["stock"], vars["money"]))
+		param := keepers.NewQueryMarketParam(dex.GetSymbol(vars["stock"], vars["money"]))
 		restutil.RestQuery(cdc, cliCtx, w, r, query, param, nil)
 	}
 }

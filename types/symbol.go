@@ -1,6 +1,12 @@
 package types
 
-import "strings"
+import (
+	"strings"
+)
+
+const (
+	SymbolSeparator = "/"
+)
 
 func GetSymbol(stock, money string) string {
 	return stock + SymbolSeparator + money

@@ -1,9 +1,9 @@
 package market
 
 import (
-	"github.com/coinexchain/dex/modules/market/internal/types"
-
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
+	"github.com/coinexchain/dex/modules/market/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 const (
@@ -30,8 +30,8 @@ var (
 	ValidateOrderID     = types.ValidateOrderID
 	IsValidTradingPair  = types.IsValidTradingPair
 	ModuleCdc           = types.ModuleCdc
-	GetSymbol           = types.GetSymbol
-	SplitSymbol         = types.SplitSymbol
+	GetSymbol           = dex.GetSymbol
+	SplitSymbol         = dex.SplitSymbol
 )
 
 type (

@@ -4,6 +4,8 @@ import (
 	"math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 type MarketInfo struct {
@@ -22,5 +24,5 @@ func GetGranularityOfOrder(orderPrecision byte) int64 {
 }
 
 func (msg MarketInfo) GetSymbol() string {
-	return GetSymbol(msg.Stock, msg.Money)
+	return dex.GetSymbol(msg.Stock, msg.Money)
 }
