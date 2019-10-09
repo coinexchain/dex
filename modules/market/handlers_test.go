@@ -733,6 +733,15 @@ func TestCancelMarketSuccess(t *testing.T) {
 	ret := input.handler(input.ctx, msgCancelMarket)
 	require.Equal(t, true, ret.IsOK(), "cancel market should success")
 
+	msgCancelMarket = types.MsgCancelTradingPair{
+		Sender:        haveCetAddress,
+		TradingPair:   GetSymbol(stock, "cet"),
+		EffectiveTime: types.DefaultMarketMinExpiredTime + 10,
+	}
+
+	ret = input.handler(input.ctx, msgCancelMarket)
+	require.Equal(t, false, ret.IsOK(), "repeatedly cancel market will fail")
+
 	dlk := keepers.NewDelistKeeper(input.keys.marketKey)
 	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, types.DefaultMarketMinExpiredTime+10+1)[0]
 	if delSymbol != GetSymbol(stock, "cet") {
