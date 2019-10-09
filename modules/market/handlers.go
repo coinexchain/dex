@@ -120,7 +120,7 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 		return types.ErrTokenNoExist()
 	}
 
-	if !keeper.IsTokenIssuer(ctx, msg.Stock, []byte(msg.Creator)) {
+	if !keeper.IsTokenIssuer(ctx, msg.Stock, msg.Creator) {
 		return types.ErrInvalidTokenIssuer()
 	}
 
