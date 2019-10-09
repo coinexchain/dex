@@ -23,6 +23,19 @@ func getDelistKey(time int64, symbol string) []byte {
 	})
 }
 
+func getDelistKeyRangeByTime(time int64) (start, end []byte) {
+	start = concatCopyPreAllocate([][]byte{
+		DelistKey,
+		int64ToBigEndianBytes(0),
+		{0x0},
+	})
+	end = concatCopyPreAllocate([][]byte{
+		DelistKey,
+		int64ToBigEndianBytes(time),
+		{0x1},
+	})
+	return
+}
 func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, time int64, symbol string) {
 	store := ctx.KVStore(keeper.marketKey)
 	store.Set(getDelistKey(time, symbol), []byte{})
@@ -31,16 +44,7 @@ func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, time int64, symbol
 //include the specific time
 func (keeper *DelistKeeper) GetDelistSymbolsBeforeTime(ctx sdk.Context, time int64) []string {
 	store := ctx.KVStore(keeper.marketKey)
-	start := concatCopyPreAllocate([][]byte{
-		DelistKey,
-		int64ToBigEndianBytes(0),
-		{0x0},
-	})
-	end := concatCopyPreAllocate([][]byte{
-		DelistKey,
-		int64ToBigEndianBytes(time),
-		{0x1},
-	})
+	start, end := getDelistKeyRangeByTime(time)
 	var result []string
 	iter := store.Iterator(start, end)
 	defer iter.Close()
@@ -53,16 +57,7 @@ func (keeper *DelistKeeper) GetDelistSymbolsBeforeTime(ctx sdk.Context, time int
 
 func (keeper *DelistKeeper) RemoveDelistRequestsBeforeTime(ctx sdk.Context, time int64) {
 	store := ctx.KVStore(keeper.marketKey)
-	start := concatCopyPreAllocate([][]byte{
-		DelistKey,
-		int64ToBigEndianBytes(0),
-		{0x0},
-	})
-	end := concatCopyPreAllocate([][]byte{
-		DelistKey,
-		int64ToBigEndianBytes(time),
-		{0x1},
-	})
+	start, end := getDelistKeyRangeByTime(time)
 	var keys [][]byte
 	iter := store.Iterator(start, end)
 	defer iter.Close()
