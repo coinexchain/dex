@@ -103,8 +103,7 @@ func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins)
 		return err
 	}
 	accx := k.axk.GetOrCreateAccountX(ctx, addr)
-	frozenCoins := accx.FrozenCoins.Add(amt)
-	accx.FrozenCoins = frozenCoins
+	accx.FrozenCoins = accx.FrozenCoins.Add(amt)
 	k.axk.SetAccountX(ctx, accx)
 
 	return nil
