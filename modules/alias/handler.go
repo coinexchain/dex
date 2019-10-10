@@ -25,13 +25,11 @@ func NewHandler(k Keeper) sdk.Handler {
 
 func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Result {
 	if msg.IsAdd {
-		err := handleAliasAdd(ctx, k, msg)
-		if err != nil {
+		if err := handleAliasAdd(ctx, k, msg); err != nil {
 			return err.Result()
 		}
 	} else {
-		err := handleAliasRemove(ctx, k, msg)
-		if err != nil {
+		if err := handleAliasRemove(ctx, k, msg); err != nil {
 			return err.Result()
 		}
 	}
@@ -71,8 +69,7 @@ func handleAliasAdd(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Err
 		return types.ErrCanOnlyBeUsedByCetOwner(msg.Alias)
 	}
 	addr, asDefault := k.GetAddressFromAlias(ctx, msg.Alias)
-	if len(addr) != 0 &&
-		(!bytes.Equal(addr, msg.Owner) || asDefault == msg.AsDefault) {
+	if len(addr) != 0 && (!bytes.Equal(addr, msg.Owner) || asDefault == msg.AsDefault) {
 		return types.ErrAliasAlreadyExists()
 	}
 	aliasParams := k.GetParams(ctx)
@@ -80,26 +77,29 @@ func handleAliasAdd(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Err
 	if !ok {
 		return types.ErrMaxAliasCountReached()
 	} else if addNewAlias {
-		var fee int64
-		if len(msg.Alias) == 2 {
-			fee = aliasParams.FeeForAliasLength2
-		} else if len(msg.Alias) == 3 {
-			fee = aliasParams.FeeForAliasLength3
-		} else if len(msg.Alias) == 4 {
-			fee = aliasParams.FeeForAliasLength4
-		} else if len(msg.Alias) == 5 {
-			fee = aliasParams.FeeForAliasLength5
-		} else if len(msg.Alias) == 6 {
-			fee = aliasParams.FeeForAliasLength6
-		} else {
-			fee = aliasParams.FeeForAliasLength7OrHigher
-		}
+		fee := getAddAliasFee(msg.Alias, aliasParams)
 		err := k.DeductInt64CetFee(ctx, msg.Owner, fee)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func getAddAliasFee(alias string, params types.Params) int64 {
+	if len(alias) == 2 {
+		return params.FeeForAliasLength2
+	} else if len(alias) == 3 {
+		return params.FeeForAliasLength3
+	} else if len(alias) == 4 {
+		return params.FeeForAliasLength4
+	} else if len(alias) == 5 {
+		return params.FeeForAliasLength5
+	} else if len(alias) == 6 {
+		return params.FeeForAliasLength6
+	} else {
+		return params.FeeForAliasLength7OrHigher
+	}
 }
 
 func handleAliasRemove(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Error {

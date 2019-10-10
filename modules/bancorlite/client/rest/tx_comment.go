@@ -54,7 +54,7 @@ func (req *BancorInitReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Ms
 	var precision int
 	if req.StockPrecision == "" {
 		precision = 0
-	}else {
+	} else {
 		precision, convertErr = strconv.Atoi(req.StockPrecision)
 		if convertErr != nil {
 			return nil, errors.New("Invalid stock precision")
