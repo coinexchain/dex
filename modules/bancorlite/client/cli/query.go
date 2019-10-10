@@ -10,6 +10,7 @@ import (
 	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 func QueryParamsCmd(cdc *codec.Codec) *cobra.Command {
@@ -35,7 +36,7 @@ Example :
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryBancorInfo)
-			symbol := args[0] + "/" + args[1]
+			symbol := dex.GetSymbol(args[0], args[1])
 			param := &keepers.QueryBancorInfoParam{Symbol: symbol}
 			return cliutil.CliQuery(cdc, query, param)
 		},

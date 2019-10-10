@@ -361,8 +361,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 		if len(ordersForUpdateList[idx]) == 0 {
 			continue
 		}
-		symbol := mi.Stock + "/" + mi.Money
-		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
+		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), mi.GetSymbol(), types.ModuleCdc)
 		// update the order book
 		for _, order := range ordersForUpdateList[idx] {
 			orderKeeper.Add(ctx, order)
