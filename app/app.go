@@ -461,9 +461,6 @@ func (app *CetChainApp) initModules() {
 	app.crisisKeeper.RegisterRoute(authx.ModuleName, "pre-total-supply", authx.PreTotalSupplyInvariant(app.accountXKeeper))
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 
-	//crisis module should be reset since invariants has been registered to crisis keeper
-	app.replaceEmptyCrisisModule(&modules)
-
 	app.registerRoutesWithOrder(modules)
 }
 
@@ -513,18 +510,6 @@ func getAppModuleInitOrder() []string {
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
 		alias.ModuleName,
 		comment.ModuleName,
-	}
-}
-
-func (app *CetChainApp) replaceEmptyCrisisModule(modules *[]module.AppModule) {
-	crisisWithInvariants := crisis.NewAppModule(&app.crisisKeeper)
-
-	app.mm.Modules[crisis.ModuleName] = crisisWithInvariants
-
-	for i, module := range *modules {
-		if module.Name() == crisis.ModuleName {
-			(*modules)[i] = crisisWithInvariants
-		}
 	}
 }
 
