@@ -7,11 +7,7 @@ import (
 )
 
 func ShowInfo() {
-	leafTypes := make(map[string]struct{}, 2)
-	var empty struct{}
-	leafTypes["github.com/cosmos/cosmos-sdk/types.Int"] = empty
-	leafTypes["github.com/cosmos/cosmos-sdk/types.Dec"] = empty
-	leafTypes["time.Time"] = empty
+	leafTypes := GetLeafTypes()
 
 	//ShowInfo("",Account{})
 
@@ -95,6 +91,7 @@ func GenerateCodecFile(w io.Writer) {
 		{Alias: "PubKeyMultisigThreshold", Value: PubKeyMultisigThreshold{}},
 		{Alias: "SignedMsgType", Value: SignedMsgType(0)},
 		{Alias: "VoteOption", Value: VoteOption(0)},
+		{Alias: "Vote", Value: Vote{}},
 
 		{Alias: "Coin", Value: Coin{}},
 		{Alias: "LockedCoin", Value: LockedCoin{}},
@@ -105,6 +102,7 @@ func GenerateCodecFile(w io.Writer) {
 		{Alias: "AccAddress", Value: AccAddress{}},
 		{Alias: "CommentRef", Value: CommentRef{}},
 
+		{Alias: "BaseAccount", Value: BaseAccount{}},
 		{Alias: "BaseVestingAccount", Value: BaseVestingAccount{}},
 		{Alias: "ContinuousVestingAccount", Value: ContinuousVestingAccount{}},
 		{Alias: "DelayedVestingAccount", Value: DelayedVestingAccount{}},
@@ -162,13 +160,20 @@ func GenerateCodecFile(w io.Writer) {
 		{Alias: "State", Value: State{}},
 		{Alias: "MsgAliasUpdate", Value: MsgAliasUpdate{}},
 	}
-	leafTypes := make(map[string]struct{}, 2)
-	var empty struct{}
-	leafTypes["github.com/cosmos/cosmos-sdk/types.Int"] = empty
-	leafTypes["github.com/cosmos/cosmos-sdk/types.Dec"] = empty
-	leafTypes["time.Time"] = empty
+
 	extraImports := []string{`"time"`, `sdk "github.com/cosmos/cosmos-sdk/types"`}
-	codon.GenerateCodecFile(w, leafTypes, list, extraLogics, extraImports)
+	ignoreImpl := make(map[string]string)
+	ignoreImpl["StdSignature"] = "PubKey"
+	ignoreImpl["PubKeyMultisigThreshold"] = "PubKey"
+	codon.GenerateCodecFile(w, GetLeafTypes(), ignoreImpl, list, extraLogics, extraImports)
+}
+
+func GetLeafTypes() map[string]string {
+	leafTypes := make(map[string]string, 20)
+	leafTypes["github.com/cosmos/cosmos-sdk/types.Int"] = "sdk.Int"
+	leafTypes["github.com/cosmos/cosmos-sdk/types.Dec"] = "sdk.Dec"
+	leafTypes["time.Time"] = "time.Time"
+	return leafTypes
 }
 
 type RandSrc interface {
@@ -228,7 +233,7 @@ func DecodeTime(bz []byte) (time.Time, int, error) {
 		return time.Unix(sec,0), n, err
 	}
 
-	nanosec, m := binary.Varint(bz)
+	nanosec, m := binary.Varint(bz[n:])
 	if m == 0 {
 		// buf too small
 		err = errors.New("buffer too small")
@@ -317,7 +322,6 @@ func RandDec(r RandSrc) sdk.Dec {
 	res = res.QuoInt64(r.GetInt64()&0xFFFFFFFF)
 	return res
 }
-
 `
 
 /*

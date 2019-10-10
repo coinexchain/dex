@@ -2,20 +2,20 @@ package randsrc
 
 import (
 	"bufio"
-	"os"
 	"crypto/sha256"
 	"encoding/binary"
 	"hash"
 	"math"
+	"os"
 )
 
 type RandBytesSrcFromFile struct {
-	fname string
-	file *os.File
+	fname   string
+	file    *os.File
 	scanner *bufio.Scanner
-	h hash.Hash
-	sum []byte
-	idx int
+	h       hash.Hash
+	sum     []byte
+	idx     int
 }
 
 func NewRandBytesSrcFromFile(fname string) RandBytesSrcFromFile {
@@ -82,12 +82,12 @@ func NewRandSrcFromFile(fname string) *RandSrcFromFile {
 
 func (rs *RandSrcFromFile) GetBool() bool {
 	bz := rs.GetBytes(1)
-	return bz[0]!=0
+	return bz[0] != 0
 }
 
 func (rs *RandSrcFromFile) GetUint8() uint8 {
 	bz := rs.GetBytes(1)
-	return uint8(bz[0])
+	return bz[0]
 }
 
 func (rs *RandSrcFromFile) GetUint16() uint16 {
@@ -146,4 +146,3 @@ type RandSrc interface {
 }
 
 var _ RandSrc = &RandSrcFromFile{}
-

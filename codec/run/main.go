@@ -8,5 +8,9 @@ import (
 
 func main() {
 	//codec.ShowInfo()
+	genCode()
+}
+
+func genCode() {
 	codec.GenerateCodecFile(os.Stdout)
 }

@@ -44,6 +44,10 @@ type (
 	PubKeyMultisigThreshold = multisig.PubKeyMultisigThreshold
 	SignedMsgType           = tmtypes.SignedMsgType
 	VoteOption              = govtypes.VoteOption
+	Vote                    = tmtypes.Vote
+
+	Int = sdk.Int
+	Dec = sdk.Dec
 
 	Coin         = sdk.Coin
 	StdSignature = auth.StdSignature
@@ -54,6 +58,7 @@ type (
 	AccAddress   = sdk.AccAddress
 	CommentRef   = comment.CommentRef
 
+	BaseAccount                    = auth.BaseAccount
 	BaseVestingAccount             = auth.BaseVestingAccount
 	ContinuousVestingAccount       = auth.ContinuousVestingAccount
 	DelayedVestingAccount          = auth.DelayedVestingAccount
