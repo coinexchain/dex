@@ -51,7 +51,12 @@ func TestBeginBlockerInPlan(t *testing.T) {
 	plans := types.Params{
 		DefaultRewardPerBlock: 2e8,
 		Plans: []types.Plan{
-			{0, 10, 10e8, 100e8},
+			{
+				StartHeight:    0,
+				EndHeight:      10,
+				RewardPerBlock: 10e8,
+				TotalIncentive: 100e8,
+			},
 		},
 	}
 	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: 10})
@@ -78,7 +83,12 @@ func TestBeginBlockerNotInPlan(t *testing.T) {
 	plans := types.Params{
 		DefaultRewardPerBlock: 2e8,
 		Plans: []types.Plan{
-			{0, 10, 10e8, 100e8},
+			{
+				StartHeight:    0,
+				EndHeight:      10,
+				RewardPerBlock: 10e8,
+				TotalIncentive: 100e8,
+			},
 		},
 	}
 	_ = input.keeper.SetState(input.ctx, incentive.State{HeightAdjustment: 20})
