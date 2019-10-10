@@ -3,6 +3,8 @@ package bankx
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/x/bank"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
@@ -28,8 +30,8 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.Result {
-	if err := k.GetSendEnabled(ctx); err != nil {
-		return err.Result()
+	if enabled := k.GetSendEnabled(ctx); !enabled {
+		return bank.ErrSendDisabled(types.CodeSpaceBankx).Result()
 	}
 
 	for _, out := range msg.Outputs {
@@ -69,8 +71,8 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 }
 
 func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
-	if err := k.GetSendEnabled(ctx); err != nil {
-		return err.Result()
+	if enabled := k.GetSendEnabled(ctx); !enabled {
+		return bank.ErrSendDisabled(types.CodeSpaceBankx).Result()
 	}
 
 	if k.BlacklistedAddr(msg.ToAddress) {

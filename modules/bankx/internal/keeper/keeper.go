@@ -265,11 +265,8 @@ func (k Keeper) SetSendEnabled(ctx sdk.Context, enabled bool) {
 	k.bk.SetSendEnabled(ctx, enabled)
 }
 
-func (k Keeper) GetSendEnabled(ctx sdk.Context) sdk.Error {
-	if !k.bk.GetSendEnabled(ctx) {
-		return bank.ErrSendDisabled(k.bk.Codespace())
-	}
-	return nil
+func (k Keeper) GetSendEnabled(ctx sdk.Context) bool {
+	return k.bk.GetSendEnabled(ctx)
 }
 
 func (k Keeper) InputOutputCoins(ctx sdk.Context, inputs []bank.Input, outputs []bank.Output) sdk.Error {
