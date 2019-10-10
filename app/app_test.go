@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -648,4 +649,50 @@ func TestPubMsgBuf(t *testing.T) {
 	app.resetPubMsgBuf()
 	require.Equal(t, 10000, cap(app.pubMsgs))
 	require.Equal(t, 0, len(app.pubMsgs))
+}
+func TestLockSend(t *testing.T) {
+	toAddr := sdk.AccAddress([]byte("addr"))
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	// app
+	app := initAppWithBaseAccounts(acc0)
+
+	// begin block
+	header := abci.Header{Height: 1, Time: time.Now()}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	// deliver tx
+	coins = dex.NewCetCoins(1000000000)
+	msg := bankx.MsgSend{
+		FromAddress: fromAddr,
+		ToAddress:   toAddr,
+		Amount:      coins,
+		UnlockTime:  time.Now().Unix(),
+	}
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+
+	ctx := app.NewContext(false, abci.Header{Height: 1})
+	toAccX, ok := app.accountXKeeper.GetAccountX(ctx, toAddr)
+	require.True(t, ok)
+	coins = coins.Sub(dex.NewCetCoins(1e8))
+	require.Equal(t, fmt.Sprintf("coin: %s, unlocked_time: %d\n", coins.String(), msg.UnlockTime), toAccX.LockedCoins[0].String())
+
+	//EndBlock
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	//begin block at height 2
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 2, Time: time.Now()}})
+	ctx = app.NewContext(false, abci.Header{Height: 2})
+	toAccX, _ = app.accountXKeeper.GetAccountX(ctx, toAddr)
+	require.Nil(t, toAccX.LockedCoins)
+	toAcc := app.accountKeeper.GetAccount(ctx, toAddr)
+	require.Equal(t, coins, toAcc.GetCoins())
+
 }
