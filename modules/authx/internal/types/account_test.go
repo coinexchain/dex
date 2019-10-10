@@ -94,42 +94,6 @@ func TestAccountX_GetLockedCoinsByDemon(t *testing.T) {
 		NewLockedCoin("eos", sdk.NewInt(40), 3000)}, res)
 }
 
-func TestAccountX_TransferUnlockedCoins(t *testing.T) {
-	//
-	//input := authx.setupTestInput()
-	//_, pub, addr := testutil.KeyPubAddr()
-	//
-	//fromAccount := auth.NewBaseAccountWithAddress(addr)
-	//_ = fromAccount.SetPubKey(pub)
-	//oneCoins := sdk.Coins{sdk.Coin{Denom: "bch", Amount: sdk.NewInt(20)}}
-	//_ = fromAccount.SetCoins(oneCoins)
-	//
-	//input.ak.SetAccount(input.ctx, &fromAccount)
-	//
-	//var acc = AccountX{Address: addr, MemoRequired: false}
-	//coins := LockedCoins{
-	//	NewLockedCoin("bch", sdk.NewInt(20), 1000),
-	//	NewLockedCoin("eth", sdk.NewInt(30), 2000),
-	//	NewLockedCoin("eos", sdk.NewInt(40), 3000),
-	//}
-	//acc.LockedCoins = coins
-	//authx.SetAccountX(input.ctx, acc)
-	//
-	//moduleAccount := input.sk.GetModuleAccount(input.ctx, ModuleName)
-	//_ = moduleAccount.SetCoins(sdk.NewCoins(
-	//	sdk.NewCoin("bch", sdk.NewInt(20)),
-	//	sdk.NewCoin("eth", sdk.NewInt(30)),
-	//	sdk.NewCoin("eos", sdk.NewInt(40)),
-	//))
-	//input.sk.SetModuleAccount(input.ctx, moduleAccount)
-	//
-	//TransferUnlockedCoins(1000, input.ctx, input.axk, input.ak)
-	//require.Equal(t, "eth", acc.LockedCoins[0].Coin.Denom)
-	//require.Equal(t, "eos", acc.LockedCoins[1].Coin.Denom)
-	//
-	//require.Equal(t, int64(40), input.ak.GetAccount(input.ctx, addr).GetCoins().AmountOf("bch").Int64())
-}
-
 func TestAccountX_AddLockedCoins(t *testing.T) {
 	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	acc.AddLockedCoins(LockedCoins{
