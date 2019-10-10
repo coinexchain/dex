@@ -15,7 +15,7 @@ import (
 
 func main() {
 	if len(os.Args) != 2 {
-		fmt.Printf("usage: %s filename", os.Args[0])
+		fmt.Printf("usage: %s filename\n", os.Args[0])
 		return
 	}
 	r := randsrc.NewRandSrcFromFile(os.Args[1])
@@ -53,10 +53,12 @@ func main() {
 	}
 
 	cdc := codec.New()
+	totalBytes := 0
 	nanoSecCount := time.Now().UnixNano()
 	for j := 0; j < 300; j++ {
 		for i := 0; i < len(accounts); i++ {
 			bzList[i], err = cdc.MarshalBinaryBare(accounts[i])
+			totalBytes += len(bzList[i])
 			if err != nil {
 				panic(err)
 			}
@@ -68,8 +70,10 @@ func main() {
 			}
 		}
 	}
-	fmt.Printf("Amino: %d\n", time.Now().UnixNano()-nanoSecCount)
+	span := time.Now().UnixNano()-nanoSecCount
+	fmt.Printf("Amino: time = %d, bytes = %d, bytes/ns = %f\n", span, totalBytes, float64(totalBytes)/float64(span))
 
+	totalBytes = 0
 	nanoSecCount = time.Now().UnixNano()
 	for j := 0; j < 300; j++ {
 		for i := 0; i < len(accounts); i++ {
@@ -79,6 +83,7 @@ func main() {
 				panic(err)
 			}
 			bzList[i] = buf.Bytes()
+			totalBytes += len(bzList[i])
 		}
 		for i := 0; i < len(accounts); i++ {
 			_, err = dexcodec.BareDecodeAny(bzList[i], &accounts[i])
@@ -87,5 +92,6 @@ func main() {
 			}
 		}
 	}
-	fmt.Printf("Codon: %d\n", time.Now().UnixNano()-nanoSecCount)
+	span = time.Now().UnixNano()-nanoSecCount
+	fmt.Printf("Codon: time = %d, bytes = %d, bytes/ns = %f\n", span, totalBytes, float64(totalBytes)/float64(span))
 }
