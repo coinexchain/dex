@@ -26,7 +26,7 @@ func ErrEmptyAlias() sdk.Error {
 }
 
 func ErrInvalidAlias() sdk.Error {
-	return sdk.NewError(CodeSpaceAlias, CodeInvalidAlias, "Empty Alias")
+	return sdk.NewError(CodeSpaceAlias, CodeInvalidAlias, "Invalid Alias")
 }
 
 func ErrAliasAlreadyExists() sdk.Error {

@@ -8,9 +8,7 @@ import (
 	"github.com/coinexchain/dex/modules/alias/internal/types"
 )
 
-// GetQueryCmd returns the cli query commands for this module
 func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	// Group asset queries under a subcommand
 	aliasQueryCmd := &cobra.Command{
 		Use:   types.StoreKey,
 		Short: "Querying commands for the alias module",
@@ -23,7 +21,6 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	return aliasQueryCmd
 }
 
-// GetTxCmd returns the transaction commands for this module
 func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	aliasTxCmd := &cobra.Command{
 		Use:   types.StoreKey,

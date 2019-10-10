@@ -18,8 +18,8 @@ import (
 var ResultParam *keepers.QueryAliasInfoParam
 var ResultPath string
 
-func RestQueryForTest(cdc *codec.Codec, cliCtx context.CLIContext, w http.ResponseWriter, r *http.Request,
-	query string, param interface{}, defaultRes []byte) {
+func RestQueryForTest(_ *codec.Codec, _ context.CLIContext, _ http.ResponseWriter, _ *http.Request,
+	query string, param interface{}, _ []byte) {
 	ResultParam = param.(*keepers.QueryAliasInfoParam)
 	ResultPath = query
 }

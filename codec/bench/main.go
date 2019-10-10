@@ -70,7 +70,7 @@ func main() {
 			}
 		}
 	}
-	span := time.Now().UnixNano()-nanoSecCount
+	span := time.Now().UnixNano() - nanoSecCount
 	fmt.Printf("Amino: time = %d, bytes = %d, bytes/ns = %f\n", span, totalBytes, float64(totalBytes)/float64(span))
 
 	totalBytes = 0
@@ -92,6 +92,6 @@ func main() {
 			}
 		}
 	}
-	span = time.Now().UnixNano()-nanoSecCount
+	span = time.Now().UnixNano() - nanoSecCount
 	fmt.Printf("Codon: time = %d, bytes = %d, bytes/ns = %f\n", span, totalBytes, float64(totalBytes)/float64(span))
 }

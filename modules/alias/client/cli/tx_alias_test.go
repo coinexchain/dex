@@ -13,7 +13,7 @@ import (
 
 var ResultMsg *types.MsgAliasUpdate
 
-func CliRunCommandForTest(cdc *codec.Codec, msg cliutil.MsgWithAccAddress) error {
+func CliRunCommandForTest(_ *codec.Codec, msg cliutil.MsgWithAccAddress) error {
 	ResultMsg = msg.(*types.MsgAliasUpdate)
 	return nil
 }
@@ -64,6 +64,7 @@ func TestCmd(t *testing.T) {
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
+	assert.Error(t, err)
 	assert.Equal(t, "Invalid value for --as-default, only 'yes' and 'no' are valid", err.Error())
 
 	args = []string{

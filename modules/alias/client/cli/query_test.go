@@ -14,7 +14,7 @@ import (
 var ResultParam *keepers.QueryAliasInfoParam
 var ResultPath string
 
-func CliQueryForTest(cdc *codec.Codec, path string, param interface{}) error {
+func CliQueryForTest(_ *codec.Codec, path string, param interface{}) error {
 	ResultParam = param.(*keepers.QueryAliasInfoParam)
 	ResultPath = path
 	return nil
@@ -32,7 +32,7 @@ func TestQuery(t *testing.T) {
 	}
 	cmd.SetArgs(args)
 	err := cmd.Execute()
-	assert.Equal(t, nil, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "custom/alias/alias-info", ResultPath)
 	assert.Equal(t, &keepers.QueryAliasInfoParam{Alias: "super_super_boy", QueryOp: keepers.GetAddressFromAlias}, ResultParam)
 
@@ -42,7 +42,7 @@ func TestQuery(t *testing.T) {
 	}
 	cmd.SetArgs(args)
 	err = cmd.Execute()
-	assert.Equal(t, nil, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "custom/alias/alias-info", ResultPath)
 	addr, _ := sdk.AccAddressFromBech32("coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a")
 	assert.Equal(t, &keepers.QueryAliasInfoParam{
