@@ -37,6 +37,11 @@ func simpleAddr(s string) sdk.AccAddress {
 	return a
 }
 
+func TestGetAccountToAliasKey(t *testing.T) {
+	key := getAccountToAliasKey([]byte("addr"), []byte("alias"))
+	require.Equal(t, "\x12\x04addralias", string(key))
+}
+
 func Test1(t *testing.T) {
 	tom := simpleAddr("00001")
 	bob := simpleAddr("00002")

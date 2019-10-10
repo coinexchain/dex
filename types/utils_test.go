@@ -11,7 +11,7 @@ import (
 )
 
 func TestConcatKeys(t *testing.T) {
-	require.Equal(t, []byte("foobar"), ConcatKeys([]byte("foo"), []byte("bar")))
+	require.Equal(t, []byte("foobar"), ConcatKeys([]byte("foo"), nil, []byte("bar")))
 }
 
 func TestErrUnknownRequest(t *testing.T) {

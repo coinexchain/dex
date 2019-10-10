@@ -5,6 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/coinexchain/dex/modules/alias/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var (
@@ -40,7 +41,7 @@ func (keeper *AliasKeeper) GetAddressFromAlias(ctx sdk.Context, alias string) ([
 }
 
 func getAccountToAliasKey(addr sdk.AccAddress, alias []byte) []byte {
-	return append(append(append(AccountToAliasKey, []byte{byte(len(addr))}...), addr...), alias...)
+	return dex.ConcatKeys(AccountToAliasKey, []byte{byte(len(addr))}, addr, alias)
 }
 
 func (keeper *AliasKeeper) GetAliasListOfAccount(ctx sdk.Context, addr sdk.AccAddress) []string {
