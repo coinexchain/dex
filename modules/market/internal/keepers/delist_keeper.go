@@ -26,18 +26,11 @@ func getDelistKey(time int64, symbol string) []byte {
 }
 
 func getDelistKeyRangeByTime(time int64) (start, end []byte) {
-	start = dex.ConcatKeys(
-		DelistKey,
-		int64ToBigEndianBytes(0),
-		[]byte{0x0},
-	)
-	end = dex.ConcatKeys(
-		DelistKey,
-		int64ToBigEndianBytes(time),
-		[]byte{0x1},
-	)
+	start = dex.ConcatKeys(DelistKey, int64ToBigEndianBytes(0), []byte{0x0})
+	end = dex.ConcatKeys(DelistKey, int64ToBigEndianBytes(time), []byte{0x1})
 	return
 }
+
 func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, time int64, symbol string) {
 	store := ctx.KVStore(keeper.marketKey)
 	store.Set(getDelistKey(time, symbol), []byte{})

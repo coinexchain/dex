@@ -40,19 +40,6 @@ func bytes2str(slice []byte) string {
 	return s
 }
 
-func Test_concatCopyPreAllocate(t *testing.T) {
-	res := dex.ConcatKeys(
-		[]byte{0, 1, 2, 3},
-		[]byte{4, 5},
-		[]byte{},
-		[]byte{6, 7},
-	)
-	ref := []byte{0, 1, 2, 3, 4, 5, 6, 7}
-	if !bytes.Equal(res, ref) {
-		t.Errorf("mismatch in concatCopyPreAllocate")
-	}
-}
-
 func newContextAndMarketKey(chainid string) (sdk.Context, storeKeys) {
 	db := dbm.NewMemDB()
 	ms := sdkstore.NewCommitMultiStore(db)

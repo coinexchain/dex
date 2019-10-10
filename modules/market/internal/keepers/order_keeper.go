@@ -72,11 +72,7 @@ func (keeper *PersistentOrderKeeper) GetSymbol() string {
 
 // build the key for global order book
 func orderBookKey(orderID string) []byte {
-	return dex.ConcatKeys(
-		OrderBookKeyPrefix,
-		[]byte{0x0},
-		[]byte(orderID),
-	)
+	return dex.ConcatKeys(OrderBookKeyPrefix, []byte{0x0}, []byte(orderID))
 }
 
 // build the key for bid list
@@ -248,26 +244,10 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*t
 	store := ctx.KVStore(keeper.marketKey)
 	priceStartPos := len(keeper.symbol) + 2
 	priceEndPos := priceStartPos + types.DecByteCount
-	bidListStart := dex.ConcatKeys(
-		BidListKeyPrefix,
-		[]byte(keeper.symbol),
-		[]byte{0x0},
-	)
-	bidListEnd := dex.ConcatKeys(
-		BidListKeyPrefix,
-		[]byte(keeper.symbol),
-		[]byte{0x1},
-	)
-	askListStart := dex.ConcatKeys(
-		AskListKeyPrefix,
-		[]byte(keeper.symbol),
-		[]byte{0x0},
-	)
-	askListEnd := dex.ConcatKeys(
-		AskListKeyPrefix,
-		[]byte(keeper.symbol),
-		[]byte{0x1},
-	)
+	bidListStart := dex.ConcatKeys(BidListKeyPrefix, []byte(keeper.symbol), []byte{0x0})
+	bidListEnd := dex.ConcatKeys(BidListKeyPrefix, []byte(keeper.symbol), []byte{0x1})
+	askListStart := dex.ConcatKeys(AskListKeyPrefix, []byte(keeper.symbol), []byte{0x0})
+	askListEnd := dex.ConcatKeys(AskListKeyPrefix, []byte(keeper.symbol), []byte{0x1})
 	bidIter := store.ReverseIterator(bidListStart, bidListEnd)
 	askIter := store.Iterator(askListStart, askListEnd)
 	defer func() {
@@ -354,14 +334,8 @@ func (keeper *PersistentGlobalOrderKeeper) GetOrdersFromUser(ctx sdk.Context, us
 func (keeper *PersistentGlobalOrderKeeper) GetAllOrders(ctx sdk.Context) []*types.Order {
 	store := ctx.KVStore(keeper.marketKey)
 	var result []*types.Order
-	start := dex.ConcatKeys(
-		OrderBookKeyPrefix,
-		[]byte{0x0},
-	)
-	end := dex.ConcatKeys(
-		OrderBookKeyPrefix,
-		[]byte{0x1},
-	)
+	start := dex.ConcatKeys(OrderBookKeyPrefix, []byte{0x0})
+	end := dex.ConcatKeys(OrderBookKeyPrefix, []byte{0x1})
 
 	iter := store.Iterator(start, end)
 	defer iter.Close()
