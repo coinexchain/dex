@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 
@@ -253,4 +254,19 @@ func TestMsgBancorCancel_ValidateBasic(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCheckStockPrecision(t *testing.T) {
+	amount := sdk.NewInt(110000)
+	var precision byte = 4
+	match := CheckStockPrecision(amount, precision)
+	assert.True(t, match)
+	precision = 5
+	match = CheckStockPrecision(amount, precision)
+	assert.False(t, match)
+	precision = 3
+	match = CheckStockPrecision(amount, precision)
+	assert.True(t, match)
+	match = CheckStockPrecision(amount, 100)
+	assert.True(t, match)
 }
