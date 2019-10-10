@@ -8,6 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/market/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 //nolint
@@ -71,44 +72,44 @@ func (keeper *PersistentOrderKeeper) GetSymbol() string {
 
 // build the key for global order book
 func orderBookKey(orderID string) []byte {
-	return concatCopyPreAllocate([][]byte{
+	return dex.ConcatKeys(
 		OrderBookKeyPrefix,
-		{0x0},
+		[]byte{0x0},
 		[]byte(orderID),
-	})
+	)
 }
 
 // build the key for bid list
 func (keeper *PersistentOrderKeeper) bidListKey(order *types.Order) []byte {
-	return concatCopyPreAllocate([][]byte{
+	return dex.ConcatKeys(
 		BidListKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
+		[]byte{0x0},
 		types.DecToBigEndianBytes(order.Price),
 		[]byte(order.OrderID()),
-	})
+	)
 }
 
 // build the key for ask list
 func (keeper *PersistentOrderKeeper) askListKey(order *types.Order) []byte {
-	return concatCopyPreAllocate([][]byte{
+	return dex.ConcatKeys(
 		AskListKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
+		[]byte{0x0},
 		types.DecToBigEndianBytes(order.Price),
 		[]byte(order.OrderID()),
-	})
+	)
 }
 
 // build the key for order queue
 func (keeper *PersistentOrderKeeper) orderQueueKey(order *types.Order) []byte {
-	return concatCopyPreAllocate([][]byte{
+	return dex.ConcatKeys(
 		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
+		[]byte{0x0},
 		int64ToBigEndianBytes(order.Height),
 		[]byte(order.OrderID()),
-	})
+	)
 }
 
 func NewOrderKeeper(key sdk.StoreKey, symbol string, codec *codec.Codec) OrderKeeper {
@@ -181,17 +182,17 @@ func (keeper *PersistentOrderKeeper) Remove(ctx sdk.Context, order *types.Order)
 func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64) []*types.Order {
 	store := ctx.KVStore(keeper.marketKey)
 	var result []*types.Order
-	start := concatCopyPreAllocate([][]byte{
+	start := dex.ConcatKeys(
 		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
-	})
-	end := concatCopyPreAllocate([][]byte{
+		[]byte{0x0},
+	)
+	end := dex.ConcatKeys(
 		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
+		[]byte{0x0},
 		int64ToBigEndianBytes(height),
-	})
+	)
 	iter := store.ReverseIterator(start, end)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
@@ -206,18 +207,18 @@ func (keeper *PersistentOrderKeeper) GetOlderThan(ctx sdk.Context, height int64)
 func (keeper *PersistentOrderKeeper) GetOrdersAtHeight(ctx sdk.Context, height int64) []*types.Order {
 	store := ctx.KVStore(keeper.marketKey)
 	var result []*types.Order
-	start := concatCopyPreAllocate([][]byte{
+	start := dex.ConcatKeys(
 		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
+		[]byte{0x0},
 		int64ToBigEndianBytes(height),
-	})
-	end := concatCopyPreAllocate([][]byte{
+	)
+	end := dex.ConcatKeys(
 		OrderQueueKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
-		int64ToBigEndianBytes(height + 1),
-	})
+		[]byte{0x0},
+		int64ToBigEndianBytes(height+1),
+	)
 	iter := store.Iterator(start, end)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
@@ -247,26 +248,26 @@ func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*t
 	store := ctx.KVStore(keeper.marketKey)
 	priceStartPos := len(keeper.symbol) + 2
 	priceEndPos := priceStartPos + types.DecByteCount
-	bidListStart := concatCopyPreAllocate([][]byte{
+	bidListStart := dex.ConcatKeys(
 		BidListKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
-	})
-	bidListEnd := concatCopyPreAllocate([][]byte{
+		[]byte{0x0},
+	)
+	bidListEnd := dex.ConcatKeys(
 		BidListKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x1},
-	})
-	askListStart := concatCopyPreAllocate([][]byte{
+		[]byte{0x1},
+	)
+	askListStart := dex.ConcatKeys(
 		AskListKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x0},
-	})
-	askListEnd := concatCopyPreAllocate([][]byte{
+		[]byte{0x0},
+	)
+	askListEnd := dex.ConcatKeys(
 		AskListKeyPrefix,
 		[]byte(keeper.symbol),
-		{0x1},
-	})
+		[]byte{0x1},
+	)
 	bidIter := store.ReverseIterator(bidListStart, bidListEnd)
 	askIter := store.Iterator(askListStart, askListEnd)
 	defer func() {
@@ -353,14 +354,14 @@ func (keeper *PersistentGlobalOrderKeeper) GetOrdersFromUser(ctx sdk.Context, us
 func (keeper *PersistentGlobalOrderKeeper) GetAllOrders(ctx sdk.Context) []*types.Order {
 	store := ctx.KVStore(keeper.marketKey)
 	var result []*types.Order
-	start := concatCopyPreAllocate([][]byte{
+	start := dex.ConcatKeys(
 		OrderBookKeyPrefix,
-		{0x0},
-	})
-	end := concatCopyPreAllocate([][]byte{
+		[]byte{0x0},
+	)
+	end := dex.ConcatKeys(
 		OrderBookKeyPrefix,
-		{0x1},
-	})
+		[]byte{0x1},
+	)
 
 	iter := store.Iterator(start, end)
 	defer iter.Close()

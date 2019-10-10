@@ -9,6 +9,20 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// Merge several byte slices into one
+func ConcatKeys(keys ...[]byte) []byte {
+	var totalLen int
+	for _, key := range keys {
+		totalLen += len(key)
+	}
+	tmp := make([]byte, totalLen)
+	var i int
+	for _, key := range keys {
+		i += copy(tmp[i:], key)
+	}
+	return tmp
+}
+
 func ErrUnknownRequest(module string, msg sdk.Msg) sdk.Result {
 	//errMsg := fmt.Sprintf("unrecognized staking message type: %T", msg)
 	errMsg := fmt.Sprintf("Unrecognized %s Msg type: %s", module, msg.Type())

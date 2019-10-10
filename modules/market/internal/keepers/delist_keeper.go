@@ -2,6 +2,8 @@ package keepers
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 type DelistKeeper struct {
@@ -15,25 +17,25 @@ func NewDelistKeeper(key sdk.StoreKey) *DelistKeeper {
 }
 
 func getDelistKey(time int64, symbol string) []byte {
-	return concatCopyPreAllocate([][]byte{
+	return dex.ConcatKeys(
 		DelistKey,
 		int64ToBigEndianBytes(time),
-		{0x0},
+		[]byte{0x0},
 		[]byte(symbol),
-	})
+	)
 }
 
 func getDelistKeyRangeByTime(time int64) (start, end []byte) {
-	start = concatCopyPreAllocate([][]byte{
+	start = dex.ConcatKeys(
 		DelistKey,
 		int64ToBigEndianBytes(0),
-		{0x0},
-	})
-	end = concatCopyPreAllocate([][]byte{
+		[]byte{0x0},
+	)
+	end = dex.ConcatKeys(
 		DelistKey,
 		int64ToBigEndianBytes(time),
-		{0x1},
-	})
+		[]byte{0x1},
+	)
 	return
 }
 func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, time int64, symbol string) {

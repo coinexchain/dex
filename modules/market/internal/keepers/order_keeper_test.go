@@ -13,6 +13,7 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/coinexchain/dex/modules/market/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 var unitChainID = "coinex-dex"
@@ -40,12 +41,12 @@ func bytes2str(slice []byte) string {
 }
 
 func Test_concatCopyPreAllocate(t *testing.T) {
-	res := concatCopyPreAllocate([][]byte{
-		{0, 1, 2, 3},
-		{4, 5},
-		{},
-		{6, 7},
-	})
+	res := dex.ConcatKeys(
+		[]byte{0, 1, 2, 3},
+		[]byte{4, 5},
+		[]byte{},
+		[]byte{6, 7},
+	)
 	ref := []byte{0, 1, 2, 3, 4, 5, 6, 7}
 	if !bytes.Equal(res, ref) {
 		t.Errorf("mismatch in concatCopyPreAllocate")
