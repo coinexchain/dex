@@ -44,7 +44,7 @@ func accAddressFromBech32(address string) sdk.AccAddress {
 func createCetToken(ownerAddr string) asset.Token {
 	token := &asset.BaseToken{
 		Name:             "CoinEx Chain Native Token",
-		Symbol:           "cet",
+		Symbol:           dex.CET,
 		TotalSupply:      sdk.NewInt(587767527061317189),
 		Owner:            accAddressFromBech32(ownerAddr),
 		SendLock:         sdk.ZeroInt(),

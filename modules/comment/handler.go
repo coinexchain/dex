@@ -25,7 +25,7 @@ func handleMsgCommentToken(ctx sdk.Context, k Keeper, msg types.MsgCommentToken)
 		return types.ErrNoSuchAsset().Result()
 	}
 	if msg.Donation > 0 {
-		donatedCoin := sdk.Coins{sdk.NewCoin("cet", sdk.NewInt(msg.Donation))}
+		donatedCoin := sdk.Coins{sdk.NewCoin(dex.CET, sdk.NewInt(msg.Donation))}
 		res := k.DonateToCommunityPool(ctx, msg.Sender, donatedCoin)
 		if res != nil {
 			return res.Result()

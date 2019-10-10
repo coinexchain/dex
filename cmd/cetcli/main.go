@@ -211,14 +211,14 @@ func fixDescriptions(cmd *cobra.Command) {
 	}
 	if idx := strings.Index(cmd.Long, "0stake"); idx >= 0 {
 		cmd.Long = strings.Replace(cmd.Long, "0stake", "0cet", -1)
-		//fmt.Printf("%s -> %s\n", "stake", "cet")
+		//fmt.Printf("%s -> %s\n", "stake", dex.CET)
 	}
 
 	// uatom -> cet
 	for _, flagName := range []string{client.FlagFees, client.FlagGasPrices} {
 		if flag := cmd.Flag(flagName); flag != nil {
-			flag.Usage = strings.Replace(flag.Usage, "uatom", "cet", -1)
-			//fmt.Printf("%s -> %s\n", "uatom", "cet")
+			flag.Usage = strings.Replace(flag.Usage, "uatom", dex.CET, -1)
+			//fmt.Printf("%s -> %s\n", "uatom", dex.CET)
 		}
 	}
 

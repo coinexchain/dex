@@ -545,18 +545,16 @@ func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePreci
 	}
 
 	if info.PricePrecision > msg.PricePrecision {
-		return types.ErrInvalidPricePrecisionChange(
-			fmt.Sprintf("Price Precision can only be increased; "+
-				"tradingPair price_precision : %d, msg price_precision : %d",
-				info.PricePrecision, msg.PricePrecision))
+		return types.ErrInvalidPricePrecisionChange(fmt.Sprintf(
+			"Price Precision can only be increased; tradingPair price_precision : %d, msg price_precision : %d",
+			info.PricePrecision, msg.PricePrecision))
 	}
 
 	stock, _ := SplitSymbol(msg.TradingPair)
 	tokenInfo := k.GetToken(ctx, stock)
 	if !tokenInfo.GetOwner().Equals(msg.Sender) {
 		return types.ErrNotMatchSender(fmt.Sprintf(
-			"The sender of the transaction (%s) does not match "+
-				"the owner of the transaction pair (%s)",
+			"The sender of the transaction (%s) does not match the owner of the transaction pair (%s)",
 			tokenInfo.GetOwner().String(), msg.Sender.String()))
 	}
 

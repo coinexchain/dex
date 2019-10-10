@@ -377,29 +377,4 @@ func EncodeMsgCreateValidator(w io.Writer, v MsgCreateValidator) error {
 err = EncodePubKey(w, v.PubKey)
 if err != nil {return err} // interface_encode
 
-////////
-package app
-
-import (
-	"fmt"
-	"testing"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
-	"github.com/coinexchain/dex/testutil"
-)
-
-func TestCodec(t *testing.T) {
-	_, _, fromAddr := testutil.KeyPubAddr()
-	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
-	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
-
-	// app
-	app := initAppWithBaseAccounts(acc0)
-
-	for name, typeInfo := range app.cdc.NameToTypeInfo() {
-		fmt.Printf("%s %v\n", name, typeInfo.Type)
-	}
-}
 */

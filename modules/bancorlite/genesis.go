@@ -8,6 +8,7 @@ import (
 
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
+	dex "github.com/coinexchain/dex/types"
 )
 
 type GenesisState struct {
@@ -57,7 +58,7 @@ func (data GenesisState) Validate() error {
 		if s[1] != bi.Money {
 			return errors.New("money mismatch")
 		}
-		if s[0] == "cet" {
+		if s[0] == dex.CET {
 			return errors.New("stock can not be cet")
 		}
 		if len(bi.Owner) == 0 {

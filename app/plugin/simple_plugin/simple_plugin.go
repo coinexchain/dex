@@ -8,6 +8,7 @@ import (
 
 	"github.com/coinexchain/dex/app/plugin"
 	"github.com/coinexchain/dex/modules/bankx"
+	dex "github.com/coinexchain/dex/types"
 )
 
 const (
@@ -30,7 +31,7 @@ func (f MsgFilter) PreCheckTx(req abci.RequestCheckTx, txDecoder sdk.TxDecoder, 
 		switch msg.(type) {
 		case bankx.MsgSend:
 			stdTx := tx.(auth.StdTx)
-			if stdTx.Fee.Amount.AmountOf("cet").Int64() >= 1000000000000 {
+			if stdTx.Fee.Amount.AmountOf(dex.CET).Int64() >= 1000000000000 {
 				return errNotAcceptableMsg
 			}
 		}

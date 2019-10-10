@@ -40,7 +40,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	if !k.Axk.IsTokenIssuer(ctx, msg.Stock, msg.Owner) {
 		return types.ErrNonOwnerIsProhibited().Result()
 	}
-	if msg.Money != "cet" &&
+	if msg.Money != dex.CET &&
 		!k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
 		return types.ErrNonMarketExist().Result()
 	}

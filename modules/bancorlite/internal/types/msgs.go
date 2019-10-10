@@ -66,7 +66,7 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 	if len(msg.Owner) == 0 {
 		return sdk.ErrInvalidAddress("missing owner address")
 	}
-	if len(msg.Stock) == 0 || len(msg.Money) == 0 || msg.Stock == "cet" {
+	if len(msg.Stock) == 0 || len(msg.Money) == 0 || msg.Stock == dex.CET {
 		return ErrInvalidSymbol()
 	}
 	if !market.IsValidTradingPair([]string{msg.Stock, msg.Money}) {

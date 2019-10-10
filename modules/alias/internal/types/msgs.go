@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 func IsOnlyForCoinEx(alias string) bool {
@@ -14,7 +16,7 @@ func IsOnlyForCoinEx(alias string) bool {
 		return true
 	}
 
-	return alias == "cet" || alias == "viabtc" || alias == "cetdac"
+	return alias == dex.CET || alias == "viabtc" || alias == "cetdac"
 }
 
 func IsValidChar(c rune) bool {

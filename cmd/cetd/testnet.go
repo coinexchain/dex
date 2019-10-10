@@ -378,7 +378,7 @@ func addCetTokenForTesting(cdc *codec.Codec,
 	cdc.MustUnmarshalJSON(appGenState[asset.ModuleName], &assetData)
 
 	baseToken, _ := asset.NewToken("CoinEx Chain Native Token",
-		"cet",
+		dex.CET,
 		tokenTotalSupply,
 		cetOwner,
 		false,
