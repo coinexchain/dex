@@ -53,7 +53,7 @@ Example :
 	cmd.Flags().Int(FlagPricePrecision, 1, "The trading-pair price precision, used to"+
 		" control the price accuracy of the order when token trades")
 	cmd.Flags().Int(FlagOrderPrecision, 0, "To control the granularity of token trade, "+
-		"the token amount of trade must be a multiple of granularity, valid range [0, 9]")
+		"the token amount of trade must be a multiple of granularity.")
 	for _, flag := range createMarketFlags {
 		cmd.MarkFlagRequired(flag)
 	}

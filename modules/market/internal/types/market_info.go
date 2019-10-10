@@ -17,10 +17,10 @@ type MarketInfo struct {
 }
 
 func GetGranularityOfOrder(orderPrecision byte) int64 {
-	if orderPrecision == 0 {
-		return 1
+	if orderPrecision > 8 {
+		orderPrecision = 0
 	}
-	return int64(math.Pow10(int(8 - (orderPrecision - 1))))
+	return int64(math.Pow10(int(orderPrecision)))
 }
 
 func (msg MarketInfo) GetSymbol() string {

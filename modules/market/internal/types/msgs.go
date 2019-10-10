@@ -84,9 +84,6 @@ func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 	if msg.Money == msg.Stock {
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "stock and money should be different")
 	}
-	if msg.OrderPrecision > MaxOrderPrecision {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderPrecision, "invalid order precision, valid range[0, 9]")
-	}
 	return nil
 }
 

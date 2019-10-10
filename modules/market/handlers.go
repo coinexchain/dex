@@ -40,12 +40,16 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 		return err.Result()
 	}
 
+	var orderPrecision byte
+	if msg.OrderPrecision <= types.MaxOrderPrecision {
+		orderPrecision = msg.OrderPrecision
+	}
 	info := types.MarketInfo{
 		Stock:             msg.Stock,
 		Money:             msg.Money,
 		PricePrecision:    msg.PricePrecision,
 		LastExecutedPrice: sdk.ZeroDec(),
-		OrderPrecision:    msg.OrderPrecision,
+		OrderPrecision:    orderPrecision,
 	}
 
 	if err := keeper.SetMarket(ctx, info); err != nil {

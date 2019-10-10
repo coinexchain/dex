@@ -360,16 +360,6 @@ func TestMarketInfoSetFailed(t *testing.T) {
 	ret = input.handler(input.ctx, failedNotHaveCetTrade)
 	require.Equal(t, types.CodeStockNoHaveCetTrade, ret.Code, "create market info should failed")
 	require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
-
-	// failed by order precision
-	failedOrderPrecision := msgMarket
-	failedOrderPrecision.Money = dex.CET
-	for i := 0; i <= 10; i++ {
-		failedOrderPrecision.OrderPrecision = byte(rand.Intn(245) + 10)
-		ret = input.handler(input.ctx, failedOrderPrecision)
-		require.Equal(t, types.CodeInvalidOrderPrecision, ret.Code, "create market info should failed")
-		require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "invalid order precision, valid range[0, 9]")
-	}
 }
 
 func createMarket(input testInput) sdk.Result {
@@ -391,7 +381,7 @@ func IsEqual(old, new sdk.Coin, diff sdk.Coin) bool {
 }
 
 func TestMarketInfoSetSuccess(t *testing.T) {
-	for i := 0; i <= 9; i++ {
+	for i := 0; i <= 10; i++ {
 		input := prepareMockInput(t, true, true)
 		oldCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
 		params := input.mk.GetParams(input.ctx)
@@ -400,6 +390,13 @@ func TestMarketInfoSetSuccess(t *testing.T) {
 		newCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
 		require.Equal(t, true, ret.IsOK(), "create market info should succeed")
 		require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, dex.NewCetCoin(params.CreateMarketFee)), "The amount is error")
+		info, err := input.mk.GetMarketInfo(input.ctx, GetSymbol(stock, dex.CET))
+		require.Nil(t, err)
+		if i <= int(types.MaxOrderPrecision) {
+			require.EqualValues(t, i, info.OrderPrecision)
+		} else {
+			require.EqualValues(t, 0, info.OrderPrecision)
+		}
 
 		for i := 0; i <= 9; i++ {
 			ret = createCetMarket(input, stock, byte(i))
@@ -537,8 +534,8 @@ func TestCreateOrderFiledByOrderPrecision(t *testing.T) {
 		ret := createCetMarket(input, stock, byte(i))
 		require.Equal(t, true, ret.IsOK(), "create market should succeed")
 		failedorderPrecision := msgGteOrder
-		for j := 0; j < 10; j++ {
-			failedorderPrecision.Quantity = int64(rand.Intn(int(math.Pow10(9-i)) - 1))
+		for j := 1; j <= 8; j++ {
+			failedorderPrecision.Quantity = int64(rand.Intn(int(math.Pow10(i)) - 1))
 			if failedorderPrecision.Quantity == 0 {
 				failedorderPrecision.Quantity = 1
 			}
@@ -567,7 +564,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 
 	param := input.mk.GetParams(input.ctx)
 
-	ret := createCetMarket(input, stock, 0)
+	ret := createCetMarket(input, stock, 10)
 	require.Equal(t, true, ret.IsOK(), "create market should succeed")
 
 	seq, err := input.mk.QuerySeqWithAddr(input.ctx, msgGteOrder.Sender)
@@ -857,9 +854,9 @@ func TestModifyPricePrecisionSuccess(t *testing.T) {
 }
 
 func TestGetGranularityOfOrder(t *testing.T) {
-	var expectValue = []float64{math.Pow10(0), math.Pow10(8), math.Pow10(7),
-		math.Pow10(6), math.Pow10(5), math.Pow10(4), math.Pow10(3),
-		math.Pow10(2), math.Pow10(1), math.Pow10(0)}
+	var expectValue = []float64{math.Pow10(0), math.Pow10(1), math.Pow10(2),
+		math.Pow10(3), math.Pow10(4), math.Pow10(5), math.Pow10(6),
+		math.Pow10(7), math.Pow10(8), math.Pow10(0)}
 	for i := 0; i <= 9; i++ {
 		ret := types.GetGranularityOfOrder(byte(i))
 		require.EqualValues(t, ret, expectValue[i])

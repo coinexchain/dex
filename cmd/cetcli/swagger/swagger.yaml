@@ -3879,7 +3879,7 @@ definitions:
       order_precision:
         type: string
         example: "0"
-        description: "To control the granularity of token trade, the token amount of trade must be a multiple of granularity, valid range [0, 9]"
+        description: "To control the granularity of token trade, the token amount of trade must be a multiple of granularity."
   MarketInfo:
     allOf:
       - $ref: "#/definitions/BaseMarket"
