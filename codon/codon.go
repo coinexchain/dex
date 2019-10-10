@@ -208,7 +208,11 @@ func GenerateCodecFile(w io.Writer, leafTypes map[string]struct{}, aliasAndValue
 	sort.Strings(aliases)
 	lines = prepareIfcEncodeFunc("EncodeAny", aliases, false)
 	writeLines(w, lines)
+	lines = prepareBareEncodeAnyFunc(aliases)
+	writeLines(w, lines)
 	lines = ctx.prepareDecodeAnyFunc()
+	writeLines(w, lines)
+	lines = prepareBareDecodeAnyFunc(aliases)
 	writeLines(w, lines)
 	lines = prepareIfcRandFunc("RandAny", "interface{}", aliases, true)
 	writeLines(w, lines)
@@ -305,10 +309,46 @@ func prepareIfcDecodeFunc(funcName, decType string, alias2bytes map[string]Magic
 		lines = append(lines, fmt.Sprintf("v, n, err := Decode%s(bz[4:])", alias))
 		lines = append(lines, fmt.Sprintf("return v, n+4, err"))
 	}
+	lines = append(lines, "default:")
+	lines = append(lines, "panic(\"Unknown type\")")
 	lines = append(lines, "} // end of switch")
 	lines = append(lines, "return v, n, nil")
 	lines = append(lines, "} // end of "+funcName)
 	return lines, aliases
+}
+
+func prepareBareEncodeAnyFunc(aliases []string) []string {
+	lines := make([]string, 0, 1000)
+	lines = append(lines, "func BareEncodeAny(w io.Writer, x interface{}) error {")
+	lines = append(lines, "switch v := x.(type) {")
+	for _, alias := range aliases {
+		lines = append(lines, fmt.Sprintf("case %s:", alias))
+		lines = append(lines, fmt.Sprintf("return Encode%s(w, v)", alias))
+
+		lines = append(lines, fmt.Sprintf("case *%s:", alias))
+		lines = append(lines, fmt.Sprintf("return Encode%s(w, *v)", alias))
+	}
+	lines = append(lines, "default:")
+	lines = append(lines, "panic(\"Unknown Type.\")")
+	lines = append(lines, "} // end of switch")
+	lines = append(lines, "} // end of func")
+	return lines
+}
+
+func prepareBareDecodeAnyFunc(aliases []string) []string {
+	lines := make([]string, 0, 1000)
+	lines = append(lines, "func BareDecodeAny(bz []byte, x interface{}) (n int, err error) {")
+	lines = append(lines, "switch v := x.(type) {")
+	for _, alias := range aliases {
+		lines = append(lines, fmt.Sprintf("case *%s:", alias))
+		lines = append(lines, fmt.Sprintf("*v, n, err = Decode%s(bz)", alias))
+	}
+	lines = append(lines, "default:")
+	lines = append(lines, "panic(\"Unknown type\")")
+	lines = append(lines, "} // end of switch")
+	lines = append(lines, "return")
+	lines = append(lines, "} // end of DecodeVar")
+	return lines
 }
 
 func (ctx *prepareCtx) prepareMagicBytesFunc() []string {
@@ -828,9 +868,9 @@ func (ctx *prepareCtx) genFieldRandLines(t reflect.Type, lines *[]string, fieldN
 	case reflect.Float64:
 		line = ctx.buildRandLine("Float64", fieldName, t)
 	case reflect.String:
-		line = fmt.Sprintf("%s = r.GetString(r.GetInt()%%MaxStringLength)", fieldName)
+		line = fmt.Sprintf("%s = r.GetString(1+int(r.GetUint()%%(MaxStringLength-1)))", fieldName)
 	case reflect.Array, reflect.Slice:
-		line = "length = r.GetInt()%MaxSliceLength"
+		line = "length = 1+int(r.GetUint()%(MaxSliceLength-1))"
 		if t.Kind() == reflect.Array {
 			line = fmt.Sprintf("length = %d", t.Len())
 		}
