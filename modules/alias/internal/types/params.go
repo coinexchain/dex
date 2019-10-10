@@ -70,13 +70,6 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	}
 }
 
-// Equal returns a boolean determining if two Params types are identical.
-func (p Params) Equal(p2 Params) bool {
-	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
-	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
-	return bytes.Equal(bz1, bz2)
-}
-
 func (p *Params) ValidateGenesis() error {
 	if p.FeeForAliasLength2 <= 0 {
 		return fmt.Errorf("%s must be a positive number, is %d", KeyFeeForAliasLength2, p.FeeForAliasLength2)
@@ -103,6 +96,29 @@ func (p *Params) ValidateGenesis() error {
 		return fmt.Errorf("%s must be a positive number, is %d", KeyMaxAliasCount, p.MaxAliasCount)
 	}
 	return nil
+}
+
+func (p *Params) GetFeeForAlias(alias string) int64 {
+	if n := len(alias); n == 2 {
+		return p.FeeForAliasLength2
+	} else if n == 3 {
+		return p.FeeForAliasLength3
+	} else if n == 4 {
+		return p.FeeForAliasLength4
+	} else if n == 5 {
+		return p.FeeForAliasLength5
+	} else if n == 6 {
+		return p.FeeForAliasLength6
+	} else {
+		return p.FeeForAliasLength7OrHigher
+	}
+}
+
+// Equal returns a boolean determining if two Params types are identical.
+func (p Params) Equal(p2 Params) bool {
+	bz1 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p)
+	bz2 := ModuleCdc.MustMarshalBinaryLengthPrefixed(&p2)
+	return bytes.Equal(bz1, bz2)
 }
 
 func (p Params) String() string {

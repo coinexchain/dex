@@ -77,29 +77,13 @@ func handleAliasAdd(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Err
 	if !ok {
 		return types.ErrMaxAliasCountReached()
 	} else if addNewAlias {
-		fee := getAddAliasFee(msg.Alias, aliasParams)
+		fee := aliasParams.GetFeeForAlias(msg.Alias)
 		err := k.DeductInt64CetFee(ctx, msg.Owner, fee)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func getAddAliasFee(alias string, params types.Params) int64 {
-	if len(alias) == 2 {
-		return params.FeeForAliasLength2
-	} else if len(alias) == 3 {
-		return params.FeeForAliasLength3
-	} else if len(alias) == 4 {
-		return params.FeeForAliasLength4
-	} else if len(alias) == 5 {
-		return params.FeeForAliasLength5
-	} else if len(alias) == 6 {
-		return params.FeeForAliasLength6
-	} else {
-		return params.FeeForAliasLength7OrHigher
-	}
 }
 
 func handleAliasRemove(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Error {
