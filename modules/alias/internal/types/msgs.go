@@ -1,50 +1,8 @@
 package types
 
 import (
-	"strings"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	dex "github.com/coinexchain/dex/types"
 )
-
-func IsOnlyForCoinEx(alias string) bool {
-	if strings.HasPrefix(alias, "coinex") ||
-		strings.HasSuffix(alias, "coinex") ||
-		strings.HasSuffix(alias, "coinex.org") ||
-		strings.HasSuffix(alias, "coinex.com") {
-		return true
-	}
-
-	return alias == dex.CET || alias == "viabtc" || alias == "cetdac"
-}
-
-func IsValidChar(c rune) bool {
-	if '0' <= c && c <= '9' {
-		return true
-	}
-	if 'a' <= c && c <= 'z' {
-		return true
-	}
-	if c == '-' || c == '_' || c == '.' || c == '@' {
-		return true
-	}
-	return false
-}
-
-func IsValidAlias(alias string) bool {
-	if len(alias) < 2 || len(alias) > 100 {
-		return false
-	}
-	for _, c := range alias {
-		if !IsValidChar(c) {
-			return false
-		}
-	}
-	return true
-}
-
-//=================================
 
 var _ sdk.Msg = MsgAliasUpdate{}
 
