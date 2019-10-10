@@ -13,7 +13,6 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/coinexchain/dex/modules/market/internal/types"
-	dex "github.com/coinexchain/dex/types"
 )
 
 var unitChainID = "coinex-dex"

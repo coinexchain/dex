@@ -107,7 +107,7 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 	}
 
 	if _, err := keeper.GetMarketInfo(ctx, msg.GetSymbol()); err == nil {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeRepeatTrade, "The repeatedly created trading pairs")
+		return types.ErrRepeatTradingPair()
 	}
 
 	if !keeper.IsTokenExists(ctx, msg.Money) || !keeper.IsTokenExists(ctx, msg.Stock) {
@@ -120,7 +120,7 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 
 	if msg.Money != dex.CET && msg.Stock != dex.CET {
 		if _, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.Stock, dex.CET)); err != nil {
-			return sdk.NewError(types.CodeSpaceMarket, types.CodeStockNoHaveCetTrade, "The stock(%s) not have cet trade", msg.Stock)
+			return types.ErrNotListedAgainstCet(msg.Stock)
 		}
 	}
 
@@ -152,7 +152,7 @@ func calFrozenFeeInOrder(ctx sdk.Context, marketParams types.Params, keeper keep
 		}
 	}
 	if frozenFeeDec.GT(sdk.NewDec(types.MaxOrderAmount)) {
-		return 0, sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The frozen fee is too large")
+		return 0, types.ErrInvalidOrderAmount("The frozen fee is too large")
 	}
 	frozenFee := frozenFeeDec.RoundInt64()
 	if frozenFee < marketParams.MarketFeeMin {
@@ -224,12 +224,12 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 		denom = money
 		tmpAmount, err := calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision)
 		if err != nil {
-			return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The order amount is too large").Result()
+			return types.ErrInvalidOrderAmount("The frozen fee is too large").Result()
 		}
 		amount = tmpAmount.RoundInt64()
 	}
 	if amount > types.MaxOrderAmount {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The order amount is too large").Result()
+		return types.ErrInvalidOrderAmount("The frozen fee is too large").Result()
 	}
 
 	seq, err := keeper.QuerySeqWithAddr(ctx, msg.Sender)
@@ -247,7 +247,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	if featureFee > types.MaxOrderAmount ||
 		frozenFee > types.MaxOrderAmount ||
 		totalFee > types.MaxOrderAmount {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The order amount is too large").Result()
+		return types.ErrInvalidOrderAmount("The frozen fee is too large").Result()
 	}
 	if ret := checkMsgCreateOrder(ctx, keeper, msg, totalFee, amount, denom, seq); !ret.IsOK() {
 		return ret
@@ -321,15 +321,15 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 	}
 	orderID, err := types.AssemblyOrderID(msg.Sender.String(), seq, msg.Identify)
 	if err != nil {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidSequence, err.Error()).Result()
+		return types.ErrInvalidSequence(err.Error()).Result()
 	}
 	globalKeeper := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc)
 	if globalKeeper.QueryOrder(ctx, orderID) != nil {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderExist, fmt.Sprintf("the order [%s] have exist", orderID)).Result()
+		return types.ErrOrderAlreadyExist(orderID).Result()
 	}
 	marketInfo, err := keeper.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
-		return types.ErrInvalidSymbol().Result()
+		return types.ErrInvalidMarket(err.Error()).Result()
 	}
 	if p := msg.PricePrecision; p > marketInfo.PricePrecision {
 		return types.ErrInvalidPricePrecision(p).Result()
@@ -338,11 +338,11 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 		return types.ErrTokenForbidByIssuer().Result()
 	}
 	if keeper.IsForbiddenByTokenIssuer(ctx, stock, msg.Sender) || keeper.IsForbiddenByTokenIssuer(ctx, money, msg.Sender) {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeAddressForbidByIssuer, "The sender is forbidden by token issuer").Result()
+		return types.ErrAddressForbidByIssuer().Result()
 	}
 	baseValue := types.GetGranularityOfOrder(marketInfo.OrderPrecision)
 	if amount%baseValue != 0 {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidOrderAmount, "The amount of tokens to trade should be a multiple of the order precision").Result()
+		return types.ErrInvalidOrderAmount("The amount of tokens to trade should be a multiple of the order precision").Result()
 	}
 
 	return sdk.Result{}
@@ -399,11 +399,11 @@ func checkMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepe
 	globalKeeper := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc)
 	order := globalKeeper.QueryOrder(ctx, msg.OrderID)
 	if order == nil {
-		return sdk.NewError(types.StoreKey, types.CodeNotFindOrder, "Not find order in blockchain")
+		return types.ErrOrderNotFound(msg.OrderID)
 	}
 
 	if !bytes.Equal(order.Sender, msg.Sender) {
-		return sdk.NewError(types.StoreKey, types.CodeNotMatchSender, "The cancel addr is not match order sender")
+		return types.ErrNotMatchSender("only order's sender can cancel this order")
 	}
 
 	return nil
@@ -457,29 +457,30 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 	marketParams := keeper.GetParams(ctx)
 	currTime := ctx.BlockHeader().Time.Unix()
 	if msg.EffectiveTime < currTime+marketParams.MarketMinExpiredTime {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidTime, "Invalid Cancel Time")
+		return types.ErrInvalidCancelTime()
 	}
 
 	info, err := keeper.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidSymbol, err.Error())
+		return types.ErrInvalidMarket(err.Error())
 	}
 
 	stockToken := keeper.GetToken(ctx, info.Stock)
 	if !bytes.Equal(msg.Sender, stockToken.GetOwner()) {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeNotMatchSender, "Not match market info sender")
+		return types.ErrNotMatchSender("only stock's owner can cancel a market")
 	}
 
 	// TODO. Will add unit test
 	if !stockToken.GetTokenForbiddable() {
 		if info.Money == dex.CET {
-			return sdk.NewError(types.CodeSpaceMarket, types.CodeNotAllowedOffline, "stock token don't have globally forbidden attribute, so a trade with CET would not be allowed ")
+			return types.ErrDelistNotAllowed("stock token doesn't have globally forbidden attribute, so its market against CET can not be canceled")
 		}
 	}
 
-	if keeper.IsBancorExist(ctx, info.Stock) {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidBancorExist,
-			"When stock has bancor contracts, you can't delete the trading-pair")
+	// TODO. Will add unit test
+	if info.Money == dex.CET && keeper.IsBancorExist(ctx, info.Stock) {
+		return types.ErrDelistNotAllowed(
+			fmt.Sprintf("When %s has bancor contracts, you can't delist the %s/cet market", info.Stock, info.Stock))
 	}
 
 	return nil
@@ -540,12 +541,11 @@ func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePreci
 
 	info, err := k.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidSymbol,
-			fmt.Sprintf("Error retrieving trade pair information : %s", err.Error()))
+		return types.ErrInvalidMarket("Error retrieving market information: " + err.Error())
 	}
 
 	if info.PricePrecision > msg.PricePrecision {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidPricePrecision,
+		return types.ErrInvalidPricePrecisionChange(
 			fmt.Sprintf("Price Precision can only be increased; "+
 				"tradingPair price_precision : %d, msg price_precision : %d",
 				info.PricePrecision, msg.PricePrecision))
@@ -554,7 +554,7 @@ func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePreci
 	stock, _ := SplitSymbol(msg.TradingPair)
 	tokenInfo := k.GetToken(ctx, stock)
 	if !tokenInfo.GetOwner().Equals(msg.Sender) {
-		return sdk.NewError(types.CodeSpaceMarket, types.CodeNotMatchSender, fmt.Sprintf(
+		return types.ErrNotMatchSender(fmt.Sprintf(
 			"The sender of the transaction (%s) does not match "+
 				"the owner of the transaction pair (%s)",
 			tokenInfo.GetOwner().String(), msg.Sender.String()))

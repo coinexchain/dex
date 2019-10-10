@@ -21,24 +21,74 @@ const (
 	CodeInvalidOrderID        sdk.CodeType = 613
 	CodeMarshalFailed         sdk.CodeType = 614
 	CodeUnMarshalFailed       sdk.CodeType = 615
-	CodeNotFindOrder          sdk.CodeType = 616
+	CodeOrderNotFound         sdk.CodeType = 616
 	CodeNotMatchSender        sdk.CodeType = 617
-	CodeInvalidTime           sdk.CodeType = 618
+	CodeInvalidCancelTime     sdk.CodeType = 618
 	CodeAddressForbidByIssuer sdk.CodeType = 619
 	CodeOrderQuantityTooSmall sdk.CodeType = 620
-	CodeStockNoHaveCetTrade   sdk.CodeType = 621
-	CodeRepeatTrade           sdk.CodeType = 622
-	CodeNotAllowedOffline     sdk.CodeType = 623
+	CodeNotListedAgainstCet   sdk.CodeType = 621
+	CodeRepeatTradingPair     sdk.CodeType = 622
+	CodeDelistNotAllowed      sdk.CodeType = 623
 	CodeInvalidOrderAmount    sdk.CodeType = 624
 	CodeInvalidBancorExist    sdk.CodeType = 625
 	CodeInvalidExistBlocks    sdk.CodeType = 626
 	CodeInvalidTimeInforce    sdk.CodeType = 627
 	CodeFailedUnmarshal       sdk.CodeType = 628
 	CodeInvalidSequence       sdk.CodeType = 629
-	CodeInvalidOrderExist     sdk.CodeType = 630
+	CodeOrderAlreadyExist     sdk.CodeType = 630
 	CodeInvalidOrderPrecision sdk.CodeType = 631
 	CodeDelistRequestExist    sdk.CodeType = 632
+	CodeInvalidMarket         sdk.CodeType = 633
+	CodeInvalidIdentify       sdk.CodeType = 634
 )
+
+//func Err(s string) sdk.Error {
+//	sdk.NewError(CodeSpaceMarket, Code, s)
+//}
+
+func ErrDelistNotAllowed(s string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeDelistNotAllowed, s)
+}
+
+func ErrInvalidMarket(s string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidMarket, s)
+}
+
+func ErrInvalidCancelTime() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidCancelTime, "Invalid Cancel Time")
+}
+
+func ErrNotMatchSender(s string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeNotMatchSender, s)
+}
+
+func ErrOrderNotFound(id string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeOrderNotFound, "can not find this order on chain: "+id)
+}
+
+func ErrAddressForbidByIssuer() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeAddressForbidByIssuer, "The sender is forbidden by token issuer")
+}
+
+func ErrOrderAlreadyExist(id string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeOrderAlreadyExist, "the order [%s] already exist", id)
+}
+
+func ErrInvalidSequence(s string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidSequence, s)
+}
+
+func ErrInvalidOrderAmount(s string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderAmount, s)
+}
+
+func ErrNotListedAgainstCet(stock string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeNotListedAgainstCet, "The stock(%s) not have cet trade", stock)
+}
+
+func ErrRepeatTradingPair() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeRepeatTradingPair, "The repeatedly created trading pairs")
+}
 
 func ErrTokenNoExist() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidToken, "Token not exist")
@@ -46,6 +96,10 @@ func ErrTokenNoExist() sdk.Error {
 
 func ErrInvalidOrderID() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderID, "Invalid order id")
+}
+
+func ErrInvalidPricePrecisionChange(s string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, s)
 }
 
 func ErrInvalidPricePrecision(precision byte) sdk.Error {

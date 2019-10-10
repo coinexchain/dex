@@ -358,7 +358,7 @@ func TestMarketInfoSetFailed(t *testing.T) {
 	// failed by not have cet trade
 	failedNotHaveCetTrade := msgMarket
 	ret = input.handler(input.ctx, failedNotHaveCetTrade)
-	require.Equal(t, types.CodeStockNoHaveCetTrade, ret.Code, "create market info should failed")
+	require.Equal(t, types.CodeNotListedAgainstCet, ret.Code, "create market info should failed")
 	require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
 }
 
@@ -400,7 +400,7 @@ func TestMarketInfoSetSuccess(t *testing.T) {
 
 		for i := 0; i <= 9; i++ {
 			ret = createCetMarket(input, stock, byte(i))
-			require.Equal(t, types.CodeRepeatTrade, ret.Code)
+			require.Equal(t, types.CodeRepeatTradingPair, ret.Code)
 			require.Equal(t, false, ret.IsOK(), "repeatedly creating market would fail")
 		}
 	}
@@ -495,7 +495,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	newCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
 	ret = input.handler(input.ctx, failedOrderHaveExist)
 	oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
-	require.Equal(t, types.CodeInvalidOrderExist, ret.Code, "create order should failed by order exist")
+	require.Equal(t, types.CodeOrderAlreadyExist, ret.Code, "create order should failed by order exist")
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 }
 
@@ -631,7 +631,7 @@ func TestCancelOrderFailed(t *testing.T) {
 	failedInvalidOrderID := cancelOrder
 	failedInvalidOrderID.OrderID, _ = types.AssemblyOrderID(haveCetAddress.String(), 1, 2)
 	ret := input.handler(input.ctx, failedInvalidOrderID)
-	require.Equal(t, types.CodeNotFindOrder, ret.Code, "cancel order should failed by not exist ")
+	require.Equal(t, types.CodeOrderNotFound, ret.Code, "cancel order should failed by not exist ")
 
 	// create order
 	msgIOCOrder := types.MsgCreateOrder{
@@ -704,7 +704,7 @@ func TestCancelMarketFailed(t *testing.T) {
 	failedTime := msgCancelMarket
 	failedTime.EffectiveTime = 10
 	ret := input.handler(input.ctx, failedTime)
-	require.Equal(t, types.CodeInvalidTime, ret.Code, "cancel order should failed by invalid cancel time")
+	require.Equal(t, types.CodeInvalidCancelTime, ret.Code, "cancel order should failed by invalid cancel time")
 
 	failedSymbol := msgCancelMarket
 	failedSymbol.TradingPair = GetSymbol(stock, "not exist")

@@ -154,7 +154,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", msg.ExistBlocks))
 	}
 	if msg.Identify < 0 || msg.Identify > 255 {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderExist, fmt.Sprintf("invalid identify : %d, expected range [0, 255]", msg.Identify))
+		return sdk.NewError(CodeSpaceMarket, CodeInvalidIdentify, fmt.Sprintf("invalid identify : %d, expected range [0, 255]", msg.Identify))
 	}
 
 	return nil
@@ -266,7 +266,7 @@ func (msg MsgCancelTradingPair) ValidateBasic() sdk.Error {
 		return ErrInvalidSymbol()
 	}
 	if msg.EffectiveTime < 0 {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidTime, "Invalid height")
+		return ErrInvalidCancelTime()
 	}
 
 	return nil
