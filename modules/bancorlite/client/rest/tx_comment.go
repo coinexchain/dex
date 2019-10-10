@@ -51,9 +51,14 @@ func (req *BancorInitReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Ms
 	if convertErr != nil {
 		return nil, errors.New("Invalid enable cancel time")
 	}
-	precision, convertErr := strconv.Atoi(req.StockPrecision)
-	if convertErr != nil {
-		return nil, errors.New("Invalid stock precision")
+	var precision int
+	if req.StockPrecision == "" {
+		precision = 0
+	}else {
+		precision, convertErr = strconv.Atoi(req.StockPrecision)
+		if convertErr != nil {
+			return nil, errors.New("Invalid stock precision")
+		}
 	}
 
 	return &types.MsgBancorInit{

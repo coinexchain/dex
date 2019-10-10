@@ -3686,6 +3686,9 @@ paths:
               max_supply:
                 type: string
                 example: "100000"
+              stock_precision:
+                type: string
+                example: "0"
               max_price:
                 type: string
                 example: "100"
@@ -3837,6 +3840,8 @@ paths:
                   init_price:
                     type: string
                   max_supply:
+                    type: string
+                  stock_precision:
                     type: string
                   max_price:
                     type: string
