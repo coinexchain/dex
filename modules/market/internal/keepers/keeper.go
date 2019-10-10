@@ -52,7 +52,7 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 func (k Keeper) QuerySeqWithAddr(ctx sdk.Context, addr sdk.AccAddress) (uint64, sdk.Error) {
 	bz, err := k.cdc.MarshalJSON(auth.QueryAccountParams{Address: addr})
 	if err != nil {
-		return 0, sdk.NewError(types.CodeSpaceMarket, types.CodeInvalidAddress, err.Error())
+		return 0, types.ErrInvalidAddress()
 	}
 	res, sdkErr := auth.NewQuerier(k.ak)(ctx, []string{auth.QueryAccount}, abci.RequestQuery{
 		Data: bz,
@@ -63,7 +63,7 @@ func (k Keeper) QuerySeqWithAddr(ctx sdk.Context, addr sdk.AccAddress) (uint64, 
 
 	var acc auth.Account
 	if err := k.cdc.UnmarshalJSON(res, &acc); err != nil {
-		return 0, sdk.NewError(types.CodeSpaceMarket, types.CodeFailedUnmarshal, err.Error())
+		return 0, types.ErrFailedUnmarshal()
 	}
 	return acc.GetSequence(), nil
 }

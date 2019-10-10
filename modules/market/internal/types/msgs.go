@@ -82,7 +82,7 @@ func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 		return ErrInvalidPricePrecision(p)
 	}
 	if msg.Money == msg.Stock {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "stock and money should be different")
+		return ErrStockAndMoneyAreSame()
 	}
 	return nil
 }
@@ -148,13 +148,10 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidTradeSide()
 	}
 	if msg.TimeInForce != GTE && msg.TimeInForce != IOC {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidTimeInforce, fmt.Sprintf("Invalid timeInforce : %d; The valid value : 3, 4", msg.TimeInForce))
+		return ErrInvalidTimeInforce(msg.TimeInForce)
 	}
 	if msg.ExistBlocks < 0 {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", msg.ExistBlocks))
-	}
-	if msg.Identify < 0 || msg.Identify > 255 {
-		return sdk.NewError(CodeSpaceMarket, CodeInvalidIdentify, fmt.Sprintf("invalid identify : %d, expected range [0, 255]", msg.Identify))
+		return ErrInvalidExistBlocks(msg.ExistBlocks)
 	}
 
 	return nil

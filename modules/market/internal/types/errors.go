@@ -1,6 +1,8 @@
 package types
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -33,18 +35,33 @@ const (
 	CodeInvalidBancorExist    sdk.CodeType = 625
 	CodeInvalidExistBlocks    sdk.CodeType = 626
 	CodeInvalidTimeInforce    sdk.CodeType = 627
-	CodeFailedUnmarshal       sdk.CodeType = 628
+	CodeUnmarshalFailed       sdk.CodeType = 628
 	CodeInvalidSequence       sdk.CodeType = 629
 	CodeOrderAlreadyExist     sdk.CodeType = 630
 	CodeInvalidOrderPrecision sdk.CodeType = 631
 	CodeDelistRequestExist    sdk.CodeType = 632
 	CodeInvalidMarket         sdk.CodeType = 633
-	CodeInvalidIdentify       sdk.CodeType = 634
 )
 
-//func Err(s string) sdk.Error {
-//	sdk.NewError(CodeSpaceMarket, Code, s)
-//}
+func ErrFailedParseParam() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "Failed to parse param")
+}
+
+func ErrFailedMarshal() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "Marshal failed")
+}
+
+func ErrInvalidExistBlocks(eb int) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", eb))
+}
+
+func ErrInvalidTimeInforce(tif int) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidTimeInforce, fmt.Sprintf("Invalid timeInforce : %d; The valid value : 3, 4", tif))
+}
+
+func ErrFailedUnmarshal() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeUnmarshalFailed, "unmarshal failed")
+}
 
 func ErrDelistNotAllowed(s string) sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeDelistNotAllowed, s)
@@ -136,6 +153,10 @@ func ErrInvalidOrderType() sdk.Error {
 
 func ErrInvalidSymbol() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "Invalid trade symbol")
+}
+
+func ErrStockAndMoneyAreSame() sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "stock and money should be different")
 }
 
 func ErrTokenForbidByIssuer() sdk.Error {
