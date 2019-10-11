@@ -905,5 +905,103 @@ func TestCalFeatureFeeForExistBlocks(t *testing.T) {
 	msg.ExistBlocks = 30001
 	fee = calFeatureFeeForExistBlocks(msg, params)
 	require.Equal(t, int64(3), fee)
+}
 
+func TestCalFrozenFeeInOrder(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	mkInfo := MarketInfo{
+		Stock:             "abc",
+		Money:             "cet",
+		LastExecutedPrice: sdk.NewDec(0),
+		PricePrecision:    1,
+		OrderPrecision:    3,
+	}
+
+	err := input.mk.SetMarket(input.ctx, mkInfo)
+	require.Nil(t, err)
+
+	checkInfo, failed := input.mk.GetMarketInfo(input.ctx, GetSymbol(mkInfo.Stock, mkInfo.Money))
+	require.Nil(t, failed)
+	require.EqualValues(t, mkInfo, checkInfo)
+
+	param := types.Params{MarketFeeRate: 10, FixedTradeFee: 0}
+	orderInfo := MsgCreateOrder{
+		Price:       1,
+		Quantity:    10000,
+		TradingPair: GetSymbol(mkInfo.Stock, mkInfo.Money),
+	}
+
+	// LastExecutedPrice is zero, MarketFeeMin is zero, FixedTradeFee is zero
+	cal, err := calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 0, cal)
+
+	// LastExecutedPrice is zero, MarketFeeMin is 100, FixedTradeFee is zero
+	param.MarketFeeMin = 100
+	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
+
+	// LastExecutedPrice is zero, MarketFeeMin is 100, FixedTradeFee is 10
+	param.MarketFeeMin = 100
+	param.FixedTradeFee = 10
+	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
+
+	// LastExecutedPrice is zero, MarketFeeMin is 100, FixedTradeFee is 200
+	param.MarketFeeMin = 100
+	param.FixedTradeFee = 200
+	cal, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 200, cal)
+
+	mkInfo.LastExecutedPrice = sdk.NewDec(10)
+	err = input.mk.SetMarket(input.ctx, mkInfo)
+	require.Nil(t, err)
+	checkInfo, failed = input.mk.GetMarketInfo(input.ctx, GetSymbol(mkInfo.Stock, mkInfo.Money))
+	require.Nil(t, failed)
+	require.EqualValues(t, mkInfo, checkInfo)
+
+	// LastExecutedPrice is 10, MarketFeeMin is 200; actual 10 * 10000 * (1 / 1000) = 100
+	param.MarketFeeMin = 200
+	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
+
+	// LastExecutedPrice is 10, MarketFeeMin is 100; actual 10 * 10000 * (1 / 1000) = 100
+	param.MarketFeeMin = 100
+	cal, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 100, cal)
+
+	// LastExecutedPrice is 10, MarketFeeMin is 100, MarketFeeRate is 10000; actual 10 * 1e18 = 1e19
+	param.MarketFeeRate = 10000
+	orderInfo.Quantity = types.MaxOrderAmount
+	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code())
+
+	mkInfo.Stock = dex.CET
+	mkInfo.Money = "abc"
+	err = input.mk.SetMarket(input.ctx, mkInfo)
+	require.Nil(t, err)
+	checkInfo, failed = input.mk.GetMarketInfo(input.ctx, GetSymbol(mkInfo.Stock, mkInfo.Money))
+	require.Nil(t, failed)
+	require.EqualValues(t, mkInfo, checkInfo)
+
+	// LastExecutedPrice is 10, MarketFeeMin is 100, MarketFeeRate is 10000; actual 1000
+	orderInfo.Quantity = 1000
+	orderInfo.TradingPair = GetSymbol(mkInfo.Stock, mkInfo.Money)
+	cal, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 1000, cal)
+
+	// LastExecutedPrice is 10, MarketFeeMin is 10000, MarketFeeRate is 10000; actual 1000
+	param.MarketFeeMin = 10000
+	orderInfo.Quantity = 1000
+	orderInfo.TradingPair = GetSymbol(mkInfo.Stock, mkInfo.Money)
+	cal, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
 }
