@@ -862,3 +862,48 @@ func TestGetGranularityOfOrder(t *testing.T) {
 		require.EqualValues(t, ret, expectValue[i])
 	}
 }
+
+func TestCalFeatureFeeForExistBlocks(t *testing.T) {
+	msg := types.MsgCreateOrder{
+		ExistBlocks: 8000,
+	}
+	params := types.Params{
+		GTEOrderLifetime:           10000,
+		GTEOrderFeatureFeeByBlocks: 1,
+	}
+	fee := calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(0), fee)
+
+	msg.ExistBlocks = 10000
+	fee = calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(0), fee)
+
+	msg.ExistBlocks = 10001
+	fee = calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(1), fee)
+
+	msg.ExistBlocks = 18000
+	fee = calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(1), fee)
+
+	msg.ExistBlocks = 20000
+	fee = calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(1), fee)
+
+	msg.ExistBlocks = 20001
+	fee = calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(2), fee)
+
+	msg.ExistBlocks = 28000
+	fee = calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(2), fee)
+
+	msg.ExistBlocks = 30000
+	fee = calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(2), fee)
+
+	msg.ExistBlocks = 30001
+	fee = calFeatureFeeForExistBlocks(msg, params)
+	require.Equal(t, int64(3), fee)
+
+}
