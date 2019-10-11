@@ -211,17 +211,13 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 			OwnerAddress: haveCetAddress,
 		}
 		tk.ForbidToken(ctx, msgForbidToken.Symbol, msgForbidToken.OwnerAddress)
-		msgForbidToken.Symbol = money
-		tk.ForbidToken(ctx, msgForbidToken.Symbol, msgForbidToken.OwnerAddress)
 	}
 	if addrForbid {
 		msgForbidAddr := asset.MsgForbidAddr{
-			Symbol:    money,
+			Symbol:    stock,
 			OwnerAddr: haveCetAddress,
 			Addresses: []sdk.AccAddress{forbidAddr},
 		}
-		tk.ForbidAddress(ctx, msgForbidAddr.Symbol, msgForbidAddr.OwnerAddr, msgForbidAddr.Addresses)
-		msgForbidAddr.Symbol = stock
 		tk.ForbidAddress(ctx, msgForbidAddr.Symbol, msgForbidAddr.OwnerAddr, msgForbidAddr.Addresses)
 	}
 
@@ -1001,7 +997,14 @@ func TestCalFrozenFeeInOrder(t *testing.T) {
 	param.MarketFeeMin = 10000
 	orderInfo.Quantity = 1000
 	orderInfo.TradingPair = GetSymbol(mkInfo.Stock, mkInfo.Money)
-	cal, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
 	require.NotNil(t, err)
 	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
+}
+
+func TestCheckMsgCreateOrder(t *testing.T) {
+	input := prepareMockInput(t, true, true)
+	require.True(t, input.mk.IsTokenForbidden(input.ctx, stock))
+	require.True(t, input.mk.IsForbiddenByTokenIssuer(input.ctx, stock, forbidAddr))
+
 }
