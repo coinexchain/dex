@@ -110,7 +110,7 @@ func TestBlockExec(t *testing.T) {
 		mock.Mempool{}, sm.MockEvidencePool{})
 
 	// generate txs
-	txcount := 10000
+	txcount := 100000
 	txs := make([]types.Tx, 0, txcount)
 	for i := 0; i < txcount; i++ {
 		//fromAddr, toAddr := accs[i%AccountNum].Address, accs[(i+1)%AccountNum].Address

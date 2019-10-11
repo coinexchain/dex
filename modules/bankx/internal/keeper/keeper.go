@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/x/auth/exported"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -46,6 +47,10 @@ func (k Keeper) GetParams(ctx sdk.Context) (param types.Params) {
 }
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
+}
+
+func (k Keeper) GetAccount() (auth.AccountKeeper,types.ExpectedAccountXKeeper){
+	return k.ak,k.axk
 }
 
 func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
@@ -156,17 +161,18 @@ func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int6
 	return k.DeductFee(ctx, addr, dex.NewCetCoins(amt))
 }
 
-func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, transfer sdk.Coins) (sdk.Coins, sdk.Error) {
+func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, transfer sdk.Coins) (exported.Account, sdk.Coins, sdk.Error) {
 	//toAccount doesn't exist yet
-	if k.ak.GetAccount(ctx, to) == nil {
+	acc := k.ak.GetAccount(ctx, to)
+	if acc == nil {
 		activationFee := dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
-		amt, neg := transfer.SafeSub(activationFee)
+		_, neg := transfer.SafeSub(activationFee)
 		if neg {
-			return transfer, types.ErrorInsufficientCETForActivatingFee()
+			return nil, transfer, types.ErrorInsufficientCETForActivatingFee()
 		}
-		return amt, k.DeductFee(ctx, from, activationFee)
+		return acc, activationFee, nil
 	}
-	return transfer, nil
+	return nil, nil, nil
 }
 func (k Keeper) PreCheckFreshAccounts(ctx sdk.Context, outputs []bank.Output) (addrs []sdk.AccAddress) {
 	for _, output := range outputs {

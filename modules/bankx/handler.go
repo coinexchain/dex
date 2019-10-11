@@ -3,8 +3,10 @@ package bankx
 import (
 	"encoding/json"
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/exported"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
@@ -68,33 +70,48 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 	}
 
 }
-
+var SendEnabled bool = true
 func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
-	if err := k.GetSendEnabled(ctx); err != nil {
-		return err.Result()
+	//if err := k.GetSendEnabled(ctx); err != nil {
+	//	return err.Result()
+	//}
+	if !SendEnabled {
+		return bank.ErrSendDisabled(types.CodeSpaceBankx).Result()
 	}
 
 	if k.BlacklistedAddr(msg.ToAddress) {
 		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.ToAddress)).Result()
 	}
-
-	if k.IsSendForbidden(ctx, msg.Amount, msg.FromAddress) {
+	amt := msg.Amount
+	if !amt.IsValid() {
+		//tmp for pprof test
+		return sdk.Result{Code: 2}
+	}
+	if k.IsSendForbidden(ctx, amt, msg.FromAddress) {
 		return types.ErrTokenForbiddenByOwner().Result()
 	}
 
-	//TODO: add codes to check whether fromAccount & toAccount is moduleAccount
-
-	amt := msg.Amount
-	if k.GetCoins(ctx, msg.FromAddress).IsAllLT(amt) {
+	ak, _ := k.GetAccount()
+	acc := ak.GetAccount(ctx, msg.FromAddress)
+	if acc == nil {
+		//tmp for pprof test
+		return sdk.Result{Code: 3}
+	}
+	srcCoins := acc.GetCoins()
+	srcSpendableCoins := acc.SpendableCoins(ctx.BlockTime())
+	var activationFee sdk.Coins
+	var dstCoins sdk.Coins
+	accDst := ak.GetAccount(ctx, msg.ToAddress)
+	if accDst == nil {
+		activationFee = dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
+	} else {
+		dstCoins = accDst.GetCoins()
+	}
+	if srcSpendableCoins.IsAllLT(amt) {
 		return sdk.ErrInsufficientCoins("sender has insufficient coins for the transfer").Result()
 	}
 
 	//check whether toAccount exist
-	amt, err := k.DeductActivationFee(ctx, msg.FromAddress, msg.ToAddress, amt)
-	if err != nil {
-		return err.Result()
-	}
-
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
@@ -103,9 +120,10 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 
 	time := msg.UnlockTime
 	if time != 0 {
+		//tmp invalid for pprof test
 		return lockedSend(ctx, k, msg.FromAddress, msg.ToAddress, amt, time)
 	}
-	return normalSend(ctx, k, msg.FromAddress, msg.ToAddress, amt)
+	return normalSend(ctx, ak, acc, accDst, srcCoins, dstCoins, amt, activationFee)
 }
 
 func lockedSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt sdk.Coins, unlockTime int64) sdk.Result {
@@ -125,14 +143,14 @@ func lockedSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt 
 	}
 }
 
-func normalSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) sdk.Result {
-	err := k.SendCoins(ctx, fromAddr, toAddr, amt)
-	if err != nil {
-		return err.Result()
-	}
+func normalSend(ctx sdk.Context, k auth.AccountKeeper, fromAcc, toAcc exported.Account, srcCoins, dstCoins, amt, activationFee sdk.Coins) sdk.Result {
 
-	//fillMsgQueue(ctx, k, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
-
+	srcCoins = srcCoins.Sub(amt)
+	dstCoins = dstCoins.Add(amt).Sub(activationFee)
+	_ = fromAcc.SetCoins(srcCoins)
+	_ = toAcc.SetCoins(dstCoins)
+	k.SetAccount(ctx, fromAcc)
+	k.SetAccount(ctx, toAcc)
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
 	}
