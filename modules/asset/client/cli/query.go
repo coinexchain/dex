@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -62,7 +63,11 @@ $ cetcli query asset token abc
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken)
-			params := types.NewQueryAssetParams(args[0])
+			symbol := args[0]
+			if err := asset.ValidateTokenSymbol(symbol); err != nil {
+				return err
+			}
+			params := types.NewQueryAssetParams(symbol)
 			return cliutil.CliQuery(cdc, route, params)
 		},
 	}
@@ -105,7 +110,11 @@ $ cetcli query asset whitelist abc
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryWhitelist)
-			params := types.NewQueryWhitelistParams(args[0])
+			symbol := args[0]
+			if err := asset.ValidateTokenSymbol(symbol); err != nil {
+				return err
+			}
+			params := types.NewQueryWhitelistParams(symbol)
 			return cliutil.CliQuery(cdc, route, params)
 		},
 	}
@@ -128,7 +137,11 @@ $ cetcli query asset forbidden-addresses abc
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryForbiddenAddr)
-			params := types.NewQueryForbiddenAddrParams(args[0])
+			symbol := args[0]
+			if err := asset.ValidateTokenSymbol(symbol); err != nil {
+				return err
+			}
+			params := types.NewQueryForbiddenAddrParams(symbol)
 			return cliutil.CliQuery(cdc, route, params)
 		},
 	}

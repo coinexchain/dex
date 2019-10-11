@@ -2,6 +2,8 @@ package rest
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/asset"
+	"github.com/cosmos/cosmos-sdk/types/rest"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -34,6 +36,10 @@ func QueryTokenRequestHandlerFn(
 	return func(w http.ResponseWriter, r *http.Request) {
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryToken)
 		symbol := mux.Vars(r)["symbol"]
+		if err := asset.ValidateTokenSymbol(symbol); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		params := types.NewQueryAssetParams(symbol)
 		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJSONObj)
 	}
@@ -56,6 +62,10 @@ func QueryWhitelistRequestHandlerFn(
 	return func(w http.ResponseWriter, r *http.Request) {
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryWhitelist)
 		symbol := mux.Vars(r)["symbol"]
+		if err := asset.ValidateTokenSymbol(symbol); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		params := types.NewQueryWhitelistParams(symbol)
 		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJSONArr)
 	}
@@ -68,6 +78,10 @@ func QueryForbiddenAddrRequestHandlerFn(
 	return func(w http.ResponseWriter, r *http.Request) {
 		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryForbiddenAddr)
 		symbol := mux.Vars(r)["symbol"]
+		if err := asset.ValidateTokenSymbol(symbol); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		params := types.NewQueryForbiddenAddrParams(symbol)
 		restutil.RestQuery(cdc, cliCtx, w, r, route, params, emptyJSONArr)
 	}
