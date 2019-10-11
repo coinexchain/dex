@@ -2,6 +2,7 @@ package keepers
 
 import (
 	"bytes"
+	"errors"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -264,6 +265,10 @@ func (k PersistentMarketInfoKeeper) iterateMarket(ctx sdk.Context, process func(
 func (k PersistentMarketInfoKeeper) GetMarketInfo(ctx sdk.Context, symbol string) (info types.MarketInfo, err error) {
 	store := ctx.KVStore(k.marketKey)
 	value := store.Get(marketStoreKey(MarketIdentifierPrefix, symbol))
+	if len(value) == 0 {
+		err = errors.New("No such market exist: " + symbol)
+		return
+	}
 	err = k.cdc.UnmarshalBinaryBare(value, &info)
 	return
 }
