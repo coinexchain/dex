@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"errors"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -51,22 +49,11 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 }
 
 func (k Keeper) QuerySeqWithAddr(ctx sdk.Context, addr sdk.AccAddress) (uint64, sdk.Error) {
-	bz, err := k.cdc.MarshalJSON(auth.QueryAccountParams{Address: addr})
-	if err != nil {
-		return 0, types.ErrInvalidAddress()
+	acc := k.ak.GetAccount(ctx, addr)
+	if acc != nil {
+		return acc.GetSequence(), nil
 	}
-	res, sdkErr := auth.NewQuerier(k.ak)(ctx, []string{auth.QueryAccount}, abci.RequestQuery{
-		Data: bz,
-	})
-	if sdkErr != nil {
-		return 0, sdkErr
-	}
-
-	var acc auth.Account
-	if err := k.cdc.UnmarshalJSON(res, &acc); err != nil {
-		return 0, types.ErrFailedUnmarshal()
-	}
-	return acc.GetSequence(), nil
+	return 0, sdk.ErrUnknownAddress("account does not exist")
 }
 
 func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
