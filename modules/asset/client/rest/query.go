@@ -4,14 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cosmos/cosmos-sdk/types/rest"
-
-	"github.com/coinexchain/dex/modules/asset"
-
-	"github.com/gorilla/mux"
-
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/gorilla/mux"
 
 	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
@@ -36,9 +32,9 @@ func QueryTokenRequestHandlerFn(
 	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryToken)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryToken)
 		symbol := mux.Vars(r)["symbol"]
-		if err := asset.ValidateTokenSymbol(symbol); err != nil {
+		if err := types.ValidateTokenSymbol(symbol); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -52,7 +48,7 @@ func QueryTokensRequestHandlerFn(
 	storeName string, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryTokenList)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryTokenList)
 		restutil.RestQuery(nil, cliCtx, w, r, route, nil, emptyJSONArr)
 	}
 }
@@ -62,9 +58,9 @@ func QueryWhitelistRequestHandlerFn(
 	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryWhitelist)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryWhitelist)
 		symbol := mux.Vars(r)["symbol"]
-		if err := asset.ValidateTokenSymbol(symbol); err != nil {
+		if err := types.ValidateTokenSymbol(symbol); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -78,9 +74,9 @@ func QueryForbiddenAddrRequestHandlerFn(
 	storeName string, cdc *codec.Codec, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryForbiddenAddr)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryForbiddenAddr)
 		symbol := mux.Vars(r)["symbol"]
-		if err := asset.ValidateTokenSymbol(symbol); err != nil {
+		if err := types.ValidateTokenSymbol(symbol); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -94,7 +90,7 @@ func QueryReservedSymbolsRequestHandlerFn(
 	storeName string, cliCtx context.CLIContext,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryReservedSymbols)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryReservedSymbols)
 		restutil.RestQuery(nil, cliCtx, w, r, route, nil, nil)
 	}
 }
@@ -102,7 +98,7 @@ func QueryReservedSymbolsRequestHandlerFn(
 // HTTP request handler to query the asset params values
 func QueryParamsHandlerFn(storeName string, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		route := fmt.Sprintf("custom/%s/%s", storeName, asset.QueryParameters)
+		route := fmt.Sprintf("custom/%s/%s", storeName, types.QueryParameters)
 		restutil.RestQuery(nil, cliCtx, w, r, route, nil, nil)
 	}
 }
