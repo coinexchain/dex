@@ -15,6 +15,7 @@ const (
 	QueryTokenList       = types.QueryTokenList
 	QueryWhitelist       = types.QueryWhitelist
 	QueryForbiddenAddr   = types.QueryForbiddenAddr
+	QueryParameters      = types.QueryParameters
 	QueryReservedSymbols = types.QueryReservedSymbols
 	MaxTokenAmount       = types.MaxTokenAmount
 	RareSymbolLength     = types.RareSymbolLength

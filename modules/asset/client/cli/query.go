@@ -2,8 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/asset"
 	"strings"
+
+	"github.com/coinexchain/dex/modules/asset"
 
 	"github.com/spf13/cobra"
 
@@ -40,7 +41,7 @@ func GetCmdQueryParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		Short: "Query asset params",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryParameters)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryParameters)
 			return cliutil.CliQuery(cdc, route, nil)
 		},
 	}
@@ -62,7 +63,7 @@ $ cetcli query asset token abc
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryToken)
 			symbol := args[0]
 			if err := asset.ValidateTokenSymbol(symbol); err != nil {
 				return err
@@ -87,7 +88,7 @@ $ cetcli query asset tokens
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryTokenList)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryTokenList)
 			return cliutil.CliQuery(cdc, route, nil)
 		},
 	}
@@ -109,7 +110,7 @@ $ cetcli query asset whitelist abc
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryWhitelist)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryWhitelist)
 			symbol := args[0]
 			if err := asset.ValidateTokenSymbol(symbol); err != nil {
 				return err
@@ -136,7 +137,7 @@ $ cetcli query asset forbidden-addresses abc
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryForbiddenAddr)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryForbiddenAddr)
 			symbol := args[0]
 			if err := asset.ValidateTokenSymbol(symbol); err != nil {
 				return err
@@ -163,7 +164,7 @@ $ cetcli query asset reserved-symbols
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryReservedSymbols)
+			route := fmt.Sprintf("custom/%s/%s", queryRoute, asset.QueryReservedSymbols)
 			return cliutil.CliQuery(cdc, route, nil)
 		},
 	}
