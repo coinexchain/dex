@@ -10,37 +10,36 @@ const (
 	CodeSpaceMarket sdk.CodespaceType = "market"
 
 	// 601 ~ 699
-	CodeInvalidToken          sdk.CodeType = 601
-	CodeInvalidPricePrecision sdk.CodeType = 602
-	CodeInvalidTokenIssuer    sdk.CodeType = 603
-	CodeInvalidAddress        sdk.CodeType = 606
-	CodeNotExistKeyInStore    sdk.CodeType = 607
-	CodeInsufficientCoin      sdk.CodeType = 608
-	CodeInvalidTradeSide      sdk.CodeType = 609
-	CodeInvalidOrderType      sdk.CodeType = 610
-	CodeInvalidSymbol         sdk.CodeType = 611
-	CodeTokenForbidByIssuer   sdk.CodeType = 612
-	CodeInvalidOrderID        sdk.CodeType = 613
-	CodeMarshalFailed         sdk.CodeType = 614
-	CodeUnMarshalFailed       sdk.CodeType = 615
-	CodeOrderNotFound         sdk.CodeType = 616
-	CodeNotMatchSender        sdk.CodeType = 617
-	CodeInvalidCancelTime     sdk.CodeType = 618
-	CodeAddressForbidByIssuer sdk.CodeType = 619
-	CodeOrderQuantityTooSmall sdk.CodeType = 620
-	CodeNotListedAgainstCet   sdk.CodeType = 621
-	CodeRepeatTradingPair     sdk.CodeType = 622
-	CodeDelistNotAllowed      sdk.CodeType = 623
-	CodeInvalidOrderAmount    sdk.CodeType = 624
-	CodeInvalidBancorExist    sdk.CodeType = 625
-	CodeInvalidExistBlocks    sdk.CodeType = 626
-	CodeInvalidTimeInforce    sdk.CodeType = 627
-	CodeUnmarshalFailed       sdk.CodeType = 628
-	CodeInvalidSequence       sdk.CodeType = 629
-	CodeOrderAlreadyExist     sdk.CodeType = 630
-	CodeInvalidOrderPrecision sdk.CodeType = 631
-	CodeDelistRequestExist    sdk.CodeType = 632
-	CodeInvalidMarket         sdk.CodeType = 633
+	CodeInvalidToken           sdk.CodeType = 601
+	CodeInvalidPricePrecision  sdk.CodeType = 602
+	CodeInvalidTokenIssuer     sdk.CodeType = 603
+	CodeInvalidPrice           sdk.CodeType = 604
+	CodeInvalidAddress         sdk.CodeType = 606
+	CodeNotExistKeyInStore     sdk.CodeType = 607
+	CodeInsufficientCoin       sdk.CodeType = 608
+	CodeInvalidTradeSide       sdk.CodeType = 609
+	CodeInvalidOrderType       sdk.CodeType = 610
+	CodeInvalidSymbol          sdk.CodeType = 611
+	CodeTokenForbidByIssuer    sdk.CodeType = 612
+	CodeInvalidOrderID         sdk.CodeType = 613
+	CodeMarshalFailed          sdk.CodeType = 614
+	CodeOrderNotFound          sdk.CodeType = 616
+	CodeNotMatchSender         sdk.CodeType = 617
+	CodeInvalidCancelTime      sdk.CodeType = 618
+	CodeAddressForbidByIssuer  sdk.CodeType = 619
+	CodeInvalidOrderCommission sdk.CodeType = 620
+	CodeNotListedAgainstCet    sdk.CodeType = 621
+	CodeRepeatTradingPair      sdk.CodeType = 622
+	CodeDelistNotAllowed       sdk.CodeType = 623
+	CodeInvalidOrderAmount     sdk.CodeType = 624
+	CodeInvalidBancorExist     sdk.CodeType = 625
+	CodeInvalidExistBlocks     sdk.CodeType = 626
+	CodeInvalidTimeInforce     sdk.CodeType = 627
+	CodeUnmarshalFailed        sdk.CodeType = 628
+	CodeInvalidSequence        sdk.CodeType = 629
+	CodeOrderAlreadyExist      sdk.CodeType = 630
+	CodeDelistRequestExist     sdk.CodeType = 632
+	CodeInvalidMarket          sdk.CodeType = 633
 )
 
 func ErrFailedParseParam() sdk.Error {
@@ -124,7 +123,7 @@ func ErrInvalidPricePrecision(precision byte) sdk.Error {
 }
 
 func ErrInvalidPrice(price int64) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price out of range [0, 1E18], actual price : %d", price)
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPrice, "Price out of range [0, 1E18], actual price : %d", price)
 }
 
 func ErrInvalidTokenIssuer() sdk.Error {
@@ -152,21 +151,25 @@ func ErrInvalidOrderType() sdk.Error {
 }
 
 func ErrInvalidSymbol() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "Invalid trade symbol")
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "Invalid trade pair symbol")
+}
+
+func ErrInvalidOrderCommission(err string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderCommission, "The order commission is invalid : ", err)
 }
 
 func ErrStockAndMoneyAreSame() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "stock and money should be different")
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidSymbol, "Stock and Money should be different")
 }
 
 func ErrTokenForbidByIssuer() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeTokenForbidByIssuer, "Token is frozen by the issuer")
 }
 
-func ErrOrderQuantityTooSmall(err string) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeOrderQuantityTooSmall, "the order commission (%s) too small", err)
+func ErrOrderAmountTooSmall(err string) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderAmount, "The order amount (%s) too small", err)
 }
 
 func ErrDelistRequestExist(market string) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeDelistRequestExist, "the delist request for %s already exists", market)
+	return sdk.NewError(CodeSpaceMarket, CodeDelistRequestExist, "The delist request for %s already exists", market)
 }

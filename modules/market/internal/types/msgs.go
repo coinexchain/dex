@@ -14,13 +14,9 @@ import (
 // RouterKey is the name of the market module
 const (
 	// msg keys for Kafka
-	CreateTradingInfoKey = "create_trading_info"
-	CancelTradingInfoKey = "cancel_trading_info"
-
-	CreateOrderInfoKey    = "create_order_info"
-	FillOrderInfoKey      = "fill_order_info"
-	CancelOrderInfoKey    = "del_order_info"
-	PricePrecisionInfoKey = "modify-price-precision"
+	CreateOrderInfoKey = "create_order_info"
+	FillOrderInfoKey   = "fill_order_info"
+	CancelOrderInfoKey = "del_order_info"
 )
 
 // cancel order of reasons
@@ -72,13 +68,13 @@ func (msg MsgCreateTradingPair) Route() string { return RouterKey }
 func (msg MsgCreateTradingPair) Type() string { return "create_market_info" }
 
 func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
-	if len(msg.Creator) == 0 {
-		return sdk.ErrInvalidAddress("missing creator address")
+	if err := sdk.VerifyAddressFormat(msg.Creator); err != nil {
+		return sdk.ErrInvalidAddress(err.Error())
 	}
 	if !IsValidTradingPair([]string{msg.Stock, msg.Money}) {
 		return ErrInvalidSymbol()
 	}
-	if p := msg.PricePrecision; p < MinTokenPricePrecision || p > MaxTokenPricePrecision {
+	if p := msg.PricePrecision; p > MaxTokenPricePrecision {
 		return ErrInvalidPricePrecision(p)
 	}
 	if msg.Money == msg.Stock {
@@ -122,27 +118,23 @@ func (msg MsgCreateOrder) Route() string { return RouterKey }
 func (msg MsgCreateOrder) Type() string { return "create_order" }
 
 func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
-	if len(msg.Sender) == 0 {
-		return sdk.ErrInvalidAddress("missing creator address")
+	if err := sdk.VerifyAddressFormat(msg.Sender); err != nil {
+		return sdk.ErrInvalidAddress(err.Error())
 	}
-	if len(msg.TradingPair) == 0 {
-		return sdk.ErrInvalidAddress("missing GTE order TradingPair identifier")
-	}
-	tokens := strings.Split(msg.TradingPair, SymbolSeparator)
-	if !IsValidTradingPair(tokens) {
+	if !IsValidTradingPair(strings.Split(msg.TradingPair, SymbolSeparator)) {
 		return ErrInvalidSymbol()
 	}
 	if msg.OrderType != LimitOrder {
 		return ErrInvalidOrderType()
 	}
-	if p := msg.PricePrecision; p < MinTokenPricePrecision || p > MaxTokenPricePrecision {
+	if p := msg.PricePrecision; p > MaxTokenPricePrecision {
 		return ErrInvalidPricePrecision(p)
 	}
 	if msg.Price <= 0 {
 		return ErrInvalidPrice(msg.Price)
 	}
 	if msg.Quantity <= 0 {
-		return ErrOrderQuantityTooSmall(fmt.Sprintf("%d", msg.Quantity))
+		return ErrOrderAmountTooSmall(fmt.Sprintf("%d", msg.Quantity))
 	}
 	if msg.Side != BUY && msg.Side != SELL {
 		return ErrInvalidTradeSide()

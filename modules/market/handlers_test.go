@@ -446,7 +446,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	failedInsufficientCoinOrder.Quantity = 0
 	ret = input.handler(input.ctx, failedInsufficientCoinOrder)
 	oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
-	require.Equal(t, types.CodeOrderQuantityTooSmall, ret.Code, "create GTE order should failed by too small commission coin")
+	require.Equal(t, types.CodeInvalidOrderAmount, ret.Code)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 
 	failedInsufficientCoinOrder = msgOrder
@@ -454,7 +454,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	failedInsufficientCoinOrder.Side = BUY
 	ret = input.handler(input.ctx, failedInsufficientCoinOrder)
 	oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
-	require.Equal(t, types.CodeOrderQuantityTooSmall, ret.Code, "create GTE order should failed by too small commission coin")
+	require.Equal(t, types.CodeInvalidOrderAmount, ret.Code)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 
 	failedTokenForbidOrder := msgOrder
@@ -936,14 +936,14 @@ func TestCalFrozenFeeInOrder(t *testing.T) {
 	param.MarketFeeMin = 100
 	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
 	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
+	require.EqualValues(t, types.CodeInvalidOrderCommission, err.Code())
 
 	// LastExecutedPrice is zero, MarketFeeMin is 100, FixedTradeFee is 10
 	param.MarketFeeMin = 100
 	param.FixedTradeFee = 10
 	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
 	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
+	require.EqualValues(t, types.CodeInvalidOrderCommission, err.Code())
 
 	// LastExecutedPrice is zero, MarketFeeMin is 100, FixedTradeFee is 200
 	param.MarketFeeMin = 100
@@ -963,7 +963,7 @@ func TestCalFrozenFeeInOrder(t *testing.T) {
 	param.MarketFeeMin = 200
 	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
 	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
+	require.EqualValues(t, types.CodeInvalidOrderCommission, err.Code())
 
 	// LastExecutedPrice is 10, MarketFeeMin is 100; actual 10 * 10000 * (1 / 1000) = 100
 	param.MarketFeeMin = 100
@@ -999,7 +999,7 @@ func TestCalFrozenFeeInOrder(t *testing.T) {
 	orderInfo.TradingPair = GetSymbol(mkInfo.Stock, mkInfo.Money)
 	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
 	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeOrderQuantityTooSmall, err.Code())
+	require.EqualValues(t, types.CodeInvalidOrderCommission, err.Code())
 }
 
 func TestCheckMsgCreateOrder(t *testing.T) {
@@ -1007,4 +1007,130 @@ func TestCheckMsgCreateOrder(t *testing.T) {
 	require.True(t, input.mk.IsTokenForbidden(input.ctx, stock))
 	require.True(t, input.mk.IsForbiddenByTokenIssuer(input.ctx, stock, forbidAddr))
 
+	// Insufficient coin
+	msg := MsgCreateOrder{
+		Sender:         haveCetAddress,
+		Identify:       255,
+		TradingPair:    GetSymbol(stock, dex.CET),
+		OrderType:      LimitOrder,
+		Side:           BUY,
+		Price:          10,
+		PricePrecision: 8,
+		Quantity:       100,
+		TimeInForce:    GTE,
+		ExistBlocks:    10000,
+	}
+	err := checkMsgCreateOrder(input.ctx, input.mk, msg, OriginHaveCetAmount+1, 1, dex.CET, 1)
+	require.EqualValues(t, err.Code, types.CodeInsufficientCoin)
+
+	err = checkMsgCreateOrder(input.ctx, input.mk, msg, issueAmount, OriginHaveCetAmount, dex.CET, 1)
+	require.EqualValues(t, err.Code, types.CodeInsufficientCoin)
+
+	// Invalid market
+	err = checkMsgCreateOrder(input.ctx, input.mk, msg, issueAmount, issueAmount, dex.CET, math.MaxUint64)
+	require.EqualValues(t, err.Code, types.CodeInvalidMarket)
+
+	mkInfo := MarketInfo{
+		Stock:             stock,
+		Money:             dex.CET,
+		PricePrecision:    6,
+		OrderPrecision:    1,
+		LastExecutedPrice: sdk.NewDec(0),
+	}
+	ret := input.mk.SetMarket(input.ctx, mkInfo)
+	require.Nil(t, ret)
+
+	// Invalid price precision
+	err = checkMsgCreateOrder(input.ctx, input.mk, msg, issueAmount, issueAmount, dex.CET, math.MaxUint64)
+	require.EqualValues(t, err.Code, types.CodeInvalidPricePrecision)
+
+	// Forbidden token
+	msg.PricePrecision = 6
+	err = checkMsgCreateOrder(input.ctx, input.mk, msg, issueAmount, issueAmount, dex.CET, math.MaxUint64)
+	require.EqualValues(t, err.Code, types.CodeTokenForbidByIssuer)
+
+	mkInfo.Stock = money
+	mkInfo.Money = dex.CET
+	ret = input.mk.SetMarket(input.ctx, mkInfo)
+	require.Nil(t, ret)
+
+	// Forbidden address
+	msg.Sender = haveCetAddress
+	msg.TradingPair = GetSymbol(money, dex.CET)
+	err = checkMsgCreateOrder(input.ctx, input.mk, msg, 1, 6, dex.CET, math.MaxUint64)
+	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code)
+
+	// Pass
+	msg.Sender = forbidAddr
+	msg.TradingPair = GetSymbol(money, dex.CET)
+	err = checkMsgCreateOrder(input.ctx, input.mk, msg, 1, 60, dex.CET, math.MaxUint64)
+	require.EqualValues(t, sdk.CodeOK, err.Code)
+}
+
+func TestCheckMsgCreateTradingPair(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+
+	msg := MsgCreateTradingPair{
+		Creator:        forbidAddr,
+		Stock:          stock,
+		Money:          dex.CET,
+		PricePrecision: 8,
+		OrderPrecision: 8,
+	}
+
+	// Not exist token
+	msg.Money = "test"
+	err := checkMsgCreateTradingPair(input.ctx, msg, input.mk)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeInvalidToken, err.Code())
+
+	msg.Money = dex.CET
+	msg.Stock = "test"
+	err = checkMsgCreateTradingPair(input.ctx, msg, input.mk)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeInvalidToken, err.Code())
+
+	// Invalid token issuer
+	msg.Stock = stock
+	err = checkMsgCreateTradingPair(input.ctx, msg, input.mk)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeInvalidTokenIssuer, err.Code())
+
+	// Stock/Cet trading pair not exist
+	msg.Money = money
+	msg.Creator = haveCetAddress
+	err = checkMsgCreateTradingPair(input.ctx, msg, input.mk)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeNotListedAgainstCet, err.Code())
+
+	// Insufficient coin
+	input.mk.SetParams(input.ctx, types.Params{
+		CreateMarketFee: OriginHaveCetAmount,
+	})
+	msg.Creator = haveCetAddress
+	msg.Money = dex.CET
+	msg.Stock = stock
+	err = checkMsgCreateTradingPair(input.ctx, msg, input.mk)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeInsufficientCoin, err.Code())
+
+	// Success
+	input.mk.SetParams(input.ctx, types.Params{
+		CreateMarketFee: 100000,
+	})
+	err = checkMsgCreateTradingPair(input.ctx, msg, input.mk)
+	require.Nil(t, err)
+
+	err = input.mk.SetMarket(input.ctx, MarketInfo{
+		Stock:             stock,
+		Money:             dex.CET,
+		PricePrecision:    8,
+		OrderPrecision:    0,
+		LastExecutedPrice: sdk.NewDec(0),
+	})
+
+	// Invalid Repeat market
+	err = checkMsgCreateTradingPair(input.ctx, msg, input.mk)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeRepeatTradingPair, err.Code())
 }

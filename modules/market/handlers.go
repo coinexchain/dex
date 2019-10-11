@@ -64,16 +64,6 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 		return err.Result()
 	}
 
-	//// send msg to kafka
-	//msgInfo := types.CreateMarketInfo{
-	//	Stock:          msg.Stock,
-	//	Money:          msg.Money,
-	//	PricePrecision: msg.PricePrecision,
-	//	Creator:        msg.Creator.String(),
-	//	CreateHeight:   ctx.BlockHeight(),
-	//}
-	//fillMsgQueue(ctx, keeper, types.CreateTradingInfoKey, msgInfo)
-
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			EventTypeMarket,
@@ -156,7 +146,7 @@ func calFrozenFeeInOrder(ctx sdk.Context, marketParams types.Params, keeper keep
 	}
 	frozenFee := frozenFeeDec.RoundInt64()
 	if frozenFee < marketParams.MarketFeeMin {
-		return 0, types.ErrOrderQuantityTooSmall(fmt.Sprintf("%d", frozenFee))
+		return 0, types.ErrInvalidOrderCommission(fmt.Sprintf("%d", frozenFee))
 	}
 
 	return frozenFee, nil
@@ -301,8 +291,7 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 		return err.Result()
 	}
 	if cetFee != 0 {
-		frozenFeeAsCet := sdk.Coins{sdk.NewCoin(dex.CET, sdk.NewInt(cetFee))}
-		if !keeper.HasCoins(ctx, msg.Sender, frozenFeeAsCet) {
+		if !keeper.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(dex.CET, sdk.NewInt(cetFee))}) {
 			return types.ErrInsufficientCoins().Result()
 		}
 	}
