@@ -19,6 +19,7 @@ import (
 	sm "github.com/tendermint/tendermint/state"
 	"github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
+	"github.com/pkg/profile"
 
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
@@ -133,6 +134,7 @@ func TestBlockExec(t *testing.T) {
 	blockID := types.BlockID{Hash: block.Hash(), PartsHeader: block.MakePartSet(types.BlockPartSizeBytes).Header()}
 
 	// exec block
+	defer profile.Start(profile.CPUProfile).Stop()
 	now := time.Now()
 	state, err = blockExec.ApplyBlock(state, blockID, block)
 	fmt.Println("exec block time :  ", time.Now().Sub(now).Seconds())
