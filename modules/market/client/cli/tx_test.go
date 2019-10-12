@@ -34,6 +34,7 @@ func TestCmd(t *testing.T) {
 		"--stock=eth",
 		"--money=cet",
 		"--price-precision=8",
+		"--order-precision=8",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -43,6 +44,7 @@ func TestCmd(t *testing.T) {
 		Stock:          "eth",
 		Money:          "cet",
 		PricePrecision: byte(8),
+		OrderPrecision: byte(8),
 	}, ResultMsg)
 
 	args = []string{
@@ -50,6 +52,7 @@ func TestCmd(t *testing.T) {
 		"--stock=eth",
 		"--money=cet",
 		"--price-precision=800",
+		"--order-precision=8",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -60,6 +63,7 @@ func TestCmd(t *testing.T) {
 		"create-trading-pair",
 		"--money=cet",
 		"--price-precision=800",
+		"--order-precision=8",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
