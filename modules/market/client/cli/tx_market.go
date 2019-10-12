@@ -26,7 +26,6 @@ var createMarketFlags = []string{
 	FlagStock,
 	FlagMoney,
 	FlagPricePrecision,
-	FlagOrderPrecision,
 }
 
 func CreateMarketCmd(cdc *codec.Codec) *cobra.Command {

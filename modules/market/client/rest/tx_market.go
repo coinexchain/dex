@@ -18,7 +18,7 @@ type createMarketReq struct {
 	Stock          string       `json:"stock"`
 	Money          string       `json:"money"`
 	PricePrecision int          `json:"price_precision"`
-	OrderPrecision int          `json:"order_precision"`
+	OrderPrecision int          `json:"order_precision,omitempty"`
 }
 
 func (req *createMarketReq) New() restutil.RestReq {
