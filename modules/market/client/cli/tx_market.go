@@ -75,6 +75,9 @@ func getCreateMarketMsg(cdc *codec.Codec) (*types.MsgCreateTradingPair, error) {
 func hasTokens(cdc *codec.Codec, tokens ...string) error {
 	route := fmt.Sprintf("custom/%s/%s", asset.QuerierRoute, asset.QueryToken)
 	for _, token := range tokens {
+		if err := asset.ValidateTokenSymbol(token); err != nil {
+			return err
+		}
 		if err := cliutil.CliQuery(cdc, route, asset.NewQueryAssetParams(token)); err != nil {
 			return err
 		}
