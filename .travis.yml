@@ -24,6 +24,7 @@ matrix:
           - $HOME/gopath/pkg/mod
       before_install:
         - export GO111MODULE=on
+        - export GOPRIVATE=github.com/coinexchain/*
         - export GOROOT=$(go env GOROOT)
         - export CXX="g++-6" CC="gcc-6"
         - export PATH=$PATH:$HOME/gopath/bin
@@ -105,6 +106,7 @@ matrix:
         # todo cache apt package
         #        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install g++-6 gcc-6
         - export GO111MODULE=on
+        - export GOPRIVATE=github.com/coinexchain/*
         - export GOROOT=$(go env GOROOT)
         - export CXX="g++-6" CC="gcc-6"
         - export PATH=$PATH:$HOME/gopath/bin
