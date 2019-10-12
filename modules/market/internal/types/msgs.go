@@ -69,7 +69,7 @@ func (msg MsgCreateTradingPair) Type() string { return "create_market_info" }
 
 func (msg MsgCreateTradingPair) ValidateBasic() sdk.Error {
 	if err := sdk.VerifyAddressFormat(msg.Creator); err != nil {
-		return sdk.ErrInvalidAddress(err.Error())
+		return ErrInvalidAddress()
 	}
 	if !IsValidTradingPair([]string{msg.Stock, msg.Money}) {
 		return ErrInvalidSymbol()
@@ -119,7 +119,7 @@ func (msg MsgCreateOrder) Type() string { return "create_order" }
 
 func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 	if err := sdk.VerifyAddressFormat(msg.Sender); err != nil {
-		return sdk.ErrInvalidAddress(err.Error())
+		return ErrInvalidAddress()
 	}
 	if !IsValidTradingPair(strings.Split(msg.TradingPair, SymbolSeparator)) {
 		return ErrInvalidSymbol()
@@ -197,7 +197,7 @@ func ValidateOrderID(id string) sdk.Error {
 
 func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
 	if err := sdk.VerifyAddressFormat(msg.Sender); err != nil {
-		return sdk.ErrInvalidAddress(err.Error())
+		return ErrInvalidAddress()
 	}
 	if err := ValidateOrderID(msg.OrderID); err != nil {
 		return err
@@ -248,7 +248,7 @@ func IsValidTradingPair(tokens []string) bool {
 }
 
 func (msg MsgCancelTradingPair) ValidateBasic() sdk.Error {
-	if len(msg.Sender) == 0 {
+	if err := sdk.VerifyAddressFormat(msg.Sender); err != nil {
 		return ErrInvalidAddress()
 	}
 	if !IsValidTradingPair(strings.Split(msg.TradingPair, SymbolSeparator)) {
@@ -291,7 +291,7 @@ func (msg MsgModifyPricePrecision) Type() string {
 }
 
 func (msg MsgModifyPricePrecision) ValidateBasic() sdk.Error {
-	if len(msg.Sender) == 0 {
+	if err := sdk.VerifyAddressFormat(msg.Sender); err != nil {
 		return ErrInvalidAddress()
 	}
 	if !IsValidTradingPair(strings.Split(msg.TradingPair, SymbolSeparator)) {

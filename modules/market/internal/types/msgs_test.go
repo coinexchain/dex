@@ -13,11 +13,11 @@ func TestMsgCreateOrder(t *testing.T) {
 	// Invalid address
 	msg := MsgCreateOrder{}
 	err := msg.ValidateBasic()
-	require.EqualValues(t, sdk.CodeInvalidAddress, err.Code())
+	require.EqualValues(t, CodeInvalidAddress, err.Code())
 
 	msg.Sender = []byte("nihao")
 	err = msg.ValidateBasic()
-	require.EqualValues(t, sdk.CodeInvalidAddress, err.Code())
+	require.EqualValues(t, CodeInvalidAddress, err.Code())
 
 	addr, failed := sdk.AccAddressFromHex("0123456789012345678901234567890123423456")
 	require.Nil(t, failed)
@@ -79,11 +79,11 @@ func TestMsgCreateTradingPair(t *testing.T) {
 	// Invalid address
 	msg := MsgCreateTradingPair{}
 	err := msg.ValidateBasic()
-	require.EqualValues(t, sdk.CodeInvalidAddress, err.Code())
+	require.EqualValues(t, CodeInvalidAddress, err.Code())
 
 	msg.Creator = []byte("hello")
 	err = msg.ValidateBasic()
-	require.EqualValues(t, sdk.CodeInvalidAddress, err.Code())
+	require.EqualValues(t, CodeInvalidAddress, err.Code())
 
 	// Invalid trading pair
 	addr, failed := sdk.AccAddressFromHex("0123456789012345678901234567890123423456")
