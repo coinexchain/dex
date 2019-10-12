@@ -3,7 +3,7 @@ package codec
 import (
 	"io"
 
-	"github.com/coinexchain/dex/codon"
+	"github.com/coinexchain/codon"
 )
 
 func ShowInfo() {

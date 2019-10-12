@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	dexcodec "github.com/coinexchain/dex/codec"
-	"github.com/coinexchain/dex/randsrc"
+	"github.com/coinexchain/randsrc"
 )
 
 func main() {

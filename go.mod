@@ -1,9 +1,11 @@
 module github.com/coinexchain/dex
 
-go 1.12
+go 1.13
 
 require (
 	github.com/Shopify/sarama v1.23.1
+	github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c
+	github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6
 	github.com/coinexchain/shorthanzi v0.1.0
 	github.com/cosmos/cosmos-sdk v0.37.0
 	github.com/emirpasic/gods v1.12.0
@@ -20,7 +22,7 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/tendermint/tendermint v0.32.2
 	github.com/tendermint/tm-db v0.1.1
-	golang.org/x/crypto v0.0.0-20190506204251-e1dfcc566284
+	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/sys v0.0.0-20190422165155-953cdadca894 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect

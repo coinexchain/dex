@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/coinexchain/codon"
 	dexcodec "github.com/coinexchain/dex/codec"
-	"github.com/coinexchain/dex/codon"
-	"github.com/coinexchain/dex/randsrc"
+	"github.com/coinexchain/randsrc"
 )
 
 var Count = 100 * 10000
