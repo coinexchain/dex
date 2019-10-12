@@ -43,7 +43,6 @@ func TestCmd(t *testing.T) {
 		Stock:          "eth",
 		Money:          "cet",
 		PricePrecision: byte(8),
-		OrderPrecision: byte(8),
 	}, ResultMsg)
 
 	args = []string{
