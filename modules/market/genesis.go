@@ -57,22 +57,22 @@ func (data GenesisState) Validate() error {
 		return err
 	}
 
-	tokenSymbols := make(map[string]interface{})
+	tokenSymbols := make(map[string]struct{})
 
 	for _, order := range data.Orders {
 		if _, exists := tokenSymbols[order.OrderID()]; exists {
 			return errors.New("duplicate order found during market ValidateGenesis")
 		}
-		tokenSymbols[order.OrderID()] = nil
+		tokenSymbols[order.OrderID()] = struct{}{}
 	}
 
-	infos := make(map[string]interface{})
+	infos := make(map[string]struct{})
 	for _, info := range data.MarketInfos {
 		symbol := info.GetSymbol()
 		if _, exists := infos[symbol]; exists {
 			return errors.New("duplicate market found during market ValidateGenesis")
 		}
-		infos[symbol] = nil
+		infos[symbol] = struct{}{}
 	}
 	return nil
 }

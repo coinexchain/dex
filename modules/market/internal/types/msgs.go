@@ -196,8 +196,8 @@ func ValidateOrderID(id string) sdk.Error {
 }
 
 func (msg MsgCancelOrder) ValidateBasic() sdk.Error {
-	if len(msg.Sender) == 0 {
-		return ErrInvalidAddress()
+	if err := sdk.VerifyAddressFormat(msg.Sender); err != nil {
+		return sdk.ErrInvalidAddress(err.Error())
 	}
 	if err := ValidateOrderID(msg.OrderID); err != nil {
 		return err

@@ -202,7 +202,7 @@ func sendCreateOrderMsg(ctx sdk.Context, keeper keepers.Keeper, order types.Orde
 	fillMsgQueue(ctx, keeper, types.CreateOrderInfoKey, msgInfo)
 }
 
-func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keepers.Keeper) sdk.Result {
+func getDenomAndOrderAmount(msg types.MsgCreateOrder) (string, int64, sdk.Error) {
 	stock, money := SplitSymbol(msg.TradingPair)
 	denom := stock
 	amount := msg.Quantity
@@ -210,14 +210,23 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 		denom = money
 		tmpAmount, err := calculateAmount(msg.Price, msg.Quantity, msg.PricePrecision)
 		if err != nil {
-			return types.ErrInvalidOrderAmount("The frozen fee is too large").Result()
+			return "", -1, types.ErrInvalidOrderAmount("The frozen fee is too large")
 		}
 		amount = tmpAmount.RoundInt64()
 	}
 	if amount > types.MaxOrderAmount {
-		return types.ErrInvalidOrderAmount("The frozen fee is too large").Result()
+		return "", -1, types.ErrInvalidOrderAmount("The frozen fee is too large")
 	}
 
+	return denom, amount, nil
+}
+
+func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keepers.Keeper) sdk.Result {
+
+	denom, amount, err := getDenomAndOrderAmount(msg)
+	if err != nil {
+		return err.Result()
+	}
 	seq, err := keeper.QuerySeqWithAddr(ctx, msg.Sender)
 	if err != nil {
 		return err.Result()
@@ -227,16 +236,13 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	if err != nil {
 		return err.Result()
 	}
-
 	featureFee := calFeatureFeeForExistBlocks(msg, marketParams)
 	totalFee := frozenFee + featureFee
-	if featureFee > types.MaxOrderAmount ||
-		frozenFee > types.MaxOrderAmount ||
-		totalFee > types.MaxOrderAmount {
+	if featureFee > types.MaxOrderAmount || frozenFee > types.MaxOrderAmount || totalFee > types.MaxOrderAmount {
 		return types.ErrInvalidOrderAmount("The frozen fee is too large").Result()
 	}
-	if ret := checkMsgCreateOrder(ctx, keeper, msg, totalFee, amount, denom, seq); !ret.IsOK() {
-		return ret
+	if err := checkMsgCreateOrder(ctx, keeper, msg, totalFee, amount, denom, seq); err != nil {
+		return err.Result()
 	}
 	existBlocks := msg.ExistBlocks
 	if existBlocks == 0 && msg.TimeInForce == GTE {
@@ -266,7 +272,6 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	if err := ork.Add(ctx, &order); err != nil {
 		return err.Result()
 	}
-
 	if err := handleFeeForCreateOrder(ctx, keeper, amount, denom, order.Sender, frozenFee, featureFee); err != nil {
 		return err.Result()
 	}
@@ -286,13 +291,13 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	}
 }
 
-func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCreateOrder, cetFee int64, amount int64, denom string, seq uint64) sdk.Result {
+func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCreateOrder, cetFee int64, amount int64, denom string, seq uint64) sdk.Error {
 	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
+		return err
 	}
 	if cetFee != 0 {
 		if !keeper.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(dex.CET, sdk.NewInt(cetFee))}) {
-			return types.ErrInsufficientCoins().Result()
+			return types.ErrInsufficientCoins()
 		}
 	}
 	stock, money := SplitSymbol(msg.TradingPair)
@@ -302,35 +307,35 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 		totalAmount = totalAmount.AddRaw(cetFee)
 	}
 	if !keeper.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(denom, totalAmount)}) {
-		return types.ErrInsufficientCoins().Result()
+		return types.ErrInsufficientCoins()
 	}
 	orderID, err := types.AssemblyOrderID(msg.Sender.String(), seq, msg.Identify)
 	if err != nil {
-		return types.ErrInvalidSequence(err.Error()).Result()
+		return types.ErrInvalidSequence(err.Error())
 	}
 	globalKeeper := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc)
 	if globalKeeper.QueryOrder(ctx, orderID) != nil {
-		return types.ErrOrderAlreadyExist(orderID).Result()
+		return types.ErrOrderAlreadyExist(orderID)
 	}
 	marketInfo, err := keeper.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
-		return types.ErrInvalidMarket(err.Error()).Result()
+		return types.ErrInvalidMarket(err.Error())
 	}
 	if p := msg.PricePrecision; p > marketInfo.PricePrecision {
-		return types.ErrInvalidPricePrecision(p).Result()
+		return types.ErrInvalidPricePrecision(p)
 	}
 	if keeper.IsTokenForbidden(ctx, stock) || keeper.IsTokenForbidden(ctx, money) {
-		return types.ErrTokenForbidByIssuer().Result()
+		return types.ErrTokenForbidByIssuer()
 	}
 	if keeper.IsForbiddenByTokenIssuer(ctx, stock, msg.Sender) || keeper.IsForbiddenByTokenIssuer(ctx, money, msg.Sender) {
-		return types.ErrAddressForbidByIssuer().Result()
+		return types.ErrAddressForbidByIssuer()
 	}
 	baseValue := types.GetGranularityOfOrder(marketInfo.OrderPrecision)
 	if amount%baseValue != 0 {
-		return types.ErrInvalidOrderAmount("The amount of tokens to trade should be a multiple of the order precision").Result()
+		return types.ErrInvalidOrderAmount("The amount of tokens to trade should be a multiple of the order precision")
 	}
 
-	return sdk.Result{}
+	return nil
 }
 
 func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepers.Keeper) sdk.Result {
@@ -409,16 +414,6 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair,
 	}
 	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.TradingPair)
 
-	// send msg to kafka
-	//values := strings.Split(msg.TradingPair, types.SymbolSeparator)
-	//msgInfo := types.CancelMarketInfo{
-	//	Stock:   values[0],
-	//	Money:   values[1],
-	//	Deleter: msg.Sender.String(),
-	//	DelTime: msg.EffectiveTime,
-	//}
-	//fillMsgQueue(ctx, keeper, types.CancelTradingInfoKey, msgInfo)
-
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
 			AttributeKeyTradingPair, msg.TradingPair)),
@@ -455,14 +450,12 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 		return types.ErrNotMatchSender("only stock's owner can cancel a market")
 	}
 
-	// TODO. Will add unit test
 	if !stockToken.GetTokenForbiddable() {
 		if info.Money == dex.CET {
 			return types.ErrDelistNotAllowed("stock token doesn't have globally forbidden attribute, so its market against CET can not be canceled")
 		}
 	}
 
-	// TODO. Will add unit test
 	if info.Money == dex.CET && keeper.IsBancorExist(ctx, info.Stock) {
 		return types.ErrDelistNotAllowed(
 			fmt.Sprintf("When %s has bancor contracts, you can't delist the %s/cet market", info.Stock, info.Stock))
@@ -495,14 +488,6 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrec
 	if err := k.SetMarket(ctx, info); err != nil {
 		return err.Result()
 	}
-
-	//msgInfo := types.ModifyPricePrecisionInfo{
-	//	Sender:            msg.Sender.String(),
-	//	TradingPair:       msg.TradingPair,
-	//	OldPricePrecision: oldInfo.PricePrecision,
-	//	NewPricePrecision: info.PricePrecision,
-	//}
-	//fillMsgQueue(ctx, k, types.PricePrecisionInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(

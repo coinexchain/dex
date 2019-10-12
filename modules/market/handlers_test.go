@@ -103,10 +103,12 @@ type storeKeys struct {
 	keySupply   *sdk.KVStoreKey
 }
 
+var bancorExist bool
+
 type mockBancorKeeper struct{}
 
 func (mbk mockBancorKeeper) IsBancorExist(ctx sdk.Context, stock string) bool {
-	return false
+	return bancorExist
 }
 
 func initAddress() {
@@ -711,6 +713,11 @@ func TestCancelMarketFailed(t *testing.T) {
 	failedSender.Sender = notHaveCetAddress
 	ret = input.handler(input.ctx, failedSender)
 	require.Equal(t, types.CodeNotMatchSender, ret.Code, "cancel order should failed by not match sender")
+
+	failedByNotForbidden := msgCancelMarket
+	ret = input.handler(input.ctx, failedByNotForbidden)
+	require.EqualValues(t, types.CodeDelistNotAllowed, ret.Code)
+
 }
 
 func TestCancelMarketSuccess(t *testing.T) {
@@ -734,12 +741,11 @@ func TestCancelMarketSuccess(t *testing.T) {
 
 	ret = input.handler(input.ctx, msgCancelMarket)
 	require.Equal(t, false, ret.IsOK(), "repeatedly cancel market will fail")
+	require.EqualValues(t, types.CodeDelistRequestExist, ret.Code)
 
 	dlk := keepers.NewDelistKeeper(input.keys.marketKey)
 	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, types.DefaultMarketMinExpiredTime+10+1)[0]
-	if delSymbol != GetSymbol(stock, "cet") {
-		t.Error("Not find del market in store")
-	}
+	require.EqualValues(t, delSymbol, GetSymbol(stock, dex.CET))
 }
 
 func TestChargeOrderFee(t *testing.T) {
@@ -1021,14 +1027,14 @@ func TestCheckMsgCreateOrder(t *testing.T) {
 		ExistBlocks:    10000,
 	}
 	err := checkMsgCreateOrder(input.ctx, input.mk, msg, OriginHaveCetAmount+1, 1, dex.CET, 1)
-	require.EqualValues(t, err.Code, types.CodeInsufficientCoin)
+	require.EqualValues(t, err.Code(), types.CodeInsufficientCoin)
 
 	err = checkMsgCreateOrder(input.ctx, input.mk, msg, issueAmount, OriginHaveCetAmount, dex.CET, 1)
-	require.EqualValues(t, err.Code, types.CodeInsufficientCoin)
+	require.EqualValues(t, err.Code(), types.CodeInsufficientCoin)
 
 	// Invalid market
 	err = checkMsgCreateOrder(input.ctx, input.mk, msg, issueAmount, issueAmount, dex.CET, math.MaxUint64)
-	require.EqualValues(t, err.Code, types.CodeInvalidMarket)
+	require.EqualValues(t, err.Code(), types.CodeInvalidMarket)
 
 	mkInfo := MarketInfo{
 		Stock:             stock,
@@ -1042,12 +1048,12 @@ func TestCheckMsgCreateOrder(t *testing.T) {
 
 	// Invalid price precision
 	err = checkMsgCreateOrder(input.ctx, input.mk, msg, issueAmount, issueAmount, dex.CET, math.MaxUint64)
-	require.EqualValues(t, err.Code, types.CodeInvalidPricePrecision)
+	require.EqualValues(t, err.Code(), types.CodeInvalidPricePrecision)
 
 	// Forbidden token
 	msg.PricePrecision = 6
 	err = checkMsgCreateOrder(input.ctx, input.mk, msg, issueAmount, issueAmount, dex.CET, math.MaxUint64)
-	require.EqualValues(t, err.Code, types.CodeTokenForbidByIssuer)
+	require.EqualValues(t, err.Code(), types.CodeTokenForbidByIssuer)
 
 	mkInfo.Stock = money
 	mkInfo.Money = dex.CET
@@ -1058,13 +1064,13 @@ func TestCheckMsgCreateOrder(t *testing.T) {
 	msg.Sender = haveCetAddress
 	msg.TradingPair = GetSymbol(money, dex.CET)
 	err = checkMsgCreateOrder(input.ctx, input.mk, msg, 1, 6, dex.CET, math.MaxUint64)
-	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code)
+	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code())
 
 	// Pass
 	msg.Sender = forbidAddr
 	msg.TradingPair = GetSymbol(money, dex.CET)
 	err = checkMsgCreateOrder(input.ctx, input.mk, msg, 1, 60, dex.CET, math.MaxUint64)
-	require.EqualValues(t, sdk.CodeOK, err.Code)
+	require.Nil(t, err)
 }
 
 func TestCheckMsgCreateTradingPair(t *testing.T) {
@@ -1133,4 +1139,220 @@ func TestCheckMsgCreateTradingPair(t *testing.T) {
 	err = checkMsgCreateTradingPair(input.ctx, msg, input.mk)
 	require.NotNil(t, err)
 	require.EqualValues(t, types.CodeRepeatTradingPair, err.Code())
+}
+
+func TestGetDenomAndOrderAmount(t *testing.T) {
+	msg := MsgCreateOrder{
+		Sender:         haveCetAddress,
+		Identify:       255,
+		TradingPair:    GetSymbol(stock, dex.CET),
+		OrderType:      LimitOrder,
+		Side:           BUY,
+		Price:          11,
+		PricePrecision: 8,
+		Quantity:       1e8,
+		TimeInForce:    GTE,
+		ExistBlocks:    10000,
+	}
+
+	// 1e8 * 11 / 10^8
+	denom, amount, err := getDenomAndOrderAmount(msg)
+	require.Nil(t, err)
+	require.EqualValues(t, dex.CET, denom)
+	require.EqualValues(t, 11, amount)
+
+	// 10 * 11 / 10^8 ≈ 10^-6
+	msg.Quantity = 10
+	denom, amount, err = getDenomAndOrderAmount(msg)
+	require.Nil(t, err)
+	require.EqualValues(t, dex.CET, denom)
+	require.EqualValues(t, 1, amount)
+
+	msg.Quantity = types.MaxOrderAmount + 1
+	msg.PricePrecision = 0
+	msg.Price = 1
+	_, _, err = getDenomAndOrderAmount(msg)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code())
+
+	msg.Side = SELL
+	msg.Quantity = 100
+	denom, amount, err = getDenomAndOrderAmount(msg)
+	require.Nil(t, err)
+	require.EqualValues(t, stock, denom)
+	require.EqualValues(t, msg.Quantity, amount)
+
+	msg.Quantity = types.MaxOrderAmount + 1
+	msg.Side = SELL
+	_, _, err = getDenomAndOrderAmount(msg)
+	require.NotNil(t, err)
+	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code())
+
+}
+
+func TestCheckMsgCancelOrder(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+
+	orderID, err := types.AssemblyOrderID(haveCetAddress.String(), 1, 1)
+	require.Nil(t, err)
+
+	msg := MsgCancelOrder{
+		OrderID: orderID,
+		Sender:  haveCetAddress,
+	}
+	failed := checkMsgCancelOrder(input.ctx, msg, input.mk)
+	require.NotNil(t, failed)
+	require.EqualValues(t, types.CodeOrderNotFound, failed.Code())
+
+	// Create order
+	msgGteOrder := types.MsgCreateOrder{
+		Sender:         haveCetAddress,
+		Identify:       1,
+		TradingPair:    GetSymbol(stock, "cet"),
+		OrderType:      types.LimitOrder,
+		PricePrecision: 8,
+		Price:          100,
+		Quantity:       10000000,
+		Side:           types.SELL,
+		TimeInForce:    types.GTE,
+	}
+
+	seq, err := input.mk.QuerySeqWithAddr(input.ctx, msgGteOrder.Sender)
+	require.Nil(t, err)
+	ret := createCetMarket(input, stock, 10)
+	require.Equal(t, true, ret.IsOK(), "create market should succeed")
+	ret = input.handler(input.ctx, msgGteOrder)
+	require.Equal(t, true, ret.IsOK(), "create market should succeed")
+
+	// Invalid order sender
+	orderID, err = types.AssemblyOrderID(haveCetAddress.String(), seq, msgGteOrder.Identify)
+	require.Nil(t, err)
+	msg.OrderID = orderID
+	msg.Sender = forbidAddr
+	failed = checkMsgCancelOrder(input.ctx, msg, input.mk)
+	require.NotNil(t, failed)
+	require.EqualValues(t, types.CodeNotMatchSender, failed.Code())
+
+}
+
+func TestCheckMsgCancelTradingPair(t *testing.T) {
+	timeNow := time.Now()
+	input := prepareMockInput(t, false, false)
+	input.ctx = input.ctx.WithBlockTime(timeNow)
+	param := input.mk.GetParams(input.ctx)
+
+	msg := MsgCancelTradingPair{
+		Sender:        haveCetAddress,
+		TradingPair:   GetSymbol(stock, dex.CET),
+		EffectiveTime: timeNow.Unix(),
+	}
+
+	// Invalid cancel time
+	err := checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.EqualValues(t, types.CodeInvalidCancelTime, err.Code())
+
+	msg.EffectiveTime = timeNow.Unix() + param.MarketMinExpiredTime - 1
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.EqualValues(t, types.CodeInvalidCancelTime, err.Code())
+
+	// Invalid market
+	msg.EffectiveTime = timeNow.Unix() + param.MarketMinExpiredTime
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.EqualValues(t, types.CodeInvalidMarket, err.Code())
+
+	ret := createCetMarket(input, stock, 10)
+	require.EqualValues(t, sdk.CodeOK, ret.Code)
+
+	// Invalid sender
+	msg.Sender = forbidAddr
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.EqualValues(t, types.CodeNotMatchSender, err.Code())
+
+	// Token not forbidden when money = cet
+	msg.Sender = haveCetAddress
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.EqualValues(t, types.CodeDelistNotAllowed, err.Code())
+
+	// Token not forbidden when money != cet
+	err = input.mk.SetMarket(input.ctx, MarketInfo{
+		Stock: stock,
+		Money: money,
+	})
+	require.Nil(t, err)
+
+	msg.TradingPair = GetSymbol(stock, money)
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.Nil(t, err)
+
+	// -----------------------
+
+	input = prepareMockInput(t, true, true)
+	input.ctx = input.ctx.WithBlockTime(timeNow)
+
+	err = input.mk.SetMarket(input.ctx, MarketInfo{
+		Stock: stock,
+		Money: dex.CET,
+	})
+	require.Nil(t, err)
+
+	// Token forbidden when money = cet
+	msg.TradingPair = GetSymbol(stock, dex.CET)
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.Nil(t, err)
+
+	// Bancor doesn't exist when money = cet
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.Nil(t, err)
+
+	// Bancor exist when money = cet
+	bancorExist = true
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.EqualValues(t, types.CodeDelistNotAllowed, err.Code())
+
+	// Bancor exist when money != cet
+	err = input.mk.SetMarket(input.ctx, MarketInfo{
+		Stock: stock,
+		Money: money,
+	})
+	require.Nil(t, err)
+
+	msg.TradingPair = GetSymbol(stock, money)
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.Nil(t, err)
+
+	// Bancor doesn't exist when money != cet
+	bancorExist = false
+	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
+	require.Nil(t, err)
+
+}
+
+func TestCheckMsgModifyPricePrecision(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	msg := MsgModifyPricePrecision{
+		Sender:         haveCetAddress,
+		TradingPair:    GetSymbol(stock, dex.CET),
+		PricePrecision: 8,
+	}
+
+	// Invalid market
+	err := checkMsgModifyPricePrecision(input.ctx, msg, input.mk)
+	require.EqualValues(t, types.CodeInvalidMarket, err.Code())
+
+	// Invalid price precision
+	ret := createCetMarket(input, stock, 7)
+	require.EqualValues(t, sdk.CodeOK, ret.Code)
+
+	for i := 0; i < 8; i++ {
+		msg.PricePrecision = byte(i)
+		err := checkMsgModifyPricePrecision(input.ctx, msg, input.mk)
+		require.EqualValues(t, types.CodeInvalidPricePrecision, err.Code())
+	}
+
+	// Invalid tx sender
+	msg.PricePrecision = 9
+	msg.Sender = forbidAddr
+	err = checkMsgModifyPricePrecision(input.ctx, msg, input.mk)
+	require.EqualValues(t, types.CodeNotMatchSender, err.Code())
+
 }
