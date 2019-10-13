@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -357,4 +358,144 @@ func TestDelist(t *testing.T) {
 			t.Errorf("Incorrect Records, actual : %s, expect : %s", unf[i], rec)
 		}
 	}
+}
+
+func TestRemoveExpiredMarket(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	haveCetAddress, _ := simpleAddr("00001")
+	param := types.Params{
+		FeeForZeroDeal: 10,
+	}
+
+	delistKeeper := keepers.NewDelistKeeper(input.mk.GetMarketKey())
+	delistKeeper.AddDelistRequest(input.ctx, 8, "abc/cet")
+	delistKeeper.AddDelistRequest(input.ctx, 7, "abd/cet")
+	delistKeeper.AddDelistRequest(input.ctx, 6, "abe/cet")
+	delistKeeper.AddDelistRequest(input.ctx, 5, "abf/cet")
+	delistKeeper.AddDelistRequest(input.ctx, 4, "abg/cet")
+	delistKeeper.AddDelistRequest(input.ctx, 3, "abh/cet")
+	delistSymbols := delistKeeper.GetDelistSymbolsBeforeTime(input.ctx, 8)
+	require.EqualValues(t, 6, len(delistSymbols))
+
+	orderInfo := Order{
+		TradingPair: "abc/cet",
+		TimeInForce: GTE,
+		ExistBlocks: 100,
+		Sender:      haveCetAddress,
+	}
+	orderKeeper := keepers.NewOrderKeeper(input.mk.GetMarketKey(), "abc/cet", types.ModuleCdc)
+	for i := 0; i < 3; i++ {
+		tmp := orderInfo
+		tmp.Sequence = uint64(i + 1)
+		tmp.Identify = byte(i)
+		tmp.Height = int64(i + 5)
+		orderKeeper.Add(input.ctx, &tmp)
+	}
+
+	input.ctx = input.ctx.WithBlockTime(time.Unix(3, 0))
+	removeExpiredMarket(input.ctx, input.mk, param)
+	delistSymbols = delistKeeper.GetDelistSymbolsBeforeTime(input.ctx, 8)
+	require.EqualValues(t, 5, len(delistSymbols))
+	require.EqualValues(t, "abc/cet", delistSymbols[len(delistSymbols)-1])
+	require.EqualValues(t, "abe/cet", delistSymbols[2])
+	orders := orderKeeper.GetOlderThan(input.ctx, 100)
+	require.EqualValues(t, 3, len(orders))
+
+	input.ctx = input.ctx.WithBlockTime(time.Unix(6, 0))
+	removeExpiredMarket(input.ctx, input.mk, param)
+	delistSymbols = delistKeeper.GetDelistSymbolsBeforeTime(input.ctx, 8)
+	require.EqualValues(t, 2, len(delistSymbols))
+	require.EqualValues(t, "abd/cet", delistSymbols[0])
+	require.EqualValues(t, "abc/cet", delistSymbols[1])
+	orders = orderKeeper.GetOlderThan(input.ctx, 100)
+	require.EqualValues(t, 3, len(orders))
+
+	input.ctx = input.ctx.WithBlockTime(time.Unix(61, 0))
+	input.ctx = input.ctx.WithBlockHeight(30)
+	removeExpiredMarket(input.ctx, input.mk, param)
+	delistSymbols = delistKeeper.GetDelistSymbolsBeforeTime(input.ctx, 8)
+	require.EqualValues(t, 0, len(delistSymbols))
+	orders = orderKeeper.GetOlderThan(input.ctx, 100)
+	require.EqualValues(t, 0, len(orders))
+}
+
+func TestRemoveExpiredOrder(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	haveCetAddress, _ := simpleAddr("00001")
+	param := types.Params{
+		FeeForZeroDeal:   10,
+		GTEOrderLifetime: 10,
+	}
+	mkInfo := MarketInfo{
+		Stock: "abc",
+		Money: "cet",
+	}
+	orderInfo := Order{
+		TradingPair: mkInfo.GetSymbol(),
+		TimeInForce: GTE,
+		ExistBlocks: 10,
+		Sender:      haveCetAddress,
+	}
+
+	// Add orders to orderKeeper; test add order success
+	orderKeeper := keepers.NewOrderKeeper(input.mk.GetMarketKey(), mkInfo.GetSymbol(), types.ModuleCdc)
+	for i := 3; i < 9; i++ {
+		tmp := orderInfo
+		tmp.Identify = byte(i)
+		tmp.Sequence = uint64(i)
+		tmp.Height = int64(i)
+		if i == 5 {
+			tmp.ExistBlocks = 12
+		}
+		orderKeeper.Add(input.ctx, &tmp)
+	}
+
+	orders := orderKeeper.GetOlderThan(input.ctx, 9)
+	require.EqualValues(t, 6, len(orders))
+	orders = orderKeeper.GetOlderThan(input.ctx, 5)
+	require.EqualValues(t, 2, len(orders))
+
+	// current height - GteOrderLifeTime < 0
+	input.ctx = input.ctx.WithBlockHeight(9)
+	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
+	orders = orderKeeper.GetOlderThan(input.ctx, 9)
+	require.EqualValues(t, 6, len(orders))
+
+	// Set blockHeight = 15; test remove order old than height = 5
+	input.ctx = input.ctx.WithBlockHeight(15)
+	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
+	orders = orderKeeper.GetOlderThan(input.ctx, 5)
+	require.EqualValues(t, 0, len(orders))
+	orders = orderKeeper.GetOlderThan(input.ctx, 9)
+	require.EqualValues(t, 4, len(orders))
+	require.EqualValues(t, 8, orders[0].Sequence)
+	require.EqualValues(t, 7, orders[1].Sequence)
+
+	// Before the height not have orders
+	input.ctx = input.ctx.WithBlockHeight(14)
+	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
+	orders = orderKeeper.GetOlderThan(input.ctx, 9)
+	require.EqualValues(t, 4, len(orders))
+	require.EqualValues(t, 5, orders[3].Height)
+
+	// Order height + exist block height > current block height
+	input.ctx = input.ctx.WithBlockHeight(16)
+	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
+	orders = orderKeeper.GetOlderThan(input.ctx, 9)
+	require.EqualValues(t, 4, len(orders))
+
+	// Set blockHeight = 18; test remove order old than height = 8
+	input.ctx = input.ctx.WithBlockHeight(18)
+	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
+	orders = orderKeeper.GetOlderThan(input.ctx, 8)
+	require.EqualValues(t, 0, len(orders))
+	orders = orderKeeper.GetOlderThan(input.ctx, 9)
+	require.EqualValues(t, 1, len(orders))
+	require.EqualValues(t, 8, orders[0].Sequence)
+
+	// Set blockHeight = 20; test remove order old than height = 10
+	input.ctx = input.ctx.WithBlockHeight(20)
+	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
+	orders = orderKeeper.GetOlderThan(input.ctx, 10)
+	require.EqualValues(t, 0, len(orders))
 }
