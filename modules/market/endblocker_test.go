@@ -21,6 +21,7 @@ import (
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
+	types2 "github.com/coinexchain/dex/types"
 )
 
 var msgCdc = types.ModuleCdc
@@ -498,4 +499,166 @@ func TestRemoveExpiredOrder(t *testing.T) {
 	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
 	orders = orderKeeper.GetOlderThan(input.ctx, 10)
 	require.EqualValues(t, 0, len(orders))
+}
+
+func TestTimeReachedRemoveOrNot(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+
+	input.ctx = input.ctx.WithChainID(IntegrationNetSubString + "01")
+	input.ctx = input.ctx.WithBlockTime(time.Unix(1, 0))
+
+	// Enter remove logic, but no market and orders
+	EndBlocker(input.ctx, input.mk)
+
+	mkInfo := MarketInfo{
+		Stock: "abc",
+		Money: "cet",
+	}
+	input.mk.SetMarket(input.ctx, mkInfo)
+	orderInfo := Order{
+		TradingPair: "abc/cet",
+		TimeInForce: GTE,
+		ExistBlocks: 10,
+		Sender:      haveCetAddress,
+	}
+	orderKeeper := keepers.NewOrderKeeper(input.mk.GetMarketKey(), "abc/cet", types.ModuleCdc)
+	for i := 3; i < 9; i++ {
+		tmp := orderInfo
+		tmp.Identify = byte(i)
+		tmp.Sequence = uint64(i)
+		tmp.Height = int64(i)
+		if i == 5 {
+			tmp.ExistBlocks = 20
+		}
+		orderKeeper.Add(input.ctx, &tmp)
+	}
+
+	param := types.Params{
+		FeeForZeroDeal:   10,
+		GTEOrderLifetime: 10,
+	}
+	input.mk.SetParams(input.ctx, param)
+
+	// EndBlocker don't remove, because time has not arrived.
+	input.ctx = input.ctx.WithBlockHeight(20)
+	EndBlocker(input.ctx, input.mk)
+	orders := orderKeeper.GetOlderThan(input.ctx, 10)
+	require.EqualValues(t, 6, len(orders))
+
+	// EndBlocker remove.
+	input.ctx = input.ctx.WithBlockTime(time.Unix(2, 0))
+	require.EqualValues(t, 20, input.ctx.BlockHeight())
+	require.EqualValues(t, 2, input.ctx.BlockTime().Unix())
+	EndBlocker(input.ctx, input.mk)
+	orders = orderKeeper.GetOlderThan(input.ctx, 10)
+	require.EqualValues(t, 1, len(orders))
+	require.EqualValues(t, 20, orders[0].ExistBlocks)
+	require.EqualValues(t, 5, orders[0].Sequence)
+}
+
+func TestEndBlocker(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	input.ctx = input.ctx.WithChainID(IntegrationNetSubString + "01")
+	input.ctx = input.ctx.WithBlockTime(time.Unix(1, 0))
+	input.mk.SetOrderCleanTime(input.ctx, 1)
+	orderKeeper := keepers.NewOrderKeeper(input.mk.GetMarketKey(), GetSymbol(stock, types2.CET), types.ModuleCdc)
+
+	mkInfo := MarketInfo{
+		Stock: stock,
+		Money: types2.CET,
+	}
+	input.mk.SetMarket(input.ctx, mkInfo)
+
+	seller, _ := simpleAddr("00001")
+	buyer, _ := simpleAddr("00002")
+	// Add orders
+	sellOrderInfo1 := Order{
+		Quantity:    250,
+		Price:       sdk.NewDec(98),
+		Sender:      seller,
+		Sequence:    1,
+		Identify:    2,
+		TradingPair: mkInfo.GetSymbol(),
+		Height:      900,
+		Side:        SELL,
+	}
+	sellOrderInfo2 := Order{
+		Quantity:    50,
+		Price:       sdk.NewDec(97),
+		Sender:      seller,
+		Sequence:    2,
+		Identify:    2,
+		TradingPair: mkInfo.GetSymbol(),
+		Height:      900,
+		Side:        SELL,
+	}
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+	orderKeeper.Add(input.ctx, &sellOrderInfo2)
+
+	buyOrderInfo1 := Order{
+		Quantity:    150,
+		Price:       sdk.NewDec(100),
+		Sequence:    3,
+		Identify:    3,
+		TradingPair: mkInfo.GetSymbol(),
+		Sender:      buyer,
+		Height:      900,
+		Side:        BUY,
+	}
+	buyOrderInfo2 := Order{
+		Quantity:    150,
+		Price:       sdk.NewDec(98),
+		Sequence:    4,
+		Identify:    3,
+		TradingPair: mkInfo.GetSymbol(),
+		Sender:      buyer,
+		Height:      900,
+		Side:        BUY,
+	}
+	// input.mk.SetOrder()
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+
+	// Choose the largest execution
+	orderCandidates := orderKeeper.GetMatchingCandidates(input.ctx)
+	require.EqualValues(t, 4, len(orderCandidates))
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, err := input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.Nil(t, err)
+	require.EqualValues(t, sdk.NewDec(98).String(), mkInfo.LastExecutedPrice.String())
+	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
+	require.EqualValues(t, 0, len(orderCandidates))
+
+	// ------------------
+
+	sellOrderInfo1.Quantity = 200
+	sellOrderInfo1.Price = sdk.NewDec(97)
+	sellOrderInfo2.Quantity = 100
+	sellOrderInfo2.Price = sdk.NewDec(96)
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+	orderKeeper.Add(input.ctx, &sellOrderInfo2)
+
+	buyOrderInfo1.Quantity = 150
+	buyOrderInfo1.Price = sdk.NewDec(100)
+	buyOrderInfo2.Quantity = 200
+	buyOrderInfo2.Price = sdk.NewDec(99)
+	buyOrderInfo3 := buyOrderInfo2
+	buyOrderInfo3.Quantity = 300
+	buyOrderInfo3.Price = sdk.NewDec(97)
+	buyOrderInfo3.Sequence = 5
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+	orderKeeper.Add(input.ctx, &buyOrderInfo3)
+
+	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
+	require.EqualValues(t, 5, len(orderCandidates))
+
+	mkInfo.LastExecutedPrice = sdk.NewDec(0)
+	input.mk.SetMarket(input.ctx, mkInfo)
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, err = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.Nil(t, err)
+	require.EqualValues(t, sdk.NewDec(97).String(), mkInfo.LastExecutedPrice.String())
+	orders := orderKeeper.GetOlderThan(input.ctx, 1000)
+	require.EqualValues(t, 1, len(orders))
 }
