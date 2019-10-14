@@ -23,10 +23,22 @@ If you want the node to run faster, the following command is recommended for cgo
 
 Compile libsecp256k1
 ```
-cd tendermint@v0.32.1/crypto/secp256k1/internal/secp256k1/libsecp256k1
+TENDERMINT_VERSION=`grep tendermint/tendermint go.mod | sed -E 's/(.*) (v[^ ]*)/\2/g'`
+SECP256K1_PATH="$GOPATH/pkg/mod/github.com/tendermint/tendermint@$TENDERMINT_VERSION/crypto/secp256k1/internal/secp256k1/libsecp256k1"
+
+TMP_DIR=/tmp/libsecp256k1
+rm -rdf $TMP_DIR && mkdir -p $TMP_DIR
+cp -r $SECP256K1_PATH/* $TMP_DIR
+chmod -R a+w $TMP_DIR
+cd $TMP_DIR
+
+# build cgo libsecp256k1
+chmod a+x ./autogen.sh
 ./autogen.sh
-./configure --with-bignum=gmp --enable-endomorphism
-make -j2 && make install
+./configure --with-bignum=gmp --enable-endomorphism --prefix=$TMP_DIR/output
+
+make -j9
+make install
 ```
 
 Compile dex
