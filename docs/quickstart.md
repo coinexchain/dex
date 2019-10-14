@@ -25,7 +25,7 @@ Compile libsecp256k1
 ```
 cd tendermint@v0.32.1/crypto/secp256k1/internal/secp256k1/libsecp256k1
 ./autogen.sh
-./configure --enable-benchmark --with-bignum=no
+./configure --with-bignum=gmp --enable-endomorphism
 make -j2 && make install
 ```
 
