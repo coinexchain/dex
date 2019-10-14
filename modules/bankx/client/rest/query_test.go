@@ -4,11 +4,12 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/coinexchain/dex/client/restutil"
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"

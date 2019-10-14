@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/coinexchain/dex/modules/authx"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/testapp"

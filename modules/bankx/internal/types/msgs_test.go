@@ -6,10 +6,11 @@ import (
 	"testing"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"

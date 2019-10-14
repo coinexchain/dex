@@ -3,9 +3,10 @@ package cli
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"

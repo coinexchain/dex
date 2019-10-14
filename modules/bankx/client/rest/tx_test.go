@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	dex "github.com/coinexchain/dex/types"
