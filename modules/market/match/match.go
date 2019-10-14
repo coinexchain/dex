@@ -179,6 +179,7 @@ func createPricePointList(orders []OrderForTrade) []PricePoint {
 			ppList[offset].bidAmount = ppList[offset].bidAmount.AddRaw(order.GetAmount())
 		}
 	}
+
 	return ppList
 }
 

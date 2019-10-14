@@ -195,7 +195,6 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 			askList = append(askList, wrappedOrder)
 		}
 	}
-
 	// call the match engine
 	match.Match(highPrice, midPrice, lowPrice, bidList, askList)
 

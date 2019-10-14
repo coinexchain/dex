@@ -573,7 +573,7 @@ func TestEndBlocker(t *testing.T) {
 	buyer, _ := simpleAddr("00002")
 	// Add orders
 	sellOrderInfo1 := Order{
-		Quantity:    250,
+		LeftStock:   250,
 		Price:       sdk.NewDec(98),
 		Sender:      seller,
 		Sequence:    1,
@@ -581,9 +581,10 @@ func TestEndBlocker(t *testing.T) {
 		TradingPair: mkInfo.GetSymbol(),
 		Height:      900,
 		Side:        SELL,
+		Freeze:      250,
 	}
 	sellOrderInfo2 := Order{
-		Quantity:    50,
+		LeftStock:   50,
 		Price:       sdk.NewDec(97),
 		Sender:      seller,
 		Sequence:    2,
@@ -591,12 +592,13 @@ func TestEndBlocker(t *testing.T) {
 		TradingPair: mkInfo.GetSymbol(),
 		Height:      900,
 		Side:        SELL,
+		Freeze:      50 * 97,
 	}
 	orderKeeper.Add(input.ctx, &sellOrderInfo1)
 	orderKeeper.Add(input.ctx, &sellOrderInfo2)
 
 	buyOrderInfo1 := Order{
-		Quantity:    150,
+		LeftStock:   150,
 		Price:       sdk.NewDec(100),
 		Sequence:    3,
 		Identify:    3,
@@ -604,9 +606,10 @@ func TestEndBlocker(t *testing.T) {
 		Sender:      buyer,
 		Height:      900,
 		Side:        BUY,
+		Freeze:      150 * 100,
 	}
 	buyOrderInfo2 := Order{
-		Quantity:    150,
+		LeftStock:   150,
 		Price:       sdk.NewDec(98),
 		Sequence:    4,
 		Identify:    3,
@@ -614,6 +617,7 @@ func TestEndBlocker(t *testing.T) {
 		Sender:      buyer,
 		Height:      900,
 		Side:        BUY,
+		Freeze:      150 * 98,
 	}
 	// input.mk.SetOrder()
 	orderKeeper.Add(input.ctx, &buyOrderInfo1)
@@ -629,23 +633,26 @@ func TestEndBlocker(t *testing.T) {
 	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
 	require.EqualValues(t, 0, len(orderCandidates))
 
-	// ------------------
-
-	sellOrderInfo1.Quantity = 200
+	sellOrderInfo1.LeftStock = 200
 	sellOrderInfo1.Price = sdk.NewDec(97)
-	sellOrderInfo2.Quantity = 100
+	sellOrderInfo1.Freeze = 200
+	sellOrderInfo2.LeftStock = 100
 	sellOrderInfo2.Price = sdk.NewDec(96)
+	sellOrderInfo2.Freeze = 100
 	orderKeeper.Add(input.ctx, &sellOrderInfo1)
 	orderKeeper.Add(input.ctx, &sellOrderInfo2)
 
-	buyOrderInfo1.Quantity = 150
+	buyOrderInfo1.LeftStock = 150
 	buyOrderInfo1.Price = sdk.NewDec(100)
-	buyOrderInfo2.Quantity = 200
+	buyOrderInfo1.Freeze = 100 * 150
+	buyOrderInfo2.LeftStock = 50
 	buyOrderInfo2.Price = sdk.NewDec(99)
+	buyOrderInfo2.Freeze = 50 * 99
 	buyOrderInfo3 := buyOrderInfo2
-	buyOrderInfo3.Quantity = 300
+	buyOrderInfo3.LeftStock = 300
 	buyOrderInfo3.Price = sdk.NewDec(97)
 	buyOrderInfo3.Sequence = 5
+	buyOrderInfo3.Freeze = 300 * 97
 	orderKeeper.Add(input.ctx, &buyOrderInfo1)
 	orderKeeper.Add(input.ctx, &buyOrderInfo2)
 	orderKeeper.Add(input.ctx, &buyOrderInfo3)
@@ -661,4 +668,350 @@ func TestEndBlocker(t *testing.T) {
 	require.EqualValues(t, sdk.NewDec(97).String(), mkInfo.LastExecutedPrice.String())
 	orders := orderKeeper.GetOlderThan(input.ctx, 1000)
 	require.EqualValues(t, 1, len(orders))
+	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
+	require.EqualValues(t, 0, len(orderCandidates))
+	err = orderKeeper.Remove(input.ctx, orders[0])
+	require.Nil(t, err)
+
+	// ---------------------------
+	// The least abs surplus imbalance
+	mkInfo.LastExecutedPrice = sdk.NewDec(0)
+	input.mk.SetMarket(input.ctx, mkInfo)
+
+	sellOrderInfo1.LeftStock = 250
+	sellOrderInfo1.Price = sdk.NewDec(98)
+	sellOrderInfo1.Freeze = 250
+	sellOrderInfo2.LeftStock = 250
+	sellOrderInfo2.Price = sdk.NewDec(97)
+	sellOrderInfo2.Freeze = 250
+	sellOrderInfo3 := sellOrderInfo2
+	sellOrderInfo3.LeftStock = 1000
+	sellOrderInfo3.Freeze = 1000
+	sellOrderInfo3.Sequence = 6
+	sellOrderInfo3.Price = sdk.NewDec(96)
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+	orderKeeper.Add(input.ctx, &sellOrderInfo2)
+	orderKeeper.Add(input.ctx, &sellOrderInfo3)
+
+	buyOrderInfo1.LeftStock = 300
+	buyOrderInfo1.Price = sdk.NewDec(102)
+	buyOrderInfo1.Freeze = 300 * 102
+	buyOrderInfo2.LeftStock = 100
+	buyOrderInfo2.Price = sdk.NewDec(100)
+	buyOrderInfo2.Freeze = 100 * 100
+	buyOrderInfo3.LeftStock = 200
+	buyOrderInfo3.Price = sdk.NewDec(99)
+	buyOrderInfo3.Freeze = 200 * 99
+	buyOrderInfo4 := buyOrderInfo1
+	buyOrderInfo4.LeftStock = 300
+	buyOrderInfo4.Sequence = 7
+	buyOrderInfo4.Price = sdk.NewDec(98)
+	buyOrderInfo4.Freeze = 300 * 98
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+	orderKeeper.Add(input.ctx, &buyOrderInfo3)
+	orderKeeper.Add(input.ctx, &buyOrderInfo4)
+
+	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
+	require.EqualValues(t, 7, len(orderCandidates))
+
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, err = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.Nil(t, err)
+	require.EqualValues(t, sdk.NewDec(96).String(), mkInfo.LastExecutedPrice.String())
+}
+
+func TestLeastAbsImbalance(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	input.ctx = input.ctx.WithChainID(IntegrationNetSubString + "01")
+	input.ctx = input.ctx.WithBlockTime(time.Unix(1, 0))
+	input.mk.SetOrderCleanTime(input.ctx, 1)
+	orderKeeper := keepers.NewOrderKeeper(input.mk.GetMarketKey(), GetSymbol(stock, types2.CET), types.ModuleCdc)
+
+	mkInfo := MarketInfo{
+		Stock: stock,
+		Money: types2.CET,
+	}
+	input.mk.SetMarket(input.ctx, mkInfo)
+
+	seller, _ := simpleAddr("00001")
+	buyer, _ := simpleAddr("00002")
+
+	sellOrderInfo1 := Order{
+		LeftStock:   10,
+		Price:       sdk.NewDec(98),
+		Sender:      seller,
+		Sequence:    1,
+		Identify:    2,
+		TradingPair: mkInfo.GetSymbol(),
+		Height:      900,
+		Side:        SELL,
+		Freeze:      10,
+	}
+	buyOrderInfo1 := Order{
+		LeftStock:   30,
+		Price:       sdk.NewDec(102),
+		Sender:      buyer,
+		Sequence:    10,
+		Identify:    2,
+		TradingPair: mkInfo.GetSymbol(),
+		Height:      900,
+		Side:        BUY,
+		Freeze:      30 * 102,
+	}
+
+	sellOrderInfo2 := sellOrderInfo1
+	sellOrderInfo2.Sequence = 2
+	sellOrderInfo2.LeftStock = 50
+	sellOrderInfo2.Freeze = 50
+	sellOrderInfo2.Price = sdk.NewDec(97)
+	sellOrderInfo3 := sellOrderInfo1
+	sellOrderInfo3.Sequence = 3
+	sellOrderInfo3.LeftStock = 50
+	sellOrderInfo3.Freeze = 50
+	sellOrderInfo3.Price = sdk.NewDec(95)
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+	orderKeeper.Add(input.ctx, &sellOrderInfo2)
+	orderKeeper.Add(input.ctx, &sellOrderInfo3)
+
+	buyOrderInfo2 := buyOrderInfo1
+	buyOrderInfo2.Sequence = 11
+	buyOrderInfo2.LeftStock = 10
+	buyOrderInfo2.Price = sdk.NewDec(101)
+	buyOrderInfo2.Freeze = 10 * 101
+	buyOrderInfo3 := buyOrderInfo1
+	buyOrderInfo3.Sequence = 12
+	buyOrderInfo3.LeftStock = 50
+	buyOrderInfo3.Price = sdk.NewDec(99)
+	buyOrderInfo3.Freeze = 50 * 99
+	buyOrderInfo4 := buyOrderInfo1
+	buyOrderInfo4.Sequence = 13
+	buyOrderInfo4.LeftStock = 15
+	buyOrderInfo4.Price = sdk.NewDec(96)
+	buyOrderInfo4.Freeze = 15 * 96
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+	orderKeeper.Add(input.ctx, &buyOrderInfo3)
+	orderKeeper.Add(input.ctx, &buyOrderInfo4)
+
+	orderCandidates := orderKeeper.GetMatchingCandidates(input.ctx)
+	require.EqualValues(t, 7, len(orderCandidates))
+
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, err := input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.Nil(t, err)
+	require.EqualValues(t, sdk.NewDec(97).String(), mkInfo.LastExecutedPrice.String())
+
+}
+
+func TestLowestPriceMatch(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	input.ctx = input.ctx.WithChainID(IntegrationNetSubString + "01")
+	input.ctx = input.ctx.WithBlockTime(time.Unix(1, 0))
+	input.mk.SetOrderCleanTime(input.ctx, 1)
+	orderKeeper := keepers.NewOrderKeeper(input.mk.GetMarketKey(), GetSymbol(stock, types2.CET), types.ModuleCdc)
+	param := types.Params{
+		MaxExecutedPriceChangeRatio: 5,
+	}
+	input.mk.SetParams(input.ctx, param)
+	mkInfo := MarketInfo{
+		Stock:             stock,
+		Money:             types2.CET,
+		LastExecutedPrice: sdk.NewDec(80),
+	}
+	input.mk.SetMarket(input.ctx, mkInfo)
+
+	seller, _ := simpleAddr("00001")
+	buyer, _ := simpleAddr("00002")
+	sellOrderInfo1 := Order{
+		LeftStock:   50,
+		Price:       sdk.NewDec(95),
+		Sender:      seller,
+		Sequence:    1,
+		Identify:    2,
+		TradingPair: mkInfo.GetSymbol(),
+		Height:      900,
+		Side:        SELL,
+		Freeze:      50,
+	}
+	buyOrderInfo1 := Order{
+		LeftStock:   10,
+		Price:       sdk.NewDec(102),
+		Sender:      buyer,
+		Sequence:    10,
+		Identify:    2,
+		TradingPair: mkInfo.GetSymbol(),
+		Height:      900,
+		Side:        BUY,
+		Freeze:      10 * 102,
+	}
+
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+
+	buyOrderInfo2 := buyOrderInfo1
+	buyOrderInfo2.Sequence = 11
+	buyOrderInfo2.LeftStock = 10
+	buyOrderInfo2.Price = sdk.NewDec(97)
+	buyOrderInfo2.Freeze = 10 * 97
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+
+	orderCandidates := orderKeeper.GetMatchingCandidates(input.ctx)
+	require.EqualValues(t, 3, len(orderCandidates))
+
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, err := input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.Nil(t, err)
+	require.EqualValues(t, sdk.NewDec(95).String(), mkInfo.LastExecutedPrice.String())
+	err = orderKeeper.Remove(input.ctx, &sellOrderInfo1)
+	require.Nil(t, err)
+
+	// --------------
+
+	sellOrderInfo1.LeftStock = 50
+	sellOrderInfo1.Freeze = 50
+	sellOrderInfo1.Price = sdk.NewDec(92)
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+
+	buyOrderInfo1.Price = sdk.NewDec(99)
+	buyOrderInfo1.LeftStock = 10
+	buyOrderInfo1.Freeze = 10 * 99
+	buyOrderInfo2.Price = sdk.NewDec(94)
+	buyOrderInfo2.LeftStock = 10
+	buyOrderInfo2.Freeze = 10 * 94
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+
+	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
+	require.EqualValues(t, 3, len(orderCandidates))
+
+	mkInfo.LastExecutedPrice = sdk.NewDec(100)
+	input.mk.SetMarket(input.ctx, mkInfo)
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, err = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.EqualValues(t, sdk.NewDec(94).String(), mkInfo.LastExecutedPrice.String())
+	err = orderKeeper.Remove(input.ctx, &sellOrderInfo1)
+	require.Nil(t, err)
+
+	// ------------------
+
+	sellOrderInfo1.LeftStock = 50
+	sellOrderInfo1.Price = sdk.NewDec(92)
+	sellOrderInfo1.Freeze = 50
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+
+	buyOrderInfo1.LeftStock = 100
+	buyOrderInfo1.Price = sdk.NewDec(99)
+	buyOrderInfo1.Freeze = 100 * 99
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+
+	mkInfo.LastExecutedPrice = sdk.NewDec(90)
+	input.mk.SetMarket(input.ctx, mkInfo)
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, err = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	// TODO. will debug
+	p, _ := sdk.NewDecFromStr(fmt.Sprintf("%f", 94.5))
+	require.EqualValues(t, p.String(), mkInfo.LastExecutedPrice.String())
+	err = orderKeeper.Remove(input.ctx, &buyOrderInfo1)
+	require.Nil(t, err)
+
+	// -------------------
+	sellOrderInfo1.LeftStock = 50
+	sellOrderInfo1.Freeze = 50
+	sellOrderInfo1.Price = sdk.NewDec(94)
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+
+	buyOrderInfo1.Price = sdk.NewDec(101)
+	buyOrderInfo1.LeftStock = 10
+	buyOrderInfo1.Freeze = 10 * 101
+	buyOrderInfo2.Price = sdk.NewDec(96)
+	buyOrderInfo2.LeftStock = 10
+	buyOrderInfo2.Freeze = 10 * 96
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+
+	mkInfo.LastExecutedPrice = sdk.NewDec(100)
+	input.mk.SetMarket(input.ctx, mkInfo)
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, err = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.EqualValues(t, sdk.NewDec(95).String(), mkInfo.LastExecutedPrice.String())
+	err = orderKeeper.Remove(input.ctx, &sellOrderInfo1)
+	require.Nil(t, err)
+
+}
+
+func TestClosestLastTradePrice(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	input.ctx = input.ctx.WithChainID(IntegrationNetSubString + "01")
+	input.ctx = input.ctx.WithBlockTime(time.Unix(1, 0))
+	input.mk.SetOrderCleanTime(input.ctx, 1)
+	orderKeeper := keepers.NewOrderKeeper(input.mk.GetMarketKey(), GetSymbol(stock, types2.CET), types.ModuleCdc)
+	mkInfo := MarketInfo{
+		Stock:             stock,
+		Money:             types2.CET,
+		LastExecutedPrice: sdk.NewDec(99),
+	}
+	input.mk.SetMarket(input.ctx, mkInfo)
+
+	seller, _ := simpleAddr("00001")
+	buyer, _ := simpleAddr("00002")
+	sellOrderInfo1 := Order{
+		LeftStock:   25,
+		Price:       sdk.NewDec(98),
+		Sender:      seller,
+		Sequence:    1,
+		Identify:    2,
+		TradingPair: mkInfo.GetSymbol(),
+		Height:      900,
+		Side:        SELL,
+		Freeze:      25,
+	}
+	buyOrderInfo1 := Order{
+		LeftStock:   25,
+		Price:       sdk.NewDec(100),
+		Sender:      buyer,
+		Sequence:    10,
+		Identify:    2,
+		TradingPair: mkInfo.GetSymbol(),
+		Height:      900,
+		Side:        BUY,
+		Freeze:      25 * 100,
+	}
+
+	sellOrderInfo2 := sellOrderInfo1
+	sellOrderInfo2.Sequence = 2
+	sellOrderInfo2.LeftStock = 25
+	sellOrderInfo2.Freeze = 25
+	sellOrderInfo2.Price = sdk.NewDec(95)
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+	orderKeeper.Add(input.ctx, &sellOrderInfo2)
+
+	buyOrderInfo2 := buyOrderInfo1
+	buyOrderInfo2.Sequence = 11
+	buyOrderInfo2.LeftStock = 25
+	buyOrderInfo2.Price = sdk.NewDec(97)
+	buyOrderInfo2.Freeze = 25 * 97
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, _ = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.EqualValues(t, sdk.NewDec(99).String(), mkInfo.LastExecutedPrice.String())
+
+	// ---------------------
+
+	sellOrderInfo1.Price = sdk.NewDec(98)
+	sellOrderInfo2.Price = sdk.NewDec(95)
+	orderKeeper.Add(input.ctx, &sellOrderInfo1)
+	orderKeeper.Add(input.ctx, &sellOrderInfo2)
+	buyOrderInfo1.Price = sdk.NewDec(100)
+	buyOrderInfo2.Price = sdk.NewDec(97)
+	orderKeeper.Add(input.ctx, &buyOrderInfo1)
+	orderKeeper.Add(input.ctx, &buyOrderInfo2)
+
+	mkInfo.LastExecutedPrice = sdk.NewDec(97)
+	input.mk.SetMarket(input.ctx, mkInfo)
+	EndBlocker(input.ctx, input.mk)
+	mkInfo, _ = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
+	require.EqualValues(t, sdk.NewDec(97).String(), mkInfo.LastExecutedPrice.String())
 }
