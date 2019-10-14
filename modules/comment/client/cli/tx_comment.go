@@ -162,7 +162,7 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 		return nil, errors.Errorf("invalid format: " + line)
 	}
 
-	id, err := strconv.ParseInt(symbols[0], 10, 63)
+	id, err := strconv.ParseUint(symbols[0], 10, 64)
 	if err != nil {
 		return nil, errors.Errorf("Not a valid comment id: " + symbols[0])
 	}
@@ -172,7 +172,7 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 		return nil, errors.Errorf("Not a valid address: " + symbols[1])
 	}
 
-	amt, err := strconv.ParseInt(symbols[2], 10, 63)
+	amt, err := strconv.ParseInt(symbols[2], 10, 64)
 	if err != nil {
 		return nil, errors.Errorf("Not a valid amount: " + symbols[2])
 	}
@@ -187,7 +187,7 @@ func parseRewardLine(line string) (*types.CommentRef, error) {
 	}
 
 	cref := &types.CommentRef{
-		ID:           uint64(id),
+		ID:           id,
 		RewardTarget: target,
 		RewardToken:  symbols[3],
 		RewardAmount: amt,

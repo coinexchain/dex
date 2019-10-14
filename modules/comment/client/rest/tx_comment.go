@@ -33,7 +33,7 @@ func (req *NewThreadReq) GetBaseReq() *rest.BaseReq {
 }
 
 func (req *NewThreadReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
-	donation, err := strconv.ParseInt(req.Donation, 10, 63)
+	donation, err := strconv.ParseInt(req.Donation, 10, 64)
 	if err != nil {
 		return nil, errors.New("invalid donation amount")
 	}
@@ -73,13 +73,13 @@ func (req *FollowupCommentReq) GetBaseReq() *rest.BaseReq {
 }
 
 func (req *FollowupCommentReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
-	donation, err := strconv.ParseInt(req.Donation, 10, 63)
+	donation, err := strconv.ParseInt(req.Donation, 10, 64)
 	if err != nil {
 		return nil, errors.New("invalid donation amount")
 	}
 
 	crefs := make([]types.CommentRef, 1)
-	idRewarded, err := strconv.ParseInt(req.IDRewarded, 10, 63)
+	idRewarded, err := strconv.ParseInt(req.IDRewarded, 10, 64)
 	if err != nil {
 		return nil, errors.New("invalid comment ID")
 	}
@@ -87,7 +87,7 @@ func (req *FollowupCommentReq) GetMsg(r *http.Request, sender sdk.AccAddress) (s
 	if err != nil {
 		return nil, err
 	}
-	rewardAmount, err := strconv.ParseInt(req.RewardAmount, 10, 63)
+	rewardAmount, err := strconv.ParseInt(req.RewardAmount, 10, 64)
 	if err != nil {
 		return nil, errors.New("invalid reward amount")
 	}
@@ -133,7 +133,7 @@ func (req *RewardCommentsReq) GetBaseReq() *rest.BaseReq {
 func (req *RewardCommentsReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Msg, error) {
 	crefs := make([]types.CommentRef, len(req.References))
 	for i, r := range req.References {
-		idRewarded, err := strconv.ParseInt(r.ID, 10, 63)
+		idRewarded, err := strconv.ParseUint(r.ID, 10, 64)
 		if err != nil {
 			return nil, errors.New("invalid comment ID")
 		}
@@ -141,11 +141,11 @@ func (req *RewardCommentsReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sd
 		if err != nil {
 			return nil, err
 		}
-		rewardAmount, err := strconv.ParseInt(r.RewardAmount, 10, 63)
+		rewardAmount, err := strconv.ParseInt(r.RewardAmount, 10, 64)
 		if err != nil {
 			return nil, errors.New("invalid reward amount")
 		}
-		crefs[i].ID = uint64(idRewarded)
+		crefs[i].ID = idRewarded
 		crefs[i].RewardTarget = rewardTarget
 		crefs[i].RewardToken = r.RewardToken
 		crefs[i].RewardAmount = rewardAmount

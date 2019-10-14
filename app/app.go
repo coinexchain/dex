@@ -223,7 +223,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	var limitTime int64
 	var err error
 	if ok {
-		limitTime, err = strconv.ParseInt(unconfirmedTxLimitTime, 10, 31)
+		limitTime, err = strconv.ParseInt(unconfirmedTxLimitTime, 10, 64)
 		if err != nil {
 			limitTime = -1
 		}
