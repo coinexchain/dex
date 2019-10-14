@@ -18,7 +18,7 @@ var (
 	DefaultMinMandatoryCommissionRate = sdk.NewDecWithPrec(1, 1)
 )
 
-var _ params.ParamSet = &Params{}
+var _ params.ParamSet = (*Params)(nil)
 
 // Params defines the parameters for the stakingx module.
 type Params struct {

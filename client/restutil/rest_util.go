@@ -10,7 +10,7 @@ type ResponseWriter4UT struct {
 	body       []byte
 }
 
-var _ http.ResponseWriter = &ResponseWriter4UT{}
+var _ http.ResponseWriter = (*ResponseWriter4UT)(nil)
 
 func NewResponseWriter4UT() *ResponseWriter4UT {
 	return &ResponseWriter4UT{

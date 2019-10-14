@@ -63,8 +63,8 @@ type mocOrder struct {
 	owner        mocAccount
 }
 
-var _ OrderForTrade = &mocOrder{}
-var _ Account = &mocAccount{}
+var _ OrderForTrade = (*mocOrder)(nil)
+var _ Account = (*mocAccount)(nil)
 
 func (order *mocOrder) GetPrice() sdk.Dec {
 	return order.price

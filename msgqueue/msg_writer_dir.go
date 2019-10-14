@@ -11,7 +11,7 @@ const (
 
 var MaxFileSize = 1024 * 1024 * 100
 
-var _ MsgWriter = &dirMsgWriter{}
+var _ MsgWriter = (*dirMsgWriter)(nil)
 
 type dirMsgWriter struct {
 	io.WriteCloser

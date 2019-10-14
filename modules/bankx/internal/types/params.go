@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-var _ params.ParamSet = &Params{}
+var _ params.ParamSet = (*Params)(nil)
 
 var (
 	KeyActivationFee = []byte("ActivationFee")

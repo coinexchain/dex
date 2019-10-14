@@ -25,7 +25,7 @@ type BancorInitReq struct {
 	EarliestCancelTime string       `json:"earliest_cancel_time"`
 }
 
-var _ restutil.RestReq = &BancorInitReq{}
+var _ restutil.RestReq = (*BancorInitReq)(nil)
 
 func (req *BancorInitReq) New() restutil.RestReq {
 	return new(BancorInitReq)
@@ -86,7 +86,7 @@ type BancorTradeReq struct {
 	MoneyLimit string       `json:"money_limit"`
 }
 
-var _ restutil.RestReq = &BancorTradeReq{}
+var _ restutil.RestReq = (*BancorTradeReq)(nil)
 
 func (req *BancorTradeReq) New() restutil.RestReq {
 	return new(BancorTradeReq)
@@ -126,7 +126,7 @@ type BancorCancelReq struct {
 	Money   string       `json:"money"`
 }
 
-var _ restutil.RestReq = &BancorCancelReq{}
+var _ restutil.RestReq = (*BancorCancelReq)(nil)
 
 func (req *BancorCancelReq) New() restutil.RestReq {
 	return new(BancorCancelReq)

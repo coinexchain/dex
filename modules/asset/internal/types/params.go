@@ -25,7 +25,7 @@ var (
 	KeyIssueRareTokenFee = []byte("IssueRareTokenFee")
 )
 
-var _ params.ParamSet = &Params{}
+var _ params.ParamSet = (*Params)(nil)
 
 // Params defines the parameters for the asset module.
 type Params struct {

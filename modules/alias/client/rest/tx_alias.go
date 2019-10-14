@@ -19,7 +19,7 @@ type AliasUpdateReq struct {
 	AsDefault bool         `json:"as_default"`
 }
 
-var _ restutil.RestReq = &AliasUpdateReq{}
+var _ restutil.RestReq = (*AliasUpdateReq)(nil)
 
 func (req *AliasUpdateReq) New() restutil.RestReq {
 	return new(AliasUpdateReq)

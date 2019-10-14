@@ -23,7 +23,7 @@ type NewThreadReq struct {
 	ContentType int8         `json:"content_type"`
 }
 
-var _ restutil.RestReq = &NewThreadReq{}
+var _ restutil.RestReq = (*NewThreadReq)(nil)
 
 func (req *NewThreadReq) New() restutil.RestReq {
 	return new(NewThreadReq)
@@ -63,7 +63,7 @@ type FollowupCommentReq struct {
 	Attitudes    []int32      `json:"attitudes"`
 }
 
-var _ restutil.RestReq = &FollowupCommentReq{}
+var _ restutil.RestReq = (*FollowupCommentReq)(nil)
 
 func (req *FollowupCommentReq) New() restutil.RestReq {
 	return new(FollowupCommentReq)
@@ -121,7 +121,7 @@ type RewardCommentsReq struct {
 	References []CommentRef `json:"references"`
 }
 
-var _ restutil.RestReq = &RewardCommentsReq{}
+var _ restutil.RestReq = (*RewardCommentsReq)(nil)
 
 func (req *RewardCommentsReq) New() restutil.RestReq {
 	return new(RewardCommentsReq)
