@@ -24,19 +24,19 @@ func NewCommentCountKeeper(key sdk.StoreKey) *CommentCountKeeper {
 	}
 }
 
-func (keeper *CommentCountKeeper) IncrCommentCount(ctx sdk.Context, denorm string) uint64 {
+func (keeper *CommentCountKeeper) IncrCommentCount(ctx sdk.Context, denom string) uint64 {
 	store := ctx.KVStore(keeper.commentKey)
-	ccKey := append(CommentCountKey, []byte(denorm)...)
+	ccKey := append(CommentCountKey, []byte(denom)...)
 	a := store.Get(ccKey)
 	count := uint64(0)
 	if len(a) != 0 {
-		count = binary.LittleEndian.Uint64(a[:])
+		count = binary.LittleEndian.Uint64(a)
 	}
 	lastCount := count
 	count++
 	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b[:], count)
-	store.Set(ccKey, b[:])
+	binary.LittleEndian.PutUint64(b, count)
+	store.Set(ccKey, b)
 	return lastCount
 }
 
@@ -46,10 +46,10 @@ func (keeper *CommentCountKeeper) GetAllCommentCount(ctx sdk.Context) map[string
 	iter := store.Iterator(CommentCountKey, CommentCountKeyEnd)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		denorm := iter.Key()[1:]
+		denom := iter.Key()[1:]
 		a := iter.Value()
 		count := binary.LittleEndian.Uint64(a[:])
-		res[string(denorm)] = count
+		res[string(denom)] = count
 	}
 	return res
 }
@@ -118,8 +118,8 @@ func (k *Keeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account {
 	return k.ak.GetAccount(ctx, addr)
 }
 
-func (k *Keeper) IncrCommentCount(ctx sdk.Context, denorm string) uint64 {
-	return k.cck.IncrCommentCount(ctx, denorm)
+func (k *Keeper) IncrCommentCount(ctx sdk.Context, denom string) uint64 {
+	return k.cck.IncrCommentCount(ctx, denom)
 }
 
 func (k *Keeper) GetAllCommentCount(ctx sdk.Context) map[string]uint64 {
