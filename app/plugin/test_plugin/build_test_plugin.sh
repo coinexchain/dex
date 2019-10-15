@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-RACE=$(ps -p $(ps -f -p $PPID | awk '!/PID/{print $3}') | grep ' -race ')
+RACE=$(ps -f -p $(ps -f -p $PPID | awk '!/PID/{print $3}') | grep ' -race ')
 
 if [[ -z ${RACE} ]]
 then
