@@ -102,7 +102,6 @@ func calcBondedRatio(p *BondPool) sdk.Dec {
 	}
 
 	return p.BondedTokens.ToDec().QuoInt(bondableTokens)
-
 }
 
 func calcNonBondableTokens(ctx sdk.Context, k *Keeper) sdk.Int {
@@ -111,8 +110,7 @@ func calcNonBondableTokens(ctx sdk.Context, k *Keeper) sdk.Int {
 
 	for _, addr := range addrs {
 		if acc := k.ak.GetAccount(ctx, addr); acc != nil {
-			amt := acc.GetCoins().AmountOf(dex.CET)
-			if amt.IsPositive() {
+			if amt := acc.GetCoins().AmountOf(dex.CET); amt.IsPositive() {
 				ret = ret.Add(amt)
 			}
 		}
