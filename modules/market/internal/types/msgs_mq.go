@@ -46,12 +46,13 @@ type FillOrderInfo struct {
 	Price       sdk.Dec `json:"price"`
 
 	// These fields will change when order was filled/canceled.
-	LeftStock int64 `json:"left_stock"`
-	Freeze    int64 `json:"freeze"`
-	DealStock int64 `json:"deal_stock"`
-	DealMoney int64 `json:"deal_money"`
-	CurrStock int64 `json:"curr_stock"`
-	CurrMoney int64 `json:"curr_money"`
+	LeftStock int64   `json:"left_stock"`
+	Freeze    int64   `json:"freeze"`
+	DealStock int64   `json:"deal_stock"`
+	DealMoney int64   `json:"deal_money"`
+	CurrStock int64   `json:"curr_stock"`
+	CurrMoney int64   `json:"curr_money"`
+	FillPrice sdk.Dec `json:"fill_price"`
 }
 
 type CancelOrderInfo struct {

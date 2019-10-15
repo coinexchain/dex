@@ -17,6 +17,7 @@ import (
 // Some handlers which are useful when orders are matched and traded.
 type InfoForDeal struct {
 	bxKeeper      types.ExpectedBankxKeeper
+	msgSender     msgqueue.MsgSender
 	dataHash      []byte
 	changedOrders map[string]*types.Order
 	lastPrice     sdk.Dec
@@ -78,14 +79,14 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	stock, money := SplitSymbol(buyer.TradingPair)
 	// buyer and seller will exchange stockCoins and moneyCoins
 	stockCoins := sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(amount))}
+	// TODO. will change moneyAmount type to int64
 	moneyAmount := price.MulInt(sdk.NewInt(amount)).TruncateInt()
 	moneyCoins := sdk.Coins{sdk.NewCoin(money, moneyAmount)}
-	//fmt.Printf("here price:%s stock:%d money:%d seller.Freeze:%d buyer.Freeze:%d %d %s\n",
-	//price.String(), amount, moneyAmount, seller.Freeze, buyer.Freeze, buyer.Quantity, buyer.Price.String())
 
 	var moneyAmountInt64 int64
 	if moneyAmount.GT(sdk.NewInt(types.MaxOrderAmount)) {
 		// should not reach this clause in production
+		// TODO. will panic or discuss
 		moneyAmountInt64 = 0
 	} else {
 		moneyAmountInt64 = moneyAmount.Int64()
@@ -111,6 +112,42 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 
 	// record the last executed price, which will be stored in MarketInfo
 	wo.infoForDeal.lastPrice = price
+
+	if wo.infoForDeal.msgSender.IsSubscribed(types.Topic) {
+		SendFillMsg(ctx, seller, buyer, amount, moneyAmountInt64, price, ctx.BlockHeight())
+	}
+}
+
+func SendFillMsg(ctx sdk.Context, seller *Order, buyer *Order, stockAmount, moneyAmount int64, price sdk.Dec, currentHeight int64) {
+	sellInfo := types.FillOrderInfo{
+		OrderID:     seller.OrderID(),
+		Height:      currentHeight,
+		TradingPair: seller.TradingPair,
+		Side:        seller.Side,
+		FillPrice:   price,
+		LeftStock:   seller.LeftStock,
+		Freeze:      seller.Freeze,
+		DealStock:   seller.DealStock,
+		DealMoney:   seller.DealMoney,
+		CurrStock:   stockAmount,
+		CurrMoney:   moneyAmount,
+	}
+	msgqueue.FillMsgs(ctx, types.FillOrderInfoKey, sellInfo)
+
+	buyInfo := types.FillOrderInfo{
+		OrderID:     buyer.OrderID(),
+		Height:      currentHeight,
+		TradingPair: buyer.TradingPair,
+		Side:        buyer.Side,
+		FillPrice:   price,
+		LeftStock:   buyer.LeftStock,
+		Freeze:      buyer.Freeze,
+		DealStock:   buyer.DealStock,
+		DealMoney:   buyer.DealMoney,
+		CurrStock:   stockAmount,
+		CurrMoney:   moneyAmount,
+	}
+	msgqueue.FillMsgs(ctx, types.FillOrderInfoKey, buyInfo)
 }
 
 // unfreeze an ask order's stock or a bid order's money
@@ -174,12 +211,6 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 	stock, money := SplitSymbol(orderKeeper.GetSymbol())
 	orderCandidates := orderKeeper.GetMatchingCandidates(ctx)
 	orderCandidates = filterCandidates(ctx, asKeeper, orderCandidates, stock, money)
-	orderOldDeals := make(map[string]int64, len(orderCandidates))
-	orderOldMoneys := make(map[string]int64, len(orderCandidates))
-	for _, order := range orderCandidates {
-		orderOldDeals[order.OrderID()] = order.DealStock
-		orderOldMoneys[order.OrderID()] = order.DealMoney
-	}
 
 	// fill bidList and askList with wrapped orders
 	bidList := make([]match.OrderForTrade, 0, len(orderCandidates))
@@ -209,38 +240,7 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 		}
 	}
 
-	if keeper.IsSubScribed(types.Topic) {
-		sendFillMsg(ctx, orderOldDeals, orderOldMoneys, ordersForUpdate, ctx.BlockHeight())
-	}
 	return ordersForUpdate, infoForDeal.lastPrice
-}
-
-func sendFillMsg(ctx sdk.Context, orderOldDeal, orderOldMoneys map[string]int64, ordersForUpdate map[string]*types.Order, height int64) {
-	if len(ordersForUpdate) == 0 {
-		return
-	}
-
-	for id, order := range ordersForUpdate {
-		oldDeal := orderOldDeal[id]
-		oldMoney := orderOldMoneys[id]
-		if (order.DealStock-oldDeal == 0) || (order.DealMoney-oldMoney == 0) {
-			continue
-		}
-		msgInfo := types.FillOrderInfo{
-			OrderID:     id,
-			Height:      height,
-			TradingPair: order.TradingPair,
-			Side:        order.Side,
-			Price:       order.Price,
-			LeftStock:   order.LeftStock,
-			Freeze:      order.Freeze,
-			DealStock:   order.DealStock,
-			DealMoney:   order.DealMoney,
-			CurrStock:   order.DealStock - oldDeal,
-			CurrMoney:   order.DealMoney - oldMoney,
-		}
-		msgqueue.FillMsgs(ctx, types.FillOrderInfoKey, msgInfo)
-	}
 }
 
 func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList []types.MarketInfo, marketParams types.Params) {
