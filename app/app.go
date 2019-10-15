@@ -642,11 +642,10 @@ func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 	otherTxExist := false
 	hashid := tmtypes.Tx(req.Tx).Hash()
 	signers := stdTx.GetSigners()
-	for _, signer := range signers {
-		res := app.account2UnconfirmedTx.Lookup(signer, hashid, app.currBlockTime)
+	if len(signers) != 0 {
+		res := app.account2UnconfirmedTx.Lookup(signers[0], hashid, app.currBlockTime)
 		if res == OtherTxExist {
 			otherTxExist = true
-			break
 		}
 	}
 
