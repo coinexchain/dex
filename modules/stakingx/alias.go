@@ -1,6 +1,8 @@
 package stakingx
 
-import "github.com/coinexchain/dex/modules/stakingx/internal/types"
+import (
+	"github.com/coinexchain/dex/modules/stakingx/internal/types"
+)
 
 type (
 	Params = types.Params

@@ -3,12 +3,16 @@ package stakingx_test
 import (
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+
 	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/dex/modules/stakingx/internal/types"
+	"github.com/coinexchain/dex/testapp"
 )
 
 func TestNewQuerier(t *testing.T) {
@@ -29,4 +33,23 @@ func TestNewQuerier(t *testing.T) {
 	failPath := "fake"
 	_, err = querier(ctx, []string{failPath}, abci.RequestQuery{})
 	require.Equal(t, sdk.CodeUnknownRequest, err.Code())
+}
+
+func TestQueryParams(t *testing.T) {
+	testApp := testapp.NewTestApp()
+	ctx := testApp.NewCtx()
+	params := staking.DefaultParams()
+	paramsx := types.DefaultParams()
+	testApp.StakingKeeper.SetParams(ctx, params)
+	testApp.StakingXKeeper.SetParams(ctx, paramsx)
+
+	querier := stakingx.NewQuerier(testApp.StakingXKeeper, testApp.Cdc)
+	res, err := querier(ctx, []string{stakingx.QueryParameters}, abci.RequestQuery{})
+	require.NoError(t, err)
+
+	var mergedParams types.MergedParams
+	testApp.Cdc.MustUnmarshalJSON(res, &mergedParams)
+	require.Equal(t,
+		string(testApp.Cdc.MustMarshalJSON(mergedParams)),
+		string(testApp.Cdc.MustMarshalJSON(types.NewMergedParams(params, paramsx))))
 }

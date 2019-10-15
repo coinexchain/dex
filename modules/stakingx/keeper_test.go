@@ -1,9 +1,6 @@
 package stakingx_test
 
 import (
-	"github.com/coinexchain/dex/modules/stakingx"
-	"github.com/coinexchain/dex/testapp"
-
 	"math"
 	"testing"
 
@@ -14,6 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/dex/testapp"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )

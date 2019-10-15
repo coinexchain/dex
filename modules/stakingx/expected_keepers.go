@@ -3,7 +3,7 @@ package stakingx
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
-	supplyexported "github.com/cosmos/cosmos-sdk/x/supply/exported"
+	supply "github.com/cosmos/cosmos-sdk/x/supply/exported"
 
 	"github.com/coinexchain/dex/modules/asset"
 )
@@ -21,8 +21,8 @@ type ExpectBankxKeeper interface {
 }
 
 type ExpectSupplyKeeper interface {
-	GetModuleAccount(ctx sdk.Context, name string) supplyexported.ModuleAccountI
-	GetSupply(ctx sdk.Context) (supply supplyexported.SupplyI)
+	GetModuleAccount(ctx sdk.Context, name string) supply.ModuleAccountI
+	GetSupply(ctx sdk.Context) (supply supply.SupplyI)
 }
 
 type AssetViewKeeper interface {

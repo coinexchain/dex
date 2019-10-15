@@ -1,13 +1,13 @@
 package stakingx
 
 import (
-	dex "github.com/coinexchain/dex/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+
+	dex "github.com/coinexchain/dex/types"
 )
 
 func CalcBondedRatio(p *BondPool) sdk.Dec {
