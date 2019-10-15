@@ -99,6 +99,10 @@ func (k Keeper) SetOrderCleanTime(ctx sdk.Context, t int64) {
 	k.ock.SetUnixTime(ctx, t)
 }
 
+func (k Keeper) GetMsgProducer() msgqueue.MsgSender {
+	return k.msgProducer
+}
+
 func (k Keeper) GetBankxKeeper() types.ExpectedBankxKeeper {
 	return k.bnk
 }

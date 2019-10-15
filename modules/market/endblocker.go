@@ -205,6 +205,7 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 		changedOrders: make(map[string]*types.Order),
 		context:       ctx,
 		lastPrice:     sdk.NewDec(0),
+		msgSender:     keeper.GetMsgProducer(),
 	}
 
 	// from the order book, we fetch the candidate orders for matching and filter them
