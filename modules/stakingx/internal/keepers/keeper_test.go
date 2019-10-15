@@ -1,4 +1,4 @@
-package stakingx_test
+package keepers_test
 
 import (
 	"math"
@@ -12,17 +12,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/dex/modules/stakingx/internal/keepers"
 	"github.com/coinexchain/dex/testapp"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
 
-func setUpInput() (stakingx.MockKeeper, sdk.Context, auth.AccountKeeper) {
+func setUpInput() (keepers.MockKeeper, sdk.Context, auth.AccountKeeper) {
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.BankKeeper.SetSendEnabled(ctx, true)
 
-	keeper := stakingx.InitStates(ctx, testApp.StakingXKeeper, testApp.AccountKeeper, testApp.SupplyKeeper)
+	keeper := keepers.InitStates(ctx, testApp.StakingXKeeper, testApp.AccountKeeper, testApp.SupplyKeeper)
 
 	return keeper, ctx, testApp.AccountKeeper
 }
@@ -84,22 +85,22 @@ func TestCalcBondPoolStatus(t *testing.T) {
 }
 
 func TestCalcBondedRatio(t *testing.T) {
-	bondPool := stakingx.BondPool{
+	bondPool := keepers.BondPool{
 		BondedTokens:      sdk.NewInt(10e8),
 		NotBondedTokens:   sdk.NewInt(500e8),
 		NonBondableTokens: sdk.NewInt(10000),
 		TotalSupply:       sdk.NewInt(510e8),
 	}
 	expectedBondRatio := bondPool.BondedTokens.ToDec().QuoInt(bondPool.TotalSupply.Sub(bondPool.NonBondableTokens))
-	require.Equal(t, expectedBondRatio, stakingx.CalcBondedRatio(&bondPool))
+	require.Equal(t, expectedBondRatio, keepers.CalcBondedRatio(&bondPool))
 }
 
 func TestCalcBondedRatioNegative(t *testing.T) {
-	bondPool := stakingx.BondPool{
+	bondPool := keepers.BondPool{
 		BondedTokens:      sdk.NewInt(-10e8),
 		NotBondedTokens:   sdk.NewInt(500e8),
 		NonBondableTokens: sdk.NewInt(10000),
 		TotalSupply:       sdk.NewInt(510e8),
 	}
-	require.Equal(t, sdk.ZeroDec(), stakingx.CalcBondedRatio(&bondPool))
+	require.Equal(t, sdk.ZeroDec(), keepers.CalcBondedRatio(&bondPool))
 }

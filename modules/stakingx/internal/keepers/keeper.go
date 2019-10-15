@@ -1,4 +1,4 @@
-package stakingx
+package keepers
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -127,7 +127,7 @@ func calcNonBondableTokens(ctx sdk.Context, k *Keeper) sdk.Int {
 // -----------------------------------------------------------------------------
 // Non-bondable addresses
 
-func (k Keeper) getCetOwnerAddress(ctx sdk.Context) sdk.AccAddress {
+func (k Keeper) GetCetOwnerAddress(ctx sdk.Context) sdk.AccAddress {
 	cet := k.assetViewKeeper.GetToken(ctx, dex.CET)
 	if cet == nil {
 		return nil
@@ -135,7 +135,7 @@ func (k Keeper) getCetOwnerAddress(ctx sdk.Context) sdk.AccAddress {
 	return cet.GetOwner()
 }
 
-func (k Keeper) getAllVestingAccountAddresses(ctx sdk.Context) []sdk.AccAddress {
+func (k Keeper) GetAllVestingAccountAddresses(ctx sdk.Context) []sdk.AccAddress {
 	addresses := make([]sdk.AccAddress, 0, 8)
 	k.ak.IterateAccounts(ctx, func(acc auth.Account) bool {
 		if vacc, ok := acc.(auth.VestingAccount); ok {
@@ -146,7 +146,7 @@ func (k Keeper) getAllVestingAccountAddresses(ctx sdk.Context) []sdk.AccAddress 
 	return addresses
 }
 
-func (k Keeper) setNonBondableAddresses(ctx sdk.Context, addresses []sdk.AccAddress) {
+func (k Keeper) SetNonBondableAddresses(ctx sdk.Context, addresses []sdk.AccAddress) {
 	store := ctx.KVStore(k.key)
 	bz, err := k.cdc.MarshalBinaryBare(addresses)
 	if err != nil {

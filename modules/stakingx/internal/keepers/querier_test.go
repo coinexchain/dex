@@ -1,4 +1,4 @@
-package stakingx_test
+package keepers_test
 
 import (
 	"testing"
@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/dex/modules/stakingx/internal/keepers"
 	"github.com/coinexchain/dex/modules/stakingx/internal/types"
 	"github.com/coinexchain/dex/testapp"
 )
@@ -23,8 +24,8 @@ func TestNewQuerier(t *testing.T) {
 	sxk.SetParams(ctx, stakingx.DefaultParams())
 
 	//query succeed
-	querier := stakingx.NewQuerier(sxk.Keeper, cdc)
-	path := stakingx.QueryPool
+	querier := keepers.NewQuerier(sxk.Keeper, cdc)
+	path := keepers.QueryPool
 
 	_, err := querier(ctx, []string{path}, abci.RequestQuery{})
 	require.Nil(t, err)
@@ -43,8 +44,8 @@ func TestQueryParams(t *testing.T) {
 	testApp.StakingKeeper.SetParams(ctx, params)
 	testApp.StakingXKeeper.SetParams(ctx, paramsx)
 
-	querier := stakingx.NewQuerier(testApp.StakingXKeeper, testApp.Cdc)
-	res, err := querier(ctx, []string{stakingx.QueryParameters}, abci.RequestQuery{})
+	querier := keepers.NewQuerier(testApp.StakingXKeeper, testApp.Cdc)
+	res, err := querier(ctx, []string{keepers.QueryParameters}, abci.RequestQuery{})
 	require.NoError(t, err)
 
 	var mergedParams types.MergedParams

@@ -16,6 +16,7 @@ import (
 
 	stakingx_cli "github.com/coinexchain/dex/modules/stakingx/client/cli"
 	stakingx_rest "github.com/coinexchain/dex/modules/stakingx/client/rest"
+	"github.com/coinexchain/dex/modules/stakingx/internal/keepers"
 )
 
 var (
@@ -70,11 +71,11 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 // app module object
 type AppModule struct {
 	AppModuleBasic
-	stakingXKeeper Keeper //TODO: rename to StakingXKeeper
+	stakingXKeeper keepers.Keeper //TODO: rename to StakingXKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(stakingxKeeper Keeper) AppModule {
+func NewAppModule(stakingxKeeper keepers.Keeper) AppModule {
 	return AppModule{
 		stakingXKeeper: stakingxKeeper,
 	}
@@ -101,7 +102,7 @@ func (AppModule) QuerierRoute() string {
 
 // module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return NewQuerier(am.stakingXKeeper, staking_types.ModuleCdc)
+	return keepers.NewQuerier(am.stakingXKeeper, staking_types.ModuleCdc)
 }
 
 // module init-genesis

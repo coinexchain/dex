@@ -1,4 +1,4 @@
-package stakingx
+package keepers
 
 import (
 	abci "github.com/tendermint/tendermint/abci/types"

@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/incentive"
+	"github.com/coinexchain/dex/modules/stakingx/internal/keepers"
 )
 
 type GenesisState struct {
@@ -22,20 +23,20 @@ func DefaultGenesisState() GenesisState {
 }
 
 // InitGenesis - Init store state from genesis data
-func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+func InitGenesis(ctx sdk.Context, keeper keepers.Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 
 	// cache non-bondable addresses
-	addresses := keeper.getAllVestingAccountAddresses(ctx)
+	addresses := keeper.GetAllVestingAccountAddresses(ctx)
 	addresses = append(addresses, incentive.PoolAddr)
-	if cetOwner := keeper.getCetOwnerAddress(ctx); cetOwner != nil {
+	if cetOwner := keeper.GetCetOwnerAddress(ctx); cetOwner != nil {
 		addresses = append(addresses, cetOwner)
 	}
-	keeper.setNonBondableAddresses(ctx, addresses)
+	keeper.SetNonBondableAddresses(ctx, addresses)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
-func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
+func ExportGenesis(ctx sdk.Context, keeper keepers.Keeper) GenesisState {
 	params := keeper.GetParams(ctx)
 	return NewGenesisState(params)
 }
