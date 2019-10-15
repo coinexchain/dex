@@ -41,9 +41,9 @@ cetd init ${GENESIS_NODE_MONIKER} --chain-id=${CHAIN_ID} --home ${OUTPUT_DIR}/.c
 # 586884903761317189 - 300000000000000000 = 286884903761317189
 
 cetd add-genesis-account ${INCENTIVE_POOL_ADDR}   31536000000000000cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account ${circulation}          286884903761317189cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account ${coinex_foundation}     87960000000000000cet --home ${OUTPUT_DIR}/.cetd
-cetd add-genesis-account ${genesis_node}            504000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${circulation}          286384903761317189cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${coinex_foundation}     88464000000000000cet --home ${OUTPUT_DIR}/.cetd
+cetd add-genesis-account ${genesis_node}            500000000000000cet --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2020}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1577836800  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2021}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1609459200  --home ${OUTPUT_DIR}/.cetd
 cetd add-genesis-account ${vesting2022}           36000000000000000cet --vesting-amount 36000000000000000cet --vesting-end-time 1640995200  --home ${OUTPUT_DIR}/.cetd
