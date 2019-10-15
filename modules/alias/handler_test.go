@@ -22,15 +22,6 @@ import (
 	dex "github.com/coinexchain/dex/types"
 )
 
-//// Bankx Keeper will implement the interface
-//type ExpectedBankxKeeper interface {
-//	DeductFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
-//}
-//// Asset Keeper will implement the interface
-//type ExpectedAssetStatusKeeper interface {
-//	IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool
-//}
-
 var logStr string
 
 type mocBankxKeeper struct {

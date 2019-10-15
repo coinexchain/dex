@@ -34,6 +34,15 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 		}
 	}
 
+	emitEvents(ctx, msg)
+
+	return sdk.Result{
+		Codespace: types.CodeSpaceAlias,
+		Events:    ctx.EventManager().Events(),
+	}
+}
+
+func emitEvents(ctx sdk.Context, msg types.MsgAliasUpdate) {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -57,41 +66,40 @@ func handleMsgAliasUpdate(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) s
 			),
 		)
 	}
-
-	return sdk.Result{
-		Codespace: types.CodeSpaceAlias,
-		Events:    ctx.EventManager().Events(),
-	}
 }
 
 func handleAliasAdd(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Error {
 	if types.IsOnlyForCoinEx(msg.Alias) && !k.IsTokenIssuer(ctx, dex.CET, msg.Owner) {
 		return types.ErrCanOnlyBeUsedByCetOwner(msg.Alias)
 	}
+
 	addr, asDefault := k.GetAddressFromAlias(ctx, msg.Alias)
 	if len(addr) != 0 && (!bytes.Equal(addr, msg.Owner) || asDefault == msg.AsDefault) {
 		return types.ErrAliasAlreadyExists()
 	}
-	aliasParams := k.GetParams(ctx)
-	ok, addNewAlias := k.AddAlias(ctx, msg.Alias, msg.Owner, msg.AsDefault, aliasParams.MaxAliasCount)
+
+	params := k.GetParams(ctx)
+	ok, addNewAlias := k.AddAlias(ctx, msg.Alias, msg.Owner, msg.AsDefault, params.MaxAliasCount)
 	if !ok {
 		return types.ErrMaxAliasCountReached()
-	} else if addNewAlias {
-		fee := aliasParams.GetFeeForAlias(msg.Alias)
-		err := k.DeductInt64CetFee(ctx, msg.Owner, fee)
-		if err != nil {
+	}
+
+	if addNewAlias {
+		fee := params.GetFeeForAlias(msg.Alias)
+		if err := k.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
 func handleAliasRemove(ctx sdk.Context, k Keeper, msg types.MsgAliasUpdate) sdk.Error {
 	addr, _ := k.GetAddressFromAlias(ctx, msg.Alias)
 	if !bytes.Equal(addr, msg.Owner) {
-		//fmt.Printf("%x vs %x\n", addr, []byte(msg.Owner))
 		return types.ErrNoSuchAlias()
 	}
+
 	k.RemoveAlias(ctx, msg.Alias, msg.Owner)
 	return nil
 }
