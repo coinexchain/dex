@@ -32,18 +32,18 @@ func DefaultGenesisState() GenesisState {
 // InitGenesis - Init store state from genesis data
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, bi := range data.BancorInfoMap {
-		keeper.Bik.Save(ctx, &bi)
+		keeper.Save(ctx, &bi)
 	}
-	keeper.Bik.SetParams(ctx, data.Params)
+	keeper.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	m := make(map[string]keepers.BancorInfo)
-	k.Bik.Iterate(ctx, func(bi *keepers.BancorInfo) {
+	k.Iterate(ctx, func(bi *keepers.BancorInfo) {
 		m[bi.GetSymbol()] = *bi
 	})
-	return NewGenesisState(k.Bik.GetParams(ctx), m)
+	return NewGenesisState(k.GetParams(ctx), m)
 }
 
 func (data GenesisState) Validate() error {

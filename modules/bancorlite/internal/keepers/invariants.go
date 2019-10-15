@@ -13,7 +13,7 @@ func BancorInfoConsistencyInvariant(keeper Keeper) sdk.Invariant {
 		var broken bool
 		var msg string
 		var count int
-		keeper.Bik.Iterate(ctx, func(bi *BancorInfo) {
+		keeper.Iterate(ctx, func(bi *BancorInfo) {
 			if !bi.IsConsistent() {
 				count++
 				msg += fmt.Sprintf(" bancor Info %s consistency is broken!", bi.GetSymbol())

@@ -18,7 +18,7 @@ import (
 func TestQueryParams(t *testing.T) {
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
-	testApp.BancorKeeper.Bik.SetParams(ctx, types.DefaultParams())
+	testApp.BancorKeeper.SetParams(ctx, types.DefaultParams())
 
 	querier := keepers.NewQuerier(testApp.BancorKeeper)
 	res, err := querier(ctx, []string{keepers.QueryParameters}, abci.RequestQuery{})
@@ -46,7 +46,7 @@ func TestQueryBancorInfo(t *testing.T) {
 		MoneyInPool:        sdk.NewInt(10000),
 		EarliestCancelTime: 0,
 	}
-	testApp.BancorKeeper.Bik.Save(ctx, &bi)
+	testApp.BancorKeeper.Save(ctx, &bi)
 
 	reqParams := keepers.QueryBancorInfoParam{
 		Symbol: "foo/bar",

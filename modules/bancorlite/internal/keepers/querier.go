@@ -37,7 +37,7 @@ func queryBancorInfo(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]b
 	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &param); err != nil {
 		return nil, sdk.NewError(types.CodeSpaceBancorlite, types.CodeUnMarshalFailed, "failed to parse param")
 	}
-	bi := keeper.Bik.Load(ctx, param.Symbol)
+	bi := keeper.Load(ctx, param.Symbol)
 	var biD BancorInfoDisplay
 	if bi != nil {
 		biD = NewBancorInfoDisplay(bi)
@@ -50,7 +50,7 @@ func queryBancorInfo(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]b
 }
 
 func queryParameters(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
-	params := k.Bik.GetParams(ctx)
+	params := k.GetParams(ctx)
 
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
 	if err != nil {

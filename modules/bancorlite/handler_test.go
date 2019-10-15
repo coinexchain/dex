@@ -62,7 +62,7 @@ func prepareSupply(ctx sdk.Context, sk supply.Keeper) {
 }
 
 func prepareBancor(ctx sdk.Context, k keepers.Keeper) {
-	k.Bik.SetParams(ctx, bancorlite.DefaultParams())
+	k.SetParams(ctx, bancorlite.DefaultParams())
 }
 func prepareAsset(t *testing.T, tk asset.Keeper, ctx sdk.Context, addrForbid, tokenForbid bool) {
 	tk.SetParams(ctx, asset.DefaultParams())
@@ -529,7 +529,7 @@ func TestKeeper(t *testing.T) {
 	e := k.IsBancorExist(ctx, "ccc")
 	assert.False(t, e)
 
-	k.Bik.Save(ctx, &keepers.BancorInfo{
+	k.Save(ctx, &keepers.BancorInfo{
 		Stock: "ccc",
 		Money: "cet",
 	})
@@ -539,13 +539,13 @@ func TestKeeper(t *testing.T) {
 	e = k.IsBancorExist(ctx, "ccb")
 	assert.False(t, e)
 
-	bi := k.Bik.Load(ctx, "ccc/abc")
+	bi := k.Load(ctx, "ccc/abc")
 	assert.Nil(t, bi)
 
-	bi = k.Bik.Load(ctx, "ccc/cet")
+	bi = k.Load(ctx, "ccc/cet")
 	assert.Equal(t, "ccc", bi.Stock)
 
-	k.Bik.Remove(ctx, bi)
+	k.Remove(ctx, bi)
 	e = k.IsBancorExist(ctx, "ccc")
 	assert.False(t, e)
 }

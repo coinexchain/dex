@@ -31,25 +31,25 @@ func NewHandler(k Keeper) sdk.Handler {
 }
 
 func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk.Result {
-	if bi := k.Bik.Load(ctx, msg.GetSymbol()); bi != nil {
+	if bi := k.Load(ctx, msg.GetSymbol()); bi != nil {
 		return types.ErrBancorAlreadyExists().Result()
 	}
-	if !k.Axk.IsTokenExists(ctx, msg.Stock) || !k.Axk.IsTokenExists(ctx, msg.Money) {
+	if !k.IsTokenExists(ctx, msg.Stock) || !k.IsTokenExists(ctx, msg.Money) {
 		return types.ErrNoSuchToken().Result()
 	}
-	if !k.Axk.IsTokenIssuer(ctx, msg.Stock, msg.Owner) {
+	if !k.IsTokenIssuer(ctx, msg.Stock, msg.Owner) {
 		return types.ErrNonOwnerIsProhibited().Result()
 	}
 	if msg.Money != dex.CET &&
-		!k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
+		!k.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
 		return types.ErrNonMarketExist().Result()
 	}
 	suppliedCoins := sdk.Coins{sdk.NewCoin(msg.Stock, msg.MaxSupply)}
-	if err := k.Bxk.FreezeCoins(ctx, msg.Owner, suppliedCoins); err != nil {
+	if err := k.FreezeCoins(ctx, msg.Owner, suppliedCoins); err != nil {
 		return err.Result()
 	}
-	fee := k.Bik.GetParams(ctx).CreateBancorFee
-	if err := k.Bxk.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
+	fee := k.GetParams(ctx).CreateBancorFee
+	if err := k.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
 		return err.Result()
 	}
 	var precision byte
@@ -69,7 +69,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		MoneyInPool:        sdk.ZeroInt(),
 		EarliestCancelTime: msg.EarliestCancelTime,
 	}
-	k.Bik.Save(ctx, bi)
+	k.Save(ctx, bi)
 
 	fillMsgQueue(ctx, k, KafkaBancorInfo, *bi)
 
@@ -77,7 +77,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 }
 
 func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel) sdk.Result {
-	bi := k.Bik.Load(ctx, msg.GetSymbol())
+	bi := k.Load(ctx, msg.GetSymbol())
 	if bi == nil {
 		return types.ErrNoBancorExists().Result()
 	}
@@ -87,18 +87,18 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	if ctx.BlockHeader().Time.Unix() < bi.EarliestCancelTime {
 		return types.ErrEarliestCancelTimeNotArrive().Result()
 	}
-	if !k.Mk.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
+	if !k.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
 		return types.ErrNonMarketExist().Result()
 	}
-	fee := k.Bik.GetParams(ctx).CancelBancorFee
-	if err := k.Bxk.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
+	fee := k.GetParams(ctx).CancelBancorFee
+	if err := k.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
 		return err.Result()
 	}
-	k.Bik.Remove(ctx, bi)
-	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Stock, bi.StockInPool))); err != nil {
+	k.Remove(ctx, bi)
+	if err := k.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Stock, bi.StockInPool))); err != nil {
 		return err.Result()
 	}
-	if err := k.Bxk.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
+	if err := k.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
 		return err.Result()
 	}
 
@@ -106,17 +106,17 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 }
 
 func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) sdk.Result {
-	bi := k.Bik.Load(ctx, msg.GetSymbol())
+	bi := k.Load(ctx, msg.GetSymbol())
 	if bi == nil {
 		return types.ErrNoBancorExists().Result()
 	}
 	if bytes.Equal(bi.Owner, msg.Sender) {
 		return types.ErrOwnerIsProhibited().Result()
 	}
-	if k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Stock, msg.Sender) ||
-		k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Money, msg.Sender) ||
-		k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Stock, bi.Owner) ||
-		k.Axk.IsForbiddenByTokenIssuer(ctx, bi.Money, bi.Owner) {
+	if k.IsForbiddenByTokenIssuer(ctx, bi.Stock, msg.Sender) ||
+		k.IsForbiddenByTokenIssuer(ctx, bi.Money, msg.Sender) ||
+		k.IsForbiddenByTokenIssuer(ctx, bi.Stock, bi.Owner) ||
+		k.IsForbiddenByTokenIssuer(ctx, bi.Money, bi.Owner) {
 		return types.ErrTokenForbiddenByOwner().Result()
 	}
 	if !types.CheckStockPrecision(sdk.NewInt(msg.Amount), bi.StockPrecision) {
@@ -167,7 +167,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return err.Result()
 	}
 
-	if err := k.Bxk.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin("cet", commission))); err != nil {
+	if err := k.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin("cet", commission))); err != nil {
 		return err.Result()
 	}
 
@@ -175,7 +175,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return err.Result()
 	}
 
-	k.Bik.Save(ctx, &biNew)
+	k.Save(ctx, &biNew)
 
 	sideStr := "sell"
 	side := market.SELL
@@ -220,7 +220,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 }
 
 func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
-	if keeper.MsgProducer.IsSubscribed(types.Topic) {
+	if keeper.IsSubscribed(types.Topic) {
 		msgqueue.FillMsgs(ctx, key, msg)
 	}
 }
@@ -231,20 +231,20 @@ func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
 	var commission sdk.Int
 	if msg.Money == "cet" {
 		commission = amountOfMoney.
-			Mul(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).
+			Mul(sdk.NewInt(k.GetParams(ctx).TradeFeeRate)).
 			Quo(sdk.NewInt(10000))
 	} else {
-		price, err := k.Mk.GetMarketLastExePrice(ctx, dex.GetSymbol(msg.Stock, dex.CET))
+		price, err := k.GetMarketLastExePrice(ctx, dex.GetSymbol(msg.Stock, dex.CET))
 		if err != nil {
 			return commission, types.ErrGetMarketPrice(err.Error())
 		}
 		commission = price.
 			MulInt(sdk.NewInt(msg.Amount)).
-			MulInt(sdk.NewInt(k.Bik.GetParams(ctx).TradeFeeRate)).
+			MulInt(sdk.NewInt(k.GetParams(ctx).TradeFeeRate)).
 			QuoInt(sdk.NewInt(10000)).RoundInt()
 	}
 
-	if commission.Int64() < k.Mk.GetMarketFeeMin(ctx) {
+	if commission.Int64() < k.GetMarketFeeMin(ctx) {
 		return commission, types.ErrTradeQuantityToSmall(commission.Int64())
 	}
 	return commission, nil
@@ -252,16 +252,16 @@ func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
 
 func swapStockAndMoney(ctx sdk.Context, k keepers.Keeper, trader sdk.AccAddress, owner sdk.AccAddress,
 	coinsFromPool sdk.Coins, coinsToPool sdk.Coins) sdk.Error {
-	if err := k.Bxk.SendCoins(ctx, trader, owner, coinsToPool); err != nil {
+	if err := k.SendCoins(ctx, trader, owner, coinsToPool); err != nil {
 		return err
 	}
-	if err := k.Bxk.FreezeCoins(ctx, owner, coinsToPool); err != nil {
+	if err := k.FreezeCoins(ctx, owner, coinsToPool); err != nil {
 		return err
 	}
-	if err := k.Bxk.UnFreezeCoins(ctx, owner, coinsFromPool); err != nil {
+	if err := k.UnFreezeCoins(ctx, owner, coinsFromPool); err != nil {
 		return err
 	}
-	if err := k.Bxk.SendCoins(ctx, owner, trader, coinsFromPool); err != nil {
+	if err := k.SendCoins(ctx, owner, trader, coinsFromPool); err != nil {
 		return err
 	}
 	return nil

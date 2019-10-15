@@ -79,11 +79,11 @@ func (keeper *BancorInfoKeeper) Iterate(ctx sdk.Context, biProc func(bi *BancorI
 }
 
 type Keeper struct {
-	Bik         *BancorInfoKeeper
-	Bxk         types.ExpectedBankxKeeper
-	Axk         types.ExpectedAssetStatusKeeper
-	Mk          types.ExpectedMarketKeeper
-	MsgProducer msgqueue.MsgSender
+	bik         *BancorInfoKeeper
+	bxk         types.ExpectedBankxKeeper
+	axk         types.ExpectedAssetStatusKeeper
+	mk          types.ExpectedMarketKeeper
+	msgProducer msgqueue.MsgSender
 }
 
 func NewKeeper(bik *BancorInfoKeeper,
@@ -92,16 +92,16 @@ func NewKeeper(bik *BancorInfoKeeper,
 	mk types.ExpectedMarketKeeper,
 	mq msgqueue.MsgSender) Keeper {
 	return Keeper{
-		Bik:         bik,
-		Bxk:         bxk,
-		Axk:         axk,
-		Mk:          mk,
-		MsgProducer: mq,
+		bik:         bik,
+		bxk:         bxk,
+		axk:         axk,
+		mk:          mk,
+		msgProducer: mq,
 	}
 }
 
-func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
-	store := ctx.KVStore(k.Bik.biKey)
+func (keeper Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
+	store := ctx.KVStore(keeper.bik.biKey)
 	key := append(BancorInfoKey, []byte(stock+dex.SymbolSeparator)...)
 	iter := store.Iterator(key, append(key, 0xff))
 	defer iter.Close()
@@ -110,4 +110,69 @@ func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
 		return true
 	}
 	return false
+}
+
+func (keeper *Keeper) SetParams(ctx sdk.Context, params types.Params) {
+	keeper.bik.SetParams(ctx, params)
+}
+
+func (keeper *Keeper) GetParams(ctx sdk.Context) (param types.Params) {
+	keeper.bik.paramSubspace.GetParamSet(ctx, &param)
+	return
+}
+
+func (keeper *Keeper) Save(ctx sdk.Context, bi *BancorInfo) {
+	keeper.bik.Save(ctx, bi)
+}
+
+func (keeper *Keeper) Remove(ctx sdk.Context, bi *BancorInfo) {
+	keeper.bik.Remove(ctx, bi)
+}
+
+func (keeper *Keeper) Load(ctx sdk.Context, symbol string) *BancorInfo {
+	return keeper.bik.Load(ctx, symbol)
+}
+
+func (keeper *Keeper) Iterate(ctx sdk.Context, biProc func(bi *BancorInfo)) {
+	keeper.bik.Iterate(ctx, biProc)
+}
+
+func (keeper *Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return keeper.bxk.SendCoins(ctx, from, to, amt)
+}
+func (keeper *Keeper) FreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return keeper.bxk.FreezeCoins(ctx, acc, amt)
+}
+func (keeper *Keeper) UnFreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return keeper.bxk.UnFreezeCoins(ctx, acc, amt)
+}
+func (keeper *Keeper) DeductFee(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return keeper.bxk.DeductFee(ctx, acc, amt)
+}
+func (keeper *Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
+	return keeper.bxk.DeductInt64CetFee(ctx, addr, amt)
+}
+
+func (keeper *Keeper) IsTokenExists(ctx sdk.Context, denom string) bool {
+	return keeper.axk.IsTokenExists(ctx, denom)
+}
+func (keeper *Keeper) IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
+	return keeper.axk.IsTokenIssuer(ctx, denom, addr)
+}
+func (keeper *Keeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
+	return keeper.axk.IsForbiddenByTokenIssuer(ctx, denom, addr)
+}
+
+func (keeper *Keeper) GetMarketLastExePrice(ctx sdk.Context, symbol string) (sdk.Dec, error) {
+	return keeper.mk.GetMarketLastExePrice(ctx, symbol)
+}
+func (keeper *Keeper) IsMarketExist(ctx sdk.Context, symbol string) bool {
+	return keeper.mk.IsMarketExist(ctx, symbol)
+}
+func (keeper *Keeper) GetMarketFeeMin(ctx sdk.Context) int64 {
+	return keeper.mk.GetMarketFeeMin(ctx)
+}
+
+func (keeper *Keeper) IsSubscribed(topic string) bool {
+	return keeper.msgProducer.IsSubscribed(topic)
 }
