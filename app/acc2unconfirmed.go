@@ -35,10 +35,10 @@ type Account2UnconfirmedTx struct {
 	mutex         sync.RWMutex
 }
 
-func NewAccount2UnconfirmedTx(limitTime int) *Account2UnconfirmedTx {
+func NewAccount2UnconfirmedTx(limitTime int64) *Account2UnconfirmedTx {
 	return &Account2UnconfirmedTx{
 		auMap:         make(map[string]UnconfirmedTx),
-		limitTime:     int64(limitTime),
+		limitTime:     limitTime,
 		removeList:    make([]sdk.AccAddress, 0, 5000),
 		lastSweepTime: 0,
 	}

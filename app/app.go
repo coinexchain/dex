@@ -232,7 +232,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	}
 	if limitTime > 0 {
 		app.enableUnconfirmedLimit = true
-		app.account2UnconfirmedTx = NewAccount2UnconfirmedTx(100)
+		app.account2UnconfirmedTx = NewAccount2UnconfirmedTx(limitTime)
 	} else {
 		app.enableUnconfirmedLimit = false
 	}
