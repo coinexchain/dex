@@ -226,6 +226,7 @@ func Test1(t *testing.T) {
 	require.Equal(t, false, res.IsOK())
 
 	msg.Token = "cet"
+	msg.References[0].RewardAmount = 10
 	msg.References[0].RewardTarget = simpleAddr("00007")
 	res = msgHandler(ctx, *msg)
 	s = `{"codespace":"comment","code":911,"message":"No such account: coinex1qy352eufqy352eufqy352eufqy35qqq8uxr4yg"}`

@@ -69,8 +69,8 @@ func (loader *Holder) togglePlugin(logger log.Logger) {
 func (loader *Holder) enablePlugin(logger log.Logger) {
 	atomic.StoreInt32(&loader.isEnabled, 1)
 
-	if p := loader.GetPlugin(); p != nil {
-		logger.Info(fmt.Sprintf("plugin %s isEnabled", p.Name()))
+	if loader.pluginInstance != nil {
+		logger.Info(fmt.Sprintf("plugin %s isEnabled", loader.pluginInstance.Name()))
 	}
 }
 
