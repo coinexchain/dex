@@ -38,6 +38,7 @@ const (
 	CodeInvalidSendLockAmt           sdk.CodeType = 527
 	CodeAddrInBlackList              sdk.CodeType = 528
 	CodeNilTokenIdentity             sdk.CodeType = 529
+	CodeTokenOwnerSelfForbidden      sdk.CodeType = 530
 )
 
 func ErrInvalidTokenName(name string) sdk.Error {
@@ -164,4 +165,9 @@ func ErrNilForbiddenAddress() sdk.Error {
 func ErrAccInBlackList(addr sdk.AccAddress) sdk.Error {
 	msg := fmt.Sprintf("%s is in blacklist", addr.String())
 	return sdk.NewError(CodeSpaceAsset, CodeAddrInBlackList, msg)
+}
+
+func ErrTokenOwnerSelfForbidden() sdk.Error {
+	msg := fmt.Sprintf("Token owner can not be forbidden")
+	return sdk.NewError(CodeSpaceAsset, CodeTokenOwnerSelfForbidden, msg)
 }

@@ -58,6 +58,11 @@ func Test_handleMsg(t *testing.T) {
 			false,
 		},
 		{
+			"transfer_ownership_self",
+			asset.NewMsgTransferOwnership("abc", owner, owner),
+			false,
+		},
+		{
 			"mint_token",
 			asset.NewMsgMintToken("abc", sdk.NewInt(1000), owner),
 			true,
@@ -119,7 +124,7 @@ func Test_handleMsg(t *testing.T) {
 		},
 		{
 			"forbid_address",
-			asset.NewMsgForbidAddr("abc", owner, mockAddrList()),
+			asset.NewMsgForbidAddr("abc", owner, mockAddrListNoOwner()),
 			true,
 		},
 		{
@@ -128,8 +133,13 @@ func Test_handleMsg(t *testing.T) {
 			false,
 		},
 		{
+			"forbid_address_self",
+			asset.NewMsgForbidAddr("abc", owner, []sdk.AccAddress{owner}),
+			false,
+		},
+		{
 			"unforbid_address",
-			asset.NewMsgUnForbidAddr("abc", owner, mockAddrList()),
+			asset.NewMsgUnForbidAddr("abc", owner, mockAddrListNoOwner()),
 			true,
 		},
 		{

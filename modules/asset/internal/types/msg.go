@@ -1,6 +1,7 @@
 package types
 
 import (
+	"bytes"
 	"unicode/utf8"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -493,6 +494,11 @@ func (msg MsgForbidAddr) ValidateBasic() sdk.Error {
 	}
 	if len(msg.Addresses) == 0 {
 		return ErrNilForbiddenAddress()
+	}
+	for _, address := range msg.Addresses {
+		if bytes.Equal(address, msg.OwnerAddr) {
+			return ErrTokenOwnerSelfForbidden()
+		}
 	}
 	return nil
 }

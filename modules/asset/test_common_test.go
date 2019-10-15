@@ -63,3 +63,12 @@ func mockAddrList() (list []sdk.AccAddress) {
 	list = append(list, addr3)
 	return
 }
+
+func mockAddrListNoOwner() (list []sdk.AccAddress) {
+	var addr1, _ = sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
+	var addr2, _ = sdk.AccAddressFromBech32("coinex1zvf0hx6rpz0n7dkuzu34s39dnsyr8eygqs8h3q")
+
+	list = append(list, addr1)
+	list = append(list, addr2)
+	return
+}
