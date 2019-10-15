@@ -54,9 +54,9 @@ func (keeper *CommentCountKeeper) GetAllCommentCount(ctx sdk.Context) map[string
 	return res
 }
 
-func (keeper *CommentCountKeeper) GetCommentCount(ctx sdk.Context, denorm string) uint64 {
+func (keeper *CommentCountKeeper) GetCommentCount(ctx sdk.Context, denom string) uint64 {
 	store := ctx.KVStore(keeper.commentKey)
-	ccKey := append(CommentCountKey, []byte(denorm)...)
+	ccKey := append(CommentCountKey, []byte(denom)...)
 	a := store.Get(ccKey)
 	count := uint64(0)
 	if len(a) != 0 {
@@ -65,11 +65,11 @@ func (keeper *CommentCountKeeper) GetCommentCount(ctx sdk.Context, denorm string
 	return count
 }
 
-func (keeper *CommentCountKeeper) SetCommentCount(ctx sdk.Context, denorm string, count uint64) {
+func (keeper *CommentCountKeeper) SetCommentCount(ctx sdk.Context, denom string, count uint64) {
 	store := ctx.KVStore(keeper.commentKey)
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b[:], count)
-	ccKey := append(CommentCountKey, []byte(denorm)...)
+	ccKey := append(CommentCountKey, []byte(denom)...)
 	store.Set(ccKey, b[:])
 }
 
@@ -126,10 +126,10 @@ func (k *Keeper) GetAllCommentCount(ctx sdk.Context) map[string]uint64 {
 	return k.cck.GetAllCommentCount(ctx)
 }
 
-func (k *Keeper) GetCommentCount(ctx sdk.Context, denorm string) uint64 {
-	return k.cck.GetCommentCount(ctx, denorm)
+func (k *Keeper) GetCommentCount(ctx sdk.Context, denom string) uint64 {
+	return k.cck.GetCommentCount(ctx, denom)
 }
 
-func (k *Keeper) SetCommentCount(ctx sdk.Context, denorm string, count uint64) {
-	k.cck.SetCommentCount(ctx, denorm, count)
+func (k *Keeper) SetCommentCount(ctx sdk.Context, denom string, count uint64) {
+	k.cck.SetCommentCount(ctx, denom, count)
 }
