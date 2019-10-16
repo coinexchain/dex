@@ -3,6 +3,7 @@ package cli
 import (
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -14,6 +15,12 @@ import (
 var ResultMsg cliutil.MsgWithAccAddress
 
 func CliRunCommandForTest(cdc *codec.Codec, msg cliutil.MsgWithAccAddress) error {
+	cliCtx := context.NewCLIContext().WithCodec(cdc)
+	senderAddr := cliCtx.GetFromAddress()
+	msg.SetAccAddress(senderAddr)
+	if err := msg.ValidateBasic(); err != nil {
+		return err
+	}
 	ResultMsg = msg
 	return nil
 }
@@ -29,17 +36,23 @@ func TestCmd(t *testing.T) {
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
 	cmd := GetTxCmd(nil)
 
+	addr, _ := sdk.AccAddressFromHex("01234567890123456789012345678901234abcde")
+	addrStr := addr.String()
+
 	args := []string{
 		"create-trading-pair",
 		"--stock=eth",
 		"--money=cet",
 		"--price-precision=8",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err := cmd.Execute()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, &types.MsgCreateTradingPair{
+		Creator:        addr,
 		Stock:          "eth",
 		Money:          "cet",
 		PricePrecision: byte(8),
@@ -49,7 +62,9 @@ func TestCmd(t *testing.T) {
 		"create-trading-pair",
 		"--stock=eth",
 		"--money=cet",
-		"--price-precision=800",
+		"--price-precision=8",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -58,8 +73,23 @@ func TestCmd(t *testing.T) {
 
 	args = []string{
 		"create-trading-pair",
+		"--stock=eth",
 		"--money=cet",
 		"--price-precision=800",
+		"--from=" + addrStr,
+		"--generate-only",
+	}
+	cmd.SetArgs(args)
+	cliutil.SetViperWithArgs(args)
+	err = cmd.Execute()
+	assert.Equal(t, "ERROR:\nCodespace: market\nCode: 602\nMessage: \"Price precision out of range [0, 18], actual: 32\"\n", err.Error())
+
+	args = []string{
+		"create-trading-pair",
+		"--money=cet",
+		"--price-precision=8",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -70,12 +100,15 @@ func TestCmd(t *testing.T) {
 		"cancel-trading-pair",
 		"--trading-pair=etc/cet",
 		"--time=1234567",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, &types.MsgCancelTradingPair{
+		Sender:        addr,
 		EffectiveTime: 1234567,
 		TradingPair:   "etc/cet",
 	}, ResultMsg)
@@ -84,12 +117,15 @@ func TestCmd(t *testing.T) {
 		"modify-price-precision",
 		"--trading-pair=etc/cet",
 		"--price-precision=9",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, &types.MsgModifyPricePrecision{
+		Sender:         addr,
 		TradingPair:    "etc/cet",
 		PricePrecision: byte(9),
 	}, ResultMsg)
@@ -105,12 +141,15 @@ func TestCmd(t *testing.T) {
 		"--price-precision=10",
 		"--identify=0",
 		"--blocks=40000",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, &types.MsgCreateOrder{
+		Sender:         addr,
 		Identify:       0,
 		TradingPair:    "btc/cet",
 		OrderType:      types.LIMIT,
@@ -132,12 +171,15 @@ func TestCmd(t *testing.T) {
 		"--side=1",
 		"--price-precision=10",
 		"--identify=1",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, &types.MsgCreateOrder{
+		Sender:         addr,
 		Identify:       1,
 		TradingPair:    "btc/cet",
 		OrderType:      types.LIMIT,
@@ -152,12 +194,15 @@ func TestCmd(t *testing.T) {
 	args = []string{
 		"cancel-order",
 		"--order-id=coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a-1025",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, &types.MsgCancelOrder{
+		Sender:  addr,
 		OrderID: "coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a-1025",
 	}, ResultMsg)
 }

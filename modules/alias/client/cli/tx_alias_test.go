@@ -3,6 +3,7 @@ package cli
 import (
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -13,7 +14,13 @@ import (
 
 var ResultMsg *types.MsgAliasUpdate
 
-func CliRunCommandForTest(_ *codec.Codec, msg cliutil.MsgWithAccAddress) error {
+func CliRunCommandForTest(cdc *codec.Codec, msg cliutil.MsgWithAccAddress) error {
+	cliCtx := context.NewCLIContext().WithCodec(cdc)
+	senderAddr := cliCtx.GetFromAddress()
+	msg.SetAccAddress(senderAddr)
+	if err := msg.ValidateBasic(); err != nil {
+		return err
+	}
 	ResultMsg = msg.(*types.MsgAliasUpdate)
 	return nil
 }
@@ -24,16 +31,22 @@ func TestCmd(t *testing.T) {
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
 	cmd := GetTxCmd(nil)
 
+	addr, _ := sdk.AccAddressFromHex("01234567890123456789012345678901234abcde")
+	addrStr := addr.String()
+
 	args := []string{
 		"add",
 		"super_super_boy",
 		"--as-default=yes",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err := cmd.Execute()
 	assert.Equal(t, nil, err)
 	msg := &types.MsgAliasUpdate{
+		Owner:     addr,
 		Alias:     "super_super_boy",
 		IsAdd:     true,
 		AsDefault: true,
@@ -44,12 +57,15 @@ func TestCmd(t *testing.T) {
 		"add",
 		"super_boy",
 		"--as-default=no",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
 	msg = &types.MsgAliasUpdate{
+		Owner:     addr,
 		Alias:     "super_boy",
 		IsAdd:     true,
 		AsDefault: false,
@@ -60,6 +76,8 @@ func TestCmd(t *testing.T) {
 		"add",
 		"super_boy",
 		"--as-default=ok",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -70,12 +88,15 @@ func TestCmd(t *testing.T) {
 	args = []string{
 		"remove",
 		"super_boy",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
 	msg = &types.MsgAliasUpdate{
+		Owner: addr,
 		Alias: "super_boy",
 		IsAdd: false,
 	}

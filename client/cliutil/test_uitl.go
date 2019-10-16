@@ -19,9 +19,10 @@ func SetViperWithArgs(args []string) {
 		}
 		idx := strings.Index(arg, "=")
 		if idx < 0 {
-			continue
+			viper.Set(arg[2:], true)
+		} else {
+			viper.Set(arg[2:idx], arg[idx+1:])
 		}
-		viper.Set(arg[2:idx], arg[idx+1:])
 	}
 }
 

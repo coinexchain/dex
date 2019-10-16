@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -16,6 +17,12 @@ import (
 var ResultMsg *types.MsgCommentToken
 
 func CliRunCommandForTest(cdc *codec.Codec, msg cliutil.MsgWithAccAddress) error {
+	cliCtx := context.NewCLIContext().WithCodec(cdc)
+	senderAddr := cliCtx.GetFromAddress()
+	msg.SetAccAddress(senderAddr)
+	if err := msg.ValidateBasic(); err != nil {
+		return err
+	}
 	ResultMsg = msg.(*types.MsgCommentToken)
 	return nil
 }
@@ -26,6 +33,9 @@ func Test1(t *testing.T) {
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
 	cmd := GetTxCmd(nil)
 
+	addr, _ := sdk.AccAddressFromHex("01234567890123456789012345678901234abcde")
+	addrStr := addr.String()
+
 	args := []string{
 		"new-thread",
 		"--token=cet",
@@ -33,13 +43,15 @@ func Test1(t *testing.T) {
 		`--title=I love cet.`,
 		`--content=CET to da moon!!!`,
 		"--content-type=UTF8Text",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err := cmd.Execute()
 	assert.Equal(t, nil, err)
 	correct, _ := json.Marshal(&types.MsgCommentToken{
-		Sender:      []byte{},
+		Sender:      addr,
 		Token:       "cet",
 		Donation:    2000000,
 		Title:       "I love cet.",
@@ -57,14 +69,16 @@ func Test1(t *testing.T) {
 		`--content=CET to da mars!!!`,
 		`--follow=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,favorite`,
 		"--content-type=UTF8Text",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
-	addr, _ := sdk.AccAddressFromBech32("coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a")
+	addr1, _ := sdk.AccAddressFromBech32("coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a")
 	correct, _ = json.Marshal(&types.MsgCommentToken{
-		Sender:      []byte{},
+		Sender:      addr,
 		Token:       "cet",
 		Donation:    0,
 		Title:       "I love cet too.",
@@ -73,7 +87,7 @@ func Test1(t *testing.T) {
 		References: []types.CommentRef{
 			{
 				ID:           10001,
-				RewardTarget: addr,
+				RewardTarget: addr1,
 				RewardToken:  "cet",
 				RewardAmount: 2,
 				Attitudes:    []int32{types.Like, types.Favorite},
@@ -88,6 +102,8 @@ func Test1(t *testing.T) {
 		"--token=cet",
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,favorite`,
 		`--reward-to=20021;coinex1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8vc4efa;1;cet;like`,
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -95,7 +111,7 @@ func Test1(t *testing.T) {
 	assert.Equal(t, nil, err)
 	addr2, _ := sdk.AccAddressFromBech32("coinex1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8vc4efa")
 	correct, _ = json.Marshal(&types.MsgCommentToken{
-		Sender:      []byte{},
+		Sender:      addr,
 		Token:       "cet",
 		Donation:    0,
 		Title:       "",
@@ -104,7 +120,7 @@ func Test1(t *testing.T) {
 		References: []types.CommentRef{
 			{
 				ID:           10001,
-				RewardTarget: addr,
+				RewardTarget: addr1,
 				RewardToken:  "cet",
 				RewardAmount: 2,
 				Attitudes:    []int32{types.Like, types.Favorite},
@@ -125,13 +141,15 @@ func Test1(t *testing.T) {
 		"reward-comments",
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,favorite`,
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
 	assert.Equal(t, nil, err)
 	correct, _ = json.Marshal(&types.MsgCommentToken{
-		Sender:      []byte{},
+		Sender:      addr,
 		Token:       "cet",
 		Donation:    0,
 		Title:       "reward-comments",
@@ -140,7 +158,7 @@ func Test1(t *testing.T) {
 		References: []types.CommentRef{
 			{
 				ID:           10001,
-				RewardTarget: addr,
+				RewardTarget: addr1,
 				RewardToken:  "cet",
 				RewardAmount: 2,
 				Attitudes:    []int32{types.Like, types.Favorite},
@@ -157,6 +175,8 @@ func Test1(t *testing.T) {
 		`--title=I love cet.`,
 		`--content=CET to da moon!!!`,
 		"--content-type=Haha",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -168,6 +188,8 @@ func Test1(t *testing.T) {
 		"reward-comments",
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;2;cet;like,favorite`,
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -179,6 +201,8 @@ func Test1(t *testing.T) {
 		"reward-comments",
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=1a0001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,favorite`,
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -190,6 +214,8 @@ func Test1(t *testing.T) {
 		"reward-comments",
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdp;2;cet;like,favorite`,
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -201,6 +227,8 @@ func Test1(t *testing.T) {
 		"reward-comments",
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2a;cet;like,favorite`,
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -212,6 +240,8 @@ func Test1(t *testing.T) {
 		"reward-comments",
 		fmt.Sprintf("--token=%s", "cet"),
 		`--reward-to=10001;coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a;2;cet;like,fuck`,
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
@@ -227,6 +257,8 @@ func Test1(t *testing.T) {
 		`--content=CET to da mars!!!`,
 		`--follow=10001;coinex1px8alypku5j8;2;cet;like,favorite`,
 		"--content-type=UTF8Text",
+		"--from=" + addrStr,
+		"--generate-only",
 	}
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
