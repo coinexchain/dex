@@ -156,11 +156,16 @@ func calFeatureFeeForExistBlocks(msg types.MsgCreateOrder, marketParam types.Par
 	if msg.TimeInForce == types.IOC {
 		return 0
 	}
-	if msg.ExistBlocks <= marketParam.GTEOrderLifetime {
+	if msg.ExistBlocks < marketParam.GTEOrderLifetime {
 		return 0
 	}
-	quotient := (msg.ExistBlocks - 1) / marketParam.GTEOrderLifetime
-	return int64(quotient) * marketParam.GTEOrderFeatureFeeByBlocks
+	fee := sdk.NewDec(int64(msg.ExistBlocks)).
+		QuoInt64(int64(marketParam.GTEOrderLifetime)).
+		MulInt64(marketParam.GTEOrderFeatureFeeByBlocks)
+	if fee.GT(sdk.NewDec(types.MaxOrderAmount)) {
+		return types.MaxOrderAmount
+	}
+	return fee.TruncateInt64()
 }
 
 func handleFeeForCreateOrder(ctx sdk.Context, keeper keepers.Keeper, amount int64, denom string,
