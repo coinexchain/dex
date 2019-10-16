@@ -41,10 +41,10 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 
 	//simple check tx
 	txBytes, _ := auth.DefaultTxEncoder(app.cdc)(tx)
-	hashId := tmtypes.Tx(txBytes).Hash()
-	exist := app.account2UnconfirmedTx.Lookup(fromAddr, hashId, header.Time.Unix())
+	hashID := tmtypes.Tx(txBytes).Hash()
+	exist := app.account2UnconfirmedTx.Lookup(fromAddr, hashID, header.Time.Unix())
 	require.Equal(t, exist, NoTxExist)
-	app.account2UnconfirmedTx.Add(fromAddr, hashId, header.Time.Unix())
+	app.account2UnconfirmedTx.Add(fromAddr, hashID, header.Time.Unix())
 
 	//deliver tx
 	result := app.Deliver(tx)
@@ -56,10 +56,10 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 	tx2 := newStdTxBuilder().
 		Msgs(msg).GasAndFee(600000, 1200000000).AccNumSeqKey(0, 0, key2).Build()
 	txBytes2, _ := auth.DefaultTxEncoder(app.cdc)(tx2)
-	hashIdAnother := tmtypes.Tx(txBytes2).Hash()
-	exist = app.account2UnconfirmedTx.Lookup(fromAddr2, hashIdAnother, header.Time.Unix())
+	hashIDAnother := tmtypes.Tx(txBytes2).Hash()
+	exist = app.account2UnconfirmedTx.Lookup(fromAddr2, hashIDAnother, header.Time.Unix())
 	require.Equal(t, exist, NoTxExist)
-	app.account2UnconfirmedTx.Add(fromAddr, hashIdAnother, header.Time.Unix())
+	app.account2UnconfirmedTx.Add(fromAddr, hashIDAnother, header.Time.Unix())
 
 	//build another same address tx
 	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
@@ -68,9 +68,9 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 
 	//check should failed for unconfirmed tx already in map
 	txBytes, _ = auth.DefaultTxEncoder(app.cdc)(tx)
-	hashId2 := tmtypes.Tx(txBytes).Hash()
-	require.NotEqual(t, hashId, hashId2)
-	exist = app.account2UnconfirmedTx.Lookup(fromAddr, hashId2, header.Time.Unix())
+	hashID2 := tmtypes.Tx(txBytes).Hash()
+	require.NotEqual(t, hashID, hashID2)
+	exist = app.account2UnconfirmedTx.Lookup(fromAddr, hashID2, header.Time.Unix())
 	require.Equal(t, exist, OtherTxExist)
 
 	//end block
@@ -88,8 +88,8 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 
 	//simple check tx
 	txBytes, _ = auth.DefaultTxEncoder(app.cdc)(tx)
-	hashId3 := tmtypes.Tx(txBytes).Hash()
-	exist = app.account2UnconfirmedTx.Lookup(fromAddr, hashId3, header.Time.Unix())
+	hashID3 := tmtypes.Tx(txBytes).Hash()
+	exist = app.account2UnconfirmedTx.Lookup(fromAddr, hashID3, header.Time.Unix())
 	require.Equal(t, exist, NoTxExist)
-	app.account2UnconfirmedTx.Add(fromAddr, hashId3, header.Time.Unix())
+	app.account2UnconfirmedTx.Add(fromAddr, hashID3, header.Time.Unix())
 }
