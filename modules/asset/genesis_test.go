@@ -104,4 +104,8 @@ func TestGenesis(t *testing.T) {
 	require.Equal(t, 2, len(export.Tokens))
 	require.Equal(t, whitelist, export.Whitelist)
 	require.Equal(t, forbiddenList, export.ForbiddenAddresses)
+
+	forbiddenList = []string{"abc:coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd"}
+	state.ForbiddenAddresses = append(state.ForbiddenAddresses, forbiddenList...)
+	require.Error(t, asset.ValidateGenesis(state))
 }

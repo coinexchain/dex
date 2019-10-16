@@ -588,6 +588,13 @@ func (keeper BaseTokenKeeper) ImportGenesisAddrKeys(ctx sdk.Context, prefix []by
 	if err != nil {
 		return err
 	}
+
+	symbol := strings.Split(split[0], string(types.SeparateKey))[0]
+	token := keeper.GetToken(ctx, symbol)
+	if addrBech32.Equals(token.GetOwner()) {
+		return types.ErrTokenOwnerSelfForbidden()
+	}
+
 	key := append(append(prefix, split[0]...), addrBech32...)
 	store.Set(key, []byte{})
 

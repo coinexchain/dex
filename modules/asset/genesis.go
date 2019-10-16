@@ -2,6 +2,7 @@ package asset
 
 import (
 	"errors"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -51,13 +52,43 @@ func ValidateGenesis(data GenesisState) error {
 		}
 	}
 
-	tokenSymbols := make(map[string]interface{})
+	tokenSymbols := make(map[string]Token)
 	for _, token := range data.Tokens {
 		if _, exists := tokenSymbols[token.GetSymbol()]; exists {
 			return errors.New("duplicate token symbol found in GenesisState")
 		}
 
-		tokenSymbols[token.GetSymbol()] = nil
+		tokenSymbols[token.GetSymbol()] = token
+	}
+
+	for _, addr := range data.ForbiddenAddresses {
+		// symbol | : | address
+		split := strings.SplitAfterN(addr, string(types.SeparateKey), 2)
+		if len(split) != 2 {
+			return errors.New("Genesis Address Err ")
+		}
+
+		_, err := sdk.AccAddressFromBech32(split[1])
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, addr := range data.ForbiddenAddresses {
+		// symbol | : | address
+		split := strings.SplitAfterN(addr, string(types.SeparateKey), 2)
+		if len(split) != 2 {
+			return errors.New("Genesis Address Err ")
+		}
+
+		addrBech32, err := sdk.AccAddressFromBech32(split[1])
+		if err != nil {
+			return err
+		}
+		symbol := strings.Split(split[0], string(types.SeparateKey))[0]
+		if addrBech32.Equals(tokenSymbols[symbol].GetOwner()) {
+			return types.ErrTokenOwnerSelfForbidden()
+		}
 	}
 
 	return nil
