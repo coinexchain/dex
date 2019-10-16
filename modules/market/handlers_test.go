@@ -878,35 +878,35 @@ func TestCalFeatureFeeForExistBlocks(t *testing.T) {
 
 	msg.ExistBlocks = 10000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(1), fee)
+	require.Equal(t, int64(0), fee)
 
 	msg.ExistBlocks = 10001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(1), fee)
+	require.Equal(t, int64(0), fee)
 
 	msg.ExistBlocks = 18000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(1), fee)
+	require.Equal(t, int64(0), fee)
 
 	msg.ExistBlocks = 20000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(2), fee)
+	require.Equal(t, int64(1), fee)
 
 	msg.ExistBlocks = 20001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(2), fee)
+	require.Equal(t, int64(1), fee)
 
 	msg.ExistBlocks = 28000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(2), fee)
+	require.Equal(t, int64(1), fee)
 
 	msg.ExistBlocks = 30000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(3), fee)
+	require.Equal(t, int64(2), fee)
 
 	msg.ExistBlocks = 30001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(3), fee)
+	require.Equal(t, int64(2), fee)
 	//
 	params = types.Params{
 		GTEOrderLifetime:           10000,
@@ -918,35 +918,35 @@ func TestCalFeatureFeeForExistBlocks(t *testing.T) {
 
 	msg.ExistBlocks = 10000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(10), fee)
+	require.Equal(t, int64(0), fee)
 
 	msg.ExistBlocks = 10001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(10), fee)
+	require.Equal(t, int64(0), fee)
 
 	msg.ExistBlocks = 18000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(18), fee)
+	require.Equal(t, int64(8), fee)
 
 	msg.ExistBlocks = 20000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(20), fee)
+	require.Equal(t, int64(10), fee)
 
 	msg.ExistBlocks = 20001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(20), fee)
+	require.Equal(t, int64(10), fee)
 
 	msg.ExistBlocks = 28000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(28), fee)
+	require.Equal(t, int64(18), fee)
 
 	msg.ExistBlocks = 30000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(30), fee)
+	require.Equal(t, int64(20), fee)
 
 	msg.ExistBlocks = 30001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(30), fee)
+	require.Equal(t, int64(20), fee)
 }
 
 func TestCalFrozenFeeInOrder(t *testing.T) {
