@@ -22,6 +22,8 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handleMsgSetMemoRequired(ctx, k, msg)
 		case types.MsgMultiSend:
 			return handleMsgMultiSend(ctx, k, msg)
+		case types.MsgSupervisedSend:
+			return handleMsgSupervisedSend(ctx, k, msg)
 		default:
 			return dex.ErrUnknownRequest(ModuleName, msg)
 		}
@@ -114,7 +116,7 @@ func lockedSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt 
 			fmt.Sprintf("%d < %d", unlockTime, ctx.BlockHeader().Time.Unix())).Result()
 	}
 
-	if err := k.SendLockedCoins(ctx, fromAddr, toAddr, amt, unlockTime); err != nil {
+	if err := k.SendLockedCoins(ctx, fromAddr, toAddr, nil, amt, unlockTime, 0); err != nil {
 		return err.Result()
 	}
 
@@ -163,6 +165,78 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
 	}
+}
+
+func handleMsgSupervisedSend(ctx sdk.Context, k Keeper, msg types.MsgSupervisedSend) sdk.Result {
+	if enabled := k.GetSendEnabled(ctx); !enabled {
+		return bank.ErrSendDisabled(types.CodeSpaceBankx).Result()
+	}
+
+	if k.BlacklistedAddr(msg.ToAddress) {
+		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.ToAddress)).Result()
+	}
+
+	if !msg.Supervisor.Empty() && msg.Reward > 0 && k.BlacklistedAddr(msg.Supervisor) {
+		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.Supervisor)).Result()
+	}
+
+	if msg.UnlockTime < ctx.BlockHeader().Time.Unix() {
+		return types.ErrUnlockTime("Invalid Unlock Time:" + fmt.Sprintf("%d < %d", msg.UnlockTime, ctx.BlockHeader().Time.Unix())).Result()
+	}
+
+	switch msg.Operation {
+	case types.Create:
+		amt := sdk.NewCoins(msg.Amount)
+		if err := checkSupervisedSend(ctx, k, msg.FromAddress, msg.ToAddress, amt); err != nil {
+			return err.Result()
+		}
+		if err := k.SendLockedCoins(ctx, msg.FromAddress, msg.ToAddress, msg.Supervisor, amt, msg.UnlockTime, msg.Reward); err != nil {
+			return err.Result()
+		}
+	case types.Return:
+		if err := k.ReturnLockedCoins(ctx, msg.FromAddress, msg.ToAddress, msg.Supervisor, &msg.Amount, msg.UnlockTime, msg.Reward); err != nil {
+			return err.Result()
+		}
+	case types.EarlierUnlockBySender:
+		if err := k.EarlierUnlockBySender(ctx, msg.FromAddress, msg.ToAddress, msg.Supervisor, &msg.Amount, msg.UnlockTime, msg.Reward); err != nil {
+			return err.Result()
+		}
+	case types.EarlierUnlockBySupervisor:
+		if err := k.EarlierUnlockBySupervisor(ctx, msg.FromAddress, msg.ToAddress, msg.Supervisor, &msg.Amount, msg.UnlockTime, msg.Reward); err != nil {
+			return err.Result()
+		}
+	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		),
+	})
+
+	fillMsgQueue(ctx, k, "send_supervised_lock_coins", types.NewMsgSupervisedSend(msg.FromAddress, msg.Supervisor,
+		msg.ToAddress, msg.Amount, msg.UnlockTime, msg.Reward, msg.Operation))
+
+	return sdk.Result{
+		Events: ctx.EventManager().Events(),
+	}
+}
+
+func checkSupervisedSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	if k.IsSendForbidden(ctx, amt, fromAddr) {
+		return types.ErrTokenForbiddenByOwner()
+	}
+
+	if !k.GetCoins(ctx, fromAddr).IsAllGTE(amt) {
+		return sdk.ErrInsufficientCoins("sender has insufficient coin for the transfer")
+	}
+
+	//check whether toAccount exist
+	var err sdk.Error
+	if _, err = k.DeductActivationFee(ctx, fromAddr, toAddr, amt); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {

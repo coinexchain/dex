@@ -9,25 +9,29 @@ import (
 var _ params.ParamSet = (*Params)(nil)
 
 var (
-	KeyActivationFee = []byte("ActivationFee")
-	KeyLockCoinsFee  = []byte("LockCoinsFee")
+	KeyActivationFee      = []byte("ActivationFee")
+	KeyLockCoinsFreeTime  = []byte("LockCoinsFreeTime")
+	KeyLockCoinsFeePerDay = []byte("LockCoinsFeePerDay")
 )
 
 type Params struct {
-	ActivationFee int64 `json:"activation_fee"`
-	LockCoinsFee  int64 `json:"lock_coins_fee"`
+	ActivationFee      int64 `json:"activation_fee"`
+	LockCoinsFreeTime  int64 `json:"lock_coins_free_time"`
+	LockCoinsFeePerDay int64 `json:"lock_coins_fee_per_day"`
 }
 
-func NewParams(activation int64, lock int64) Params {
+func NewParams(activation int64, freeTime, lock int64) Params {
 	return Params{
-		ActivationFee: activation,
-		LockCoinsFee:  lock,
+		ActivationFee:      activation,
+		LockCoinsFreeTime:  freeTime,
+		LockCoinsFeePerDay: lock,
 	}
 }
 func DefaultParams() Params {
 	return Params{
-		ActivationFee: 100000000,
-		LockCoinsFee:  1e10,
+		ActivationFee:      100000000,
+		LockCoinsFreeTime:  604800000000000,
+		LockCoinsFeePerDay: 1e6,
 	}
 }
 
@@ -39,14 +43,17 @@ func ParamKeyTable() params.KeyTable {
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyActivationFee, Value: &p.ActivationFee},
-		{Key: KeyLockCoinsFee, Value: &p.LockCoinsFee},
+		{Key: KeyLockCoinsFreeTime, Value: &p.LockCoinsFreeTime},
+		{Key: KeyLockCoinsFeePerDay, Value: &p.LockCoinsFeePerDay},
 	}
 }
 
 func (p Params) String() string {
 	return fmt.Sprintf(`BankX Params:
-  ActivationFee: %d
-  LockCoinsFee:  %d`,
+  ActivationFee:      %d
+  LockCoinsFreeTime:  %d
+  LockCoinsFeePerDay: %d`,
 		p.ActivationFee,
-		p.LockCoinsFee)
+		p.LockCoinsFreeTime,
+		p.LockCoinsFeePerDay)
 }

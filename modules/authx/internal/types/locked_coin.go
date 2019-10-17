@@ -10,19 +10,27 @@ import (
 // Locked Coin
 
 type LockedCoin struct {
-	Coin       sdk.Coin `json:"coin"`
-	UnlockTime int64    `json:"unlock_time"`
+	FromAddress sdk.AccAddress `json:"from_address,omitempty"`
+	Supervisor  sdk.AccAddress `json:"supervisor,omitempty"`
+	Coin        sdk.Coin       `json:"coin"`
+	UnlockTime  int64          `json:"unlock_time"`
+	Reward      int64          `json:"reward"`
 }
 
-func NewLockedCoin(denom string, amount sdk.Int, unlockTime int64) LockedCoin {
+func NewLockedCoin(fromAddress sdk.AccAddress, supervisor sdk.AccAddress, denom string, amount sdk.Int,
+	unlockTime int64, reward int64) LockedCoin {
 	return LockedCoin{
-		Coin:       sdk.NewCoin(denom, amount),
-		UnlockTime: unlockTime,
+		FromAddress: fromAddress,
+		Supervisor:  supervisor,
+		Coin:        sdk.NewCoin(denom, amount),
+		UnlockTime:  unlockTime,
+		Reward:      reward,
 	}
 }
 
 func (coin LockedCoin) String() string {
-	return fmt.Sprintf("coin: %s, unlocked_time: %d\n", coin.Coin, coin.UnlockTime)
+	return fmt.Sprintf("from: %s, supervisor: %s, coin: %s, unlocked_time: %d, reward: %d\n",
+		coin.FromAddress.String(), coin.Supervisor.String(), coin.Coin, coin.UnlockTime, coin.Reward)
 }
 
 //-----------------------------------------------------------------------------

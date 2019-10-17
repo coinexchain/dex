@@ -17,7 +17,7 @@ func TestEndBlocker(t *testing.T) {
 	addr1 := sdk.AccAddress("addr1")
 	var accX1 = authx.AccountX{Address: addr1, MemoRequired: false}
 	coins := authx.LockedCoins{
-		authx.NewLockedCoin("cet", sdk.NewInt(1), input.ctx.BlockHeader().Time.Unix()-1),
+		authx.NewLockedCoin(nil, nil, "cet", sdk.NewInt(1), input.ctx.BlockHeader().Time.Unix()-1, 0),
 	}
 	accX1.LockedCoins = coins
 	input.axk.SetAccountX(input.ctx, accX1)
@@ -32,7 +32,7 @@ func TestEndBlocker(t *testing.T) {
 	addr2 := sdk.AccAddress("addr2")
 	var accX2 = authx.AccountX{Address: addr2, MemoRequired: false}
 	coins = authx.LockedCoins{
-		authx.NewLockedCoin("cet", sdk.NewInt(1), input.ctx.BlockHeader().Time.Unix()+1),
+		authx.NewLockedCoin(nil, nil, "cet", sdk.NewInt(1), input.ctx.BlockHeader().Time.Unix()+1, 0),
 	}
 	accX2.LockedCoins = coins
 	input.axk.SetAccountX(input.ctx, accX2)

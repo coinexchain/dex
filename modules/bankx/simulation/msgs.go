@@ -27,7 +27,7 @@ func SimulateMsgSend(mapper auth.AccountKeeper, bk bankx.Keeper) simulation.Oper
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account) (
 		opMsg simulation.OperationMsg, fOps []simulation.FutureOperation, err error) {
 
-		lockCoinsFee := dex.NewCetCoins(bk.GetParams(ctx).LockCoinsFee)
+		lockCoinsFee := dex.NewCetCoins(bk.GetParams(ctx).LockCoinsFeePerDay)
 
 		fromAcc, comment, msg, ok := createMsgSend(r, ctx, accs, mapper, lockCoinsFee)
 		opMsg = simulation.NewOperationMsg(msg, ok, comment)

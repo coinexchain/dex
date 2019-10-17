@@ -9,9 +9,22 @@ import (
 )
 
 func TestToString(t *testing.T) {
-	lockedCoin := NewLockedCoin("cet", sdk.NewInt(100), 12345)
-	require.Equal(t, "coin: 100cet, unlocked_time: 12345\n", lockedCoin.String())
+	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
+	fromAddr, _ := sdk.AccAddressFromBech32("coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a")
+	supervisor, _ := sdk.AccAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd")
+	lockedCoin := NewLockedCoin(fromAddr, supervisor, "cet", sdk.NewInt(100), 12345, 1)
+	require.Equal(t,
+		"from: coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a, supervisor: coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd, coin: 100cet, unlocked_time: 12345, reward: 1\n",
+		lockedCoin.String())
 
-	lockedCoins := LockedCoins{lockedCoin, lockedCoin}
-	require.Equal(t, "coin: 100cet, unlocked_time: 12345\ncoin: 100cet, unlocked_time: 12345", lockedCoins.String())
+	lockedCoin2 := NewLockedCoin(nil, nil, "cet", sdk.NewInt(100), 12345, 0)
+	require.Equal(t,
+		"from: , supervisor: , coin: 100cet, unlocked_time: 12345, reward: 0\n",
+		lockedCoin2.String())
+
+	lockedCoins := LockedCoins{lockedCoin, lockedCoin2}
+	require.Equal(t,
+		"from: coinex1px8alypku5j84qlwzdpynhn4nyrkagaytu5u4a, supervisor: coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd, coin: 100cet, unlocked_time: 12345, reward: 1\n"+
+			"from: , supervisor: , coin: 100cet, unlocked_time: 12345, reward: 0",
+		lockedCoins.String())
 }

@@ -130,8 +130,8 @@ func TestGetTotalCoins(t *testing.T) {
 	require.NoError(t, err)
 
 	lockedCoins := authx.LockedCoins{
-		authx.NewLockedCoin("bch", sdk.NewInt(20), 1000),
-		authx.NewLockedCoin("eth", sdk.NewInt(30), 2000),
+		authx.NewLockedCoin(nil, nil, "bch", sdk.NewInt(20), 1000, 0),
+		authx.NewLockedCoin(nil, nil, "eth", sdk.NewInt(30), 2000, 0),
 	}
 
 	frozenCoins := sdk.NewCoins(
@@ -163,7 +163,7 @@ func TestKeeper_TotalAmountOfCoin(t *testing.T) {
 	require.NoError(t, err)
 
 	lockedCoins := authx.LockedCoins{
-		authx.NewLockedCoin("cet", sdk.NewInt(100), 1000),
+		authx.NewLockedCoin(nil, nil, "cet", sdk.NewInt(100), 1000, 0),
 	}
 	frozenCoins := sdk.NewCoins(sdk.NewCoin("cet", sdk.NewInt(100)))
 

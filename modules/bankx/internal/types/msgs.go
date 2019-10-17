@@ -168,3 +168,97 @@ func ValidateInputsOutputs(inputs []bank.Input, outputs []bank.Output) sdk.Error
 
 	return nil
 }
+
+var _ sdk.Msg = MsgSupervisedSend{}
+
+// MsgSupervisedSend
+type MsgSupervisedSend struct {
+	FromAddress sdk.AccAddress `json:"from_address"`
+	Supervisor  sdk.AccAddress `json:"supervisor,omitempty"`
+	ToAddress   sdk.AccAddress `json:"to_address"`
+	Amount      sdk.Coin       `json:"amount"`
+	UnlockTime  int64          `json:"unlock_time"`
+	Reward      int64          `json:"reward"`
+	Operation   byte           `json:"operation"`
+}
+
+const (
+	Create                    byte = 0
+	Return                    byte = 1
+	EarlierUnlockBySender     byte = 2
+	EarlierUnlockBySupervisor byte = 3
+)
+
+// NewMsgSupervisedSend
+func NewMsgSupervisedSend(fromAddress sdk.AccAddress, supervisor sdk.AccAddress, toAddress sdk.AccAddress, amount sdk.Coin,
+	unlockTime int64, reward int64, operation byte) MsgSupervisedSend {
+	return MsgSupervisedSend{
+		FromAddress: fromAddress,
+		Supervisor:  supervisor,
+		ToAddress:   toAddress,
+		Amount:      amount,
+		UnlockTime:  unlockTime,
+		Reward:      reward,
+		Operation:   operation,
+	}
+}
+
+func (msg *MsgSupervisedSend) SetAccAddress(addr sdk.AccAddress) {
+	if msg.Operation == Return || msg.Operation == EarlierUnlockBySupervisor {
+		msg.Supervisor = addr
+	} else {
+		msg.FromAddress = addr
+	}
+}
+
+// Route Implements Msg
+func (msg MsgSupervisedSend) Route() string { return RouterKey }
+
+// Type Implements Msg
+func (msg MsgSupervisedSend) Type() string { return "supervisedsend" }
+
+// ValidateBasic Implements Msg.
+func (msg MsgSupervisedSend) ValidateBasic() sdk.Error {
+	if msg.FromAddress.Empty() {
+		return sdk.ErrInvalidAddress("missing sender address")
+	}
+	if msg.ToAddress.Empty() {
+		return sdk.ErrInvalidAddress("missing recipient address")
+	}
+	if msg.Supervisor.Empty() && (msg.Operation == Return || msg.Operation == EarlierUnlockBySupervisor) {
+		return sdk.ErrInvalidAddress("missing supervisor address")
+	}
+	if !msg.Amount.IsValid() {
+		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
+	}
+	if !msg.Amount.IsPositive() {
+		return sdk.ErrInsufficientCoins("send amount must be positive")
+	}
+	if msg.UnlockTime <= 0 {
+		return ErrUnlockTime("unlock time must be positive")
+	}
+	if msg.Reward < 0 {
+		return sdk.ErrInsufficientCoins("reward can not be negative")
+	}
+	if sdk.NewInt(msg.Reward).GT(msg.Amount.Amount) {
+		return ErrorRewardExceedsAmount()
+	}
+	if msg.Operation < Create || msg.Operation > EarlierUnlockBySupervisor {
+		return ErrorInvalidOperation()
+	}
+
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgSupervisedSend) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgSupervisedSend) GetSigners() []sdk.AccAddress {
+	if msg.Operation == Return || msg.Operation == EarlierUnlockBySupervisor {
+		return []sdk.AccAddress{msg.Supervisor}
+	}
+	return []sdk.AccAddress{msg.FromAddress}
+}

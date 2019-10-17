@@ -40,7 +40,10 @@ func (data GenesisState) ValidateGenesis() error {
 	if activationFee := data.Params.ActivationFee; activationFee < 0 {
 		return types.ErrorInvalidActivatingFee()
 	}
-	if lockCoinsFee := data.Params.LockCoinsFee; lockCoinsFee < 0 {
+	if freeTime := data.Params.LockCoinsFreeTime; freeTime < 0 {
+		return types.ErrorInvalidLockCoinsFreeTime()
+	}
+	if lockCoinsFee := data.Params.LockCoinsFeePerDay; lockCoinsFee < 0 {
 		return types.ErrorInvalidLockCoinsFee()
 	}
 	return nil

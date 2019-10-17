@@ -43,38 +43,38 @@ import (
 func TestAccountX_GetAllUnlockedCoinsAtTheTime(t *testing.T) {
 	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
-		NewLockedCoin("bch", sdk.NewInt(20), 1000),
-		NewLockedCoin("eth", sdk.NewInt(30), 2000),
-		NewLockedCoin("eos", sdk.NewInt(40), 3000),
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(20), 1000, 0),
+		NewLockedCoin(nil, nil, "eth", sdk.NewInt(30), 2000, 0),
+		NewLockedCoin(nil, nil, "eos", sdk.NewInt(40), 3000, 0),
 	}
 	acc.LockedCoins = coins
 	res := acc.GetAllUnlockedCoinsAtTheTime(1000)
 	require.Equal(t, LockedCoins{
-		NewLockedCoin("bch", sdk.NewInt(20), 1000)}, res)
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(20), 1000, 0)}, res)
 }
 
 func TestAccountX_GetUnlockedCoinsAtTheTime(t *testing.T) {
 	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
-		NewLockedCoin("bch", sdk.NewInt(20), 1000),
-		NewLockedCoin("eth", sdk.NewInt(30), 2000),
-		NewLockedCoin("bch", sdk.NewInt(30), 2000),
-		NewLockedCoin("eos", sdk.NewInt(40), 3000),
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(20), 1000, 0),
+		NewLockedCoin(nil, nil, "eth", sdk.NewInt(30), 2000, 0),
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(30), 2000, 0),
+		NewLockedCoin(nil, nil, "eos", sdk.NewInt(40), 3000, 0),
 	}
 	acc.LockedCoins = coins
 	res := acc.GetUnlockedCoinsAtTheTime("bch", 2000)
 	require.Equal(t, LockedCoins{
-		NewLockedCoin("bch", sdk.NewInt(20), 1000),
-		NewLockedCoin("bch", sdk.NewInt(30), 2000),
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(20), 1000, 0),
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(30), 2000, 0),
 	}, res)
 }
 
 func TestAccountX_GetAllLockedCoins(t *testing.T) {
 	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
-		NewLockedCoin("bch", sdk.NewInt(20), 1000),
-		NewLockedCoin("eth", sdk.NewInt(30), 2000),
-		NewLockedCoin("eos", sdk.NewInt(40), 3000),
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(20), 1000, 0),
+		NewLockedCoin(nil, nil, "eth", sdk.NewInt(30), 2000, 0),
+		NewLockedCoin(nil, nil, "eos", sdk.NewInt(40), 3000, 0),
 	}
 	acc.LockedCoins = coins
 	res := acc.GetAllLockedCoins()
@@ -84,20 +84,20 @@ func TestAccountX_GetAllLockedCoins(t *testing.T) {
 func TestAccountX_GetLockedCoinsByDemon(t *testing.T) {
 	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
-		NewLockedCoin("bch", sdk.NewInt(20), 1000),
-		NewLockedCoin("eth", sdk.NewInt(30), 2000),
-		NewLockedCoin("eos", sdk.NewInt(40), 3000),
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(20), 1000, 0),
+		NewLockedCoin(nil, nil, "eth", sdk.NewInt(30), 2000, 0),
+		NewLockedCoin(nil, nil, "eos", sdk.NewInt(40), 3000, 0),
 	}
 	acc.LockedCoins = coins
 	res := acc.GetLockedCoinsByDemon("eos")
 	require.Equal(t, LockedCoins{
-		NewLockedCoin("eos", sdk.NewInt(40), 3000)}, res)
+		NewLockedCoin(nil, nil, "eos", sdk.NewInt(40), 3000, 0)}, res)
 }
 
 func TestAccountX_AddLockedCoins(t *testing.T) {
 	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	acc.AddLockedCoins(LockedCoins{
-		NewLockedCoin("bch", sdk.NewInt(10), 1000)})
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(10), 1000, 0)})
 	require.Equal(t, "bch", acc.GetLockedCoinsByDemon("bch")[0].Coin.Denom)
 	require.Equal(t, sdk.NewInt(10), acc.GetLockedCoinsByDemon("bch")[0].Coin.Amount)
 }
@@ -105,9 +105,9 @@ func TestAccountX_AddLockedCoins(t *testing.T) {
 func TestAccountX_GetAllCoins(t *testing.T) {
 	var acc = AccountX{Address: []byte("123"), MemoRequired: false}
 	coins := LockedCoins{
-		NewLockedCoin("bch", sdk.NewInt(20), 1000),
-		NewLockedCoin("eth", sdk.NewInt(30), 2000),
-		NewLockedCoin("eos", sdk.NewInt(40), 3000),
+		NewLockedCoin(nil, nil, "bch", sdk.NewInt(20), 1000, 0),
+		NewLockedCoin(nil, nil, "eth", sdk.NewInt(30), 2000, 0),
+		NewLockedCoin(nil, nil, "eos", sdk.NewInt(40), 3000, 0),
 	}
 	acc.LockedCoins = coins
 	acc.FrozenCoins = sdk.NewCoins(

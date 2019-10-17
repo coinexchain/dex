@@ -17,6 +17,10 @@ const (
 	CodeNoInputs                        sdk.CodeType = 307
 	CodeNoOutputs                       sdk.CodeType = 308
 	CodeInputOutputMismatch             sdk.CodeType = 309
+	CodeInvalidLockCoinsFreeTime        sdk.CodeType = 310
+	CodeInvalidOperation                sdk.CodeType = 311
+	CodeRewardExceedsAmount             sdk.CodeType = 312
+	CodeLockedCoinNotFound              sdk.CodeType = 313
 )
 
 func ErrMemoMissing() sdk.Error {
@@ -49,4 +53,20 @@ func ErrorInvalidActivatingFee() sdk.Error {
 
 func ErrorInvalidLockCoinsFee() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInvalidLockCoinsFee, "invalid lock coins fee")
+}
+
+func ErrorInvalidLockCoinsFreeTime() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeInvalidLockCoinsFreeTime, "invalid lock coins free time")
+}
+
+func ErrorInvalidOperation() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeInvalidOperation, "invalid operation")
+}
+
+func ErrorRewardExceedsAmount() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeRewardExceedsAmount, "reward exceeds amount")
+}
+
+func ErrorLockedCoinNotFound() sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeLockedCoinNotFound, "locked coin not found")
 }

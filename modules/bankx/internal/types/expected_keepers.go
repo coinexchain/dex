@@ -12,6 +12,7 @@ type ExpectedAccountXKeeper interface {
 	SetAccountX(ctx sdk.Context, ax authx.AccountX)
 	IterateAccounts(ctx sdk.Context, process func(authx.AccountX) (stop bool))
 	InsertUnlockedCoinsQueue(ctx sdk.Context, unlockedTime int64, address sdk.AccAddress)
+	RemoveFromUnlockedCoinsQueue(ctx sdk.Context, unlockedTime int64, address sdk.AccAddress)
 }
 
 type ExpectedAssetStatusKeeper interface {

@@ -2,6 +2,7 @@ package bankx_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -33,7 +34,7 @@ var (
 
 func defaultContext() (*keeper.Keeper, sdk.Handler, sdk.Context) {
 	app := testapp.NewTestApp()
-	ctx := sdk.NewContext(app.Cms, abci.Header{}, false, log.NewNopLogger())
+	ctx := sdk.NewContext(app.Cms, abci.Header{Time: time.Now()}, false, log.NewNopLogger())
 	app.BankxKeeper.SetParams(ctx, bx.DefaultParams())
 	app.BankxKeeper.SetSendEnabled(ctx, true)
 	handler := bankx.NewHandler(app.BankxKeeper)
@@ -57,7 +58,8 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(100000000), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
 
-	fee := bkx.GetParams(ctx).LockCoinsFee
+	lockFreeTime := ctx.BlockHeader().Time.Unix() + bkx.GetParams(ctx).LockCoinsFreeTime/int64(time.Second)
+	fee := bkx.GetParams(ctx).LockCoinsFeePerDay
 	err = bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(1000000000+fee*2))
 	require.NoError(t, err)
 
@@ -71,23 +73,35 @@ func TestHandlerMsgSend(t *testing.T) {
 	require.Equal(t, sdk.NewInt(200000000), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(100000000), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
 
-	newMsg := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 1}
+	newMsg := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: lockFreeTime + 1}
 	handle(ctx, newMsg)
 	require.Equal(t, sdk.NewInt(100000000), bkx.GetLockedCoins(ctx, toAddr)[0].Coin.Amount)
 	require.Equal(t, sdk.NewInt(700000000+fee), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(200000000), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(100000000+fee), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
-	require.Equal(t, int64(1), bkx.GetLockedCoins(ctx, toAddr)[0].UnlockTime)
+	require.Equal(t, 1, len(bkx.GetLockedCoins(ctx, toAddr)))
+	require.Equal(t, sdk.NewInt(100000000), bkx.GetLockedCoins(ctx, toAddr)[0].Coin.Amount)
+	require.Equal(t, lockFreeTime+1, bkx.GetLockedCoins(ctx, toAddr)[0].UnlockTime)
 
-	newMsg2 := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	newMsg2 := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: lockFreeTime + 2}
 	handle(ctx, newMsg2)
 	require.Equal(t, sdk.NewInt(100000000), bkx.GetLockedCoins(ctx, toAddr)[0].Coin.Amount)
 	require.Equal(t, sdk.NewInt(600000000), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(200000000), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(100000000+fee*2), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
-	require.Equal(t, int64(1), bkx.GetLockedCoins(ctx, toAddr)[0].UnlockTime)
+	require.Equal(t, 2, len(bkx.GetLockedCoins(ctx, toAddr)))
 	require.Equal(t, sdk.NewInt(100000000), bkx.GetLockedCoins(ctx, toAddr)[1].Coin.Amount)
-	require.Equal(t, int64(2), bkx.GetLockedCoins(ctx, toAddr)[1].UnlockTime)
+	require.Equal(t, lockFreeTime+2, bkx.GetLockedCoins(ctx, toAddr)[1].UnlockTime)
+
+	newMsg3 := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: lockFreeTime}
+	handle(ctx, newMsg3)
+	require.Equal(t, sdk.NewInt(100000000), bkx.GetLockedCoins(ctx, toAddr)[0].Coin.Amount)
+	require.Equal(t, sdk.NewInt(500000000), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(200000000), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(100000000+fee*2), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
+	require.Equal(t, 3, len(bkx.GetLockedCoins(ctx, toAddr)))
+	require.Equal(t, sdk.NewInt(100000000), bkx.GetLockedCoins(ctx, toAddr)[2].Coin.Amount)
+	require.Equal(t, lockFreeTime, bkx.GetLockedCoins(ctx, toAddr)[2].UnlockTime)
 }
 
 func TestHandlerMsgSendFail(t *testing.T) {
@@ -109,17 +123,19 @@ func TestHandlerMsgSendFail(t *testing.T) {
 
 func TestHandlerMsgSendUnlockFirst(t *testing.T) {
 	bkx, handle, ctx := defaultContext()
-	fee := bkx.GetParams(ctx).LockCoinsFee
+	fee := bkx.GetParams(ctx).LockCoinsFeePerDay
 	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(1000000000+fee*2))
 	require.NoError(t, err)
 
-	msgSend := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	lockFreeTime := ctx.BlockHeader().Time.Unix() + bkx.GetParams(ctx).LockCoinsFreeTime/int64(time.Second)
+
+	msgSend := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: lockFreeTime + 2}
 	handle(ctx, msgSend)
 	require.Equal(t, sdk.NewInt(900000000+fee), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(100000000+fee), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
 
-	msgSend2 := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 2}
+	msgSend2 := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: lockFreeTime + 2}
 	handle(ctx, msgSend2)
 	require.Equal(t, sdk.NewInt(800000000), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
@@ -158,10 +174,14 @@ func TestHandleMsgSetMemoRequiredAccountOK(t *testing.T) {
 
 func TestUnlockQueueNotAppend(t *testing.T) {
 	bkx, handle, ctx := defaultContext()
-	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(10100000000))
+
+	fee := bkx.GetParams(ctx).LockCoinsFeePerDay
+	lockFreeTime := ctx.BlockHeader().Time.Unix() + bkx.GetParams(ctx).LockCoinsFreeTime/int64(time.Second)
+
+	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(100000000+fee*2))
 	require.NoError(t, err)
 
-	msgSend := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: 10000}
+	msgSend := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: lockFreeTime + 3600*25}
 	handle(ctx, msgSend)
 
 	//send 0 to toaddr results toAccount to be created

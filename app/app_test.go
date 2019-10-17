@@ -172,12 +172,13 @@ func TestSend(t *testing.T) {
 	app := initAppWithBaseAccounts(acc0)
 
 	// begin block
-	header := abci.Header{Height: 1}
+	now := time.Now()
+	header := abci.Header{Height: 1, Time: now}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
-	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, now.Unix()+10000)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
@@ -481,14 +482,15 @@ func TestTotalSupplyInvariant(t *testing.T) {
 	app := initAppWithBaseAccounts(acc0)
 
 	// begin block
-	header := abci.Header{Height: 1}
+	now := time.Now()
+	header := abci.Header{Height: 1, Time: now}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 	ctx := app.NewContext(false, header)
 	app.crisisKeeper.SetConstantFee(ctx, sdk.NewCoin("cet", sdk.NewInt(1e8)))
 
 	// deliver tx
 	coins = dex.NewCetCoins(1000000000)
-	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, now.Unix()+10000)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
@@ -681,7 +683,8 @@ func TestLockSend(t *testing.T) {
 	toAccX, ok := app.accountXKeeper.GetAccountX(ctx, toAddr)
 	require.True(t, ok)
 	coins = coins.Sub(dex.NewCetCoins(1e8))
-	require.Equal(t, fmt.Sprintf("coin: %s, unlocked_time: %d\n", coins.String(), msg.UnlockTime), toAccX.LockedCoins[0].String())
+	require.Equal(t, fmt.Sprintf("from: %s, supervisor: , coin: %s, unlocked_time: %d, reward: 0\n",
+		msg.FromAddress.String(), coins.String(), msg.UnlockTime), toAccX.LockedCoins[0].String())
 
 	//EndBlock
 	app.EndBlock(abci.RequestEndBlock{Height: 1})
