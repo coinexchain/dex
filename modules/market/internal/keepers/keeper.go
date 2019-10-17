@@ -48,6 +48,18 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 	}
 }
 
+func (k Keeper) GetMarketsWithNewlyAddedOrder(ctx sdk.Context) []string {
+	store := ctx.KVStore(k.marketKey)
+	iter := store.Iterator(NewlyAddedKeyPrefix, NewlyAddedKeyEnd)
+	res := make([]string, 0, 100)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		key := iter.Key()
+		res = append(res, string(key[1:]))
+	}
+	return res
+}
+
 func (k Keeper) QuerySeqWithAddr(ctx sdk.Context, addr sdk.AccAddress) (uint64, sdk.Error) {
 	acc := k.ak.GetAccount(ctx, addr)
 	if acc != nil {

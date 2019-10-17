@@ -17,6 +17,8 @@ var (
 	BidListKeyPrefix       = []byte{0x12}
 	AskListKeyPrefix       = []byte{0x13}
 	OrderQueueKeyPrefix    = []byte{0x14}
+	NewlyAddedKeyPrefix    = []byte{0x66}
+	NewlyAddedKeyEnd       = []byte{0x67}
 	LastOrderCleanUpDayKey = []byte{0x20}
 )
 
@@ -133,6 +135,9 @@ func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *types.Order) sd
 	value := keeper.codec.MustMarshalBinaryBare(order)
 	store.Set(key, value)
 
+	// mark this order book as newly-added
+	store.Set(append(NewlyAddedKeyPrefix, []byte(keeper.symbol)...), []byte{'a'})
+
 	// add it to the local order queue
 	key = keeper.orderQueueKey(order)
 	store.Set(key, []byte{})
@@ -242,6 +247,9 @@ func (keeper *PersistentOrderKeeper) getOrder(ctx sdk.Context, orderID string) *
 // Return the bid orders and ask orders which have proper prices and have possibilities for deal
 func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*types.Order {
 	store := ctx.KVStore(keeper.marketKey)
+	// mark this order book as not-newly-added
+	store.Delete(append(NewlyAddedKeyPrefix, []byte(keeper.symbol)...))
+
 	priceStartPos := len(keeper.symbol) + 2
 	priceEndPos := priceStartPos + types.DecByteCount
 	bidListStart := dex.ConcatKeys(BidListKeyPrefix, []byte(keeper.symbol), []byte{0x0})
