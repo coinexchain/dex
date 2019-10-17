@@ -31,11 +31,12 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 	app.enableUnconfirmedLimit = true
 	app.account2UnconfirmedTx.limitTime = 100
 	// begin block
-	header := abci.Header{Height: 1}
+	now := time.Now()
+	header := abci.Header{Height: 1, Time: now}
 	app.BeginBlock(abci.RequestBeginBlock{Header: header})
 	// build tx
 	coins = dex.NewCetCoins(1000000000)
-	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, time.Now().Unix()+10000)
+	msg := bankx.NewMsgSend(fromAddr, toAddr, coins, now.Unix()+10000)
 	tx := newStdTxBuilder().
 		Msgs(msg).GasAndFee(600000, 1200000000).AccNumSeqKey(0, 0, key).Build()
 

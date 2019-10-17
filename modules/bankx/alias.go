@@ -14,6 +14,13 @@ const (
 	DefaultParamspace = types.DefaultParamspace
 )
 
+const (
+	Create                    = types.Create
+	Return                    = types.Return
+	EarlierUnlockBySender     = types.EarlierUnlockBySender
+	EarlierUnlockBySupervisor = types.EarlierUnlockBySupervisor
+)
+
 var (
 	// functions aliases
 
@@ -39,4 +46,5 @@ type (
 	MsgSend            = types.MsgSend
 	MsgSetMemoRequired = types.MsgSetMemoRequired
 	MsgMultiSend       = types.MsgMultiSend
+	MsgSupervisedSend  = types.MsgSupervisedSend
 )

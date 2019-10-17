@@ -181,8 +181,7 @@ func (k Keeper) earlierUnlockCoin(ctx sdk.Context, addr sdk.AccAddress, amt *aut
 	for i, lockedCoin := range ax.LockedCoins {
 		if bytes.Equal(amt.FromAddress, lockedCoin.FromAddress) &&
 			bytes.Equal(amt.Supervisor, lockedCoin.Supervisor) &&
-			amt.Coin.Amount == lockedCoin.Coin.Amount &&
-			amt.Coin.Denom == lockedCoin.Coin.Denom &&
+			amt.Coin.IsEqual(lockedCoin.Coin) &&
 			amt.UnlockTime == lockedCoin.UnlockTime &&
 			amt.Reward == lockedCoin.Reward {
 			coinIndex = i

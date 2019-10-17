@@ -27,6 +27,7 @@ var (
 	myaddr        = testutil.ToAccAddress("myaddr")
 	fromAddr      = testutil.ToAccAddress("fromaddr")
 	toAddr        = testutil.ToAccAddress("toaddr")
+	supervisor    = testutil.ToAccAddress("supervisoraddr")
 	feeAddr       = sdk.AccAddress(crypto.AddressHash([]byte(auth.FeeCollectorName)))
 	owner         = testutil.ToAccAddress("owner")
 	forbiddenAddr = testutil.ToAccAddress("forbidden")
@@ -178,16 +179,58 @@ func TestUnlockQueueNotAppend(t *testing.T) {
 	fee := bkx.GetParams(ctx).LockCoinsFeePerDay
 	lockFreeTime := ctx.BlockHeader().Time.Unix() + bkx.GetParams(ctx).LockCoinsFreeTime/int64(time.Second)
 
-	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(100000000+fee*2))
+	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(100000000+fee))
 	require.NoError(t, err)
 
-	msgSend := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: lockFreeTime + 3600*25}
+	msgSend := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(100000000), UnlockTime: lockFreeTime + 1000}
 	handle(ctx, msgSend)
 
 	//send 0 to toaddr results toAccount to be created
 	//to be consistent with cosmos-sdk
 	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, 0, len(bkx.GetLockedCoins(ctx, toAddr)))
+}
+
+func TestLockedCoinFee(t *testing.T) {
+	bkx, handle, ctx := defaultContext()
+
+	fee := bkx.GetParams(ctx).LockCoinsFeePerDay
+	lockFreeTime := ctx.BlockHeader().Time.Unix() + bkx.GetParams(ctx).LockCoinsFreeTime/int64(time.Second)
+
+	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(5e8+fee*3))
+	require.NoError(t, err)
+
+	msgSend := bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1e8)}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(4e8+fee*3), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e8), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
+
+	msgSend = bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1e8), UnlockTime: lockFreeTime}
+	handle(ctx, msgSend)
+	// no fee
+	require.Equal(t, sdk.NewInt(3e8+fee*3), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e8), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
+	require.Equal(t, 1, len(bkx.GetLockedCoins(ctx, toAddr)))
+
+	msgSend = bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1e8), UnlockTime: lockFreeTime + 24*3600}
+	handle(ctx, msgSend)
+	// 1 day fee
+	require.Equal(t, sdk.NewInt(2e8+fee*2), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e8+fee), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
+	require.Equal(t, 2, len(bkx.GetLockedCoins(ctx, toAddr)))
+
+	msgSend = bankx.MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: dex.NewCetCoins(1e8), UnlockTime: lockFreeTime + 24*3600 + 1}
+	handle(ctx, msgSend)
+	// 2 day fees
+	require.Equal(t, sdk.NewInt(1e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(0), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e8+fee*3), bkx.GetCoins(ctx, feeAddr).AmountOf("cet"))
+	require.Equal(t, 3, len(bkx.GetLockedCoins(ctx, toAddr)))
 }
 
 func TestHandlerMsgMultiSend(t *testing.T) {
@@ -223,4 +266,84 @@ func TestHandlerMsgMultiSend(t *testing.T) {
 	msg = bankx.NewMsgMultiSend(in, out)
 	res := handle(ctx, msg)
 	require.False(t, res.IsOK())
+}
+
+func TestHandleMsgSupervisedSend(t *testing.T) {
+	bkx, handle, ctx := defaultContext()
+
+	//fee := bkx.GetParams(ctx).LockCoinsFeePerDay
+	lockFreeTime := ctx.BlockHeader().Time.Unix() + bkx.GetParams(ctx).LockCoinsFreeTime/int64(time.Second)
+
+	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(100*1e8))
+	require.NoError(t, err)
+	err = bkx.AddCoins(ctx, toAddr, dex.NewCetCoins(1e8))
+	require.NoError(t, err)
+	err = bkx.AddCoins(ctx, supervisor, dex.NewCetCoins(1e8))
+	require.NoError(t, err)
+
+	// create -> return
+	msgSend := bankx.MsgSupervisedSend{FromAddress: fromAddr, Supervisor: supervisor, ToAddress: toAddr,
+		Amount: dex.NewCetCoin(3e8), UnlockTime: lockFreeTime, Reward: 1e8, Operation: bankx.Create}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(97e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e8), bkx.GetCoins(ctx, supervisor).AmountOf("cet"))
+
+	msgSend = bankx.MsgSupervisedSend{FromAddress: fromAddr, Supervisor: supervisor, ToAddress: toAddr,
+		Amount: dex.NewCetCoin(3e8), UnlockTime: lockFreeTime, Reward: 1e8, Operation: bankx.Return}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(99e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(2e8), bkx.GetCoins(ctx, supervisor).AmountOf("cet"))
+
+	// create -> unlock by sender
+	msgSend = bankx.MsgSupervisedSend{FromAddress: fromAddr, Supervisor: supervisor, ToAddress: toAddr,
+		Amount: dex.NewCetCoin(3e8), UnlockTime: lockFreeTime, Reward: 1e8, Operation: bankx.Create}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(96e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(1e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(2e8), bkx.GetCoins(ctx, supervisor).AmountOf("cet"))
+
+	msgSend = bankx.MsgSupervisedSend{FromAddress: fromAddr, Supervisor: supervisor, ToAddress: toAddr,
+		Amount: dex.NewCetCoin(3e8), UnlockTime: lockFreeTime, Reward: 1e8, Operation: bankx.EarlierUnlockBySender}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(96e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(3e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(3e8), bkx.GetCoins(ctx, supervisor).AmountOf("cet"))
+
+	// create -> unlock by supervisor
+	msgSend = bankx.MsgSupervisedSend{FromAddress: fromAddr, Supervisor: supervisor, ToAddress: toAddr,
+		Amount: dex.NewCetCoin(3e8), UnlockTime: lockFreeTime, Reward: 1e8, Operation: bankx.Create}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(93e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(3e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(3e8), bkx.GetCoins(ctx, supervisor).AmountOf("cet"))
+
+	msgSend = bankx.MsgSupervisedSend{FromAddress: fromAddr, Supervisor: supervisor, ToAddress: toAddr,
+		Amount: dex.NewCetCoin(3e8), UnlockTime: lockFreeTime, Reward: 1e8, Operation: bankx.EarlierUnlockBySupervisor}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(93e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(5e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(4e8), bkx.GetCoins(ctx, supervisor).AmountOf("cet"))
+
+	// no supervisor
+	msgSend = bankx.MsgSupervisedSend{FromAddress: fromAddr, Supervisor: nil, ToAddress: toAddr,
+		Amount: dex.NewCetCoin(3e8), UnlockTime: lockFreeTime, Reward: 1e8, Operation: bankx.Create}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(90e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(5e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+
+	msgSend = bankx.MsgSupervisedSend{FromAddress: fromAddr, Supervisor: nil, ToAddress: toAddr,
+		Amount: dex.NewCetCoin(3e8), UnlockTime: lockFreeTime, Reward: 1e8, Operation: bankx.EarlierUnlockBySender}
+	handle(ctx, msgSend)
+
+	require.Equal(t, sdk.NewInt(90e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
+	require.Equal(t, sdk.NewInt(8e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
 }
