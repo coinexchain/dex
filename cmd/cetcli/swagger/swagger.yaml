@@ -4117,11 +4117,20 @@ definitions:
       - coin
       - unlock_time
     properties:
+      from_address:
+        type: string
+        example: "coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke"
+      supervisor:
+        type: string
+        example: "coinex1dmz7e2fddhejdz5n7e3qc5szx3zn2gj3ta8rwj"
       coin:
         $ref: "#/definitions/Coin"
       unlock_time:
         type: string
         example: "1559549834"
+      reward:
+        type: number
+        example: 0
     additionalProperties: false
   Hash:
     type: string
