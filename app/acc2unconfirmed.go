@@ -65,35 +65,40 @@ func (acc2unc *Account2UnconfirmedTx) Add(addr sdk.AccAddress, hashid []byte, ti
 }
 
 func (acc2unc *Account2UnconfirmedTx) AddToRemoveList(addrs []sdk.AccAddress) {
-	acc2unc.mutex.Lock()
+	//acc2unc.mutex.Lock()
 	acc2unc.removeList = append(acc2unc.removeList, addrs...)
-	acc2unc.mutex.Unlock()
+	//acc2unc.mutex.Unlock()
 }
 
 func (acc2unc *Account2UnconfirmedTx) CommitRemove(timestamp int64) {
-	acc2unc.mutex.Lock()
+	//acc2unc.mutex.Lock()
 	for _, addr := range acc2unc.removeList {
 		s := string(addr)
 		delete(acc2unc.auMap, s) // will do nothing if key not existing
 	}
 	if timestamp-acc2unc.lastSweepTime > SweepPeriod {
 		toBeRemoved := make([]string, 0, 100)
+		acc2unc.mutex.RLock()
 		for acc, unconfirmedTx := range acc2unc.auMap {
 			expired := timestamp-unconfirmedTx.Timestamp > acc2unc.limitTime
 			if expired {
 				toBeRemoved = append(toBeRemoved, acc)
 			}
 		}
-		for _, acc := range toBeRemoved {
-			delete(acc2unc.auMap, acc)
+		acc2unc.mutex.RUnlock()
+		if len(toBeRemoved) != 0 {
+			acc2unc.mutex.Lock()
+			for _, acc := range toBeRemoved {
+				delete(acc2unc.auMap, acc)
+			}
+			acc2unc.mutex.Unlock()
 		}
 		acc2unc.lastSweepTime = timestamp
 	}
-	acc2unc.mutex.Unlock()
 }
 
 func (acc2unc *Account2UnconfirmedTx) ClearRemoveList() {
-	acc2unc.mutex.Lock()
+	//acc2unc.mutex.Lock()
 	acc2unc.removeList = acc2unc.removeList[:0]
-	acc2unc.mutex.Unlock()
+	//acc2unc.mutex.Unlock()
 }
