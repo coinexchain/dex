@@ -54,6 +54,7 @@ func (keeper *OrderCleanUpDayKeeper) SetUnixTime(ctx sdk.Context, unixTime int64
 // OrderKeeper manages the order book of one market
 type OrderKeeper interface {
 	Add(ctx sdk.Context, order *types.Order) sdk.Error
+	Update(ctx sdk.Context, order *types.Order) sdk.Error
 	Remove(ctx sdk.Context, order *types.Order) sdk.Error
 	GetOlderThan(ctx sdk.Context, height int64) []*types.Order
 	GetOrdersAtHeight(ctx sdk.Context, height int64) []*types.Order
@@ -129,14 +130,19 @@ func int64ToBigEndianBytes(n int64) []byte {
 }
 
 func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *types.Order) sdk.Error {
+	// mark this order book as newly-added
+	store := ctx.KVStore(keeper.marketKey)
+	store.Set(append(NewlyAddedKeyPrefix, []byte(keeper.symbol)...), []byte{'a'})
+
+	return keeper.Update(ctx, order)
+}
+
+func (keeper *PersistentOrderKeeper) Update(ctx sdk.Context, order *types.Order) sdk.Error {
 	// add it to the global order book
 	store := ctx.KVStore(keeper.marketKey)
 	key := orderBookKey(order.OrderID())
 	value := keeper.codec.MustMarshalBinaryBare(order)
 	store.Set(key, value)
-
-	// mark this order book as newly-added
-	store.Set(append(NewlyAddedKeyPrefix, []byte(keeper.symbol)...), []byte{'a'})
 
 	// add it to the local order queue
 	key = keeper.orderQueueKey(order)

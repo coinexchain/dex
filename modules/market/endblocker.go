@@ -376,7 +376,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), mi.GetSymbol(), types.ModuleCdc)
 		// update the order book
 		for _, order := range ordersForUpdateList[idx] {
-			orderKeeper.Add(ctx, order)
+			orderKeeper.Update(ctx, order)
 			if order.TimeInForce == types.IOC || order.LeftStock == 0 || notEnoughMoney(order) {
 				if keeper.IsSubScribed(types.Topic) {
 					sendOrderMsg(ctx, order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, keeper)
