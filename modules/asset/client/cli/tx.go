@@ -1,17 +1,12 @@
 package cli
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 
 	"github.com/coinexchain/dex/client/cliutil"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
@@ -76,30 +71,11 @@ $ cetcli tx asset issue-token --name="ABC Token" \
 	--from mykey
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			tokenOwner := cliCtx.GetFromAddress()
-
-			msg, err := parseIssueFlags(tokenOwner)
+			msg, err := parseIssueFlags(nil)
 			if err != nil {
 				return err
 			}
-
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			bz, err := cdc.MarshalJSON(types.NewQueryAssetParams(msg.Symbol))
-			if err != nil {
-				return err
-			}
-			route := fmt.Sprintf("custom/%s/%s", queryRoute, types.QueryToken)
-			if res, _, _ := cliCtx.QueryWithData(route, bz); res != nil {
-				return fmt.Errorf("token symbol already exists，please query tokens and issue another symbol")
-			}
-
-			// build and sign the transaction, then broadcast to Tendermint
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return cliutil.CliRunCommand(cdc, msg)
 		},
 	}
 

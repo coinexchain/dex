@@ -57,6 +57,10 @@ func NewMsgIssueToken(name string, symbol string, amt sdk.Int, owner sdk.AccAddr
 	}
 }
 
+func (msg *MsgIssueToken) SetAccAddress(addr sdk.AccAddress) {
+	msg.Owner = addr
+}
+
 // Route Implements Msg.
 func (msg MsgIssueToken) Route() string {
 	return RouterKey
