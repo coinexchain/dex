@@ -10,8 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/coinexchain/dex/client/cliutil"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 )
 
@@ -66,23 +64,7 @@ func getCreateMarketMsg(cdc *codec.Codec) (*types.MsgCreateTradingPair, error) {
 		return nil, errors.Errorf("tx flag is error, please see help : " +
 			"$ cetcli tx market createmarket -h")
 	}
-	if err := hasTokens(cdc, msg.Stock, msg.Money); err != nil {
-		return nil, err
-	}
 	return msg, nil
-}
-
-func hasTokens(cdc *codec.Codec, tokens ...string) error {
-	route := fmt.Sprintf("custom/%s/%s", asset.QuerierRoute, asset.QueryToken)
-	for _, token := range tokens {
-		if err := asset.ValidateTokenSymbol(token); err != nil {
-			return err
-		}
-		if err := cliutil.CliQuery(cdc, route, asset.NewQueryAssetParams(token)); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func parseCreateMarketFlags() (*types.MsgCreateTradingPair, error) {
@@ -134,10 +116,6 @@ func getCancelMarketMsg(cdc *codec.Codec) (*types.MsgCancelTradingPair, error) {
 		EffectiveTime: viper.GetInt64(FlagTime),
 		TradingPair:   viper.GetString(FlagSymbol),
 	}
-	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
-	if err := cliutil.CliQuery(cdc, query, keepers.NewQueryMarketParam(msg.TradingPair)); err != nil {
-		return nil, err
-	}
 	return &msg, nil
 }
 
@@ -171,10 +149,6 @@ func getModifyTradingPairPricePrecisionMsg(cdc *codec.Codec) (*types.MsgModifyPr
 	msg := types.MsgModifyPricePrecision{
 		TradingPair:    viper.GetString(FlagSymbol),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
-	}
-	query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
-	if err := cliutil.CliQuery(cdc, query, keepers.NewQueryMarketParam(msg.TradingPair)); err != nil {
-		return nil, err
 	}
 	return &msg, nil
 }
