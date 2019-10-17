@@ -4129,8 +4129,8 @@ definitions:
         type: string
         example: "1559549834"
       reward:
-        type: number
-        example: 0
+        type: string
+        example: "0"
     additionalProperties: false
   Hash:
     type: string
