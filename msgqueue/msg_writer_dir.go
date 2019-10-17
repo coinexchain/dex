@@ -20,7 +20,7 @@ type dirMsgWriter struct {
 	dir           string
 }
 
-func NewdirMsgWriter(dir string) (MsgWriter, error) {
+func NewDirMsgWriter(dir string) (MsgWriter, error) {
 	filePath, fileIndex, err := GetFilePathAndFileIndexFromDir(dir, MaxFileSize)
 	if err != nil {
 		return &dirMsgWriter{}, err

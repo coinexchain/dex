@@ -27,7 +27,7 @@ func createMsgWriter(cfg string) (MsgWriter, error) {
 		return NewStdOutMsgWriter(), nil
 	} else if strings.HasPrefix(cfg, CfgPrefixDir) {
 		dirPath := strings.TrimPrefix(cfg, CfgPrefixDir)
-		return NewdirMsgWriter(dirPath)
+		return NewDirMsgWriter(dirPath)
 	} else {
 		return nil, fmt.Errorf("unsupported config: %s", cfg)
 	}

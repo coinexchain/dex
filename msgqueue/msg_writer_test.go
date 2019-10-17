@@ -71,7 +71,7 @@ func TestFileMsgWriter(t *testing.T) {
 }
 
 func TestDirMsgWriter(t *testing.T) {
-	w, err := NewdirMsgWriter("tmp")
+	w, err := NewDirMsgWriter("tmp")
 	require.NoError(t, err)
 	defer os.RemoveAll("tmp")
 
