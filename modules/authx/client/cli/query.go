@@ -3,6 +3,8 @@ package cli
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
+
 	"github.com/spf13/cobra"
 
 	"github.com/coinexchain/dex/client/cliutil"
@@ -42,7 +44,7 @@ func GetQueryParamsCmd(cdc *codec.Codec) *cobra.Command {
 }
 
 func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "account [address]",
 		Short: "Query account balance",
 		Args:  cobra.ExactArgs(1),
@@ -56,4 +58,5 @@ func GetAccountXCmd(cdc *codec.Codec) *cobra.Command {
 			return cliutil.CliQuery(cdc, route, &param)
 		},
 	}
+	return flags.GetCommands(cmd)[0]
 }
