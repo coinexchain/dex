@@ -77,22 +77,14 @@ func (acc2unc *Account2UnconfirmedTx) CommitRemove(timestamp int64) {
 		delete(acc2unc.auMap, s) // will do nothing if key not existing
 	}
 	if timestamp-acc2unc.lastSweepTime > SweepPeriod {
-		toBeRemoved := make([]string, 0, 100)
-		acc2unc.mutex.RLock()
+		acc2unc.mutex.Lock()
 		for acc, unconfirmedTx := range acc2unc.auMap {
 			expired := timestamp-unconfirmedTx.Timestamp > acc2unc.limitTime
 			if expired {
-				toBeRemoved = append(toBeRemoved, acc)
-			}
-		}
-		acc2unc.mutex.RUnlock()
-		if len(toBeRemoved) != 0 {
-			acc2unc.mutex.Lock()
-			for _, acc := range toBeRemoved {
 				delete(acc2unc.auMap, acc)
 			}
-			acc2unc.mutex.Unlock()
 		}
+		acc2unc.mutex.Unlock()
 		acc2unc.lastSweepTime = timestamp
 	}
 }
