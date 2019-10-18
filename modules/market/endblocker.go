@@ -131,6 +131,7 @@ func SendFillMsg(ctx sdk.Context, seller *Order, buyer *Order, stockAmount, mone
 		DealMoney:   seller.DealMoney,
 		CurrStock:   stockAmount,
 		CurrMoney:   moneyAmount,
+		Price:       seller.Price,
 	}
 	msgqueue.FillMsgs(ctx, types.FillOrderInfoKey, sellInfo)
 
@@ -146,6 +147,7 @@ func SendFillMsg(ctx sdk.Context, seller *Order, buyer *Order, stockAmount, mone
 		DealMoney:   buyer.DealMoney,
 		CurrStock:   stockAmount,
 		CurrMoney:   moneyAmount,
+		Price:       buyer.Price,
 	}
 	msgqueue.FillMsgs(ctx, types.FillOrderInfoKey, buyInfo)
 }
