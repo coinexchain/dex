@@ -1,6 +1,7 @@
 package types
 
 import (
+	"bytes"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -31,6 +32,14 @@ func NewLockedCoin(fromAddress sdk.AccAddress, supervisor sdk.AccAddress, denom 
 func (coin LockedCoin) String() string {
 	return fmt.Sprintf("from: %s, supervisor: %s, coin: %s, unlocked_time: %d, reward: %d\n",
 		coin.FromAddress.String(), coin.Supervisor.String(), coin.Coin, coin.UnlockTime, coin.Reward)
+}
+
+func (coin LockedCoin) IsEqual(other LockedCoin) bool {
+	return bytes.Equal(coin.FromAddress, other.FromAddress) &&
+		bytes.Equal(coin.Supervisor, other.Supervisor) &&
+		coin.Coin.IsEqual(other.Coin) &&
+		coin.UnlockTime == other.UnlockTime &&
+		coin.Reward == other.Reward
 }
 
 //-----------------------------------------------------------------------------

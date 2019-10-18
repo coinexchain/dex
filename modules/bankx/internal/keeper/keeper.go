@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"bytes"
 	"fmt"
 	"time"
 
@@ -177,20 +176,22 @@ func (k Keeper) earlierUnlockCoin(ctx sdk.Context, addr sdk.AccAddress, amt *aut
 	}
 
 	coinIndex := -1
+	found := false
 	hasOther := false
+
 	for i, lockedCoin := range ax.LockedCoins {
-		if bytes.Equal(amt.FromAddress, lockedCoin.FromAddress) &&
-			bytes.Equal(amt.Supervisor, lockedCoin.Supervisor) &&
-			amt.Coin.IsEqual(lockedCoin.Coin) &&
-			amt.UnlockTime == lockedCoin.UnlockTime &&
-			amt.Reward == lockedCoin.Reward {
-			coinIndex = i
+		if !found {
+			if amt.IsEqual(lockedCoin) {
+				found = true
+				coinIndex = i
+			}
 		} else if amt.UnlockTime == lockedCoin.UnlockTime {
 			hasOther = true
+			break
 		}
 	}
 
-	if coinIndex < 0 {
+	if !found {
 		return types.ErrorLockedCoinNotFound()
 	}
 
