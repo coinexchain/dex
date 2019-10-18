@@ -11,35 +11,48 @@ import (
 // Locked Coin
 
 type LockedCoin struct {
-	FromAddress sdk.AccAddress `json:"from_address,omitempty"`
-	Supervisor  sdk.AccAddress `json:"supervisor,omitempty"`
 	Coin        sdk.Coin       `json:"coin"`
 	UnlockTime  int64          `json:"unlock_time"`
-	Reward      int64          `json:"reward"`
+	FromAddress sdk.AccAddress `json:"from_address,omitempty"`
+	Supervisor  sdk.AccAddress `json:"supervisor,omitempty"`
+	Reward      int64          `json:"reward,omitempty"`
 }
 
-func NewLockedCoin(fromAddress sdk.AccAddress, supervisor sdk.AccAddress, denom string, amount sdk.Int,
-	unlockTime int64, reward int64) LockedCoin {
+func NewLockedCoin(denom string, amount sdk.Int, unlockTime int64) LockedCoin {
 	return LockedCoin{
-		FromAddress: fromAddress,
-		Supervisor:  supervisor,
+		Coin:       sdk.NewCoin(denom, amount),
+		UnlockTime: unlockTime,
+	}
+}
+
+func NewSupervisedLockedCoin(denom string, amount sdk.Int, unlockTime int64, fromAddress sdk.AccAddress, supervisor sdk.AccAddress, reward int64) LockedCoin {
+	return LockedCoin{
 		Coin:        sdk.NewCoin(denom, amount),
 		UnlockTime:  unlockTime,
+		FromAddress: fromAddress,
+		Supervisor:  supervisor,
 		Reward:      reward,
 	}
 }
 
 func (coin LockedCoin) String() string {
-	return fmt.Sprintf("from: %s, supervisor: %s, coin: %s, unlocked_time: %d, reward: %d\n",
-		coin.FromAddress.String(), coin.Supervisor.String(), coin.Coin, coin.UnlockTime, coin.Reward)
+	str := fmt.Sprintf("coin: %s, unlocked_time: %d", coin.Coin, coin.UnlockTime)
+	if coin.FromAddress != nil {
+		str += fmt.Sprintf(", from: %s", coin.FromAddress.String())
+	}
+	if coin.Supervisor != nil {
+		str += fmt.Sprintf(", supervisor: %s, reward: %d", coin.Supervisor.String(), coin.Reward)
+	}
+	str += "\n"
+	return str
 }
 
 func (coin LockedCoin) IsEqual(other LockedCoin) bool {
-	return bytes.Equal(coin.FromAddress, other.FromAddress) &&
-		bytes.Equal(coin.Supervisor, other.Supervisor) &&
-		coin.Coin.IsEqual(other.Coin) &&
+	return coin.Coin.IsEqual(other.Coin) &&
 		coin.UnlockTime == other.UnlockTime &&
-		coin.Reward == other.Reward
+		coin.Reward == other.Reward &&
+		bytes.Equal(coin.FromAddress, other.FromAddress) &&
+		bytes.Equal(coin.Supervisor, other.Supervisor)
 }
 
 //-----------------------------------------------------------------------------

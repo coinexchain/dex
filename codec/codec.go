@@ -1207,6 +1207,15 @@ func EncodeLockedCoin(w io.Writer, v LockedCoin) error {
 	if err != nil {
 		return err
 	}
+	err = EncodeInt(w, v.Coin.Amount)
+	if err != nil {
+		return err
+	}
+	// end of v.Coin
+	err = codonEncodeVarint(w, int64(v.UnlockTime))
+	if err != nil {
+		return err
+	}
 	var fromAddress []byte
 	if v.FromAddress != nil {
 		fromAddress = v.FromAddress[:]
@@ -1220,15 +1229,6 @@ func EncodeLockedCoin(w io.Writer, v LockedCoin) error {
 		supervisor = v.Supervisor[:]
 	}
 	err = codonEncodeByteSlice(w, supervisor)
-	if err != nil {
-		return err
-	}
-	err = EncodeInt(w, v.Coin.Amount)
-	if err != nil {
-		return err
-	}
-	// end of v.Coin
-	err = codonEncodeVarint(w, int64(v.UnlockTime))
 	if err != nil {
 		return err
 	}
@@ -1246,6 +1246,25 @@ func DecodeLockedCoin(bz []byte) (LockedCoin, int, error) {
 	var v LockedCoin
 	var n int
 	var total int
+	v.Coin.Denom = string(codonDecodeString(bz, &n, &err))
+	if err != nil {
+		return v, total, err
+	}
+	bz = bz[n:]
+	total += n
+	v.Coin.Amount, n, err = DecodeInt(bz)
+	if err != nil {
+		return v, total, err
+	}
+	bz = bz[n:]
+	total += n
+	// end of v.Coin
+	v.UnlockTime = int64(codonDecodeInt64(bz, &n, &err))
+	if err != nil {
+		return v, total, err
+	}
+	bz = bz[n:]
+	total += n
 	length = codonDecodeInt(bz, &n, &err)
 	if err != nil {
 		return v, total, err
@@ -1270,25 +1289,6 @@ func DecodeLockedCoin(bz []byte) (LockedCoin, int, error) {
 		bz = bz[n:]
 		total += n
 	}
-	v.Coin.Denom = string(codonDecodeString(bz, &n, &err))
-	if err != nil {
-		return v, total, err
-	}
-	bz = bz[n:]
-	total += n
-	v.Coin.Amount, n, err = DecodeInt(bz)
-	if err != nil {
-		return v, total, err
-	}
-	bz = bz[n:]
-	total += n
-	// end of v.Coin
-	v.UnlockTime = int64(codonDecodeInt64(bz, &n, &err))
-	if err != nil {
-		return v, total, err
-	}
-	bz = bz[n:]
-	total += n
 	v.Reward = int64(codonDecodeInt64(bz, &n, &err))
 	if err != nil {
 		return v, total, err

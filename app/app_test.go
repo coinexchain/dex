@@ -683,8 +683,7 @@ func TestLockSend(t *testing.T) {
 	toAccX, ok := app.accountXKeeper.GetAccountX(ctx, toAddr)
 	require.True(t, ok)
 	coins = coins.Sub(dex.NewCetCoins(1e8))
-	require.Equal(t, fmt.Sprintf("from: %s, supervisor: , coin: %s, unlocked_time: %d, reward: 0\n",
-		msg.FromAddress.String(), coins.String(), msg.UnlockTime), toAccX.LockedCoins[0].String())
+	require.Equal(t, fmt.Sprintf("coin: %s, unlocked_time: %d\n", coins.String(), msg.UnlockTime), toAccX.LockedCoins[0].String())
 
 	//EndBlock
 	app.EndBlock(abci.RequestEndBlock{Height: 1})
@@ -728,7 +727,7 @@ func TestSupervisorNotExist(t *testing.T) {
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 
 	result := app.Deliver(tx)
-	require.Equal(t, sdk.CodeOK, result.Code)
+	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
 
 	//end block
 	app.EndBlock(abci.RequestEndBlock{Height: 1})
@@ -743,13 +742,8 @@ func TestSupervisorNotExist(t *testing.T) {
 		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
 
 	result = app.Deliver(tx)
-	require.Equal(t, sdk.CodeOK, result.Code)
+	require.Equal(t, sdk.CodeUnknownAddress, result.Code)
 
 	toAccX, _ := app.accountXKeeper.GetAccountX(ctx, toAddr)
 	require.Nil(t, toAccX.LockedCoins)
-
-	//activation fee is expected to be deducted for supervisor
-	supervisorAcc := app.accountKeeper.GetAccount(ctx, supervisorAddr)
-	require.Equal(t, msg.Reward, supervisorAcc.GetCoins().AmountOf(dex.CET).Int64())
-
 }

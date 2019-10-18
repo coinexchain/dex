@@ -22,6 +22,7 @@ var (
 	ErrInvalidMinGasPriceLimit = types.ErrInvalidMinGasPriceLimit
 	ErrGasPriceTooLow          = types.ErrGasPriceTooLow
 	NewLockedCoin              = types.NewLockedCoin
+	NewSupervisedLockedCoin    = types.NewSupervisedLockedCoin
 	NewParams                  = types.NewParams
 	NewAccountX                = types.NewAccountX
 	DefaultParams              = types.DefaultParams

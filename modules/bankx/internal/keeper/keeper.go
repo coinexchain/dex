@@ -62,7 +62,7 @@ func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddres
 }
 
 func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr, supervisor sdk.AccAddress, amt sdk.Coins,
-	unlockTime int64, reward int64) sdk.Error {
+	unlockTime int64, reward int64, isSupervised bool) sdk.Error {
 	if k.IsSendForbidden(ctx, amt, fromAddr) {
 		return types.ErrTokenForbiddenByOwner()
 	}
@@ -87,13 +87,12 @@ func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr, supervisor sd
 
 	ax := k.axk.GetOrCreateAccountX(ctx, toAddr)
 	for _, coin := range amt {
-		ax.LockedCoins = append(ax.LockedCoins, authx.LockedCoin{
-			FromAddress: fromAddr,
-			Supervisor:  supervisor,
-			Coin:        coin,
-			UnlockTime:  unlockTime,
-			Reward:      reward,
-		})
+		if isSupervised {
+			ax.LockedCoins = append(ax.LockedCoins, authx.NewSupervisedLockedCoin(coin.Denom, coin.Amount, unlockTime,
+				fromAddr, supervisor, reward))
+		} else {
+			ax.LockedCoins = append(ax.LockedCoins, authx.NewLockedCoin(coin.Denom, coin.Amount, unlockTime))
+		}
 		if err := k.tk.UpdateTokenSendLock(ctx, coin.Denom, coin.Amount, true); err != nil {
 			return err
 		}
@@ -106,86 +105,24 @@ func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr, supervisor sd
 	return nil
 }
 
-func (k Keeper) ReturnLockedCoins(ctx sdk.Context, fromAddr, toAddr, supervisor sdk.AccAddress, amt *sdk.Coin,
-	unlockTime int64, reward int64) sdk.Error {
-
-	lockedCoin := authx.NewLockedCoin(fromAddr, supervisor, amt.Denom, amt.Amount, unlockTime, reward)
-	if err := k.earlierUnlockCoin(ctx, toAddr, &lockedCoin); err != nil {
-		return err
-	}
-	returnAmt := sdk.NewCoin(amt.Denom, amt.Amount.Sub(sdk.NewInt(reward)))
-	if err := k.AddCoins(ctx, fromAddr, sdk.NewCoins(returnAmt)); err != nil {
-		return err
-	}
-	rewardAmt := sdk.NewCoin(amt.Denom, sdk.NewInt(reward))
-	if err := k.AddCoins(ctx, supervisor, sdk.NewCoins(rewardAmt)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (k Keeper) EarlierUnlockBySender(ctx sdk.Context, fromAddr, toAddr, supervisor sdk.AccAddress, amt *sdk.Coin,
-	unlockTime int64, reward int64) sdk.Error {
-
-	lockedCoin := authx.NewLockedCoin(fromAddr, supervisor, amt.Denom, amt.Amount, unlockTime, reward)
-	if err := k.earlierUnlockCoin(ctx, toAddr, &lockedCoin); err != nil {
-		return err
-	}
-	if supervisor.Empty() {
-		if err := k.AddCoins(ctx, toAddr, sdk.NewCoins(*amt)); err != nil {
-			return err
-		}
-	} else {
-		receivedAmt := sdk.NewCoin(amt.Denom, amt.Amount.Sub(sdk.NewInt(reward)))
-		if err := k.AddCoins(ctx, toAddr, sdk.NewCoins(receivedAmt)); err != nil {
-			return err
-		}
-		rewardAmt := sdk.NewCoin(amt.Denom, sdk.NewInt(reward))
-		if err := k.AddCoins(ctx, supervisor, sdk.NewCoins(rewardAmt)); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (k Keeper) EarlierUnlockBySupervisor(ctx sdk.Context, fromAddr, toAddr, supervisor sdk.AccAddress, amt *sdk.Coin,
-	unlockTime int64, reward int64) sdk.Error {
-
-	lockedCoin := authx.NewLockedCoin(fromAddr, supervisor, amt.Denom, amt.Amount, unlockTime, reward)
-	if err := k.earlierUnlockCoin(ctx, toAddr, &lockedCoin); err != nil {
-		return err
-	}
-	receivedAmt := sdk.NewCoin(amt.Denom, amt.Amount.Sub(sdk.NewInt(reward)))
-	if err := k.AddCoins(ctx, toAddr, sdk.NewCoins(receivedAmt)); err != nil {
-		return err
-	}
-	rewardAmt := sdk.NewCoin(amt.Denom, sdk.NewInt(reward))
-	if err := k.AddCoins(ctx, supervisor, sdk.NewCoins(rewardAmt)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (k Keeper) earlierUnlockCoin(ctx sdk.Context, addr sdk.AccAddress, amt *authx.LockedCoin) sdk.Error {
-	ax, ok := k.axk.GetAccountX(ctx, addr)
+func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor sdk.AccAddress, amt *sdk.Coin,
+	unlockTime int64, reward int64, isReturned bool) sdk.Error {
+	ax, ok := k.axk.GetAccountX(ctx, toAddr)
 	if !ok {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
+		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", toAddr))
 	}
 
-	coinIndex := -1
 	found := false
 	hasOther := false
-
+	coinIndex := -1
+	coin := authx.NewSupervisedLockedCoin(amt.Denom, amt.Amount, unlockTime, fromAddr, supervisor, reward)
 	for i, lockedCoin := range ax.LockedCoins {
 		if !found {
-			if amt.IsEqual(lockedCoin) {
+			if coin.IsEqual(lockedCoin) {
 				found = true
 				coinIndex = i
 			}
-		} else if amt.UnlockTime == lockedCoin.UnlockTime {
+		} else if unlockTime == lockedCoin.UnlockTime {
 			hasOther = true
 			break
 		}
@@ -195,17 +132,35 @@ func (k Keeper) earlierUnlockCoin(ctx sdk.Context, addr sdk.AccAddress, amt *aut
 		return types.ErrorLockedCoinNotFound()
 	}
 
-	if err := k.tk.UpdateTokenSendLock(ctx, amt.Coin.Denom, amt.Coin.Amount, false); err != nil {
+	if err := k.tk.UpdateTokenSendLock(ctx, amt.Denom, amt.Amount, false); err != nil {
 		return err
+	}
+
+	if supervisor.Empty() {
+		if err := k.AddCoins(ctx, toAddr, sdk.NewCoins(*amt)); err != nil {
+			return err
+		}
+	} else {
+		receiver := toAddr
+		if isReturned {
+			receiver = fromAddr
+		}
+		transferAmt := sdk.NewCoin(amt.Denom, amt.Amount.Sub(sdk.NewInt(reward)))
+		if err := k.AddCoins(ctx, receiver, sdk.NewCoins(transferAmt)); err != nil {
+			return err
+		}
+		rewardAmt := sdk.NewCoin(amt.Denom, sdk.NewInt(reward))
+		if err := k.AddCoins(ctx, supervisor, sdk.NewCoins(rewardAmt)); err != nil {
+			return err
+		}
 	}
 
 	ax.LockedCoins = append(ax.LockedCoins[:coinIndex], ax.LockedCoins[coinIndex+1:]...)
 	k.axk.SetAccountX(ctx, ax)
 
 	if !hasOther {
-		k.axk.RemoveFromUnlockedCoinsQueue(ctx, amt.UnlockTime, addr)
+		k.axk.RemoveFromUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 	}
-
 	return nil
 }
 
@@ -268,6 +223,14 @@ func (k Keeper) MockAddFrozenCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk
 
 func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
 	return k.DeductFee(ctx, addr, dex.NewCetCoins(amt))
+}
+
+func (k Keeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account {
+	return k.ak.GetAccount(ctx, addr)
+}
+
+func (k Keeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax authx.AccountX, ok bool) {
+	return k.axk.GetAccountX(ctx, addr)
 }
 
 func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, transfer sdk.Coins) (sdk.Coins, sdk.Error) {
