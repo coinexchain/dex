@@ -15,9 +15,7 @@ func collectKafkaEvents(events []abci.Event, app *CetChainApp) []abci.Event {
 	nonKafkaEvents := make([]abci.Event, 0, len(events)) // TODO: no need to make new slice
 	for _, event := range events {
 		if event.Type == msgqueue.EventTypeMsgQueue {
-			for _, attr := range event.Attributes {
-				app.appendPubMsg(PubMsg{Key: attr.Key, Value: attr.Value})
-			}
+			app.appendPubEvent(event)
 		} else {
 			nonKafkaEvents = append(nonKafkaEvents, event)
 		}

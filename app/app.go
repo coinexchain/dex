@@ -603,6 +603,11 @@ func (app *CetChainApp) resetPubMsgBuf() {
 func (app *CetChainApp) appendPubMsg(msg PubMsg) {
 	app.pubMsgs = append(app.pubMsgs, msg)
 }
+func (app *CetChainApp) appendPubEvent(event abci.Event) {
+	for _, attr := range event.Attributes {
+		app.appendPubMsg(PubMsg{Key: attr.Key, Value: attr.Value})
+	}
+}
 func (app *CetChainApp) appendPubMsgKV(key string, val []byte) {
 	app.pubMsgs = append(app.pubMsgs, PubMsg{Key: []byte(key), Value: val})
 }
