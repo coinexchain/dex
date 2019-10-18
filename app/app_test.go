@@ -699,3 +699,57 @@ func TestLockSend(t *testing.T) {
 	require.Equal(t, coins, toAcc.GetCoins())
 
 }
+func TestSupervisorNotExist(t *testing.T) {
+	key, _, fromAddr := testutil.KeyPubAddr()
+	_, _, toAddr := testutil.KeyPubAddr()
+	_, _, supervisorAddr := testutil.KeyPubAddr()
+	coins := dex.NewCetCoins(30e8)
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+	acc1 := auth.BaseAccount{Address: toAddr, Coins: coins}
+
+	// app
+	app := initAppWithBaseAccounts(acc0, acc1)
+
+	// begin block
+	header := abci.Header{Height: 1, Time: time.Now()}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	//deliver tx
+	msg := bankx.MsgSupervisedSend{
+		FromAddress: fromAddr,
+		ToAddress:   toAddr,
+		Supervisor:  supervisorAddr,
+		Amount:      dex.NewCetCoin(1e8),
+		Reward:      1e7,
+		UnlockTime:  time.Now().Unix() + 100,
+		Operation:   bankx.Create,
+	}
+	tx := newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+
+	//end block
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 2, Time: time.Now(), ChainID: testChainID}})
+	ctx := app.NewContext(false, abci.Header{Height: 2})
+
+	//deliver tx
+	msg.Operation = bankx.EarlierUnlockBySender
+	tx = newStdTxBuilder().
+		Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
+
+	result = app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+
+	toAccX, _ := app.accountXKeeper.GetAccountX(ctx, toAddr)
+	require.Nil(t, toAccX.LockedCoins)
+
+	//activation fee is expected to be deducted for supervisor
+	supervisorAcc := app.accountKeeper.GetAccount(ctx, supervisorAddr)
+	require.Equal(t, msg.Reward, supervisorAcc.GetCoins().AmountOf(dex.CET).Int64())
+
+}
