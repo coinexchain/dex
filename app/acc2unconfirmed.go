@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 const (
@@ -25,6 +26,7 @@ const (
 type UnconfirmedTx struct {
 	HashID    []byte
 	Timestamp int64
+	ABCIResp  abci.ResponseCheckTx
 }
 
 type Account2UnconfirmedTx struct {
@@ -44,23 +46,23 @@ func NewAccount2UnconfirmedTx(limitTime int64) *Account2UnconfirmedTx {
 	}
 }
 
-func (acc2unc *Account2UnconfirmedTx) Lookup(addr sdk.AccAddress, hashid []byte, timestamp int64) int {
+func (acc2unc *Account2UnconfirmedTx) Lookup(addr sdk.AccAddress, hashid []byte, timestamp int64) (int, *abci.ResponseCheckTx) {
 	acc2unc.mutex.RLock()
 	unconfirmedTx, ok := acc2unc.auMap[string(addr)]
 	acc2unc.mutex.RUnlock()
 	expired := timestamp-unconfirmedTx.Timestamp > acc2unc.limitTime
 	if !ok || expired {
-		return NoTxExist
+		return NoTxExist, nil
 	}
 	if bytes.Equal(unconfirmedTx.HashID, hashid) {
-		return SameTxExist
+		return SameTxExist, &unconfirmedTx.ABCIResp
 	}
-	return OtherTxExist
+	return OtherTxExist, nil
 }
 
-func (acc2unc *Account2UnconfirmedTx) Add(addr sdk.AccAddress, hashid []byte, timestamp int64) {
+func (acc2unc *Account2UnconfirmedTx) Add(addr sdk.AccAddress, hashid []byte, timestamp int64, resp abci.ResponseCheckTx) {
 	acc2unc.mutex.Lock()
-	acc2unc.auMap[string(addr)] = UnconfirmedTx{HashID: hashid, Timestamp: timestamp}
+	acc2unc.auMap[string(addr)] = UnconfirmedTx{HashID: hashid, Timestamp: timestamp, ABCIResp: resp}
 	acc2unc.mutex.Unlock()
 }
 

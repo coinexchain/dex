@@ -43,9 +43,9 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 	//simple check tx
 	txBytes, _ := auth.DefaultTxEncoder(app.cdc)(tx)
 	hashID := tmtypes.Tx(txBytes).Hash()
-	exist := app.account2UnconfirmedTx.Lookup(fromAddr, hashID, header.Time.Unix())
+	exist, _ := app.account2UnconfirmedTx.Lookup(fromAddr, hashID, header.Time.Unix())
 	require.Equal(t, exist, NoTxExist)
-	app.account2UnconfirmedTx.Add(fromAddr, hashID, header.Time.Unix())
+	app.account2UnconfirmedTx.Add(fromAddr, hashID, header.Time.Unix(), abci.ResponseCheckTx{})
 
 	//deliver tx
 	result := app.Deliver(tx)
@@ -58,9 +58,9 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 		Msgs(msg).GasAndFee(600000, 1200000000).AccNumSeqKey(0, 0, key2).Build()
 	txBytes2, _ := auth.DefaultTxEncoder(app.cdc)(tx2)
 	hashIDAnother := tmtypes.Tx(txBytes2).Hash()
-	exist = app.account2UnconfirmedTx.Lookup(fromAddr2, hashIDAnother, header.Time.Unix())
+	exist, _ = app.account2UnconfirmedTx.Lookup(fromAddr2, hashIDAnother, header.Time.Unix())
 	require.Equal(t, exist, NoTxExist)
-	app.account2UnconfirmedTx.Add(fromAddr, hashIDAnother, header.Time.Unix())
+	app.account2UnconfirmedTx.Add(fromAddr, hashIDAnother, header.Time.Unix(), abci.ResponseCheckTx{})
 
 	//build another same address tx
 	msg = bankx.NewMsgSend(fromAddr, toAddr, coins, 0)
@@ -71,7 +71,7 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 	txBytes, _ = auth.DefaultTxEncoder(app.cdc)(tx)
 	hashID2 := tmtypes.Tx(txBytes).Hash()
 	require.NotEqual(t, hashID, hashID2)
-	exist = app.account2UnconfirmedTx.Lookup(fromAddr, hashID2, header.Time.Unix())
+	exist, _ = app.account2UnconfirmedTx.Lookup(fromAddr, hashID2, header.Time.Unix())
 	require.Equal(t, exist, OtherTxExist)
 
 	//end block
@@ -90,7 +90,7 @@ func TestAccount2UnconfirmedTx(t *testing.T) {
 	//simple check tx
 	txBytes, _ = auth.DefaultTxEncoder(app.cdc)(tx)
 	hashID3 := tmtypes.Tx(txBytes).Hash()
-	exist = app.account2UnconfirmedTx.Lookup(fromAddr, hashID3, header.Time.Unix())
+	exist, _ = app.account2UnconfirmedTx.Lookup(fromAddr, hashID3, header.Time.Unix())
 	require.Equal(t, exist, NoTxExist)
-	app.account2UnconfirmedTx.Add(fromAddr, hashID3, header.Time.Unix())
+	app.account2UnconfirmedTx.Add(fromAddr, hashID3, header.Time.Unix(), abci.ResponseCheckTx{})
 }

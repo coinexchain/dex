@@ -644,24 +644,35 @@ func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 		}
 	}
 
+	sameTxExist := false
+	var cachedResp *abci.ResponseCheckTx
 	otherTxExist := false
 	hashid := tmtypes.Tx(req.Tx).Hash()
 	signers := stdTx.GetSigners()
 	for _, signer := range signers {
-		res := app.account2UnconfirmedTx.Lookup(signer, hashid, app.currBlockTime)
+		res, resp := app.account2UnconfirmedTx.Lookup(signer, hashid, app.currBlockTime)
+		if res == SameTxExist {
+			sameTxExist = true
+			cachedResp = resp
+			break
+		}
 		if res == OtherTxExist {
 			otherTxExist = true
 			break
 		}
 	}
 
+	if sameTxExist {
+		return *cachedResp
+	}
 	if otherTxExist {
 		return dex.ResponseFrom(errTooManyUnconfirmedTx)
 	}
+
 	ret := app.BaseApp.CheckTx(req)
 	if ret.IsOK() {
 		for _, signer := range signers {
-			app.account2UnconfirmedTx.Add(signer, hashid, app.currBlockTime)
+			app.account2UnconfirmedTx.Add(signer, hashid, app.currBlockTime, ret)
 		}
 	}
 	return ret
