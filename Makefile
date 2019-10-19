@@ -70,7 +70,7 @@ ldflags := $(strip $(ldflags))
 
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
-ifeq ($(DEBUG), 1)
+ifeq ($(DEBUG), true)
   BUILD_FLAGS += -gcflags "all=-N -l"
 endif
 
