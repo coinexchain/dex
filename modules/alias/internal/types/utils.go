@@ -18,7 +18,7 @@ func IsOnlyForCoinEx(alias string) bool {
 }
 
 func IsValidAlias(alias string) bool {
-	if len(alias) < 2 || len(alias) > 100 {
+	if len(alias) < 2 || len(alias) > 45 {
 		return false
 	}
 	for _, c := range alias {
