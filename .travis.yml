@@ -102,7 +102,7 @@ matrix:
 
       before_install:
         - curl https://glide.sh/get | sh
-        - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
+        - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.20.0
         # todo cache apt package
         #        - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install g++-6 gcc-6
         - export GO111MODULE=on
