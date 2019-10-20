@@ -106,10 +106,10 @@ func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr, supervisor sd
 }
 
 func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor sdk.AccAddress, amt *sdk.Coin,
-	unlockTime int64, reward int64, isReturned bool) sdk.Error {
+	unlockTime int64, reward int64, isReturned bool) (*authx.NotificationUnlock, sdk.Error) {
 	ax, ok := k.axk.GetAccountX(ctx, toAddr)
 	if !ok {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", toAddr))
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", toAddr))
 	}
 
 	found := false
@@ -129,29 +129,32 @@ func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor 
 	}
 
 	if !found {
-		return types.ErrorLockedCoinNotFound()
+		return nil, types.ErrorLockedCoinNotFound()
 	}
 
 	if err := k.tk.UpdateTokenSendLock(ctx, amt.Denom, amt.Amount, false); err != nil {
-		return err
+		return nil, err
 	}
 
+	receiver := toAddr
+	if isReturned {
+		receiver = fromAddr
+	}
+	var transferAmt sdk.Coins
+
 	if supervisor.Empty() {
-		if err := k.AddCoins(ctx, toAddr, sdk.NewCoins(*amt)); err != nil {
-			return err
+		transferAmt = sdk.NewCoins(*amt)
+		if err := k.AddCoins(ctx, receiver, transferAmt); err != nil {
+			return nil, err
 		}
 	} else {
-		receiver := toAddr
-		if isReturned {
-			receiver = fromAddr
-		}
-		transferAmt := sdk.NewCoin(amt.Denom, amt.Amount.Sub(sdk.NewInt(reward)))
-		if err := k.AddCoins(ctx, receiver, sdk.NewCoins(transferAmt)); err != nil {
-			return err
+		transferAmt = sdk.NewCoins(sdk.NewCoin(amt.Denom, amt.Amount.Sub(sdk.NewInt(reward))))
+		if err := k.AddCoins(ctx, receiver, transferAmt); err != nil {
+			return nil, err
 		}
 		rewardAmt := sdk.NewCoin(amt.Denom, sdk.NewInt(reward))
 		if err := k.AddCoins(ctx, supervisor, sdk.NewCoins(rewardAmt)); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -161,7 +164,19 @@ func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor 
 	if !hasOther {
 		k.axk.RemoveFromUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 	}
-	return nil
+
+	acc := k.GetAccount(ctx, receiver)
+	accx, _ := k.GetAccountX(ctx, receiver)
+	unlockInfo := &authx.NotificationUnlock{
+		Address:     receiver,
+		Unlocked:    transferAmt,
+		LockedCoins: accx.LockedCoins,
+		FrozenCoins: accx.FrozenCoins,
+		Coins:       acc.GetCoins(),
+		Height:      ctx.BlockHeight(),
+	}
+
+	return unlockInfo, nil
 }
 
 func (k Keeper) FreezeCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {

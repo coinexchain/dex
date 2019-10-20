@@ -6,7 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 	"github.com/coinexchain/dex/msgqueue"
 	dex "github.com/coinexchain/dex/types"
@@ -213,20 +212,12 @@ func handleMsgSupervisedSend(ctx sdk.Context, k Keeper, msg types.MsgSupervisedS
 
 	} else {
 		isReturned := types.Return == msg.Operation
-		if err := k.EarlierUnlockCoin(ctx, msg.FromAddress, msg.ToAddress, msg.Supervisor, &msg.Amount, msg.UnlockTime, msg.Reward, isReturned); err != nil {
+		unlockInfo, err := k.EarlierUnlockCoin(ctx, msg.FromAddress, msg.ToAddress, msg.Supervisor, &msg.Amount, msg.UnlockTime, msg.Reward, isReturned)
+		if err != nil {
 			return err.Result()
 		}
 
-		acc := k.GetAccount(ctx, msg.ToAddress)
-		accx, _ := k.GetAccountX(ctx, msg.ToAddress)
-		fillMsgQueue(ctx, k, "notify_unlock", authx.NotificationUnlock{
-			Address:     msg.ToAddress,
-			Unlocked:    sdk.NewCoins(msg.Amount),
-			LockedCoins: accx.LockedCoins,
-			FrozenCoins: accx.FrozenCoins,
-			Coins:       acc.GetCoins(),
-			Height:      ctx.BlockHeight(),
-		})
+		fillMsgQueue(ctx, k, "notify_unlock", unlockInfo)
 	}
 
 	return sdk.Result{
