@@ -41,7 +41,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 
 ### API Breaking Changes
-
+* [\#2](https://github.com/coinexchain/dex/issues/2) Limit max address length to 45, so UI display will be easier.
 
 ### Client Breaking Changes
 
