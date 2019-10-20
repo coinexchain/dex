@@ -35,26 +35,32 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## [v0.0.19]
+
+## [Unreleased]
 
 ### State Machine Breaking
 
+### API Breaking Changes
 
+### Client Breaking Changes
+
+### Features
+
+### Improvements
+
+### Bug Fixes
+
+## [v0.0.19]
+
+### State Machine Breaking
 ### API Breaking Changes
 * [\#1](https://github.com/coinexchain/dex/issues/1) Add a new type of transaction to support OTC.
 * [\#2](https://github.com/coinexchain/dex/issues/2) Limit max address length to 45, so UI display will be easier.
 
 ### Client Breaking Changes
-
-
 ### Features
-
-
 ### Improvements
-
-
 ### Bug Fixes
-
 
 ## [v0.0.1] - example change log entries
 
