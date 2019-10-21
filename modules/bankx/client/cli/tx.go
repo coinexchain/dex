@@ -151,7 +151,7 @@ Example:
 	}
 
 	cmd.Flags().Int64(FlagUnlockTime, 0, "The unix timestamp when tokens can transfer again")
-	cmd.Flags().String(FlagSender, "", "The sender's address (required when return or unlock-by-supervisor)")
+	cmd.Flags().String(FlagSender, "", "The supervised amount sender's address (required when return or unlock-by-supervisor)")
 	cmd.Flags().String(FlagSupervisor, "", "The supervisor's address (required when create or unlock-by-sender if there is a supervisor)")
 	cmd.Flags().Int64(FlagReward, 0, "The reward for supervisor")
 	cmd.Flags().Int(FlagOperation, 0, "Operation type (create: 0; return: 1; unlock-by-sender: 2; unlock-by-supervisor: 3)")

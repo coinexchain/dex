@@ -140,8 +140,8 @@ func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor 
 	if isReturned {
 		receiver = fromAddr
 	}
-	var transferAmt sdk.Coins
 
+	var transferAmt sdk.Coins
 	if supervisor.Empty() {
 		transferAmt = sdk.NewCoins(*amt)
 		if err := k.AddCoins(ctx, receiver, transferAmt); err != nil {
@@ -152,9 +152,13 @@ func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor 
 		if err := k.AddCoins(ctx, receiver, transferAmt); err != nil {
 			return nil, err
 		}
-		rewardAmt := sdk.NewCoin(amt.Denom, sdk.NewInt(reward))
-		if err := k.AddCoins(ctx, supervisor, sdk.NewCoins(rewardAmt)); err != nil {
-			return nil, err
+		if reward > 0 {
+			rewardAmt := sdk.NewCoin(amt.Denom, sdk.NewInt(reward))
+			if err := k.AddCoins(ctx, supervisor, sdk.NewCoins(rewardAmt)); err != nil {
+				// try to revert
+				_ = k.SubtractCoins(ctx, receiver, transferAmt)
+				return nil, err
+			}
 		}
 	}
 

@@ -467,7 +467,7 @@ paths:
           description: Server internal error
   /bank/accounts/{address}/supervised_transfers:
     post:
-      summary: Send coins from one account to another
+      summary: Operate a supervised transfer
       operationId: transferSupervisedCoins
       tags:
         - Bank
@@ -503,9 +503,9 @@ paths:
               unlock_time:
                 type: string
                 example: "675132000"
-              from_address:
+              sender:
                 type: string
-                description: "The sender's address (required when return or unlock-by-supervisor)"
+                description: "The supervised amount sender's address (required when return or unlock-by-supervisor)"
               supervisor:
                 type: string
                 description: "The supervisor's address (required when create or unlock-by-sender if there is a supervisor)"

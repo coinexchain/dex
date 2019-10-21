@@ -28,7 +28,7 @@ type (
 		BaseReq     rest.BaseReq   `json:"base_req"`
 		Amount      sdk.Coin       `json:"amount"`
 		UnlockTime  int64          `json:"unlock_time"`
-		FromAddress sdk.AccAddress `json:"from_address,omitempty"`
+		FromAddress sdk.AccAddress `json:"sender,omitempty"`
 		Supervisor  sdk.AccAddress `json:"supervisor,omitempty"`
 		Reward      int64          `json:"reward,omitempty"`
 		Operation   byte           `json:"operation"`

@@ -178,7 +178,7 @@ func handleMsgSupervisedSend(ctx sdk.Context, k Keeper, msg types.MsgSupervisedS
 	if k.BlacklistedAddr(msg.ToAddress) {
 		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", msg.ToAddress)).Result()
 	}
-	if !msg.Supervisor.Empty() && msg.Reward > 0 {
+	if !msg.Supervisor.Empty() {
 		if k.GetAccount(ctx, msg.Supervisor) == nil {
 			return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", msg.Supervisor)).Result()
 		}
