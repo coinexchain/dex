@@ -3,6 +3,7 @@ package msgqueue
 import (
 	"io"
 	"os"
+	"syscall"
 )
 
 var _ MsgWriter = fileMsgWriter{}
@@ -13,6 +14,23 @@ type fileMsgWriter struct {
 
 func NewStdOutMsgWriter() MsgWriter {
 	return fileMsgWriter{os.Stdout}
+}
+
+func NewPipeMsgWriter(pipe string) (MsgWriter, error) {
+	file, err := os.OpenFile(pipe, os.O_RDWR, 0666)
+	if os.IsNotExist(err) {
+		err := syscall.Mkfifo(pipe, 0666)
+		if err != nil {
+			return fileMsgWriter{}, err
+		}
+		file, err = os.OpenFile(pipe, os.O_RDWR, 0666)
+		if err != nil {
+			return fileMsgWriter{}, err
+		}
+	} else if err != nil {
+		return fileMsgWriter{}, err
+	}
+	return fileMsgWriter{file}, nil
 }
 
 func NewFileMsgWriter(filePath string) (MsgWriter, error) {
