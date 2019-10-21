@@ -465,6 +465,67 @@ paths:
           description: Invalid request
         500:
           description: Server internal error
+  /bank/accounts/{address}/supervised_transfers:
+    post:
+      summary: Send coins from one account to another
+      operationId: transferSupervisedCoins
+      tags:
+        - Bank
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: address
+          description: Account address in bech32 format
+          required: true
+          type: string
+          x-example: coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
+        - in: body
+          name: account
+          description: The sender and tx information
+          required: true
+          schema:
+            type: object
+            required:
+              - base_req
+              - amount
+              - unlock_time
+              - operation
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              amount:
+                type: array
+                items:
+                  $ref: "#/definitions/Coin"
+              unlock_time:
+                type: string
+                example: "675132000"
+              from_address:
+                type: string
+                description: "The sender's address (required when return or unlock-by-supervisor)"
+              supervisor:
+                type: string
+                description: "The supervisor's address (required when create or unlock-by-sender if there is a supervisor)"
+              reward:
+                type: string
+                example: "1000000000"
+              operation:
+                type: integer
+                example: 1
+                description: "Operation type (create: 0; return: 1; unlock-by-sender: 2; unlock-by-supervisor: 3)"
+            additionalProperties: false
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
   /bank/accounts/memo:
     post:
       summary: Mark if memo is required to receive coins

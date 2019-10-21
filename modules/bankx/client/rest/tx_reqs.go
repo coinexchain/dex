@@ -23,6 +23,16 @@ type (
 		BaseReq  rest.BaseReq `json:"base_req"`
 		Required bool         `json:"memo_required"`
 	}
+
+	sendSupervisedReq struct {
+		BaseReq     rest.BaseReq   `json:"base_req"`
+		Amount      sdk.Coin       `json:"amount"`
+		UnlockTime  int64          `json:"unlock_time"`
+		FromAddress sdk.AccAddress `json:"from_address,omitempty"`
+		Supervisor  sdk.AccAddress `json:"supervisor,omitempty"`
+		Reward      int64          `json:"reward,omitempty"`
+		Operation   byte           `json:"operation"`
+	}
 )
 
 func (req *sendReq) New() restutil.RestReq {
@@ -44,6 +54,23 @@ func (req *memoReq) GetBaseReq() *rest.BaseReq {
 }
 func (req *memoReq) GetMsg(r *http.Request, addr sdk.AccAddress) (sdk.Msg, error) {
 	return types.NewMsgSetTransferMemoRequired(addr, req.Required), nil
+}
+
+func (req *sendSupervisedReq) New() restutil.RestReq {
+	return new(sendSupervisedReq)
+}
+func (req *sendSupervisedReq) GetBaseReq() *rest.BaseReq {
+	return &req.BaseReq
+}
+func (req *sendSupervisedReq) GetMsg(r *http.Request, addr sdk.AccAddress) (sdk.Msg, error) {
+	toAddr := getAddr(r)
+	if req.Operation == types.Return || req.Operation == types.EarlierUnlockBySupervisor {
+		req.Supervisor = addr
+	} else {
+		req.FromAddress = addr
+	}
+	return types.NewMsgSupervisedSend(req.FromAddress, req.Supervisor, toAddr, req.Amount, req.UnlockTime,
+		req.Reward, req.Operation), nil
 }
 
 func getAddr(r *http.Request) sdk.AccAddress {
