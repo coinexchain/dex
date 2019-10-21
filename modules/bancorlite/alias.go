@@ -14,6 +14,7 @@ var (
 	NewBaseKeeper       = keepers.NewKeeper
 	NewBancorInfoKeeper = keepers.NewBancorInfoKeeper
 	DefaultParams       = types.DefaultParams
+	ModuleCdc           = types.ModuleCdc
 )
 
 type (
