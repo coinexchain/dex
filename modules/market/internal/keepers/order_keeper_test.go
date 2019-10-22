@@ -99,7 +99,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 		Price:       decPrice,
 		Quantity:    qua,
 		Side:        side,
-		TimeInForce: tif,
+		TimeInForce: int64(tif),
 		Height:      h,
 		Freeze:      freeze,
 		LeftStock:   qua,

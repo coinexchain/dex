@@ -105,8 +105,8 @@ type MsgCreateOrder struct {
 	Price          int64          `json:"price"`
 	Quantity       int64          `json:"quantity"`
 	Side           byte           `json:"side"`
-	TimeInForce    int            `json:"time_in_force"`
-	ExistBlocks    int            `json:"exist_blocks"`
+	TimeInForce    int64          `json:"time_in_force"`
+	ExistBlocks    int64          `json:"exist_blocks"`
 }
 
 func (msg *MsgCreateOrder) SetAccAddress(address sdk.AccAddress) {

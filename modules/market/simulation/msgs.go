@@ -115,10 +115,10 @@ func SimulateMsgCancelTradingPair(k keepers.Keeper) simulation.Operation {
 		if !ok {
 			return simulation.NewOperationMsg(msg, ok, ""), nil, nil
 		}
-		if time.Now().Unix() < msg.EffectiveTime {
+		if time.Now().UnixNano() < msg.EffectiveTime {
 			return simulation.NewOperationMsg(msg, ok, ""), []simulation.FutureOperation{
 				{
-					BlockTime: time.Unix(msg.EffectiveTime, 0),
+					BlockTime: time.Unix(0, msg.EffectiveTime),
 					Op:        SimulateVerifyCancelTradingPair(k, msg),
 				},
 			}, nil
@@ -140,7 +140,7 @@ func createMsgCancelTradingPair(r *rand.Rand, ctx sdk.Context, k keepers.Keeper,
 	msg := types.MsgCancelTradingPair{
 		Sender:        fromAddr,
 		TradingPair:   tradingPair.GetSymbol(),
-		EffectiveTime: timeStamp.Unix(),
+		EffectiveTime: timeStamp.UnixNano(),
 	}
 	if msg.ValidateBasic() != nil {
 		return types.MsgCancelTradingPair{}, fmt.Errorf("msg expected to pass validation check")
@@ -298,7 +298,7 @@ func createMsgCreateOrder(r *rand.Rand, ctx sdk.Context, k keepers.Keeper, ak au
 		Price:          price,
 		Quantity:       quantity,
 		Side:           byte(side),
-		TimeInForce:    timeInforce,
+		TimeInForce:    int64(timeInforce),
 	}
 	if msg.ValidateBasic() != nil {
 		return types.MsgCreateOrder{}, fmt.Errorf("msg expected to pass validation check")

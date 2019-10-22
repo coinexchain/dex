@@ -50,11 +50,11 @@ func ErrFailedMarshal() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeMarshalFailed, "Marshal failed")
 }
 
-func ErrInvalidExistBlocks(eb int) sdk.Error {
+func ErrInvalidExistBlocks(eb int64) sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", eb))
 }
 
-func ErrInvalidTimeInforce(tif int) sdk.Error {
+func ErrInvalidTimeInforce(tif int64) sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidTimeInforce, fmt.Sprintf("Invalid timeInforce : %d; The valid value : 3, 4", tif))
 }
 

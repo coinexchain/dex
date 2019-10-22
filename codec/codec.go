@@ -6496,13 +6496,13 @@ func DecodeMsgCreateOrder(bz []byte) (MsgCreateOrder, int, error) {
 	}
 	bz = bz[n:]
 	total += n
-	v.TimeInForce = int(codonDecodeInt(bz, &n, &err))
+	v.TimeInForce = int64(codonDecodeInt(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
 	bz = bz[n:]
 	total += n
-	v.ExistBlocks = int(codonDecodeInt(bz, &n, &err))
+	v.ExistBlocks = int64(codonDecodeInt(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
@@ -6524,8 +6524,8 @@ func RandMsgCreateOrder(r RandSrc) MsgCreateOrder {
 	v.Price = r.GetInt64()
 	v.Quantity = r.GetInt64()
 	v.Side = r.GetUint8()
-	v.TimeInForce = r.GetInt()
-	v.ExistBlocks = r.GetInt()
+	v.TimeInForce = r.GetInt64()
+	v.ExistBlocks = r.GetInt64()
 	return v
 } //End of RandMsgCreateOrder
 
@@ -6811,7 +6811,7 @@ func DecodeOrder(bz []byte) (Order, int, error) {
 	}
 	bz = bz[n:]
 	total += n
-	v.TimeInForce = int(codonDecodeInt(bz, &n, &err))
+	v.TimeInForce = int64(codonDecodeInt(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
@@ -6829,7 +6829,7 @@ func DecodeOrder(bz []byte) (Order, int, error) {
 	}
 	bz = bz[n:]
 	total += n
-	v.ExistBlocks = int(codonDecodeInt(bz, &n, &err))
+	v.ExistBlocks = int64(codonDecodeInt(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
@@ -6875,10 +6875,10 @@ func RandOrder(r RandSrc) Order {
 	v.Price = RandDec(r)
 	v.Quantity = r.GetInt64()
 	v.Side = r.GetUint8()
-	v.TimeInForce = r.GetInt()
+	v.TimeInForce = r.GetInt64()
 	v.Height = r.GetInt64()
 	v.FrozenFee = r.GetInt64()
-	v.ExistBlocks = r.GetInt()
+	v.ExistBlocks = r.GetInt64()
 	v.LeftStock = r.GetInt64()
 	v.Freeze = r.GetInt64()
 	v.DealStock = r.GetInt64()

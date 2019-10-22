@@ -45,7 +45,7 @@ func newTO(sender string, seq uint64, price int64, qua int64, side byte, tif int
 		Price:       decPrice,
 		Quantity:    qua,
 		Side:        side,
-		TimeInForce: tif,
+		TimeInForce: int64(tif),
 		Height:      h,
 		Freeze:      freeze,
 		LeftStock:   qua,
@@ -393,7 +393,7 @@ func TestRemoveExpiredMarket(t *testing.T) {
 		orderKeeper.Add(input.ctx, &tmp)
 	}
 
-	input.ctx = input.ctx.WithBlockTime(time.Unix(3, 0))
+	input.ctx = input.ctx.WithBlockTime(time.Unix(0, 3))
 	removeExpiredMarket(input.ctx, input.mk, param)
 	delistSymbols = delistKeeper.GetDelistSymbolsBeforeTime(input.ctx, 8)
 	require.EqualValues(t, 5, len(delistSymbols))
@@ -402,7 +402,7 @@ func TestRemoveExpiredMarket(t *testing.T) {
 	orders := orderKeeper.GetOlderThan(input.ctx, 100)
 	require.EqualValues(t, 3, len(orders))
 
-	input.ctx = input.ctx.WithBlockTime(time.Unix(6, 0))
+	input.ctx = input.ctx.WithBlockTime(time.Unix(0, 6))
 	removeExpiredMarket(input.ctx, input.mk, param)
 	delistSymbols = delistKeeper.GetDelistSymbolsBeforeTime(input.ctx, 8)
 	require.EqualValues(t, 2, len(delistSymbols))
@@ -411,7 +411,7 @@ func TestRemoveExpiredMarket(t *testing.T) {
 	orders = orderKeeper.GetOlderThan(input.ctx, 100)
 	require.EqualValues(t, 3, len(orders))
 
-	input.ctx = input.ctx.WithBlockTime(time.Unix(61, 0))
+	input.ctx = input.ctx.WithBlockTime(time.Unix(0, 61))
 	input.ctx = input.ctx.WithBlockHeight(30)
 	removeExpiredMarket(input.ctx, input.mk, param)
 	delistSymbols = delistKeeper.GetDelistSymbolsBeforeTime(input.ctx, 8)

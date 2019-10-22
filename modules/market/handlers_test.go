@@ -691,13 +691,14 @@ func TestCancelMarketFailed(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	createCetMarket(input, stock, 0)
 
+	now := time.Now()
 	msgCancelMarket := types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
 		TradingPair:   GetSymbol(stock, "cet"),
-		EffectiveTime: time.Now().Unix() + types.DefaultMarketMinExpiredTime,
+		EffectiveTime: now.UnixNano() + int64(types.DefaultMarketMinExpiredTime),
 	}
 
-	header := abci.Header{Time: time.Now(), Height: 10}
+	header := abci.Header{Time: now, Height: 10}
 	input.ctx = input.ctx.WithBlockHeader(header)
 	failedTime := msgCancelMarket
 	failedTime.EffectiveTime = 10
@@ -727,7 +728,7 @@ func TestCancelMarketSuccess(t *testing.T) {
 	msgCancelMarket := types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
 		TradingPair:   GetSymbol(stock, "cet"),
-		EffectiveTime: types.DefaultMarketMinExpiredTime + 10,
+		EffectiveTime: int64(types.DefaultMarketMinExpiredTime + 10),
 	}
 
 	ret := input.handler(input.ctx, msgCancelMarket)
@@ -736,7 +737,7 @@ func TestCancelMarketSuccess(t *testing.T) {
 	msgCancelMarket = types.MsgCancelTradingPair{
 		Sender:        haveCetAddress,
 		TradingPair:   GetSymbol(stock, "cet"),
-		EffectiveTime: types.DefaultMarketMinExpiredTime + 10,
+		EffectiveTime: int64(types.DefaultMarketMinExpiredTime + 10),
 	}
 
 	ret = input.handler(input.ctx, msgCancelMarket)
@@ -744,7 +745,7 @@ func TestCancelMarketSuccess(t *testing.T) {
 	require.EqualValues(t, types.CodeDelistRequestExist, ret.Code)
 
 	dlk := keepers.NewDelistKeeper(input.keys.marketKey)
-	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, types.DefaultMarketMinExpiredTime+10+1)[0]
+	delSymbol := dlk.GetDelistSymbolsBeforeTime(input.ctx, int64(types.DefaultMarketMinExpiredTime+10+1))[0]
 	require.EqualValues(t, delSymbol, GetSymbol(stock, dex.CET))
 }
 
@@ -1284,19 +1285,19 @@ func TestCheckMsgCancelTradingPair(t *testing.T) {
 	msg := MsgCancelTradingPair{
 		Sender:        haveCetAddress,
 		TradingPair:   GetSymbol(stock, dex.CET),
-		EffectiveTime: timeNow.Unix(),
+		EffectiveTime: timeNow.UnixNano(),
 	}
 
 	// Invalid cancel time
 	err := checkMsgCancelTradingPair(input.mk, msg, input.ctx)
 	require.EqualValues(t, types.CodeInvalidCancelTime, err.Code())
 
-	msg.EffectiveTime = timeNow.Unix() + param.MarketMinExpiredTime - 1
+	msg.EffectiveTime = timeNow.UnixNano() + param.MarketMinExpiredTime - 1
 	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
 	require.EqualValues(t, types.CodeInvalidCancelTime, err.Code())
 
 	// Invalid market
-	msg.EffectiveTime = timeNow.Unix() + param.MarketMinExpiredTime
+	msg.EffectiveTime = timeNow.UnixNano() + param.MarketMinExpiredTime
 	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
 	require.EqualValues(t, types.CodeInvalidMarket, err.Code())
 

@@ -15,10 +15,10 @@ type Order struct {
 	Price       sdk.Dec        `json:"price"`
 	Quantity    int64          `json:"quantity"`
 	Side        byte           `json:"side"`
-	TimeInForce int            `json:"time_in_force"`
+	TimeInForce int64          `json:"time_in_force"`
 	Height      int64          `json:"height"`
 	FrozenFee   int64          `json:"frozen_fee"`
-	ExistBlocks int            `json:"exist_blocks"`
+	ExistBlocks int64          `json:"exist_blocks"`
 
 	// These fields will change when order was filled/canceled.
 	LeftStock int64 `json:"left_stock"`

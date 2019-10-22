@@ -194,12 +194,12 @@ func filterCandidates(ctx sdk.Context, asKeeper types.ExpectedAssetStatusKeeper,
 	return ordersOut
 }
 
-func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keeper keepers.Keeper, dataHash []byte, currHeight int64) (map[string]*types.Order, sdk.Dec) {
+func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int64, symbol string, keeper keepers.Keeper, dataHash []byte, currHeight int64) (map[string]*types.Order, sdk.Dec) {
 	orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 	asKeeper := keeper.GetAssetKeeper()
 	bxKeeper := keeper.GetBankxKeeper()
-	lowPrice := midPrice.Mul(sdk.NewDec(int64(100 - ratio))).Quo(sdk.NewDec(100))
-	highPrice := midPrice.Mul(sdk.NewDec(int64(100 + ratio))).Quo(sdk.NewDec(100))
+	lowPrice := midPrice.Mul(sdk.NewDec(100 - ratio)).Quo(sdk.NewDec(100))
+	highPrice := midPrice.Mul(sdk.NewDec(100 + ratio)).Quo(sdk.NewDec(100))
 
 	infoForDeal := &InfoForDeal{
 		bxKeeper:      bxKeeper,
@@ -249,15 +249,15 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int, symbol string, keepe
 func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList []types.MarketInfo, marketParams types.Params) {
 	lifeTime := marketParams.GTEOrderLifetime
 	currHeight := ctx.BlockHeight()
-	if currHeight-int64(lifeTime) <= 0 {
+	if currHeight-lifeTime <= 0 {
 		return
 	}
 	for _, mi := range marketInfoList {
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), mi.GetSymbol(), types.ModuleCdc)
-		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-int64(lifeTime))
+		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-lifeTime)
 
 		for _, order := range oldOrders {
-			if order.Height+int64(order.ExistBlocks) > currHeight {
+			if order.Height+order.ExistBlocks > currHeight {
 				continue
 			}
 			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
@@ -283,7 +283,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 
 func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams types.Params) {
 	currHeight := ctx.BlockHeight()
-	currTime := ctx.BlockHeader().Time.Unix()
+	currTime := ctx.BlockHeader().Time.UnixNano()
 
 	// process the delist requests
 	delistKeeper := keepers.NewDelistKeeper(keeper.GetMarketKey())

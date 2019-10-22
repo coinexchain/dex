@@ -104,7 +104,7 @@ Example
 	}
 
 	cmd.Flags().String(FlagSymbol, "btc/cet", "The market trading-pair")
-	cmd.Flags().Int64(FlagTime, 100, "The trading pair on expired unix timestamp. (timestamp - time.Now() > 7days)")
+	cmd.Flags().Int64(FlagTime, 100, "The trading pair expired after the unix timestamp is specified with nanosecond. (timestamp - time.Now() > 7days)")
 	cmd.MarkFlagRequired(FlagSymbol)
 	cmd.MarkFlagRequired(FlagTime)
 

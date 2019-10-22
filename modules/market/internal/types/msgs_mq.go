@@ -31,7 +31,7 @@ type CreateOrderInfo struct {
 	Price       sdk.Dec `json:"price"`
 	Quantity    int64   `json:"quantity"`
 	Side        byte    `json:"side"`
-	TimeInForce int     `json:"time_in_force"`
+	TimeInForce int64   `json:"time_in_force"`
 	FeatureFee  int64   `json:"feature_fee"`
 	Height      int64   `json:"height"`
 	FrozenFee   int64   `json:"frozen_fee"`

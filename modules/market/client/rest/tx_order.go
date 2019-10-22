@@ -43,7 +43,7 @@ func (req *createOrderReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.M
 		Quantity:       req.Quantity,
 		Side:           byte(req.Side),
 		TimeInForce:    types.IOC,
-		ExistBlocks:    req.ExistBlocks,
+		ExistBlocks:    int64(req.ExistBlocks),
 	}
 	if r.URL.Path == "/market/gte-orders" {
 		msg.TimeInForce = types.GTE

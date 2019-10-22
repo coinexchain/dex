@@ -159,8 +159,8 @@ func calFeatureFeeForExistBlocks(msg types.MsgCreateOrder, marketParam types.Par
 	if msg.ExistBlocks < marketParam.GTEOrderLifetime {
 		return 0
 	}
-	fee := sdk.NewDec(int64(msg.ExistBlocks - marketParam.GTEOrderLifetime)).
-		QuoInt64(int64(marketParam.GTEOrderLifetime)).
+	fee := sdk.NewDec(msg.ExistBlocks - marketParam.GTEOrderLifetime).
+		QuoInt64(marketParam.GTEOrderLifetime).
 		MulInt64(marketParam.GTEOrderFeatureFeeByBlocks)
 	if fee.GT(sdk.NewDec(types.MaxOrderAmount)) {
 		return types.MaxOrderAmount
@@ -440,7 +440,7 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 	}
 
 	marketParams := keeper.GetParams(ctx)
-	currTime := ctx.BlockHeader().Time.Unix()
+	currTime := ctx.BlockHeader().Time.UnixNano()
 	if msg.EffectiveTime < currTime+marketParams.MarketMinExpiredTime {
 		return types.ErrInvalidCancelTime()
 	}

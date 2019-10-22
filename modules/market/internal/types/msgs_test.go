@@ -2,6 +2,7 @@ package types
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -103,4 +104,11 @@ func TestMsgCreateTradingPair(t *testing.T) {
 	msg.PricePrecision = MaxTokenPricePrecision + 1
 	err = msg.ValidateBasic()
 	require.EqualValues(t, CodeInvalidPricePrecision, err.Code())
+}
+
+func TestMsgCancelOrder_GetSignBytes(t *testing.T) {
+	tmp := time.Now()
+	msg := MsgCancelTradingPair{EffectiveTime: tmp.UnixNano()}
+	t2 := time.Unix(0, tmp.UnixNano())
+	require.Equal(t, t2.UnixNano(), msg.EffectiveTime)
 }
