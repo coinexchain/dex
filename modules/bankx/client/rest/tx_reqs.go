@@ -25,13 +25,13 @@ type (
 	}
 
 	sendSupervisedReq struct {
-		BaseReq     rest.BaseReq   `json:"base_req"`
-		Amount      sdk.Coin       `json:"amount"`
-		UnlockTime  int64          `json:"unlock_time"`
-		FromAddress sdk.AccAddress `json:"sender,omitempty"`
-		Supervisor  sdk.AccAddress `json:"supervisor,omitempty"`
-		Reward      int64          `json:"reward,omitempty"`
-		Operation   byte           `json:"operation"`
+		BaseReq    rest.BaseReq `json:"base_req"`
+		Amount     sdk.Coin     `json:"amount"`
+		UnlockTime int64        `json:"unlock_time"`
+		Sender     string       `json:"sender,omitempty"`
+		Supervisor string       `json:"supervisor,omitempty"`
+		Reward     int64        `json:"reward,omitempty"`
+		Operation  byte         `json:"operation"`
 	}
 )
 
@@ -64,12 +64,28 @@ func (req *sendSupervisedReq) GetBaseReq() *rest.BaseReq {
 }
 func (req *sendSupervisedReq) GetMsg(r *http.Request, addr sdk.AccAddress) (sdk.Msg, error) {
 	toAddr := getAddr(r)
-	if req.Operation == types.Return || req.Operation == types.EarlierUnlockBySupervisor {
-		req.Supervisor = addr
-	} else {
-		req.FromAddress = addr
+
+	var fromAddr sdk.AccAddress
+	var supervisorAddr sdk.AccAddress
+	var err error
+
+	if req.Sender != "" {
+		if fromAddr, err = sdk.AccAddressFromBech32(req.Sender); err != nil {
+			return nil, err
+		}
 	}
-	return types.NewMsgSupervisedSend(req.FromAddress, req.Supervisor, toAddr, req.Amount, req.UnlockTime,
+	if req.Supervisor != "" {
+		if supervisorAddr, err = sdk.AccAddressFromBech32(req.Supervisor); err != nil {
+			return nil, err
+		}
+	}
+
+	if req.Operation == types.Return || req.Operation == types.EarlierUnlockBySupervisor {
+		supervisorAddr = addr
+	} else {
+		fromAddr = addr
+	}
+	return types.NewMsgSupervisedSend(fromAddr, supervisorAddr, toAddr, req.Amount, req.UnlockTime,
 		req.Reward, req.Operation), nil
 }
 

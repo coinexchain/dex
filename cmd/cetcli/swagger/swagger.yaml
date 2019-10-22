@@ -483,7 +483,7 @@ paths:
           type: string
           x-example: coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
         - in: body
-          name: account
+          name: post_tx_body
           description: The sender and tx information
           required: true
           schema:
@@ -497,9 +497,7 @@ paths:
               base_req:
                 $ref: "#/definitions/BaseReq"
               amount:
-                type: array
-                items:
-                  $ref: "#/definitions/Coin"
+                $ref: "#/definitions/Coin"
               unlock_time:
                 type: string
                 example: "675132000"

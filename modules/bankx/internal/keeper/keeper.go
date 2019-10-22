@@ -117,14 +117,13 @@ func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor 
 	coinIndex := -1
 	coin := authx.NewSupervisedLockedCoin(amt.Denom, amt.Amount, unlockTime, fromAddr, supervisor, reward)
 	for i, lockedCoin := range ax.LockedCoins {
-		if !found {
-			if coin.IsEqual(lockedCoin) {
+		if unlockTime == lockedCoin.UnlockTime {
+			if !found && coin.IsEqual(lockedCoin) {
 				found = true
 				coinIndex = i
+			} else {
+				hasOther = true
 			}
-		} else if unlockTime == lockedCoin.UnlockTime {
-			hasOther = true
-			break
 		}
 	}
 
