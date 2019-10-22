@@ -36,9 +36,9 @@ type Params struct {
 	CreateMarketFee             int64 `json:"create_market_fee"`
 	FixedTradeFee               int64 `json:"fixed_trade_fee"`
 	MarketMinExpiredTime        int64 `json:"market_min_expired_time"`
-	GTEOrderLifetime            int   `json:"gte_order_lifetime"`
+	GTEOrderLifetime            int   `json:"gte_order_lifetime"` // TODO
 	GTEOrderFeatureFeeByBlocks  int64 `json:"gte_order_feature_fee_by_blocks"`
-	MaxExecutedPriceChangeRatio int   `json:"max_executed_price_change_ratio"`
+	MaxExecutedPriceChangeRatio int   `json:"max_executed_price_change_ratio"` // TODO
 	MarketFeeRate               int64 `json:"market_fee_rate"`
 	MarketFeeMin                int64 `json:"market_fee_min"`
 	FeeForZeroDeal              int64 `json:"fee_for_zero_deal"`

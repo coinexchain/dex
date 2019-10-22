@@ -91,7 +91,7 @@ func TestDefaultGenesisState(t *testing.T) {
 	var bankxData bankx.GenesisState
 	bankx.ModuleCdc.MustUnmarshalJSON(state[bankx.ModuleName], &bankxData)
 	require.Equal(t, int64(1e8), bankxData.Params.ActivationFee)
-	require.Equal(t, int64(604800000000000), bankxData.Params.LockCoinsFreeTime)
+	require.Equal(t, int64(604800e9), bankxData.Params.LockCoinsFreeTime)
 	require.Equal(t, int64(100_0000), bankxData.Params.LockCoinsFeePerDay)
 	var stakingxData stakingx.GenesisState
 	bankx.ModuleCdc.MustUnmarshalJSON(state[stakingx.ModuleName], &stakingxData) // TODO
@@ -112,8 +112,8 @@ func TestDefaultGenesisState(t *testing.T) {
 	// asset
 	var assetData asset.GenesisState
 	asset.ModuleCdc.MustUnmarshalJSON(state[asset.ModuleName], &assetData)
-	checkCET(t, 10000, assetData.Params.IssueTokenFee)
-	checkCET(t, 100000, assetData.Params.IssueRareTokenFee)
+	require.Equal(t, int64(10000e8), assetData.Params.IssueTokenFee)
+	require.Equal(t, int64(100000e8), assetData.Params.IssueRareTokenFee)
 
 	// bancor
 	var bancorData bancorlite.GenesisState
@@ -132,10 +132,10 @@ func TestDefaultGenesisState(t *testing.T) {
 	market.ModuleCdc.MustUnmarshalJSON(state[market.ModuleName], &marketData)
 	require.Equal(t, int64(10000e8), marketData.Params.CreateMarketFee)
 	require.Equal(t, int64(100_0000), marketData.Params.FixedTradeFee)
-	require.Equal(t, int64(604800), marketData.Params.MarketMinExpiredTime)
-	require.Equal(t, 10000, marketData.Params.GTEOrderLifetime)
+	require.Equal(t, int64(604800), marketData.Params.MarketMinExpiredTime) // TODO
+	require.Equal(t, 10000, marketData.Params.GTEOrderLifetime)             // TODO
 	require.Equal(t, int64(600_0000), marketData.Params.GTEOrderFeatureFeeByBlocks)
-	require.Equal(t, 25, marketData.Params.MaxExecutedPriceChangeRatio)
+	require.Equal(t, 25, marketData.Params.MaxExecutedPriceChangeRatio) // TODO
 	require.Equal(t, int64(10), marketData.Params.MarketFeeRate)
 	require.Equal(t, int64(100_0000), marketData.Params.MarketFeeMin)
 	require.Equal(t, int64(100_0000), marketData.Params.FeeForZeroDeal)

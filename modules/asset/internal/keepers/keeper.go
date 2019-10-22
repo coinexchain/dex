@@ -332,8 +332,8 @@ func (keeper BaseKeeper) SendCoinsFromAccountToAssetModule(ctx sdk.Context, addr
 }
 
 // DeductIssueFee - deduct issue token fee
-func (keeper BaseKeeper) DeductIssueFee(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	return keeper.bkx.DeductFee(ctx, addr, amt)
+func (keeper BaseKeeper) DeductIssueFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
+	return keeper.bkx.DeductInt64CetFee(ctx, addr, amt)
 }
 
 // AddToken - used for unit test

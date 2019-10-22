@@ -96,7 +96,7 @@ func prepareAccounts(ctx sdk.Context, ak auth.AccountKeeper) {
 		sdk.NewCoin(dex.CET, sdk.NewInt(issueAmount))))
 	ak.SetAccount(ctx, eosacc)
 	onlyIssueToken := ak.NewAccountWithAddress(ctx, notHaveCetAddress)
-	_ = onlyIssueToken.SetCoins(dex.NewCetCoins(asset.IssueTokenFee))
+	_ = onlyIssueToken.SetCoins(dex.NewCetCoins(asset.DefaultIssueTokenFee))
 	ak.SetAccount(ctx, onlyIssueToken)
 
 	//set module account

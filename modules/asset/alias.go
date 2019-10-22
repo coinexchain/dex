@@ -20,8 +20,8 @@ const (
 	MaxTokenAmount       = types.MaxTokenAmount
 	RareSymbolLength     = types.RareSymbolLength
 
-	IssueTokenFee     = types.IssueTokenFee
-	IssueRareTokenFee = types.IssueRareTokenFee
+	DefaultIssueTokenFee     = types.DefaultIssueTokenFee
+	DefaultIssueRareTokenFee = types.DefaultIssueRareTokenFee
 )
 
 var (
