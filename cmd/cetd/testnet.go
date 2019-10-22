@@ -365,7 +365,7 @@ func modifyGenStateForTesting(cdc *codec.Codec, appGenState map[string]json.RawM
 	var stakingxData stakingx.GenesisState
 	cdc.MustUnmarshalJSON(appGenState[stakingx.ModuleName], &stakingxData)
 
-	stakingxData.Params.MinSelfDelegation = sdk.NewInt(testnetMinSelfDelegation)
+	stakingxData.Params.MinSelfDelegation = testnetMinSelfDelegation
 	stakingxData.Params.MinMandatoryCommissionRate = sdk.NewDecWithPrec(2, 2)
 
 	appGenState[stakingx.ModuleName] = cdc.MustMarshalJSON(stakingxData)

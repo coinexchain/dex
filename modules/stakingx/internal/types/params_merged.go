@@ -14,7 +14,7 @@ type MergedParams struct {
 	MaxValidators              uint16        `json:"max_validators" yaml:"max_validators"`
 	MaxEntries                 uint16        `json:"max_entries" yaml:"max_entries"`
 	BondDenom                  string        `json:"bond_denom" yaml:"bond_denom"`
-	MinSelfDelegation          sdk.Int       `json:"min_self_delegation" yaml:"min_self_delegation"`
+	MinSelfDelegation          int64         `json:"min_self_delegation" yaml:"min_self_delegation"`
 	MinMandatoryCommissionRate sdk.Dec       `json:"min_mandatory_commission_rate" yaml:"min_mandatory_commission_rate"`
 }
 
@@ -35,7 +35,7 @@ func (p MergedParams) String() string {
   Max Validators:                %d
   Max Entries:                   %d
   Bonded Coin Denom:             %s
-  Min Self Delegation:           %s
+  Min Self Delegation:           %d
   Min Mandatory Commission Rate: %s`,
 		p.UnbondingTime, p.MaxValidators, p.MaxEntries, p.BondDenom,
 		p.MinSelfDelegation, p.MinMandatoryCommissionRate)

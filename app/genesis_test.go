@@ -91,11 +91,11 @@ func TestDefaultGenesisState(t *testing.T) {
 	var bankxData bankx.GenesisState
 	bankx.ModuleCdc.MustUnmarshalJSON(state[bankx.ModuleName], &bankxData)
 	require.Equal(t, int64(1e8), bankxData.Params.ActivationFee)
-	require.Equal(t, int64(604800000000000), bankxData.Params.LockCoinsFreeTime)
-	require.Equal(t, int64(100_0000), bankxData.Params.LockCoinsFeePerDay)
+	require.Equal(t, int64(604800e9), bankxData.Params.LockCoinsFreeTime)
+	require.Equal(t, int64(1000000), bankxData.Params.LockCoinsFeePerDay)
 	var stakingxData stakingx.GenesisState
 	bankx.ModuleCdc.MustUnmarshalJSON(state[stakingx.ModuleName], &stakingxData) // TODO
-	require.Equal(t, int64(500_0000e8), stakingxData.Params.MinSelfDelegation.Int64())
+	require.Equal(t, int64(5000000e8), stakingxData.Params.MinSelfDelegation)
 	require.Equal(t, sdk.MustNewDecFromStr("0.1"), stakingxData.Params.MinMandatoryCommissionRate)
 
 	// alias
@@ -112,8 +112,8 @@ func TestDefaultGenesisState(t *testing.T) {
 	// asset
 	var assetData asset.GenesisState
 	asset.ModuleCdc.MustUnmarshalJSON(state[asset.ModuleName], &assetData)
-	checkCET(t, 10000, assetData.Params.IssueTokenFee)
-	checkCET(t, 100000, assetData.Params.IssueRareTokenFee)
+	require.Equal(t, int64(10000e8), assetData.Params.IssueTokenFee)
+	require.Equal(t, int64(100000e8), assetData.Params.IssueRareTokenFee)
 
 	// bancor
 	var bancorData bancorlite.GenesisState
@@ -137,8 +137,8 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, int64(600_0000), marketData.Params.GTEOrderFeatureFeeByBlocks)
 	require.EqualValues(t, 25, marketData.Params.MaxExecutedPriceChangeRatio)
 	require.Equal(t, int64(10), marketData.Params.MarketFeeRate)
-	require.Equal(t, int64(100_0000), marketData.Params.MarketFeeMin)
-	require.Equal(t, int64(100_0000), marketData.Params.FeeForZeroDeal)
+	require.Equal(t, int64(1000000), marketData.Params.MarketFeeMin)
+	require.Equal(t, int64(1000000), marketData.Params.FeeForZeroDeal)
 }
 
 func checkCET(t *testing.T, amt int64, coins sdk.Coins) {

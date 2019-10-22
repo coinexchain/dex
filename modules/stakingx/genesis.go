@@ -45,7 +45,7 @@ func ExportGenesis(ctx sdk.Context, keeper keepers.Keeper) GenesisState {
 // error for any failed validation criteria.
 func (data GenesisState) ValidateGenesis() error {
 	msd := data.Params.MinSelfDelegation
-	if !msd.IsPositive() {
+	if msd <= 0 {
 		return ErrInvalidMinSelfDelegation(msd)
 	}
 	return nil

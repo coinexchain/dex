@@ -7,7 +7,7 @@ import (
 
 // Default parameter values
 const (
-	DefaultMinSelfDelegation = 5000000e8
+	DefaultMinSelfDelegation = int64(5000000e8)
 )
 
 // Parameter keys
@@ -22,7 +22,7 @@ var _ params.ParamSet = (*Params)(nil)
 
 // Params defines the parameters for the stakingx module.
 type Params struct {
-	MinSelfDelegation          sdk.Int `json:"min_self_delegation"`
+	MinSelfDelegation          int64   `json:"min_self_delegation"`
 	MinMandatoryCommissionRate sdk.Dec `json:"min_mandatory_commission_rate"`
 }
 
@@ -34,7 +34,7 @@ func ParamKeyTable() params.KeyTable {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		MinSelfDelegation:          sdk.NewInt(DefaultMinSelfDelegation),
+		MinSelfDelegation:          DefaultMinSelfDelegation,
 		MinMandatoryCommissionRate: DefaultMinMandatoryCommissionRate,
 	}
 }

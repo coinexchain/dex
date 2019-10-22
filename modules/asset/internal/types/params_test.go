@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
 	dex "github.com/coinexchain/dex/types"
@@ -22,14 +21,13 @@ func TestParams_Equal(t *testing.T) {
 	require.True(t, p1.Equal(p2))
 
 	// mount should equal
-	cet := dex.NewCetCoins(10)
-	p1.IssueTokenFee = cet
+	p1.IssueTokenFee = 10
 	require.NotEqual(t, p1, p2)
 
 	// denom should equal
-	abc := NewTokenCoins("abc", sdk.NewInt(1e12))
-	p1.IssueTokenFee = abc
-	require.NotEqual(t, p1, p2)
+	//abc := NewTokenCoins("abc", sdk.NewInt(1e12))
+	//p1.IssueTokenFee = abc
+	//require.NotEqual(t, p1, p2)
 }
 
 func TestParams_ValidateGenesis(t *testing.T) {
@@ -46,8 +44,8 @@ func TestParams_ValidateGenesis(t *testing.T) {
 		{
 			"case-invalidate",
 			Params{
-				sdk.Coins{},
-				sdk.Coins{},
+				0,
+				0,
 			},
 			true,
 		},

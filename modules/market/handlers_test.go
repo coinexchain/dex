@@ -189,7 +189,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		sdk.NewCoin(dex.CET, sdk.NewInt(issueAmount))))
 	ak.SetAccount(ctx, usdtacc)
 	onlyIssueToken := ak.NewAccountWithAddress(ctx, notHaveCetAddress)
-	onlyIssueToken.SetCoins(dex.NewCetCoins(asset.IssueTokenFee))
+	onlyIssueToken.SetCoins(dex.NewCetCoins(asset.DefaultIssueTokenFee))
 	ak.SetAccount(ctx, onlyIssueToken)
 
 	// issue tokens
@@ -302,7 +302,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 
 func TestMarketInfoSetFailed(t *testing.T) {
 	input := prepareMockInput(t, false, true)
-	remainCoin := dex.NewCetCoin(OriginHaveCetAmount + issueAmount - asset.IssueTokenFee*2)
+	remainCoin := dex.NewCetCoin(OriginHaveCetAmount + issueAmount - asset.DefaultIssueTokenFee*2)
 	msgMarket := types.MsgCreateTradingPair{
 		Stock:          stock,
 		Money:          money,
