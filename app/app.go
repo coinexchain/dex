@@ -644,6 +644,7 @@ func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 		}
 	}
 
+	justExecuted := false
 	sameTxExist := false
 	var cachedResp *abci.ResponseCheckTx
 	otherTxExist := false
@@ -651,17 +652,28 @@ func (app *CetChainApp) CheckTx(req abci.RequestCheckTx) abci.ResponseCheckTx {
 	signers := stdTx.GetSigners()
 	for _, signer := range signers {
 		res, resp := app.account2UnconfirmedTx.Lookup(signer, hashid, app.currBlockTime)
+		if res == JustExecuted {
+			justExecuted = true
+		}
 		if res == SameTxExist {
 			sameTxExist = true
 			cachedResp = resp
-			break
 		}
 		if res == OtherTxExist {
 			otherTxExist = true
-			break
 		}
 	}
 
+	if justExecuted {
+		res := sdk.ErrUnauthorized("signature verification failed; verify correct account sequence and chain-id").Result()
+		return abci.ResponseCheckTx{
+			Code:      uint32(res.Code),
+			Data:      res.Data,
+			Log:       res.Log,
+			GasWanted: 0,
+			GasUsed:   0,
+		}
+	}
 	if sameTxExist {
 		return *cachedResp
 	}
@@ -703,9 +715,10 @@ func (app *CetChainApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDelive
 		}
 	}
 
+	hashid := tmtypes.Tx(req.Tx).Hash()
 	if formatOK && app.enableUnconfirmedLimit {
 		signers := stdTx.GetSigners()
-		app.account2UnconfirmedTx.AddToRemoveList(signers)
+		app.account2UnconfirmedTx.AddToRemoveList(signers, hashid)
 	}
 	return ret
 }
