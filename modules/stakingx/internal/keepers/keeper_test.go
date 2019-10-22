@@ -33,7 +33,7 @@ func TestInitExportGenesis(t *testing.T) {
 
 	genesisState := stakingx.GenesisState{
 		Params: stakingx.Params{
-			MinSelfDelegation:          sdk.NewInt(stakingx.DefaultMinSelfDelegation),
+			MinSelfDelegation:          stakingx.DefaultMinSelfDelegation,
 			MinMandatoryCommissionRate: stakingx.DefaultMinMandatoryCommissionRate,
 		},
 	}
@@ -49,7 +49,7 @@ func TestCalcBondPoolStatus(t *testing.T) {
 
 	_, _, addr := testutil.KeyPubAddr()
 	testParam := stakingx.Params{
-		MinSelfDelegation: sdk.ZeroInt(),
+		MinSelfDelegation: 0,
 	}
 	acc := auth.BaseAccount{
 		Address: addr,

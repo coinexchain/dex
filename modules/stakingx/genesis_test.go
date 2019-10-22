@@ -3,7 +3,6 @@ package stakingx_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
 	"github.com/coinexchain/dex/modules/stakingx"
@@ -19,7 +18,7 @@ func TestGenesisState_Validate(t *testing.T) {
 	//invalidMinSelfDelegation
 	invalidMinSelfDelegation := stakingx.GenesisState{
 		Params: stakingx.Params{
-			MinSelfDelegation: sdk.ZeroInt(),
+			MinSelfDelegation: 0,
 		},
 	}
 	require.NotNil(t, invalidMinSelfDelegation.ValidateGenesis())

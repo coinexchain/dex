@@ -21,7 +21,7 @@ import (
 
 func TestDefaultParams(t *testing.T) {
 	params := stakingx.DefaultParams()
-	require.Equal(t, "500000000000000", params.MinSelfDelegation.String())
+	require.Equal(t, stakingx.DefaultMinSelfDelegation, params.MinSelfDelegation)
 }
 
 func defaultContext() (sdk.Context, params.Keeper) {
@@ -47,7 +47,7 @@ func TestParamGetSet(t *testing.T) {
 	sxk := stakingx.NewKeeper(sdk.NewKVStoreKey("test"), codec.New(), subspace, nil, &staking.Keeper{}, distribution.Keeper{}, auth.AccountKeeper{}, nil, nil, "")
 
 	testParam := stakingx.Params{
-		MinSelfDelegation:          sdk.ZeroInt(),
+		MinSelfDelegation:          0,
 		MinMandatoryCommissionRate: stakingx.DefaultMinMandatoryCommissionRate,
 	}
 

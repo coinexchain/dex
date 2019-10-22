@@ -13,12 +13,12 @@ const (
 	CodeBelowMinMandatoryCommissionRate sdk.CodeType = 403
 )
 
-func ErrInvalidMinSelfDelegation(val sdk.Int) sdk.Error {
+func ErrInvalidMinSelfDelegation(val int64) sdk.Error {
 	return sdk.NewError(CodeSpaceStakingX, CodeInvalidMinSelfDelegation,
-		"invalid min gas price: %v", val)
+		"invalid minimum self-delegation: %d", val)
 }
 
-func ErrMinSelfDelegationBelowRequired(expected, actual sdk.Int) sdk.Error {
+func ErrMinSelfDelegationBelowRequired(expected, actual int64) sdk.Error {
 	return sdk.NewError(CodeSpaceStakingX, CodeMinSelfDelegationBelowRequired,
 		"minimum self-delegation is %v, less than %v", actual, expected)
 }

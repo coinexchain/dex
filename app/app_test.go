@@ -280,7 +280,7 @@ func TestMinSelfDelegation(t *testing.T) {
 	// init app
 	app := initApp(func(genState *GenesisState) {
 		genState.Accounts = append(genState.Accounts, genaccounts.NewGenesisAccount(&acc0))
-		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(500)
+		genState.StakingXData.Params.MinSelfDelegation = 500
 
 		addAccountForDanglingCET(1000, genState)
 	})
@@ -310,7 +310,7 @@ func TestMinMandatoryCommissionRate(t *testing.T) {
 	// init app
 	app := initApp(func(genState *GenesisState) {
 		genState.Accounts = append(genState.Accounts, genaccounts.NewGenesisAccount(&acc0))
-		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1)
+		genState.StakingXData.Params.MinSelfDelegation = 1
 		addAccountForDanglingCET(1000, genState)
 	})
 
@@ -341,7 +341,7 @@ func TestDelegatorShares(t *testing.T) {
 	// init app
 	app := initApp(func(genState *GenesisState) {
 		addGenesisAccounts(genState, valAcc, del1Acc, del2Acc)
-		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1)
+		genState.StakingXData.Params.MinSelfDelegation = 1
 	})
 	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
 
@@ -396,7 +396,7 @@ func TestSlashTokensToCommunityPool(t *testing.T) {
 	// init app
 	app := initApp(func(genState *GenesisState) {
 		addGenesisAccounts(genState, valAcc)
-		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1e8)
+		genState.StakingXData.Params.MinSelfDelegation = 1e8
 	})
 
 	//begin block at height 1

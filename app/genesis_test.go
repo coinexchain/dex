@@ -95,7 +95,7 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, int64(100_0000), bankxData.Params.LockCoinsFeePerDay)
 	var stakingxData stakingx.GenesisState
 	bankx.ModuleCdc.MustUnmarshalJSON(state[stakingx.ModuleName], &stakingxData) // TODO
-	require.Equal(t, int64(500_0000e8), stakingxData.Params.MinSelfDelegation.Int64())
+	require.Equal(t, int64(500_0000e8), stakingxData.Params.MinSelfDelegation)
 	require.Equal(t, sdk.MustNewDecFromStr("0.1"), stakingxData.Params.MinMandatoryCommissionRate)
 
 	// alias

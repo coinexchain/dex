@@ -69,7 +69,7 @@ func TestExportGenesisState(t *testing.T) {
 	require.Equal(t, sdk.NewInt(int64(10)), accountX.LockedCoins[0].Coin.Amount)
 	require.Equal(t, "cet", accountX.LockedCoins[0].Coin.Denom)
 	require.Equal(t, "1000cet", accountX.FrozenCoins.String())
-	require.True(t, state.StakingXData.Params.MinSelfDelegation.IsPositive())
+	require.True(t, state.StakingXData.Params.MinSelfDelegation > 0)
 }
 
 func findAccount(t *testing.T, state GenesisState) *genaccounts.GenesisAccount {
@@ -157,7 +157,8 @@ func TestExportAppStateAndValidators(t *testing.T) {
 	valAcc := app.accountKeeper.GetAccount(ctx, addr)
 	require.Equal(t, sdk.NewDec(100), appState.DistrData.FeePool.CommunityPool.AmountOf("cet"))
 	minSelfDelegate := app.stakingXKeeper.GetParams(ctx).MinSelfDelegation
-	require.Equal(t, cetToken().GetTotalSupply().Sub(minSelfDelegate).SubRaw(100), valAcc.GetCoins().AmountOf("cet"))
+	require.Equal(t, cetToken().GetTotalSupply().SubRaw(minSelfDelegate).SubRaw(100),
+		valAcc.GetCoins().AmountOf("cet"))
 
 	//DistributionAccount including OutStanding rewards and CommunityPool
 	feeCollectAccount := getDistributionAccount(&appState)
@@ -178,7 +179,7 @@ func getDistributionAccount(gs *GenesisState) *genaccounts.GenesisAccount {
 func startAppWithOneValidator(acc auth.BaseAccount, addr sdk.AccAddress, pk crypto.PubKey, sk crypto.PrivKey, t *testing.T) *CetChainApp {
 	app := initApp(func(genState *GenesisState) {
 		addGenesisAccounts(genState, acc)
-		genState.StakingXData.Params.MinSelfDelegation = sdk.NewInt(1e8)
+		genState.StakingXData.Params.MinSelfDelegation = 1e8
 	})
 
 	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 1}})
@@ -202,7 +203,7 @@ func prepareCreateValidatorTx(addr sdk.AccAddress, app *CetChainApp, ctx sdk.Con
 	minSelfDelegate := app.stakingXKeeper.GetParams(ctx).MinSelfDelegation
 
 	createValMsg := testutil.NewMsgCreateValidatorBuilder(valAddr, pk).
-		MinSelfDelegation(minSelfDelegate.Int64()).SelfDelegation(minSelfDelegate.Int64()).
+		MinSelfDelegation(minSelfDelegate).SelfDelegation(minSelfDelegate).
 		Commission("0.1", "0.1", "0.01").
 		Build()
 	createValTx := newStdTxBuilder().

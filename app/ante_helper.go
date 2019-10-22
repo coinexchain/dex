@@ -76,8 +76,8 @@ func (ah anteHelper) checkMemo(ctx sdk.Context, addr sdk.AccAddress, memo string
 
 func (ah anteHelper) checkMinSelfDelegation(ctx sdk.Context, actual sdk.Int) sdk.Error {
 	expected := ah.stakingXKeeper.GetParams(ctx).MinSelfDelegation
-	if actual.LT(expected) {
-		return stakingx.ErrMinSelfDelegationBelowRequired(expected, actual)
+	if actual.LT(sdk.NewInt(expected)) {
+		return stakingx.ErrMinSelfDelegationBelowRequired(expected, actual.Int64())
 	}
 	return nil
 }
