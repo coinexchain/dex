@@ -92,10 +92,10 @@ func TestDefaultGenesisState(t *testing.T) {
 	bankx.ModuleCdc.MustUnmarshalJSON(state[bankx.ModuleName], &bankxData)
 	require.Equal(t, int64(1e8), bankxData.Params.ActivationFee)
 	require.Equal(t, int64(604800e9), bankxData.Params.LockCoinsFreeTime)
-	require.Equal(t, int64(100_0000), bankxData.Params.LockCoinsFeePerDay)
+	require.Equal(t, int64(1000000), bankxData.Params.LockCoinsFeePerDay)
 	var stakingxData stakingx.GenesisState
 	bankx.ModuleCdc.MustUnmarshalJSON(state[stakingx.ModuleName], &stakingxData) // TODO
-	require.Equal(t, int64(500_0000e8), stakingxData.Params.MinSelfDelegation)
+	require.Equal(t, int64(5000000e8), stakingxData.Params.MinSelfDelegation)
 	require.Equal(t, sdk.MustNewDecFromStr("0.1"), stakingxData.Params.MinMandatoryCommissionRate)
 
 	// alias
@@ -131,14 +131,14 @@ func TestDefaultGenesisState(t *testing.T) {
 	var marketData market.GenesisState
 	market.ModuleCdc.MustUnmarshalJSON(state[market.ModuleName], &marketData)
 	require.Equal(t, int64(10000e8), marketData.Params.CreateMarketFee)
-	require.Equal(t, int64(100_0000), marketData.Params.FixedTradeFee)
+	require.Equal(t, int64(1000000), marketData.Params.FixedTradeFee)
 	require.Equal(t, int64(604800), marketData.Params.MarketMinExpiredTime) // TODO
 	require.Equal(t, 10000, marketData.Params.GTEOrderLifetime)             // TODO
-	require.Equal(t, int64(600_0000), marketData.Params.GTEOrderFeatureFeeByBlocks)
+	require.Equal(t, int64(6000000), marketData.Params.GTEOrderFeatureFeeByBlocks)
 	require.Equal(t, 25, marketData.Params.MaxExecutedPriceChangeRatio) // TODO
 	require.Equal(t, int64(10), marketData.Params.MarketFeeRate)
-	require.Equal(t, int64(100_0000), marketData.Params.MarketFeeMin)
-	require.Equal(t, int64(100_0000), marketData.Params.FeeForZeroDeal)
+	require.Equal(t, int64(1000000), marketData.Params.MarketFeeMin)
+	require.Equal(t, int64(1000000), marketData.Params.FeeForZeroDeal)
 }
 
 func checkCET(t *testing.T, amt int64, coins sdk.Coins) {
