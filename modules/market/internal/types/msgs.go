@@ -219,7 +219,7 @@ func (msg MsgCancelOrder) GetSigners() []sdk.AccAddress {
 type MsgCancelTradingPair struct {
 	Sender        sdk.AccAddress `json:"sender"`
 	TradingPair   string         `json:"trading_pair"`
-	EffectiveTime int64          `json:"effective_height"`
+	EffectiveTime int64          `json:"effective_time"`
 }
 
 func (msg *MsgCancelTradingPair) SetAccAddress(address sdk.AccAddress) {
