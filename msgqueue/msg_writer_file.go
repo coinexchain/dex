@@ -1,6 +1,7 @@
 package msgqueue
 
 import (
+	"bytes"
 	"io"
 	"os"
 )
@@ -24,16 +25,12 @@ func NewFileMsgWriter(filePath string) (MsgWriter, error) {
 }
 
 func (w fileMsgWriter) WriteKV(k, v []byte) error {
-	if _, err := w.WriteCloser.Write(k); err != nil {
-		return err
-	}
-	if _, err := w.WriteCloser.Write([]byte("#")); err != nil {
-		return err
-	}
-	if _, err := w.WriteCloser.Write(v); err != nil {
-		return err
-	}
-	if _, err := w.WriteCloser.Write([]byte("\r\n")); err != nil {
+	buffer := bytes.NewBuffer(nil)
+	buffer.Write(k)
+	buffer.Write([]byte("#"))
+	buffer.Write(v)
+	buffer.Write([]byte("\r\n"))
+	if _, err := w.WriteCloser.Write(buffer.Bytes()); err != nil {
 		return err
 	}
 	return nil
