@@ -1,6 +1,7 @@
 package msgqueue
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 )
@@ -54,16 +55,12 @@ func (w *dirMsgWriter) WriteKV(k, v []byte) error {
 		w.fileIndex++
 		w.haveWriteSize = 0
 	}
-	if _, err := w.WriteCloser.Write(k); err != nil {
-		return err
-	}
-	if _, err := w.WriteCloser.Write([]byte("#")); err != nil {
-		return err
-	}
-	if _, err := w.WriteCloser.Write(v); err != nil {
-		return err
-	}
-	if _, err := w.WriteCloser.Write([]byte("\r\n")); err != nil {
+	buferr := bytes.NewBuffer(nil)
+	buferr.Write(k)
+	buferr.Write([]byte("#"))
+	buferr.Write(v)
+	buferr.Write([]byte("\r\n"))
+	if _, err := w.WriteCloser.Write(buferr.Bytes()); err != nil {
 		return err
 	}
 	w.haveWriteSize += len(k) + len(v) + 3
