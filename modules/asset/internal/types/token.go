@@ -382,10 +382,6 @@ func (t BaseToken) String() string {
 	)
 }
 
-func MustMarshalToken(cdc *codec.Codec, token Token) []byte {
-	return cdc.MustMarshalBinaryBare(token)
-}
-
 func MustUnmarshalToken(cdc *codec.Codec, value []byte) Token {
 	validator, err := UnmarshalToken(cdc, value)
 	if err != nil {

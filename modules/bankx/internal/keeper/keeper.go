@@ -329,29 +329,6 @@ func (k Keeper) GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 
 }
 
-func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int {
-	var (
-		axkTotalAmount = sdk.ZeroInt()
-		akTotalAmount  = sdk.ZeroInt()
-	)
-	axkProcess := func(acc authx.AccountX) bool {
-		val := acc.GetAllCoins().AmountOf(denom)
-		axkTotalAmount = axkTotalAmount.Add(val)
-		return false
-	}
-
-	akProcess := func(acc auth.Account) bool {
-		val := acc.GetCoins().AmountOf(denom)
-		akTotalAmount = akTotalAmount.Add(val)
-		return false
-	}
-
-	k.axk.IterateAccounts(ctx, axkProcess)
-	k.ak.IterateAccounts(ctx, akProcess)
-
-	return axkTotalAmount.Add(akTotalAmount)
-}
-
 func (k Keeper) BlacklistedAddr(addr sdk.AccAddress) bool {
 	return k.bk.BlacklistedAddr(addr)
 }
@@ -385,4 +362,28 @@ func (k Keeper) GetMemoRequired(ctx sdk.Context, addr sdk.AccAddress) bool {
 		return accX.MemoRequired
 	}
 	return false
+}
+
+// only used by unit tests
+func (k Keeper) TotalAmountOfCoin(ctx sdk.Context, denom string) sdk.Int {
+	var (
+		axkTotalAmount = sdk.ZeroInt()
+		akTotalAmount  = sdk.ZeroInt()
+	)
+	axkProcess := func(acc authx.AccountX) bool {
+		val := acc.GetAllCoins().AmountOf(denom)
+		axkTotalAmount = axkTotalAmount.Add(val)
+		return false
+	}
+
+	akProcess := func(acc auth.Account) bool {
+		val := acc.GetCoins().AmountOf(denom)
+		akTotalAmount = akTotalAmount.Add(val)
+		return false
+	}
+
+	k.axk.IterateAccounts(ctx, axkProcess)
+	k.ak.IterateAccounts(ctx, akProcess)
+
+	return axkTotalAmount.Add(akTotalAmount)
 }
