@@ -41,6 +41,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### State Machine Breaking
 
 ### API Breaking Changes
+*   [\#4](https://github.com/coinexchain/dex/issues/4) Modify the json name of the field 
+*   [\#3](https://github.com/coinexchain/dex/issues/3) Modify time unit 
 
 ### Client Breaking Changes
 
