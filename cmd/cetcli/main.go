@@ -80,6 +80,7 @@ func createRootCmd(cdc *codec.Codec) *cobra.Command {
 		client.LineBreak,
 		version.Cmd,
 		client.NewCompletionCmd(rootCmd, true),
+		client.LineBreak,
 	)
 
 	return rootCmd
