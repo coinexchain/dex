@@ -2,7 +2,6 @@ package app
 
 import (
 	"bytes"
-	"sync"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -32,7 +31,6 @@ type Account2UnconfirmedTx struct {
 	limitTime     int64
 	removeList    []sdk.AccAddress
 	lastSweepTime int64
-	mutex         sync.RWMutex
 }
 
 func NewAccount2UnconfirmedTx(limitTime int64) *Account2UnconfirmedTx {
@@ -45,9 +43,7 @@ func NewAccount2UnconfirmedTx(limitTime int64) *Account2UnconfirmedTx {
 }
 
 func (acc2unc *Account2UnconfirmedTx) Lookup(addr sdk.AccAddress, hashid []byte, timestamp int64) int {
-	acc2unc.mutex.RLock()
 	unconfirmedTx, ok := acc2unc.auMap[string(addr)]
-	acc2unc.mutex.RUnlock()
 	expired := timestamp-unconfirmedTx.Timestamp > acc2unc.limitTime
 	if !ok || expired {
 		return NoTxExist
@@ -59,38 +55,29 @@ func (acc2unc *Account2UnconfirmedTx) Lookup(addr sdk.AccAddress, hashid []byte,
 }
 
 func (acc2unc *Account2UnconfirmedTx) Add(addr sdk.AccAddress, hashid []byte, timestamp int64) {
-	acc2unc.mutex.Lock()
 	acc2unc.auMap[string(addr)] = UnconfirmedTx{HashID: hashid, Timestamp: timestamp}
-	acc2unc.mutex.Unlock()
 }
 
 func (acc2unc *Account2UnconfirmedTx) AddToRemoveList(addrs []sdk.AccAddress) {
-	//acc2unc.mutex.Lock()
 	acc2unc.removeList = append(acc2unc.removeList, addrs...)
-	//acc2unc.mutex.Unlock()
 }
 
 func (acc2unc *Account2UnconfirmedTx) CommitRemove(timestamp int64) {
-	//acc2unc.mutex.Lock()
 	for _, addr := range acc2unc.removeList {
 		s := string(addr)
 		delete(acc2unc.auMap, s) // will do nothing if key not existing
 	}
 	if timestamp-acc2unc.lastSweepTime > SweepPeriod {
-		acc2unc.mutex.Lock()
 		for acc, unconfirmedTx := range acc2unc.auMap {
 			expired := timestamp-unconfirmedTx.Timestamp > acc2unc.limitTime
 			if expired {
 				delete(acc2unc.auMap, acc)
 			}
 		}
-		acc2unc.mutex.Unlock()
 		acc2unc.lastSweepTime = timestamp
 	}
 }
 
 func (acc2unc *Account2UnconfirmedTx) ClearRemoveList() {
-	//acc2unc.mutex.Lock()
 	acc2unc.removeList = acc2unc.removeList[:0]
-	//acc2unc.mutex.Unlock()
 }
