@@ -112,6 +112,7 @@ func queryMarketList(ctx sdk.Context, req abci.RequestQuery, mk Keeper) ([]byte,
 			Money:             info.Money,
 			PricePrecision:    strconv.Itoa(int(info.PricePrecision)),
 			LastExecutedPrice: info.LastExecutedPrice,
+			OrderPrecision:    strconv.Itoa(int(info.OrderPrecision)),
 		}
 	}
 	bz, err := codec.MarshalJSONIndent(mk.cdc, mInfoList)
