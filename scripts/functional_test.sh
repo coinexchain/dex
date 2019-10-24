@@ -34,7 +34,7 @@ date +%s
 echo "$(pwd)"
 cd func_test
 if [[ $1 -lt 0 ]]; then
-    bash script/run_ft_non_parallel.sh $(abs $1) $2
+    bash script/run_ft_non_cli_mode.sh $(abs $1) $2
 else
     bash script/run_ft_in_parallel.sh $1 $2
 fi

@@ -49,40 +49,40 @@ matrix:
           - CACHE_DIR=$HOME/.cache/docker
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 0
+        - scripts/functional_test.sh 6 0
 
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 1
+        - scripts/functional_test.sh 6 1
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 2
+        - scripts/functional_test.sh 6 2
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 3
+        - scripts/functional_test.sh 6 3
 
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh -4 0
+        - scripts/functional_test.sh 6 4
 
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh -4 1
+        - scripts/functional_test.sh 6 5
 
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh -4 2
+        - scripts/functional_test.sh -2 0
 
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh -4 3
+        - scripts/functional_test.sh -2 1
 
     - language: go
       go: 1.13.x
