@@ -42,6 +42,7 @@ endif
 
 ifeq ($(WITH_CLEVELDB),yes)
   build_tags += gcc
+  build_tags += cleveldb
 endif
 build_tags += $(BUILD_TAGS)
 build_tags := $(strip $(build_tags))
