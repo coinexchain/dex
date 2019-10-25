@@ -32,7 +32,7 @@ SECP256K1_PATH="$GOPATH/pkg/mod/github.com/tendermint/tendermint@$TENDERMINT_VER
 TMP_DIR=/tmp/libsecp256k1
 rm -rdf $TMP_DIR && mkdir -p $TMP_DIR
 cp -r $SECP256K1_PATH/* $TMP_DIR
-chmod a+w -R $TMP_DIR
+chmod -R a+w $TMP_DIR
 cd $TMP_DIR
 
 # build cgo libsecp256k1
@@ -58,9 +58,9 @@ else
     echo "=====build cetd with cgo libsecp256k1 succeeded====="
 fi
 
-md5sum `which cetd`
-md5sum `which cetcli`
-md5sum `which cetdev`
+md5sum `which cetd`  || md5 `which cetd` 
+md5sum `which cetcli` || md5 `which cetcli`
+md5sum `which cetdev` || md5 `which cetdev`
 
 cetd version --long
 cetcli version --long
