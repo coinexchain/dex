@@ -21,9 +21,9 @@ type MsgBancorInit struct {
 	Owner              sdk.AccAddress `json:"owner"`
 	Stock              string         `json:"stock"` // supply denom
 	Money              string         `json:"money"` // paying denom
-	InitPrice          sdk.Dec        `json:"init_price"`
+	InitPrice          string         `json:"init_price"`
 	MaxSupply          sdk.Int        `json:"max_supply"`
-	MaxPrice           sdk.Dec        `json:"max_price"`
+	MaxPrice           string         `json:"max_price"`
 	StockPrecision     byte           `json:"stock_precision"`
 	EarliestCancelTime int64          `json:"earliest_cancel_time"`
 }
@@ -75,13 +75,21 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 	if !msg.MaxSupply.IsPositive() {
 		return ErrNonPositiveSupply()
 	}
-	if !msg.MaxPrice.IsPositive() {
+	maxPrice, err := sdk.NewDecFromStr(msg.MaxPrice)
+	if err != nil {
+		return ErrPriceFmt()
+	}
+	if !maxPrice.IsPositive() {
 		return ErrNonPositivePrice()
 	}
-	if msg.InitPrice.IsNegative() {
+	initPrice, err := sdk.NewDecFromStr(msg.InitPrice)
+	if err != nil {
+		return ErrPriceFmt()
+	}
+	if initPrice.IsNegative() {
 		return ErrNegativePrice()
 	}
-	if msg.InitPrice.GT(msg.MaxPrice) {
+	if initPrice.GT(maxPrice) {
 		return ErrPriceConfiguration()
 	}
 	if !CheckStockPrecision(msg.MaxSupply, msg.StockPrecision) {

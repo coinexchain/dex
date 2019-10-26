@@ -6071,7 +6071,7 @@ func EncodeMsgBancorInit(w io.Writer, v MsgBancorInit) error {
 	if err != nil {
 		return err
 	}
-	err = EncodeDec(w, v.InitPrice)
+	err = codonEncodeString(w, v.InitPrice)
 	if err != nil {
 		return err
 	}
@@ -6079,7 +6079,7 @@ func EncodeMsgBancorInit(w io.Writer, v MsgBancorInit) error {
 	if err != nil {
 		return err
 	}
-	err = EncodeDec(w, v.MaxPrice)
+	err = codonEncodeString(w, v.MaxPrice)
 	if err != nil {
 		return err
 	}
@@ -6125,7 +6125,7 @@ func DecodeMsgBancorInit(bz []byte) (MsgBancorInit, int, error) {
 	}
 	bz = bz[n:]
 	total += n
-	v.InitPrice, n, err = DecodeDec(bz)
+	v.InitPrice = string(codonDecodeString(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
@@ -6137,7 +6137,7 @@ func DecodeMsgBancorInit(bz []byte) (MsgBancorInit, int, error) {
 	}
 	bz = bz[n:]
 	total += n
-	v.MaxPrice, n, err = DecodeDec(bz)
+	v.MaxPrice = string(codonDecodeString(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
@@ -6166,9 +6166,9 @@ func RandMsgBancorInit(r RandSrc) MsgBancorInit {
 	v.Owner = r.GetBytes(length)
 	v.Stock = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.Money = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
-	v.InitPrice = RandDec(r)
+	v.InitPrice = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.MaxSupply = RandInt(r)
-	v.MaxPrice = RandDec(r)
+	v.MaxPrice = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.StockPrecision = r.GetUint8()
 	v.EarliestCancelTime = r.GetInt64()
 	return v

@@ -56,15 +56,23 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	if msg.StockPrecision <= 8 {
 		precision = msg.StockPrecision
 	}
+	initPrice, err := sdk.NewDecFromStr(msg.InitPrice)
+	if err != nil {
+		return types.ErrPriceFmt().Result()
+	}
+	maxPrice, err := sdk.NewDecFromStr(msg.MaxPrice)
+	if err != nil {
+		return types.ErrPriceFmt().Result()
+	}
 	bi := &keepers.BancorInfo{
 		Owner:              msg.Owner,
 		Stock:              msg.Stock,
 		Money:              msg.Money,
-		InitPrice:          msg.InitPrice,
+		InitPrice:          initPrice,
 		MaxSupply:          msg.MaxSupply,
 		StockPrecision:     precision,
-		MaxPrice:           msg.MaxPrice,
-		Price:              msg.InitPrice,
+		MaxPrice:           maxPrice,
+		Price:              initPrice,
 		StockInPool:        msg.MaxSupply,
 		MoneyInPool:        sdk.ZeroInt(),
 		EarliestCancelTime: msg.EarliestCancelTime,

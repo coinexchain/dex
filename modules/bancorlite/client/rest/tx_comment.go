@@ -65,10 +65,10 @@ func (req *BancorInitReq) GetMsg(r *http.Request, sender sdk.AccAddress) (sdk.Ms
 		Owner:              sender,
 		Stock:              req.Stock,
 		Money:              req.Money,
-		InitPrice:          initPrice,
+		InitPrice:          req.InitPrice,
 		MaxSupply:          maxSupply,
 		StockPrecision:     byte(precision),
-		MaxPrice:           maxPrice,
+		MaxPrice:           req.MaxPrice,
 		EarliestCancelTime: time,
 	}, nil
 }

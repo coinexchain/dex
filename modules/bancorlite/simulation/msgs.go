@@ -71,8 +71,8 @@ func createMsgBancorInit(r *rand.Rand,
 		Owner:              owner,
 		Stock:              stockSymbol,
 		Money:              dex.DefaultBondDenom,
-		InitPrice:          sdk.NewDec(initPrice),
-		MaxPrice:           sdk.NewDec(maxPrice),
+		InitPrice:          sdk.NewDec(initPrice).String(),
+		MaxPrice:           sdk.NewDec(maxPrice).String(),
 		MaxSupply:          sdk.NewInt(maxSupply),
 		EarliestCancelTime: 0, // TODO
 	}
@@ -83,12 +83,12 @@ func verifyBancorInit(ctx sdk.Context, keeper bancorlite.Keeper, msg bancorlite.
 		bancorInfo.Money == msg.Money &&
 		bancorInfo.Owner.Equals(msg.Owner) &&
 		bancorInfo.EarliestCancelTime == msg.EarliestCancelTime &&
-		bancorInfo.InitPrice.Equal(msg.InitPrice) &&
-		bancorInfo.MaxPrice.Equal(msg.MaxPrice) &&
+		bancorInfo.InitPrice.String() == msg.InitPrice &&
+		bancorInfo.MaxPrice.String() == msg.MaxPrice &&
 		bancorInfo.MaxSupply.Equal(msg.MaxSupply) &&
 		bancorInfo.StockInPool.Equal(msg.MaxSupply) &&
 		bancorInfo.MoneyInPool.IsZero() &&
-		bancorInfo.Price.Equal(msg.InitPrice)
+		bancorInfo.Price.String() == msg.InitPrice
 }
 
 func SimulateMsgBancorTrade(ak auth.AccountKeeper, blk bancorlite.Keeper) simulation.Operation {

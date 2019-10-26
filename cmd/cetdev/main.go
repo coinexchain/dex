@@ -9,7 +9,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
-	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/codec"
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 
@@ -55,7 +54,6 @@ func createRootCmd(cdc *codec.Codec) *cobra.Command {
 
 func registerRoutes(rs *lcd.RestServer) {
 	//registerSwaggerUI(rs)
-	rpc.RegisterRPCRoutes(rs.CliCtx, rs.Mux)
 	client.RegisterRoutes(rs.CliCtx, rs.Mux)
 	authrest.RegisterTxRoutes(rs.CliCtx, rs.Mux)
 	app.ModuleBasics.RegisterRESTRoutes(rs.CliCtx, rs.Mux)

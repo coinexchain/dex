@@ -18,9 +18,9 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 		Owner              sdk.AccAddress
 		Stock              string
 		Money              string
-		InitPrice          sdk.Dec
+		InitPrice          string
 		MaxSupply          sdk.Int
-		MaxPrice           sdk.Dec
+		MaxPrice           string
 		EarliestCancelTime int64
 	}
 	tests := []struct {
@@ -34,9 +34,9 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				addrOwner,
 				"abc",
 				"cet",
-				sdk.NewDec(0),
+				"0",
 				sdk.NewInt(100),
-				sdk.NewDec(10),
+				"10",
 				100},
 			nil,
 		},
@@ -46,9 +46,9 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				addrNull,
 				"abc",
 				"cet",
-				sdk.NewDec(0),
+				"0",
 				sdk.NewInt(100),
-				sdk.NewDec(10),
+				"10",
 				1000,
 			},
 			sdk.ErrInvalidAddress("missing owner address"),
@@ -59,9 +59,9 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				addrOwner,
 				"cet",
 				"abc",
-				sdk.NewDec(0),
+				"0",
 				sdk.NewInt(100),
-				sdk.NewDec(10),
+				"10",
 				1000,
 			},
 			ErrInvalidSymbol(),
@@ -72,9 +72,9 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				addrOwner,
 				"abc",
 				"cet",
-				sdk.NewDec(0),
+				"0",
 				sdk.NewInt(0),
-				sdk.NewDec(10),
+				"10",
 				1000,
 			},
 			ErrNonPositiveSupply(),
@@ -85,9 +85,9 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				addrOwner,
 				"abc",
 				"cet",
-				sdk.NewDec(0),
+				"0",
 				sdk.NewInt(100),
-				sdk.NewDec(0),
+				"0",
 				1000,
 			},
 			ErrNonPositivePrice(),

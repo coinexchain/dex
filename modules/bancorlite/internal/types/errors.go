@@ -32,6 +32,7 @@ const (
 	CodeTradeQuantityToSmall         sdk.CodeType = 1022
 	CodeTokenForbiddenByOwner        sdk.CodeType = 1023
 	CodeStockSupplyPrecisionNotMatch sdk.CodeType = 1024
+	CodeErrPriceFmt                  sdk.CodeType = 1025
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -40,6 +41,10 @@ func ErrInvalidSymbol() sdk.Error {
 
 func ErrNonPositiveSupply() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeNonPositiveSupply, "Non-positive supply is invalid")
+}
+
+func ErrPriceFmt() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeErrPriceFmt, "Invalid Price format")
 }
 
 func ErrNonPositivePrice() sdk.Error {

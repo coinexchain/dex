@@ -73,10 +73,10 @@ Example:
 			msg := &types.MsgBancorInit{
 				Stock:              args[0],
 				Money:              args[1],
-				InitPrice:          initPrice,
+				InitPrice:          initPrice.String(),
 				MaxSupply:          maxSupply,
 				StockPrecision:     byte(precision),
-				MaxPrice:           maxPrice,
+				MaxPrice:           maxPrice.String(),
 				EarliestCancelTime: time,
 			}
 			return cliutil.CliRunCommand(cdc, msg)
