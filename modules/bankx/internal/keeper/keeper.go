@@ -53,6 +53,11 @@ func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bo
 	return k.bk.HasCoins(ctx, addr, amt)
 }
 
+func (k Keeper) SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+	acc := k.ak.GetAccount(ctx, addr)
+	return acc.SpendableCoins(ctx.BlockTime())
+}
+
 func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
 	if k.IsSendForbidden(ctx, amt, from) {
 		return types.ErrTokenForbiddenByOwner()
