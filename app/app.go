@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -30,6 +31,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/cosmos/cosmos-sdk/sigbalancer"
 
 	"github.com/coinexchain/dex/app/plugin"
 	"github.com/coinexchain/dex/modules/alias"
@@ -539,6 +541,7 @@ func (app *CetChainApp) mountStores() {
 
 // application updates every begin block
 func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	sigbalancer.ErrorCount = 0
 	app.height = ctx.BlockHeight()
 	app.resetPubMsgBuf()
 	if app.msgQueProducer.IsOpenToggle() {
@@ -560,6 +563,13 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 // application updates every end block
 // nolint: unparam
 func (app *CetChainApp) endBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+	for {
+		totalFinished := <-sigbalancer.SyncChan
+		if totalFinished == sigbalancer.TotalRequest {
+			fmt.Printf("Catching %d, now %d\n", sigbalancer.TotalRequest, totalFinished)
+			break
+		}
+	}
 	ret := app.mm.EndBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
 		ret.Events = collectKafkaEvents(ret.Events, app)
