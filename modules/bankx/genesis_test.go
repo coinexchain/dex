@@ -15,11 +15,11 @@ func TestValidate(t *testing.T) {
 	require.Equal(t, nil, err)
 
 	errGenes := bankx.NewGenesisState(bankx.NewParams(-1, 0, 0))
-	require.Equal(t, errGenes.ValidateGenesis(), types.ErrorInvalidActivatingFee())
+	require.Equal(t, errGenes.ValidateGenesis(), types.ErrInvalidActivatingFee())
 	errGenes = bankx.NewGenesisState(bankx.NewParams(0, -1, 0))
-	require.Equal(t, errGenes.ValidateGenesis(), types.ErrorInvalidLockCoinsFreeTime())
+	require.Equal(t, errGenes.ValidateGenesis(), types.ErrInvalidLockCoinsFreeTime())
 	errGenes = bankx.NewGenesisState(bankx.NewParams(0, 0, -1))
-	require.Equal(t, errGenes.ValidateGenesis(), types.ErrorInvalidLockCoinsFee())
+	require.Equal(t, errGenes.ValidateGenesis(), types.ErrInvalidLockCoinsFee())
 }
 
 func TestInitGenesis(t *testing.T) {

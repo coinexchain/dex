@@ -38,13 +38,13 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 // error for any failed validation criteria.
 func (data GenesisState) ValidateGenesis() error {
 	if activationFee := data.Params.ActivationFee; activationFee < 0 {
-		return types.ErrorInvalidActivatingFee()
+		return types.ErrInvalidActivatingFee()
 	}
 	if freeTime := data.Params.LockCoinsFreeTime; freeTime < 0 {
-		return types.ErrorInvalidLockCoinsFreeTime()
+		return types.ErrInvalidLockCoinsFreeTime()
 	}
 	if lockCoinsFee := data.Params.LockCoinsFeePerDay; lockCoinsFee < 0 {
-		return types.ErrorInvalidLockCoinsFee()
+		return types.ErrInvalidLockCoinsFee()
 	}
 	return nil
 }

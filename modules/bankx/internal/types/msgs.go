@@ -1,6 +1,9 @@
 package types
 
 import (
+	"math"
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
@@ -82,6 +85,9 @@ func (msg MsgSend) ValidateBasic() sdk.Error {
 	}
 	if msg.UnlockTime < 0 {
 		return ErrUnlockTime("negative unlock time ")
+	}
+	if msg.UnlockTime > math.MaxInt64/int64(time.Second) {
+		return ErrUnlockTime("unlock time is too large")
 	}
 
 	return nil
@@ -215,7 +221,7 @@ func (msg *MsgSupervisedSend) SetAccAddress(addr sdk.AccAddress) {
 func (msg MsgSupervisedSend) Route() string { return RouterKey }
 
 // Type Implements Msg
-func (msg MsgSupervisedSend) Type() string { return "supervisedsend" }
+func (msg MsgSupervisedSend) Type() string { return "supervised_send" }
 
 // ValidateBasic Implements Msg.
 func (msg MsgSupervisedSend) ValidateBasic() sdk.Error {
@@ -237,14 +243,17 @@ func (msg MsgSupervisedSend) ValidateBasic() sdk.Error {
 	if msg.UnlockTime <= 0 {
 		return ErrUnlockTime("unlock time must be positive")
 	}
+	if msg.UnlockTime > math.MaxInt64/int64(time.Second) {
+		return ErrUnlockTime("unlock time is too large")
+	}
 	if msg.Reward < 0 {
 		return sdk.ErrInsufficientCoins("reward can not be negative")
 	}
 	if sdk.NewInt(msg.Reward).GT(msg.Amount.Amount) {
-		return ErrorRewardExceedsAmount()
+		return ErrRewardExceedsAmount()
 	}
 	if msg.Operation < Create || msg.Operation > EarlierUnlockBySupervisor {
-		return ErrorInvalidOperation()
+		return ErrInvalidOperation()
 	}
 
 	return nil

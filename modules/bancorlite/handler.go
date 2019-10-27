@@ -253,7 +253,7 @@ func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
 	}
 
 	if commission.Int64() < k.GetMarketFeeMin(ctx) {
-		return commission, types.ErrTradeQuantityToSmall(commission.Int64())
+		return commission, types.ErrTradeQuantityTooSmall(commission.Int64())
 	}
 	return commission, nil
 }

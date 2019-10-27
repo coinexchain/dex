@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -78,8 +79,11 @@ func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr, supervisor sd
 	}
 
 	lockDuration := (unlockTime - ctx.BlockHeader().Time.Unix()) * int64(time.Second)
-	if lockDuration > k.GetParams(ctx).LockCoinsFreeTime {
+	if lockDuration > k.GetParams(ctx).LockCoinsFreeTime && k.GetParams(ctx).LockCoinsFeePerDay > 0 {
 		exceededDays := (lockDuration-k.GetParams(ctx).LockCoinsFreeTime-1)/(24*int64(time.Hour)) + 1
+		if exceededDays > math.MaxInt64/k.GetParams(ctx).LockCoinsFeePerDay {
+			return types.ErrUnlockTime("Unlock time is toos large")
+		}
 		lockCoinsFee := dex.NewCetCoins(k.GetParams(ctx).LockCoinsFeePerDay * exceededDays)
 		if err := k.DeductFee(ctx, fromAddr, lockCoinsFee); err != nil {
 			return err
@@ -133,7 +137,7 @@ func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor 
 	}
 
 	if !found {
-		return nil, types.ErrorLockedCoinNotFound()
+		return nil, types.ErrLockedCoinNotFound()
 	}
 
 	if err := k.tk.UpdateTokenSendLock(ctx, amt.Denom, amt.Amount, false); err != nil {
@@ -171,14 +175,12 @@ func (k Keeper) EarlierUnlockCoin(ctx sdk.Context, fromAddr, toAddr, supervisor 
 		k.axk.RemoveFromUnlockedCoinsQueue(ctx, unlockTime, toAddr)
 	}
 
-	acc := k.GetAccount(ctx, receiver)
-	accx, _ := k.GetAccountX(ctx, receiver)
 	unlockInfo := &authx.NotificationUnlock{
 		Address:     receiver,
 		Unlocked:    transferAmt,
-		LockedCoins: accx.LockedCoins,
-		FrozenCoins: accx.FrozenCoins,
-		Coins:       acc.GetCoins(),
+		LockedCoins: k.GetLockedCoins(ctx, receiver),
+		FrozenCoins: k.GetFrozenCoins(ctx, receiver),
+		Coins:       k.GetCoins(ctx, receiver),
 		Height:      ctx.BlockHeight(),
 	}
 
@@ -246,21 +248,13 @@ func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int6
 	return k.DeductFee(ctx, addr, dex.NewCetCoins(amt))
 }
 
-func (k Keeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account {
-	return k.ak.GetAccount(ctx, addr)
-}
-
-func (k Keeper) GetAccountX(ctx sdk.Context, addr sdk.AccAddress) (ax authx.AccountX, ok bool) {
-	return k.axk.GetAccountX(ctx, addr)
-}
-
 func (k Keeper) DeductActivationFee(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, transfer sdk.Coins) (sdk.Coins, sdk.Error) {
 	//toAccount doesn't exist yet
 	if k.ak.GetAccount(ctx, to) == nil {
 		activationFee := dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
 		amt, neg := transfer.SafeSub(activationFee)
 		if neg {
-			return transfer, types.ErrorInsufficientCETForActivatingFee()
+			return transfer, types.ErrInsufficientCETForActivatingFee()
 		}
 		return amt, k.DeductFee(ctx, from, activationFee)
 	}
@@ -302,6 +296,10 @@ func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddr
 		}
 	}
 	return false
+}
+
+func (k Keeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account {
+	return k.ak.GetAccount(ctx, addr)
 }
 
 func (k Keeper) GetCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {

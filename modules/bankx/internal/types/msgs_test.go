@@ -94,6 +94,7 @@ func TestMsgSendValidation(t *testing.T) {
 		{false, NewMsgSend(addr1, emptyAddr, cet123, 0)},  // empty to addr
 		{true, NewMsgSend(addr1, addr2, cet123, validTime)},
 		{false, NewMsgSend(addr1, addr2, cet123eth123, invalidTime)},
+		{false, NewMsgSend(addr1, addr2, cet123eth123, 0x0FFFFFFFFFFFFFFF)},
 		{true, NewMsgSend(addr1, addr2, eth123, 0)},
 		{true, NewMsgSend(addr1, addr2, eth123, validTime)},
 	}
@@ -175,4 +176,59 @@ func TestMsgMultiSend(t *testing.T) {
 	require.Error(t, msg.ValidateBasic())
 	msg = NewMsgMultiSend([]bank.Input{bank.NewInput(addr, cet123)}, []bank.Output{bank.NewOutput(sdk.AccAddress{}, cet123)})
 	require.Error(t, msg.ValidateBasic())
+}
+
+func TestMsgSupervisedSend_ValidateBasic(t *testing.T) {
+	sender := sdk.AccAddress([]byte("sender"))
+	recipient := sdk.AccAddress([]byte("recipient"))
+	supervisor := sdk.AccAddress([]byte("supervisor"))
+	amt := sdk.NewInt64Coin("cet", 123)
+	amtZero := sdk.NewInt64Coin("cet", 0)
+	amtInvalid := sdk.Coin{Denom: "cet", Amount: sdk.NewInt(-123)}
+
+	testutil.ValidateBasic(t, []testutil.TestCase{
+		{Valid: true, Msg: NewMsgSupervisedSend(sender, supervisor, recipient, amt, 10, 1, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(nil, supervisor, recipient, amt, 10, 1, Create)},
+		{Valid: true, Msg: NewMsgSupervisedSend(sender, nil, recipient, amt, 10, 1, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, nil, recipient, amt, 10, 1, Return)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, supervisor, nil, amt, 10, 1, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, supervisor, supervisor, amtInvalid, 10, 1, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, supervisor, supervisor, amtZero, 10, 1, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, supervisor, supervisor, amt, -1, 1, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, supervisor, supervisor, amt, 0x0FFFFFFFFFFFFFFF, 1, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, supervisor, supervisor, amt, 10, -1, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, supervisor, supervisor, amt, 10, 10000, Create)},
+		{Valid: false, Msg: NewMsgSupervisedSend(sender, supervisor, supervisor, amt, 10, 1, 10)},
+	})
+}
+
+func TestMsgSupervisedSend_GetSigners(t *testing.T) {
+	sender := sdk.AccAddress([]byte("sender"))
+	recipient := sdk.AccAddress([]byte("recipient"))
+	supervisor := sdk.AccAddress([]byte("supervisor"))
+	amt := sdk.NewInt64Coin("cet", 123)
+
+	createMsg := NewMsgSupervisedSend(sender, supervisor, recipient, amt, 10, 1, Create)
+	require.Equal(t, []sdk.AccAddress{createMsg.FromAddress}, createMsg.GetSigners())
+
+	returnMsg := NewMsgSupervisedSend(sender, supervisor, recipient, amt, 10, 1, Return)
+	require.Equal(t, []sdk.AccAddress{returnMsg.Supervisor}, returnMsg.GetSigners())
+
+	unlockBySenderMsg := NewMsgSupervisedSend(sender, supervisor, recipient, amt, 10, 1, EarlierUnlockBySender)
+	require.Equal(t, []sdk.AccAddress{unlockBySenderMsg.FromAddress}, unlockBySenderMsg.GetSigners())
+
+	unlockBySupervisorMsg := NewMsgSupervisedSend(sender, supervisor, recipient, amt, 10, 1, EarlierUnlockBySupervisor)
+	require.Equal(t, []sdk.AccAddress{unlockBySupervisorMsg.Supervisor}, unlockBySupervisorMsg.GetSigners())
+}
+
+func TestMsgSupervisedSend_Type(t *testing.T) {
+	sender := sdk.AccAddress([]byte("sender"))
+	recipient := sdk.AccAddress([]byte("recipient"))
+	supervisor := sdk.AccAddress([]byte("supervisor"))
+	amt := sdk.NewInt64Coin("cet", 123)
+
+	msg := NewMsgSupervisedSend(sender, supervisor, recipient, amt, 10, 1, Create)
+
+	require.True(t, len(msg.Type()) > 0)
+	require.Equal(t, ModuleName, msg.Route())
 }

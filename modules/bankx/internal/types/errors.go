@@ -27,7 +27,7 @@ func ErrMemoMissing() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeMemoMissing, "memo is empty")
 }
 
-func ErrorInsufficientCETForActivatingFee() sdk.Error {
+func ErrInsufficientCETForActivatingFee() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInsufficientCETForActivationFee, "Insufficient CET for Activating fees")
 }
 
@@ -38,35 +38,39 @@ func ErrUnlockTime(msg string) sdk.Error {
 func ErrTokenForbiddenByOwner() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeTokenForbiddenByOwner, "transfer has been forbidden by token owner")
 }
+
 func ErrNoInputs() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeNoInputs, "no inputs in multisend")
 }
+
 func ErrNoOutputs() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeNoOutputs, "no outputs in multisend")
 }
+
 func ErrInputOutputMismatch(msg string) sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInputOutputMismatch, msg)
 }
-func ErrorInvalidActivatingFee() sdk.Error {
+
+func ErrInvalidActivatingFee() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInvalidActivationFee, "invalid activated fees")
 }
 
-func ErrorInvalidLockCoinsFee() sdk.Error {
+func ErrInvalidLockCoinsFee() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInvalidLockCoinsFee, "invalid lock coins fee")
 }
 
-func ErrorInvalidLockCoinsFreeTime() sdk.Error {
+func ErrInvalidLockCoinsFreeTime() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInvalidLockCoinsFreeTime, "invalid lock coins free time")
 }
 
-func ErrorInvalidOperation() sdk.Error {
+func ErrInvalidOperation() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeInvalidOperation, "invalid operation")
 }
 
-func ErrorRewardExceedsAmount() sdk.Error {
+func ErrRewardExceedsAmount() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeRewardExceedsAmount, "reward exceeds amount")
 }
 
-func ErrorLockedCoinNotFound() sdk.Error {
+func ErrLockedCoinNotFound() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeLockedCoinNotFound, "locked coin not found")
 }

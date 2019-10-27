@@ -447,7 +447,7 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 					MoneyLimit: math.MaxInt64,
 				},
 			},
-			want: types.ErrTradeQuantityToSmall(0).Result(),
+			want: types.ErrTradeQuantityTooSmall(0).Result(),
 		},
 	}
 

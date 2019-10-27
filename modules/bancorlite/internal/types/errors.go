@@ -29,7 +29,7 @@ const (
 	CodeGetMarketExePriceFailed      sdk.CodeType = 1019
 	CodeInitPriceBigThanMaxPrice     sdk.CodeType = 1020
 	CodeCancelEnableTimeNegative     sdk.CodeType = 1021
-	CodeTradeQuantityToSmall         sdk.CodeType = 1022
+	CodeTradeQuantityTooSmall        sdk.CodeType = 1022
 	CodeTokenForbiddenByOwner        sdk.CodeType = 1023
 	CodeStockSupplyPrecisionNotMatch sdk.CodeType = 1024
 	CodeErrPriceFmt                  sdk.CodeType = 1025
@@ -107,8 +107,8 @@ func ErrGetMarketPrice(err string) sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeGetMarketExePriceFailed, err)
 }
 
-func ErrTradeQuantityToSmall(amount int64) sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite, CodeTradeQuantityToSmall, "The trade commission (%d) too small", amount)
+func ErrTradeQuantityTooSmall(amount int64) sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeTradeQuantityTooSmall, "The trade commission (%d) too small", amount)
 }
 
 func ErrPriceConfiguration() sdk.Error {

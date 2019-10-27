@@ -1,6 +1,8 @@
 package bankx_test
 
 import (
+	"fmt"
+	"math"
 	"testing"
 	"time"
 
@@ -13,6 +15,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/coinexchain/dex/modules/asset"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -40,7 +43,7 @@ func defaultContext() (*keeper.Keeper, sdk.Handler, sdk.Context) {
 	app.BankxKeeper.SetSendEnabled(ctx, true)
 	handler := bankx.NewHandler(app.BankxKeeper)
 	cet, _ := asset.NewToken("cet", "cet", sdk.NewInt(200000000000000), owner,
-		false, false, false, false,
+		false, false, true, true,
 		"", "", asset.TestIdentityString)
 	_ = app.AssetKeeper.SetToken(ctx, cet)
 	_ = app.AssetKeeper.ForbidAddress(ctx, "cet", owner, []sdk.AccAddress{forbiddenAddr})
@@ -346,4 +349,79 @@ func TestHandleMsgSupervisedSend(t *testing.T) {
 
 	require.Equal(t, sdk.NewInt(90e8), bkx.GetCoins(ctx, fromAddr).AmountOf("cet"))
 	require.Equal(t, sdk.NewInt(8e8), bkx.GetCoins(ctx, toAddr).AmountOf("cet"))
+}
+
+func TestHandleMsgSupervisedSendException(t *testing.T) {
+	bkx, handle, ctx := defaultContext()
+
+	params := bkx.GetParams(ctx)
+	params.LockCoinsFeePerDay = 1e15
+	bkx.SetParams(ctx, params)
+	lockFreeTime := ctx.BlockHeader().Time.Unix() + bkx.GetParams(ctx).LockCoinsFreeTime/int64(time.Second)
+	govModuleAcc := supply.NewEmptyModuleAccount("gov")
+
+	err := bkx.AddCoins(ctx, fromAddr, dex.NewCetCoins(100*1e8))
+	require.NoError(t, err)
+	err = bkx.AddCoins(ctx, toAddr, dex.NewCetCoins(1e8))
+	require.NoError(t, err)
+	err = bkx.AddCoins(ctx, supervisor, dex.NewCetCoins(1e8))
+	require.NoError(t, err)
+	err = bkx.AddCoins(ctx, forbiddenAddr, dex.NewCetCoins(100*1e8))
+	require.NoError(t, err)
+	err = bkx.AddCoins(ctx, govModuleAcc.Address, dex.NewCetCoins(100*1e8))
+	require.NoError(t, err)
+
+	var msgSend bankx.MsgSupervisedSend
+	var ret sdk.Result
+	var emptyAddr sdk.AccAddress
+	newAddr := testutil.ToAccAddress("newaddr")
+	amt := dex.NewCetCoin(3e8)
+
+	bkx.SetSendEnabled(ctx, false)
+	msgSend = bx.NewMsgSupervisedSend(fromAddr, supervisor, toAddr, amt, lockFreeTime, 1e8, bankx.Create)
+	ret = handle(ctx, msgSend)
+	require.False(t, ret.IsOK())
+	bkx.SetSendEnabled(ctx, true)
+
+	now := time.Now()
+	header := abci.Header{Time: now, Height: 10}
+	ctx = ctx.WithBlockHeader(header)
+
+	fmt.Printf("max time < :%v\n", math.MaxInt64/int64(time.Second))
+	fmt.Printf("count:%v\n", math.MaxInt64/int64(24*time.Hour))
+
+	cases := []struct {
+		isOK bool
+		code sdk.CodeType
+		msg  bankx.MsgSupervisedSend
+	}{
+		{false, sdk.CodeUnknownAddress,
+			bx.NewMsgSupervisedSend(fromAddr, supervisor, emptyAddr, amt, lockFreeTime, 1e8, bankx.Create)},
+		{false, sdk.CodeUnknownAddress,
+			bx.NewMsgSupervisedSend(fromAddr, supervisor, newAddr, amt, lockFreeTime, 1e8, bankx.Create)},
+		{false, sdk.CodeUnauthorized,
+			bx.NewMsgSupervisedSend(fromAddr, supervisor, govModuleAcc.Address, amt, lockFreeTime, 1e8, bankx.Create)},
+		{true, sdk.CodeOK,
+			bx.NewMsgSupervisedSend(fromAddr, emptyAddr, toAddr, amt, lockFreeTime, 1e8, bankx.Create)},
+		{false, sdk.CodeUnknownAddress,
+			bx.NewMsgSupervisedSend(fromAddr, newAddr, toAddr, amt, lockFreeTime, 1e8, bankx.Create)},
+		{false, sdk.CodeUnauthorized,
+			bx.NewMsgSupervisedSend(fromAddr, govModuleAcc.Address, toAddr, amt, lockFreeTime, 1e8, bankx.Create)},
+		{false, sdk.CodeInsufficientCoins,
+			bx.NewMsgSupervisedSend(fromAddr, supervisor, toAddr, dex.NewCetCoin(1000e8), lockFreeTime, 1e8, bankx.Create)},
+		{false, bx.CodeInvalidUnlockTime,
+			bx.NewMsgSupervisedSend(fromAddr, supervisor, toAddr, amt, ctx.BlockHeader().Time.Unix()-1, 1e8, bankx.Create)},
+		{false, bx.CodeInvalidUnlockTime,
+			bx.NewMsgSupervisedSend(fromAddr, supervisor, toAddr, amt, ctx.BlockHeader().Time.Unix()+math.MaxInt64/int64(1e9), 1e8, bankx.Create)},
+		{false, bx.CodeTokenForbiddenByOwner,
+			bx.NewMsgSupervisedSend(forbiddenAddr, supervisor, toAddr, amt, lockFreeTime, 1e8, bankx.Create)},
+		{false, bx.CodeLockedCoinNotFound,
+			bx.NewMsgSupervisedSend(forbiddenAddr, supervisor, toAddr, amt, lockFreeTime, 1e8, bankx.Return)},
+	}
+
+	for _, tc := range cases {
+		ret = handle(ctx, tc.msg)
+		require.Equal(t, tc.isOK, ret.IsOK())
+		require.Equal(t, tc.code, ret.Code)
+	}
 }

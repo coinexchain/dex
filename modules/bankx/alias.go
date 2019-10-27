@@ -24,16 +24,16 @@ const (
 var (
 	// functions aliases
 
-	RegisterCodec                        = types.RegisterCodec
-	ParamKeyTable                        = types.ParamKeyTable
-	DefaultParams                        = types.DefaultParams
-	NewParams                            = types.NewParams
-	NewKeeper                            = keeper.NewKeeper
-	NewMsgSend                           = types.NewMsgSend
-	NewMsgSetTransferMemoRequired        = types.NewMsgSetTransferMemoRequired
-	NewMsgMultiSend                      = types.NewMsgMultiSend
-	ErrMemoMissing                       = types.ErrMemoMissing
-	ErrorInsufficientCETForActivatingFee = types.ErrorInsufficientCETForActivatingFee
+	RegisterCodec                      = types.RegisterCodec
+	ParamKeyTable                      = types.ParamKeyTable
+	DefaultParams                      = types.DefaultParams
+	NewParams                          = types.NewParams
+	NewKeeper                          = keeper.NewKeeper
+	NewMsgSend                         = types.NewMsgSend
+	NewMsgSetTransferMemoRequired      = types.NewMsgSetTransferMemoRequired
+	NewMsgMultiSend                    = types.NewMsgMultiSend
+	ErrMemoMissing                     = types.ErrMemoMissing
+	ErrInsufficientCETForActivatingFee = types.ErrInsufficientCETForActivatingFee
 
 	// variable aliases
 

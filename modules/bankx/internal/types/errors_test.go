@@ -9,7 +9,7 @@ import (
 func TestErrMsg(t *testing.T) {
 	err := ErrMemoMissing()
 	require.Equal(t, CodeMemoMissing, err.Code())
-	err = ErrorInsufficientCETForActivatingFee()
+	err = ErrInsufficientCETForActivatingFee()
 	require.Equal(t, CodeInsufficientCETForActivationFee, err.Code())
 	err = ErrUnlockTime("")
 	require.Equal(t, CodeInvalidUnlockTime, err.Code())

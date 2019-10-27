@@ -292,7 +292,7 @@ func (app *TestApp) initKeepers(invCheckPeriod uint) {
 func (app *TestApp) ModuleAccountAddrs() map[string]bool {
 	modAccAddrs := make(map[string]bool)
 	for acc := range dexapp.MaccPerms {
-		modAccAddrs[app.SupplyKeeper.GetModuleAddress(acc).String()] = true
+		modAccAddrs[supply.NewModuleAddress(acc).String()] = true
 	}
 	return modAccAddrs
 }
