@@ -92,10 +92,6 @@ func fillMsgQueue(ctx sdk.Context, keeper keepers.Keeper, key string, msg interf
 }
 
 func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, keeper keepers.Keeper) sdk.Error {
-	if err := msg.ValidateBasic(); err != nil {
-		return err
-	}
-
 	if _, err := keeper.GetMarketInfo(ctx, msg.GetSymbol()); err == nil {
 		return types.ErrRepeatTradingPair()
 	}
@@ -297,9 +293,6 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 }
 
 func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCreateOrder, cetFee int64, amount int64, denom string, seq uint64) sdk.Error {
-	if err := msg.ValidateBasic(); err != nil {
-		return err
-	}
 	if cetFee != 0 {
 		if !keeper.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(dex.CET, sdk.NewInt(cetFee))}) {
 			return types.ErrInsufficientCoins()
@@ -387,10 +380,6 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 }
 
 func checkMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepers.Keeper) sdk.Error {
-	if err := msg.ValidateBasic(); err != nil {
-		return err
-	}
-
 	globalKeeper := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc)
 	order := globalKeeper.QueryOrder(ctx, msg.OrderID)
 	if order == nil {
@@ -435,10 +424,6 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair,
 }
 
 func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTradingPair, ctx sdk.Context) sdk.Error {
-	if err := msg.ValidateBasic(); err != nil {
-		return err
-	}
-
 	marketParams := keeper.GetParams(ctx)
 	currTime := ctx.BlockHeader().Time.UnixNano()
 	if msg.EffectiveTime < currTime+marketParams.MarketMinExpiredTime {
@@ -510,10 +495,6 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrec
 }
 
 func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrecision, k keepers.Keeper) sdk.Error {
-	if err := msg.ValidateBasic(); err != nil {
-		return err
-	}
-
 	info, err := k.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
 		return types.ErrInvalidMarket("Error retrieving market information: " + err.Error())

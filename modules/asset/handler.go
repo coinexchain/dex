@@ -79,10 +79,6 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken
 
 // handleMsgTransferOwnership - Handle MsgTransferOwnership
 func handleMsgTransferOwnership(ctx sdk.Context, keeper Keeper, msg types.MsgTransferOwnership) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.TransferOwnership(ctx, msg.Symbol, msg.OriginalOwner, msg.NewOwner); err != nil {
 		return err.Result()
 	}
@@ -103,10 +99,6 @@ func handleMsgTransferOwnership(ctx sdk.Context, keeper Keeper, msg types.MsgTra
 
 // handleMsgMintToken - Handle MsgMintToken
 func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg types.MsgMintToken) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.MintToken(ctx, msg.Symbol, msg.OwnerAddress, msg.Amount); err != nil {
 		return err.Result()
 	}
@@ -130,9 +122,6 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg types.MsgMintToken) 
 
 // handleMsgBurnToken - Handle MsgBurnToken
 func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg types.MsgBurnToken) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
 	if err := keeper.SendCoinsFromAccountToAssetModule(ctx, msg.OwnerAddress, types.NewTokenCoins(msg.Symbol, msg.Amount)); err != nil {
 		return err.Result()
 	}
@@ -157,10 +146,6 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg types.MsgBurnToken) 
 
 // handleMsgForbidToken - Handle ForbidToken msg
 func handleMsgForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgForbidToken) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.ForbidToken(ctx, msg.Symbol, msg.OwnerAddress); err != nil {
 		return err.Result()
 	}
@@ -180,10 +165,6 @@ func handleMsgForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgForbidTok
 
 // handleMsgUnForbidToken - Handle UnForbidToken msg
 func handleMsgUnForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbidToken) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.UnForbidToken(ctx, msg.Symbol, msg.OwnerAddress); err != nil {
 		return err.Result()
 	}
@@ -203,10 +184,6 @@ func handleMsgUnForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbi
 
 // handleMsgAddTokenWhitelist - Handle AddTokenWhitelist msg
 func handleMsgAddTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.MsgAddTokenWhitelist) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.AddTokenWhitelist(ctx, msg.Symbol, msg.OwnerAddress, msg.Whitelist); err != nil {
 		return err.Result()
 	}
@@ -231,10 +208,6 @@ func handleMsgAddTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.MsgAdd
 
 // handleMsgRemoveTokenWhitelist - Handle RemoveTokenWhitelist msg
 func handleMsgRemoveTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.MsgRemoveTokenWhitelist) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.RemoveTokenWhitelist(ctx, msg.Symbol, msg.OwnerAddress, msg.Whitelist); err != nil {
 		return err.Result()
 	}
@@ -260,10 +233,6 @@ func handleMsgRemoveTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.Msg
 
 // handleMsgForbidAddr - Handle MsgForbidAddr
 func handleMsgForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgForbidAddr) (res sdk.Result) {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.ForbidAddress(ctx, msg.Symbol, msg.OwnerAddr, msg.Addresses); err != nil {
 		return err.Result()
 	}
@@ -289,10 +258,6 @@ func handleMsgForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgForbidAddr
 
 // handleMsgUnForbidAddr - Handle MsgUnForbidAddr
 func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbidAddr) (res sdk.Result) {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.UnForbidAddress(ctx, msg.Symbol, msg.OwnerAddr, msg.Addresses); err != nil {
 		return err.Result()
 	}
@@ -318,10 +283,6 @@ func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbid
 
 // handleMsgModifyTokenInfo - Handle MsgModifyTokenInfo
 func handleMsgModifyTokenInfo(ctx sdk.Context, keeper Keeper, msg types.MsgModifyTokenInfo) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
 	if err := keeper.ModifyTokenInfo(ctx, msg.Symbol, msg.OwnerAddress, msg.URL, msg.Description, msg.Identity); err != nil {
 		return err.Result()
 	}
