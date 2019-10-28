@@ -50,13 +50,10 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
+//return whether addr has enough spendable coins
 func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
-	return k.bk.HasCoins(ctx, addr, amt)
-}
-
-func (k Keeper) SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 	acc := k.ak.GetAccount(ctx, addr)
-	return acc.SpendableCoins(ctx.BlockTime())
+	return acc.SpendableCoins(ctx.BlockTime()).IsAllGTE(amt)
 }
 
 func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {

@@ -87,7 +87,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	//TODO: add codes to check whether fromAccount & toAccount is moduleAccount
 
 	amt := msg.Amount
-	if !k.GetCoins(ctx, msg.FromAddress).IsAllGTE(amt) {
+	if !k.HasCoins(ctx, msg.FromAddress, amt) {
 		return sdk.ErrInsufficientCoins("sender has insufficient coins for the transfer").Result()
 	}
 
@@ -211,7 +211,7 @@ func handleMsgSupervisedSend(ctx sdk.Context, k Keeper, msg types.MsgSupervisedS
 
 	if msg.Operation == types.Create {
 		amt := sdk.NewCoins(msg.Amount)
-		if !k.SpendableCoins(ctx, msg.FromAddress).IsAllGTE(amt) {
+		if !k.HasCoins(ctx, msg.FromAddress, amt) {
 			return sdk.ErrInsufficientCoins("sender has insufficient coin for the transfer").Result()
 		}
 		if err := k.SendLockedCoins(ctx, msg.FromAddress, msg.ToAddress, msg.Supervisor, amt, msg.UnlockTime, msg.Reward, true); err != nil {
