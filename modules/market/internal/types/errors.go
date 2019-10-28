@@ -119,11 +119,11 @@ func ErrInvalidPricePrecisionChange(s string) sdk.Error {
 }
 
 func ErrInvalidPricePrecision(precision byte) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Price precision out of range [0, 18], actual: %d", precision)
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, "Invalid price precision : %d", precision)
 }
 
 func ErrInvalidPrice(price int64) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPrice, "Price out of range [0, 1E18], actual price : %d", price)
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidPrice, "Invalid price : %d", price)
 }
 
 func ErrInvalidTokenIssuer() sdk.Error {
