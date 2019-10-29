@@ -1384,16 +1384,14 @@ func TestCheckMsgModifyPricePrecision(t *testing.T) {
 	ret := createCetMarket(input, stock, 7)
 	require.EqualValues(t, sdk.CodeOK, ret.Code)
 
-	for i := 0; i < 8; i++ {
-		msg.PricePrecision = byte(i)
-		err := checkMsgModifyPricePrecision(input.ctx, msg, input.mk)
-		require.EqualValues(t, types.CodeInvalidPricePrecision, err.Code())
-	}
-
 	// Invalid tx sender
 	msg.PricePrecision = 9
 	msg.Sender = forbidAddr
 	err = checkMsgModifyPricePrecision(input.ctx, msg, input.mk)
 	require.EqualValues(t, types.CodeNotMatchSender, err.Code())
 
+	msg.PricePrecision = 3
+	msg.Sender = forbidAddr
+	err = checkMsgModifyPricePrecision(input.ctx, msg, input.mk)
+	require.EqualValues(t, types.CodeNotMatchSender, err.Code())
 }

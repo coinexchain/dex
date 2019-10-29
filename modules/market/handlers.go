@@ -495,15 +495,9 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrec
 }
 
 func checkMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrecision, k keepers.Keeper) sdk.Error {
-	info, err := k.GetMarketInfo(ctx, msg.TradingPair)
+	_, err := k.GetMarketInfo(ctx, msg.TradingPair)
 	if err != nil {
 		return types.ErrInvalidMarket("Error retrieving market information: " + err.Error())
-	}
-
-	if info.PricePrecision > msg.PricePrecision {
-		return types.ErrInvalidPricePrecisionChange(fmt.Sprintf(
-			"Price Precision can only be increased; tradingPair price_precision : %d, msg price_precision : %d",
-			info.PricePrecision, msg.PricePrecision))
 	}
 
 	stock, _ := SplitSymbol(msg.TradingPair)
