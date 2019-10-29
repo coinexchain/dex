@@ -28,4 +28,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace github.com/cosmos/cosmos-sdk v0.37.0 => ../cosmos-sdk
+replace github.com/cosmos/cosmos-sdk v0.37.0 => github.com/ludete/cosmos-sdk v0.40.1
