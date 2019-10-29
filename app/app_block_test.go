@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/sigbalancer"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/pkg/profile"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -19,7 +21,6 @@ import (
 	sm "github.com/tendermint/tendermint/state"
 	"github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
-	"github.com/pkg/profile"
 
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/modules/market"
@@ -137,6 +138,7 @@ func TestBlockExec(t *testing.T) {
 	defer profile.Start(profile.CPUProfile).Stop()
 	now := time.Now()
 	state, err = blockExec.ApplyBlock(state, blockID, block)
+	fmt.Printf("TotalFinished : %d, TotalRequest : %d\n", sigbalancer.TotalFinished, sigbalancer.TotalRequest)
 	fmt.Println("exec block time :  ", time.Now().Sub(now).Seconds())
 	fmt.Println("exec block time :  ", time.Now().Sub(now).Milliseconds())
 	require.Nil(t, err)
