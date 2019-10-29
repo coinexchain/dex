@@ -95,7 +95,7 @@ Example
 	--time=1000000 --trading-pair=etc/cet --from=bob --chain-id=coinexdex 
 	--gas=1000000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			msg, err := getCancelMarketMsg(cdc)
+			msg, err := getCancelMarketMsg()
 			if err != nil {
 				return err
 			}
@@ -111,7 +111,7 @@ Example
 	return cmd
 }
 
-func getCancelMarketMsg(cdc *codec.Codec) (*types.MsgCancelTradingPair, error) {
+func getCancelMarketMsg() (*types.MsgCancelTradingPair, error) {
 	msg := types.MsgCancelTradingPair{
 		EffectiveTime: viper.GetInt64(FlagTime),
 		TradingPair:   viper.GetString(FlagSymbol),
