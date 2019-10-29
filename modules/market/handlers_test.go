@@ -1101,14 +1101,16 @@ func TestCheckMsgCreateOrder(t *testing.T) {
 	ret = input.mk.SetMarket(input.ctx, mkInfo)
 	require.Nil(t, ret)
 
-	// Forbidden address
+	// Invalid order quantity
 	msg.Sender = haveCetAddress
+	msg.Quantity = 2
 	msg.TradingPair = GetSymbol(money, dex.CET)
 	err = checkMsgCreateOrder(input.ctx, input.mk, msg, 1, 6, dex.CET, math.MaxUint64)
 	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code())
 
 	// Pass
 	msg.Sender = forbidAddr
+	msg.Quantity = 10
 	msg.TradingPair = GetSymbol(money, dex.CET)
 	err = checkMsgCreateOrder(input.ctx, input.mk, msg, 1, 60, dex.CET, math.MaxUint64)
 	require.Nil(t, err)

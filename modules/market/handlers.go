@@ -329,7 +329,7 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 		return types.ErrAddressForbidByIssuer()
 	}
 	baseValue := types.GetGranularityOfOrder(marketInfo.OrderPrecision)
-	if amount%baseValue != 0 {
+	if msg.Quantity%baseValue != 0 {
 		return types.ErrInvalidOrderAmount("The amount of tokens to trade should be a multiple of the order precision")
 	}
 
