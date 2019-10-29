@@ -1,7 +1,6 @@
 package bankx_test
 
 import (
-	"fmt"
 	"math"
 	"testing"
 	"time"
@@ -381,14 +380,12 @@ func TestHandleMsgSupervisedSendException(t *testing.T) {
 	msgSend = bx.NewMsgSupervisedSend(fromAddr, supervisor, toAddr, amt, lockFreeTime, 1e8, bankx.Create)
 	ret = handle(ctx, msgSend)
 	require.False(t, ret.IsOK())
+	require.Equal(t, bank.CodeSendDisabled, ret.Code)
 	bkx.SetSendEnabled(ctx, true)
 
 	now := time.Now()
 	header := abci.Header{Time: now, Height: 10}
 	ctx = ctx.WithBlockHeader(header)
-
-	fmt.Printf("max time < :%v\n", math.MaxInt64/int64(time.Second))
-	fmt.Printf("count:%v\n", math.MaxInt64/int64(24*time.Hour))
 
 	cases := []struct {
 		isOK bool
