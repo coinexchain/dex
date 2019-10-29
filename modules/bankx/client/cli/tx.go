@@ -100,11 +100,18 @@ func SendSupervisedTxCmd(cdc *codec.Codec) *cobra.Command {
 
 Example:
     cetcli tx send supervised-tx coinex1ke3qq22zvzlcdh3j8nenlrjxmvnrna7z426n0x 1000000000cet \
+        --supervisor=coinex1qga320mdvfhr62hcjn78n6pjl3z3vsvgtz2w8t \
+        --unlock-time=1600000000 \
+        --reward=100000000 \
+        --operation=0 \
+        --from=sender_user
+
+    cetcli tx send supervised-tx coinex1ke3qq22zvzlcdh3j8nenlrjxmvnrna7z426n0x 1000000000cet \
         --sender=coinex1hckjvduhckfaxq2tuythfd270cex94c0hv5hs7 \
         --unlock-time=1600000000 \
         --reward=100000000 \
         --operation=1 \
-        --from=local_user
+        --from=supervisor_user
 `,
 
 		Args: cobra.ExactArgs(2),
