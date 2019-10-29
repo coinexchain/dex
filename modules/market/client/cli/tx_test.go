@@ -82,7 +82,7 @@ func TestCmd(t *testing.T) {
 	cmd.SetArgs(args)
 	cliutil.SetViperWithArgs(args)
 	err = cmd.Execute()
-	assert.Equal(t, "ERROR:\nCodespace: market\nCode: 602\nMessage: \"Price precision out of range [0, 18], actual: 32\"\n", err.Error())
+	assert.Equal(t, "ERROR:\nCodespace: market\nCode: 602\nMessage: \"Invalid price precision : 32\"\n", err.Error())
 
 	args = []string{
 		"create-trading-pair",
