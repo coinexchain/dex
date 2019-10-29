@@ -32,7 +32,6 @@ const (
 	CodeRepeatTradingPair      sdk.CodeType = 622
 	CodeDelistNotAllowed       sdk.CodeType = 623
 	CodeInvalidOrderAmount     sdk.CodeType = 624
-	CodeInvalidBancorExist     sdk.CodeType = 625
 	CodeInvalidExistBlocks     sdk.CodeType = 626
 	CodeInvalidTimeInforce     sdk.CodeType = 627
 	CodeUnmarshalFailed        sdk.CodeType = 628
@@ -56,10 +55,6 @@ func ErrInvalidExistBlocks(eb int64) sdk.Error {
 
 func ErrInvalidTimeInforce(tif int64) sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidTimeInforce, fmt.Sprintf("Invalid timeInforce : %d; The valid value : 3, 4", tif))
-}
-
-func ErrFailedUnmarshal() sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeUnmarshalFailed, "unmarshal failed")
 }
 
 func ErrDelistNotAllowed(s string) sdk.Error {
@@ -112,10 +107,6 @@ func ErrTokenNoExist() sdk.Error {
 
 func ErrInvalidOrderID() sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderID, "Invalid order id")
-}
-
-func ErrInvalidPricePrecisionChange(s string) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidPricePrecision, s)
 }
 
 func ErrInvalidPricePrecision(precision byte) sdk.Error {
