@@ -49,6 +49,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 ### Improvements
+* [\#4990](https://github.com/cosmos/cosmos-sdk/issues/4990) Add `Events` to the `ABCIMessageLog` to
+provide context and grouping of events based on the messages they correspond to. The `Events` field
+in `TxResponse` is deprecated and will be removed in the next major release.
 
 *   [\#5](https://github.com/coinexchain/dex/issues/5) The function of modify the price precision is adjusted.
 *   [\#6](https://github.com/coinexchain/dex/issues/6) Add send lock tx events keys.
