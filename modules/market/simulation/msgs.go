@@ -136,7 +136,7 @@ func createMsgCancelTradingPair(r *rand.Rand, ctx sdk.Context, k keepers.Keeper,
 	if err != nil {
 		return types.MsgCancelTradingPair{}, fmt.Errorf("no trading pair to cancel")
 	}
-	timeStamp := simulation.RandTimestamp(r)
+	timeStamp := time.Unix(simulation.RandTimestamp(r).Unix()%11039450954, 0)
 	msg := types.MsgCancelTradingPair{
 		Sender:        fromAddr,
 		TradingPair:   tradingPair.GetSymbol(),
