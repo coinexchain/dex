@@ -451,6 +451,11 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 			fmt.Sprintf("When %s has bancor contracts, you can't delist the %s/cet market", info.Stock, info.Stock))
 	}
 
+	if info.Money == dex.CET && keeper.MarketCountOfStock(ctx, info.Stock) >= 2 {
+		return types.ErrDelistNotAllowed(
+			fmt.Sprintf("When %s has other market with non-cet token as money, you can't delist the %s/cet market", info.Stock, info.Stock))
+	}
+
 	return nil
 }
 
