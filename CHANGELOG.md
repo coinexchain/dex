@@ -51,6 +51,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 *   [\#5](https://github.com/coinexchain/dex/issues/5) The function of modify the price precision is adjusted.
+*   [\#6](https://github.com/coinexchain/dex/issues/6) Add send lock tx events keys.
 
 ### Bug Fixes
 
