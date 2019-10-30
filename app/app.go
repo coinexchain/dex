@@ -15,6 +15,7 @@ import (
 
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/sigbalancer"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
@@ -31,7 +32,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
-	"github.com/cosmos/cosmos-sdk/sigbalancer"
 
 	"github.com/coinexchain/dex/app/plugin"
 	"github.com/coinexchain/dex/modules/alias"
@@ -563,13 +563,26 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 // application updates every end block
 // nolint: unparam
 func (app *CetChainApp) endBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+	var totalFinished int64
+	var isSkip bool
+	//SKIP:
 	for {
-		totalFinished := <-sigbalancer.SyncChan
-		if totalFinished == sigbalancer.TotalRequest {
-			fmt.Printf("Catching %d, now %d\n", sigbalancer.TotalRequest, totalFinished)
+		fmt.Println("hhhhhh")
+		select {
+		case totalFinished = <-sigbalancer.SyncChan:
+			if totalFinished == sigbalancer.TotalRequest {
+				fmt.Printf("Catching %d, now %d\n", sigbalancer.TotalRequest, totalFinished)
+				break
+			}
+		default:
+			isSkip = true
+			//break SKIP
+		}
+		if isSkip {
 			break
 		}
 	}
+
 	ret := app.mm.EndBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
 		ret.Events = collectKafkaEvents(ret.Events, app)
