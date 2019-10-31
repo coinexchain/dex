@@ -2,6 +2,7 @@ package simulation
 
 import (
 	"math/rand"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -14,6 +15,16 @@ import (
 const (
 	alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
 )
+
+// 11013321600
+var unixTime2999 = time.Date(2319, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+
+// RandTimestamp generates a random timestamp
+func RandTimestamp(r *rand.Rand) time.Time {
+	// json.Marshal breaks for timestamps greater with year greater than 9999
+	unixTime := r.Int63n(unixTime2999)
+	return time.Unix(unixTime, 0)
+}
 
 func RandomSymbol(r *rand.Rand, prefix string, randomPartLen int) string {
 	bytes := make([]byte, 0, len(prefix)+randomPartLen)

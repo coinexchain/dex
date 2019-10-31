@@ -117,7 +117,7 @@ func appStateFn(
 	cdc := MakeCodec()
 
 	if genesisTime == 0 {
-		genesisTimestamp = time.Unix(simulation.RandTimestamp(r).Unix()%time.Now().Unix(), 0)
+		genesisTimestamp = dexsim.RandTimestamp(r)
 	} else {
 		genesisTimestamp = time.Unix(genesisTime, 0)
 	}
