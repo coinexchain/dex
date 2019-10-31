@@ -16,13 +16,13 @@ const (
 	alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
 )
 
-// 11013321600
-var unixTime2999 = time.Date(2319, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+// 4701974400
+var unixTime2119 = time.Date(2119, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 
 // RandTimestamp generates a random timestamp
 func RandTimestamp(r *rand.Rand) time.Time {
 	// json.Marshal breaks for timestamps greater with year greater than 9999
-	unixTime := r.Int63n(unixTime2999)
+	unixTime := r.Int63n(unixTime2119)
 	return time.Unix(unixTime, 0)
 }
 
