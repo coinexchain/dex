@@ -17,7 +17,6 @@ endif
 
 GOPATH ?= $(shell $(GO) env GOPATH)
 GITHUBDIR := $(GOPATH)$(FS)src$(FS)github.com
-GOLANGCI_LINT_VERSION := v1.18.0
 GOLANGCI_LINT_HASHSUM := 8d21cc95da8d3daf8321ac40091456fc26123c964d7c2281d339d431f2f4c840
 
 ###
@@ -43,37 +42,33 @@ mkfile_dir := $(shell cd $(shell dirname $(mkfile_path)); pwd)
 ###
 
 TOOLS_DESTDIR  ?= $(GOPATH)/bin
-
-GOLANGCI_LINT   = $(TOOLS_DESTDIR)/golangci-lint
-STATIK          = $(TOOLS_DESTDIR)/statik
-GOIMPORTS       = $(TOOLS_DESTDIR)/goimports
-CLOG            = $(TOOLS_DESTDIR)/clog
-RUNSIM          = $(TOOLS_DESTDIR)/runsim
-
+GOLANGCI_LINT  = $(TOOLS_DESTDIR)/golangci-lint
+RUNSIM         = $(TOOLS_DESTDIR)/runsim
 
 all: tools
 
 tools: tools-stamp
-tools-stamp: $(STATIK) $(GOIMPORTS) $(CLOG) $(GOLANGCI_LINT)
+tools-stamp: $(RUNSIM)
 	touch $@
 
 $(GOLANGCI_LINT): $(mkfile_dir)/install-golangci-lint.sh
-	bash $(mkfile_dir)/install-golangci-lint.sh $(TOOLS_DESTDIR) $(GOLANGCI_LINT_VERSION) $(GOLANGCI_LINT_HASHSUM)
+	@echo "Installing golangci-lint..."
+	@bash $(mkfile_dir)/install-golangci-lint.sh $(TOOLS_DESTDIR) $(GOLANGCI_LINT_HASHSUM)
 
-$(STATIK):
-	$(call go_install,rakyll,statik,v0.1.5)
-
-$(GOIMPORTS):
-	go get golang.org/x/tools/cmd/goimports@v0.0.0-20190114222345-bf090417da8b
-
-$(CLOG):
-	$(call go_install,alessio,clog,1)
-
+# Install the runsim binary with a temporary workaround of entering an outside
+# directory as the "go get" command ignores the -mod option and will polute the
+# go.{mod, sum} files.
+#
+# ref: https://github.com/golang/go/issues/30515
 $(RUNSIM):
-	go install -mod=readonly github.com/cosmos/cosmos-sdk/contrib/runsim
+	@echo "Installing runsim..."
+	@(cd /tmp && go get github.com/cosmos/tools/cmd/runsim@v1.0.0)
+
+golangci-lint: $(GOLANGCI_LINT)
 
 tools-clean:
-	rm -f $(STATIK) $(GOIMPORTS) $(CLOG) $(GOLANGCI_LINT)
+	rm -f $(GOLANGCI_LINT)
+	rm -f $(RUNSIM)
 	rm -f tools-stamp
 
 .PHONY: all tools tools-clean
