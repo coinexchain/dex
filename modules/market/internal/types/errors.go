@@ -146,7 +146,7 @@ func ErrInvalidSymbol() sdk.Error {
 }
 
 func ErrInvalidOrderCommission(err string) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderCommission, "The order commission is invalid : ", err)
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidOrderCommission, "The order commission is invalid : %s", err)
 }
 
 func ErrStockAndMoneyAreSame() sdk.Error {
