@@ -79,7 +79,7 @@ func (k Keeper) SendLockedCoins(ctx sdk.Context, fromAddr, toAddr, supervisor sd
 	if lockDuration > k.GetParams(ctx).LockCoinsFreeTime && k.GetParams(ctx).LockCoinsFeePerDay > 0 {
 		exceededDays := (lockDuration-k.GetParams(ctx).LockCoinsFreeTime-1)/(24*int64(time.Hour)) + 1
 		if exceededDays > math.MaxInt64/k.GetParams(ctx).LockCoinsFeePerDay {
-			return types.ErrUnlockTime("Unlock time is toos large")
+			return types.ErrUnlockTime("Unlock time is too large")
 		}
 		lockCoinsFee := dex.NewCetCoins(k.GetParams(ctx).LockCoinsFeePerDay * exceededDays)
 		if err := k.DeductFee(ctx, fromAddr, lockCoinsFee); err != nil {
