@@ -15,7 +15,7 @@ const (
 	EventTypeUnForbidAddr         = "unforbid_addr"
 	EventTypeModifyTokenInfo      = "modify_token_info"
 
-	AttributeKeyToken         = "token"
+	AttributeKeySymbol        = "symbol"
 	AttributeKeyTokenOwner    = "owner"
 	AttributeKeyOriginalOwner = "original_owner"
 	AttributeKeyAmount        = "amount"

@@ -71,7 +71,7 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken
 		),
 		sdk.NewEvent(
 			types.EventTypeIssueToken,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyTokenOwner, msg.Owner.String()),
 		),
 	})
@@ -95,7 +95,7 @@ func handleMsgTransferOwnership(ctx sdk.Context, keeper Keeper, msg types.MsgTra
 		),
 		sdk.NewEvent(
 			types.EventTypeTransferOwnership,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyTokenOwner, msg.NewOwner.String()),
 			sdk.NewAttribute(types.AttributeKeyOriginalOwner, msg.OriginalOwner.String()),
 		),
@@ -122,7 +122,7 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg types.MsgMintToken) 
 		),
 		sdk.NewEvent(
 			types.EventTypeMintToken,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAmount, msg.Amount.String()),
 		),
 	})
@@ -149,7 +149,7 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg types.MsgBurnToken) 
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
 		),
 		sdk.NewEvent(types.EventTypeBurnToken,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAmount, msg.Amount.String()),
 		),
 	})
@@ -172,7 +172,7 @@ func handleMsgForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgForbidTok
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
 		),
 		sdk.NewEvent(types.EventTypeForbidToken,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 		),
 	})
 
@@ -194,7 +194,7 @@ func handleMsgUnForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbi
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
 		),
 		sdk.NewEvent(types.EventTypeUnForbidToken,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 		),
 	})
 
@@ -221,7 +221,7 @@ func handleMsgAddTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.MsgAdd
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
 		),
 		sdk.NewEvent(types.EventTypeAddTokenWhitelist,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAddrList, str),
 		),
 	})
@@ -248,7 +248,7 @@ func handleMsgRemoveTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.Msg
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
 		),
 		sdk.NewEvent(types.EventTypeRemoveTokenWhitelist,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAddrList, str),
 		),
 	})
@@ -276,7 +276,7 @@ func handleMsgForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgForbidAddr
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddr.String()),
 		),
 		sdk.NewEvent(types.EventTypeForbidAddr,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAddrList, str),
 		),
 	})
@@ -304,7 +304,7 @@ func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbid
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddr.String()),
 		),
 		sdk.NewEvent(types.EventTypeUnForbidAddr,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAddrList, str),
 		),
 	})
@@ -327,7 +327,7 @@ func handleMsgModifyTokenInfo(ctx sdk.Context, keeper Keeper, msg types.MsgModif
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
 		),
 		sdk.NewEvent(types.EventTypeModifyTokenInfo,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
+			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyURL, msg.URL),
 			sdk.NewAttribute(types.AttributeKeyDescription, msg.Description),
 			sdk.NewAttribute(types.AttributeKeyIdentity, msg.Identity),
