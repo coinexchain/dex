@@ -61,42 +61,6 @@ func AssemblyOrderID(userAddr string, seq uint64, identify byte) (string, error)
 	return orderID, nil
 }
 
-type PricePoint struct {
-	Price     sdk.Dec `json:"price"`
-	LeftStock sdk.Int `json:"left_stock"`
-}
-
-type DepthGraph struct {
-	Bids []*PricePoint `json:"bids"`
-	Asks []*PricePoint `json:"asks"`
-}
-
-func CalDepthGraph(orderList []*Order) *DepthGraph {
-	bidMap := make(map[string]int)
-	askMap := make(map[string]int)
-	bidList := make([]*PricePoint, 0, 100)
-	askList := make([]*PricePoint, 0, 100)
-	for _, order := range orderList {
-		p := string(DecToBigEndianBytes(order.Price))
-		if order.Side == BID {
-			if offset, ok := bidMap[p]; ok {
-				bidList[offset].LeftStock = bidList[offset].LeftStock.AddRaw(order.LeftStock)
-			} else {
-				bidList = append(bidList, &PricePoint{Price: order.Price, LeftStock: sdk.NewInt(order.LeftStock)})
-				bidMap[p] = len(bidList)
-			}
-		} else {
-			if offset, ok := askMap[p]; ok {
-				askList[offset].LeftStock = askList[offset].LeftStock.AddRaw(order.LeftStock)
-			} else {
-				askList = append(askList, &PricePoint{Price: order.Price, LeftStock: sdk.NewInt(order.LeftStock)})
-				askMap[p] = len(askList)
-			}
-		}
-	}
-	return &DepthGraph{Bids: bidList, Asks: askList}
-}
-
 func DecToBigEndianBytes(d sdk.Dec) []byte {
 	var result [DecByteCount]byte
 	bytes := d.Int.Bytes() //  returns the absolute value of d as a big-endian byte slice.

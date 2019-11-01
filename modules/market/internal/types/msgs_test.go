@@ -99,11 +99,11 @@ func TestMsgCancelOrder(t *testing.T) {
 	err = msg.ValidateBasic()
 	require.EqualValues(t, CodeInvalidOrderID, err.Code())
 
-	msg.OrderID = addr.String()+"-1-1"
+	msg.OrderID = addr.String() + "-1-1"
 	err = msg.ValidateBasic()
 	require.EqualValues(t, CodeInvalidOrderID, err.Code())
 
-	msg.OrderID = addr.String()+"-abc"
+	msg.OrderID = addr.String() + "-abc"
 	err = msg.ValidateBasic()
 	require.EqualValues(t, CodeInvalidOrderID, err.Code())
 
@@ -112,7 +112,7 @@ func TestMsgCancelOrder(t *testing.T) {
 	require.EqualValues(t, CodeInvalidAddress, err.Code())
 
 	// Success
-	msg.OrderID = addr.String()+"-1"
+	msg.OrderID = addr.String() + "-1"
 	err = msg.ValidateBasic()
 	require.EqualValues(t, nil, err)
 }
@@ -156,9 +156,9 @@ func TestMsgCreateTradingPair(t *testing.T) {
 func TestMsgCancelTradingPair(t *testing.T) {
 	addr, failed := sdk.AccAddressFromHex("0123456789012345678901234567890123423456")
 	require.Nil(t, failed)
-	msg := MsgCancelTradingPair {
-		Sender:       addr,
-		TradingPair:  "abc/cet",
+	msg := MsgCancelTradingPair{
+		Sender:        addr,
+		TradingPair:   "abc/cet",
 		EffectiveTime: 10000,
 	}
 	err := msg.ValidateBasic()
@@ -197,9 +197,9 @@ func TestMsgCancelOrder_GetSignBytes(t *testing.T) {
 func TestMsgModifyPricePrecision(t *testing.T) {
 	addr, failed := sdk.AccAddressFromHex("0123456789012345678901234567890123423456")
 	require.Nil(t, failed)
-	msg := MsgModifyPricePrecision {
-		Sender:       addr,
-		TradingPair:  "abc/cet",
+	msg := MsgModifyPricePrecision{
+		Sender:         addr,
+		TradingPair:    "abc/cet",
 		PricePrecision: 10,
 	}
 	err := msg.ValidateBasic()
@@ -227,5 +227,3 @@ func TestMsgModifyPricePrecision(t *testing.T) {
 	err = msg.ValidateBasic()
 	require.EqualValues(t, ErrInvalidPricePrecision(msg.PricePrecision), err)
 }
-
-
