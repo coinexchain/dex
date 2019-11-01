@@ -205,13 +205,6 @@ func handleMsgSupervisedSend(ctx sdk.Context, k Keeper, msg types.MsgSupervisedS
 		return types.ErrUnlockTime("Invalid Unlock Time:" + fmt.Sprintf("%d < %d", msg.UnlockTime, ctx.BlockHeader().Time.Unix())).Result()
 	}
 
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-		),
-	)
-
 	if msg.Operation == types.Create {
 		amt := sdk.NewCoins(msg.Amount)
 		if !k.HasCoins(ctx, msg.FromAddress, amt) {
@@ -234,6 +227,22 @@ func handleMsgSupervisedSend(ctx sdk.Context, k Keeper, msg types.MsgSupervisedS
 		fillMsgQueue(ctx, k, "notify_unlock", unlockInfo)
 	}
 
+	sender := msg.FromAddress
+	if msg.Operation == types.Return || msg.Operation == types.EarlierUnlockBySupervisor {
+		sender = msg.Supervisor
+	}
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(types.AttributeKeySender, sender.String()),
+		),
+		sdk.NewEvent(
+			types.EventTypeTransfer,
+			sdk.NewAttribute(types.AttributeKeyRecipient, msg.ToAddress.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
+		),
+	})
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
 	}
