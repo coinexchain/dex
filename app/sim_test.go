@@ -22,6 +22,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	authsim "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	distrsim "github.com/cosmos/cosmos-sdk/x/distribution/simulation"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
@@ -862,7 +863,15 @@ func TestAppStateDeterminism(t *testing.T) {
 		for j := 0; j < numTimesToRunPerSeed; j++ {
 			logger := log.NewNopLogger()
 			db := dbm.NewMemDB()
-			app := NewCetChainApp(logger, db, nil, true, 0)
+			app := NewCetChainApp(logger, db, nil, false, 0)
+			// intercept InitChainer to create fee_collector account
+			app.SetInitChainer(func(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+				app.supplyKeeper.GetModuleAccount(app.NewContext(false, abci.Header{}), auth.FeeCollectorName)
+				return app.initChainer(ctx, req)
+			})
+			if err := app.LoadLatestVersion(app.keyMain); err != nil {
+				panic(err)
+			}
 
 			fmt.Printf(
 				"Running non-determinism simulation; seed: %d/%d (%d), attempt: %d/%d\n",
