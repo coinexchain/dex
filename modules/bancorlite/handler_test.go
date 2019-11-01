@@ -142,7 +142,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want sdk.Result
+		want string
 	}{
 		{
 			name: "not stock owner",
@@ -159,7 +159,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					EarliestCancelTime: 0,
 				},
 			},
-			want: types.ErrNonOwnerIsProhibited().Result(),
+			want: types.ErrNonOwnerIsProhibited().Result().Log,
 		},
 		{
 			name: "positive",
@@ -176,7 +176,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					EarliestCancelTime: 0,
 				},
 			},
-			want: sdk.Result{},
+			want: sdk.Result{}.Log,
 		},
 		{
 			name: "money is cet",
@@ -193,7 +193,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					EarliestCancelTime: 0,
 				},
 			},
-			want: sdk.Result{},
+			want: sdk.Result{}.Log,
 		},
 		{
 			name: "stock not exist",
@@ -210,7 +210,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					EarliestCancelTime: 0,
 				},
 			},
-			want: types.ErrNoSuchToken().Result(),
+			want: types.ErrNoSuchToken().Result().Log,
 		},
 		{
 			name: "trading pair already exist",
@@ -227,7 +227,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					EarliestCancelTime: 0,
 				},
 			},
-			want: types.ErrBancorAlreadyExists().Result(),
+			want: types.ErrBancorAlreadyExists().Result().Log,
 		},
 		{
 			name: "market trading pair not exist",
@@ -244,7 +244,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					EarliestCancelTime: 0,
 				},
 			},
-			want: types.ErrNonMarketExist().Result(),
+			want: types.ErrNonMarketExist().Result().Log,
 		},
 		{
 			name: "sender does not have enough stock to sell",
@@ -261,13 +261,13 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					EarliestCancelTime: 0,
 				},
 			},
-			want: types.ErrNonMarketExist().Result(),
+			want: types.ErrNonMarketExist().Result().Log,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := input.handler(tt.args.ctx, tt.args.msg); !reflect.DeepEqual(got, tt.want) {
+			if got := input.handler(tt.args.ctx, tt.args.msg).Log; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("handleMsgBancorInit() = %v, want %v", got, tt.want)
 			}
 		})
@@ -471,7 +471,7 @@ func Test_BancorCancel(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want sdk.Result
+		want string
 	}{
 		{
 			name: "negative token",
@@ -484,7 +484,7 @@ func Test_BancorCancel(t *testing.T) {
 					Money: money,
 				},
 			},
-			want: types.ErrNotBancorOwner().Result(),
+			want: types.ErrNotBancorOwner().Result().Log,
 		},
 		{
 			name: "cancel succeed",
@@ -497,7 +497,7 @@ func Test_BancorCancel(t *testing.T) {
 					Money: money,
 				},
 			},
-			want: sdk.Result{},
+			want: sdk.Result{}.Log,
 		},
 		{
 			name: "bancor does not exist",
@@ -510,13 +510,13 @@ func Test_BancorCancel(t *testing.T) {
 					Money: stock,
 				},
 			},
-			want: types.ErrNoBancorExists().Result(),
+			want: types.ErrNoBancorExists().Result().Log,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := input.handler(tt.args.ctx, tt.args.msgCancel); !reflect.DeepEqual(got, tt.want) {
+			if got := input.handler(tt.args.ctx, tt.args.msgCancel).Log; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("handleMsgBancorTrade() = %v, want %v", got, tt.want)
 			}
 		})

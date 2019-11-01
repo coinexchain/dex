@@ -105,7 +105,7 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, re
 				redelegationMsgList = append(redelegationMsgList, val)
 				i++
 			}
-		} else if events[i].Type == "transfer" && i+1 <= len(events) {
+		} else if events[i].Type == "transfer" && i+2 <= len(events) {
 			val := getTransferRecord(events[i : i+2])
 			transfers = append(transfers, val)
 			i++
