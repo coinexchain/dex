@@ -8,12 +8,17 @@ import (
 	"plugin"
 	"runtime/debug"
 	"sync/atomic"
-	"syscall"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/log"
 )
+
+var reloadPluginSignal os.Signal
+
+func SetReloadPluginSignal(signal os.Signal) {
+	reloadPluginSignal = signal
+}
 
 func (loader *Holder) WaitPluginToggleSignal(logger log.Logger) {
 	loader.logger = logger
@@ -25,7 +30,7 @@ func (loader *Holder) WaitPluginToggleSignal(logger log.Logger) {
 	}
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGUSR1)
+	signal.Notify(c, reloadPluginSignal)
 	go togglePlugin(c)
 }
 

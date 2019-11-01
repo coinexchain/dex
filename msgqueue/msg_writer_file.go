@@ -4,10 +4,17 @@ import (
 	"bytes"
 	"io"
 	"os"
-	"syscall"
 )
 
 var _ MsgWriter = fileMsgWriter{}
+
+type MkFifoFunc func(path string, mode uint32) (err error)
+
+var mkFifoFunc MkFifoFunc
+
+func SetMkFifoFunc(mkFifo MkFifoFunc) {
+	mkFifoFunc = mkFifo
+}
 
 type fileMsgWriter struct {
 	io.WriteCloser
@@ -20,7 +27,7 @@ func NewStdOutMsgWriter() MsgWriter {
 func NewPipeMsgWriter(pipe string) (MsgWriter, error) {
 	file, err := os.OpenFile(pipe, os.O_RDWR, 0666)
 	if os.IsNotExist(err) {
-		err := syscall.Mkfifo(pipe, 0666)
+		err := mkFifoFunc(pipe, 0666)
 		if err != nil {
 			return fileMsgWriter{}, err
 		}

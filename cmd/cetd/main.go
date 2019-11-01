@@ -3,7 +3,12 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"syscall"
 	"time"
+
+	"github.com/coinexchain/dex/msgqueue"
+
+	"github.com/coinexchain/dex/app/plugin"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -37,6 +42,9 @@ const flagInvCheckPeriod = "inv-check-period"
 var invCheckPeriod uint
 
 func main() {
+	plugin.SetReloadPluginSignal(syscall.SIGUSR1)
+	msgqueue.SetMkFifoFunc(syscall.Mkfifo)
+
 	dex.InitSdkConfig()
 	rootCmd := createCetdCmd()
 

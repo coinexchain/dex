@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -110,6 +111,8 @@ func TestDirMsgWriter(t *testing.T) {
 }
 
 func TestNewPipeMsgWriter(t *testing.T) {
+	SetMkFifoFunc(syscall.Mkfifo)
+
 	pipeName := "/tmp/pipe.ipc"
 	w, err := NewPipeMsgWriter(pipeName)
 	require.Nil(t, err)
