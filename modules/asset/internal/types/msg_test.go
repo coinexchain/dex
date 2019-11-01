@@ -387,6 +387,11 @@ func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
 			NewMsgForbidAddr("abc", testAddr, []sdk.AccAddress{}),
 			ErrNilForbiddenAddress(),
 		},
+		{
+			"case-forbidSelf",
+			NewMsgForbidAddr("abc", testAddr, []sdk.AccAddress{testAddr}),
+			ErrTokenOwnerSelfForbidden(),
+		},
 	}
 
 	for _, tt := range tests {
