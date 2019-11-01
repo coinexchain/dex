@@ -168,7 +168,10 @@ func handleMsgSetMemoRequired(ctx sdk.Context, k Keeper, msg types.MsgSetMemoReq
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(types.AttributeKeyAddr, addr.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, addr.String()),
+		),
+		sdk.NewEvent(
+			types.EventTypeTransfer,
 			sdk.NewAttribute(types.AttributeKeyMemoRequired, fmt.Sprintf("%v", required)),
 		),
 	})

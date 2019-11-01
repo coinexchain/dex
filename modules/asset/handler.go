@@ -64,10 +64,14 @@ func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
+		),
+		sdk.NewEvent(
+			types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyTokenOwner, msg.Owner.String()),
 		),
 	})
@@ -84,10 +88,14 @@ func handleMsgTransferOwnership(ctx sdk.Context, keeper Keeper, msg types.MsgTra
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OriginalOwner.String()),
+		),
+		sdk.NewEvent(
+			types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyTokenOwner, msg.NewOwner.String()),
 			sdk.NewAttribute(types.AttributeKeyOriginalOwner, msg.OriginalOwner.String()),
 		),
@@ -107,10 +115,14 @@ func handleMsgMintToken(ctx sdk.Context, keeper Keeper, msg types.MsgMintToken) 
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
+		),
+		sdk.NewEvent(
+			types.EventTypeAsset,
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyMintAmount, msg.Amount.String()),
 		),
 	})
@@ -131,10 +143,13 @@ func handleMsgBurnToken(ctx sdk.Context, keeper Keeper, msg types.MsgBurnToken) 
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
+		),
 		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyMintAmount, msg.Amount.String()),
 		),
 	})
@@ -151,10 +166,13 @@ func handleMsgForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgForbidTok
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
+		),
 		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 		),
 	})
 
@@ -170,10 +188,13 @@ func handleMsgUnForbidToken(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbi
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
+		),
 		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 		),
 	})
 
@@ -194,10 +215,13 @@ func handleMsgAddTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.MsgAdd
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
+		),
 		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAddWhitelist, str),
 		),
 	})
@@ -218,10 +242,13 @@ func handleMsgRemoveTokenWhitelist(ctx sdk.Context, keeper Keeper, msg types.Msg
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
+		),
 		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyRemoveWhitelist, str),
 		),
 	})
@@ -243,10 +270,13 @@ func handleMsgForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgForbidAddr
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddr.String()),
+		),
 		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAddr, str),
 		),
 	})
@@ -268,10 +298,13 @@ func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbid
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddr.String()),
+		),
 		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyAddr, str),
 		),
 	})
@@ -288,18 +321,15 @@ func handleMsgModifyTokenInfo(ctx sdk.Context, keeper Keeper, msg types.MsgModif
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.OwnerAddress.String()),
+		),
 		sdk.NewEvent(types.EventTypeAsset,
-			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
+			sdk.NewAttribute(types.AttributeKeyToken, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyURL, msg.URL),
-		),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
 			sdk.NewAttribute(types.AttributeKeyDescription, msg.Description),
-		),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, "asset"),
 			sdk.NewAttribute(types.AttributeKeyIdentity, msg.Identity),
 		),
 	})

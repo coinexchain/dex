@@ -81,7 +81,21 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 
 	fillMsgQueue(ctx, k, KafkaBancorInfo, *bi)
 
-	return sdk.Result{}
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			EventTypeBancorlite,
+			sdk.NewAttribute(AttributeKeyTradeFor, bi.GetSymbol()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
+		),
+	})
+
+	return sdk.Result{
+		Events: ctx.EventManager().Events(),
+	}
 }
 
 func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel) sdk.Result {
@@ -110,7 +124,21 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 		return err.Result()
 	}
 
-	return sdk.Result{}
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			EventTypeBancorlite,
+			sdk.NewAttribute(AttributeKeyTradeFor, bi.GetSymbol()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
+		),
+	})
+
+	return sdk.Result{
+		Events: ctx.EventManager().Events(),
+	}
 }
 
 func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) sdk.Result {
@@ -209,16 +237,17 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		sdk.NewEvent(
 			EventTypeBancorlite,
 			sdk.NewAttribute(AttributeKeyTradeFor, bi.GetSymbol()),
-		),
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 			sdk.NewAttribute(AttributeNewStockInPool, biNew.StockInPool.String()),
 			sdk.NewAttribute(AttributeNewMoneyInPool, biNew.MoneyInPool.String()),
 			sdk.NewAttribute(AttributeNewPrice, biNew.Price.String()),
 			sdk.NewAttribute(AttributeTradeSide, sideStr),
 			sdk.NewAttribute(AttributeCoinsFromPool, coinsFromPool.String()),
 			sdk.NewAttribute(AttributeCoinsToPool, coinsToPool.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})
 

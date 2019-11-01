@@ -28,7 +28,7 @@ func handleMsgDonateToCommunityPool(ctx sdk.Context, k Keeper, msg types.MsgDona
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(types.AttributeKeyDonator, msg.FromAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.FromAddr.String()),
 		),
 	})
 	return sdk.Result{

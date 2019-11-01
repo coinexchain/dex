@@ -68,15 +68,15 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 		sdk.NewEvent(
 			EventTypeMarket,
 			sdk.NewAttribute(AttributeKeyTradingPair, msg.GetSymbol()),
+			sdk.NewAttribute(AttributeKeyStock, msg.Stock),
+			sdk.NewAttribute(AttributeKeyMoney, msg.Money),
+			sdk.NewAttribute(AttributeKeyPricePrecision, strconv.Itoa(int(info.PricePrecision))),
+			sdk.NewAttribute(AttributeKeyLastExecutePrice, info.LastExecutedPrice.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(AttributeKeyStock, msg.Stock),
-			sdk.NewAttribute(AttributeKeyMoney, msg.Money),
-			sdk.NewAttribute(AttributeKeySender, msg.Creator.String()),
-			sdk.NewAttribute(AttributeKeyPricePrecision, strconv.Itoa(int(info.PricePrecision))),
-			sdk.NewAttribute(AttributeKeyLastExecutePrice, info.LastExecutedPrice.String()),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Creator.String()),
 		),
 	})
 
@@ -279,13 +279,17 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	sendCreateOrderMsg(ctx, keeper, order, featureFee)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
-			AttributeKeyOrder, order.OrderID())),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(AttributeKeySender, msg.Sender.String()),
+		sdk.NewEvent(
+			EventTypeMarket,
+			sdk.NewAttribute(AttributeKeyOrder, order.OrderID()),
 			sdk.NewAttribute(AttributeKeyTradingPair, order.TradingPair),
-			sdk.NewAttribute(AttributeKeyHeight, strconv.FormatInt(order.Height, 10))),
+			sdk.NewAttribute(AttributeKeyHeight, strconv.FormatInt(order.Height, 10)),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
+		),
 	})
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
@@ -364,14 +368,17 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 	fillMsgQueue(ctx, keeper, types.CancelOrderInfoKey, msgInfo)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
-			AttributeKeyOrder, order.OrderID())),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewEvent(
+			EventTypeMarket,
+			sdk.NewAttribute(AttributeKeyOrder, order.OrderID()),
 			sdk.NewAttribute(AttributeKeyDelOrderReason, types.CancelOrderByManual),
-			sdk.NewAttribute(AttributeKeySender, msg.Sender.String()),
 			sdk.NewAttribute(AttributeKeyDelOrderHeight, strconv.Itoa(int(ctx.BlockHeight()))),
 			sdk.NewAttribute(AttributeKeyTradingPair, order.TradingPair),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})
 	return sdk.Result{
@@ -409,12 +416,15 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair,
 	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.TradingPair)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
-			AttributeKeyTradingPair, msg.TradingPair)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewEvent(
+			EventTypeMarket,
+			sdk.NewAttribute(AttributeKeyTradingPair, msg.TradingPair),
 			sdk.NewAttribute(AttributeKeyEffectiveTime, strconv.Itoa(int(msg.EffectiveTime))),
-			sdk.NewAttribute(AttributeKeySender, msg.Sender.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})
 
@@ -480,13 +490,17 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrec
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
-		sdk.NewEvent(EventTypeMarket, sdk.NewAttribute(
-			AttributeKeyTradingPair, msg.TradingPair)),
-		sdk.NewEvent(sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(AttributeKeySender, msg.Sender.String()),
+		sdk.NewEvent(
+			EventTypeMarket,
+			sdk.NewAttribute(AttributeKeyTradingPair, msg.TradingPair),
 			sdk.NewAttribute(AttributeKeyOldPricePrecision, strconv.Itoa(int(oldInfo.PricePrecision))),
-			sdk.NewAttribute(AttributeKeyNewPricePrecision, strconv.Itoa(int(info.PricePrecision)))),
+			sdk.NewAttribute(AttributeKeyNewPricePrecision, strconv.Itoa(int(info.PricePrecision))),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
+		),
 	})
 
 	return sdk.Result{
