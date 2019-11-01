@@ -4,17 +4,17 @@ package bancorlite
 var (
 	EventTypeBancorlite = "bancorlite"
 
-	AttributeKeyCreateFor = "create-for"
-	AttributeKeyTradeFor  = "trade-for"
+	AttributeKeyCreateFor = "create_for"
+	AttributeKeyTradeFor  = "trade_for"
 
-	AttributeOwner          = "bancor-owner"
-	AttributeMaxSupply      = "bancor-max-supply"
-	AttributeNewStockInPool = "bancor-new-stock-in-pool"
-	AttributeNewMoneyInPool = "bancor-new-money-in-pool"
-	AttributeNewPrice       = "bancor-new-price"
-	AttributeCoinsFromPool  = "bancor-coins-from-pool"
-	AttributeCoinsToPool    = "bancor-coins-to-pool"
-	AttributeTradeSide      = "bancor-trade-side"
+	AttributeOwner          = "bancor_owner"
+	AttributeMaxSupply      = "bancor_max_supply"
+	AttributeNewStockInPool = "bancor_new_stock_in_pool"
+	AttributeNewMoneyInPool = "bancor_new_money_in_pool"
+	AttributeNewPrice       = "bancor_new_price"
+	AttributeCoinsFromPool  = "bancor_coins_from_pool"
+	AttributeCoinsToPool    = "bancor_coins_to_pool"
+	AttributeTradeSide      = "bancor_trade_side"
 
 	KafkaBancorTrade  = "bancor_trade"
 	KafkaBancorCreate = "bancor_create"

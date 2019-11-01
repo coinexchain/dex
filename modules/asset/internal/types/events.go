@@ -5,10 +5,10 @@ const (
 
 	AttributeKeyToken           = "token"
 	AttributeKeyTokenOwner      = "owner"
-	AttributeKeyOriginalOwner   = "original-owner"
+	AttributeKeyOriginalOwner   = "original_owner"
 	AttributeKeyMintAmount      = "mint-amount"
-	AttributeKeyAddWhitelist    = "add-white-list"
-	AttributeKeyRemoveWhitelist = "remove-white-list"
+	AttributeKeyAddWhitelist    = "add_white_list"
+	AttributeKeyRemoveWhitelist = "remove_white_list"
 	AttributeKeyAddr            = "address"
 	AttributeKeyURL             = "url"
 	AttributeKeyDescription     = "description"
