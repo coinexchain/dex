@@ -66,7 +66,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeMarket,
+			EventTypeKeyCreateTradingPair,
 			sdk.NewAttribute(AttributeKeyTradingPair, msg.GetSymbol()),
 			sdk.NewAttribute(AttributeKeyStock, msg.Stock),
 			sdk.NewAttribute(AttributeKeyMoney, msg.Money),
@@ -75,7 +75,7 @@ func handleMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair,
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Creator.String()),
 		),
 	})
@@ -280,14 +280,14 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeMarket,
+			EventTypeKeyCreateOrder,
 			sdk.NewAttribute(AttributeKeyOrder, order.OrderID()),
 			sdk.NewAttribute(AttributeKeyTradingPair, order.TradingPair),
 			sdk.NewAttribute(AttributeKeyHeight, strconv.FormatInt(order.Height, 10)),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})
@@ -369,7 +369,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeMarket,
+			EventTypeKeyCancelOrder,
 			sdk.NewAttribute(AttributeKeyOrder, order.OrderID()),
 			sdk.NewAttribute(AttributeKeyDelOrderReason, types.CancelOrderByManual),
 			sdk.NewAttribute(AttributeKeyDelOrderHeight, strconv.Itoa(int(ctx.BlockHeight()))),
@@ -377,7 +377,7 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})
@@ -417,13 +417,13 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair,
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeMarket,
+			EventTypeKeyCancelTradingPair,
 			sdk.NewAttribute(AttributeKeyTradingPair, msg.TradingPair),
 			sdk.NewAttribute(AttributeKeyEffectiveTime, strconv.Itoa(int(msg.EffectiveTime))),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})
@@ -491,14 +491,14 @@ func handleMsgModifyPricePrecision(ctx sdk.Context, msg types.MsgModifyPricePrec
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeMarket,
+			EventTypeKeyModifyPricePrecision,
 			sdk.NewAttribute(AttributeKeyTradingPair, msg.TradingPair),
 			sdk.NewAttribute(AttributeKeyOldPricePrecision, strconv.Itoa(int(oldInfo.PricePrecision))),
 			sdk.NewAttribute(AttributeKeyNewPricePrecision, strconv.Itoa(int(info.PricePrecision))),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})

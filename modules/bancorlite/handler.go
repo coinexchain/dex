@@ -83,12 +83,13 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeBancorlite,
-			sdk.NewAttribute(AttributeKeyTradeFor, bi.GetSymbol()),
+			EventTypeKeyBancorInit,
+			sdk.NewAttribute(AttributeSymbol, bi.GetSymbol()),
+			sdk.NewAttribute(AttributeOwner, bi.Owner.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
 		),
 	})
@@ -126,12 +127,12 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeBancorlite,
-			sdk.NewAttribute(AttributeKeyTradeFor, bi.GetSymbol()),
+			EventTypeKeyBancorCancel,
+			sdk.NewAttribute(AttributeSymbol, bi.GetSymbol()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Owner.String()),
 		),
 	})
@@ -235,8 +236,8 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeBancorlite,
-			sdk.NewAttribute(AttributeKeyTradeFor, bi.GetSymbol()),
+			EventTypeKeyBancorTrade,
+			sdk.NewAttribute(AttributeSymbol, bi.GetSymbol()),
 			sdk.NewAttribute(AttributeNewStockInPool, biNew.StockInPool.String()),
 			sdk.NewAttribute(AttributeNewMoneyInPool, biNew.MoneyInPool.String()),
 			sdk.NewAttribute(AttributeNewPrice, biNew.Price.String()),
@@ -246,7 +247,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})

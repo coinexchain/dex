@@ -125,8 +125,9 @@ func lockedSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeTransfer,
+			sdk.NewAttribute(types.AttributeKeySender, fromAddr.String()),
 			sdk.NewAttribute(types.AttributeKeyRecipient, toAddr.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, amt.String()),
+			sdk.NewAttribute(types.AttributeKeyAmount, amt.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -145,7 +146,12 @@ func normalSend(ctx sdk.Context, k Keeper, fromAddr, toAddr sdk.AccAddress, amt 
 	}
 
 	//fillMsgQueue(ctx, k, "send_coins", types.NewMsgSend(fromAddr, toAddr, amt, 0))
-
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeTransfer,
+			sdk.NewAttribute(types.AttributeKeySender, fromAddr.String()),
+		),
+	})
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
 	}

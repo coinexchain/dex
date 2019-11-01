@@ -1,16 +1,26 @@
 package types
 
 const (
-	EventTypeAsset = "asset"
+	AttributeValueCategory = ModuleName
 
-	AttributeKeyToken           = "token"
-	AttributeKeyTokenOwner      = "owner"
-	AttributeKeyOriginalOwner   = "original_owner"
-	AttributeKeyMintAmount      = "mint-amount"
-	AttributeKeyAddWhitelist    = "add_white_list"
-	AttributeKeyRemoveWhitelist = "remove_white_list"
-	AttributeKeyAddr            = "address"
-	AttributeKeyURL             = "url"
-	AttributeKeyDescription     = "description"
-	AttributeKeyIdentity        = "identity"
+	EventTypeIssueToken           = "issue_token"
+	EventTypeTransferOwnership    = "transfer_ownership"
+	EventTypeMintToken            = "mint_token"
+	EventTypeBurnToken            = "burn_token"
+	EventTypeForbidToken          = "forbid_token"
+	EventTypeUnForbidToken        = "unforbid_token"
+	EventTypeAddTokenWhitelist    = "add_token_whitelist"
+	EventTypeRemoveTokenWhitelist = "remove_token_whitelist"
+	EventTypeForbidAddr           = "forbid_addr"
+	EventTypeUnForbidAddr         = "unforbid_addr"
+	EventTypeModifyTokenInfo      = "modify_token_info"
+
+	AttributeKeyToken         = "token"
+	AttributeKeyTokenOwner    = "owner"
+	AttributeKeyOriginalOwner = "original_owner"
+	AttributeKeyAmount        = "amount"
+	AttributeKeyAddrList      = "address_list"
+	AttributeKeyURL           = "url"
+	AttributeKeyDescription   = "description"
+	AttributeKeyIdentity      = "identity"
 )

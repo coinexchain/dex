@@ -2,7 +2,13 @@ package market
 
 // Market module event types
 var (
-	EventTypeMarket = "market"
+	AttributeValueCategory = ModuleName
+
+	EventTypeKeyCreateTradingPair    = "create_market"
+	EventTypeKeyCreateOrder          = "create_order"
+	EventTypeKeyCancelOrder          = "cancel_order"
+	EventTypeKeyCancelTradingPair    = "cancel_market"
+	EventTypeKeyModifyPricePrecision = "modify_price_precision"
 
 	AttributeKeyTradingPair      = "trading_pair"
 	AttributeKeyOrder            = "order"

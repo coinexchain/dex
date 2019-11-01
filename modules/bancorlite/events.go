@@ -2,11 +2,13 @@ package bancorlite
 
 // Market module event types
 var (
-	EventTypeBancorlite = "bancorlite"
+	AttributeValueCategory = ModuleName
 
-	AttributeKeyCreateFor = "create_for"
-	AttributeKeyTradeFor  = "trade_for"
+	EventTypeKeyBancorInit   = "bancor_init"
+	EventTypeKeyBancorTrade  = "bancor_trade"
+	EventTypeKeyBancorCancel = "bancor_cancel"
 
+	AttributeSymbol         = "symbol"
 	AttributeOwner          = "bancor_owner"
 	AttributeMaxSupply      = "bancor_max_supply"
 	AttributeNewStockInPool = "bancor_new_stock_in_pool"
