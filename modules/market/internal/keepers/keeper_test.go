@@ -127,8 +127,13 @@ func TestKeeper_SetMarket(t *testing.T) {
 	infos := keeper.GetAllMarketInfos(ctx)
 	assert.Equal(t, len(infos), 2)
 
+	assert.Equal(t, int64(0), keeper.MarketCountOfStock(ctx, "abb"))
+	assert.Equal(t, int64(1), keeper.MarketCountOfStock(ctx, "abc"))
+
 	err = keeper.RemoveMarket(ctx, "abc/abb")
 	assert.Nil(t, err)
+
+	assert.Equal(t, int64(0), keeper.MarketCountOfStock(ctx, "abc"))
 
 	info, e := keeper.GetMarketInfo(ctx, "abd/abb")
 	assert.Nil(t, e)
@@ -143,4 +148,34 @@ func TestKeeper_SetMarket(t *testing.T) {
 
 	no := keeper.IsMarketExist(ctx, "abc/abb")
 	assert.False(t, no)
+
+	info3 := market.MarketInfo{
+		Stock:             "abc",
+		Money:             "xyz",
+		PricePrecision:    8,
+		LastExecutedPrice: sdk.NewDec(10),
+	}
+	err = keeper.SetMarket(ctx, info3)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(1), keeper.MarketCountOfStock(ctx, "abc"))
+
+	info3 = market.MarketInfo{
+		Stock:             "abc",
+		Money:             "btc",
+		PricePrecision:    8,
+		LastExecutedPrice: sdk.NewDec(10),
+	}
+	err = keeper.SetMarket(ctx, info3)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(2), keeper.MarketCountOfStock(ctx, "abc"))
+
+	info3 = market.MarketInfo{
+		Stock:             "abc",
+		Money:             "usdt",
+		PricePrecision:    8,
+		LastExecutedPrice: sdk.NewDec(10),
+	}
+	err = keeper.SetMarket(ctx, info3)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(3), keeper.MarketCountOfStock(ctx, "abc"))
 }
