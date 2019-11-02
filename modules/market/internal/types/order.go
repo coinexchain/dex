@@ -30,22 +30,15 @@ func (or *Order) OrderID() string {
 	return orderID
 }
 
-func (or *Order) CalOrderFee(feeForZeroDeal int64) sdk.Dec {
-	actualFee := sdk.NewDec(or.DealStock).Mul(sdk.NewDec(or.FrozenFee)).Quo(sdk.NewDec(or.Quantity))
-	if or.DealStock == 0 {
-		actualFee = sdk.NewDec(feeForZeroDeal)
-	}
-	return actualFee.TruncateDec()
-}
-
 func (or *Order) CalOrderFeeInt64(feeForZeroDeal int64) int64 {
 	actualFee := sdk.NewDec(or.DealStock).Mul(sdk.NewDec(or.FrozenFee)).Quo(sdk.NewDec(or.Quantity))
 	if or.DealStock == 0 {
 		actualFee = sdk.NewDec(feeForZeroDeal)
 	}
-	if actualFee.GT(sdk.NewDec(MaxOrderAmount)) {
+	moa := sdk.NewDec(MaxOrderAmount)
+	if actualFee.GT(moa) {
 		//should not reach this clause in production, add it for safety
-		actualFee = sdk.ZeroDec()
+		actualFee = moa
 	}
 	return actualFee.TruncateInt64()
 }
@@ -58,7 +51,7 @@ func AssemblyOrderID(userAddr string, seq uint64, identify byte) string {
 
 func DecToBigEndianBytes(d sdk.Dec) []byte {
 	var result [DecByteCount]byte
-	bytes := d.Int.Bytes() //  returns the absolute value of d as a big-endian byte slice.
+	bytes := d.Int.Bytes() // returns the absolute value of d as a big-endian byte slice. sign is ignored
 	//todo: panic_for_test
 	if len(bytes) > DecByteCount {
 		panic("dec length larger than 40")

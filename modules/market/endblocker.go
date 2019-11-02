@@ -166,8 +166,8 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, 
 	if order.FrozenFee != 0 {
 		coins = []sdk.Coin{sdk.NewCoin(dex.CET, sdk.NewInt(order.FrozenFee))}
 		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
-		actualFee := order.CalOrderFee(feeForZeroDeal)
-		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee.RoundInt64()); err != nil {
+		actualFee := order.CalOrderFeeInt64(feeForZeroDeal)
+		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee); err != nil {
 			//should not reach this clause in production
 			ctx.Logger().Debug("unfreezeCoinsForOrder: %s", err.Error())
 		}
@@ -269,7 +269,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 					Side:           order.Side,
 					Price:          order.Price,
 					DelReason:      types.CancelOrderByGteTimeOut,
-					UsedCommission: order.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+					UsedCommission: order.CalOrderFeeInt64(marketParams.FeeForZeroDeal),
 					LeftStock:      order.LeftStock,
 					RemainAmount:   order.Freeze,
 					DealStock:      order.DealStock,
@@ -301,7 +301,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 					Side:           ord.Side,
 					Price:          ord.Price,
 					DelReason:      types.CancelOrderByGteTimeOut,
-					UsedCommission: ord.CalOrderFee(marketParams.FeeForZeroDeal).RoundInt64(),
+					UsedCommission: ord.CalOrderFeeInt64(marketParams.FeeForZeroDeal),
 					LeftStock:      ord.LeftStock,
 					RemainAmount:   ord.Freeze,
 					DealStock:      ord.DealStock,
@@ -389,7 +389,7 @@ func sendOrderMsg(ctx sdk.Context, order *types.Order, height int64, feeForZeroD
 		Side:           order.Side,
 		Height:         height,
 		Price:          order.Price,
-		UsedCommission: order.CalOrderFee(feeForZeroDeal).RoundInt64(),
+		UsedCommission: order.CalOrderFeeInt64(feeForZeroDeal),
 		LeftStock:      order.LeftStock,
 		RemainAmount:   order.Freeze,
 		DealStock:      order.DealStock,
