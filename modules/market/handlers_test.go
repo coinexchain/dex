@@ -575,8 +575,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, frozenMoney), "The amount is error")
 
 	glk := keepers.NewGlobalOrderKeeper(input.keys.marketKey, input.cdc)
-	orderID, err2 := types.AssemblyOrderID(msgGteOrder.Sender.String(), seq, msgGteOrder.Identify)
-	require.Equal(t, nil, err2)
+	orderID := types.AssemblyOrderID(msgGteOrder.Sender.String(), seq, msgGteOrder.Identify)
 	order := glk.QueryOrder(input.ctx, orderID)
 	require.Equal(t, true, isSameOrderAndMsg(order, msgGteOrder), "order should equal msg")
 
@@ -604,8 +603,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, totalFrozen), "The amount is error")
 
-	orderID, err2 = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
-	require.Equal(t, nil, err2)
+	orderID = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
 	order = glk.QueryOrder(input.ctx, orderID)
 	require.Equal(t, true, isSameOrderAndMsg(order, msgIOCOrder), "order should equal msg")
 }
@@ -627,7 +625,7 @@ func TestCancelOrderFailed(t *testing.T) {
 	}
 
 	failedInvalidOrderID := cancelOrder
-	failedInvalidOrderID.OrderID, _ = types.AssemblyOrderID(haveCetAddress.String(), 1, 2)
+	failedInvalidOrderID.OrderID = types.AssemblyOrderID(haveCetAddress.String(), 1, 2)
 	ret := input.handler(input.ctx, failedInvalidOrderID)
 	require.Equal(t, types.CodeOrderNotFound, ret.Code, "cancel order should failed by not exist ")
 
@@ -649,7 +647,7 @@ func TestCancelOrderFailed(t *testing.T) {
 	seq, err := input.mk.QuerySeqWithAddr(input.ctx, msgIOCOrder.Sender)
 	require.Equal(t, nil, err)
 	failedNotOrderSender := cancelOrder
-	failedNotOrderSender.OrderID, _ = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
+	failedNotOrderSender.OrderID = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
 	failedNotOrderSender.Sender = notHaveCetAddress
 	ret = input.handler(input.ctx, failedNotOrderSender)
 	require.Equal(t, types.CodeNotMatchSender, ret.Code, "cancel order should failed by not match order sender")
@@ -679,7 +677,7 @@ func TestCancelOrderSuccess(t *testing.T) {
 	cancelOrder := types.MsgCancelOrder{
 		Sender: haveCetAddress,
 	}
-	cancelOrder.OrderID, _ = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
+	cancelOrder.OrderID = types.AssemblyOrderID(msgIOCOrder.Sender.String(), seq, msgIOCOrder.Identify)
 	ret = input.handler(input.ctx, cancelOrder)
 	require.Equal(t, true, ret.IsOK(), "cancel order should succeed ; ", ret.Log)
 
@@ -1236,8 +1234,7 @@ func TestGetDenomAndOrderAmount(t *testing.T) {
 func TestCheckMsgCancelOrder(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 
-	orderID, err := types.AssemblyOrderID(haveCetAddress.String(), 1, 1)
-	require.Nil(t, err)
+	orderID := types.AssemblyOrderID(haveCetAddress.String(), 1, 1)
 
 	msg := MsgCancelOrder{
 		OrderID: orderID,
@@ -1268,8 +1265,7 @@ func TestCheckMsgCancelOrder(t *testing.T) {
 	require.Equal(t, true, ret.IsOK(), "create market should succeed")
 
 	// Invalid order sender
-	orderID, err = types.AssemblyOrderID(haveCetAddress.String(), seq, msgGteOrder.Identify)
-	require.Nil(t, err)
+	orderID = types.AssemblyOrderID(haveCetAddress.String(), seq, msgGteOrder.Identify)
 	msg.OrderID = orderID
 	msg.Sender = forbidAddr
 	failed = checkMsgCancelOrder(input.ctx, msg, input.mk)

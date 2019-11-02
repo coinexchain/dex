@@ -322,10 +322,7 @@ func randomExistedTradingPair(r *rand.Rand, ctx sdk.Context, k keepers.Keeper) (
 func verifyCreateOrder(ctx sdk.Context, k keepers.Keeper, msg types.MsgCreateOrder) bool {
 
 	ork := keepers.NewGlobalOrderKeeper(k.GetMarketKey(), types.ModuleCdc)
-	orderID, err := types.AssemblyOrderID(msg.Sender.String(), 0, msg.Identify)
-	if err != nil {
-		return false
-	}
+	orderID := types.AssemblyOrderID(msg.Sender.String(), 0, msg.Identify)
 	order := ork.QueryOrder(ctx, orderID)
 	return order.Sender.Equals(msg.Sender) &&
 		order.TimeInForce == msg.TimeInForce &&

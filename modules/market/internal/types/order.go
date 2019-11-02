@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -28,7 +26,7 @@ type Order struct {
 }
 
 func (or *Order) OrderID() string {
-	orderID, _ := AssemblyOrderID(or.Sender.String(), or.Sequence, or.Identify)
+	orderID := AssemblyOrderID(or.Sender.String(), or.Sequence, or.Identify)
 	return orderID
 }
 
@@ -52,13 +50,10 @@ func (or *Order) CalOrderFeeInt64(feeForZeroDeal int64) int64 {
 	return actualFee.TruncateInt64()
 }
 
-func AssemblyOrderID(userAddr string, seq uint64, identify byte) (string, error) {
-	seqInt, ok := sdk.NewIntFromString(fmt.Sprintf("%d", seq))
-	if !ok {
-		return "", fmt.Errorf("invalid sequence : %d", seq)
-	}
-	orderID := userAddr + OrderIDSeparator + seqInt.MulRaw(256).AddRaw(int64(identify)).String()
-	return orderID, nil
+func AssemblyOrderID(userAddr string, seq uint64, identify byte) string {
+	idI64 := int64(identify) + 256*int64(seq%2)
+	seqI64 := int64(seq / 2)
+	return userAddr + OrderIDSeparator + sdk.NewInt(seqI64).MulRaw(512).AddRaw(idI64).String()
 }
 
 func DecToBigEndianBytes(d sdk.Dec) []byte {

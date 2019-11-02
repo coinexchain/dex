@@ -311,10 +311,7 @@ func checkMsgCreateOrder(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCr
 	if !keeper.HasCoins(ctx, msg.Sender, sdk.Coins{sdk.NewCoin(denom, totalAmount)}) {
 		return types.ErrInsufficientCoins()
 	}
-	orderID, err := types.AssemblyOrderID(msg.Sender.String(), seq, msg.Identify)
-	if err != nil {
-		return types.ErrInvalidSequence(err.Error())
-	}
+	orderID := types.AssemblyOrderID(msg.Sender.String(), seq, msg.Identify)
 	globalKeeper := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc)
 	if globalKeeper.QueryOrder(ctx, orderID) != nil {
 		return types.ErrOrderAlreadyExist(orderID)
