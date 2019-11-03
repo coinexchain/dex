@@ -26,3 +26,5 @@ require (
 	golang.org/x/sys v0.0.0-20190422165155-953cdadca894 // indirect
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 )
+
+replace github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c => ../../coinexchain/codon

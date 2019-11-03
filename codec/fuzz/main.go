@@ -42,7 +42,8 @@ func main() {
 			codon.ShowInfoForVar(leafTypes, ifc)
 			panic(err)
 		}
-		decS, _ := json.Marshal(ifcDec)
+		cpDec := dexcodec.DeepCopyAny(ifcDec)
+		decS, _ := json.Marshal(cpDec)
 		if !bytes.Equal(origS, decS) {
 			fmt.Printf("Now: %d\n%s\n%s\n", i, string(origS), string(decS))
 			codon.ShowInfoForVar(leafTypes, ifc)
