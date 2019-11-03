@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/x/auth/exported"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -49,8 +50,8 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
-func (k Keeper) GetAccount() (auth.AccountKeeper,types.ExpectedAccountXKeeper){
-	return k.ak,k.axk
+func (k Keeper) GetAccount() (auth.AccountKeeper, types.ExpectedAccountXKeeper) {
+	return k.ak, k.axk
 }
 
 func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {

@@ -28,4 +28,6 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace github.com/cosmos/cosmos-sdk v0.37.0 => github.com/ludete/cosmos-sdk v0.40.1
+replace github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c => ../../coinexchain/codon
+
+replace github.com/cosmos/cosmos-sdk v0.37.0 => ../cosmos-sdk

@@ -77,7 +77,7 @@ func ShowInfo() {
 }
 
 func GenerateCodecFile(w io.Writer) {
-	list := []codon.AliasAndValue{
+	list := []codon.TypeEntry{
 		{Alias: "PubKey", Value: (*PubKey)(nil)},
 		{Alias: "Msg", Value: (*Msg)(nil)},
 		{Alias: "Account", Value: (*Account)(nil)},
@@ -176,24 +176,6 @@ func GetLeafTypes() map[string]string {
 	return leafTypes
 }
 
-type RandSrc interface {
-	GetBool() bool
-	GetInt() int
-	GetInt8() int8
-	GetInt16() int16
-	GetInt32() int32
-	GetInt64() int64
-	GetUint() uint
-	GetUint8() uint8
-	GetUint16() uint16
-	GetUint32() uint32
-	GetUint64() uint64
-	GetFloat32() float32
-	GetFloat64() float64
-	GetString(n int) string
-	GetBytes(n int) []byte
-}
-
 const MaxSliceLength = 10
 const MaxStringLength = 100
 
@@ -254,6 +236,10 @@ func RandTime(r RandSrc) time.Time {
 	return time.Unix(r.GetInt64(), r.GetInt64()).UTC()
 }
 
+func DeepCopyTime(t time.Time) time.Time {
+	return t.Add(time.Duration(0))
+}
+
 func EncodeInt(w io.Writer, v sdk.Int) error {
 	s, err := v.MarshalAmino()
 	if err!=nil {
@@ -286,6 +272,10 @@ func RandInt(r RandSrc) sdk.Int {
 		res = res.MulRaw(r.GetInt64())
 	}
 	return res
+}
+
+func DeepCopyInt(i sdk.Int) sdk.Int {
+	return i.AddRaw(0)
 }
 
 func EncodeDec(w io.Writer, v sdk.Dec) error {
@@ -322,59 +312,9 @@ func RandDec(r RandSrc) sdk.Dec {
 	res = res.QuoInt64(r.GetInt64()&0xFFFFFFFF)
 	return res
 }
+
+func DeepCopyDec(d sdk.Dec) sdk.Dec {
+	return d.MulInt64(1)
+}
+
 `
-
-/*
-func EncodeDuplicateVoteEvidence(w io.Writer, v DuplicateVoteEvidence) error {
-// codon version: 1
-var err error
-err = EncodePubKey(w, v.PubKey)
-}
-
-func EncodePubKeyMultisigThreshold(w io.Writer, v PubKeyMultisigThreshold) error {
-// codon version: 1
-var err error
-err = codonEncodeUvarint(w, uint64(v.K))
-if err != nil {return err}
-err = codonEncodeVarint(w, int64(len(v.PubKeys)))
-if err != nil {return err}
-for _0:=0; _0<len(v.PubKeys); _0++ {
-err = EncodePubKey(w, v.PubKeys[_0])
-if err != nil {return err} // interface_encode
-
-func EncodeStdSignature(w io.Writer, v StdSignature) error {
-// codon version: 1
-var err error
-err = EncodePubKey(w, v.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeBaseVestingAccount(w io.Writer, v BaseVestingAccount) error {
-err = EncodePubKey(w, v.BaseAccount.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeContinuousVestingAccount(w io.Writer, v ContinuousVestingAccount) error {
-err = EncodePubKey(w, v.BaseVestingAccount.BaseAccount.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeDelayedVestingAccount(w io.Writer, v DelayedVestingAccount) error {
-err = EncodePubKey(w, v.BaseVestingAccount.BaseAccount.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeModuleAccount(w io.Writer, v ModuleAccount) error {
-err = EncodePubKey(w, v.BaseVestingAccount.BaseAccount.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeStdTx(w io.Writer, v StdTx) error {
-for _0:=0; _0<len(v.Msgs); _0++ {
-err = EncodeMsg(w, v.Msgs[_0])
-if err != nil {return err} // interface_encode
-}
-for _0:=0; _0<len(v.Signatures); _0++ {
-err = EncodePubKey(w, v.Signatures[_0].PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeMsgCreateValidator(w io.Writer, v MsgCreateValidator) error {
-err = EncodePubKey(w, v.PubKey)
-if err != nil {return err} // interface_encode
-
-*/

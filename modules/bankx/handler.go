@@ -3,6 +3,7 @@ package bankx
 import (
 	"encoding/json"
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/exported"
@@ -70,7 +71,9 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 	}
 
 }
+
 var SendEnabled bool = true
+
 func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	//if err := k.GetSendEnabled(ctx); err != nil {
 	//	return err.Result()

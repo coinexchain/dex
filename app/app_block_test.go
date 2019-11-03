@@ -139,7 +139,7 @@ func TestBlockExec(t *testing.T) {
 	now := time.Now()
 	state, err = blockExec.ApplyBlock(state, blockID, block)
 	fmt.Printf("TotalFinished : %d, TotalRequest : %d\n", sigbalancer.TotalFinished, sigbalancer.TotalRequest)
-	fmt.Println("exec block time :  ", time.Now().Sub(now).Seconds())
-	fmt.Println("exec block time :  ", time.Now().Sub(now).Milliseconds())
+	fmt.Println("exec block time :  ", time.Since(now).Seconds())
+	fmt.Println("exec block time :  ", time.Since(now).Milliseconds())
 	require.Nil(t, err)
 }

@@ -11,6 +11,24 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+type RandSrc interface {
+	GetBool() bool
+	GetInt() int
+	GetInt8() int8
+	GetInt16() int16
+	GetInt32() int32
+	GetInt64() int64
+	GetUint() uint
+	GetUint8() uint8
+	GetUint16() uint16
+	GetUint32() uint32
+	GetUint64() uint64
+	GetFloat32() float32
+	GetFloat64() float64
+	GetString(n int) string
+	GetBytes(n int) []byte
+}
+
 func codonEncodeBool(w io.Writer, v bool) error {
 	slice := []byte{0}
 	if v {
@@ -270,6 +288,10 @@ func RandTime(r RandSrc) time.Time {
 	return time.Unix(r.GetInt64(), r.GetInt64()).UTC()
 }
 
+func DeepCopyTime(t time.Time) time.Time {
+	return t.Add(time.Duration(0))
+}
+
 func EncodeInt(w io.Writer, v sdk.Int) error {
 	s, err := v.MarshalAmino()
 	if err != nil {
@@ -302,6 +324,10 @@ func RandInt(r RandSrc) sdk.Int {
 		res = res.MulRaw(r.GetInt64())
 	}
 	return res
+}
+
+func DeepCopyInt(i sdk.Int) sdk.Int {
+	return i.AddRaw(0)
 }
 
 func EncodeDec(w io.Writer, v sdk.Dec) error {
@@ -339,9 +365,12 @@ func RandDec(r RandSrc) sdk.Dec {
 	return res
 }
 
+func DeepCopyDec(d sdk.Dec) sdk.Dec {
+	return d.MulInt64(1)
+}
+
 // Non-Interface
 func EncodeDuplicateVoteEvidence(w io.Writer, v DuplicateVoteEvidence) error {
-	// codon version: 1
 	var err error
 	err = EncodePubKey(w, v.PubKey)
 	if err != nil {
@@ -437,7 +466,6 @@ func EncodeDuplicateVoteEvidence(w io.Writer, v DuplicateVoteEvidence) error {
 } //End of EncodeDuplicateVoteEvidence
 
 func DecodeDuplicateVoteEvidence(bz []byte) (DuplicateVoteEvidence, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v DuplicateVoteEvidence
@@ -629,7 +657,6 @@ func DecodeDuplicateVoteEvidence(bz []byte) (DuplicateVoteEvidence, int, error) 
 } //End of DecodeDuplicateVoteEvidence
 
 func RandDuplicateVoteEvidence(r RandSrc) DuplicateVoteEvidence {
-	// codon version: 1
 	var length int
 	var v DuplicateVoteEvidence
 	v.PubKey = RandPubKey(r) // interface_decode
@@ -672,9 +699,58 @@ func RandDuplicateVoteEvidence(r RandSrc) DuplicateVoteEvidence {
 	return v
 } //End of RandDuplicateVoteEvidence
 
+func DeepCopyDuplicateVoteEvidence(in DuplicateVoteEvidence) (out DuplicateVoteEvidence) {
+	var length int
+	out.PubKey = DeepCopyPubKey(in.PubKey)
+	out.VoteA = &Vote{}
+	out.VoteA.Type = in.VoteA.Type
+	out.VoteA.Height = in.VoteA.Height
+	out.VoteA.Round = in.VoteA.Round
+	length = len(in.VoteA.BlockID.Hash)
+	out.VoteA.BlockID.Hash = make([]uint8, length)
+	copy(out.VoteA.BlockID.Hash[:], in.VoteA.BlockID.Hash[:])
+	out.VoteA.BlockID.PartsHeader.Total = in.VoteA.BlockID.PartsHeader.Total
+	length = len(in.VoteA.BlockID.PartsHeader.Hash)
+	out.VoteA.BlockID.PartsHeader.Hash = make([]uint8, length)
+	copy(out.VoteA.BlockID.PartsHeader.Hash[:], in.VoteA.BlockID.PartsHeader.Hash[:])
+	// end of .VoteA.BlockID.PartsHeader
+	// end of .VoteA.BlockID
+	out.VoteA.Timestamp = DeepCopyTime(in.VoteA.Timestamp)
+	length = len(in.VoteA.ValidatorAddress)
+	out.VoteA.ValidatorAddress = make([]uint8, length)
+	copy(out.VoteA.ValidatorAddress[:], in.VoteA.ValidatorAddress[:])
+	out.VoteA.ValidatorIndex = in.VoteA.ValidatorIndex
+	length = len(in.VoteA.Signature)
+	out.VoteA.Signature = make([]uint8, length)
+	copy(out.VoteA.Signature[:], in.VoteA.Signature[:])
+	// end of .VoteA
+	out.VoteB = &Vote{}
+	out.VoteB.Type = in.VoteB.Type
+	out.VoteB.Height = in.VoteB.Height
+	out.VoteB.Round = in.VoteB.Round
+	length = len(in.VoteB.BlockID.Hash)
+	out.VoteB.BlockID.Hash = make([]uint8, length)
+	copy(out.VoteB.BlockID.Hash[:], in.VoteB.BlockID.Hash[:])
+	out.VoteB.BlockID.PartsHeader.Total = in.VoteB.BlockID.PartsHeader.Total
+	length = len(in.VoteB.BlockID.PartsHeader.Hash)
+	out.VoteB.BlockID.PartsHeader.Hash = make([]uint8, length)
+	copy(out.VoteB.BlockID.PartsHeader.Hash[:], in.VoteB.BlockID.PartsHeader.Hash[:])
+	// end of .VoteB.BlockID.PartsHeader
+	// end of .VoteB.BlockID
+	out.VoteB.Timestamp = DeepCopyTime(in.VoteB.Timestamp)
+	length = len(in.VoteB.ValidatorAddress)
+	out.VoteB.ValidatorAddress = make([]uint8, length)
+	copy(out.VoteB.ValidatorAddress[:], in.VoteB.ValidatorAddress[:])
+	out.VoteB.ValidatorIndex = in.VoteB.ValidatorIndex
+	length = len(in.VoteB.Signature)
+	out.VoteB.Signature = make([]uint8, length)
+	copy(out.VoteB.Signature[:], in.VoteB.Signature[:])
+	// end of .VoteB
+	return
+} //End of DeepCopyDuplicateVoteEvidence
+
 // Non-Interface
 func EncodePrivKeyEd25519(w io.Writer, v PrivKeyEd25519) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v[:])
 	if err != nil {
@@ -684,7 +760,6 @@ func EncodePrivKeyEd25519(w io.Writer, v PrivKeyEd25519) error {
 } //End of EncodePrivKeyEd25519
 
 func DecodePrivKeyEd25519(bz []byte) (PrivKeyEd25519, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v PrivKeyEd25519
@@ -708,7 +783,6 @@ func DecodePrivKeyEd25519(bz []byte) (PrivKeyEd25519, int, error) {
 } //End of DecodePrivKeyEd25519
 
 func RandPrivKeyEd25519(r RandSrc) PrivKeyEd25519 {
-	// codon version: 1
 	var length int
 	var v PrivKeyEd25519
 	length = 64
@@ -718,9 +792,17 @@ func RandPrivKeyEd25519(r RandSrc) PrivKeyEd25519 {
 	return v
 } //End of RandPrivKeyEd25519
 
+func DeepCopyPrivKeyEd25519(in PrivKeyEd25519) (out PrivKeyEd25519) {
+	var length int
+	length = len(in)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //array of uint8
+		out[_0] = in[_0]
+	}
+	return
+} //End of DeepCopyPrivKeyEd25519
+
 // Non-Interface
 func EncodePrivKeySecp256k1(w io.Writer, v PrivKeySecp256k1) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v[:])
 	if err != nil {
@@ -730,7 +812,6 @@ func EncodePrivKeySecp256k1(w io.Writer, v PrivKeySecp256k1) error {
 } //End of EncodePrivKeySecp256k1
 
 func DecodePrivKeySecp256k1(bz []byte) (PrivKeySecp256k1, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v PrivKeySecp256k1
@@ -754,7 +835,6 @@ func DecodePrivKeySecp256k1(bz []byte) (PrivKeySecp256k1, int, error) {
 } //End of DecodePrivKeySecp256k1
 
 func RandPrivKeySecp256k1(r RandSrc) PrivKeySecp256k1 {
-	// codon version: 1
 	var length int
 	var v PrivKeySecp256k1
 	length = 32
@@ -764,9 +844,17 @@ func RandPrivKeySecp256k1(r RandSrc) PrivKeySecp256k1 {
 	return v
 } //End of RandPrivKeySecp256k1
 
+func DeepCopyPrivKeySecp256k1(in PrivKeySecp256k1) (out PrivKeySecp256k1) {
+	var length int
+	length = len(in)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //array of uint8
+		out[_0] = in[_0]
+	}
+	return
+} //End of DeepCopyPrivKeySecp256k1
+
 // Non-Interface
 func EncodePubKeyEd25519(w io.Writer, v PubKeyEd25519) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v[:])
 	if err != nil {
@@ -776,7 +864,6 @@ func EncodePubKeyEd25519(w io.Writer, v PubKeyEd25519) error {
 } //End of EncodePubKeyEd25519
 
 func DecodePubKeyEd25519(bz []byte) (PubKeyEd25519, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v PubKeyEd25519
@@ -800,7 +887,6 @@ func DecodePubKeyEd25519(bz []byte) (PubKeyEd25519, int, error) {
 } //End of DecodePubKeyEd25519
 
 func RandPubKeyEd25519(r RandSrc) PubKeyEd25519 {
-	// codon version: 1
 	var length int
 	var v PubKeyEd25519
 	length = 32
@@ -810,9 +896,17 @@ func RandPubKeyEd25519(r RandSrc) PubKeyEd25519 {
 	return v
 } //End of RandPubKeyEd25519
 
+func DeepCopyPubKeyEd25519(in PubKeyEd25519) (out PubKeyEd25519) {
+	var length int
+	length = len(in)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //array of uint8
+		out[_0] = in[_0]
+	}
+	return
+} //End of DeepCopyPubKeyEd25519
+
 // Non-Interface
 func EncodePubKeySecp256k1(w io.Writer, v PubKeySecp256k1) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v[:])
 	if err != nil {
@@ -822,7 +916,6 @@ func EncodePubKeySecp256k1(w io.Writer, v PubKeySecp256k1) error {
 } //End of EncodePubKeySecp256k1
 
 func DecodePubKeySecp256k1(bz []byte) (PubKeySecp256k1, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v PubKeySecp256k1
@@ -846,7 +939,6 @@ func DecodePubKeySecp256k1(bz []byte) (PubKeySecp256k1, int, error) {
 } //End of DecodePubKeySecp256k1
 
 func RandPubKeySecp256k1(r RandSrc) PubKeySecp256k1 {
-	// codon version: 1
 	var length int
 	var v PubKeySecp256k1
 	length = 33
@@ -856,9 +948,17 @@ func RandPubKeySecp256k1(r RandSrc) PubKeySecp256k1 {
 	return v
 } //End of RandPubKeySecp256k1
 
+func DeepCopyPubKeySecp256k1(in PubKeySecp256k1) (out PubKeySecp256k1) {
+	var length int
+	length = len(in)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //array of uint8
+		out[_0] = in[_0]
+	}
+	return
+} //End of DeepCopyPubKeySecp256k1
+
 // Non-Interface
 func EncodePubKeyMultisigThreshold(w io.Writer, v PubKeyMultisigThreshold) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeUvarint(w, uint64(v.K))
 	if err != nil {
@@ -878,7 +978,6 @@ func EncodePubKeyMultisigThreshold(w io.Writer, v PubKeyMultisigThreshold) error
 } //End of EncodePubKeyMultisigThreshold
 
 func DecodePubKeyMultisigThreshold(bz []byte) (PubKeyMultisigThreshold, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v PubKeyMultisigThreshold
@@ -909,7 +1008,6 @@ func DecodePubKeyMultisigThreshold(bz []byte) (PubKeyMultisigThreshold, int, err
 } //End of DecodePubKeyMultisigThreshold
 
 func RandPubKeyMultisigThreshold(r RandSrc) PubKeyMultisigThreshold {
-	// codon version: 1
 	var length int
 	var v PubKeyMultisigThreshold
 	v.K = r.GetUint()
@@ -921,9 +1019,19 @@ func RandPubKeyMultisigThreshold(r RandSrc) PubKeyMultisigThreshold {
 	return v
 } //End of RandPubKeyMultisigThreshold
 
+func DeepCopyPubKeyMultisigThreshold(in PubKeyMultisigThreshold) (out PubKeyMultisigThreshold) {
+	var length int
+	out.K = in.K
+	length = len(in.PubKeys)
+	out.PubKeys = make([]PubKey, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of interface
+		out.PubKeys[_0] = DeepCopyPubKey(in.PubKeys[_0])
+	}
+	return
+} //End of DeepCopyPubKeyMultisigThreshold
+
 // Non-Interface
 func EncodeSignedMsgType(w io.Writer, v SignedMsgType) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeUint8(w, uint8(v))
 	if err != nil {
@@ -933,7 +1041,6 @@ func EncodeSignedMsgType(w io.Writer, v SignedMsgType) error {
 } //End of EncodeSignedMsgType
 
 func DecodeSignedMsgType(bz []byte) (SignedMsgType, int, error) {
-	// codon version: 1
 	var err error
 	var v SignedMsgType
 	var n int
@@ -948,15 +1055,18 @@ func DecodeSignedMsgType(bz []byte) (SignedMsgType, int, error) {
 } //End of DecodeSignedMsgType
 
 func RandSignedMsgType(r RandSrc) SignedMsgType {
-	// codon version: 1
 	var v SignedMsgType
 	v = SignedMsgType(r.GetUint8())
 	return v
 } //End of RandSignedMsgType
 
+func DeepCopySignedMsgType(in SignedMsgType) (out SignedMsgType) {
+	out = in
+	return
+} //End of DeepCopySignedMsgType
+
 // Non-Interface
 func EncodeVoteOption(w io.Writer, v VoteOption) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeUint8(w, uint8(v))
 	if err != nil {
@@ -966,7 +1076,6 @@ func EncodeVoteOption(w io.Writer, v VoteOption) error {
 } //End of EncodeVoteOption
 
 func DecodeVoteOption(bz []byte) (VoteOption, int, error) {
-	// codon version: 1
 	var err error
 	var v VoteOption
 	var n int
@@ -981,15 +1090,18 @@ func DecodeVoteOption(bz []byte) (VoteOption, int, error) {
 } //End of DecodeVoteOption
 
 func RandVoteOption(r RandSrc) VoteOption {
-	// codon version: 1
 	var v VoteOption
 	v = VoteOption(r.GetUint8())
 	return v
 } //End of RandVoteOption
 
+func DeepCopyVoteOption(in VoteOption) (out VoteOption) {
+	out = in
+	return
+} //End of DeepCopyVoteOption
+
 // Non-Interface
 func EncodeVote(w io.Writer, v Vote) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeUint8(w, uint8(v.Type))
 	if err != nil {
@@ -1037,7 +1149,6 @@ func EncodeVote(w io.Writer, v Vote) error {
 } //End of EncodeVote
 
 func DecodeVote(bz []byte) (Vote, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v Vote
@@ -1133,7 +1244,6 @@ func DecodeVote(bz []byte) (Vote, int, error) {
 } //End of DecodeVote
 
 func RandVote(r RandSrc) Vote {
-	// codon version: 1
 	var length int
 	var v Vote
 	v.Type = SignedMsgType(r.GetUint8())
@@ -1155,9 +1265,33 @@ func RandVote(r RandSrc) Vote {
 	return v
 } //End of RandVote
 
+func DeepCopyVote(in Vote) (out Vote) {
+	var length int
+	out.Type = in.Type
+	out.Height = in.Height
+	out.Round = in.Round
+	length = len(in.BlockID.Hash)
+	out.BlockID.Hash = make([]uint8, length)
+	copy(out.BlockID.Hash[:], in.BlockID.Hash[:])
+	out.BlockID.PartsHeader.Total = in.BlockID.PartsHeader.Total
+	length = len(in.BlockID.PartsHeader.Hash)
+	out.BlockID.PartsHeader.Hash = make([]uint8, length)
+	copy(out.BlockID.PartsHeader.Hash[:], in.BlockID.PartsHeader.Hash[:])
+	// end of .BlockID.PartsHeader
+	// end of .BlockID
+	out.Timestamp = DeepCopyTime(in.Timestamp)
+	length = len(in.ValidatorAddress)
+	out.ValidatorAddress = make([]uint8, length)
+	copy(out.ValidatorAddress[:], in.ValidatorAddress[:])
+	out.ValidatorIndex = in.ValidatorIndex
+	length = len(in.Signature)
+	out.Signature = make([]uint8, length)
+	copy(out.Signature[:], in.Signature[:])
+	return
+} //End of DeepCopyVote
+
 // Non-Interface
 func EncodeCoin(w io.Writer, v Coin) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Denom)
 	if err != nil {
@@ -1171,7 +1305,6 @@ func EncodeCoin(w io.Writer, v Coin) error {
 } //End of EncodeCoin
 
 func DecodeCoin(bz []byte) (Coin, int, error) {
-	// codon version: 1
 	var err error
 	var v Coin
 	var n int
@@ -1192,16 +1325,20 @@ func DecodeCoin(bz []byte) (Coin, int, error) {
 } //End of DecodeCoin
 
 func RandCoin(r RandSrc) Coin {
-	// codon version: 1
 	var v Coin
 	v.Denom = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.Amount = RandInt(r)
 	return v
 } //End of RandCoin
 
+func DeepCopyCoin(in Coin) (out Coin) {
+	out.Denom = in.Denom
+	out.Amount = DeepCopyInt(in.Amount)
+	return
+} //End of DeepCopyCoin
+
 // Non-Interface
 func EncodeLockedCoin(w io.Writer, v LockedCoin) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Coin.Denom)
 	if err != nil {
@@ -1216,23 +1353,15 @@ func EncodeLockedCoin(w io.Writer, v LockedCoin) error {
 	if err != nil {
 		return err
 	}
-	var fromAddress []byte
-	if v.FromAddress != nil {
-		fromAddress = v.FromAddress[:]
-	}
-	err = codonEncodeByteSlice(w, fromAddress)
+	err = codonEncodeByteSlice(w, v.FromAddress[:])
 	if err != nil {
 		return err
 	}
-	var supervisor []byte
-	if v.Supervisor != nil {
-		supervisor = v.Supervisor[:]
-	}
-	err = codonEncodeByteSlice(w, supervisor)
+	err = codonEncodeByteSlice(w, v.Supervisor[:])
 	if err != nil {
 		return err
 	}
-	err = codonEncodeVarint(w, v.Reward)
+	err = codonEncodeVarint(w, int64(v.Reward))
 	if err != nil {
 		return err
 	}
@@ -1240,7 +1369,6 @@ func EncodeLockedCoin(w io.Writer, v LockedCoin) error {
 } //End of EncodeLockedCoin
 
 func DecodeLockedCoin(bz []byte) (LockedCoin, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v LockedCoin
@@ -1269,26 +1397,26 @@ func DecodeLockedCoin(bz []byte) (LockedCoin, int, error) {
 	if err != nil {
 		return v, total, err
 	}
-	if length > 0 {
-		v.FromAddress, n, err = codonGetByteSlice(bz, length)
-		if err != nil {
-			return v, total, err
-		}
-		bz = bz[n:]
-		total += n
+	bz = bz[n:]
+	total += n
+	v.FromAddress, n, err = codonGetByteSlice(bz, length)
+	if err != nil {
+		return v, total, err
 	}
+	bz = bz[n:]
+	total += n
 	length = codonDecodeInt(bz, &n, &err)
 	if err != nil {
 		return v, total, err
 	}
-	if length > 0 {
-		v.Supervisor, n, err = codonGetByteSlice(bz, length)
-		if err != nil {
-			return v, total, err
-		}
-		bz = bz[n:]
-		total += n
+	bz = bz[n:]
+	total += n
+	v.Supervisor, n, err = codonGetByteSlice(bz, length)
+	if err != nil {
+		return v, total, err
 	}
+	bz = bz[n:]
+	total += n
 	v.Reward = int64(codonDecodeInt64(bz, &n, &err))
 	if err != nil {
 		return v, total, err
@@ -1299,18 +1427,38 @@ func DecodeLockedCoin(bz []byte) (LockedCoin, int, error) {
 } //End of DecodeLockedCoin
 
 func RandLockedCoin(r RandSrc) LockedCoin {
-	// codon version: 1
+	var length int
 	var v LockedCoin
 	v.Coin.Denom = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.Coin.Amount = RandInt(r)
 	// end of v.Coin
 	v.UnlockTime = r.GetInt64()
+	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
+	v.FromAddress = r.GetBytes(length)
+	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
+	v.Supervisor = r.GetBytes(length)
+	v.Reward = r.GetInt64()
 	return v
 } //End of RandLockedCoin
 
+func DeepCopyLockedCoin(in LockedCoin) (out LockedCoin) {
+	var length int
+	out.Coin.Denom = in.Coin.Denom
+	out.Coin.Amount = DeepCopyInt(in.Coin.Amount)
+	// end of .Coin
+	out.UnlockTime = in.UnlockTime
+	length = len(in.FromAddress)
+	out.FromAddress = make([]uint8, length)
+	copy(out.FromAddress[:], in.FromAddress[:])
+	length = len(in.Supervisor)
+	out.Supervisor = make([]uint8, length)
+	copy(out.Supervisor[:], in.Supervisor[:])
+	out.Reward = in.Reward
+	return
+} //End of DeepCopyLockedCoin
+
 // Non-Interface
 func EncodeStdSignature(w io.Writer, v StdSignature) error {
-	// codon version: 1
 	var err error
 	err = EncodePubKey(w, v.PubKey)
 	if err != nil {
@@ -1324,7 +1472,6 @@ func EncodeStdSignature(w io.Writer, v StdSignature) error {
 } //End of EncodeStdSignature
 
 func DecodeStdSignature(bz []byte) (StdSignature, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v StdSignature
@@ -1352,7 +1499,6 @@ func DecodeStdSignature(bz []byte) (StdSignature, int, error) {
 } //End of DecodeStdSignature
 
 func RandStdSignature(r RandSrc) StdSignature {
-	// codon version: 1
 	var length int
 	var v StdSignature
 	v.PubKey = RandPubKey(r) // interface_decode
@@ -1361,9 +1507,17 @@ func RandStdSignature(r RandSrc) StdSignature {
 	return v
 } //End of RandStdSignature
 
+func DeepCopyStdSignature(in StdSignature) (out StdSignature) {
+	var length int
+	out.PubKey = DeepCopyPubKey(in.PubKey)
+	length = len(in.Signature)
+	out.Signature = make([]uint8, length)
+	copy(out.Signature[:], in.Signature[:])
+	return
+} //End of DeepCopyStdSignature
+
 // Non-Interface
 func EncodeParamChange(w io.Writer, v ParamChange) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Subspace)
 	if err != nil {
@@ -1385,7 +1539,6 @@ func EncodeParamChange(w io.Writer, v ParamChange) error {
 } //End of EncodeParamChange
 
 func DecodeParamChange(bz []byte) (ParamChange, int, error) {
-	// codon version: 1
 	var err error
 	var v ParamChange
 	var n int
@@ -1418,7 +1571,6 @@ func DecodeParamChange(bz []byte) (ParamChange, int, error) {
 } //End of DecodeParamChange
 
 func RandParamChange(r RandSrc) ParamChange {
-	// codon version: 1
 	var v ParamChange
 	v.Subspace = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.Key = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -1427,9 +1579,16 @@ func RandParamChange(r RandSrc) ParamChange {
 	return v
 } //End of RandParamChange
 
+func DeepCopyParamChange(in ParamChange) (out ParamChange) {
+	out.Subspace = in.Subspace
+	out.Key = in.Key
+	out.Subkey = in.Subkey
+	out.Value = in.Value
+	return
+} //End of DeepCopyParamChange
+
 // Non-Interface
 func EncodeInput(w io.Writer, v Input) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Address[:])
 	if err != nil {
@@ -1454,7 +1613,6 @@ func EncodeInput(w io.Writer, v Input) error {
 } //End of EncodeInput
 
 func DecodeInput(bz []byte) (Input, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v Input
@@ -1491,7 +1649,6 @@ func DecodeInput(bz []byte) (Input, int, error) {
 } //End of DecodeInput
 
 func RandInput(r RandSrc) Input {
-	// codon version: 1
 	var length int
 	var v Input
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -1504,9 +1661,21 @@ func RandInput(r RandSrc) Input {
 	return v
 } //End of RandInput
 
+func DeepCopyInput(in Input) (out Input) {
+	var length int
+	length = len(in.Address)
+	out.Address = make([]uint8, length)
+	copy(out.Address[:], in.Address[:])
+	length = len(in.Coins)
+	out.Coins = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Coins[_0] = DeepCopyCoin(in.Coins[_0])
+	}
+	return
+} //End of DeepCopyInput
+
 // Non-Interface
 func EncodeOutput(w io.Writer, v Output) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Address[:])
 	if err != nil {
@@ -1531,7 +1700,6 @@ func EncodeOutput(w io.Writer, v Output) error {
 } //End of EncodeOutput
 
 func DecodeOutput(bz []byte) (Output, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v Output
@@ -1568,7 +1736,6 @@ func DecodeOutput(bz []byte) (Output, int, error) {
 } //End of DecodeOutput
 
 func RandOutput(r RandSrc) Output {
-	// codon version: 1
 	var length int
 	var v Output
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -1581,9 +1748,21 @@ func RandOutput(r RandSrc) Output {
 	return v
 } //End of RandOutput
 
+func DeepCopyOutput(in Output) (out Output) {
+	var length int
+	length = len(in.Address)
+	out.Address = make([]uint8, length)
+	copy(out.Address[:], in.Address[:])
+	length = len(in.Coins)
+	out.Coins = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Coins[_0] = DeepCopyCoin(in.Coins[_0])
+	}
+	return
+} //End of DeepCopyOutput
+
 // Non-Interface
 func EncodeAccAddress(w io.Writer, v AccAddress) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v[:])
 	if err != nil {
@@ -1593,7 +1772,6 @@ func EncodeAccAddress(w io.Writer, v AccAddress) error {
 } //End of EncodeAccAddress
 
 func DecodeAccAddress(bz []byte) (AccAddress, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v AccAddress
@@ -1615,7 +1793,6 @@ func DecodeAccAddress(bz []byte) (AccAddress, int, error) {
 } //End of DecodeAccAddress
 
 func RandAccAddress(r RandSrc) AccAddress {
-	// codon version: 1
 	var length int
 	var v AccAddress
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -1623,9 +1800,16 @@ func RandAccAddress(r RandSrc) AccAddress {
 	return v
 } //End of RandAccAddress
 
+func DeepCopyAccAddress(in AccAddress) (out AccAddress) {
+	var length int
+	length = len(in)
+	out = make([]uint8, length)
+	copy(out[:], in[:])
+	return
+} //End of DeepCopyAccAddress
+
 // Non-Interface
 func EncodeCommentRef(w io.Writer, v CommentRef) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeUvarint(w, uint64(v.ID))
 	if err != nil {
@@ -1657,7 +1841,6 @@ func EncodeCommentRef(w io.Writer, v CommentRef) error {
 } //End of EncodeCommentRef
 
 func DecodeCommentRef(bz []byte) (CommentRef, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v CommentRef
@@ -1712,7 +1895,6 @@ func DecodeCommentRef(bz []byte) (CommentRef, int, error) {
 } //End of DecodeCommentRef
 
 func RandCommentRef(r RandSrc) CommentRef {
-	// codon version: 1
 	var length int
 	var v CommentRef
 	v.ID = r.GetUint64()
@@ -1728,9 +1910,24 @@ func RandCommentRef(r RandSrc) CommentRef {
 	return v
 } //End of RandCommentRef
 
+func DeepCopyCommentRef(in CommentRef) (out CommentRef) {
+	var length int
+	out.ID = in.ID
+	length = len(in.RewardTarget)
+	out.RewardTarget = make([]uint8, length)
+	copy(out.RewardTarget[:], in.RewardTarget[:])
+	out.RewardToken = in.RewardToken
+	out.RewardAmount = in.RewardAmount
+	length = len(in.Attitudes)
+	out.Attitudes = make([]int32, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of int32
+		out.Attitudes[_0] = in.Attitudes[_0]
+	}
+	return
+} //End of DeepCopyCommentRef
+
 // Non-Interface
 func EncodeBaseAccount(w io.Writer, v BaseAccount) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Address[:])
 	if err != nil {
@@ -1767,7 +1964,6 @@ func EncodeBaseAccount(w io.Writer, v BaseAccount) error {
 } //End of EncodeBaseAccount
 
 func DecodeBaseAccount(bz []byte) (BaseAccount, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v BaseAccount
@@ -1822,7 +2018,6 @@ func DecodeBaseAccount(bz []byte) (BaseAccount, int, error) {
 } //End of DecodeBaseAccount
 
 func RandBaseAccount(r RandSrc) BaseAccount {
-	// codon version: 1
 	var length int
 	var v BaseAccount
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -1838,9 +2033,24 @@ func RandBaseAccount(r RandSrc) BaseAccount {
 	return v
 } //End of RandBaseAccount
 
+func DeepCopyBaseAccount(in BaseAccount) (out BaseAccount) {
+	var length int
+	length = len(in.Address)
+	out.Address = make([]uint8, length)
+	copy(out.Address[:], in.Address[:])
+	length = len(in.Coins)
+	out.Coins = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Coins[_0] = DeepCopyCoin(in.Coins[_0])
+	}
+	out.PubKey = DeepCopyPubKey(in.PubKey)
+	out.AccountNumber = in.AccountNumber
+	out.Sequence = in.Sequence
+	return
+} //End of DeepCopyBaseAccount
+
 // Non-Interface
 func EncodeBaseVestingAccount(w io.Writer, v BaseVestingAccount) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.BaseAccount.Address[:])
 	if err != nil {
@@ -1927,7 +2137,6 @@ func EncodeBaseVestingAccount(w io.Writer, v BaseVestingAccount) error {
 } //End of EncodeBaseVestingAccount
 
 func DecodeBaseVestingAccount(bz []byte) (BaseVestingAccount, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v BaseVestingAccount
@@ -2035,7 +2244,6 @@ func DecodeBaseVestingAccount(bz []byte) (BaseVestingAccount, int, error) {
 } //End of DecodeBaseVestingAccount
 
 func RandBaseVestingAccount(r RandSrc) BaseVestingAccount {
-	// codon version: 1
 	var length int
 	var v BaseVestingAccount
 	v.BaseAccount = &BaseAccount{}
@@ -2069,9 +2277,42 @@ func RandBaseVestingAccount(r RandSrc) BaseVestingAccount {
 	return v
 } //End of RandBaseVestingAccount
 
+func DeepCopyBaseVestingAccount(in BaseVestingAccount) (out BaseVestingAccount) {
+	var length int
+	out.BaseAccount = &BaseAccount{}
+	length = len(in.BaseAccount.Address)
+	out.BaseAccount.Address = make([]uint8, length)
+	copy(out.BaseAccount.Address[:], in.BaseAccount.Address[:])
+	length = len(in.BaseAccount.Coins)
+	out.BaseAccount.Coins = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseAccount.Coins[_0] = DeepCopyCoin(in.BaseAccount.Coins[_0])
+	}
+	out.BaseAccount.PubKey = DeepCopyPubKey(in.BaseAccount.PubKey)
+	out.BaseAccount.AccountNumber = in.BaseAccount.AccountNumber
+	out.BaseAccount.Sequence = in.BaseAccount.Sequence
+	// end of .BaseAccount
+	length = len(in.OriginalVesting)
+	out.OriginalVesting = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.OriginalVesting[_0] = DeepCopyCoin(in.OriginalVesting[_0])
+	}
+	length = len(in.DelegatedFree)
+	out.DelegatedFree = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.DelegatedFree[_0] = DeepCopyCoin(in.DelegatedFree[_0])
+	}
+	length = len(in.DelegatedVesting)
+	out.DelegatedVesting = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.DelegatedVesting[_0] = DeepCopyCoin(in.DelegatedVesting[_0])
+	}
+	out.EndTime = in.EndTime
+	return
+} //End of DeepCopyBaseVestingAccount
+
 // Non-Interface
 func EncodeContinuousVestingAccount(w io.Writer, v ContinuousVestingAccount) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.BaseVestingAccount.BaseAccount.Address[:])
 	if err != nil {
@@ -2163,7 +2404,6 @@ func EncodeContinuousVestingAccount(w io.Writer, v ContinuousVestingAccount) err
 } //End of EncodeContinuousVestingAccount
 
 func DecodeContinuousVestingAccount(bz []byte) (ContinuousVestingAccount, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v ContinuousVestingAccount
@@ -2279,7 +2519,6 @@ func DecodeContinuousVestingAccount(bz []byte) (ContinuousVestingAccount, int, e
 } //End of DecodeContinuousVestingAccount
 
 func RandContinuousVestingAccount(r RandSrc) ContinuousVestingAccount {
-	// codon version: 1
 	var length int
 	var v ContinuousVestingAccount
 	v.BaseVestingAccount = &BaseVestingAccount{}
@@ -2316,9 +2555,45 @@ func RandContinuousVestingAccount(r RandSrc) ContinuousVestingAccount {
 	return v
 } //End of RandContinuousVestingAccount
 
+func DeepCopyContinuousVestingAccount(in ContinuousVestingAccount) (out ContinuousVestingAccount) {
+	var length int
+	out.BaseVestingAccount = &BaseVestingAccount{}
+	out.BaseVestingAccount.BaseAccount = &BaseAccount{}
+	length = len(in.BaseVestingAccount.BaseAccount.Address)
+	out.BaseVestingAccount.BaseAccount.Address = make([]uint8, length)
+	copy(out.BaseVestingAccount.BaseAccount.Address[:], in.BaseVestingAccount.BaseAccount.Address[:])
+	length = len(in.BaseVestingAccount.BaseAccount.Coins)
+	out.BaseVestingAccount.BaseAccount.Coins = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseVestingAccount.BaseAccount.Coins[_0] = DeepCopyCoin(in.BaseVestingAccount.BaseAccount.Coins[_0])
+	}
+	out.BaseVestingAccount.BaseAccount.PubKey = DeepCopyPubKey(in.BaseVestingAccount.BaseAccount.PubKey)
+	out.BaseVestingAccount.BaseAccount.AccountNumber = in.BaseVestingAccount.BaseAccount.AccountNumber
+	out.BaseVestingAccount.BaseAccount.Sequence = in.BaseVestingAccount.BaseAccount.Sequence
+	// end of .BaseVestingAccount.BaseAccount
+	length = len(in.BaseVestingAccount.OriginalVesting)
+	out.BaseVestingAccount.OriginalVesting = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseVestingAccount.OriginalVesting[_0] = DeepCopyCoin(in.BaseVestingAccount.OriginalVesting[_0])
+	}
+	length = len(in.BaseVestingAccount.DelegatedFree)
+	out.BaseVestingAccount.DelegatedFree = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseVestingAccount.DelegatedFree[_0] = DeepCopyCoin(in.BaseVestingAccount.DelegatedFree[_0])
+	}
+	length = len(in.BaseVestingAccount.DelegatedVesting)
+	out.BaseVestingAccount.DelegatedVesting = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseVestingAccount.DelegatedVesting[_0] = DeepCopyCoin(in.BaseVestingAccount.DelegatedVesting[_0])
+	}
+	out.BaseVestingAccount.EndTime = in.BaseVestingAccount.EndTime
+	// end of .BaseVestingAccount
+	out.StartTime = in.StartTime
+	return
+} //End of DeepCopyContinuousVestingAccount
+
 // Non-Interface
 func EncodeDelayedVestingAccount(w io.Writer, v DelayedVestingAccount) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.BaseVestingAccount.BaseAccount.Address[:])
 	if err != nil {
@@ -2406,7 +2681,6 @@ func EncodeDelayedVestingAccount(w io.Writer, v DelayedVestingAccount) error {
 } //End of EncodeDelayedVestingAccount
 
 func DecodeDelayedVestingAccount(bz []byte) (DelayedVestingAccount, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v DelayedVestingAccount
@@ -2516,7 +2790,6 @@ func DecodeDelayedVestingAccount(bz []byte) (DelayedVestingAccount, int, error) 
 } //End of DecodeDelayedVestingAccount
 
 func RandDelayedVestingAccount(r RandSrc) DelayedVestingAccount {
-	// codon version: 1
 	var length int
 	var v DelayedVestingAccount
 	v.BaseVestingAccount = &BaseVestingAccount{}
@@ -2552,9 +2825,44 @@ func RandDelayedVestingAccount(r RandSrc) DelayedVestingAccount {
 	return v
 } //End of RandDelayedVestingAccount
 
+func DeepCopyDelayedVestingAccount(in DelayedVestingAccount) (out DelayedVestingAccount) {
+	var length int
+	out.BaseVestingAccount = &BaseVestingAccount{}
+	out.BaseVestingAccount.BaseAccount = &BaseAccount{}
+	length = len(in.BaseVestingAccount.BaseAccount.Address)
+	out.BaseVestingAccount.BaseAccount.Address = make([]uint8, length)
+	copy(out.BaseVestingAccount.BaseAccount.Address[:], in.BaseVestingAccount.BaseAccount.Address[:])
+	length = len(in.BaseVestingAccount.BaseAccount.Coins)
+	out.BaseVestingAccount.BaseAccount.Coins = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseVestingAccount.BaseAccount.Coins[_0] = DeepCopyCoin(in.BaseVestingAccount.BaseAccount.Coins[_0])
+	}
+	out.BaseVestingAccount.BaseAccount.PubKey = DeepCopyPubKey(in.BaseVestingAccount.BaseAccount.PubKey)
+	out.BaseVestingAccount.BaseAccount.AccountNumber = in.BaseVestingAccount.BaseAccount.AccountNumber
+	out.BaseVestingAccount.BaseAccount.Sequence = in.BaseVestingAccount.BaseAccount.Sequence
+	// end of .BaseVestingAccount.BaseAccount
+	length = len(in.BaseVestingAccount.OriginalVesting)
+	out.BaseVestingAccount.OriginalVesting = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseVestingAccount.OriginalVesting[_0] = DeepCopyCoin(in.BaseVestingAccount.OriginalVesting[_0])
+	}
+	length = len(in.BaseVestingAccount.DelegatedFree)
+	out.BaseVestingAccount.DelegatedFree = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseVestingAccount.DelegatedFree[_0] = DeepCopyCoin(in.BaseVestingAccount.DelegatedFree[_0])
+	}
+	length = len(in.BaseVestingAccount.DelegatedVesting)
+	out.BaseVestingAccount.DelegatedVesting = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseVestingAccount.DelegatedVesting[_0] = DeepCopyCoin(in.BaseVestingAccount.DelegatedVesting[_0])
+	}
+	out.BaseVestingAccount.EndTime = in.BaseVestingAccount.EndTime
+	// end of .BaseVestingAccount
+	return
+} //End of DeepCopyDelayedVestingAccount
+
 // Non-Interface
 func EncodeModuleAccount(w io.Writer, v ModuleAccount) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.BaseAccount.Address[:])
 	if err != nil {
@@ -2606,7 +2914,6 @@ func EncodeModuleAccount(w io.Writer, v ModuleAccount) error {
 } //End of EncodeModuleAccount
 
 func DecodeModuleAccount(bz []byte) (ModuleAccount, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v ModuleAccount
@@ -2684,7 +2991,6 @@ func DecodeModuleAccount(bz []byte) (ModuleAccount, int, error) {
 } //End of DecodeModuleAccount
 
 func RandModuleAccount(r RandSrc) ModuleAccount {
-	// codon version: 1
 	var length int
 	var v ModuleAccount
 	v.BaseAccount = &BaseAccount{}
@@ -2708,9 +3014,32 @@ func RandModuleAccount(r RandSrc) ModuleAccount {
 	return v
 } //End of RandModuleAccount
 
+func DeepCopyModuleAccount(in ModuleAccount) (out ModuleAccount) {
+	var length int
+	out.BaseAccount = &BaseAccount{}
+	length = len(in.BaseAccount.Address)
+	out.BaseAccount.Address = make([]uint8, length)
+	copy(out.BaseAccount.Address[:], in.BaseAccount.Address[:])
+	length = len(in.BaseAccount.Coins)
+	out.BaseAccount.Coins = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.BaseAccount.Coins[_0] = DeepCopyCoin(in.BaseAccount.Coins[_0])
+	}
+	out.BaseAccount.PubKey = DeepCopyPubKey(in.BaseAccount.PubKey)
+	out.BaseAccount.AccountNumber = in.BaseAccount.AccountNumber
+	out.BaseAccount.Sequence = in.BaseAccount.Sequence
+	// end of .BaseAccount
+	out.Name = in.Name
+	length = len(in.Permissions)
+	out.Permissions = make([]string, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of string
+		out.Permissions[_0] = in.Permissions[_0]
+	}
+	return
+} //End of DeepCopyModuleAccount
+
 // Non-Interface
 func EncodeStdTx(w io.Writer, v StdTx) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeVarint(w, int64(len(v.Msgs)))
 	if err != nil {
@@ -2765,7 +3094,6 @@ func EncodeStdTx(w io.Writer, v StdTx) error {
 } //End of EncodeStdTx
 
 func DecodeStdTx(bz []byte) (StdTx, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v StdTx
@@ -2833,7 +3161,6 @@ func DecodeStdTx(bz []byte) (StdTx, int, error) {
 } //End of DecodeStdTx
 
 func RandStdTx(r RandSrc) StdTx {
-	// codon version: 1
 	var length int
 	var v StdTx
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -2857,9 +3184,31 @@ func RandStdTx(r RandSrc) StdTx {
 	return v
 } //End of RandStdTx
 
+func DeepCopyStdTx(in StdTx) (out StdTx) {
+	var length int
+	length = len(in.Msgs)
+	out.Msgs = make([]Msg, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of interface
+		out.Msgs[_0] = DeepCopyMsg(in.Msgs[_0])
+	}
+	length = len(in.Fee.Amount)
+	out.Fee.Amount = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Fee.Amount[_0] = DeepCopyCoin(in.Fee.Amount[_0])
+	}
+	out.Fee.Gas = in.Fee.Gas
+	// end of .Fee
+	length = len(in.Signatures)
+	out.Signatures = make([]StdSignature, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Signatures[_0] = DeepCopyStdSignature(in.Signatures[_0])
+	}
+	out.Memo = in.Memo
+	return
+} //End of DeepCopyStdTx
+
 // Non-Interface
 func EncodeMsgBeginRedelegate(w io.Writer, v MsgBeginRedelegate) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.DelegatorAddress[:])
 	if err != nil {
@@ -2886,7 +3235,6 @@ func EncodeMsgBeginRedelegate(w io.Writer, v MsgBeginRedelegate) error {
 } //End of EncodeMsgBeginRedelegate
 
 func DecodeMsgBeginRedelegate(bz []byte) (MsgBeginRedelegate, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgBeginRedelegate
@@ -2945,7 +3293,6 @@ func DecodeMsgBeginRedelegate(bz []byte) (MsgBeginRedelegate, int, error) {
 } //End of DecodeMsgBeginRedelegate
 
 func RandMsgBeginRedelegate(r RandSrc) MsgBeginRedelegate {
-	// codon version: 1
 	var length int
 	var v MsgBeginRedelegate
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -2960,9 +3307,25 @@ func RandMsgBeginRedelegate(r RandSrc) MsgBeginRedelegate {
 	return v
 } //End of RandMsgBeginRedelegate
 
+func DeepCopyMsgBeginRedelegate(in MsgBeginRedelegate) (out MsgBeginRedelegate) {
+	var length int
+	length = len(in.DelegatorAddress)
+	out.DelegatorAddress = make([]uint8, length)
+	copy(out.DelegatorAddress[:], in.DelegatorAddress[:])
+	length = len(in.ValidatorSrcAddress)
+	out.ValidatorSrcAddress = make([]uint8, length)
+	copy(out.ValidatorSrcAddress[:], in.ValidatorSrcAddress[:])
+	length = len(in.ValidatorDstAddress)
+	out.ValidatorDstAddress = make([]uint8, length)
+	copy(out.ValidatorDstAddress[:], in.ValidatorDstAddress[:])
+	out.Amount.Denom = in.Amount.Denom
+	out.Amount.Amount = DeepCopyInt(in.Amount.Amount)
+	// end of .Amount
+	return
+} //End of DeepCopyMsgBeginRedelegate
+
 // Non-Interface
 func EncodeMsgCreateValidator(w io.Writer, v MsgCreateValidator) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Description.Moniker)
 	if err != nil {
@@ -3023,7 +3386,6 @@ func EncodeMsgCreateValidator(w io.Writer, v MsgCreateValidator) error {
 } //End of EncodeMsgCreateValidator
 
 func DecodeMsgCreateValidator(bz []byte) (MsgCreateValidator, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgCreateValidator
@@ -3126,7 +3488,6 @@ func DecodeMsgCreateValidator(bz []byte) (MsgCreateValidator, int, error) {
 } //End of DecodeMsgCreateValidator
 
 func RandMsgCreateValidator(r RandSrc) MsgCreateValidator {
-	// codon version: 1
 	var length int
 	var v MsgCreateValidator
 	v.Description.Moniker = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -3150,9 +3511,33 @@ func RandMsgCreateValidator(r RandSrc) MsgCreateValidator {
 	return v
 } //End of RandMsgCreateValidator
 
+func DeepCopyMsgCreateValidator(in MsgCreateValidator) (out MsgCreateValidator) {
+	var length int
+	out.Description.Moniker = in.Description.Moniker
+	out.Description.Identity = in.Description.Identity
+	out.Description.Website = in.Description.Website
+	out.Description.Details = in.Description.Details
+	// end of .Description
+	out.Commission.Rate = DeepCopyDec(in.Commission.Rate)
+	out.Commission.MaxRate = DeepCopyDec(in.Commission.MaxRate)
+	out.Commission.MaxChangeRate = DeepCopyDec(in.Commission.MaxChangeRate)
+	// end of .Commission
+	out.MinSelfDelegation = DeepCopyInt(in.MinSelfDelegation)
+	length = len(in.DelegatorAddress)
+	out.DelegatorAddress = make([]uint8, length)
+	copy(out.DelegatorAddress[:], in.DelegatorAddress[:])
+	length = len(in.ValidatorAddress)
+	out.ValidatorAddress = make([]uint8, length)
+	copy(out.ValidatorAddress[:], in.ValidatorAddress[:])
+	out.PubKey = DeepCopyPubKey(in.PubKey)
+	out.Value.Denom = in.Value.Denom
+	out.Value.Amount = DeepCopyInt(in.Value.Amount)
+	// end of .Value
+	return
+} //End of DeepCopyMsgCreateValidator
+
 // Non-Interface
 func EncodeMsgDelegate(w io.Writer, v MsgDelegate) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.DelegatorAddress[:])
 	if err != nil {
@@ -3175,7 +3560,6 @@ func EncodeMsgDelegate(w io.Writer, v MsgDelegate) error {
 } //End of EncodeMsgDelegate
 
 func DecodeMsgDelegate(bz []byte) (MsgDelegate, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgDelegate
@@ -3222,7 +3606,6 @@ func DecodeMsgDelegate(bz []byte) (MsgDelegate, int, error) {
 } //End of DecodeMsgDelegate
 
 func RandMsgDelegate(r RandSrc) MsgDelegate {
-	// codon version: 1
 	var length int
 	var v MsgDelegate
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -3235,9 +3618,22 @@ func RandMsgDelegate(r RandSrc) MsgDelegate {
 	return v
 } //End of RandMsgDelegate
 
+func DeepCopyMsgDelegate(in MsgDelegate) (out MsgDelegate) {
+	var length int
+	length = len(in.DelegatorAddress)
+	out.DelegatorAddress = make([]uint8, length)
+	copy(out.DelegatorAddress[:], in.DelegatorAddress[:])
+	length = len(in.ValidatorAddress)
+	out.ValidatorAddress = make([]uint8, length)
+	copy(out.ValidatorAddress[:], in.ValidatorAddress[:])
+	out.Amount.Denom = in.Amount.Denom
+	out.Amount.Amount = DeepCopyInt(in.Amount.Amount)
+	// end of .Amount
+	return
+} //End of DeepCopyMsgDelegate
+
 // Non-Interface
 func EncodeMsgEditValidator(w io.Writer, v MsgEditValidator) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Description.Moniker)
 	if err != nil {
@@ -3272,7 +3668,6 @@ func EncodeMsgEditValidator(w io.Writer, v MsgEditValidator) error {
 } //End of EncodeMsgEditValidator
 
 func DecodeMsgEditValidator(bz []byte) (MsgEditValidator, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgEditValidator
@@ -3333,7 +3728,6 @@ func DecodeMsgEditValidator(bz []byte) (MsgEditValidator, int, error) {
 } //End of DecodeMsgEditValidator
 
 func RandMsgEditValidator(r RandSrc) MsgEditValidator {
-	// codon version: 1
 	var length int
 	var v MsgEditValidator
 	v.Description.Moniker = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -3350,9 +3744,25 @@ func RandMsgEditValidator(r RandSrc) MsgEditValidator {
 	return v
 } //End of RandMsgEditValidator
 
+func DeepCopyMsgEditValidator(in MsgEditValidator) (out MsgEditValidator) {
+	var length int
+	out.Description.Moniker = in.Description.Moniker
+	out.Description.Identity = in.Description.Identity
+	out.Description.Website = in.Description.Website
+	out.Description.Details = in.Description.Details
+	// end of .Description
+	length = len(in.ValidatorAddress)
+	out.ValidatorAddress = make([]uint8, length)
+	copy(out.ValidatorAddress[:], in.ValidatorAddress[:])
+	out.CommissionRate = &sdk.Dec{}
+	*(out.CommissionRate) = DeepCopyDec(*(in.CommissionRate))
+	out.MinSelfDelegation = &sdk.Int{}
+	*(out.MinSelfDelegation) = DeepCopyInt(*(in.MinSelfDelegation))
+	return
+} //End of DeepCopyMsgEditValidator
+
 // Non-Interface
 func EncodeMsgSetWithdrawAddress(w io.Writer, v MsgSetWithdrawAddress) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.DelegatorAddress[:])
 	if err != nil {
@@ -3366,7 +3776,6 @@ func EncodeMsgSetWithdrawAddress(w io.Writer, v MsgSetWithdrawAddress) error {
 } //End of EncodeMsgSetWithdrawAddress
 
 func DecodeMsgSetWithdrawAddress(bz []byte) (MsgSetWithdrawAddress, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgSetWithdrawAddress
@@ -3400,7 +3809,6 @@ func DecodeMsgSetWithdrawAddress(bz []byte) (MsgSetWithdrawAddress, int, error) 
 } //End of DecodeMsgSetWithdrawAddress
 
 func RandMsgSetWithdrawAddress(r RandSrc) MsgSetWithdrawAddress {
-	// codon version: 1
 	var length int
 	var v MsgSetWithdrawAddress
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -3410,9 +3818,19 @@ func RandMsgSetWithdrawAddress(r RandSrc) MsgSetWithdrawAddress {
 	return v
 } //End of RandMsgSetWithdrawAddress
 
+func DeepCopyMsgSetWithdrawAddress(in MsgSetWithdrawAddress) (out MsgSetWithdrawAddress) {
+	var length int
+	length = len(in.DelegatorAddress)
+	out.DelegatorAddress = make([]uint8, length)
+	copy(out.DelegatorAddress[:], in.DelegatorAddress[:])
+	length = len(in.WithdrawAddress)
+	out.WithdrawAddress = make([]uint8, length)
+	copy(out.WithdrawAddress[:], in.WithdrawAddress[:])
+	return
+} //End of DeepCopyMsgSetWithdrawAddress
+
 // Non-Interface
 func EncodeMsgUndelegate(w io.Writer, v MsgUndelegate) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.DelegatorAddress[:])
 	if err != nil {
@@ -3435,7 +3853,6 @@ func EncodeMsgUndelegate(w io.Writer, v MsgUndelegate) error {
 } //End of EncodeMsgUndelegate
 
 func DecodeMsgUndelegate(bz []byte) (MsgUndelegate, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgUndelegate
@@ -3482,7 +3899,6 @@ func DecodeMsgUndelegate(bz []byte) (MsgUndelegate, int, error) {
 } //End of DecodeMsgUndelegate
 
 func RandMsgUndelegate(r RandSrc) MsgUndelegate {
-	// codon version: 1
 	var length int
 	var v MsgUndelegate
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -3495,9 +3911,22 @@ func RandMsgUndelegate(r RandSrc) MsgUndelegate {
 	return v
 } //End of RandMsgUndelegate
 
+func DeepCopyMsgUndelegate(in MsgUndelegate) (out MsgUndelegate) {
+	var length int
+	length = len(in.DelegatorAddress)
+	out.DelegatorAddress = make([]uint8, length)
+	copy(out.DelegatorAddress[:], in.DelegatorAddress[:])
+	length = len(in.ValidatorAddress)
+	out.ValidatorAddress = make([]uint8, length)
+	copy(out.ValidatorAddress[:], in.ValidatorAddress[:])
+	out.Amount.Denom = in.Amount.Denom
+	out.Amount.Amount = DeepCopyInt(in.Amount.Amount)
+	// end of .Amount
+	return
+} //End of DeepCopyMsgUndelegate
+
 // Non-Interface
 func EncodeMsgUnjail(w io.Writer, v MsgUnjail) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.ValidatorAddr[:])
 	if err != nil {
@@ -3507,7 +3936,6 @@ func EncodeMsgUnjail(w io.Writer, v MsgUnjail) error {
 } //End of EncodeMsgUnjail
 
 func DecodeMsgUnjail(bz []byte) (MsgUnjail, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgUnjail
@@ -3529,7 +3957,6 @@ func DecodeMsgUnjail(bz []byte) (MsgUnjail, int, error) {
 } //End of DecodeMsgUnjail
 
 func RandMsgUnjail(r RandSrc) MsgUnjail {
-	// codon version: 1
 	var length int
 	var v MsgUnjail
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -3537,9 +3964,16 @@ func RandMsgUnjail(r RandSrc) MsgUnjail {
 	return v
 } //End of RandMsgUnjail
 
+func DeepCopyMsgUnjail(in MsgUnjail) (out MsgUnjail) {
+	var length int
+	length = len(in.ValidatorAddr)
+	out.ValidatorAddr = make([]uint8, length)
+	copy(out.ValidatorAddr[:], in.ValidatorAddr[:])
+	return
+} //End of DeepCopyMsgUnjail
+
 // Non-Interface
 func EncodeMsgWithdrawDelegatorReward(w io.Writer, v MsgWithdrawDelegatorReward) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.DelegatorAddress[:])
 	if err != nil {
@@ -3553,7 +3987,6 @@ func EncodeMsgWithdrawDelegatorReward(w io.Writer, v MsgWithdrawDelegatorReward)
 } //End of EncodeMsgWithdrawDelegatorReward
 
 func DecodeMsgWithdrawDelegatorReward(bz []byte) (MsgWithdrawDelegatorReward, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgWithdrawDelegatorReward
@@ -3587,7 +4020,6 @@ func DecodeMsgWithdrawDelegatorReward(bz []byte) (MsgWithdrawDelegatorReward, in
 } //End of DecodeMsgWithdrawDelegatorReward
 
 func RandMsgWithdrawDelegatorReward(r RandSrc) MsgWithdrawDelegatorReward {
-	// codon version: 1
 	var length int
 	var v MsgWithdrawDelegatorReward
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -3597,9 +4029,19 @@ func RandMsgWithdrawDelegatorReward(r RandSrc) MsgWithdrawDelegatorReward {
 	return v
 } //End of RandMsgWithdrawDelegatorReward
 
+func DeepCopyMsgWithdrawDelegatorReward(in MsgWithdrawDelegatorReward) (out MsgWithdrawDelegatorReward) {
+	var length int
+	length = len(in.DelegatorAddress)
+	out.DelegatorAddress = make([]uint8, length)
+	copy(out.DelegatorAddress[:], in.DelegatorAddress[:])
+	length = len(in.ValidatorAddress)
+	out.ValidatorAddress = make([]uint8, length)
+	copy(out.ValidatorAddress[:], in.ValidatorAddress[:])
+	return
+} //End of DeepCopyMsgWithdrawDelegatorReward
+
 // Non-Interface
 func EncodeMsgWithdrawValidatorCommission(w io.Writer, v MsgWithdrawValidatorCommission) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.ValidatorAddress[:])
 	if err != nil {
@@ -3609,7 +4051,6 @@ func EncodeMsgWithdrawValidatorCommission(w io.Writer, v MsgWithdrawValidatorCom
 } //End of EncodeMsgWithdrawValidatorCommission
 
 func DecodeMsgWithdrawValidatorCommission(bz []byte) (MsgWithdrawValidatorCommission, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgWithdrawValidatorCommission
@@ -3631,7 +4072,6 @@ func DecodeMsgWithdrawValidatorCommission(bz []byte) (MsgWithdrawValidatorCommis
 } //End of DecodeMsgWithdrawValidatorCommission
 
 func RandMsgWithdrawValidatorCommission(r RandSrc) MsgWithdrawValidatorCommission {
-	// codon version: 1
 	var length int
 	var v MsgWithdrawValidatorCommission
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -3639,9 +4079,16 @@ func RandMsgWithdrawValidatorCommission(r RandSrc) MsgWithdrawValidatorCommissio
 	return v
 } //End of RandMsgWithdrawValidatorCommission
 
+func DeepCopyMsgWithdrawValidatorCommission(in MsgWithdrawValidatorCommission) (out MsgWithdrawValidatorCommission) {
+	var length int
+	length = len(in.ValidatorAddress)
+	out.ValidatorAddress = make([]uint8, length)
+	copy(out.ValidatorAddress[:], in.ValidatorAddress[:])
+	return
+} //End of DeepCopyMsgWithdrawValidatorCommission
+
 // Non-Interface
 func EncodeMsgDeposit(w io.Writer, v MsgDeposit) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeUvarint(w, uint64(v.ProposalID))
 	if err != nil {
@@ -3670,7 +4117,6 @@ func EncodeMsgDeposit(w io.Writer, v MsgDeposit) error {
 } //End of EncodeMsgDeposit
 
 func DecodeMsgDeposit(bz []byte) (MsgDeposit, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgDeposit
@@ -3713,7 +4159,6 @@ func DecodeMsgDeposit(bz []byte) (MsgDeposit, int, error) {
 } //End of DecodeMsgDeposit
 
 func RandMsgDeposit(r RandSrc) MsgDeposit {
-	// codon version: 1
 	var length int
 	var v MsgDeposit
 	v.ProposalID = r.GetUint64()
@@ -3727,9 +4172,22 @@ func RandMsgDeposit(r RandSrc) MsgDeposit {
 	return v
 } //End of RandMsgDeposit
 
+func DeepCopyMsgDeposit(in MsgDeposit) (out MsgDeposit) {
+	var length int
+	out.ProposalID = in.ProposalID
+	length = len(in.Depositor)
+	out.Depositor = make([]uint8, length)
+	copy(out.Depositor[:], in.Depositor[:])
+	length = len(in.Amount)
+	out.Amount = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Amount[_0] = DeepCopyCoin(in.Amount[_0])
+	}
+	return
+} //End of DeepCopyMsgDeposit
+
 // Non-Interface
 func EncodeMsgSubmitProposal(w io.Writer, v MsgSubmitProposal) error {
-	// codon version: 1
 	var err error
 	err = EncodeContent(w, v.Content)
 	if err != nil {
@@ -3758,7 +4216,6 @@ func EncodeMsgSubmitProposal(w io.Writer, v MsgSubmitProposal) error {
 } //End of EncodeMsgSubmitProposal
 
 func DecodeMsgSubmitProposal(bz []byte) (MsgSubmitProposal, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgSubmitProposal
@@ -3801,7 +4258,6 @@ func DecodeMsgSubmitProposal(bz []byte) (MsgSubmitProposal, int, error) {
 } //End of DecodeMsgSubmitProposal
 
 func RandMsgSubmitProposal(r RandSrc) MsgSubmitProposal {
-	// codon version: 1
 	var length int
 	var v MsgSubmitProposal
 	v.Content = RandContent(r) // interface_decode
@@ -3815,9 +4271,22 @@ func RandMsgSubmitProposal(r RandSrc) MsgSubmitProposal {
 	return v
 } //End of RandMsgSubmitProposal
 
+func DeepCopyMsgSubmitProposal(in MsgSubmitProposal) (out MsgSubmitProposal) {
+	var length int
+	out.Content = DeepCopyContent(in.Content)
+	length = len(in.InitialDeposit)
+	out.InitialDeposit = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.InitialDeposit[_0] = DeepCopyCoin(in.InitialDeposit[_0])
+	}
+	length = len(in.Proposer)
+	out.Proposer = make([]uint8, length)
+	copy(out.Proposer[:], in.Proposer[:])
+	return
+} //End of DeepCopyMsgSubmitProposal
+
 // Non-Interface
 func EncodeMsgVote(w io.Writer, v MsgVote) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeUvarint(w, uint64(v.ProposalID))
 	if err != nil {
@@ -3835,7 +4304,6 @@ func EncodeMsgVote(w io.Writer, v MsgVote) error {
 } //End of EncodeMsgVote
 
 func DecodeMsgVote(bz []byte) (MsgVote, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgVote
@@ -3869,7 +4337,6 @@ func DecodeMsgVote(bz []byte) (MsgVote, int, error) {
 } //End of DecodeMsgVote
 
 func RandMsgVote(r RandSrc) MsgVote {
-	// codon version: 1
 	var length int
 	var v MsgVote
 	v.ProposalID = r.GetUint64()
@@ -3879,9 +4346,18 @@ func RandMsgVote(r RandSrc) MsgVote {
 	return v
 } //End of RandMsgVote
 
+func DeepCopyMsgVote(in MsgVote) (out MsgVote) {
+	var length int
+	out.ProposalID = in.ProposalID
+	length = len(in.Voter)
+	out.Voter = make([]uint8, length)
+	copy(out.Voter[:], in.Voter[:])
+	out.Option = in.Option
+	return
+} //End of DeepCopyMsgVote
+
 // Non-Interface
 func EncodeParameterChangeProposal(w io.Writer, v ParameterChangeProposal) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Title)
 	if err != nil {
@@ -3918,7 +4394,6 @@ func EncodeParameterChangeProposal(w io.Writer, v ParameterChangeProposal) error
 } //End of EncodeParameterChangeProposal
 
 func DecodeParameterChangeProposal(bz []byte) (ParameterChangeProposal, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v ParameterChangeProposal
@@ -3955,7 +4430,6 @@ func DecodeParameterChangeProposal(bz []byte) (ParameterChangeProposal, int, err
 } //End of DecodeParameterChangeProposal
 
 func RandParameterChangeProposal(r RandSrc) ParameterChangeProposal {
-	// codon version: 1
 	var length int
 	var v ParameterChangeProposal
 	v.Title = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -3968,9 +4442,20 @@ func RandParameterChangeProposal(r RandSrc) ParameterChangeProposal {
 	return v
 } //End of RandParameterChangeProposal
 
+func DeepCopyParameterChangeProposal(in ParameterChangeProposal) (out ParameterChangeProposal) {
+	var length int
+	out.Title = in.Title
+	out.Description = in.Description
+	length = len(in.Changes)
+	out.Changes = make([]ParamChange, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Changes[_0] = DeepCopyParamChange(in.Changes[_0])
+	}
+	return
+} //End of DeepCopyParameterChangeProposal
+
 // Non-Interface
 func EncodeSoftwareUpgradeProposal(w io.Writer, v SoftwareUpgradeProposal) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Title)
 	if err != nil {
@@ -3984,7 +4469,6 @@ func EncodeSoftwareUpgradeProposal(w io.Writer, v SoftwareUpgradeProposal) error
 } //End of EncodeSoftwareUpgradeProposal
 
 func DecodeSoftwareUpgradeProposal(bz []byte) (SoftwareUpgradeProposal, int, error) {
-	// codon version: 1
 	var err error
 	var v SoftwareUpgradeProposal
 	var n int
@@ -4005,16 +4489,20 @@ func DecodeSoftwareUpgradeProposal(bz []byte) (SoftwareUpgradeProposal, int, err
 } //End of DecodeSoftwareUpgradeProposal
 
 func RandSoftwareUpgradeProposal(r RandSrc) SoftwareUpgradeProposal {
-	// codon version: 1
 	var v SoftwareUpgradeProposal
 	v.Title = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.Description = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	return v
 } //End of RandSoftwareUpgradeProposal
 
+func DeepCopySoftwareUpgradeProposal(in SoftwareUpgradeProposal) (out SoftwareUpgradeProposal) {
+	out.Title = in.Title
+	out.Description = in.Description
+	return
+} //End of DeepCopySoftwareUpgradeProposal
+
 // Non-Interface
 func EncodeTextProposal(w io.Writer, v TextProposal) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Title)
 	if err != nil {
@@ -4028,7 +4516,6 @@ func EncodeTextProposal(w io.Writer, v TextProposal) error {
 } //End of EncodeTextProposal
 
 func DecodeTextProposal(bz []byte) (TextProposal, int, error) {
-	// codon version: 1
 	var err error
 	var v TextProposal
 	var n int
@@ -4049,16 +4536,20 @@ func DecodeTextProposal(bz []byte) (TextProposal, int, error) {
 } //End of DecodeTextProposal
 
 func RandTextProposal(r RandSrc) TextProposal {
-	// codon version: 1
 	var v TextProposal
 	v.Title = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.Description = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	return v
 } //End of RandTextProposal
 
+func DeepCopyTextProposal(in TextProposal) (out TextProposal) {
+	out.Title = in.Title
+	out.Description = in.Description
+	return
+} //End of DeepCopyTextProposal
+
 // Non-Interface
 func EncodeCommunityPoolSpendProposal(w io.Writer, v CommunityPoolSpendProposal) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Title)
 	if err != nil {
@@ -4091,7 +4582,6 @@ func EncodeCommunityPoolSpendProposal(w io.Writer, v CommunityPoolSpendProposal)
 } //End of EncodeCommunityPoolSpendProposal
 
 func DecodeCommunityPoolSpendProposal(bz []byte) (CommunityPoolSpendProposal, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v CommunityPoolSpendProposal
@@ -4140,7 +4630,6 @@ func DecodeCommunityPoolSpendProposal(bz []byte) (CommunityPoolSpendProposal, in
 } //End of DecodeCommunityPoolSpendProposal
 
 func RandCommunityPoolSpendProposal(r RandSrc) CommunityPoolSpendProposal {
-	// codon version: 1
 	var length int
 	var v CommunityPoolSpendProposal
 	v.Title = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -4155,9 +4644,23 @@ func RandCommunityPoolSpendProposal(r RandSrc) CommunityPoolSpendProposal {
 	return v
 } //End of RandCommunityPoolSpendProposal
 
+func DeepCopyCommunityPoolSpendProposal(in CommunityPoolSpendProposal) (out CommunityPoolSpendProposal) {
+	var length int
+	out.Title = in.Title
+	out.Description = in.Description
+	length = len(in.Recipient)
+	out.Recipient = make([]uint8, length)
+	copy(out.Recipient[:], in.Recipient[:])
+	length = len(in.Amount)
+	out.Amount = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Amount[_0] = DeepCopyCoin(in.Amount[_0])
+	}
+	return
+} //End of DeepCopyCommunityPoolSpendProposal
+
 // Non-Interface
 func EncodeMsgMultiSend(w io.Writer, v MsgMultiSend) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeVarint(w, int64(len(v.Inputs)))
 	if err != nil {
@@ -4215,7 +4718,6 @@ func EncodeMsgMultiSend(w io.Writer, v MsgMultiSend) error {
 } //End of EncodeMsgMultiSend
 
 func DecodeMsgMultiSend(bz []byte) (MsgMultiSend, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgMultiSend
@@ -4255,7 +4757,6 @@ func DecodeMsgMultiSend(bz []byte) (MsgMultiSend, int, error) {
 } //End of DecodeMsgMultiSend
 
 func RandMsgMultiSend(r RandSrc) MsgMultiSend {
-	// codon version: 1
 	var length int
 	var v MsgMultiSend
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -4271,9 +4772,23 @@ func RandMsgMultiSend(r RandSrc) MsgMultiSend {
 	return v
 } //End of RandMsgMultiSend
 
+func DeepCopyMsgMultiSend(in MsgMultiSend) (out MsgMultiSend) {
+	var length int
+	length = len(in.Inputs)
+	out.Inputs = make([]Input, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Inputs[_0] = DeepCopyInput(in.Inputs[_0])
+	}
+	length = len(in.Outputs)
+	out.Outputs = make([]Output, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Outputs[_0] = DeepCopyOutput(in.Outputs[_0])
+	}
+	return
+} //End of DeepCopyMsgMultiSend
+
 // Non-Interface
 func EncodeMsgSend(w io.Writer, v MsgSend) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.FromAddress[:])
 	if err != nil {
@@ -4302,7 +4817,6 @@ func EncodeMsgSend(w io.Writer, v MsgSend) error {
 } //End of EncodeMsgSend
 
 func DecodeMsgSend(bz []byte) (MsgSend, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgSend
@@ -4351,7 +4865,6 @@ func DecodeMsgSend(bz []byte) (MsgSend, int, error) {
 } //End of DecodeMsgSend
 
 func RandMsgSend(r RandSrc) MsgSend {
-	// codon version: 1
 	var length int
 	var v MsgSend
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -4366,9 +4879,24 @@ func RandMsgSend(r RandSrc) MsgSend {
 	return v
 } //End of RandMsgSend
 
+func DeepCopyMsgSend(in MsgSend) (out MsgSend) {
+	var length int
+	length = len(in.FromAddress)
+	out.FromAddress = make([]uint8, length)
+	copy(out.FromAddress[:], in.FromAddress[:])
+	length = len(in.ToAddress)
+	out.ToAddress = make([]uint8, length)
+	copy(out.ToAddress[:], in.ToAddress[:])
+	length = len(in.Amount)
+	out.Amount = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Amount[_0] = DeepCopyCoin(in.Amount[_0])
+	}
+	return
+} //End of DeepCopyMsgSend
+
 // Non-Interface
 func EncodeMsgVerifyInvariant(w io.Writer, v MsgVerifyInvariant) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Sender[:])
 	if err != nil {
@@ -4386,7 +4914,6 @@ func EncodeMsgVerifyInvariant(w io.Writer, v MsgVerifyInvariant) error {
 } //End of EncodeMsgVerifyInvariant
 
 func DecodeMsgVerifyInvariant(bz []byte) (MsgVerifyInvariant, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgVerifyInvariant
@@ -4420,7 +4947,6 @@ func DecodeMsgVerifyInvariant(bz []byte) (MsgVerifyInvariant, int, error) {
 } //End of DecodeMsgVerifyInvariant
 
 func RandMsgVerifyInvariant(r RandSrc) MsgVerifyInvariant {
-	// codon version: 1
 	var length int
 	var v MsgVerifyInvariant
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -4430,9 +4956,18 @@ func RandMsgVerifyInvariant(r RandSrc) MsgVerifyInvariant {
 	return v
 } //End of RandMsgVerifyInvariant
 
+func DeepCopyMsgVerifyInvariant(in MsgVerifyInvariant) (out MsgVerifyInvariant) {
+	var length int
+	length = len(in.Sender)
+	out.Sender = make([]uint8, length)
+	copy(out.Sender[:], in.Sender[:])
+	out.InvariantModuleName = in.InvariantModuleName
+	out.InvariantRoute = in.InvariantRoute
+	return
+} //End of DeepCopyMsgVerifyInvariant
+
 // Non-Interface
 func EncodeSupply(w io.Writer, v Supply) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeVarint(w, int64(len(v.Total)))
 	if err != nil {
@@ -4453,7 +4988,6 @@ func EncodeSupply(w io.Writer, v Supply) error {
 } //End of EncodeSupply
 
 func DecodeSupply(bz []byte) (Supply, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v Supply
@@ -4478,7 +5012,6 @@ func DecodeSupply(bz []byte) (Supply, int, error) {
 } //End of DecodeSupply
 
 func RandSupply(r RandSrc) Supply {
-	// codon version: 1
 	var length int
 	var v Supply
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -4489,9 +5022,18 @@ func RandSupply(r RandSrc) Supply {
 	return v
 } //End of RandSupply
 
+func DeepCopySupply(in Supply) (out Supply) {
+	var length int
+	length = len(in.Total)
+	out.Total = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Total[_0] = DeepCopyCoin(in.Total[_0])
+	}
+	return
+} //End of DeepCopySupply
+
 // Non-Interface
 func EncodeAccountX(w io.Writer, v AccountX) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Address[:])
 	if err != nil {
@@ -4519,6 +5061,18 @@ func EncodeAccountX(w io.Writer, v AccountX) error {
 		if err != nil {
 			return err
 		}
+		err = codonEncodeByteSlice(w, v.LockedCoins[_0].FromAddress[:])
+		if err != nil {
+			return err
+		}
+		err = codonEncodeByteSlice(w, v.LockedCoins[_0].Supervisor[:])
+		if err != nil {
+			return err
+		}
+		err = codonEncodeVarint(w, int64(v.LockedCoins[_0].Reward))
+		if err != nil {
+			return err
+		}
 		// end of v.LockedCoins[_0]
 	}
 	err = codonEncodeVarint(w, int64(len(v.FrozenCoins)))
@@ -4540,7 +5094,6 @@ func EncodeAccountX(w io.Writer, v AccountX) error {
 } //End of EncodeAccountX
 
 func DecodeAccountX(bz []byte) (AccountX, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v AccountX
@@ -4598,7 +5151,6 @@ func DecodeAccountX(bz []byte) (AccountX, int, error) {
 } //End of DecodeAccountX
 
 func RandAccountX(r RandSrc) AccountX {
-	// codon version: 1
 	var length int
 	var v AccountX
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -4617,9 +5169,27 @@ func RandAccountX(r RandSrc) AccountX {
 	return v
 } //End of RandAccountX
 
+func DeepCopyAccountX(in AccountX) (out AccountX) {
+	var length int
+	length = len(in.Address)
+	out.Address = make([]uint8, length)
+	copy(out.Address[:], in.Address[:])
+	out.MemoRequired = in.MemoRequired
+	length = len(in.LockedCoins)
+	out.LockedCoins = make([]LockedCoin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.LockedCoins[_0] = DeepCopyLockedCoin(in.LockedCoins[_0])
+	}
+	length = len(in.FrozenCoins)
+	out.FrozenCoins = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.FrozenCoins[_0] = DeepCopyCoin(in.FrozenCoins[_0])
+	}
+	return
+} //End of DeepCopyAccountX
+
 // Non-Interface
 func EncodeMsgMultiSendX(w io.Writer, v MsgMultiSendX) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeVarint(w, int64(len(v.Inputs)))
 	if err != nil {
@@ -4677,7 +5247,6 @@ func EncodeMsgMultiSendX(w io.Writer, v MsgMultiSendX) error {
 } //End of EncodeMsgMultiSendX
 
 func DecodeMsgMultiSendX(bz []byte) (MsgMultiSendX, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgMultiSendX
@@ -4717,7 +5286,6 @@ func DecodeMsgMultiSendX(bz []byte) (MsgMultiSendX, int, error) {
 } //End of DecodeMsgMultiSendX
 
 func RandMsgMultiSendX(r RandSrc) MsgMultiSendX {
-	// codon version: 1
 	var length int
 	var v MsgMultiSendX
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -4733,9 +5301,23 @@ func RandMsgMultiSendX(r RandSrc) MsgMultiSendX {
 	return v
 } //End of RandMsgMultiSendX
 
+func DeepCopyMsgMultiSendX(in MsgMultiSendX) (out MsgMultiSendX) {
+	var length int
+	length = len(in.Inputs)
+	out.Inputs = make([]Input, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Inputs[_0] = DeepCopyInput(in.Inputs[_0])
+	}
+	length = len(in.Outputs)
+	out.Outputs = make([]Output, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Outputs[_0] = DeepCopyOutput(in.Outputs[_0])
+	}
+	return
+} //End of DeepCopyMsgMultiSendX
+
 // Non-Interface
 func EncodeMsgSendX(w io.Writer, v MsgSendX) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.FromAddress[:])
 	if err != nil {
@@ -4768,7 +5350,6 @@ func EncodeMsgSendX(w io.Writer, v MsgSendX) error {
 } //End of EncodeMsgSendX
 
 func DecodeMsgSendX(bz []byte) (MsgSendX, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgSendX
@@ -4823,7 +5404,6 @@ func DecodeMsgSendX(bz []byte) (MsgSendX, int, error) {
 } //End of DecodeMsgSendX
 
 func RandMsgSendX(r RandSrc) MsgSendX {
-	// codon version: 1
 	var length int
 	var v MsgSendX
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -4839,9 +5419,25 @@ func RandMsgSendX(r RandSrc) MsgSendX {
 	return v
 } //End of RandMsgSendX
 
+func DeepCopyMsgSendX(in MsgSendX) (out MsgSendX) {
+	var length int
+	length = len(in.FromAddress)
+	out.FromAddress = make([]uint8, length)
+	copy(out.FromAddress[:], in.FromAddress[:])
+	length = len(in.ToAddress)
+	out.ToAddress = make([]uint8, length)
+	copy(out.ToAddress[:], in.ToAddress[:])
+	length = len(in.Amount)
+	out.Amount = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Amount[_0] = DeepCopyCoin(in.Amount[_0])
+	}
+	out.UnlockTime = in.UnlockTime
+	return
+} //End of DeepCopyMsgSendX
+
 // Non-Interface
 func EncodeMsgSetMemoRequired(w io.Writer, v MsgSetMemoRequired) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Address[:])
 	if err != nil {
@@ -4855,7 +5451,6 @@ func EncodeMsgSetMemoRequired(w io.Writer, v MsgSetMemoRequired) error {
 } //End of EncodeMsgSetMemoRequired
 
 func DecodeMsgSetMemoRequired(bz []byte) (MsgSetMemoRequired, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgSetMemoRequired
@@ -4883,7 +5478,6 @@ func DecodeMsgSetMemoRequired(bz []byte) (MsgSetMemoRequired, int, error) {
 } //End of DecodeMsgSetMemoRequired
 
 func RandMsgSetMemoRequired(r RandSrc) MsgSetMemoRequired {
-	// codon version: 1
 	var length int
 	var v MsgSetMemoRequired
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -4892,9 +5486,17 @@ func RandMsgSetMemoRequired(r RandSrc) MsgSetMemoRequired {
 	return v
 } //End of RandMsgSetMemoRequired
 
+func DeepCopyMsgSetMemoRequired(in MsgSetMemoRequired) (out MsgSetMemoRequired) {
+	var length int
+	length = len(in.Address)
+	out.Address = make([]uint8, length)
+	copy(out.Address[:], in.Address[:])
+	out.Required = in.Required
+	return
+} //End of DeepCopyMsgSetMemoRequired
+
 // Non-Interface
 func EncodeBaseToken(w io.Writer, v BaseToken) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Name)
 	if err != nil {
@@ -4960,7 +5562,6 @@ func EncodeBaseToken(w io.Writer, v BaseToken) error {
 } //End of EncodeBaseToken
 
 func DecodeBaseToken(bz []byte) (BaseToken, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v BaseToken
@@ -5066,7 +5667,6 @@ func DecodeBaseToken(bz []byte) (BaseToken, int, error) {
 } //End of DecodeBaseToken
 
 func RandBaseToken(r RandSrc) BaseToken {
-	// codon version: 1
 	var length int
 	var v BaseToken
 	v.Name = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5088,9 +5688,30 @@ func RandBaseToken(r RandSrc) BaseToken {
 	return v
 } //End of RandBaseToken
 
+func DeepCopyBaseToken(in BaseToken) (out BaseToken) {
+	var length int
+	out.Name = in.Name
+	out.Symbol = in.Symbol
+	out.TotalSupply = DeepCopyInt(in.TotalSupply)
+	out.SendLock = DeepCopyInt(in.SendLock)
+	length = len(in.Owner)
+	out.Owner = make([]uint8, length)
+	copy(out.Owner[:], in.Owner[:])
+	out.Mintable = in.Mintable
+	out.Burnable = in.Burnable
+	out.AddrForbiddable = in.AddrForbiddable
+	out.TokenForbiddable = in.TokenForbiddable
+	out.TotalBurn = DeepCopyInt(in.TotalBurn)
+	out.TotalMint = DeepCopyInt(in.TotalMint)
+	out.IsForbidden = in.IsForbidden
+	out.URL = in.URL
+	out.Description = in.Description
+	out.Identity = in.Identity
+	return
+} //End of DeepCopyBaseToken
+
 // Non-Interface
 func EncodeMsgAddTokenWhitelist(w io.Writer, v MsgAddTokenWhitelist) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5114,7 +5735,6 @@ func EncodeMsgAddTokenWhitelist(w io.Writer, v MsgAddTokenWhitelist) error {
 } //End of EncodeMsgAddTokenWhitelist
 
 func DecodeMsgAddTokenWhitelist(bz []byte) (MsgAddTokenWhitelist, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgAddTokenWhitelist
@@ -5163,7 +5783,6 @@ func DecodeMsgAddTokenWhitelist(bz []byte) (MsgAddTokenWhitelist, int, error) {
 } //End of DecodeMsgAddTokenWhitelist
 
 func RandMsgAddTokenWhitelist(r RandSrc) MsgAddTokenWhitelist {
-	// codon version: 1
 	var length int
 	var v MsgAddTokenWhitelist
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5178,9 +5797,24 @@ func RandMsgAddTokenWhitelist(r RandSrc) MsgAddTokenWhitelist {
 	return v
 } //End of RandMsgAddTokenWhitelist
 
+func DeepCopyMsgAddTokenWhitelist(in MsgAddTokenWhitelist) (out MsgAddTokenWhitelist) {
+	var length int
+	out.Symbol = in.Symbol
+	length = len(in.OwnerAddress)
+	out.OwnerAddress = make([]uint8, length)
+	copy(out.OwnerAddress[:], in.OwnerAddress[:])
+	length = len(in.Whitelist)
+	out.Whitelist = make([]AccAddress, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of slice
+		length = len(in.Whitelist[_0])
+		out.Whitelist[_0] = make([]uint8, length)
+		copy(out.Whitelist[_0][:], in.Whitelist[_0][:])
+	}
+	return
+} //End of DeepCopyMsgAddTokenWhitelist
+
 // Non-Interface
 func EncodeMsgBurnToken(w io.Writer, v MsgBurnToken) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5198,7 +5832,6 @@ func EncodeMsgBurnToken(w io.Writer, v MsgBurnToken) error {
 } //End of EncodeMsgBurnToken
 
 func DecodeMsgBurnToken(bz []byte) (MsgBurnToken, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgBurnToken
@@ -5232,7 +5865,6 @@ func DecodeMsgBurnToken(bz []byte) (MsgBurnToken, int, error) {
 } //End of DecodeMsgBurnToken
 
 func RandMsgBurnToken(r RandSrc) MsgBurnToken {
-	// codon version: 1
 	var length int
 	var v MsgBurnToken
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5242,9 +5874,18 @@ func RandMsgBurnToken(r RandSrc) MsgBurnToken {
 	return v
 } //End of RandMsgBurnToken
 
+func DeepCopyMsgBurnToken(in MsgBurnToken) (out MsgBurnToken) {
+	var length int
+	out.Symbol = in.Symbol
+	out.Amount = DeepCopyInt(in.Amount)
+	length = len(in.OwnerAddress)
+	out.OwnerAddress = make([]uint8, length)
+	copy(out.OwnerAddress[:], in.OwnerAddress[:])
+	return
+} //End of DeepCopyMsgBurnToken
+
 // Non-Interface
 func EncodeMsgForbidAddr(w io.Writer, v MsgForbidAddr) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5268,7 +5909,6 @@ func EncodeMsgForbidAddr(w io.Writer, v MsgForbidAddr) error {
 } //End of EncodeMsgForbidAddr
 
 func DecodeMsgForbidAddr(bz []byte) (MsgForbidAddr, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgForbidAddr
@@ -5317,7 +5957,6 @@ func DecodeMsgForbidAddr(bz []byte) (MsgForbidAddr, int, error) {
 } //End of DecodeMsgForbidAddr
 
 func RandMsgForbidAddr(r RandSrc) MsgForbidAddr {
-	// codon version: 1
 	var length int
 	var v MsgForbidAddr
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5332,9 +5971,24 @@ func RandMsgForbidAddr(r RandSrc) MsgForbidAddr {
 	return v
 } //End of RandMsgForbidAddr
 
+func DeepCopyMsgForbidAddr(in MsgForbidAddr) (out MsgForbidAddr) {
+	var length int
+	out.Symbol = in.Symbol
+	length = len(in.OwnerAddr)
+	out.OwnerAddr = make([]uint8, length)
+	copy(out.OwnerAddr[:], in.OwnerAddr[:])
+	length = len(in.Addresses)
+	out.Addresses = make([]AccAddress, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of slice
+		length = len(in.Addresses[_0])
+		out.Addresses[_0] = make([]uint8, length)
+		copy(out.Addresses[_0][:], in.Addresses[_0][:])
+	}
+	return
+} //End of DeepCopyMsgForbidAddr
+
 // Non-Interface
 func EncodeMsgForbidToken(w io.Writer, v MsgForbidToken) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5348,7 +6002,6 @@ func EncodeMsgForbidToken(w io.Writer, v MsgForbidToken) error {
 } //End of EncodeMsgForbidToken
 
 func DecodeMsgForbidToken(bz []byte) (MsgForbidToken, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgForbidToken
@@ -5376,7 +6029,6 @@ func DecodeMsgForbidToken(bz []byte) (MsgForbidToken, int, error) {
 } //End of DecodeMsgForbidToken
 
 func RandMsgForbidToken(r RandSrc) MsgForbidToken {
-	// codon version: 1
 	var length int
 	var v MsgForbidToken
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5385,9 +6037,17 @@ func RandMsgForbidToken(r RandSrc) MsgForbidToken {
 	return v
 } //End of RandMsgForbidToken
 
+func DeepCopyMsgForbidToken(in MsgForbidToken) (out MsgForbidToken) {
+	var length int
+	out.Symbol = in.Symbol
+	length = len(in.OwnerAddress)
+	out.OwnerAddress = make([]uint8, length)
+	copy(out.OwnerAddress[:], in.OwnerAddress[:])
+	return
+} //End of DeepCopyMsgForbidToken
+
 // Non-Interface
 func EncodeMsgIssueToken(w io.Writer, v MsgIssueToken) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Name)
 	if err != nil {
@@ -5437,7 +6097,6 @@ func EncodeMsgIssueToken(w io.Writer, v MsgIssueToken) error {
 } //End of EncodeMsgIssueToken
 
 func DecodeMsgIssueToken(bz []byte) (MsgIssueToken, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgIssueToken
@@ -5519,7 +6178,6 @@ func DecodeMsgIssueToken(bz []byte) (MsgIssueToken, int, error) {
 } //End of DecodeMsgIssueToken
 
 func RandMsgIssueToken(r RandSrc) MsgIssueToken {
-	// codon version: 1
 	var length int
 	var v MsgIssueToken
 	v.Name = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5537,9 +6195,26 @@ func RandMsgIssueToken(r RandSrc) MsgIssueToken {
 	return v
 } //End of RandMsgIssueToken
 
+func DeepCopyMsgIssueToken(in MsgIssueToken) (out MsgIssueToken) {
+	var length int
+	out.Name = in.Name
+	out.Symbol = in.Symbol
+	out.TotalSupply = DeepCopyInt(in.TotalSupply)
+	length = len(in.Owner)
+	out.Owner = make([]uint8, length)
+	copy(out.Owner[:], in.Owner[:])
+	out.Mintable = in.Mintable
+	out.Burnable = in.Burnable
+	out.AddrForbiddable = in.AddrForbiddable
+	out.TokenForbiddable = in.TokenForbiddable
+	out.URL = in.URL
+	out.Description = in.Description
+	out.Identity = in.Identity
+	return
+} //End of DeepCopyMsgIssueToken
+
 // Non-Interface
 func EncodeMsgMintToken(w io.Writer, v MsgMintToken) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5557,7 +6232,6 @@ func EncodeMsgMintToken(w io.Writer, v MsgMintToken) error {
 } //End of EncodeMsgMintToken
 
 func DecodeMsgMintToken(bz []byte) (MsgMintToken, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgMintToken
@@ -5591,7 +6265,6 @@ func DecodeMsgMintToken(bz []byte) (MsgMintToken, int, error) {
 } //End of DecodeMsgMintToken
 
 func RandMsgMintToken(r RandSrc) MsgMintToken {
-	// codon version: 1
 	var length int
 	var v MsgMintToken
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5601,9 +6274,18 @@ func RandMsgMintToken(r RandSrc) MsgMintToken {
 	return v
 } //End of RandMsgMintToken
 
+func DeepCopyMsgMintToken(in MsgMintToken) (out MsgMintToken) {
+	var length int
+	out.Symbol = in.Symbol
+	out.Amount = DeepCopyInt(in.Amount)
+	length = len(in.OwnerAddress)
+	out.OwnerAddress = make([]uint8, length)
+	copy(out.OwnerAddress[:], in.OwnerAddress[:])
+	return
+} //End of DeepCopyMsgMintToken
+
 // Non-Interface
 func EncodeMsgModifyTokenInfo(w io.Writer, v MsgModifyTokenInfo) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5629,7 +6311,6 @@ func EncodeMsgModifyTokenInfo(w io.Writer, v MsgModifyTokenInfo) error {
 } //End of EncodeMsgModifyTokenInfo
 
 func DecodeMsgModifyTokenInfo(bz []byte) (MsgModifyTokenInfo, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgModifyTokenInfo
@@ -5675,7 +6356,6 @@ func DecodeMsgModifyTokenInfo(bz []byte) (MsgModifyTokenInfo, int, error) {
 } //End of DecodeMsgModifyTokenInfo
 
 func RandMsgModifyTokenInfo(r RandSrc) MsgModifyTokenInfo {
-	// codon version: 1
 	var length int
 	var v MsgModifyTokenInfo
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5687,9 +6367,20 @@ func RandMsgModifyTokenInfo(r RandSrc) MsgModifyTokenInfo {
 	return v
 } //End of RandMsgModifyTokenInfo
 
+func DeepCopyMsgModifyTokenInfo(in MsgModifyTokenInfo) (out MsgModifyTokenInfo) {
+	var length int
+	out.Symbol = in.Symbol
+	out.URL = in.URL
+	out.Description = in.Description
+	out.Identity = in.Identity
+	length = len(in.OwnerAddress)
+	out.OwnerAddress = make([]uint8, length)
+	copy(out.OwnerAddress[:], in.OwnerAddress[:])
+	return
+} //End of DeepCopyMsgModifyTokenInfo
+
 // Non-Interface
 func EncodeMsgRemoveTokenWhitelist(w io.Writer, v MsgRemoveTokenWhitelist) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5713,7 +6404,6 @@ func EncodeMsgRemoveTokenWhitelist(w io.Writer, v MsgRemoveTokenWhitelist) error
 } //End of EncodeMsgRemoveTokenWhitelist
 
 func DecodeMsgRemoveTokenWhitelist(bz []byte) (MsgRemoveTokenWhitelist, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgRemoveTokenWhitelist
@@ -5762,7 +6452,6 @@ func DecodeMsgRemoveTokenWhitelist(bz []byte) (MsgRemoveTokenWhitelist, int, err
 } //End of DecodeMsgRemoveTokenWhitelist
 
 func RandMsgRemoveTokenWhitelist(r RandSrc) MsgRemoveTokenWhitelist {
-	// codon version: 1
 	var length int
 	var v MsgRemoveTokenWhitelist
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5777,9 +6466,24 @@ func RandMsgRemoveTokenWhitelist(r RandSrc) MsgRemoveTokenWhitelist {
 	return v
 } //End of RandMsgRemoveTokenWhitelist
 
+func DeepCopyMsgRemoveTokenWhitelist(in MsgRemoveTokenWhitelist) (out MsgRemoveTokenWhitelist) {
+	var length int
+	out.Symbol = in.Symbol
+	length = len(in.OwnerAddress)
+	out.OwnerAddress = make([]uint8, length)
+	copy(out.OwnerAddress[:], in.OwnerAddress[:])
+	length = len(in.Whitelist)
+	out.Whitelist = make([]AccAddress, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of slice
+		length = len(in.Whitelist[_0])
+		out.Whitelist[_0] = make([]uint8, length)
+		copy(out.Whitelist[_0][:], in.Whitelist[_0][:])
+	}
+	return
+} //End of DeepCopyMsgRemoveTokenWhitelist
+
 // Non-Interface
 func EncodeMsgTransferOwnership(w io.Writer, v MsgTransferOwnership) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5797,7 +6501,6 @@ func EncodeMsgTransferOwnership(w io.Writer, v MsgTransferOwnership) error {
 } //End of EncodeMsgTransferOwnership
 
 func DecodeMsgTransferOwnership(bz []byte) (MsgTransferOwnership, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgTransferOwnership
@@ -5837,7 +6540,6 @@ func DecodeMsgTransferOwnership(bz []byte) (MsgTransferOwnership, int, error) {
 } //End of DecodeMsgTransferOwnership
 
 func RandMsgTransferOwnership(r RandSrc) MsgTransferOwnership {
-	// codon version: 1
 	var length int
 	var v MsgTransferOwnership
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5848,9 +6550,20 @@ func RandMsgTransferOwnership(r RandSrc) MsgTransferOwnership {
 	return v
 } //End of RandMsgTransferOwnership
 
+func DeepCopyMsgTransferOwnership(in MsgTransferOwnership) (out MsgTransferOwnership) {
+	var length int
+	out.Symbol = in.Symbol
+	length = len(in.OriginalOwner)
+	out.OriginalOwner = make([]uint8, length)
+	copy(out.OriginalOwner[:], in.OriginalOwner[:])
+	length = len(in.NewOwner)
+	out.NewOwner = make([]uint8, length)
+	copy(out.NewOwner[:], in.NewOwner[:])
+	return
+} //End of DeepCopyMsgTransferOwnership
+
 // Non-Interface
 func EncodeMsgUnForbidAddr(w io.Writer, v MsgUnForbidAddr) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5874,7 +6587,6 @@ func EncodeMsgUnForbidAddr(w io.Writer, v MsgUnForbidAddr) error {
 } //End of EncodeMsgUnForbidAddr
 
 func DecodeMsgUnForbidAddr(bz []byte) (MsgUnForbidAddr, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgUnForbidAddr
@@ -5923,7 +6635,6 @@ func DecodeMsgUnForbidAddr(bz []byte) (MsgUnForbidAddr, int, error) {
 } //End of DecodeMsgUnForbidAddr
 
 func RandMsgUnForbidAddr(r RandSrc) MsgUnForbidAddr {
-	// codon version: 1
 	var length int
 	var v MsgUnForbidAddr
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5938,9 +6649,24 @@ func RandMsgUnForbidAddr(r RandSrc) MsgUnForbidAddr {
 	return v
 } //End of RandMsgUnForbidAddr
 
+func DeepCopyMsgUnForbidAddr(in MsgUnForbidAddr) (out MsgUnForbidAddr) {
+	var length int
+	out.Symbol = in.Symbol
+	length = len(in.OwnerAddr)
+	out.OwnerAddr = make([]uint8, length)
+	copy(out.OwnerAddr[:], in.OwnerAddr[:])
+	length = len(in.Addresses)
+	out.Addresses = make([]AccAddress, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of slice
+		length = len(in.Addresses[_0])
+		out.Addresses[_0] = make([]uint8, length)
+		copy(out.Addresses[_0][:], in.Addresses[_0][:])
+	}
+	return
+} //End of DeepCopyMsgUnForbidAddr
+
 // Non-Interface
 func EncodeMsgUnForbidToken(w io.Writer, v MsgUnForbidToken) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Symbol)
 	if err != nil {
@@ -5954,7 +6680,6 @@ func EncodeMsgUnForbidToken(w io.Writer, v MsgUnForbidToken) error {
 } //End of EncodeMsgUnForbidToken
 
 func DecodeMsgUnForbidToken(bz []byte) (MsgUnForbidToken, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgUnForbidToken
@@ -5982,7 +6707,6 @@ func DecodeMsgUnForbidToken(bz []byte) (MsgUnForbidToken, int, error) {
 } //End of DecodeMsgUnForbidToken
 
 func RandMsgUnForbidToken(r RandSrc) MsgUnForbidToken {
-	// codon version: 1
 	var length int
 	var v MsgUnForbidToken
 	v.Symbol = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -5991,9 +6715,17 @@ func RandMsgUnForbidToken(r RandSrc) MsgUnForbidToken {
 	return v
 } //End of RandMsgUnForbidToken
 
+func DeepCopyMsgUnForbidToken(in MsgUnForbidToken) (out MsgUnForbidToken) {
+	var length int
+	out.Symbol = in.Symbol
+	length = len(in.OwnerAddress)
+	out.OwnerAddress = make([]uint8, length)
+	copy(out.OwnerAddress[:], in.OwnerAddress[:])
+	return
+} //End of DeepCopyMsgUnForbidToken
+
 // Non-Interface
 func EncodeMsgBancorCancel(w io.Writer, v MsgBancorCancel) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Owner[:])
 	if err != nil {
@@ -6011,7 +6743,6 @@ func EncodeMsgBancorCancel(w io.Writer, v MsgBancorCancel) error {
 } //End of EncodeMsgBancorCancel
 
 func DecodeMsgBancorCancel(bz []byte) (MsgBancorCancel, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgBancorCancel
@@ -6045,7 +6776,6 @@ func DecodeMsgBancorCancel(bz []byte) (MsgBancorCancel, int, error) {
 } //End of DecodeMsgBancorCancel
 
 func RandMsgBancorCancel(r RandSrc) MsgBancorCancel {
-	// codon version: 1
 	var length int
 	var v MsgBancorCancel
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -6055,9 +6785,18 @@ func RandMsgBancorCancel(r RandSrc) MsgBancorCancel {
 	return v
 } //End of RandMsgBancorCancel
 
+func DeepCopyMsgBancorCancel(in MsgBancorCancel) (out MsgBancorCancel) {
+	var length int
+	length = len(in.Owner)
+	out.Owner = make([]uint8, length)
+	copy(out.Owner[:], in.Owner[:])
+	out.Stock = in.Stock
+	out.Money = in.Money
+	return
+} //End of DeepCopyMsgBancorCancel
+
 // Non-Interface
 func EncodeMsgBancorInit(w io.Writer, v MsgBancorInit) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Owner[:])
 	if err != nil {
@@ -6095,7 +6834,6 @@ func EncodeMsgBancorInit(w io.Writer, v MsgBancorInit) error {
 } //End of EncodeMsgBancorInit
 
 func DecodeMsgBancorInit(bz []byte) (MsgBancorInit, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgBancorInit
@@ -6159,7 +6897,6 @@ func DecodeMsgBancorInit(bz []byte) (MsgBancorInit, int, error) {
 } //End of DecodeMsgBancorInit
 
 func RandMsgBancorInit(r RandSrc) MsgBancorInit {
-	// codon version: 1
 	var length int
 	var v MsgBancorInit
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -6174,9 +6911,23 @@ func RandMsgBancorInit(r RandSrc) MsgBancorInit {
 	return v
 } //End of RandMsgBancorInit
 
+func DeepCopyMsgBancorInit(in MsgBancorInit) (out MsgBancorInit) {
+	var length int
+	length = len(in.Owner)
+	out.Owner = make([]uint8, length)
+	copy(out.Owner[:], in.Owner[:])
+	out.Stock = in.Stock
+	out.Money = in.Money
+	out.InitPrice = DeepCopyDec(in.InitPrice)
+	out.MaxSupply = DeepCopyInt(in.MaxSupply)
+	out.MaxPrice = DeepCopyDec(in.MaxPrice)
+	out.StockPrecision = in.StockPrecision
+	out.EarliestCancelTime = in.EarliestCancelTime
+	return
+} //End of DeepCopyMsgBancorInit
+
 // Non-Interface
 func EncodeMsgBancorTrade(w io.Writer, v MsgBancorTrade) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Sender[:])
 	if err != nil {
@@ -6206,7 +6957,6 @@ func EncodeMsgBancorTrade(w io.Writer, v MsgBancorTrade) error {
 } //End of EncodeMsgBancorTrade
 
 func DecodeMsgBancorTrade(bz []byte) (MsgBancorTrade, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgBancorTrade
@@ -6258,7 +7008,6 @@ func DecodeMsgBancorTrade(bz []byte) (MsgBancorTrade, int, error) {
 } //End of DecodeMsgBancorTrade
 
 func RandMsgBancorTrade(r RandSrc) MsgBancorTrade {
-	// codon version: 1
 	var length int
 	var v MsgBancorTrade
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -6271,9 +7020,21 @@ func RandMsgBancorTrade(r RandSrc) MsgBancorTrade {
 	return v
 } //End of RandMsgBancorTrade
 
+func DeepCopyMsgBancorTrade(in MsgBancorTrade) (out MsgBancorTrade) {
+	var length int
+	length = len(in.Sender)
+	out.Sender = make([]uint8, length)
+	copy(out.Sender[:], in.Sender[:])
+	out.Stock = in.Stock
+	out.Money = in.Money
+	out.Amount = in.Amount
+	out.IsBuy = in.IsBuy
+	out.MoneyLimit = in.MoneyLimit
+	return
+} //End of DeepCopyMsgBancorTrade
+
 // Non-Interface
 func EncodeMsgCancelOrder(w io.Writer, v MsgCancelOrder) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Sender[:])
 	if err != nil {
@@ -6287,7 +7048,6 @@ func EncodeMsgCancelOrder(w io.Writer, v MsgCancelOrder) error {
 } //End of EncodeMsgCancelOrder
 
 func DecodeMsgCancelOrder(bz []byte) (MsgCancelOrder, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgCancelOrder
@@ -6315,7 +7075,6 @@ func DecodeMsgCancelOrder(bz []byte) (MsgCancelOrder, int, error) {
 } //End of DecodeMsgCancelOrder
 
 func RandMsgCancelOrder(r RandSrc) MsgCancelOrder {
-	// codon version: 1
 	var length int
 	var v MsgCancelOrder
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -6324,9 +7083,17 @@ func RandMsgCancelOrder(r RandSrc) MsgCancelOrder {
 	return v
 } //End of RandMsgCancelOrder
 
+func DeepCopyMsgCancelOrder(in MsgCancelOrder) (out MsgCancelOrder) {
+	var length int
+	length = len(in.Sender)
+	out.Sender = make([]uint8, length)
+	copy(out.Sender[:], in.Sender[:])
+	out.OrderID = in.OrderID
+	return
+} //End of DeepCopyMsgCancelOrder
+
 // Non-Interface
 func EncodeMsgCancelTradingPair(w io.Writer, v MsgCancelTradingPair) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Sender[:])
 	if err != nil {
@@ -6344,7 +7111,6 @@ func EncodeMsgCancelTradingPair(w io.Writer, v MsgCancelTradingPair) error {
 } //End of EncodeMsgCancelTradingPair
 
 func DecodeMsgCancelTradingPair(bz []byte) (MsgCancelTradingPair, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgCancelTradingPair
@@ -6378,7 +7144,6 @@ func DecodeMsgCancelTradingPair(bz []byte) (MsgCancelTradingPair, int, error) {
 } //End of DecodeMsgCancelTradingPair
 
 func RandMsgCancelTradingPair(r RandSrc) MsgCancelTradingPair {
-	// codon version: 1
 	var length int
 	var v MsgCancelTradingPair
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -6388,9 +7153,18 @@ func RandMsgCancelTradingPair(r RandSrc) MsgCancelTradingPair {
 	return v
 } //End of RandMsgCancelTradingPair
 
+func DeepCopyMsgCancelTradingPair(in MsgCancelTradingPair) (out MsgCancelTradingPair) {
+	var length int
+	length = len(in.Sender)
+	out.Sender = make([]uint8, length)
+	copy(out.Sender[:], in.Sender[:])
+	out.TradingPair = in.TradingPair
+	out.EffectiveTime = in.EffectiveTime
+	return
+} //End of DeepCopyMsgCancelTradingPair
+
 // Non-Interface
 func EncodeMsgCreateOrder(w io.Writer, v MsgCreateOrder) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Sender[:])
 	if err != nil {
@@ -6436,7 +7210,6 @@ func EncodeMsgCreateOrder(w io.Writer, v MsgCreateOrder) error {
 } //End of EncodeMsgCreateOrder
 
 func DecodeMsgCreateOrder(bz []byte) (MsgCreateOrder, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgCreateOrder
@@ -6512,7 +7285,6 @@ func DecodeMsgCreateOrder(bz []byte) (MsgCreateOrder, int, error) {
 } //End of DecodeMsgCreateOrder
 
 func RandMsgCreateOrder(r RandSrc) MsgCreateOrder {
-	// codon version: 1
 	var length int
 	var v MsgCreateOrder
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -6529,9 +7301,25 @@ func RandMsgCreateOrder(r RandSrc) MsgCreateOrder {
 	return v
 } //End of RandMsgCreateOrder
 
+func DeepCopyMsgCreateOrder(in MsgCreateOrder) (out MsgCreateOrder) {
+	var length int
+	length = len(in.Sender)
+	out.Sender = make([]uint8, length)
+	copy(out.Sender[:], in.Sender[:])
+	out.Identify = in.Identify
+	out.TradingPair = in.TradingPair
+	out.OrderType = in.OrderType
+	out.PricePrecision = in.PricePrecision
+	out.Price = in.Price
+	out.Quantity = in.Quantity
+	out.Side = in.Side
+	out.TimeInForce = in.TimeInForce
+	out.ExistBlocks = in.ExistBlocks
+	return
+} //End of DeepCopyMsgCreateOrder
+
 // Non-Interface
 func EncodeMsgCreateTradingPair(w io.Writer, v MsgCreateTradingPair) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Stock)
 	if err != nil {
@@ -6557,7 +7345,6 @@ func EncodeMsgCreateTradingPair(w io.Writer, v MsgCreateTradingPair) error {
 } //End of EncodeMsgCreateTradingPair
 
 func DecodeMsgCreateTradingPair(bz []byte) (MsgCreateTradingPair, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgCreateTradingPair
@@ -6603,7 +7390,6 @@ func DecodeMsgCreateTradingPair(bz []byte) (MsgCreateTradingPair, int, error) {
 } //End of DecodeMsgCreateTradingPair
 
 func RandMsgCreateTradingPair(r RandSrc) MsgCreateTradingPair {
-	// codon version: 1
 	var length int
 	var v MsgCreateTradingPair
 	v.Stock = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -6615,9 +7401,20 @@ func RandMsgCreateTradingPair(r RandSrc) MsgCreateTradingPair {
 	return v
 } //End of RandMsgCreateTradingPair
 
+func DeepCopyMsgCreateTradingPair(in MsgCreateTradingPair) (out MsgCreateTradingPair) {
+	var length int
+	out.Stock = in.Stock
+	out.Money = in.Money
+	length = len(in.Creator)
+	out.Creator = make([]uint8, length)
+	copy(out.Creator[:], in.Creator[:])
+	out.PricePrecision = in.PricePrecision
+	out.OrderPrecision = in.OrderPrecision
+	return
+} //End of DeepCopyMsgCreateTradingPair
+
 // Non-Interface
 func EncodeMsgModifyPricePrecision(w io.Writer, v MsgModifyPricePrecision) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Sender[:])
 	if err != nil {
@@ -6635,7 +7432,6 @@ func EncodeMsgModifyPricePrecision(w io.Writer, v MsgModifyPricePrecision) error
 } //End of EncodeMsgModifyPricePrecision
 
 func DecodeMsgModifyPricePrecision(bz []byte) (MsgModifyPricePrecision, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgModifyPricePrecision
@@ -6669,7 +7465,6 @@ func DecodeMsgModifyPricePrecision(bz []byte) (MsgModifyPricePrecision, int, err
 } //End of DecodeMsgModifyPricePrecision
 
 func RandMsgModifyPricePrecision(r RandSrc) MsgModifyPricePrecision {
-	// codon version: 1
 	var length int
 	var v MsgModifyPricePrecision
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -6679,9 +7474,18 @@ func RandMsgModifyPricePrecision(r RandSrc) MsgModifyPricePrecision {
 	return v
 } //End of RandMsgModifyPricePrecision
 
+func DeepCopyMsgModifyPricePrecision(in MsgModifyPricePrecision) (out MsgModifyPricePrecision) {
+	var length int
+	length = len(in.Sender)
+	out.Sender = make([]uint8, length)
+	copy(out.Sender[:], in.Sender[:])
+	out.TradingPair = in.TradingPair
+	out.PricePrecision = in.PricePrecision
+	return
+} //End of DeepCopyMsgModifyPricePrecision
+
 // Non-Interface
 func EncodeOrder(w io.Writer, v Order) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Sender[:])
 	if err != nil {
@@ -6751,7 +7555,6 @@ func EncodeOrder(w io.Writer, v Order) error {
 } //End of EncodeOrder
 
 func DecodeOrder(bz []byte) (Order, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v Order
@@ -6863,7 +7666,6 @@ func DecodeOrder(bz []byte) (Order, int, error) {
 } //End of DecodeOrder
 
 func RandOrder(r RandSrc) Order {
-	// codon version: 1
 	var length int
 	var v Order
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -6886,9 +7688,31 @@ func RandOrder(r RandSrc) Order {
 	return v
 } //End of RandOrder
 
+func DeepCopyOrder(in Order) (out Order) {
+	var length int
+	length = len(in.Sender)
+	out.Sender = make([]uint8, length)
+	copy(out.Sender[:], in.Sender[:])
+	out.Sequence = in.Sequence
+	out.Identify = in.Identify
+	out.TradingPair = in.TradingPair
+	out.OrderType = in.OrderType
+	out.Price = DeepCopyDec(in.Price)
+	out.Quantity = in.Quantity
+	out.Side = in.Side
+	out.TimeInForce = in.TimeInForce
+	out.Height = in.Height
+	out.FrozenFee = in.FrozenFee
+	out.ExistBlocks = in.ExistBlocks
+	out.LeftStock = in.LeftStock
+	out.Freeze = in.Freeze
+	out.DealStock = in.DealStock
+	out.DealMoney = in.DealMoney
+	return
+} //End of DeepCopyOrder
+
 // Non-Interface
 func EncodeMarketInfo(w io.Writer, v MarketInfo) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeString(w, v.Stock)
 	if err != nil {
@@ -6914,7 +7738,6 @@ func EncodeMarketInfo(w io.Writer, v MarketInfo) error {
 } //End of EncodeMarketInfo
 
 func DecodeMarketInfo(bz []byte) (MarketInfo, int, error) {
-	// codon version: 1
 	var err error
 	var v MarketInfo
 	var n int
@@ -6953,7 +7776,6 @@ func DecodeMarketInfo(bz []byte) (MarketInfo, int, error) {
 } //End of DecodeMarketInfo
 
 func RandMarketInfo(r RandSrc) MarketInfo {
-	// codon version: 1
 	var v MarketInfo
 	v.Stock = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.Money = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
@@ -6963,9 +7785,17 @@ func RandMarketInfo(r RandSrc) MarketInfo {
 	return v
 } //End of RandMarketInfo
 
+func DeepCopyMarketInfo(in MarketInfo) (out MarketInfo) {
+	out.Stock = in.Stock
+	out.Money = in.Money
+	out.PricePrecision = in.PricePrecision
+	out.LastExecutedPrice = DeepCopyDec(in.LastExecutedPrice)
+	out.OrderPrecision = in.OrderPrecision
+	return
+} //End of DeepCopyMarketInfo
+
 // Non-Interface
 func EncodeMsgDonateToCommunityPool(w io.Writer, v MsgDonateToCommunityPool) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.FromAddr[:])
 	if err != nil {
@@ -6990,7 +7820,6 @@ func EncodeMsgDonateToCommunityPool(w io.Writer, v MsgDonateToCommunityPool) err
 } //End of EncodeMsgDonateToCommunityPool
 
 func DecodeMsgDonateToCommunityPool(bz []byte) (MsgDonateToCommunityPool, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgDonateToCommunityPool
@@ -7027,7 +7856,6 @@ func DecodeMsgDonateToCommunityPool(bz []byte) (MsgDonateToCommunityPool, int, e
 } //End of DecodeMsgDonateToCommunityPool
 
 func RandMsgDonateToCommunityPool(r RandSrc) MsgDonateToCommunityPool {
-	// codon version: 1
 	var length int
 	var v MsgDonateToCommunityPool
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -7040,9 +7868,21 @@ func RandMsgDonateToCommunityPool(r RandSrc) MsgDonateToCommunityPool {
 	return v
 } //End of RandMsgDonateToCommunityPool
 
+func DeepCopyMsgDonateToCommunityPool(in MsgDonateToCommunityPool) (out MsgDonateToCommunityPool) {
+	var length int
+	length = len(in.FromAddr)
+	out.FromAddr = make([]uint8, length)
+	copy(out.FromAddr[:], in.FromAddr[:])
+	length = len(in.Amount)
+	out.Amount = make([]Coin, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.Amount[_0] = DeepCopyCoin(in.Amount[_0])
+	}
+	return
+} //End of DeepCopyMsgDonateToCommunityPool
+
 // Non-Interface
 func EncodeMsgCommentToken(w io.Writer, v MsgCommentToken) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Sender[:])
 	if err != nil {
@@ -7105,7 +7945,6 @@ func EncodeMsgCommentToken(w io.Writer, v MsgCommentToken) error {
 } //End of EncodeMsgCommentToken
 
 func DecodeMsgCommentToken(bz []byte) (MsgCommentToken, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgCommentToken
@@ -7178,7 +8017,6 @@ func DecodeMsgCommentToken(bz []byte) (MsgCommentToken, int, error) {
 } //End of DecodeMsgCommentToken
 
 func RandMsgCommentToken(r RandSrc) MsgCommentToken {
-	// codon version: 1
 	var length int
 	var v MsgCommentToken
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -7197,9 +8035,28 @@ func RandMsgCommentToken(r RandSrc) MsgCommentToken {
 	return v
 } //End of RandMsgCommentToken
 
+func DeepCopyMsgCommentToken(in MsgCommentToken) (out MsgCommentToken) {
+	var length int
+	length = len(in.Sender)
+	out.Sender = make([]uint8, length)
+	copy(out.Sender[:], in.Sender[:])
+	out.Token = in.Token
+	out.Donation = in.Donation
+	out.Title = in.Title
+	length = len(in.Content)
+	out.Content = make([]uint8, length)
+	copy(out.Content[:], in.Content[:])
+	out.ContentType = in.ContentType
+	length = len(in.References)
+	out.References = make([]CommentRef, length)
+	for _0, length_0 := 0, length; _0 < length_0; _0++ { //slice of struct
+		out.References[_0] = DeepCopyCommentRef(in.References[_0])
+	}
+	return
+} //End of DeepCopyMsgCommentToken
+
 // Non-Interface
 func EncodeState(w io.Writer, v State) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeVarint(w, int64(v.HeightAdjustment))
 	if err != nil {
@@ -7209,7 +8066,6 @@ func EncodeState(w io.Writer, v State) error {
 } //End of EncodeState
 
 func DecodeState(bz []byte) (State, int, error) {
-	// codon version: 1
 	var err error
 	var v State
 	var n int
@@ -7224,15 +8080,18 @@ func DecodeState(bz []byte) (State, int, error) {
 } //End of DecodeState
 
 func RandState(r RandSrc) State {
-	// codon version: 1
 	var v State
 	v.HeightAdjustment = r.GetInt64()
 	return v
 } //End of RandState
 
+func DeepCopyState(in State) (out State) {
+	out.HeightAdjustment = in.HeightAdjustment
+	return
+} //End of DeepCopyState
+
 // Non-Interface
 func EncodeMsgAliasUpdate(w io.Writer, v MsgAliasUpdate) error {
-	// codon version: 1
 	var err error
 	err = codonEncodeByteSlice(w, v.Owner[:])
 	if err != nil {
@@ -7254,7 +8113,6 @@ func EncodeMsgAliasUpdate(w io.Writer, v MsgAliasUpdate) error {
 } //End of EncodeMsgAliasUpdate
 
 func DecodeMsgAliasUpdate(bz []byte) (MsgAliasUpdate, int, error) {
-	// codon version: 1
 	var err error
 	var length int
 	var v MsgAliasUpdate
@@ -7294,7 +8152,6 @@ func DecodeMsgAliasUpdate(bz []byte) (MsgAliasUpdate, int, error) {
 } //End of DecodeMsgAliasUpdate
 
 func RandMsgAliasUpdate(r RandSrc) MsgAliasUpdate {
-	// codon version: 1
 	var length int
 	var v MsgAliasUpdate
 	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
@@ -7305,7 +8162,43 @@ func RandMsgAliasUpdate(r RandSrc) MsgAliasUpdate {
 	return v
 } //End of RandMsgAliasUpdate
 
+func DeepCopyMsgAliasUpdate(in MsgAliasUpdate) (out MsgAliasUpdate) {
+	var length int
+	length = len(in.Owner)
+	out.Owner = make([]uint8, length)
+	copy(out.Owner[:], in.Owner[:])
+	out.Alias = in.Alias
+	out.IsAdd = in.IsAdd
+	out.AsDefault = in.AsDefault
+	return
+} //End of DeepCopyMsgAliasUpdate
+
 // Interface
+func DecodePubKey(bz []byte) (PubKey, int, error) {
+	var v PubKey
+	var magicBytes [4]byte
+	var n int
+	for i := 0; i < 4; i++ {
+		magicBytes[i] = bz[i]
+	}
+	switch magicBytes {
+	case [4]byte{114, 76, 37, 23}:
+		v, n, err := DecodePubKeyEd25519(bz[4:])
+		return v, n + 4, err
+	case [4]byte{14, 33, 23, 141}:
+		v, n, err := DecodePubKeyMultisigThreshold(bz[4:])
+		return v, n + 4, err
+	case [4]byte{51, 161, 20, 197}:
+		v, n, err := DecodePubKeySecp256k1(bz[4:])
+		return v, n + 4, err
+	case [4]byte{247, 42, 43, 179}:
+		v, n, err := DecodeStdSignature(bz[4:])
+		return v, n + 4, err
+	default:
+		panic("Unknown type")
+	} // end of switch
+	return v, n, nil
+} // end of DecodePubKey
 func EncodePubKey(w io.Writer, x interface{}) error {
 	switch v := x.(type) {
 	case PubKeyEd25519:
@@ -7336,31 +8229,6 @@ func EncodePubKey(w io.Writer, x interface{}) error {
 		panic("Unknown Type.")
 	} // end of switch
 } // end of func
-func DecodePubKey(bz []byte) (PubKey, int, error) {
-	var v PubKey
-	var magicBytes [4]byte
-	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
-	}
-	switch magicBytes {
-	case [4]byte{108, 143, 2, 48}:
-		v, n, err := DecodePubKeyEd25519(bz[4:])
-		return v, n + 4, err
-	case [4]byte{131, 227, 102, 173}:
-		v, n, err := DecodePubKeyMultisigThreshold(bz[4:])
-		return v, n + 4, err
-	case [4]byte{10, 126, 85, 105}:
-		v, n, err := DecodePubKeySecp256k1(bz[4:])
-		return v, n + 4, err
-	case [4]byte{88, 244, 106, 18}:
-		v, n, err := DecodeStdSignature(bz[4:])
-		return v, n + 4, err
-	default:
-		panic("Unknown type")
-	} // end of switch
-	return v, n, nil
-} // end of DecodePubKey
 func RandPubKey(r RandSrc) PubKey {
 	switch r.GetUint() % 2 {
 	case 0:
@@ -7371,7 +8239,158 @@ func RandPubKey(r RandSrc) PubKey {
 		panic("Unknown Type.")
 	} // end of switch
 } // end of func
+func DeepCopyPubKey(x PubKey) PubKey {
+	switch v := x.(type) {
+	case *PubKeyEd25519:
+		res := DeepCopyPubKeyEd25519(*v)
+		return &res
+	case PubKeyEd25519:
+		res := DeepCopyPubKeyEd25519(v)
+		return &res
+	case *PubKeySecp256k1:
+		res := DeepCopyPubKeySecp256k1(*v)
+		return &res
+	case PubKeySecp256k1:
+		res := DeepCopyPubKeySecp256k1(v)
+		return &res
+	default:
+		panic("Unknown Type.")
+	} // end of switch
+} // end of func
 // Interface
+func DecodeMsg(bz []byte) (Msg, int, error) {
+	var v Msg
+	var magicBytes [4]byte
+	var n int
+	for i := 0; i < 4; i++ {
+		magicBytes[i] = bz[i]
+	}
+	switch magicBytes {
+	case [4]byte{158, 44, 49, 82}:
+		v, n, err := DecodeMsgAddTokenWhitelist(bz[4:])
+		return v, n + 4, err
+	case [4]byte{250, 126, 184, 36}:
+		v, n, err := DecodeMsgAliasUpdate(bz[4:])
+		return v, n + 4, err
+	case [4]byte{124, 247, 85, 232}:
+		v, n, err := DecodeMsgBancorCancel(bz[4:])
+		return v, n + 4, err
+	case [4]byte{192, 118, 23, 126}:
+		v, n, err := DecodeMsgBancorInit(bz[4:])
+		return v, n + 4, err
+	case [4]byte{191, 189, 4, 59}:
+		v, n, err := DecodeMsgBancorTrade(bz[4:])
+		return v, n + 4, err
+	case [4]byte{141, 7, 107, 68}:
+		v, n, err := DecodeMsgBeginRedelegate(bz[4:])
+		return v, n + 4, err
+	case [4]byte{42, 203, 158, 131}:
+		v, n, err := DecodeMsgBurnToken(bz[4:])
+		return v, n + 4, err
+	case [4]byte{238, 105, 251, 19}:
+		v, n, err := DecodeMsgCancelOrder(bz[4:])
+		return v, n + 4, err
+	case [4]byte{184, 188, 48, 70}:
+		v, n, err := DecodeMsgCancelTradingPair(bz[4:])
+		return v, n + 4, err
+	case [4]byte{21, 125, 54, 51}:
+		v, n, err := DecodeMsgCommentToken(bz[4:])
+		return v, n + 4, err
+	case [4]byte{211, 100, 66, 245}:
+		v, n, err := DecodeMsgCreateOrder(bz[4:])
+		return v, n + 4, err
+	case [4]byte{116, 186, 50, 92}:
+		v, n, err := DecodeMsgCreateTradingPair(bz[4:])
+		return v, n + 4, err
+	case [4]byte{24, 79, 66, 107}:
+		v, n, err := DecodeMsgCreateValidator(bz[4:])
+		return v, n + 4, err
+	case [4]byte{184, 121, 196, 185}:
+		v, n, err := DecodeMsgDelegate(bz[4:])
+		return v, n + 4, err
+	case [4]byte{234, 76, 240, 151}:
+		v, n, err := DecodeMsgDeposit(bz[4:])
+		return v, n + 4, err
+	case [4]byte{148, 38, 167, 140}:
+		v, n, err := DecodeMsgDonateToCommunityPool(bz[4:])
+		return v, n + 4, err
+	case [4]byte{9, 254, 168, 109}:
+		v, n, err := DecodeMsgEditValidator(bz[4:])
+		return v, n + 4, err
+	case [4]byte{120, 151, 22, 12}:
+		v, n, err := DecodeMsgForbidAddr(bz[4:])
+		return v, n + 4, err
+	case [4]byte{191, 26, 148, 82}:
+		v, n, err := DecodeMsgForbidToken(bz[4:])
+		return v, n + 4, err
+	case [4]byte{67, 33, 188, 107}:
+		v, n, err := DecodeMsgIssueToken(bz[4:])
+		return v, n + 4, err
+	case [4]byte{172, 102, 179, 22}:
+		v, n, err := DecodeMsgMintToken(bz[4:])
+		return v, n + 4, err
+	case [4]byte{190, 128, 0, 94}:
+		v, n, err := DecodeMsgModifyPricePrecision(bz[4:])
+		return v, n + 4, err
+	case [4]byte{178, 137, 211, 164}:
+		v, n, err := DecodeMsgModifyTokenInfo(bz[4:])
+		return v, n + 4, err
+	case [4]byte{64, 119, 59, 163}:
+		v, n, err := DecodeMsgMultiSend(bz[4:])
+		return v, n + 4, err
+	case [4]byte{112, 57, 9, 246}:
+		v, n, err := DecodeMsgMultiSendX(bz[4:])
+		return v, n + 4, err
+	case [4]byte{198, 39, 33, 109}:
+		v, n, err := DecodeMsgRemoveTokenWhitelist(bz[4:])
+		return v, n + 4, err
+	case [4]byte{212, 255, 125, 220}:
+		v, n, err := DecodeMsgSend(bz[4:])
+		return v, n + 4, err
+	case [4]byte{62, 163, 57, 104}:
+		v, n, err := DecodeMsgSendX(bz[4:])
+		return v, n + 4, err
+	case [4]byte{18, 183, 33, 189}:
+		v, n, err := DecodeMsgSetMemoRequired(bz[4:])
+		return v, n + 4, err
+	case [4]byte{208, 136, 199, 77}:
+		v, n, err := DecodeMsgSetWithdrawAddress(bz[4:])
+		return v, n + 4, err
+	case [4]byte{84, 236, 141, 114}:
+		v, n, err := DecodeMsgSubmitProposal(bz[4:])
+		return v, n + 4, err
+	case [4]byte{120, 20, 134, 126}:
+		v, n, err := DecodeMsgTransferOwnership(bz[4:])
+		return v, n + 4, err
+	case [4]byte{141, 21, 34, 63}:
+		v, n, err := DecodeMsgUnForbidAddr(bz[4:])
+		return v, n + 4, err
+	case [4]byte{79, 103, 52, 189}:
+		v, n, err := DecodeMsgUnForbidToken(bz[4:])
+		return v, n + 4, err
+	case [4]byte{21, 241, 6, 56}:
+		v, n, err := DecodeMsgUndelegate(bz[4:])
+		return v, n + 4, err
+	case [4]byte{139, 110, 39, 159}:
+		v, n, err := DecodeMsgUnjail(bz[4:])
+		return v, n + 4, err
+	case [4]byte{109, 173, 240, 7}:
+		v, n, err := DecodeMsgVerifyInvariant(bz[4:])
+		return v, n + 4, err
+	case [4]byte{233, 121, 28, 250}:
+		v, n, err := DecodeMsgVote(bz[4:])
+		return v, n + 4, err
+	case [4]byte{43, 19, 183, 111}:
+		v, n, err := DecodeMsgWithdrawDelegatorReward(bz[4:])
+		return v, n + 4, err
+	case [4]byte{84, 85, 236, 88}:
+		v, n, err := DecodeMsgWithdrawValidatorCommission(bz[4:])
+		return v, n + 4, err
+	default:
+		panic("Unknown type")
+	} // end of switch
+	return v, n, nil
+} // end of DecodeMsg
 func EncodeMsg(w io.Writer, x interface{}) error {
 	switch v := x.(type) {
 	case MsgAddTokenWhitelist:
@@ -7618,139 +8637,6 @@ func EncodeMsg(w io.Writer, x interface{}) error {
 		panic("Unknown Type.")
 	} // end of switch
 } // end of func
-func DecodeMsg(bz []byte) (Msg, int, error) {
-	var v Msg
-	var magicBytes [4]byte
-	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
-	}
-	switch magicBytes {
-	case [4]byte{147, 136, 220, 215}:
-		v, n, err := DecodeMsgAddTokenWhitelist(bz[4:])
-		return v, n + 4, err
-	case [4]byte{173, 181, 17, 162}:
-		v, n, err := DecodeMsgAliasUpdate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{187, 190, 104, 91}:
-		v, n, err := DecodeMsgBancorCancel(bz[4:])
-		return v, n + 4, err
-	case [4]byte{160, 232, 209, 155}:
-		v, n, err := DecodeMsgBancorInit(bz[4:])
-		return v, n + 4, err
-	case [4]byte{225, 122, 18, 80}:
-		v, n, err := DecodeMsgBancorTrade(bz[4:])
-		return v, n + 4, err
-	case [4]byte{247, 3, 0, 105}:
-		v, n, err := DecodeMsgBeginRedelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{228, 0, 236, 212}:
-		v, n, err := DecodeMsgBurnToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{106, 229, 80, 141}:
-		v, n, err := DecodeMsgCancelOrder(bz[4:])
-		return v, n + 4, err
-	case [4]byte{13, 177, 95, 127}:
-		v, n, err := DecodeMsgCancelTradingPair(bz[4:])
-		return v, n + 4, err
-	case [4]byte{79, 125, 235, 121}:
-		v, n, err := DecodeMsgCommentToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{145, 241, 102, 115}:
-		v, n, err := DecodeMsgCreateOrder(bz[4:])
-		return v, n + 4, err
-	case [4]byte{130, 221, 55, 57}:
-		v, n, err := DecodeMsgCreateTradingPair(bz[4:])
-		return v, n + 4, err
-	case [4]byte{58, 78, 252, 114}:
-		v, n, err := DecodeMsgCreateValidator(bz[4:])
-		return v, n + 4, err
-	case [4]byte{1, 82, 140, 71}:
-		v, n, err := DecodeMsgDelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{205, 134, 140, 190}:
-		v, n, err := DecodeMsgDeposit(bz[4:])
-		return v, n + 4, err
-	case [4]byte{20, 250, 115, 197}:
-		v, n, err := DecodeMsgDonateToCommunityPool(bz[4:])
-		return v, n + 4, err
-	case [4]byte{202, 62, 140, 8}:
-		v, n, err := DecodeMsgEditValidator(bz[4:])
-		return v, n + 4, err
-	case [4]byte{105, 235, 112, 10}:
-		v, n, err := DecodeMsgForbidAddr(bz[4:])
-		return v, n + 4, err
-	case [4]byte{36, 174, 203, 238}:
-		v, n, err := DecodeMsgForbidToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{233, 180, 92, 129}:
-		v, n, err := DecodeMsgIssueToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{66, 148, 56, 203}:
-		v, n, err := DecodeMsgMintToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{76, 91, 156, 199}:
-		v, n, err := DecodeMsgModifyPricePrecision(bz[4:])
-		return v, n + 4, err
-	case [4]byte{40, 158, 40, 18}:
-		v, n, err := DecodeMsgModifyTokenInfo(bz[4:])
-		return v, n + 4, err
-	case [4]byte{207, 152, 156, 90}:
-		v, n, err := DecodeMsgMultiSend(bz[4:])
-		return v, n + 4, err
-	case [4]byte{61, 117, 88, 200}:
-		v, n, err := DecodeMsgMultiSendX(bz[4:])
-		return v, n + 4, err
-	case [4]byte{44, 154, 68, 83}:
-		v, n, err := DecodeMsgRemoveTokenWhitelist(bz[4:])
-		return v, n + 4, err
-	case [4]byte{100, 168, 39, 140}:
-		v, n, err := DecodeMsgSend(bz[4:])
-		return v, n + 4, err
-	case [4]byte{198, 76, 8, 81}:
-		v, n, err := DecodeMsgSendX(bz[4:])
-		return v, n + 4, err
-	case [4]byte{184, 238, 253, 154}:
-		v, n, err := DecodeMsgSetMemoRequired(bz[4:])
-		return v, n + 4, err
-	case [4]byte{190, 178, 173, 144}:
-		v, n, err := DecodeMsgSetWithdrawAddress(bz[4:])
-		return v, n + 4, err
-	case [4]byte{115, 119, 137, 48}:
-		v, n, err := DecodeMsgSubmitProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{200, 224, 118, 175}:
-		v, n, err := DecodeMsgTransferOwnership(bz[4:])
-		return v, n + 4, err
-	case [4]byte{167, 165, 166, 227}:
-		v, n, err := DecodeMsgUnForbidAddr(bz[4:])
-		return v, n + 4, err
-	case [4]byte{78, 83, 156, 139}:
-		v, n, err := DecodeMsgUnForbidToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{122, 66, 160, 76}:
-		v, n, err := DecodeMsgUndelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{216, 247, 180, 46}:
-		v, n, err := DecodeMsgUnjail(bz[4:])
-		return v, n + 4, err
-	case [4]byte{84, 44, 219, 65}:
-		v, n, err := DecodeMsgVerifyInvariant(bz[4:])
-		return v, n + 4, err
-	case [4]byte{238, 246, 67, 141}:
-		v, n, err := DecodeMsgVote(bz[4:])
-		return v, n + 4, err
-	case [4]byte{94, 251, 176, 152}:
-		v, n, err := DecodeMsgWithdrawDelegatorReward(bz[4:])
-		return v, n + 4, err
-	case [4]byte{18, 172, 190, 152}:
-		v, n, err := DecodeMsgWithdrawValidatorCommission(bz[4:])
-		return v, n + 4, err
-	default:
-		panic("Unknown type")
-	} // end of switch
-	return v, n, nil
-} // end of DecodeMsg
 func RandMsg(r RandSrc) Msg {
 	switch r.GetUint() % 40 {
 	case 0:
@@ -7837,7 +8723,278 @@ func RandMsg(r RandSrc) Msg {
 		panic("Unknown Type.")
 	} // end of switch
 } // end of func
+func DeepCopyMsg(x Msg) Msg {
+	switch v := x.(type) {
+	case *MsgAddTokenWhitelist:
+		res := DeepCopyMsgAddTokenWhitelist(*v)
+		return &res
+	case MsgAddTokenWhitelist:
+		res := DeepCopyMsgAddTokenWhitelist(v)
+		return &res
+	case *MsgAliasUpdate:
+		res := DeepCopyMsgAliasUpdate(*v)
+		return &res
+	case MsgAliasUpdate:
+		res := DeepCopyMsgAliasUpdate(v)
+		return &res
+	case *MsgBancorCancel:
+		res := DeepCopyMsgBancorCancel(*v)
+		return &res
+	case MsgBancorCancel:
+		res := DeepCopyMsgBancorCancel(v)
+		return &res
+	case *MsgBancorInit:
+		res := DeepCopyMsgBancorInit(*v)
+		return &res
+	case MsgBancorInit:
+		res := DeepCopyMsgBancorInit(v)
+		return &res
+	case *MsgBancorTrade:
+		res := DeepCopyMsgBancorTrade(*v)
+		return &res
+	case MsgBancorTrade:
+		res := DeepCopyMsgBancorTrade(v)
+		return &res
+	case *MsgBeginRedelegate:
+		res := DeepCopyMsgBeginRedelegate(*v)
+		return &res
+	case MsgBeginRedelegate:
+		res := DeepCopyMsgBeginRedelegate(v)
+		return &res
+	case *MsgBurnToken:
+		res := DeepCopyMsgBurnToken(*v)
+		return &res
+	case MsgBurnToken:
+		res := DeepCopyMsgBurnToken(v)
+		return &res
+	case *MsgCancelOrder:
+		res := DeepCopyMsgCancelOrder(*v)
+		return &res
+	case MsgCancelOrder:
+		res := DeepCopyMsgCancelOrder(v)
+		return &res
+	case *MsgCancelTradingPair:
+		res := DeepCopyMsgCancelTradingPair(*v)
+		return &res
+	case MsgCancelTradingPair:
+		res := DeepCopyMsgCancelTradingPair(v)
+		return &res
+	case *MsgCommentToken:
+		res := DeepCopyMsgCommentToken(*v)
+		return &res
+	case MsgCommentToken:
+		res := DeepCopyMsgCommentToken(v)
+		return &res
+	case *MsgCreateOrder:
+		res := DeepCopyMsgCreateOrder(*v)
+		return &res
+	case MsgCreateOrder:
+		res := DeepCopyMsgCreateOrder(v)
+		return &res
+	case *MsgCreateTradingPair:
+		res := DeepCopyMsgCreateTradingPair(*v)
+		return &res
+	case MsgCreateTradingPair:
+		res := DeepCopyMsgCreateTradingPair(v)
+		return &res
+	case *MsgCreateValidator:
+		res := DeepCopyMsgCreateValidator(*v)
+		return &res
+	case MsgCreateValidator:
+		res := DeepCopyMsgCreateValidator(v)
+		return &res
+	case *MsgDelegate:
+		res := DeepCopyMsgDelegate(*v)
+		return &res
+	case MsgDelegate:
+		res := DeepCopyMsgDelegate(v)
+		return &res
+	case *MsgDeposit:
+		res := DeepCopyMsgDeposit(*v)
+		return &res
+	case MsgDeposit:
+		res := DeepCopyMsgDeposit(v)
+		return &res
+	case *MsgDonateToCommunityPool:
+		res := DeepCopyMsgDonateToCommunityPool(*v)
+		return &res
+	case MsgDonateToCommunityPool:
+		res := DeepCopyMsgDonateToCommunityPool(v)
+		return &res
+	case *MsgEditValidator:
+		res := DeepCopyMsgEditValidator(*v)
+		return &res
+	case MsgEditValidator:
+		res := DeepCopyMsgEditValidator(v)
+		return &res
+	case *MsgForbidAddr:
+		res := DeepCopyMsgForbidAddr(*v)
+		return &res
+	case MsgForbidAddr:
+		res := DeepCopyMsgForbidAddr(v)
+		return &res
+	case *MsgForbidToken:
+		res := DeepCopyMsgForbidToken(*v)
+		return &res
+	case MsgForbidToken:
+		res := DeepCopyMsgForbidToken(v)
+		return &res
+	case *MsgIssueToken:
+		res := DeepCopyMsgIssueToken(*v)
+		return &res
+	case MsgIssueToken:
+		res := DeepCopyMsgIssueToken(v)
+		return &res
+	case *MsgMintToken:
+		res := DeepCopyMsgMintToken(*v)
+		return &res
+	case MsgMintToken:
+		res := DeepCopyMsgMintToken(v)
+		return &res
+	case *MsgModifyPricePrecision:
+		res := DeepCopyMsgModifyPricePrecision(*v)
+		return &res
+	case MsgModifyPricePrecision:
+		res := DeepCopyMsgModifyPricePrecision(v)
+		return &res
+	case *MsgModifyTokenInfo:
+		res := DeepCopyMsgModifyTokenInfo(*v)
+		return &res
+	case MsgModifyTokenInfo:
+		res := DeepCopyMsgModifyTokenInfo(v)
+		return &res
+	case *MsgMultiSend:
+		res := DeepCopyMsgMultiSend(*v)
+		return &res
+	case MsgMultiSend:
+		res := DeepCopyMsgMultiSend(v)
+		return &res
+	case *MsgMultiSendX:
+		res := DeepCopyMsgMultiSendX(*v)
+		return &res
+	case MsgMultiSendX:
+		res := DeepCopyMsgMultiSendX(v)
+		return &res
+	case *MsgRemoveTokenWhitelist:
+		res := DeepCopyMsgRemoveTokenWhitelist(*v)
+		return &res
+	case MsgRemoveTokenWhitelist:
+		res := DeepCopyMsgRemoveTokenWhitelist(v)
+		return &res
+	case *MsgSend:
+		res := DeepCopyMsgSend(*v)
+		return &res
+	case MsgSend:
+		res := DeepCopyMsgSend(v)
+		return &res
+	case *MsgSendX:
+		res := DeepCopyMsgSendX(*v)
+		return &res
+	case MsgSendX:
+		res := DeepCopyMsgSendX(v)
+		return &res
+	case *MsgSetMemoRequired:
+		res := DeepCopyMsgSetMemoRequired(*v)
+		return &res
+	case MsgSetMemoRequired:
+		res := DeepCopyMsgSetMemoRequired(v)
+		return &res
+	case *MsgSetWithdrawAddress:
+		res := DeepCopyMsgSetWithdrawAddress(*v)
+		return &res
+	case MsgSetWithdrawAddress:
+		res := DeepCopyMsgSetWithdrawAddress(v)
+		return &res
+	case *MsgSubmitProposal:
+		res := DeepCopyMsgSubmitProposal(*v)
+		return &res
+	case MsgSubmitProposal:
+		res := DeepCopyMsgSubmitProposal(v)
+		return &res
+	case *MsgTransferOwnership:
+		res := DeepCopyMsgTransferOwnership(*v)
+		return &res
+	case MsgTransferOwnership:
+		res := DeepCopyMsgTransferOwnership(v)
+		return &res
+	case *MsgUnForbidAddr:
+		res := DeepCopyMsgUnForbidAddr(*v)
+		return &res
+	case MsgUnForbidAddr:
+		res := DeepCopyMsgUnForbidAddr(v)
+		return &res
+	case *MsgUnForbidToken:
+		res := DeepCopyMsgUnForbidToken(*v)
+		return &res
+	case MsgUnForbidToken:
+		res := DeepCopyMsgUnForbidToken(v)
+		return &res
+	case *MsgUndelegate:
+		res := DeepCopyMsgUndelegate(*v)
+		return &res
+	case MsgUndelegate:
+		res := DeepCopyMsgUndelegate(v)
+		return &res
+	case *MsgUnjail:
+		res := DeepCopyMsgUnjail(*v)
+		return &res
+	case MsgUnjail:
+		res := DeepCopyMsgUnjail(v)
+		return &res
+	case *MsgVerifyInvariant:
+		res := DeepCopyMsgVerifyInvariant(*v)
+		return &res
+	case MsgVerifyInvariant:
+		res := DeepCopyMsgVerifyInvariant(v)
+		return &res
+	case *MsgVote:
+		res := DeepCopyMsgVote(*v)
+		return &res
+	case MsgVote:
+		res := DeepCopyMsgVote(v)
+		return &res
+	case *MsgWithdrawDelegatorReward:
+		res := DeepCopyMsgWithdrawDelegatorReward(*v)
+		return &res
+	case MsgWithdrawDelegatorReward:
+		res := DeepCopyMsgWithdrawDelegatorReward(v)
+		return &res
+	case *MsgWithdrawValidatorCommission:
+		res := DeepCopyMsgWithdrawValidatorCommission(*v)
+		return &res
+	case MsgWithdrawValidatorCommission:
+		res := DeepCopyMsgWithdrawValidatorCommission(v)
+		return &res
+	default:
+		panic("Unknown Type.")
+	} // end of switch
+} // end of func
 // Interface
+func DecodeAccount(bz []byte) (Account, int, error) {
+	var v Account
+	var magicBytes [4]byte
+	var n int
+	for i := 0; i < 4; i++ {
+		magicBytes[i] = bz[i]
+	}
+	switch magicBytes {
+	case [4]byte{78, 248, 144, 54}:
+		v, n, err := DecodeBaseVestingAccount(bz[4:])
+		return v, n + 4, err
+	case [4]byte{75, 69, 41, 151}:
+		v, n, err := DecodeContinuousVestingAccount(bz[4:])
+		return v, n + 4, err
+	case [4]byte{59, 193, 203, 230}:
+		v, n, err := DecodeDelayedVestingAccount(bz[4:])
+		return v, n + 4, err
+	case [4]byte{37, 29, 227, 212}:
+		v, n, err := DecodeModuleAccount(bz[4:])
+		return v, n + 4, err
+	default:
+		panic("Unknown type")
+	} // end of switch
+	return v, n, nil
+} // end of DecodeAccount
 func EncodeAccount(w io.Writer, x interface{}) error {
 	switch v := x.(type) {
 	case BaseVestingAccount:
@@ -7868,31 +9025,6 @@ func EncodeAccount(w io.Writer, x interface{}) error {
 		panic("Unknown Type.")
 	} // end of switch
 } // end of func
-func DecodeAccount(bz []byte) (Account, int, error) {
-	var v Account
-	var magicBytes [4]byte
-	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
-	}
-	switch magicBytes {
-	case [4]byte{178, 47, 121, 129}:
-		v, n, err := DecodeBaseVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{95, 96, 75, 0}:
-		v, n, err := DecodeContinuousVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{187, 71, 224, 1}:
-		v, n, err := DecodeDelayedVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{190, 107, 1, 124}:
-		v, n, err := DecodeModuleAccount(bz[4:])
-		return v, n + 4, err
-	default:
-		panic("Unknown type")
-	} // end of switch
-	return v, n, nil
-} // end of DecodeAccount
 func RandAccount(r RandSrc) Account {
 	switch r.GetUint() % 4 {
 	case 0:
@@ -7907,7 +9039,62 @@ func RandAccount(r RandSrc) Account {
 		panic("Unknown Type.")
 	} // end of switch
 } // end of func
+func DeepCopyAccount(x Account) Account {
+	switch v := x.(type) {
+	case *BaseVestingAccount:
+		res := DeepCopyBaseVestingAccount(*v)
+		return &res
+	case BaseVestingAccount:
+		res := DeepCopyBaseVestingAccount(v)
+		return &res
+	case *ContinuousVestingAccount:
+		res := DeepCopyContinuousVestingAccount(*v)
+		return &res
+	case ContinuousVestingAccount:
+		res := DeepCopyContinuousVestingAccount(v)
+		return &res
+	case *DelayedVestingAccount:
+		res := DeepCopyDelayedVestingAccount(*v)
+		return &res
+	case DelayedVestingAccount:
+		res := DeepCopyDelayedVestingAccount(v)
+		return &res
+	case *ModuleAccount:
+		res := DeepCopyModuleAccount(*v)
+		return &res
+	case ModuleAccount:
+		res := DeepCopyModuleAccount(v)
+		return &res
+	default:
+		panic("Unknown Type.")
+	} // end of switch
+} // end of func
 // Interface
+func DecodeContent(bz []byte) (Content, int, error) {
+	var v Content
+	var magicBytes [4]byte
+	var n int
+	for i := 0; i < 4; i++ {
+		magicBytes[i] = bz[i]
+	}
+	switch magicBytes {
+	case [4]byte{31, 93, 37, 208}:
+		v, n, err := DecodeCommunityPoolSpendProposal(bz[4:])
+		return v, n + 4, err
+	case [4]byte{49, 37, 122, 86}:
+		v, n, err := DecodeParameterChangeProposal(bz[4:])
+		return v, n + 4, err
+	case [4]byte{162, 148, 222, 207}:
+		v, n, err := DecodeSoftwareUpgradeProposal(bz[4:])
+		return v, n + 4, err
+	case [4]byte{207, 179, 211, 152}:
+		v, n, err := DecodeTextProposal(bz[4:])
+		return v, n + 4, err
+	default:
+		panic("Unknown type")
+	} // end of switch
+	return v, n, nil
+} // end of DecodeContent
 func EncodeContent(w io.Writer, x interface{}) error {
 	switch v := x.(type) {
 	case CommunityPoolSpendProposal:
@@ -7938,31 +9125,6 @@ func EncodeContent(w io.Writer, x interface{}) error {
 		panic("Unknown Type.")
 	} // end of switch
 } // end of func
-func DecodeContent(bz []byte) (Content, int, error) {
-	var v Content
-	var magicBytes [4]byte
-	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
-	}
-	switch magicBytes {
-	case [4]byte{37, 214, 119, 170}:
-		v, n, err := DecodeCommunityPoolSpendProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{166, 63, 172, 210}:
-		v, n, err := DecodeParameterChangeProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{37, 100, 208, 251}:
-		v, n, err := DecodeSoftwareUpgradeProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{169, 32, 176, 245}:
-		v, n, err := DecodeTextProposal(bz[4:])
-		return v, n + 4, err
-	default:
-		panic("Unknown type")
-	} // end of switch
-	return v, n, nil
-} // end of DecodeContent
 func RandContent(r RandSrc) Content {
 	switch r.GetUint() % 4 {
 	case 0:
@@ -7977,154 +9139,192 @@ func RandContent(r RandSrc) Content {
 		panic("Unknown Type.")
 	} // end of switch
 } // end of func
+func DeepCopyContent(x Content) Content {
+	switch v := x.(type) {
+	case *CommunityPoolSpendProposal:
+		res := DeepCopyCommunityPoolSpendProposal(*v)
+		return &res
+	case CommunityPoolSpendProposal:
+		res := DeepCopyCommunityPoolSpendProposal(v)
+		return &res
+	case *ParameterChangeProposal:
+		res := DeepCopyParameterChangeProposal(*v)
+		return &res
+	case ParameterChangeProposal:
+		res := DeepCopyParameterChangeProposal(v)
+		return &res
+	case *SoftwareUpgradeProposal:
+		res := DeepCopySoftwareUpgradeProposal(*v)
+		return &res
+	case SoftwareUpgradeProposal:
+		res := DeepCopySoftwareUpgradeProposal(v)
+		return &res
+	case *TextProposal:
+		res := DeepCopyTextProposal(*v)
+		return &res
+	case TextProposal:
+		res := DeepCopyTextProposal(v)
+		return &res
+	default:
+		panic("Unknown Type.")
+	} // end of switch
+} // end of func
 func getMagicBytes(name string) []byte {
 	switch name {
 	case "AccAddress":
-		return []byte{37, 50, 37, 208}
+		return []byte{0, 157, 18, 162}
+	case "Account":
+		return []byte{126, 27, 13, 86}
 	case "AccountX":
-		return []byte{3, 161, 99, 37}
+		return []byte{168, 11, 31, 112}
 	case "BaseAccount":
-		return []byte{100, 94, 81, 72}
+		return []byte{153, 157, 134, 34}
 	case "BaseToken":
-		return []byte{34, 178, 244, 51}
+		return []byte{38, 16, 216, 53}
 	case "BaseVestingAccount":
-		return []byte{178, 47, 121, 129}
+		return []byte{78, 248, 144, 54}
 	case "Coin":
-		return []byte{141, 140, 97, 80}
+		return []byte{2, 65, 204, 255}
 	case "CommentRef":
-		return []byte{17, 162, 164, 235}
+		return []byte{128, 102, 129, 152}
 	case "CommunityPoolSpendProposal":
-		return []byte{37, 214, 119, 170}
+		return []byte{31, 93, 37, 208}
+	case "Content":
+		return []byte{71, 189, 41, 7}
 	case "ContinuousVestingAccount":
-		return []byte{95, 96, 75, 0}
+		return []byte{75, 69, 41, 151}
 	case "DelayedVestingAccount":
-		return []byte{187, 71, 224, 1}
+		return []byte{59, 193, 203, 230}
 	case "DuplicateVoteEvidence":
-		return []byte{130, 76, 198, 17}
+		return []byte{89, 252, 98, 178}
 	case "Input":
-		return []byte{165, 152, 189, 47}
+		return []byte{54, 236, 180, 248}
 	case "LockedCoin":
-		return []byte{92, 7, 7, 57}
+		return []byte{176, 57, 246, 199}
 	case "MarketInfo":
-		return []byte{174, 117, 167, 230}
+		return []byte{93, 194, 118, 168}
 	case "ModuleAccount":
-		return []byte{190, 107, 1, 124}
+		return []byte{37, 29, 227, 212}
+	case "Msg":
+		return []byte{220, 25, 33, 148}
 	case "MsgAddTokenWhitelist":
-		return []byte{147, 136, 220, 215}
+		return []byte{158, 44, 49, 82}
 	case "MsgAliasUpdate":
-		return []byte{173, 181, 17, 162}
+		return []byte{250, 126, 184, 36}
 	case "MsgBancorCancel":
-		return []byte{187, 190, 104, 91}
+		return []byte{124, 247, 85, 232}
 	case "MsgBancorInit":
-		return []byte{160, 232, 209, 155}
+		return []byte{192, 118, 23, 126}
 	case "MsgBancorTrade":
-		return []byte{225, 122, 18, 80}
+		return []byte{191, 189, 4, 59}
 	case "MsgBeginRedelegate":
-		return []byte{247, 3, 0, 105}
+		return []byte{141, 7, 107, 68}
 	case "MsgBurnToken":
-		return []byte{228, 0, 236, 212}
+		return []byte{42, 203, 158, 131}
 	case "MsgCancelOrder":
-		return []byte{106, 229, 80, 141}
+		return []byte{238, 105, 251, 19}
 	case "MsgCancelTradingPair":
-		return []byte{13, 177, 95, 127}
+		return []byte{184, 188, 48, 70}
 	case "MsgCommentToken":
-		return []byte{79, 125, 235, 121}
+		return []byte{21, 125, 54, 51}
 	case "MsgCreateOrder":
-		return []byte{145, 241, 102, 115}
+		return []byte{211, 100, 66, 245}
 	case "MsgCreateTradingPair":
-		return []byte{130, 221, 55, 57}
+		return []byte{116, 186, 50, 92}
 	case "MsgCreateValidator":
-		return []byte{58, 78, 252, 114}
+		return []byte{24, 79, 66, 107}
 	case "MsgDelegate":
-		return []byte{1, 82, 140, 71}
+		return []byte{184, 121, 196, 185}
 	case "MsgDeposit":
-		return []byte{205, 134, 140, 190}
+		return []byte{234, 76, 240, 151}
 	case "MsgDonateToCommunityPool":
-		return []byte{20, 250, 115, 197}
+		return []byte{148, 38, 167, 140}
 	case "MsgEditValidator":
-		return []byte{202, 62, 140, 8}
+		return []byte{9, 254, 168, 109}
 	case "MsgForbidAddr":
-		return []byte{105, 235, 112, 10}
+		return []byte{120, 151, 22, 12}
 	case "MsgForbidToken":
-		return []byte{36, 174, 203, 238}
+		return []byte{191, 26, 148, 82}
 	case "MsgIssueToken":
-		return []byte{233, 180, 92, 129}
+		return []byte{67, 33, 188, 107}
 	case "MsgMintToken":
-		return []byte{66, 148, 56, 203}
+		return []byte{172, 102, 179, 22}
 	case "MsgModifyPricePrecision":
-		return []byte{76, 91, 156, 199}
+		return []byte{190, 128, 0, 94}
 	case "MsgModifyTokenInfo":
-		return []byte{40, 158, 40, 18}
+		return []byte{178, 137, 211, 164}
 	case "MsgMultiSend":
-		return []byte{207, 152, 156, 90}
+		return []byte{64, 119, 59, 163}
 	case "MsgMultiSendX":
-		return []byte{61, 117, 88, 200}
+		return []byte{112, 57, 9, 246}
 	case "MsgRemoveTokenWhitelist":
-		return []byte{44, 154, 68, 83}
+		return []byte{198, 39, 33, 109}
 	case "MsgSend":
-		return []byte{100, 168, 39, 140}
+		return []byte{212, 255, 125, 220}
 	case "MsgSendX":
-		return []byte{198, 76, 8, 81}
+		return []byte{62, 163, 57, 104}
 	case "MsgSetMemoRequired":
-		return []byte{184, 238, 253, 154}
+		return []byte{18, 183, 33, 189}
 	case "MsgSetWithdrawAddress":
-		return []byte{190, 178, 173, 144}
+		return []byte{208, 136, 199, 77}
 	case "MsgSubmitProposal":
-		return []byte{115, 119, 137, 48}
+		return []byte{84, 236, 141, 114}
 	case "MsgTransferOwnership":
-		return []byte{200, 224, 118, 175}
+		return []byte{120, 20, 134, 126}
 	case "MsgUnForbidAddr":
-		return []byte{167, 165, 166, 227}
+		return []byte{141, 21, 34, 63}
 	case "MsgUnForbidToken":
-		return []byte{78, 83, 156, 139}
+		return []byte{79, 103, 52, 189}
 	case "MsgUndelegate":
-		return []byte{122, 66, 160, 76}
+		return []byte{21, 241, 6, 56}
 	case "MsgUnjail":
-		return []byte{216, 247, 180, 46}
+		return []byte{139, 110, 39, 159}
 	case "MsgVerifyInvariant":
-		return []byte{84, 44, 219, 65}
+		return []byte{109, 173, 240, 7}
 	case "MsgVote":
-		return []byte{238, 246, 67, 141}
+		return []byte{233, 121, 28, 250}
 	case "MsgWithdrawDelegatorReward":
-		return []byte{94, 251, 176, 152}
+		return []byte{43, 19, 183, 111}
 	case "MsgWithdrawValidatorCommission":
-		return []byte{18, 172, 190, 152}
+		return []byte{84, 85, 236, 88}
 	case "Order":
-		return []byte{227, 245, 17, 65}
+		return []byte{107, 224, 144, 130}
 	case "Output":
-		return []byte{251, 0, 54, 127}
+		return []byte{178, 67, 155, 203}
 	case "ParamChange":
-		return []byte{234, 101, 49, 27}
+		return []byte{66, 250, 248, 208}
 	case "ParameterChangeProposal":
-		return []byte{166, 63, 172, 210}
+		return []byte{49, 37, 122, 86}
 	case "PrivKeyEd25519":
-		return []byte{93, 160, 108, 51}
+		return []byte{158, 94, 112, 161}
 	case "PrivKeySecp256k1":
-		return []byte{209, 107, 141, 98}
+		return []byte{83, 16, 177, 42}
+	case "PubKey":
+		return []byte{151, 16, 151, 128}
 	case "PubKeyEd25519":
-		return []byte{108, 143, 2, 48}
+		return []byte{114, 76, 37, 23}
 	case "PubKeyMultisigThreshold":
-		return []byte{131, 227, 102, 173}
+		return []byte{14, 33, 23, 141}
 	case "PubKeySecp256k1":
-		return []byte{10, 126, 85, 105}
+		return []byte{51, 161, 20, 197}
 	case "SignedMsgType":
-		return []byte{169, 174, 252, 87}
+		return []byte{67, 52, 162, 78}
 	case "SoftwareUpgradeProposal":
-		return []byte{37, 100, 208, 251}
+		return []byte{162, 148, 222, 207}
 	case "State":
-		return []byte{186, 223, 120, 4}
+		return []byte{163, 181, 12, 71}
 	case "StdSignature":
-		return []byte{88, 244, 106, 18}
+		return []byte{247, 42, 43, 179}
 	case "StdTx":
-		return []byte{71, 175, 179, 184}
+		return []byte{247, 170, 118, 185}
 	case "Supply":
-		return []byte{233, 209, 209, 86}
+		return []byte{191, 66, 141, 63}
 	case "TextProposal":
-		return []byte{169, 32, 176, 245}
+		return []byte{207, 179, 211, 152}
 	case "Vote":
-		return []byte{113, 227, 24, 224}
+		return []byte{205, 85, 136, 219}
 	case "VoteOption":
-		return []byte{56, 159, 20, 227}
+		return []byte{170, 208, 50, 2}
 	} // end of switch
 	panic("Should not reach here")
 	return []byte{}
@@ -8879,223 +10079,235 @@ func DecodeAny(bz []byte) (interface{}, int, error) {
 		magicBytes[i] = bz[i]
 	}
 	switch magicBytes {
-	case [4]byte{37, 50, 37, 208}:
+	case [4]byte{0, 157, 18, 162}:
 		v, n, err := DecodeAccAddress(bz[4:])
 		return v, n + 4, err
-	case [4]byte{3, 161, 99, 37}:
+	case [4]byte{126, 27, 13, 86}:
+		v, n, err := DecodeAccount(bz[4:])
+		return v, n + 4, err
+	case [4]byte{168, 11, 31, 112}:
 		v, n, err := DecodeAccountX(bz[4:])
 		return v, n + 4, err
-	case [4]byte{100, 94, 81, 72}:
+	case [4]byte{153, 157, 134, 34}:
 		v, n, err := DecodeBaseAccount(bz[4:])
 		return v, n + 4, err
-	case [4]byte{34, 178, 244, 51}:
+	case [4]byte{38, 16, 216, 53}:
 		v, n, err := DecodeBaseToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{178, 47, 121, 129}:
+	case [4]byte{78, 248, 144, 54}:
 		v, n, err := DecodeBaseVestingAccount(bz[4:])
 		return v, n + 4, err
-	case [4]byte{141, 140, 97, 80}:
+	case [4]byte{2, 65, 204, 255}:
 		v, n, err := DecodeCoin(bz[4:])
 		return v, n + 4, err
-	case [4]byte{17, 162, 164, 235}:
+	case [4]byte{128, 102, 129, 152}:
 		v, n, err := DecodeCommentRef(bz[4:])
 		return v, n + 4, err
-	case [4]byte{37, 214, 119, 170}:
+	case [4]byte{31, 93, 37, 208}:
 		v, n, err := DecodeCommunityPoolSpendProposal(bz[4:])
 		return v, n + 4, err
-	case [4]byte{95, 96, 75, 0}:
+	case [4]byte{71, 189, 41, 7}:
+		v, n, err := DecodeContent(bz[4:])
+		return v, n + 4, err
+	case [4]byte{75, 69, 41, 151}:
 		v, n, err := DecodeContinuousVestingAccount(bz[4:])
 		return v, n + 4, err
-	case [4]byte{187, 71, 224, 1}:
+	case [4]byte{59, 193, 203, 230}:
 		v, n, err := DecodeDelayedVestingAccount(bz[4:])
 		return v, n + 4, err
-	case [4]byte{130, 76, 198, 17}:
+	case [4]byte{89, 252, 98, 178}:
 		v, n, err := DecodeDuplicateVoteEvidence(bz[4:])
 		return v, n + 4, err
-	case [4]byte{165, 152, 189, 47}:
+	case [4]byte{54, 236, 180, 248}:
 		v, n, err := DecodeInput(bz[4:])
 		return v, n + 4, err
-	case [4]byte{92, 7, 7, 57}:
+	case [4]byte{176, 57, 246, 199}:
 		v, n, err := DecodeLockedCoin(bz[4:])
 		return v, n + 4, err
-	case [4]byte{174, 117, 167, 230}:
+	case [4]byte{93, 194, 118, 168}:
 		v, n, err := DecodeMarketInfo(bz[4:])
 		return v, n + 4, err
-	case [4]byte{190, 107, 1, 124}:
+	case [4]byte{37, 29, 227, 212}:
 		v, n, err := DecodeModuleAccount(bz[4:])
 		return v, n + 4, err
-	case [4]byte{147, 136, 220, 215}:
+	case [4]byte{220, 25, 33, 148}:
+		v, n, err := DecodeMsg(bz[4:])
+		return v, n + 4, err
+	case [4]byte{158, 44, 49, 82}:
 		v, n, err := DecodeMsgAddTokenWhitelist(bz[4:])
 		return v, n + 4, err
-	case [4]byte{173, 181, 17, 162}:
+	case [4]byte{250, 126, 184, 36}:
 		v, n, err := DecodeMsgAliasUpdate(bz[4:])
 		return v, n + 4, err
-	case [4]byte{187, 190, 104, 91}:
+	case [4]byte{124, 247, 85, 232}:
 		v, n, err := DecodeMsgBancorCancel(bz[4:])
 		return v, n + 4, err
-	case [4]byte{160, 232, 209, 155}:
+	case [4]byte{192, 118, 23, 126}:
 		v, n, err := DecodeMsgBancorInit(bz[4:])
 		return v, n + 4, err
-	case [4]byte{225, 122, 18, 80}:
+	case [4]byte{191, 189, 4, 59}:
 		v, n, err := DecodeMsgBancorTrade(bz[4:])
 		return v, n + 4, err
-	case [4]byte{247, 3, 0, 105}:
+	case [4]byte{141, 7, 107, 68}:
 		v, n, err := DecodeMsgBeginRedelegate(bz[4:])
 		return v, n + 4, err
-	case [4]byte{228, 0, 236, 212}:
+	case [4]byte{42, 203, 158, 131}:
 		v, n, err := DecodeMsgBurnToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{106, 229, 80, 141}:
+	case [4]byte{238, 105, 251, 19}:
 		v, n, err := DecodeMsgCancelOrder(bz[4:])
 		return v, n + 4, err
-	case [4]byte{13, 177, 95, 127}:
+	case [4]byte{184, 188, 48, 70}:
 		v, n, err := DecodeMsgCancelTradingPair(bz[4:])
 		return v, n + 4, err
-	case [4]byte{79, 125, 235, 121}:
+	case [4]byte{21, 125, 54, 51}:
 		v, n, err := DecodeMsgCommentToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{145, 241, 102, 115}:
+	case [4]byte{211, 100, 66, 245}:
 		v, n, err := DecodeMsgCreateOrder(bz[4:])
 		return v, n + 4, err
-	case [4]byte{130, 221, 55, 57}:
+	case [4]byte{116, 186, 50, 92}:
 		v, n, err := DecodeMsgCreateTradingPair(bz[4:])
 		return v, n + 4, err
-	case [4]byte{58, 78, 252, 114}:
+	case [4]byte{24, 79, 66, 107}:
 		v, n, err := DecodeMsgCreateValidator(bz[4:])
 		return v, n + 4, err
-	case [4]byte{1, 82, 140, 71}:
+	case [4]byte{184, 121, 196, 185}:
 		v, n, err := DecodeMsgDelegate(bz[4:])
 		return v, n + 4, err
-	case [4]byte{205, 134, 140, 190}:
+	case [4]byte{234, 76, 240, 151}:
 		v, n, err := DecodeMsgDeposit(bz[4:])
 		return v, n + 4, err
-	case [4]byte{20, 250, 115, 197}:
+	case [4]byte{148, 38, 167, 140}:
 		v, n, err := DecodeMsgDonateToCommunityPool(bz[4:])
 		return v, n + 4, err
-	case [4]byte{202, 62, 140, 8}:
+	case [4]byte{9, 254, 168, 109}:
 		v, n, err := DecodeMsgEditValidator(bz[4:])
 		return v, n + 4, err
-	case [4]byte{105, 235, 112, 10}:
+	case [4]byte{120, 151, 22, 12}:
 		v, n, err := DecodeMsgForbidAddr(bz[4:])
 		return v, n + 4, err
-	case [4]byte{36, 174, 203, 238}:
+	case [4]byte{191, 26, 148, 82}:
 		v, n, err := DecodeMsgForbidToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{233, 180, 92, 129}:
+	case [4]byte{67, 33, 188, 107}:
 		v, n, err := DecodeMsgIssueToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{66, 148, 56, 203}:
+	case [4]byte{172, 102, 179, 22}:
 		v, n, err := DecodeMsgMintToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{76, 91, 156, 199}:
+	case [4]byte{190, 128, 0, 94}:
 		v, n, err := DecodeMsgModifyPricePrecision(bz[4:])
 		return v, n + 4, err
-	case [4]byte{40, 158, 40, 18}:
+	case [4]byte{178, 137, 211, 164}:
 		v, n, err := DecodeMsgModifyTokenInfo(bz[4:])
 		return v, n + 4, err
-	case [4]byte{207, 152, 156, 90}:
+	case [4]byte{64, 119, 59, 163}:
 		v, n, err := DecodeMsgMultiSend(bz[4:])
 		return v, n + 4, err
-	case [4]byte{61, 117, 88, 200}:
+	case [4]byte{112, 57, 9, 246}:
 		v, n, err := DecodeMsgMultiSendX(bz[4:])
 		return v, n + 4, err
-	case [4]byte{44, 154, 68, 83}:
+	case [4]byte{198, 39, 33, 109}:
 		v, n, err := DecodeMsgRemoveTokenWhitelist(bz[4:])
 		return v, n + 4, err
-	case [4]byte{100, 168, 39, 140}:
+	case [4]byte{212, 255, 125, 220}:
 		v, n, err := DecodeMsgSend(bz[4:])
 		return v, n + 4, err
-	case [4]byte{198, 76, 8, 81}:
+	case [4]byte{62, 163, 57, 104}:
 		v, n, err := DecodeMsgSendX(bz[4:])
 		return v, n + 4, err
-	case [4]byte{184, 238, 253, 154}:
+	case [4]byte{18, 183, 33, 189}:
 		v, n, err := DecodeMsgSetMemoRequired(bz[4:])
 		return v, n + 4, err
-	case [4]byte{190, 178, 173, 144}:
+	case [4]byte{208, 136, 199, 77}:
 		v, n, err := DecodeMsgSetWithdrawAddress(bz[4:])
 		return v, n + 4, err
-	case [4]byte{115, 119, 137, 48}:
+	case [4]byte{84, 236, 141, 114}:
 		v, n, err := DecodeMsgSubmitProposal(bz[4:])
 		return v, n + 4, err
-	case [4]byte{200, 224, 118, 175}:
+	case [4]byte{120, 20, 134, 126}:
 		v, n, err := DecodeMsgTransferOwnership(bz[4:])
 		return v, n + 4, err
-	case [4]byte{167, 165, 166, 227}:
+	case [4]byte{141, 21, 34, 63}:
 		v, n, err := DecodeMsgUnForbidAddr(bz[4:])
 		return v, n + 4, err
-	case [4]byte{78, 83, 156, 139}:
+	case [4]byte{79, 103, 52, 189}:
 		v, n, err := DecodeMsgUnForbidToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{122, 66, 160, 76}:
+	case [4]byte{21, 241, 6, 56}:
 		v, n, err := DecodeMsgUndelegate(bz[4:])
 		return v, n + 4, err
-	case [4]byte{216, 247, 180, 46}:
+	case [4]byte{139, 110, 39, 159}:
 		v, n, err := DecodeMsgUnjail(bz[4:])
 		return v, n + 4, err
-	case [4]byte{84, 44, 219, 65}:
+	case [4]byte{109, 173, 240, 7}:
 		v, n, err := DecodeMsgVerifyInvariant(bz[4:])
 		return v, n + 4, err
-	case [4]byte{238, 246, 67, 141}:
+	case [4]byte{233, 121, 28, 250}:
 		v, n, err := DecodeMsgVote(bz[4:])
 		return v, n + 4, err
-	case [4]byte{94, 251, 176, 152}:
+	case [4]byte{43, 19, 183, 111}:
 		v, n, err := DecodeMsgWithdrawDelegatorReward(bz[4:])
 		return v, n + 4, err
-	case [4]byte{18, 172, 190, 152}:
+	case [4]byte{84, 85, 236, 88}:
 		v, n, err := DecodeMsgWithdrawValidatorCommission(bz[4:])
 		return v, n + 4, err
-	case [4]byte{227, 245, 17, 65}:
+	case [4]byte{107, 224, 144, 130}:
 		v, n, err := DecodeOrder(bz[4:])
 		return v, n + 4, err
-	case [4]byte{251, 0, 54, 127}:
+	case [4]byte{178, 67, 155, 203}:
 		v, n, err := DecodeOutput(bz[4:])
 		return v, n + 4, err
-	case [4]byte{234, 101, 49, 27}:
+	case [4]byte{66, 250, 248, 208}:
 		v, n, err := DecodeParamChange(bz[4:])
 		return v, n + 4, err
-	case [4]byte{166, 63, 172, 210}:
+	case [4]byte{49, 37, 122, 86}:
 		v, n, err := DecodeParameterChangeProposal(bz[4:])
 		return v, n + 4, err
-	case [4]byte{93, 160, 108, 51}:
+	case [4]byte{158, 94, 112, 161}:
 		v, n, err := DecodePrivKeyEd25519(bz[4:])
 		return v, n + 4, err
-	case [4]byte{209, 107, 141, 98}:
+	case [4]byte{83, 16, 177, 42}:
 		v, n, err := DecodePrivKeySecp256k1(bz[4:])
 		return v, n + 4, err
-	case [4]byte{108, 143, 2, 48}:
+	case [4]byte{151, 16, 151, 128}:
+		v, n, err := DecodePubKey(bz[4:])
+		return v, n + 4, err
+	case [4]byte{114, 76, 37, 23}:
 		v, n, err := DecodePubKeyEd25519(bz[4:])
 		return v, n + 4, err
-	case [4]byte{131, 227, 102, 173}:
+	case [4]byte{14, 33, 23, 141}:
 		v, n, err := DecodePubKeyMultisigThreshold(bz[4:])
 		return v, n + 4, err
-	case [4]byte{10, 126, 85, 105}:
+	case [4]byte{51, 161, 20, 197}:
 		v, n, err := DecodePubKeySecp256k1(bz[4:])
 		return v, n + 4, err
-	case [4]byte{169, 174, 252, 87}:
+	case [4]byte{67, 52, 162, 78}:
 		v, n, err := DecodeSignedMsgType(bz[4:])
 		return v, n + 4, err
-	case [4]byte{37, 100, 208, 251}:
+	case [4]byte{162, 148, 222, 207}:
 		v, n, err := DecodeSoftwareUpgradeProposal(bz[4:])
 		return v, n + 4, err
-	case [4]byte{186, 223, 120, 4}:
+	case [4]byte{163, 181, 12, 71}:
 		v, n, err := DecodeState(bz[4:])
 		return v, n + 4, err
-	case [4]byte{88, 244, 106, 18}:
+	case [4]byte{247, 42, 43, 179}:
 		v, n, err := DecodeStdSignature(bz[4:])
 		return v, n + 4, err
-	case [4]byte{71, 175, 179, 184}:
+	case [4]byte{247, 170, 118, 185}:
 		v, n, err := DecodeStdTx(bz[4:])
 		return v, n + 4, err
-	case [4]byte{233, 209, 209, 86}:
+	case [4]byte{191, 66, 141, 63}:
 		v, n, err := DecodeSupply(bz[4:])
 		return v, n + 4, err
-	case [4]byte{169, 32, 176, 245}:
+	case [4]byte{207, 179, 211, 152}:
 		v, n, err := DecodeTextProposal(bz[4:])
 		return v, n + 4, err
-	case [4]byte{113, 227, 24, 224}:
+	case [4]byte{205, 85, 136, 219}:
 		v, n, err := DecodeVote(bz[4:])
 		return v, n + 4, err
-	case [4]byte{56, 159, 20, 227}:
+	case [4]byte{170, 208, 50, 2}:
 		v, n, err := DecodeVoteOption(bz[4:])
 		return v, n + 4, err
 	default:
@@ -9404,6 +10616,450 @@ func RandAny(r RandSrc) interface{} {
 		return RandVote(r)
 	case 72:
 		return RandVoteOption(r)
+	default:
+		panic("Unknown Type.")
+	} // end of switch
+} // end of func
+func DeepCopyAny(x interface{}) interface{} {
+	switch v := x.(type) {
+	case *AccAddress:
+		res := DeepCopyAccAddress(*v)
+		return &res
+	case AccAddress:
+		res := DeepCopyAccAddress(v)
+		return &res
+	case *AccountX:
+		res := DeepCopyAccountX(*v)
+		return &res
+	case AccountX:
+		res := DeepCopyAccountX(v)
+		return &res
+	case *BaseAccount:
+		res := DeepCopyBaseAccount(*v)
+		return &res
+	case BaseAccount:
+		res := DeepCopyBaseAccount(v)
+		return &res
+	case *BaseToken:
+		res := DeepCopyBaseToken(*v)
+		return &res
+	case BaseToken:
+		res := DeepCopyBaseToken(v)
+		return &res
+	case *BaseVestingAccount:
+		res := DeepCopyBaseVestingAccount(*v)
+		return &res
+	case BaseVestingAccount:
+		res := DeepCopyBaseVestingAccount(v)
+		return &res
+	case *Coin:
+		res := DeepCopyCoin(*v)
+		return &res
+	case Coin:
+		res := DeepCopyCoin(v)
+		return &res
+	case *CommentRef:
+		res := DeepCopyCommentRef(*v)
+		return &res
+	case CommentRef:
+		res := DeepCopyCommentRef(v)
+		return &res
+	case *CommunityPoolSpendProposal:
+		res := DeepCopyCommunityPoolSpendProposal(*v)
+		return &res
+	case CommunityPoolSpendProposal:
+		res := DeepCopyCommunityPoolSpendProposal(v)
+		return &res
+	case *ContinuousVestingAccount:
+		res := DeepCopyContinuousVestingAccount(*v)
+		return &res
+	case ContinuousVestingAccount:
+		res := DeepCopyContinuousVestingAccount(v)
+		return &res
+	case *DelayedVestingAccount:
+		res := DeepCopyDelayedVestingAccount(*v)
+		return &res
+	case DelayedVestingAccount:
+		res := DeepCopyDelayedVestingAccount(v)
+		return &res
+	case *DuplicateVoteEvidence:
+		res := DeepCopyDuplicateVoteEvidence(*v)
+		return &res
+	case DuplicateVoteEvidence:
+		res := DeepCopyDuplicateVoteEvidence(v)
+		return &res
+	case *Input:
+		res := DeepCopyInput(*v)
+		return &res
+	case Input:
+		res := DeepCopyInput(v)
+		return &res
+	case *LockedCoin:
+		res := DeepCopyLockedCoin(*v)
+		return &res
+	case LockedCoin:
+		res := DeepCopyLockedCoin(v)
+		return &res
+	case *MarketInfo:
+		res := DeepCopyMarketInfo(*v)
+		return &res
+	case MarketInfo:
+		res := DeepCopyMarketInfo(v)
+		return &res
+	case *ModuleAccount:
+		res := DeepCopyModuleAccount(*v)
+		return &res
+	case ModuleAccount:
+		res := DeepCopyModuleAccount(v)
+		return &res
+	case *MsgAddTokenWhitelist:
+		res := DeepCopyMsgAddTokenWhitelist(*v)
+		return &res
+	case MsgAddTokenWhitelist:
+		res := DeepCopyMsgAddTokenWhitelist(v)
+		return &res
+	case *MsgAliasUpdate:
+		res := DeepCopyMsgAliasUpdate(*v)
+		return &res
+	case MsgAliasUpdate:
+		res := DeepCopyMsgAliasUpdate(v)
+		return &res
+	case *MsgBancorCancel:
+		res := DeepCopyMsgBancorCancel(*v)
+		return &res
+	case MsgBancorCancel:
+		res := DeepCopyMsgBancorCancel(v)
+		return &res
+	case *MsgBancorInit:
+		res := DeepCopyMsgBancorInit(*v)
+		return &res
+	case MsgBancorInit:
+		res := DeepCopyMsgBancorInit(v)
+		return &res
+	case *MsgBancorTrade:
+		res := DeepCopyMsgBancorTrade(*v)
+		return &res
+	case MsgBancorTrade:
+		res := DeepCopyMsgBancorTrade(v)
+		return &res
+	case *MsgBeginRedelegate:
+		res := DeepCopyMsgBeginRedelegate(*v)
+		return &res
+	case MsgBeginRedelegate:
+		res := DeepCopyMsgBeginRedelegate(v)
+		return &res
+	case *MsgBurnToken:
+		res := DeepCopyMsgBurnToken(*v)
+		return &res
+	case MsgBurnToken:
+		res := DeepCopyMsgBurnToken(v)
+		return &res
+	case *MsgCancelOrder:
+		res := DeepCopyMsgCancelOrder(*v)
+		return &res
+	case MsgCancelOrder:
+		res := DeepCopyMsgCancelOrder(v)
+		return &res
+	case *MsgCancelTradingPair:
+		res := DeepCopyMsgCancelTradingPair(*v)
+		return &res
+	case MsgCancelTradingPair:
+		res := DeepCopyMsgCancelTradingPair(v)
+		return &res
+	case *MsgCommentToken:
+		res := DeepCopyMsgCommentToken(*v)
+		return &res
+	case MsgCommentToken:
+		res := DeepCopyMsgCommentToken(v)
+		return &res
+	case *MsgCreateOrder:
+		res := DeepCopyMsgCreateOrder(*v)
+		return &res
+	case MsgCreateOrder:
+		res := DeepCopyMsgCreateOrder(v)
+		return &res
+	case *MsgCreateTradingPair:
+		res := DeepCopyMsgCreateTradingPair(*v)
+		return &res
+	case MsgCreateTradingPair:
+		res := DeepCopyMsgCreateTradingPair(v)
+		return &res
+	case *MsgCreateValidator:
+		res := DeepCopyMsgCreateValidator(*v)
+		return &res
+	case MsgCreateValidator:
+		res := DeepCopyMsgCreateValidator(v)
+		return &res
+	case *MsgDelegate:
+		res := DeepCopyMsgDelegate(*v)
+		return &res
+	case MsgDelegate:
+		res := DeepCopyMsgDelegate(v)
+		return &res
+	case *MsgDeposit:
+		res := DeepCopyMsgDeposit(*v)
+		return &res
+	case MsgDeposit:
+		res := DeepCopyMsgDeposit(v)
+		return &res
+	case *MsgDonateToCommunityPool:
+		res := DeepCopyMsgDonateToCommunityPool(*v)
+		return &res
+	case MsgDonateToCommunityPool:
+		res := DeepCopyMsgDonateToCommunityPool(v)
+		return &res
+	case *MsgEditValidator:
+		res := DeepCopyMsgEditValidator(*v)
+		return &res
+	case MsgEditValidator:
+		res := DeepCopyMsgEditValidator(v)
+		return &res
+	case *MsgForbidAddr:
+		res := DeepCopyMsgForbidAddr(*v)
+		return &res
+	case MsgForbidAddr:
+		res := DeepCopyMsgForbidAddr(v)
+		return &res
+	case *MsgForbidToken:
+		res := DeepCopyMsgForbidToken(*v)
+		return &res
+	case MsgForbidToken:
+		res := DeepCopyMsgForbidToken(v)
+		return &res
+	case *MsgIssueToken:
+		res := DeepCopyMsgIssueToken(*v)
+		return &res
+	case MsgIssueToken:
+		res := DeepCopyMsgIssueToken(v)
+		return &res
+	case *MsgMintToken:
+		res := DeepCopyMsgMintToken(*v)
+		return &res
+	case MsgMintToken:
+		res := DeepCopyMsgMintToken(v)
+		return &res
+	case *MsgModifyPricePrecision:
+		res := DeepCopyMsgModifyPricePrecision(*v)
+		return &res
+	case MsgModifyPricePrecision:
+		res := DeepCopyMsgModifyPricePrecision(v)
+		return &res
+	case *MsgModifyTokenInfo:
+		res := DeepCopyMsgModifyTokenInfo(*v)
+		return &res
+	case MsgModifyTokenInfo:
+		res := DeepCopyMsgModifyTokenInfo(v)
+		return &res
+	case *MsgMultiSend:
+		res := DeepCopyMsgMultiSend(*v)
+		return &res
+	case MsgMultiSend:
+		res := DeepCopyMsgMultiSend(v)
+		return &res
+	case *MsgMultiSendX:
+		res := DeepCopyMsgMultiSendX(*v)
+		return &res
+	case MsgMultiSendX:
+		res := DeepCopyMsgMultiSendX(v)
+		return &res
+	case *MsgRemoveTokenWhitelist:
+		res := DeepCopyMsgRemoveTokenWhitelist(*v)
+		return &res
+	case MsgRemoveTokenWhitelist:
+		res := DeepCopyMsgRemoveTokenWhitelist(v)
+		return &res
+	case *MsgSend:
+		res := DeepCopyMsgSend(*v)
+		return &res
+	case MsgSend:
+		res := DeepCopyMsgSend(v)
+		return &res
+	case *MsgSendX:
+		res := DeepCopyMsgSendX(*v)
+		return &res
+	case MsgSendX:
+		res := DeepCopyMsgSendX(v)
+		return &res
+	case *MsgSetMemoRequired:
+		res := DeepCopyMsgSetMemoRequired(*v)
+		return &res
+	case MsgSetMemoRequired:
+		res := DeepCopyMsgSetMemoRequired(v)
+		return &res
+	case *MsgSetWithdrawAddress:
+		res := DeepCopyMsgSetWithdrawAddress(*v)
+		return &res
+	case MsgSetWithdrawAddress:
+		res := DeepCopyMsgSetWithdrawAddress(v)
+		return &res
+	case *MsgSubmitProposal:
+		res := DeepCopyMsgSubmitProposal(*v)
+		return &res
+	case MsgSubmitProposal:
+		res := DeepCopyMsgSubmitProposal(v)
+		return &res
+	case *MsgTransferOwnership:
+		res := DeepCopyMsgTransferOwnership(*v)
+		return &res
+	case MsgTransferOwnership:
+		res := DeepCopyMsgTransferOwnership(v)
+		return &res
+	case *MsgUnForbidAddr:
+		res := DeepCopyMsgUnForbidAddr(*v)
+		return &res
+	case MsgUnForbidAddr:
+		res := DeepCopyMsgUnForbidAddr(v)
+		return &res
+	case *MsgUnForbidToken:
+		res := DeepCopyMsgUnForbidToken(*v)
+		return &res
+	case MsgUnForbidToken:
+		res := DeepCopyMsgUnForbidToken(v)
+		return &res
+	case *MsgUndelegate:
+		res := DeepCopyMsgUndelegate(*v)
+		return &res
+	case MsgUndelegate:
+		res := DeepCopyMsgUndelegate(v)
+		return &res
+	case *MsgUnjail:
+		res := DeepCopyMsgUnjail(*v)
+		return &res
+	case MsgUnjail:
+		res := DeepCopyMsgUnjail(v)
+		return &res
+	case *MsgVerifyInvariant:
+		res := DeepCopyMsgVerifyInvariant(*v)
+		return &res
+	case MsgVerifyInvariant:
+		res := DeepCopyMsgVerifyInvariant(v)
+		return &res
+	case *MsgVote:
+		res := DeepCopyMsgVote(*v)
+		return &res
+	case MsgVote:
+		res := DeepCopyMsgVote(v)
+		return &res
+	case *MsgWithdrawDelegatorReward:
+		res := DeepCopyMsgWithdrawDelegatorReward(*v)
+		return &res
+	case MsgWithdrawDelegatorReward:
+		res := DeepCopyMsgWithdrawDelegatorReward(v)
+		return &res
+	case *MsgWithdrawValidatorCommission:
+		res := DeepCopyMsgWithdrawValidatorCommission(*v)
+		return &res
+	case MsgWithdrawValidatorCommission:
+		res := DeepCopyMsgWithdrawValidatorCommission(v)
+		return &res
+	case *Order:
+		res := DeepCopyOrder(*v)
+		return &res
+	case Order:
+		res := DeepCopyOrder(v)
+		return &res
+	case *Output:
+		res := DeepCopyOutput(*v)
+		return &res
+	case Output:
+		res := DeepCopyOutput(v)
+		return &res
+	case *ParamChange:
+		res := DeepCopyParamChange(*v)
+		return &res
+	case ParamChange:
+		res := DeepCopyParamChange(v)
+		return &res
+	case *ParameterChangeProposal:
+		res := DeepCopyParameterChangeProposal(*v)
+		return &res
+	case ParameterChangeProposal:
+		res := DeepCopyParameterChangeProposal(v)
+		return &res
+	case *PrivKeyEd25519:
+		res := DeepCopyPrivKeyEd25519(*v)
+		return &res
+	case PrivKeyEd25519:
+		res := DeepCopyPrivKeyEd25519(v)
+		return &res
+	case *PrivKeySecp256k1:
+		res := DeepCopyPrivKeySecp256k1(*v)
+		return &res
+	case PrivKeySecp256k1:
+		res := DeepCopyPrivKeySecp256k1(v)
+		return &res
+	case *PubKeyEd25519:
+		res := DeepCopyPubKeyEd25519(*v)
+		return &res
+	case PubKeyEd25519:
+		res := DeepCopyPubKeyEd25519(v)
+		return &res
+	case *PubKeyMultisigThreshold:
+		res := DeepCopyPubKeyMultisigThreshold(*v)
+		return &res
+	case PubKeyMultisigThreshold:
+		res := DeepCopyPubKeyMultisigThreshold(v)
+		return &res
+	case *PubKeySecp256k1:
+		res := DeepCopyPubKeySecp256k1(*v)
+		return &res
+	case PubKeySecp256k1:
+		res := DeepCopyPubKeySecp256k1(v)
+		return &res
+	case *SignedMsgType:
+		res := DeepCopySignedMsgType(*v)
+		return &res
+	case SignedMsgType:
+		res := DeepCopySignedMsgType(v)
+		return &res
+	case *SoftwareUpgradeProposal:
+		res := DeepCopySoftwareUpgradeProposal(*v)
+		return &res
+	case SoftwareUpgradeProposal:
+		res := DeepCopySoftwareUpgradeProposal(v)
+		return &res
+	case *State:
+		res := DeepCopyState(*v)
+		return &res
+	case State:
+		res := DeepCopyState(v)
+		return &res
+	case *StdSignature:
+		res := DeepCopyStdSignature(*v)
+		return &res
+	case StdSignature:
+		res := DeepCopyStdSignature(v)
+		return &res
+	case *StdTx:
+		res := DeepCopyStdTx(*v)
+		return &res
+	case StdTx:
+		res := DeepCopyStdTx(v)
+		return &res
+	case *Supply:
+		res := DeepCopySupply(*v)
+		return &res
+	case Supply:
+		res := DeepCopySupply(v)
+		return &res
+	case *TextProposal:
+		res := DeepCopyTextProposal(*v)
+		return &res
+	case TextProposal:
+		res := DeepCopyTextProposal(v)
+		return &res
+	case *Vote:
+		res := DeepCopyVote(*v)
+		return &res
+	case Vote:
+		res := DeepCopyVote(v)
+		return &res
+	case *VoteOption:
+		res := DeepCopyVoteOption(*v)
+		return &res
+	case VoteOption:
+		res := DeepCopyVoteOption(v)
+		return &res
 	default:
 		panic("Unknown Type.")
 	} // end of switch
