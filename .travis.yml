@@ -49,25 +49,20 @@ matrix:
           - CACHE_DIR=$HOME/.cache/docker
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 5 0
+        - scripts/functional_test.sh 4 0
 
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 5 1
+        - scripts/functional_test.sh 4 1
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 5 2
+        - scripts/functional_test.sh 4 2
     - <<: *ft_job
       script:
         - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 5 3
-
-    - <<: *ft_job
-      script:
-        - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 5 4
+        - scripts/functional_test.sh 4 3
 
     - <<: *ft_job
       script:
