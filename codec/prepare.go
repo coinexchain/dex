@@ -161,7 +161,7 @@ func GenerateCodecFile(w io.Writer) {
 		{Alias: "MsgAliasUpdate", Value: MsgAliasUpdate{}},
 	}
 
-	extraImports := []string{`"time"`, `sdk "github.com/cosmos/cosmos-sdk/types"`}
+	extraImports := []string{`"time"`, `"math/big"`, `sdk "github.com/cosmos/cosmos-sdk/types"`}
 	ignoreImpl := make(map[string]string)
 	ignoreImpl["StdSignature"] = "PubKey"
 	ignoreImpl["PubKeyMultisigThreshold"] = "PubKey"
@@ -180,23 +180,16 @@ const MaxSliceLength = 10
 const MaxStringLength = 100
 
 var extraLogics = `
-func EncodeTime(w io.Writer, t time.Time) error {
+func EncodeTime(w *[]byte, t time.Time) {
 	t = t.UTC()
 	sec := t.Unix()
 	var buf [10]byte
 	n := binary.PutVarint(buf[:], sec)
-	_, err := w.Write(buf[0:n])
-	if err != nil {
-		return err
-	}
+	*w = append(*w, buf[0:n]...)
 
 	nanosec := t.Nanosecond()
 	n = binary.PutVarint(buf[:], int64(nanosec))
-	_, err = w.Write(buf[0:n])
-	if err != nil {
-		return err
-	}
-	return nil
+	*w = append(*w, buf[0:n]...)
 }
 
 func DecodeTime(bz []byte) (time.Time, int, error) {
@@ -240,29 +233,40 @@ func DeepCopyTime(t time.Time) time.Time {
 	return t.Add(time.Duration(0))
 }
 
-func EncodeInt(w io.Writer, v sdk.Int) error {
-	s, err := v.MarshalAmino()
-	if err!=nil {
-		return err
-	}
-	return codonEncodeString(w, s)
+func EncodeInt(w *[]byte, v sdk.Int) {
+	codonEncodeByteSlice(w, v.BigInt().Bytes())
+	codonEncodeBool(w, v.BigInt().Sign() < 0)
 }
 
-func DecodeInt(bz []byte) (sdk.Int, int, error) {
-	v := sdk.ZeroInt()
-	var n int
-	var err error
-	s := codonDecodeString(bz, &n, &err)
-	if err!=nil {
-		return v, n, err
+func DecodeInt(bz []byte) (v sdk.Int, n int, err error) {
+	var m int
+	length := codonDecodeInt64(bz, &m, &err)
+	if err != nil {
+		return
 	}
-
-	err = (&v).UnmarshalAmino(s)
-	if err!=nil {
-		return v, n, err
+	var bs []byte
+	var l int
+	bs, l, err = codonGetByteSlice(bz[m:], int(length))
+	n = m + l
+	if err != nil {
+		return
 	}
-
-	return v, n, nil
+	var k int
+	isNeg := codonDecodeBool(bz[n:], &k, &err)
+	n = n + 1
+	if err != nil {
+		return
+	}
+	x := big.NewInt(0)
+	z := big.NewInt(0)
+	x.SetBytes(bs)
+	if isNeg {
+		z.Neg(x)
+		v = sdk.NewIntFromBigInt(z)
+	} else {
+		v = sdk.NewIntFromBigInt(x)
+	}
+	return
 }
 
 func RandInt(r RandSrc) sdk.Int {
@@ -278,29 +282,36 @@ func DeepCopyInt(i sdk.Int) sdk.Int {
 	return i.AddRaw(0)
 }
 
-func EncodeDec(w io.Writer, v sdk.Dec) error {
-	s, err := v.MarshalAmino()
-	if err!=nil {
-		return err
-	}
-	return codonEncodeString(w, s)
+func EncodeDec(w *[]byte, v sdk.Dec) {
+	codonEncodeByteSlice(w, v.Int.Bytes())
+	codonEncodeBool(w, v.Int.Sign() < 0)
 }
 
-func DecodeDec(bz []byte) (sdk.Dec, int, error) {
-	v := sdk.ZeroDec()
-	var n int
-	var err error
-	s := codonDecodeString(bz, &n, &err)
-	if err!=nil {
-		return v, n, err
+func DecodeDec(bz []byte) (v sdk.Dec, n int, err error) {
+	var m int
+	length := codonDecodeInt64(bz, &m, &err)
+	if err != nil {
+		return
 	}
-
-	err = (&v).UnmarshalAmino(s)
-	if err!=nil {
-		return v, n, err
+	var bs []byte
+	var l int
+	bs, l, err = codonGetByteSlice(bz[m:], int(length))
+	n = m + l
+	if err != nil {
+		return
 	}
-
-	return v, n, nil
+	var k int
+	isNeg := codonDecodeBool(bz[n:], &k, &err)
+	n = n + 1
+	if err != nil {
+		return
+	}
+	v = sdk.ZeroDec()
+	v.Int.SetBytes(bs)
+	if isNeg {
+		v.Int.Neg(v.Int)
+	}
+	return
 }
 
 func RandDec(r RandSrc) sdk.Dec {

@@ -22,6 +22,7 @@ func main() {
 
 	leafTypes := dexcodec.GetLeafTypes()
 
+	buf := make([]byte, 0, 4096)
 	for i := 0; i < Count; i++ {
 		if i%10000 == 0 {
 			fmt.Printf("=== %d ===\n", i)
@@ -29,14 +30,9 @@ func main() {
 
 		ifc := dexcodec.RandAny(r)
 		origS, _ := json.Marshal(ifc)
-		var buf bytes.Buffer
-		err := dexcodec.EncodeAny(&buf, ifc)
-		if err != nil {
-			fmt.Printf("Now: %d\n", i)
-			codon.ShowInfoForVar(leafTypes, ifc)
-			panic(err)
-		}
-		ifcDec, _, err := dexcodec.DecodeAny(buf.Bytes())
+		buf = buf[:0]
+		dexcodec.EncodeAny(&buf, ifc)
+		ifcDec, _, err := dexcodec.DecodeAny(buf)
 		if err != nil {
 			fmt.Printf("Now: %d\n", i)
 			codon.ShowInfoForVar(leafTypes, ifc)

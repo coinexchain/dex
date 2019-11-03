@@ -32,16 +32,16 @@ func main() {
 	var err error
 	bzList := make([][]byte, 1000)
 	for i := 0; i < len(accounts); i++ {
-		var buf bytes.Buffer
-		err = dexcodec.BareEncodeAny(&buf, accounts[i])
+		buf := make([]byte, 0, 1024)
+		dexcodec.EncodeAny(&buf, accounts[i])
 		if err != nil {
 			panic(err)
 		}
-		bzList[i] = buf.Bytes()
+		bzList[i] = buf
 	}
 	for i := 0; i < len(accounts); i++ {
-		var v dexcodec.AccountX
-		_, err = dexcodec.BareDecodeAny(bzList[i], &v)
+		obj, _, err := dexcodec.DecodeAny(bzList[i])
+		v := obj.(dexcodec.AccountX)
 		if err != nil {
 			panic(err)
 		}
@@ -77,16 +77,15 @@ func main() {
 	nanoSecCount = time.Now().UnixNano()
 	for j := 0; j < 300; j++ {
 		for i := 0; i < len(accounts); i++ {
-			var buf bytes.Buffer
-			err = dexcodec.BareEncodeAny(&buf, accounts[i])
+			bzList[i] = bzList[i][:0]
+			dexcodec.EncodeAny(&bzList[i], accounts[i])
 			if err != nil {
 				panic(err)
 			}
-			bzList[i] = buf.Bytes()
 			totalBytes += len(bzList[i])
 		}
 		for i := 0; i < len(accounts); i++ {
-			_, err = dexcodec.BareDecodeAny(bzList[i], &accounts[i])
+			_, _, err = dexcodec.DecodeAny(bzList[i])
 			if err != nil {
 				panic(err)
 			}
