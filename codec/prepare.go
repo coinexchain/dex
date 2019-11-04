@@ -162,6 +162,8 @@ func GenerateCodecFile(w io.Writer) {
 	}
 
 	extraImports := []string{`"time"`, `"math/big"`, `sdk "github.com/cosmos/cosmos-sdk/types"`}
+	extraImports = append(extraImports, codon.ImportsForBridgeLogic...)
+	extraLogics := extraLogicsForLeafTypes + codon.BridgeLogic
 	ignoreImpl := make(map[string]string)
 	ignoreImpl["StdSignature"] = "PubKey"
 	ignoreImpl["PubKeyMultisigThreshold"] = "PubKey"
@@ -179,7 +181,7 @@ func GetLeafTypes() map[string]string {
 const MaxSliceLength = 10
 const MaxStringLength = 100
 
-var extraLogics = `
+var extraLogicsForLeafTypes = `
 func EncodeTime(w *[]byte, t time.Time) {
 	t = t.UTC()
 	sec := t.Unix()
