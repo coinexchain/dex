@@ -788,7 +788,6 @@ func TestCancelMarketFailWhenCetDelist(t *testing.T) {
 
 }
 
-
 func TestChargeOrderFee(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	ret := createCetMarket(input, stock, 0)
