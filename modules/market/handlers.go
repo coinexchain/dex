@@ -105,7 +105,12 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 	}
 
 	if msg.Money != dex.CET && msg.Stock != dex.CET {
-		if _, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.Stock, dex.CET)); err != nil {
+		sym := GetSymbol(msg.Stock, dex.CET)
+		if _, err := keeper.GetMarketInfo(ctx, sym); err != nil {
+			return types.ErrNotListedAgainstCet(msg.Stock)
+		}
+		dlk := keepers.NewDelistKeeper(keeper.GetMarketKey())
+		if dlk.HasDelistRequest(ctx, sym) {
 			return types.ErrNotListedAgainstCet(msg.Stock)
 		}
 	}
@@ -404,11 +409,8 @@ func handleMsgCancelTradingPair(ctx sdk.Context, msg types.MsgCancelTradingPair,
 
 	// Add del request to store
 	dlk := keepers.NewDelistKeeper(keeper.GetMarketKey())
-	delistSymbols := dlk.GetDelistSymbolsBeforeTime(ctx, math.MaxInt64)
-	for _, sym := range delistSymbols {
-		if msg.TradingPair == sym {
-			return types.ErrDelistRequestExist(sym).Result()
-		}
+	if dlk.HasDelistRequest(ctx, msg.TradingPair) {
+		return types.ErrDelistRequestExist(msg.TradingPair).Result()
 	}
 	dlk.AddDelistRequest(ctx, msg.EffectiveTime, msg.TradingPair)
 
@@ -456,6 +458,11 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 	if info.Money == dex.CET && keeper.IsBancorExist(ctx, info.Stock) {
 		return types.ErrDelistNotAllowed(
 			fmt.Sprintf("When %s has bancor contracts, you can't delist the %s/cet market", info.Stock, info.Stock))
+	}
+
+	if info.Money == dex.CET && keeper.MarketCountOfStock(ctx, info.Stock) >= 2 {
+		return types.ErrDelistNotAllowed(
+			fmt.Sprintf("When %s has other market with non-cet token as money, you can't delist the %s/cet market", info.Stock, info.Stock))
 	}
 
 	return nil

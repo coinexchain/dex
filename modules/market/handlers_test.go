@@ -747,6 +747,48 @@ func TestCancelMarketSuccess(t *testing.T) {
 	require.EqualValues(t, delSymbol, GetSymbol(stock, dex.CET))
 }
 
+func TestCancelMarketAgainstCetFail(t *testing.T) {
+	input := prepareMockInput(t, false, true)
+	createCetMarket(input, stock, 0)
+	createImpMarket(input, stock, money, 10)
+
+	msgCancelMarket := types.MsgCancelTradingPair{
+		Sender:        haveCetAddress,
+		TradingPair:   GetSymbol(stock, "cet"),
+		EffectiveTime: int64(types.DefaultMarketMinExpiredTime + 10),
+	}
+
+	ret := input.handler(input.ctx, msgCancelMarket)
+	err := types.ErrDelistNotAllowed("When tusdt has other market with non-cet token as money, you can't delist the tusdt/cet market")
+	require.EqualValues(t, err.Result(), ret)
+}
+
+func TestCancelMarketFailWhenCetDelist(t *testing.T) {
+	input := prepareMockInput(t, false, true)
+	createCetMarket(input, stock, 0)
+
+	msgCancelMarket := types.MsgCancelTradingPair{
+		Sender:        haveCetAddress,
+		TradingPair:   GetSymbol(stock, "cet"),
+		EffectiveTime: int64(types.DefaultMarketMinExpiredTime + 10),
+	}
+
+	ret := input.handler(input.ctx, msgCancelMarket)
+	require.Equal(t, true, ret.IsOK(), "cancel market should success")
+
+	msg := MsgCreateTradingPair{
+		Creator:        haveCetAddress,
+		Stock:          stock,
+		Money:          money,
+		PricePrecision: 8,
+		OrderPrecision: 8,
+	}
+	ret = input.handler(input.ctx, msg)
+	require.Equal(t, types.ErrNotListedAgainstCet(stock).Result(), ret)
+
+}
+
+
 func TestChargeOrderFee(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	ret := createCetMarket(input, stock, 0)
