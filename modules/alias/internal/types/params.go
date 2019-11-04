@@ -37,7 +37,7 @@ type Params struct {
 	MaxAliasCount              int   `json:"max_alias_count"`
 }
 
-// ParamKeyTable for asset module
+// ParamKeyTable for alias module
 func ParamKeyTable() params.KeyTable {
 	return params.NewKeyTable().RegisterParamSet(&Params{})
 }

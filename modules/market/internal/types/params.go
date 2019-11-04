@@ -45,7 +45,7 @@ type Params struct {
 	FeeForZeroDeal              int64 `json:"fee_for_zero_deal"`
 }
 
-// ParamKeyTable for asset module
+// ParamKeyTable for market module
 func ParamKeyTable() params.KeyTable {
 	return params.NewKeyTable().RegisterParamSet(&Params{})
 }
