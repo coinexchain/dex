@@ -19,6 +19,10 @@ func main() {
 		return
 	}
 	r := randsrc.NewRandSrcFromFile(os.Args[1])
+	runBench(r)
+}
+
+func runBench(r dexcodec.RandSrc) {
 	accounts := make([]dexcodec.AccountX, 1000)
 	accountsJ := make([][]byte, 1000)
 	for i := 0; i < len(accounts); i++ {
@@ -51,6 +55,11 @@ func main() {
 		}
 
 	}
+	println("========== Check 0 Finished ==========")
+	extraCheck1(accounts, accountsJ)
+	println("========== Check 1 Finished ==========")
+	extraCheck2(accounts, accountsJ)
+	println("========== Check 2 Finished ==========")
 
 	cdc := codec.New()
 	totalBytes := 0
@@ -79,9 +88,6 @@ func main() {
 		for i := 0; i < len(accounts); i++ {
 			bzList[i] = bzList[i][:0]
 			dexcodec.EncodeAny(&bzList[i], accounts[i])
-			if err != nil {
-				panic(err)
-			}
 			totalBytes += len(bzList[i])
 		}
 		for i := 0; i < len(accounts); i++ {
@@ -93,4 +99,52 @@ func main() {
 	}
 	span = time.Now().UnixNano() - nanoSecCount
 	fmt.Printf("Codon: time = %d, bytes = %d, bytes/ns = %f\n", span, totalBytes, float64(totalBytes)/float64(span))
+}
+
+func extraCheck1(accounts []dexcodec.AccountX, accountsJ [][]byte) {
+	var err error
+	stub := dexcodec.CodonStub{}
+	bzList := make([][]byte, 1000)
+	for i := 0; i < len(accounts); i++ {
+		bzList[i], err = stub.MarshalBinaryBare(accounts[i])
+		if err != nil {
+			panic(err)
+		}
+	}
+	for i := 0; i < len(accounts); i++ {
+		var v dexcodec.AccountX
+		err := stub.UnmarshalBinaryBare(bzList[i], &v)
+		if err != nil {
+			panic(err)
+		}
+		s, _ := json.Marshal(v)
+		if !bytes.Equal(s, accountsJ[i]) {
+			fmt.Printf("%s\n%s\n%d mismatch!\n", string(s), string(accountsJ[i]), i)
+		}
+
+	}
+}
+
+func extraCheck2(accounts []dexcodec.AccountX, accountsJ [][]byte) {
+	var err error
+	stub := dexcodec.CodonStub{}
+	bzList := make([][]byte, 1000)
+	for i := 0; i < len(accounts); i++ {
+		bzList[i], err = stub.MarshalBinaryLengthPrefixed(accounts[i])
+		if err != nil {
+			panic(err)
+		}
+	}
+	for i := 0; i < len(accounts); i++ {
+		var v dexcodec.AccountX
+		err := stub.UnmarshalBinaryLengthPrefixed(bzList[i], &v)
+		if err != nil {
+			panic(err)
+		}
+		s, _ := json.Marshal(v)
+		if !bytes.Equal(s, accountsJ[i]) {
+			fmt.Printf("%s\n%s\n%d mismatch!\n", string(s), string(accountsJ[i]), i)
+		}
+
+	}
 }

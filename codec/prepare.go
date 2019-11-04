@@ -76,98 +76,98 @@ func ShowInfo() {
 	codon.ShowInfoForVar(leafTypes, &MsgAliasUpdate{})
 }
 
+var TypeEntryList = []codon.TypeEntry{
+	{Alias: "PubKey", Value: (*PubKey)(nil)},
+	{Alias: "Msg", Value: (*Msg)(nil)},
+	{Alias: "Account", Value: (*Account)(nil)},
+	{Alias: "Content", Value: (*Content)(nil)},
+
+	{Alias: "DuplicateVoteEvidence", Value: DuplicateVoteEvidence{}},
+	{Alias: "PrivKeyEd25519", Value: PrivKeyEd25519{}},
+	{Alias: "PrivKeySecp256k1", Value: PrivKeySecp256k1{}},
+	{Alias: "PubKeyEd25519", Value: PubKeyEd25519{}},
+	{Alias: "PubKeySecp256k1", Value: PubKeySecp256k1{}},
+	{Alias: "PubKeyMultisigThreshold", Value: PubKeyMultisigThreshold{}},
+	{Alias: "SignedMsgType", Value: SignedMsgType(0)},
+	{Alias: "VoteOption", Value: VoteOption(0)},
+	{Alias: "Vote", Value: Vote{}},
+
+	{Alias: "Coin", Value: Coin{}},
+	{Alias: "LockedCoin", Value: LockedCoin{}},
+	{Alias: "StdSignature", Value: StdSignature{}},
+	{Alias: "ParamChange", Value: ParamChange{}},
+	{Alias: "Input", Value: Input{}},
+	{Alias: "Output", Value: Output{}},
+	{Alias: "AccAddress", Value: AccAddress{}},
+	{Alias: "CommentRef", Value: CommentRef{}},
+
+	{Alias: "BaseAccount", Value: BaseAccount{}},
+	{Alias: "BaseVestingAccount", Value: BaseVestingAccount{}},
+	{Alias: "ContinuousVestingAccount", Value: ContinuousVestingAccount{}},
+	{Alias: "DelayedVestingAccount", Value: DelayedVestingAccount{}},
+	{Alias: "ModuleAccount", Value: ModuleAccount{}},
+	{Alias: "StdTx", Value: StdTx{}},
+	{Alias: "MsgBeginRedelegate", Value: MsgBeginRedelegate{}},
+	{Alias: "MsgCreateValidator", Value: MsgCreateValidator{}},
+	{Alias: "MsgDelegate", Value: MsgDelegate{}},
+	{Alias: "MsgEditValidator", Value: MsgEditValidator{}},
+	{Alias: "MsgSetWithdrawAddress", Value: MsgSetWithdrawAddress{}},
+	{Alias: "MsgUndelegate", Value: MsgUndelegate{}},
+	{Alias: "MsgUnjail", Value: MsgUnjail{}},
+	{Alias: "MsgWithdrawDelegatorReward", Value: MsgWithdrawDelegatorReward{}},
+	{Alias: "MsgWithdrawValidatorCommission", Value: MsgWithdrawValidatorCommission{}},
+	{Alias: "MsgDeposit", Value: MsgDeposit{}},
+	{Alias: "MsgSubmitProposal", Value: MsgSubmitProposal{}},
+	{Alias: "MsgVote", Value: MsgVote{}},
+	{Alias: "ParameterChangeProposal", Value: ParameterChangeProposal{}},
+	{Alias: "SoftwareUpgradeProposal", Value: SoftwareUpgradeProposal{}},
+	{Alias: "TextProposal", Value: TextProposal{}},
+	{Alias: "CommunityPoolSpendProposal", Value: CommunityPoolSpendProposal{}},
+	{Alias: "MsgMultiSend", Value: MsgMultiSend{}},
+	{Alias: "MsgSend", Value: MsgSend{}},
+	{Alias: "MsgVerifyInvariant", Value: MsgVerifyInvariant{}},
+	{Alias: "Supply", Value: Supply{}},
+
+	{Alias: "AccountX", Value: AccountX{}},
+	{Alias: "MsgMultiSendX", Value: MsgMultiSendX{}},
+	{Alias: "MsgSendX", Value: MsgSendX{}},
+	{Alias: "MsgSetMemoRequired", Value: MsgSetMemoRequired{}},
+	{Alias: "BaseToken", Value: BaseToken{}},
+	{Alias: "MsgAddTokenWhitelist", Value: MsgAddTokenWhitelist{}},
+	{Alias: "MsgBurnToken", Value: MsgBurnToken{}},
+	{Alias: "MsgForbidAddr", Value: MsgForbidAddr{}},
+	{Alias: "MsgForbidToken", Value: MsgForbidToken{}},
+	{Alias: "MsgIssueToken", Value: MsgIssueToken{}},
+	{Alias: "MsgMintToken", Value: MsgMintToken{}},
+	{Alias: "MsgModifyTokenInfo", Value: MsgModifyTokenInfo{}},
+	{Alias: "MsgRemoveTokenWhitelist", Value: MsgRemoveTokenWhitelist{}},
+	{Alias: "MsgTransferOwnership", Value: MsgTransferOwnership{}},
+	{Alias: "MsgUnForbidAddr", Value: MsgUnForbidAddr{}},
+	{Alias: "MsgUnForbidToken", Value: MsgUnForbidToken{}},
+	{Alias: "MsgBancorCancel", Value: MsgBancorCancel{}},
+	{Alias: "MsgBancorInit", Value: MsgBancorInit{}},
+	{Alias: "MsgBancorTrade", Value: MsgBancorTrade{}},
+	{Alias: "MsgCancelOrder", Value: MsgCancelOrder{}},
+	{Alias: "MsgCancelTradingPair", Value: MsgCancelTradingPair{}},
+	{Alias: "MsgCreateOrder", Value: MsgCreateOrder{}},
+	{Alias: "MsgCreateTradingPair", Value: MsgCreateTradingPair{}},
+	{Alias: "MsgModifyPricePrecision", Value: MsgModifyPricePrecision{}},
+	{Alias: "Order", Value: Order{}},
+	{Alias: "MarketInfo", Value: MarketInfo{}},
+	{Alias: "MsgDonateToCommunityPool", Value: MsgDonateToCommunityPool{}},
+	{Alias: "MsgCommentToken", Value: MsgCommentToken{}},
+	{Alias: "State", Value: State{}},
+	{Alias: "MsgAliasUpdate", Value: MsgAliasUpdate{}},
+}
+
 func GenerateCodecFile(w io.Writer) {
-	list := []codon.TypeEntry{
-		{Alias: "PubKey", Value: (*PubKey)(nil)},
-		{Alias: "Msg", Value: (*Msg)(nil)},
-		{Alias: "Account", Value: (*Account)(nil)},
-		{Alias: "Content", Value: (*Content)(nil)},
-
-		{Alias: "DuplicateVoteEvidence", Value: DuplicateVoteEvidence{}},
-		{Alias: "PrivKeyEd25519", Value: PrivKeyEd25519{}},
-		{Alias: "PrivKeySecp256k1", Value: PrivKeySecp256k1{}},
-		{Alias: "PubKeyEd25519", Value: PubKeyEd25519{}},
-		{Alias: "PubKeySecp256k1", Value: PubKeySecp256k1{}},
-		{Alias: "PubKeyMultisigThreshold", Value: PubKeyMultisigThreshold{}},
-		{Alias: "SignedMsgType", Value: SignedMsgType(0)},
-		{Alias: "VoteOption", Value: VoteOption(0)},
-		{Alias: "Vote", Value: Vote{}},
-
-		{Alias: "Coin", Value: Coin{}},
-		{Alias: "LockedCoin", Value: LockedCoin{}},
-		{Alias: "StdSignature", Value: StdSignature{}},
-		{Alias: "ParamChange", Value: ParamChange{}},
-		{Alias: "Input", Value: Input{}},
-		{Alias: "Output", Value: Output{}},
-		{Alias: "AccAddress", Value: AccAddress{}},
-		{Alias: "CommentRef", Value: CommentRef{}},
-
-		{Alias: "BaseAccount", Value: BaseAccount{}},
-		{Alias: "BaseVestingAccount", Value: BaseVestingAccount{}},
-		{Alias: "ContinuousVestingAccount", Value: ContinuousVestingAccount{}},
-		{Alias: "DelayedVestingAccount", Value: DelayedVestingAccount{}},
-		{Alias: "ModuleAccount", Value: ModuleAccount{}},
-		{Alias: "StdTx", Value: StdTx{}},
-		{Alias: "MsgBeginRedelegate", Value: MsgBeginRedelegate{}},
-		{Alias: "MsgCreateValidator", Value: MsgCreateValidator{}},
-		{Alias: "MsgDelegate", Value: MsgDelegate{}},
-		{Alias: "MsgEditValidator", Value: MsgEditValidator{}},
-		{Alias: "MsgSetWithdrawAddress", Value: MsgSetWithdrawAddress{}},
-		{Alias: "MsgUndelegate", Value: MsgUndelegate{}},
-		{Alias: "MsgUnjail", Value: MsgUnjail{}},
-		{Alias: "MsgWithdrawDelegatorReward", Value: MsgWithdrawDelegatorReward{}},
-		{Alias: "MsgWithdrawValidatorCommission", Value: MsgWithdrawValidatorCommission{}},
-		{Alias: "MsgDeposit", Value: MsgDeposit{}},
-		{Alias: "MsgSubmitProposal", Value: MsgSubmitProposal{}},
-		{Alias: "MsgVote", Value: MsgVote{}},
-		{Alias: "ParameterChangeProposal", Value: ParameterChangeProposal{}},
-		{Alias: "SoftwareUpgradeProposal", Value: SoftwareUpgradeProposal{}},
-		{Alias: "TextProposal", Value: TextProposal{}},
-		{Alias: "CommunityPoolSpendProposal", Value: CommunityPoolSpendProposal{}},
-		{Alias: "MsgMultiSend", Value: MsgMultiSend{}},
-		{Alias: "MsgSend", Value: MsgSend{}},
-		{Alias: "MsgVerifyInvariant", Value: MsgVerifyInvariant{}},
-		{Alias: "Supply", Value: Supply{}},
-
-		{Alias: "AccountX", Value: AccountX{}},
-		{Alias: "MsgMultiSendX", Value: MsgMultiSendX{}},
-		{Alias: "MsgSendX", Value: MsgSendX{}},
-		{Alias: "MsgSetMemoRequired", Value: MsgSetMemoRequired{}},
-		{Alias: "BaseToken", Value: BaseToken{}},
-		{Alias: "MsgAddTokenWhitelist", Value: MsgAddTokenWhitelist{}},
-		{Alias: "MsgBurnToken", Value: MsgBurnToken{}},
-		{Alias: "MsgForbidAddr", Value: MsgForbidAddr{}},
-		{Alias: "MsgForbidToken", Value: MsgForbidToken{}},
-		{Alias: "MsgIssueToken", Value: MsgIssueToken{}},
-		{Alias: "MsgMintToken", Value: MsgMintToken{}},
-		{Alias: "MsgModifyTokenInfo", Value: MsgModifyTokenInfo{}},
-		{Alias: "MsgRemoveTokenWhitelist", Value: MsgRemoveTokenWhitelist{}},
-		{Alias: "MsgTransferOwnership", Value: MsgTransferOwnership{}},
-		{Alias: "MsgUnForbidAddr", Value: MsgUnForbidAddr{}},
-		{Alias: "MsgUnForbidToken", Value: MsgUnForbidToken{}},
-		{Alias: "MsgBancorCancel", Value: MsgBancorCancel{}},
-		{Alias: "MsgBancorInit", Value: MsgBancorInit{}},
-		{Alias: "MsgBancorTrade", Value: MsgBancorTrade{}},
-		{Alias: "MsgCancelOrder", Value: MsgCancelOrder{}},
-		{Alias: "MsgCancelTradingPair", Value: MsgCancelTradingPair{}},
-		{Alias: "MsgCreateOrder", Value: MsgCreateOrder{}},
-		{Alias: "MsgCreateTradingPair", Value: MsgCreateTradingPair{}},
-		{Alias: "MsgModifyPricePrecision", Value: MsgModifyPricePrecision{}},
-		{Alias: "Order", Value: Order{}},
-		{Alias: "MarketInfo", Value: MarketInfo{}},
-		{Alias: "MsgDonateToCommunityPool", Value: MsgDonateToCommunityPool{}},
-		{Alias: "MsgCommentToken", Value: MsgCommentToken{}},
-		{Alias: "State", Value: State{}},
-		{Alias: "MsgAliasUpdate", Value: MsgAliasUpdate{}},
-	}
-
 	extraImports := []string{`"time"`, `"math/big"`, `sdk "github.com/cosmos/cosmos-sdk/types"`}
 	extraImports = append(extraImports, codon.ImportsForBridgeLogic...)
 	extraLogics := extraLogicsForLeafTypes + codon.BridgeLogic
 	ignoreImpl := make(map[string]string)
 	ignoreImpl["StdSignature"] = "PubKey"
 	ignoreImpl["PubKeyMultisigThreshold"] = "PubKey"
-	codon.GenerateCodecFile(w, GetLeafTypes(), ignoreImpl, list, extraLogics, extraImports)
+	codon.GenerateCodecFile(w, GetLeafTypes(), ignoreImpl, TypeEntryList, extraLogics, extraImports)
 }
 
 func GetLeafTypes() map[string]string {
@@ -227,9 +227,30 @@ func DecodeTime(bz []byte) (time.Time, int, error) {
 	return time.Unix(sec, nanosec).UTC(), n+m, nil
 }
 
-func RandTime(r RandSrc) time.Time {
-	return time.Unix(r.GetInt64(), r.GetInt64()).UTC()
+func T(s string) time.Time {
+	t, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		panic(err)
+	}
+	return t
 }
+
+var maxSec = T("9999-09-29T08:02:06.647266Z").Unix()
+
+func RandTime(r RandSrc) time.Time {
+	sec := r.GetInt64()
+	nanosec := r.GetInt64()
+	if sec < 0 {
+		sec = -sec
+	}
+	if nanosec < 0 {
+		nanosec = -nanosec
+	}
+	nanosec = nanosec%(1000*1000*1000)
+	sec = sec%maxSec
+	return time.Unix(sec, nanosec).UTC()
+}
+
 
 func DeepCopyTime(t time.Time) time.Time {
 	return t.Add(time.Duration(0))
