@@ -178,4 +178,14 @@ func TestKeeper_SetMarket(t *testing.T) {
 	err = keeper.SetMarket(ctx, info3)
 	assert.Nil(t, err)
 	assert.Equal(t, int64(3), keeper.MarketCountOfStock(ctx, "abc"))
+
+	info3 = market.MarketInfo{
+		Stock:             "abcde",
+		Money:             "usdt",
+		PricePrecision:    8,
+		LastExecutedPrice: sdk.NewDec(10),
+	}
+	err = keeper.SetMarket(ctx, info3)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(3), keeper.MarketCountOfStock(ctx, "abc"))
 }
