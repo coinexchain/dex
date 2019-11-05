@@ -44,6 +44,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 *   [\#4](https://github.com/coinexchain/dex/issues/4) Modify the json name of the field 
 *   [\#3](https://github.com/coinexchain/dex/issues/3) Modify time unit 
 *   [\#6](https://github.com/coinexchain/dex/issues/6) Modify modules emit events.
+*   [\#7](https://github.com/coinexchain/dex/issues/7) Modify swagger.
 
 ### Client Breaking Changes
 
