@@ -157,7 +157,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return types.ErrTokenForbiddenByOwner().Result()
 	}
 	if !types.CheckStockPrecision(sdk.NewInt(msg.Amount), bi.StockPrecision) {
-		return types.ErrStockSupplyPrecisionNotMatch().Result()
+		return types.ErrStockAmountPrecisionNotMatch().Result()
 	}
 	stockInPool := bi.StockInPool.AddRaw(msg.Amount)
 	if msg.IsBuy {
