@@ -41,7 +41,7 @@ var (
 
 	DefaultGovMinDeposit = sdk.NewInt(10000e8)
 
-	DefaultCrisisConstantFee = sdk.NewInt(350000e8)
+	DefaultCrisisConstantFee = sdk.NewInt(100000e8)
 )
 
 // gov

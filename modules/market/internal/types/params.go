@@ -11,8 +11,8 @@ import (
 const (
 	DefaultCreateMarketFee             = 1e12 // 10000 * 10 ^8
 	DefaultFixedTradeFee               = 1000000
-	DefaultGTEOrderLifetime            = 10000
-	DefaultGTEOrderFeatureFeeByBlocks  = 6000000
+	DefaultGTEOrderLifetime            = 100000
+	DefaultGTEOrderFeatureFeeByBlocks  = 1000000
 	DefaultMaxExecutedPriceChangeRatio = 25
 	MarketFeeRatePrecision             = 4
 	DefaultMarketFeeRate               = 10

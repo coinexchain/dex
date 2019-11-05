@@ -82,7 +82,7 @@ func TestDefaultGenesisState(t *testing.T) {
 	// crisis
 	var crisisData crisis.GenesisState
 	crisis.ModuleCdc.MustUnmarshalJSON(state[crisis.ModuleName], &crisisData)
-	checkCET(t, 350000, sdk.Coins{crisisData.ConstantFee})
+	checkCET(t, 100000, sdk.Coins{crisisData.ConstantFee})
 
 	// others
 	var authxData authx.GenesisState
@@ -133,8 +133,8 @@ func TestDefaultGenesisState(t *testing.T) {
 	require.Equal(t, int64(10000e8), marketData.Params.CreateMarketFee)
 	require.Equal(t, int64(1000000), marketData.Params.FixedTradeFee)
 	require.Equal(t, int64(604800e9), marketData.Params.MarketMinExpiredTime)
-	require.EqualValues(t, 10000, marketData.Params.GTEOrderLifetime)
-	require.Equal(t, int64(6000000), marketData.Params.GTEOrderFeatureFeeByBlocks)
+	require.EqualValues(t, 100000, marketData.Params.GTEOrderLifetime)
+	require.Equal(t, int64(1000000), marketData.Params.GTEOrderFeatureFeeByBlocks)
 	require.EqualValues(t, 25, marketData.Params.MaxExecutedPriceChangeRatio)
 	require.Equal(t, int64(10), marketData.Params.MarketFeeRate)
 	require.Equal(t, int64(1000000), marketData.Params.MarketFeeMin)
