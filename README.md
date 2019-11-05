@@ -1,4 +1,4 @@
-## CoinEx Dex
+## CoinEx DEX
 
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://github.com/coinexchain/dex/blob/master/LICENSE)
