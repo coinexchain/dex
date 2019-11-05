@@ -40,6 +40,8 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c h1:ZcWk9BWVuvAZW23esCnCyhp7Ss6xhVuffwNxHsQccRE=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c/go.mod h1:IPOtAzhvIJrmitYLXC4DC0fJFoGulqhn3LBSnwkA1eo=
+github.com/coinexchain/cosmos-sdk v0.0.0-20191105081855-42aabfdc228e h1:6glGUla/YNqyLQOQyKht6otyxVTSNAXm8AspfTQXBCg=
+github.com/coinexchain/cosmos-sdk v0.0.0-20191105081855-42aabfdc228e/go.mod h1:Axr+Q+G2Ffduxt4zMA6KwxxvyVSKPB9+nXZVPKgpC2c=
 github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6 h1:ResmUJSlC5h17IL5ZUAOZCwRZELSLr4m1/VowdLfreM=
 github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6/go.mod h1:erQnv+T5z4Ca0rw18gcd4cfpjHj/wvZHW/zmadISOBI=
 github.com/coinexchain/shorthanzi v0.1.0 h1:c4Fcb8GkQ37uLNSQr5SRohmS+aW+WY3doyy7ZuhF0W4=
