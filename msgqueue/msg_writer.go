@@ -25,6 +25,9 @@ func createMsgWriter(cfg string) (MsgWriter, error) {
 		return NewFileMsgWriter(filePath)
 	} else if strings.TrimPrefix(cfg, CfgPrefixOS) == "stdout" {
 		return NewStdOutMsgWriter(), nil
+	} else if strings.HasPrefix(cfg, CfgNamedPipe) {
+		pipeName := strings.TrimPrefix(cfg, CfgNamedPipe)
+		return NewPipeMsgWriter(pipeName)
 	} else if strings.HasPrefix(cfg, CfgPrefixDir) {
 		dirPath := strings.TrimPrefix(cfg, CfgPrefixDir)
 		return NewDirMsgWriter(dirPath)

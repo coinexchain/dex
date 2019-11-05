@@ -1,6 +1,8 @@
 package msgqueue
 
 import (
+	"bufio"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -105,4 +107,31 @@ func TestDirMsgWriter(t *testing.T) {
 	require.EqualValues(t, []byte("hello world#nihao\r\n"), bz)
 
 	require.Nil(t, w.Close())
+}
+
+func TestNewPipeMsgWriter(t *testing.T) {
+	pipeName := "/tmp/pipe.ipc"
+	w, err := NewPipeMsgWriter(pipeName)
+	require.Nil(t, err)
+	// defer os.Remove(pipeName)
+
+	func() {
+		for i := 0; i < 10; i++ {
+			err = w.WriteKV([]byte(fmt.Sprintf("nihao%d", i)), []byte("hello"))
+			require.Nil(t, err)
+		}
+	}()
+
+	func() {
+		r, err := os.OpenFile(pipeName, os.O_RDONLY, os.ModeNamedPipe)
+		require.Nil(t, err)
+		scan := bufio.NewScanner(r)
+		for i := 0; i < 10; i++ {
+			if scan.Scan() {
+				text := scan.Text()
+				expect := fmt.Sprintf("nihao%d#hello", i)
+				require.EqualValues(t, text, expect)
+			}
+		}
+	}()
 }
