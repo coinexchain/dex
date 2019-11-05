@@ -129,5 +129,5 @@ func ErrStockSupplyPrecisionNotMatch() sdk.Error {
 }
 
 func ErrStockAmountPrecisionNotMatch() sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite,CodeStockAmountPrecisionNotMatch, "stock amount not match the stock precision")
+	return sdk.NewError(CodeSpaceBancorlite, CodeStockAmountPrecisionNotMatch, "stock amount not match the stock precision")
 }
