@@ -53,6 +53,9 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 //return whether addr has enough spendable coins
 func (k Keeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) bool {
 	acc := k.ak.GetAccount(ctx, addr)
+	if acc == nil {
+		return false
+	}
 	return acc.SpendableCoins(ctx.BlockTime()).IsAllGTE(amt)
 }
 
