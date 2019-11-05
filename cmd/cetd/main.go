@@ -6,10 +6,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/coinexchain/dex/msgqueue"
-
-	"github.com/coinexchain/dex/app/plugin"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -31,7 +27,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
+	"github.com/coinexchain/dex/app/plugin"
 	assetcli "github.com/coinexchain/dex/modules/asset/client/cli"
+	"github.com/coinexchain/dex/msgqueue"
 	dexserver "github.com/coinexchain/dex/server"
 	dex "github.com/coinexchain/dex/types"
 )
