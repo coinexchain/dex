@@ -52,7 +52,7 @@ cetd add-genesis-account ${vesting2024}           36000000000000000cet --vesting
 
 CET_TOKEN_DESCRIPTION="Decentralized public chain ecosystem, Born for financial liberalization"
 
-cetd add-genesis-token --name="CoinEx Chain Native Token"               \
+cetd add-genesis-token --name="CoinEx Token"                            \
     --symbol="${TOKEN_SYMBOL}"                                          \
     --owner=${coinex_foundation}                                        \
     --total-supply=586884903761317189                                   \
