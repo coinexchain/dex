@@ -107,6 +107,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	accDst := ak.GetAccount(ctx, msg.ToAddress)
 	if accDst == nil {
 		activationFee = dex.NewCetCoins(k.GetParams(ctx).ActivationFee)
+		accDst=ak.NewAccountWithAddress(ctx,msg.ToAddress)
 	} else {
 		dstCoins = accDst.GetCoins()
 	}
