@@ -38,10 +38,14 @@ func (builder *StdTxBuilder) GasAndFee(gas uint64, cet int64) *StdTxBuilder {
 }
 
 func (builder *StdTxBuilder) Build() auth.StdTx {
+	return builder.BuildTxWithMemo("")
+}
+
+func (builder *StdTxBuilder) BuildTxWithMemo(memo string) auth.StdTx {
 	sigs := make([]auth.StdSignature, len(builder.privKeys))
 	for i, privKey := range builder.privKeys {
 		signBytes := auth.StdSignBytes(builder.chainID,
-			builder.accNums[i], builder.seqs[i], builder.fee, builder.msgs, "")
+			builder.accNums[i], builder.seqs[i], builder.fee, builder.msgs, memo)
 
 		sig, err := privKey.Sign(signBytes)
 		if err != nil {
@@ -51,6 +55,6 @@ func (builder *StdTxBuilder) Build() auth.StdTx {
 		sigs[i] = auth.StdSignature{PubKey: privKey.PubKey(), Signature: sig}
 	}
 
-	tx := auth.NewStdTx(builder.msgs, builder.fee, sigs, "")
+	tx := auth.NewStdTx(builder.msgs, builder.fee, sigs, memo)
 	return tx
 }

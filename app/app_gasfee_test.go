@@ -79,14 +79,17 @@ func TestSmallAccountGasCost(t *testing.T) {
 	coins := dex.NewCetCoins(1e8)
 	toAddr := sdk.AccAddress([]byte("addr"))
 	msg := bankx.NewMsgSend(acc.Address, toAddr, coins, 0)
+
+	memo := string(make([]byte, DefaultMaxMemoCharacters))
+
 	tx := newStdTxBuilder().
-		Msgs(msg).GasAndFee(90000, 100).AccNumSeqKey(0, 0, key).Build()
+		Msgs(msg).GasAndFee(90000, 100).AccNumSeqKey(0, 0, key).BuildTxWithMemo(memo)
 
 	// ok
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 90000, int(result.GasWanted))
-	require.Equal(t, 2840, int(result.GasUsed))
+	require.Equal(t, 33980, int(result.GasUsed))
 }
 
 func TestBigAccountGasCost(t *testing.T) {
@@ -113,7 +116,7 @@ func TestBigAccountGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 2850, int(result.GasUsed))
+	require.Equal(t, 23700, int(result.GasUsed))
 }
 
 func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
@@ -176,7 +179,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 2890, int(result.GasUsed))
+	require.Equal(t, 23780, int(result.GasUsed))
 }
 
 func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
@@ -228,5 +231,5 @@ func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
 	require.Equal(t, 9000000, int(result.GasWanted))
-	require.Equal(t, 2890, int(result.GasUsed))
+	require.Equal(t, 23780, int(result.GasUsed))
 }

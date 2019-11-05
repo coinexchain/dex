@@ -10,7 +10,10 @@ const Day = 24 * time.Hour
 
 // auth
 const (
-	DefaultMaxMemoCharacters uint64 = 512
+	DefaultMaxMemoCharacters      uint64 = 512
+	DefaultTxSizeCostPerByte      uint64 = 20
+	DefaultSigVerifyCostED25519   uint64 = 11800
+	DefaultSigVerifyCostSecp256k1 uint64 = 20000
 )
 
 // staking

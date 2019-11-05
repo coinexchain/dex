@@ -39,9 +39,9 @@ func TestDefaultGenesisState(t *testing.T) {
 	auth.ModuleCdc.MustUnmarshalJSON(state[auth.ModuleName], &authData)
 	require.Equal(t, uint64(512), authData.Params.MaxMemoCharacters)
 	require.Equal(t, uint64(7), authData.Params.TxSigLimit)
-	require.Equal(t, uint64(10), authData.Params.TxSizeCostPerByte)
-	require.Equal(t, uint64(590), authData.Params.SigVerifyCostED25519)
-	require.Equal(t, uint64(1000), authData.Params.SigVerifyCostSecp256k1)
+	require.Equal(t, DefaultTxSizeCostPerByte, authData.Params.TxSizeCostPerByte)
+	require.Equal(t, DefaultSigVerifyCostED25519, authData.Params.SigVerifyCostED25519)
+	require.Equal(t, DefaultSigVerifyCostSecp256k1, authData.Params.SigVerifyCostSecp256k1)
 
 	// staking
 	var stakingData staking.GenesisState
