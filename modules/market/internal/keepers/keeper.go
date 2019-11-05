@@ -244,7 +244,7 @@ func (k PersistentMarketInfoKeeper) GetAllMarketInfos(ctx sdk.Context) []types.M
 
 func (k PersistentMarketInfoKeeper) MarketCountOfStock(ctx sdk.Context, stock string) (count int64) {
 	store := ctx.KVStore(k.marketKey)
-	key := marketStoreKey(MarketIdentifierPrefix, stock)
+	key := marketStoreKey(MarketIdentifierPrefix, stock, types.SymbolSeparator)
 	iter := sdk.KVStorePrefixIterator(store, key)
 	defer iter.Close()
 	for {
