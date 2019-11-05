@@ -66,7 +66,7 @@ func TestMsgCreateOrder(t *testing.T) {
 	// Invalid time in force
 	msg.Side = BUY
 	err = msg.ValidateBasic()
-	require.EqualValues(t, CodeInvalidTimeInforce, err.Code())
+	require.EqualValues(t, CodeInvalidTimeInForce, err.Code())
 
 	// Invalid exist block
 	msg.TimeInForce = GTE
