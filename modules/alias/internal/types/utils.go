@@ -10,7 +10,8 @@ func IsOnlyForCoinEx(alias string) bool {
 	if strings.HasPrefix(alias, "coinex") ||
 		strings.HasSuffix(alias, "coinex") ||
 		strings.HasSuffix(alias, "coinex.org") ||
-		strings.HasSuffix(alias, "coinex.com") {
+		strings.HasSuffix(alias, "coinex.com") ||
+		strings.HasSuffix(alias, "coinex.net") {
 		return true
 	}
 

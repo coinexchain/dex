@@ -19,7 +19,7 @@ fi
 
 # common parameter
 TOKEN_SYMBOL=cet
-GENESIS_NODE_MONIKER=GenesisNode
+GENESIS_NODE_MONIKER=ViaWallet
 OUTPUT_DIR=/tmp/build
 
 # prepare output dir
@@ -74,11 +74,11 @@ mkdir ${OUTPUT_DIR}/gentx
 
 cetd gentx                                \
 --name genesis_node                       \
---website www.coinex.org                  \
---details "Network Genesis Node"          \
+--website wallet.viabtc.com               \
+--details "ViaWallet Node"                \
 --amount=500000000000000cet               \
 --commission-rate=0.2                     \
---commission-max-rate=1                   \
+--commission-max-rate=0.5                 \
 --commission-max-change-rate=0.1          \
 --min-self-delegation=500000000000000     \
 --home ${OUTPUT_DIR}/.cetd                \
