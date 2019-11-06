@@ -35,8 +35,23 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-
 ## [Unreleased]
+
+### State Machine Breaking
+
+### API Breaking Changes
+
+### Client Breaking Changes
+
+### Features
+
+### Improvements
+
+### Bug Fixes
+
+
+
+## [v0.0.19]
 
 ### State Machine Breaking
 
