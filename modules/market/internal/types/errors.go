@@ -34,7 +34,6 @@ const (
 	CodeInvalidOrderAmount     sdk.CodeType = 624
 	CodeInvalidExistBlocks     sdk.CodeType = 626
 	CodeInvalidTimeInForce     sdk.CodeType = 627
-	CodeInvalidSequence        sdk.CodeType = 629
 	CodeOrderAlreadyExist      sdk.CodeType = 630
 	CodeDelistRequestExist     sdk.CodeType = 632
 	CodeInvalidMarket          sdk.CodeType = 633

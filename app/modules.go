@@ -3,8 +3,6 @@ package app
 import (
 	"encoding/json"
 
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -23,7 +21,7 @@ func (amb AuthModuleBasic) DefaultGenesis() json.RawMessage {
 	return auth.ModuleCdc.MustMarshalJSON(GetDefaultAuthGenesisState())
 }
 
-func GetDefaultAuthGenesisState() types.GenesisState {
+func GetDefaultAuthGenesisState() auth.GenesisState {
 	genState := auth.DefaultGenesisState()
 	genState.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
 	genState.Params.TxSizeCostPerByte = DefaultTxSizeCostPerByte
