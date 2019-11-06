@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 
 	"github.com/coinexchain/codon"
@@ -22,7 +23,8 @@ func main() {
 		return
 	}
 	r := randsrc.NewRandSrcFromFile(os.Args[1])
-	runRandTest(r)
+	//runRandTest(r)
+	runRandTestJSON(r)
 }
 
 func runRandTest(r dexcodec.RandSrc) {
@@ -88,3 +90,50 @@ func findMismatch(a, b []byte) int {
 	return -1
 }
 
+func runRandTestJSON(r dexcodec.RandSrc) {
+	leafTypes := dexcodec.GetLeafTypes()
+	stub := dexcodec.CodonStub{}
+	cdcImp := stub.NewCodecImp()
+	cdcAmino := amino.NewCodec()
+	registerAll(cdcImp, cdcAmino)
+
+	for i := 0; i < Count; i++ {
+		if i%10000 == 0 {
+			fmt.Printf("=== %d ===\n", i)
+		}
+
+		obj := dexcodec.RandAny(r)
+
+		_, ok := obj.(dexcodec.ContinuousVestingAccount)
+		if ok {
+			continue
+		}
+
+		bzImp, err := cdcImp.MarshalJSON(obj)
+		if err != nil {
+			fmt.Printf("Now: %d\n", i)
+			codon.ShowInfoForVar(leafTypes, obj)
+			panic(err)
+		}
+		bzImp, err = sdk.SortJSON(bzImp) //here
+		if err != nil {
+			panic(err)
+		}
+		bzAmino, err := cdcAmino.MarshalJSON(obj)
+		if err != nil {
+			fmt.Printf("Now: %d\n", i)
+			codon.ShowInfoForVar(leafTypes, obj)
+			panic(err)
+		}
+		bzAmino, err = sdk.SortJSON(bzAmino) //here
+		if err != nil {
+			panic(err)
+		}
+		if pos := findMismatch(bzImp, bzAmino); pos != -1 {
+			fmt.Printf("Now: %d\n%s\n%s\n", i, string(bzImp), string(bzAmino))
+			fmt.Printf("Now: %d\n%s\n%s\n", i, string(bzImp[:pos]), string(bzAmino[:pos]))
+			codon.ShowInfoForVar(leafTypes, obj)
+			panic("Mismatch!")
+		}
+	}
+}
