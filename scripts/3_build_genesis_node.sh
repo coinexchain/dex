@@ -90,15 +90,15 @@ GENESIS_JSON=${OUTPUT_DIR}/.cetd/config/genesis.json
 
 jq ".consensus_params.evidence.max_age = \"1000000\" "                              $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
 
-if [ "${IS_TESTNET:-false}" == "true" ]; then
-    # adjust testnet parameters
-    jq ".app_state.staking.params.unbonding_time               = \"3600000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-    jq ".app_state.stakingx.params.min_self_delegation         = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-    jq ".app_state.gov.deposit_params.max_deposit_period       = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-    jq ".app_state.gov.voting_params.voting_period             = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-    jq ".app_state.asset.params.issue_rare_token_fee[0].amount = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-    jq ".app_state.asset.params.issue_token_fee[0].amount      = \"100000000000\"   "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
-fi
+#if [ "${IS_TESTNET:-false}" == "true" ]; then
+#    # adjust testnet parameters
+#    jq ".app_state.staking.params.unbonding_time               = \"3600000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+#    jq ".app_state.stakingx.params.min_self_delegation         = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+#    jq ".app_state.gov.deposit_params.max_deposit_period       = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+#    jq ".app_state.gov.voting_params.voting_period             = \"86400000000000\" "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+#    jq ".app_state.asset.params.issue_rare_token_fee[0].amount = \"1000000000000\"  "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+#    jq ".app_state.asset.params.issue_token_fee[0].amount      = \"100000000000\"   "  $GENESIS_JSON  > tmp.$$.json && mv tmp.$$.json $GENESIS_JSON
+#fi
 
 
 # collect gentx
@@ -109,14 +109,13 @@ rm -rdf ${OUTPUT_DIR}/gentx
 
 
 # generate secret_connection.key signing.key for tmkms
-tmkms version
-
-cd ${OUTPUT_DIR} && tmkms softsign keygen secret_connection.key
-cd ${OUTPUT_DIR} && tm-signer-harness extract_key -tmhome ${OUTPUT_DIR}/.cetd -output ./signing.key
-
-# move the priv_validator_key.json and do not upload it to cloud server
-# cause we'll use tmkms to sign the prevote and precommits
-mv ${OUTPUT_DIR}/.cetd/config/priv_validator_key.json ${OUTPUT_DIR}
+# tmkms version
+# cd ${OUTPUT_DIR} && tmkms softsign keygen secret_connection.key
+# cd ${OUTPUT_DIR} && tm-signer-harness extract_key -tmhome ${OUTPUT_DIR}/.cetd -output ./signing.key
+# 
+# # move the priv_validator_key.json and do not upload it to cloud server
+# # cause we'll use tmkms to sign the prevote and precommits
+# mv ${OUTPUT_DIR}/.cetd/config/priv_validator_key.json ${OUTPUT_DIR}
 
 #make data dir tarball
 cd ${OUTPUT_DIR}
