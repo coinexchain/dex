@@ -28,3 +28,5 @@ func mockAddrList() (list []sdk.AccAddress) {
 	list = append(list, addr3)
 	return
 }
+
+var nilAddr, _ = sdk.AccAddressFromBech32("")
