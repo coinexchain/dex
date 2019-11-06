@@ -138,7 +138,13 @@ func parseAddWhitelistFlags(owner sdk.AccAddress) (*types.MsgAddTokenWhitelist, 
 		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
 			return nil, err
 		}
+		if addr.Empty() {
+			continue
+		}
 		whitelist = append(whitelist, addr)
+	}
+	if len(whitelist) == 0 {
+		return nil, types.ErrNilTokenWhitelist()
 	}
 
 	msg := types.NewMsgAddTokenWhitelist(
@@ -164,7 +170,13 @@ func parseRemoveWhitelistFlags(owner sdk.AccAddress) (*types.MsgRemoveTokenWhite
 		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
 			return nil, err
 		}
+		if addr.Empty() {
+			continue
+		}
 		whitelist = append(whitelist, addr)
+	}
+	if len(whitelist) == 0 {
+		return nil, types.ErrNilTokenWhitelist()
 	}
 
 	msg := types.NewMsgRemoveTokenWhitelist(
@@ -190,7 +202,13 @@ func parseForbidAddrFlags(owner sdk.AccAddress) (*types.MsgForbidAddr, error) {
 		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
 			return nil, err
 		}
+		if addr.Empty() {
+			continue
+		}
 		addresses = append(addresses, addr)
+	}
+	if len(addresses) == 0 {
+		return nil, types.ErrNilForbiddenAddress()
 	}
 
 	msg := types.NewMsgForbidAddr(
@@ -216,7 +234,13 @@ func parseUnForbidAddrFlags(owner sdk.AccAddress) (*types.MsgUnForbidAddr, error
 		if addr, err = sdk.AccAddressFromBech32(s); err != nil {
 			return nil, err
 		}
+		if addr.Empty() {
+			continue
+		}
 		addresses = append(addresses, addr)
+	}
+	if len(addresses) == 0 {
+		return nil, types.ErrNilForbiddenAddress()
 	}
 
 	msg := types.NewMsgUnForbidAddr(

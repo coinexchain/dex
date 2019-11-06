@@ -393,7 +393,13 @@ func (msg MsgAddTokenWhitelist) ValidateBasic() sdk.Error {
 	if len(msg.Whitelist) == 0 {
 		return ErrNilTokenWhitelist()
 	}
-	return nil
+
+	for _, addr := range msg.Whitelist {
+		if !addr.Empty() {
+			return nil
+		}
+	}
+	return ErrNilTokenWhitelist()
 }
 
 // GetSignBytes Implements Msg.
@@ -446,7 +452,12 @@ func (msg MsgRemoveTokenWhitelist) ValidateBasic() sdk.Error {
 	if len(msg.Whitelist) == 0 {
 		return ErrNilTokenWhitelist()
 	}
-	return nil
+	for _, addr := range msg.Whitelist {
+		if !addr.Empty() {
+			return nil
+		}
+	}
+	return ErrNilTokenWhitelist()
 }
 
 // GetSignBytes Implements Msg.
@@ -504,7 +515,13 @@ func (msg MsgForbidAddr) ValidateBasic() sdk.Error {
 			return ErrTokenOwnerSelfForbidden()
 		}
 	}
-	return nil
+
+	for _, addr := range msg.Addresses {
+		if !addr.Empty() {
+			return nil
+		}
+	}
+	return ErrNilForbiddenAddress()
 }
 
 // GetSignBytes Implements Msg.
@@ -557,7 +574,13 @@ func (msg MsgUnForbidAddr) ValidateBasic() sdk.Error {
 	if len(msg.Addresses) == 0 {
 		return ErrNilForbiddenAddress()
 	}
-	return nil
+
+	for _, addr := range msg.Addresses {
+		if !addr.Empty() {
+			return nil
+		}
+	}
+	return ErrNilForbiddenAddress()
 }
 
 // GetSignBytes Implements Msg.
