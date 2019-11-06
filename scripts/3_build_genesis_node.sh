@@ -82,6 +82,7 @@ cetd gentx                                \
 --commission-max-change-rate=0.1          \
 --min-self-delegation=500000000000000     \
 --home ${OUTPUT_DIR}/.cetd                \
+--identity 9A30CBDA5872CED8               \
 --output-document ${OUTPUT_DIR}/gentx/gentx.json
 
 
