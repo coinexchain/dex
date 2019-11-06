@@ -204,7 +204,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return err.Result()
 	}
 
-	if err := k.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin("cet", commission))); err != nil {
+	if err := k.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin(dex.CET, commission))); err != nil {
 		return err.Result()
 	}
 
