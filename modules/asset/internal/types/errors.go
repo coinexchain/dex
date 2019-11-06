@@ -50,7 +50,7 @@ func ErrInvalidTokenSymbol(symbol string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenSymbol, msg)
 }
 func ErrInvalidTokenSupply(amt string) sdk.Error {
-	msg := fmt.Sprintf("invalid supply %s : token total supply before 1e8 boosting should be less than 90 billion and supply amount must be positive", amt)
+	msg := fmt.Sprintf("invalid supply %s : token total supply is limited int256 and must be positive", amt)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenSupply, msg)
 }
 func ErrInvalidSendLockAmt(amt string) sdk.Error {
@@ -62,11 +62,11 @@ func ErrInvalidTokenOwner(addr sdk.Address) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenOwner, msg)
 }
 func ErrInvalidTokenMintAmt(amt string) sdk.Error {
-	msg := fmt.Sprintf("invalid mint amount %s : token total supply before 1e8 boosting should be less than 90 billion and mint amount should be positive", amt)
+	msg := fmt.Sprintf("invalid mint amount %s : token total supply is limited int256 and must be positive", amt)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenMintAmt, msg)
 }
 func ErrInvalidTokenBurnAmt(amt string) sdk.Error {
-	msg := fmt.Sprintf("invalid burn amount %s : token total supply before 1e8 boosting should be less than 90 billion and burn amount should be positive", amt)
+	msg := fmt.Sprintf("invalid burn amount %s : token total supply is limited int256 and must be positive", amt)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenBurnAmt, msg)
 }
 func ErrInvalidTokenForbidden(symbol string) sdk.Error {
