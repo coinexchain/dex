@@ -13,32 +13,31 @@ const (
 	CodeInvalidTokenName             sdk.CodeType = 501
 	CodeInvalidTokenSymbol           sdk.CodeType = 502
 	CodeInvalidTokenSupply           sdk.CodeType = 503
-	CodeInvalidTokenOwner            sdk.CodeType = 504
-	CodeInvalidTokenMintAmt          sdk.CodeType = 505
-	CodeInvalidTokenBurnAmt          sdk.CodeType = 506
-	CodeInvalidTokenForbidden        sdk.CodeType = 507
-	CodeInvalidTokenUnForbidden      sdk.CodeType = 508
-	CodeInvalidTokenWhitelist        sdk.CodeType = 509
-	CodeInvalidForbiddenAddress      sdk.CodeType = 510
-	CodeInvalidTokenURL              sdk.CodeType = 511
-	CodeInvalidTokenDescription      sdk.CodeType = 512
-	CodeTokenNotFound                sdk.CodeType = 513
-	CodeDuplicateTokenSymbol         sdk.CodeType = 514
-	CodeTransferSelfTokenOwner       sdk.CodeType = 515
-	CodeNilTokenOwner                sdk.CodeType = 516
-	CodeNeedTokenOwner               sdk.CodeType = 517
-	CodeInvalidIssueOwner            sdk.CodeType = 518
-	CodeTokenMintNotSupported        sdk.CodeType = 519
-	CodeTokenBurnNotSupported        sdk.CodeType = 520
-	CodeTokenForbiddenNotSupported   sdk.CodeType = 521
-	CodeAddressForbiddenNotSupported sdk.CodeType = 522
-	CodeNilTokenWhitelist            sdk.CodeType = 523
-	CodeNilForbiddenAddress          sdk.CodeType = 524
-	CodeInvalidTokenIdentity         sdk.CodeType = 526
-	CodeInvalidSendLockAmt           sdk.CodeType = 527
-	CodeAddrInBlackList              sdk.CodeType = 528
-	CodeNilTokenIdentity             sdk.CodeType = 529
-	CodeTokenOwnerSelfForbidden      sdk.CodeType = 530
+	CodeInvalidTokenMintAmt          sdk.CodeType = 504
+	CodeInvalidTokenBurnAmt          sdk.CodeType = 505
+	CodeInvalidTokenForbidden        sdk.CodeType = 506
+	CodeInvalidTokenUnForbidden      sdk.CodeType = 507
+	CodeInvalidTokenWhitelist        sdk.CodeType = 508
+	CodeInvalidForbiddenAddress      sdk.CodeType = 509
+	CodeInvalidTokenURL              sdk.CodeType = 510
+	CodeInvalidTokenDescription      sdk.CodeType = 511
+	CodeTokenNotFound                sdk.CodeType = 512
+	CodeDuplicateTokenSymbol         sdk.CodeType = 513
+	CodeTransferSelfTokenOwner       sdk.CodeType = 514
+	CodeNilTokenOwner                sdk.CodeType = 515
+	CodeNeedTokenOwner               sdk.CodeType = 516
+	CodeInvalidIssueOwner            sdk.CodeType = 517
+	CodeTokenMintNotSupported        sdk.CodeType = 518
+	CodeTokenBurnNotSupported        sdk.CodeType = 519
+	CodeTokenForbiddenNotSupported   sdk.CodeType = 520
+	CodeAddressForbiddenNotSupported sdk.CodeType = 521
+	CodeNilTokenWhitelist            sdk.CodeType = 522
+	CodeNilForbiddenAddress          sdk.CodeType = 523
+	CodeInvalidTokenIdentity         sdk.CodeType = 524
+	CodeInvalidSendLockAmt           sdk.CodeType = 525
+	CodeAddrInBlackList              sdk.CodeType = 526
+	CodeNilTokenIdentity             sdk.CodeType = 527
+	CodeTokenOwnerSelfForbidden      sdk.CodeType = 528
 )
 
 func ErrInvalidTokenName(name string) sdk.Error {
@@ -56,10 +55,6 @@ func ErrInvalidTokenSupply(amt string) sdk.Error {
 func ErrInvalidSendLockAmt(amt string) sdk.Error {
 	msg := fmt.Sprintf("invalid send lock %s : token send lock amount must be positive", amt)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidSendLockAmt, msg)
-}
-func ErrInvalidTokenOwner(addr sdk.Address) sdk.Error {
-	msg := fmt.Sprintf("invalid owner %s : token owner is invalid", addr.String())
-	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenOwner, msg)
 }
 func ErrInvalidTokenMintAmt(amt string) sdk.Error {
 	msg := fmt.Sprintf("invalid mint amount %s : token total supply before 1e8 boosting should be less than 90 billion and mint amount should be positive", amt)

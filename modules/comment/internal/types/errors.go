@@ -21,7 +21,6 @@ const (
 	CodeNoSuchAsset        sdk.CodeType = 909
 	CodeTitleTooLarge      sdk.CodeType = 910
 	CodeNoSuchAccount      sdk.CodeType = 911
-	CodeMarshalFailed      sdk.CodeType = 914
 )
 
 func ErrInvalidSymbol() sdk.Error {
