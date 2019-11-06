@@ -58,7 +58,7 @@ func (amb AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 // app module object
 type AppModule struct {
 	AppModuleBasic
-	marketKeeper keepers.Keeper //TODO: rename to AssetKeeper
+	marketKeeper keepers.Keeper
 }
 
 // NewAppModule creates a new AppModule object
