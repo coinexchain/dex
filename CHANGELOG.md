@@ -35,7 +35,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## [Unreleased]
+## [v0.0.19]
 
 ### State Machine Breaking
 
@@ -63,6 +63,14 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Client Breaking Changes
 * [\#8](https://github.com/coinexchain/dex/issues/8) Parameter changes
+
+| REST Endpoint       | Response Field                  | Change                                 |
+| ------------------- | ------------------------------- | -------------------------------------- |
+| /asset/parameters   | issue_token_fee                 | format changed from sdk.Coins to int64 |
+| /asset/parameters   | issue_rare_token_fee            | format changed from sdk.Coins to int64 |
+| /market/parameters  | gte_order_lifetime              | format changed from int to int64       |
+| /market/parameters  | max_executed_price_change_ratio | format changed from int to int64       |
+| /staking/parameters | min_self_delegation             | format changed from sdk.Int to int64   |
 
 ### Features
 
