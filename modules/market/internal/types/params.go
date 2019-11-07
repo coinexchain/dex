@@ -11,8 +11,8 @@ import (
 const (
 	DefaultCreateMarketFee             = 1e12 // 10000 * 10 ^8
 	DefaultFixedTradeFee               = 1000000
-	DefaultGTEOrderLifetime            = 10000
-	DefaultGTEOrderFeatureFeeByBlocks  = 6000000
+	DefaultGTEOrderLifetime            = 100000
+	DefaultGTEOrderFeatureFeeByBlocks  = 10
 	DefaultMaxExecutedPriceChangeRatio = 25
 	MarketFeeRatePrecision             = 4
 	DefaultMarketFeeRate               = 10
@@ -45,7 +45,7 @@ type Params struct {
 	FeeForZeroDeal              int64 `json:"fee_for_zero_deal"`
 }
 
-// ParamKeyTable for asset module
+// ParamKeyTable for market module
 func ParamKeyTable() params.KeyTable {
 	return params.NewKeyTable().RegisterParamSet(&Params{})
 }

@@ -33,9 +33,7 @@ const (
 	CodeDelistNotAllowed       sdk.CodeType = 623
 	CodeInvalidOrderAmount     sdk.CodeType = 624
 	CodeInvalidExistBlocks     sdk.CodeType = 626
-	CodeInvalidTimeInforce     sdk.CodeType = 627
-	CodeUnmarshalFailed        sdk.CodeType = 628
-	CodeInvalidSequence        sdk.CodeType = 629
+	CodeInvalidTimeInForce     sdk.CodeType = 627
 	CodeOrderAlreadyExist      sdk.CodeType = 630
 	CodeDelistRequestExist     sdk.CodeType = 632
 	CodeInvalidMarket          sdk.CodeType = 633
@@ -53,8 +51,8 @@ func ErrInvalidExistBlocks(eb int64) sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeInvalidExistBlocks, fmt.Sprintf("Invalid existence time : %d; The range of expected values [0, +∞] ", eb))
 }
 
-func ErrInvalidTimeInforce(tif int64) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidTimeInforce, fmt.Sprintf("Invalid timeInforce : %d; The valid value : 3, 4", tif))
+func ErrInvalidTimeInForce(tif int64) sdk.Error {
+	return sdk.NewError(CodeSpaceMarket, CodeInvalidTimeInForce, fmt.Sprintf("Invalid timeInForce : %d; The valid value : 3, 4", tif))
 }
 
 func ErrDelistNotAllowed(s string) sdk.Error {
@@ -83,10 +81,6 @@ func ErrAddressForbidByIssuer() sdk.Error {
 
 func ErrOrderAlreadyExist(id string) sdk.Error {
 	return sdk.NewError(CodeSpaceMarket, CodeOrderAlreadyExist, "the order [%s] already exist", id)
-}
-
-func ErrInvalidSequence(s string) sdk.Error {
-	return sdk.NewError(CodeSpaceMarket, CodeInvalidSequence, s)
 }
 
 func ErrInvalidOrderAmount(s string) sdk.Error {

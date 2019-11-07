@@ -89,6 +89,7 @@ type (
 	MsgMultiSendX            = bankx.MsgMultiSend
 	MsgSendX                 = bankx.MsgSend
 	MsgSetMemoRequired       = bankx.MsgSetMemoRequired
+	MsgSupervisedSend        = bankx.MsgSupervisedSend
 	BaseToken                = asset.BaseToken
 	MsgAddTokenWhitelist     = asset.MsgAddTokenWhitelist
 	MsgBurnToken             = asset.MsgBurnToken

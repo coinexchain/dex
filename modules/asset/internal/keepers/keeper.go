@@ -368,6 +368,9 @@ func (keeper BaseKeeper) RemoveToken(ctx sdk.Context, token types.Token) {
 func (keeper BaseKeeper) addWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.storeKey)
 	for _, addr := range whitelist {
+		if addr.Empty() {
+			continue
+		}
 		store.Set(types.GetWhitelistStoreKey(symbol, addr), []byte{})
 	}
 
@@ -377,6 +380,9 @@ func (keeper BaseKeeper) addWhitelist(ctx sdk.Context, symbol string, whitelist 
 func (keeper BaseKeeper) removeWhitelist(ctx sdk.Context, symbol string, whitelist []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.storeKey)
 	for _, addr := range whitelist {
+		if addr.Empty() {
+			continue
+		}
 		store.Delete(types.GetWhitelistStoreKey(symbol, addr))
 	}
 
@@ -386,6 +392,9 @@ func (keeper BaseKeeper) removeWhitelist(ctx sdk.Context, symbol string, whiteli
 func (keeper BaseKeeper) addForbiddenAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.storeKey)
 	for _, addr := range addresses {
+		if addr.Empty() {
+			continue
+		}
 		store.Set(types.GetForbiddenAddrStoreKey(symbol, addr), []byte{})
 	}
 
@@ -395,6 +404,9 @@ func (keeper BaseKeeper) addForbiddenAddress(ctx sdk.Context, symbol string, add
 func (keeper BaseKeeper) removeForbiddenAddress(ctx sdk.Context, symbol string, addresses []sdk.AccAddress) sdk.Error {
 	store := ctx.KVStore(keeper.storeKey)
 	for _, addr := range addresses {
+		if addr.Empty() {
+			continue
+		}
 		store.Delete(types.GetForbiddenAddrStoreKey(symbol, addr))
 	}
 

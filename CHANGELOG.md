@@ -35,8 +35,23 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-
 ## [Unreleased]
+
+### State Machine Breaking
+
+### API Breaking Changes
+
+### Client Breaking Changes
+
+### Features
+
+### Improvements
+
+### Bug Fixes
+
+
+
+## [v0.0.20]
 
 ### State Machine Breaking
 
@@ -44,12 +59,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 *   [\#4](https://github.com/coinexchain/dex/issues/4) Modify the json name of the field 
 *   [\#3](https://github.com/coinexchain/dex/issues/3) Modify time unit 
 *   [\#6](https://github.com/coinexchain/dex/issues/6) Modify modules emit events.
+*   [\#7](https://github.com/coinexchain/dex/issues/7) Modify swagger.
 
 ### Client Breaking Changes
+* [\#8](https://github.com/coinexchain/dex/issues/8) Parameter changes
 
 ### Features
 
 ### Improvements
+* (sdk) Bump SDK version to [v0.37.4](https://github.com/cosmos/cosmos-sdk/releases/tag/v0.37.4).
+* (tendermint) Bump Tendermint version to [v0.32.7](https://github.com/tendermint/tendermint/releases/tag/v0.32.7).
 * [\#4990](https://github.com/cosmos/cosmos-sdk/issues/4990) Add `Events` to the `ABCIMessageLog` to
 provide context and grouping of events based on the messages they correspond to. The `Events` field
 in `TxResponse` is deprecated and will be removed in the next major release.

@@ -101,7 +101,7 @@ func parseCreateOrderFlags(isGTE bool) (*types.MsgCreateOrder, error) {
 		Price:          viper.GetInt64(FlagPrice),
 		PricePrecision: byte(viper.GetInt(FlagPricePrecision)),
 		Quantity:       viper.GetInt64(FlagQuantity),
-		ExistBlocks:    int64(viper.GetInt(FlagBlocks)),
+		ExistBlocks:    viper.GetInt64(FlagBlocks),
 		TimeInForce:    types.IOC,
 	}
 	if isGTE {

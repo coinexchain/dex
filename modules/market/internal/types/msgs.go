@@ -140,7 +140,7 @@ func (msg MsgCreateOrder) ValidateBasic() sdk.Error {
 		return ErrInvalidTradeSide()
 	}
 	if msg.TimeInForce != GTE && msg.TimeInForce != IOC {
-		return ErrInvalidTimeInforce(msg.TimeInForce)
+		return ErrInvalidTimeInForce(msg.TimeInForce)
 	}
 	if msg.ExistBlocks < 0 {
 		return ErrInvalidExistBlocks(msg.ExistBlocks)

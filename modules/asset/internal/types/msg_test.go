@@ -311,6 +311,11 @@ func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
 			NewMsgAddTokenWhitelist("abc", testAddr, []sdk.AccAddress{}),
 			ErrNilTokenWhitelist(),
 		},
+		{
+			"case-nilWhitelist",
+			NewMsgAddTokenWhitelist("abc", testAddr, []sdk.AccAddress{nilAddr, nilAddr}),
+			ErrNilTokenWhitelist(),
+		},
 	}
 
 	for _, tt := range tests {
@@ -347,6 +352,11 @@ func TestMsgRemoveTokenWhitelist_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidWhitelist",
 			NewMsgRemoveTokenWhitelist("abc", testAddr, []sdk.AccAddress{}),
+			ErrNilTokenWhitelist(),
+		},
+		{
+			"case-nilWhitelist",
+			NewMsgRemoveTokenWhitelist("abc", testAddr, []sdk.AccAddress{nilAddr, nilAddr}),
 			ErrNilTokenWhitelist(),
 		},
 	}
@@ -392,6 +402,11 @@ func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
 			NewMsgForbidAddr("abc", testAddr, []sdk.AccAddress{testAddr}),
 			ErrTokenOwnerSelfForbidden(),
 		},
+		{
+			"case-nilForbiddenAddress",
+			NewMsgForbidAddr("abc", testAddr, []sdk.AccAddress{nilAddr, nilAddr}),
+			ErrNilForbiddenAddress(),
+		},
 	}
 
 	for _, tt := range tests {
@@ -428,6 +443,11 @@ func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
 		{
 			"case-invalidAddr",
 			NewMsgUnForbidAddr("abc", testAddr, []sdk.AccAddress{}),
+			ErrNilForbiddenAddress(),
+		},
+		{
+			"case-nilForbiddenAddress",
+			NewMsgUnForbidAddr("abc", testAddr, []sdk.AccAddress{nilAddr, nilAddr}),
 			ErrNilForbiddenAddress(),
 		},
 	}

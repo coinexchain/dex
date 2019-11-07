@@ -331,19 +331,6 @@ func TestMarketInfoSetFailed(t *testing.T) {
 	require.Equal(t, types.CodeInvalidTokenIssuer, ret.Code, "create market info should failed by not token issuer")
 	require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
 
-	//// failed by price precision
-	//failedPricePrecision := msgMarket
-	//failedPricePrecision.Money = "cet"
-	//failedPricePrecision.PricePrecision = 20
-	//ret = input.handler(input.ctx, failedPricePrecision)
-	//require.Equal(t, types.CodeInvalidPricePrecision, ret.Code, "create market info should failed")
-	//require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
-
-	//failedPricePrecision.PricePrecision = 19
-	//ret = input.handler(input.ctx, failedPricePrecision)
-	//require.Equal(t, types.CodeInvalidPricePrecision, ret.Code, "create market info should failed")
-	//require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
-
 	// failed by not have sufficient cet
 	failedInsufficient := msgMarket
 	failedInsufficient.Creator = notHaveCetAddress
@@ -421,14 +408,7 @@ func TestCreateOrderFailed(t *testing.T) {
 	ret = createMarket(input)
 	require.Equal(t, true, ret.IsOK(), "create market trade should success")
 	zeroCet := sdk.NewCoin("cet", sdk.NewInt(0))
-
-	//failedSymbolOrder := msgOrder
-	//failedSymbolOrder.TradingPair = GetSymbol(stock, "no exsit")
-	//oldCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
-	//ret = input.handler(input.ctx, failedSymbolOrder)
 	newCetCoin := input.getCoinFromAddr(haveCetAddress, dex.CET)
-	//require.Equal(t, types.CodeInvalidSymbol, ret.Code, "create GTE order should failed by invalid symbol")
-	//require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 
 	failedPricePrecisionOrder := msgOrder
 	failedPricePrecisionOrder.PricePrecision = 9
@@ -443,21 +423,6 @@ func TestCreateOrderFailed(t *testing.T) {
 	oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
 	require.Equal(t, types.CodeInsufficientCoin, ret.Code, "create GTE order should failed by insufficient coin")
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
-
-	//failedInsufficientCoinOrder = msgOrder
-	//failedInsufficientCoinOrder.Quantity = 0
-	//ret = input.handler(input.ctx, failedInsufficientCoinOrder)
-	//oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
-	//require.Equal(t, types.CodeInvalidOrderAmount, ret.Code)
-	//require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
-
-	//failedInsufficientCoinOrder = msgOrder
-	//failedInsufficientCoinOrder.Quantity = 0
-	//failedInsufficientCoinOrder.Side = BUY
-	//ret = input.handler(input.ctx, failedInsufficientCoinOrder)
-	//oldCetCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
-	//require.Equal(t, types.CodeInvalidOrderAmount, ret.Code)
-	//require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, zeroCet), "The amount is error")
 
 	failedTokenForbidOrder := msgOrder
 	ret = input.handler(input.ctx, failedTokenForbidOrder)
@@ -747,6 +712,47 @@ func TestCancelMarketSuccess(t *testing.T) {
 	require.EqualValues(t, delSymbol, GetSymbol(stock, dex.CET))
 }
 
+func TestCancelMarketAgainstCetFail(t *testing.T) {
+	input := prepareMockInput(t, false, true)
+	createCetMarket(input, stock, 0)
+	createImpMarket(input, stock, money, 10)
+
+	msgCancelMarket := types.MsgCancelTradingPair{
+		Sender:        haveCetAddress,
+		TradingPair:   GetSymbol(stock, "cet"),
+		EffectiveTime: int64(types.DefaultMarketMinExpiredTime + 10),
+	}
+
+	ret := input.handler(input.ctx, msgCancelMarket)
+	err := types.ErrDelistNotAllowed("When tusdt has other market with non-cet token as money, you can't delist the tusdt/cet market")
+	require.EqualValues(t, err.Result(), ret)
+}
+
+func TestCancelMarketFailWhenCetDelist(t *testing.T) {
+	input := prepareMockInput(t, false, true)
+	createCetMarket(input, stock, 0)
+
+	msgCancelMarket := types.MsgCancelTradingPair{
+		Sender:        haveCetAddress,
+		TradingPair:   GetSymbol(stock, "cet"),
+		EffectiveTime: int64(types.DefaultMarketMinExpiredTime + 10),
+	}
+
+	ret := input.handler(input.ctx, msgCancelMarket)
+	require.Equal(t, true, ret.IsOK(), "cancel market should success")
+
+	msg := MsgCreateTradingPair{
+		Creator:        haveCetAddress,
+		Stock:          stock,
+		Money:          money,
+		PricePrecision: 8,
+		OrderPrecision: 8,
+	}
+	ret = input.handler(input.ctx, msg)
+	require.Equal(t, types.ErrNotListedAgainstCet(stock).Result(), ret)
+
+}
+
 func TestChargeOrderFee(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	ret := createCetMarket(input, stock, 0)
@@ -821,20 +827,6 @@ func TestModifyPricePrecisionFaild(t *testing.T) {
 	msgFailedBySender.Sender = notHaveCetAddress
 	ret := input.handler(input.ctx, msgFailedBySender)
 	require.Equal(t, types.CodeNotMatchSender, ret.Code, "the tx should failed by dis match sender")
-
-	//msgFailedByPricePrecision := msg
-	//msgFailedByPricePrecision.PricePrecision = 19
-	//ret = input.handler(input.ctx, msgFailedByPricePrecision)
-	//require.Equal(t, types.CodeInvalidPricePrecision, ret.Code, "the tx should failed by dis match sender")
-
-	//msgFailedByPricePrecision.PricePrecision = 2
-	//ret = input.handler(input.ctx, msgFailedByPricePrecision)
-	//require.Equal(t, types.CodeInvalidPricePrecision, ret.Code, "the tx should failed, the price precision can only be increased")
-
-	//msgFailedByInvalidSymbol := msg
-	//msgFailedByInvalidSymbol.TradingPair = GetSymbol(stock, "not find")
-	//ret = input.handler(input.ctx, msgFailedByInvalidSymbol)
-	//require.Equal(t, types.CodeInvalidSymbol, ret.Code, "the tx should failed by dis match sender")
 }
 
 func TestModifyPricePrecisionSuccess(t *testing.T) {
@@ -881,31 +873,31 @@ func TestCalFeatureFeeForExistBlocks(t *testing.T) {
 
 	msg.ExistBlocks = 10001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(0), fee)
+	require.Equal(t, int64(1), fee)
 
 	msg.ExistBlocks = 18000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(0), fee)
+	require.Equal(t, int64(8000), fee)
 
 	msg.ExistBlocks = 20000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(1), fee)
+	require.Equal(t, int64(10000), fee)
 
 	msg.ExistBlocks = 20001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(1), fee)
+	require.Equal(t, int64(10001), fee)
 
 	msg.ExistBlocks = 28000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(1), fee)
+	require.Equal(t, int64(18000), fee)
 
 	msg.ExistBlocks = 30000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(2), fee)
+	require.Equal(t, int64(20000), fee)
 
 	msg.ExistBlocks = 30001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(2), fee)
+	require.Equal(t, int64(20001), fee)
 	//
 	params = types.Params{
 		GTEOrderLifetime:           10000,
@@ -921,31 +913,31 @@ func TestCalFeatureFeeForExistBlocks(t *testing.T) {
 
 	msg.ExistBlocks = 10001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(0), fee)
+	require.Equal(t, int64(10), fee)
 
 	msg.ExistBlocks = 18000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(8), fee)
+	require.Equal(t, int64(80000), fee)
 
 	msg.ExistBlocks = 20000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(10), fee)
+	require.Equal(t, int64(100000), fee)
 
 	msg.ExistBlocks = 20001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(10), fee)
+	require.Equal(t, int64(100010), fee)
 
 	msg.ExistBlocks = 28000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(18), fee)
+	require.Equal(t, int64(180000), fee)
 
 	msg.ExistBlocks = 30000
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(20), fee)
+	require.Equal(t, int64(200000), fee)
 
 	msg.ExistBlocks = 30001
 	fee = calFeatureFeeForExistBlocks(msg, params)
-	require.Equal(t, int64(20), fee)
+	require.Equal(t, int64(200010), fee)
 }
 
 func TestCalFrozenFeeInOrder(t *testing.T) {

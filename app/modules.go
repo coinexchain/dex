@@ -17,10 +17,17 @@ type AuthModuleBasic struct {
 	auth.AppModuleBasic
 }
 
-func (AuthModuleBasic) DefaultGenesis() json.RawMessage {
+func (amb AuthModuleBasic) DefaultGenesis() json.RawMessage {
+	return auth.ModuleCdc.MustMarshalJSON(GetDefaultAuthGenesisState())
+}
+
+func GetDefaultAuthGenesisState() auth.GenesisState {
 	genState := auth.DefaultGenesisState()
 	genState.Params.MaxMemoCharacters = DefaultMaxMemoCharacters
-	return auth.ModuleCdc.MustMarshalJSON(genState)
+	genState.Params.TxSizeCostPerByte = DefaultTxSizeCostPerByte
+	genState.Params.SigVerifyCostED25519 = DefaultSigVerifyCostED25519
+	genState.Params.SigVerifyCostSecp256k1 = DefaultSigVerifyCostSecp256k1
+	return genState
 }
 
 type StakingModuleBasic struct {

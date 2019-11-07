@@ -1,0 +1,47 @@
+=== 0 ===
+Now: 9
+{"type":"DuplicateVoteEvidence","value":{"PubKey":"0eUc35z8vAA7+FOIErHZQn5PvRCQyaHokElUO70gft0=","VoteA":{"block_id":{"hash":"11233344F019E150","parts":{"hash":"E5CF331988D6EF5084","total":709917729922545000}},"height":2222835373913561300,"round":7291799235798845000,"signature":"PQ==","timestamp":"9999-09-29T08:02:06.444714421Z","type":47,"validator_address":"AD8B17BAF867","validator_index":8807347039066580000},"VoteB":{"block_id":{"hash":"D300021C","parts":{"hash":"84D304","total":-4214064565856559000}},"height":-2420350541473383000,"round":1839311151369588700,"signature":"jKtjpeOvB2Y=","timestamp":"9999-09-29T08:02:06.272429834Z","type":99,"validator_address":"9A2D09","validator_index":-67121760378945700}}}
+{"type":"DuplicateVoteEvidence","value":{"PubKey":{"type":"PubKeyEd25519","value":"0eUc35z8vAA7+FOIErHZQn5PvRCQyaHokElUO70gft0="},"VoteA":{"block_id":{"hash":"11233344F019E150","parts":{"hash":"E5CF331988D6EF5084","total":"709917729922545032"}},"height":"2222835373913561253","round":"7291799235798845653","signature":"PQ==","timestamp":"9999-09-29T08:02:06.444714421Z","type":47,"validator_address":"AD8B17BAF867","validator_index":"8807347039066579960"},"VoteB":{"block_id":{"hash":"D300021C","parts":{"hash":"84D304","total":"-4214064565856558969"}},"height":"-2420350541473383010","round":"1839311151369588648","signature":"jKtjpeOvB2Y=","timestamp":"9999-09-29T08:02:06.272429834Z","type":99,"validator_address":"9A2D09","validator_index":"-67121760378945699"}}}
+Now: 9
+{"type":"DuplicateVoteEvidence","value":{"PubKey":
+{"type":"DuplicateVoteEvidence","value":{"PubKey":
+======= types.DuplicateVoteEvidence 'github.com/tendermint/tendermint/types' 'DuplicateVoteEvidence' == 
+struct {
+    PubKey : ('github.com/tendermint/tendermint/crypto' 'PubKey') interface (github.com/tendermint/tendermint/crypto PubKey)!
+    VoteA : ('' '') pointer ('github.com/tendermint/tendermint/types' 'Vote') {
+        struct {
+            Type : ('github.com/tendermint/tendermint/types' 'SignedMsgType') uint8
+            Height : ('' 'int64') int64
+            Round : ('' 'int') int
+            BlockID : ('github.com/tendermint/tendermint/types' 'BlockID') struct {
+                Hash : ('github.com/tendermint/tendermint/libs/common' 'HexBytes') ByteSlice
+                PartsHeader : ('github.com/tendermint/tendermint/types' 'PartSetHeader') struct {
+                    Total : ('' 'int') int
+                    Hash : ('github.com/tendermint/tendermint/libs/common' 'HexBytes') ByteSlice
+                } //struct
+            } //struct
+            Timestamp : ('time' 'Time') 
+            ValidatorAddress : ('github.com/tendermint/tendermint/libs/common' 'HexBytes') ByteSlice
+            ValidatorIndex : ('' 'int') int
+            Signature : ('' '') ByteSlice
+        } //struct
+    } // pointer
+    VoteB : ('' '') pointer ('github.com/tendermint/tendermint/types' 'Vote') {
+        struct {
+            Type : ('github.com/tendermint/tendermint/types' 'SignedMsgType') uint8
+            Height : ('' 'int64') int64
+            Round : ('' 'int') int
+            BlockID : ('github.com/tendermint/tendermint/types' 'BlockID') struct {
+                Hash : ('github.com/tendermint/tendermint/libs/common' 'HexBytes') ByteSlice
+                PartsHeader : ('github.com/tendermint/tendermint/types' 'PartSetHeader') struct {
+                    Total : ('' 'int') int
+                    Hash : ('github.com/tendermint/tendermint/libs/common' 'HexBytes') ByteSlice
+                } //struct
+            } //struct
+            Timestamp : ('time' 'Time') 
+            ValidatorAddress : ('github.com/tendermint/tendermint/libs/common' 'HexBytes') ByteSlice
+            ValidatorIndex : ('' 'int') int
+            Signature : ('' '') ByteSlice
+        } //struct
+    } // pointer
+} //struct

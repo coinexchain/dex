@@ -57,31 +57,16 @@ func Test_handleMsg(t *testing.T) {
 			asset.NewMsgTransferOwnership("abc", testAddr, owner),
 			false,
 		},
-		//{
-		//	"transfer_ownership_self",
-		//	asset.NewMsgTransferOwnership("abc", owner, owner),
-		//	false,
-		//},
 		{
 			"mint_token",
 			asset.NewMsgMintToken("abc", sdk.NewInt(1000), owner),
 			true,
 		},
-		//{
-		//	"mint_token_invalid",
-		//	asset.NewMsgMintToken("abc", sdk.NewInt(-1000), owner),
-		//	false,
-		//},
 		{
 			"burn_token",
 			asset.NewMsgBurnToken("abc", sdk.NewInt(1000), owner),
 			true,
 		},
-		//{
-		//	"burn_token_invalid",
-		//	asset.NewMsgBurnToken("abc", sdk.NewInt(-1000), owner),
-		//	false,
-		//},
 		{
 			"forbid_token",
 			asset.NewMsgForbidToken("abc", owner),
@@ -107,46 +92,21 @@ func Test_handleMsg(t *testing.T) {
 			asset.NewMsgAddTokenWhitelist("abc", owner, mockAddrList()),
 			true,
 		},
-		//{
-		//	"add_token_whitelist_invalid",
-		//	asset.NewMsgAddTokenWhitelist("abc", owner, []sdk.AccAddress{}),
-		//	false,
-		//},
 		{
 			"remove_token_whitelist",
 			asset.NewMsgRemoveTokenWhitelist("abc", owner, mockAddrList()),
 			true,
 		},
-		//{
-		//	"remove_token_whitelist_invalid",
-		//	asset.NewMsgRemoveTokenWhitelist("abc", owner, []sdk.AccAddress{}),
-		//	false,
-		//},
 		{
 			"forbid_address",
 			asset.NewMsgForbidAddr("abc", owner, mockAddrListNoOwner()),
 			true,
 		},
-		//{
-		//	"forbid_address_invalid",
-		//	asset.NewMsgForbidAddr("abc", owner, []sdk.AccAddress{}),
-		//	false,
-		//},
-		//{
-		//	"forbid_address_self",
-		//	asset.NewMsgForbidAddr("abc", owner, []sdk.AccAddress{owner}),
-		//	false,
-		//},
 		{
 			"unforbid_address",
 			asset.NewMsgUnForbidAddr("abc", owner, mockAddrListNoOwner()),
 			true,
 		},
-		//{
-		//	"unforbid_address_invalid",
-		//	asset.NewMsgUnForbidAddr("abc", owner, []sdk.AccAddress{}),
-		//	false,
-		//},
 		{
 			"modify_token_info",
 			asset.NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", types.TestIdentityString, owner),

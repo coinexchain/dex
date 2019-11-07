@@ -33,6 +33,7 @@ const (
 	CodeTokenForbiddenByOwner        sdk.CodeType = 1023
 	CodeStockSupplyPrecisionNotMatch sdk.CodeType = 1024
 	CodeErrPriceFmt                  sdk.CodeType = 1025
+	CodeStockAmountPrecisionNotMatch sdk.CodeType = 1026
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -124,5 +125,9 @@ func ErrTokenForbiddenByOwner() sdk.Error {
 }
 
 func ErrStockSupplyPrecisionNotMatch() sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite, CodeStockSupplyPrecisionNotMatch, "stock supply not match the precision")
+	return sdk.NewError(CodeSpaceBancorlite, CodeStockSupplyPrecisionNotMatch, "stock supply not match the stock precision")
+}
+
+func ErrStockAmountPrecisionNotMatch() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeStockAmountPrecisionNotMatch, "stock amount not match the stock precision")
 }

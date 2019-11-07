@@ -5,7 +5,6 @@ set -eux
 
 cetcli keys add circulation
 cetcli keys add coinex_foundation
-cetcli keys add genesis_node
 cetcli keys add vesting2020
 cetcli keys add vesting2021
 cetcli keys add vesting2022
@@ -15,7 +14,6 @@ cetcli keys add vesting2024
 
 echo "export circulation=$(cetcli keys show -a circulation) \
 coinex_foundation=$(cetcli keys show -a coinex_foundation) \
-genesis_node=$(cetcli keys show -a genesis_node) \
 vesting2020=$(cetcli keys show -a vesting2020) \
 vesting2021=$(cetcli keys show -a vesting2021) \
 vesting2022=$(cetcli keys show -a vesting2022) \

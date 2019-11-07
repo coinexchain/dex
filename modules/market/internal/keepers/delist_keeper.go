@@ -33,7 +33,13 @@ func getDelistKeyRangeByTime(time int64) (start, end []byte) {
 
 func (keeper *DelistKeeper) AddDelistRequest(ctx sdk.Context, time int64, symbol string) {
 	store := ctx.KVStore(keeper.marketKey)
-	store.Set(getDelistKey(time, symbol), []byte{})
+	store.Set(getDelistKey(time, symbol), []byte(symbol))
+	store.Set(append(DelistRevKey, []byte(symbol)...), int64ToBigEndianBytes(time))
+}
+
+func (keeper *DelistKeeper) HasDelistRequest(ctx sdk.Context, symbol string) bool {
+	store := ctx.KVStore(keeper.marketKey)
+	return store.Has(append(DelistRevKey, []byte(symbol)...))
 }
 
 //include the specific time
@@ -53,13 +59,18 @@ func (keeper *DelistKeeper) GetDelistSymbolsBeforeTime(ctx sdk.Context, time int
 func (keeper *DelistKeeper) RemoveDelistRequestsBeforeTime(ctx sdk.Context, time int64) {
 	store := ctx.KVStore(keeper.marketKey)
 	start, end := getDelistKeyRangeByTime(time)
-	var keys [][]byte
+	keys := make([][]byte, 0, 100)
+	symbols := make([][]byte, 0, 100)
 	iter := store.Iterator(start, end)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		keys = append(keys, iter.Key())
+		symbols = append(symbols, iter.Value())
 	}
 	for _, key := range keys {
 		store.Delete(key)
+	}
+	for _, symbol := range symbols {
+		store.Delete(append(DelistRevKey, symbol...))
 	}
 }

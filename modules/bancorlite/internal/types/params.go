@@ -27,7 +27,7 @@ type Params struct {
 	TradeFeeRate    int64 `json:"trade_fee_rate"`
 }
 
-// ParamKeyTable for asset module
+// ParamKeyTable for bancorlite module
 func ParamKeyTable() params.KeyTable {
 	return params.NewKeyTable().RegisterParamSet(&Params{})
 }

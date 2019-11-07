@@ -68,6 +68,7 @@ func newApp() *CetChainApp {
 func initAppWithBaseAccounts(accs ...auth.BaseAccount) *CetChainApp {
 	return initApp(func(genState *GenesisState) {
 		addGenesisAccounts(genState, accs...)
+		genState.AuthData = GetDefaultAuthGenesisState()
 	})
 }
 
@@ -135,6 +136,7 @@ func initAppWithAccounts(accs ...auth.BaseAccount) *CetChainApp {
 	return initApp(func(genState *GenesisState) {
 		addGenesisAccounts(genState, accs...)
 		addModuleAccounts(genState)
+		genState.AuthData = GetDefaultAuthGenesisState()
 	})
 }
 

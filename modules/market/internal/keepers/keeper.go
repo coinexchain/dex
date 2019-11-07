@@ -160,6 +160,10 @@ func (k Keeper) GetAllMarketInfos(ctx sdk.Context) []types.MarketInfo {
 	return k.gmk.GetAllMarketInfos(ctx)
 }
 
+func (k Keeper) MarketCountOfStock(ctx sdk.Context, stock string) int64 {
+	return k.gmk.MarketCountOfStock(ctx, stock)
+}
+
 func (k Keeper) GetMarketInfo(ctx sdk.Context, symbol string) (types.MarketInfo, error) {
 	return k.gmk.GetMarketInfo(ctx, symbol)
 }
@@ -191,6 +195,7 @@ type GlobalMarketInfoKeeper interface {
 	SetMarket(ctx sdk.Context, info types.MarketInfo) sdk.Error
 	RemoveMarket(ctx sdk.Context, symbol string) sdk.Error
 	GetAllMarketInfos(ctx sdk.Context) []types.MarketInfo
+	MarketCountOfStock(ctx sdk.Context, stock string) int64
 	GetMarketInfo(ctx sdk.Context, symbol string) (types.MarketInfo, error)
 }
 
@@ -235,6 +240,20 @@ func (k PersistentMarketInfoKeeper) GetAllMarketInfos(ctx sdk.Context) []types.M
 	}
 	k.iterateMarket(ctx, appendMarket)
 	return infos
+}
+
+func (k PersistentMarketInfoKeeper) MarketCountOfStock(ctx sdk.Context, stock string) (count int64) {
+	store := ctx.KVStore(k.marketKey)
+	key := marketStoreKey(MarketIdentifierPrefix, stock, types.SymbolSeparator)
+	iter := sdk.KVStorePrefixIterator(store, key)
+	defer iter.Close()
+	for {
+		if !iter.Valid() {
+			return
+		}
+		count++
+		iter.Next()
+	}
 }
 
 func (k PersistentMarketInfoKeeper) iterateMarket(ctx sdk.Context, process func(info types.MarketInfo) bool) {

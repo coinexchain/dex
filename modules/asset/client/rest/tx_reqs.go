@@ -56,20 +56,20 @@ type (
 	}
 	// the flowing 4 reqs defines the properties of a whitelist or forbidden addr request's body.
 	addWhiteListReq struct {
-		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
-		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
+		BaseReq   rest.BaseReq     `json:"base_req" yaml:"base_req"`
+		Whitelist []sdk.AccAddress `json:"whitelist" yaml:"whitelist"`
 	}
 	removeWhiteListReq struct {
-		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
-		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
+		BaseReq   rest.BaseReq     `json:"base_req" yaml:"base_req"`
+		Whitelist []sdk.AccAddress `json:"whitelist" yaml:"whitelist"`
 	}
 	forbidAddrReq struct {
-		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
-		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
+		BaseReq   rest.BaseReq     `json:"base_req" yaml:"base_req"`
+		Addresses []sdk.AccAddress `json:"addresses" yaml:"addresses"`
 	}
 	unforbidAddrReq struct {
-		BaseReq  rest.BaseReq     `json:"base_req" yaml:"base_req"`
-		AddrList []sdk.AccAddress `json:"addr_list" yaml:"addr_list"`
+		BaseReq   rest.BaseReq     `json:"base_req" yaml:"base_req"`
+		Addresses []sdk.AccAddress `json:"addresses" yaml:"addresses"`
 	}
 	// modifyTokenInfoReq defines the properties of a modify token info request's body.
 	modifyTokenInfoReq struct {
@@ -171,7 +171,7 @@ func (req *addWhiteListReq) GetBaseReq() *rest.BaseReq {
 }
 func (req *addWhiteListReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
 	symbol := getSymbol(r)
-	return types.NewMsgAddTokenWhitelist(symbol, owner, req.AddrList), nil
+	return types.NewMsgAddTokenWhitelist(symbol, owner, req.Whitelist), nil
 }
 
 func (req *removeWhiteListReq) New() restutil.RestReq {
@@ -182,7 +182,7 @@ func (req *removeWhiteListReq) GetBaseReq() *rest.BaseReq {
 }
 func (req *removeWhiteListReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
 	symbol := getSymbol(r)
-	return types.NewMsgRemoveTokenWhitelist(symbol, owner, req.AddrList), nil
+	return types.NewMsgRemoveTokenWhitelist(symbol, owner, req.Whitelist), nil
 }
 
 func (req *forbidAddrReq) New() restutil.RestReq {
@@ -193,7 +193,7 @@ func (req *forbidAddrReq) GetBaseReq() *rest.BaseReq {
 }
 func (req *forbidAddrReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
 	symbol := getSymbol(r)
-	return types.NewMsgForbidAddr(symbol, owner, req.AddrList), nil
+	return types.NewMsgForbidAddr(symbol, owner, req.Addresses), nil
 }
 
 func (req *unforbidAddrReq) New() restutil.RestReq {
@@ -204,7 +204,7 @@ func (req *unforbidAddrReq) GetBaseReq() *rest.BaseReq {
 }
 func (req *unforbidAddrReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
 	symbol := getSymbol(r)
-	return types.NewMsgUnForbidAddr(symbol, owner, req.AddrList), nil
+	return types.NewMsgUnForbidAddr(symbol, owner, req.Addresses), nil
 }
 
 func (req *modifyTokenInfoReq) New() restutil.RestReq {

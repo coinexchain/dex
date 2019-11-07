@@ -2818,7 +2818,7 @@ paths:
           description: token whitelist addr
           required: true
           schema:
-            $ref: "#/definitions/AddrList"
+            $ref: "#/definitions/Whitelist"
       responses:
         200:
           description: Add forbid whitelist result
@@ -2851,7 +2851,7 @@ paths:
           description: token whitelist addr
           required: true
           schema:
-            $ref: "#/definitions/AddrList"
+            $ref: "#/definitions/Whitelist"
       responses:
         200:
           description: Remove forbid whitelist result
@@ -2915,7 +2915,7 @@ paths:
           description: forbidden addresses
           required: true
           schema:
-            $ref: "#/definitions/AddrList"
+            $ref: "#/definitions/Addresses"
       responses:
         200:
           description: Forbid address result
@@ -2948,7 +2948,7 @@ paths:
           description: un forbidden addresses
           required: true
           schema:
-            $ref: "#/definitions/AddrList"
+            $ref: "#/definitions/Addresses"
       responses:
         200:
           description: UnForbid address result
@@ -5003,15 +5003,28 @@ definitions:
             example: false
         additionalProperties: false
     additionalProperties: false
-  AddrList:
+  Addresses:
     type: object
     required:
       - base_req
-      - addr_list
+      - addresses
     properties:
       base_req:
         $ref: "#/definitions/BaseReq"
-      addr_list:
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/Address"
+    additionalProperties: false
+  Whitelist:
+    type: object
+    required:
+      - base_req
+      - whitelist
+    properties:
+      base_req:
+        $ref: "#/definitions/BaseReq"
+      whitelist:
         type: array
         items:
           $ref: "#/definitions/Address"

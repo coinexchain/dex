@@ -82,7 +82,7 @@ var TypeEntryList = []codon.TypeEntry{
 	{Alias: "Account", Value: (*Account)(nil)},
 	{Alias: "Content", Value: (*Content)(nil)},
 
-	{Alias: "DuplicateVoteEvidence", Value: DuplicateVoteEvidence{}},
+	//{Alias: "DuplicateVoteEvidence", Value: DuplicateVoteEvidence{}},
 	{Alias: "PrivKeyEd25519", Value: PrivKeyEd25519{}},
 	{Alias: "PrivKeySecp256k1", Value: PrivKeySecp256k1{}},
 	{Alias: "PubKeyEd25519", Value: PubKeyEd25519{}},
@@ -125,6 +125,7 @@ var TypeEntryList = []codon.TypeEntry{
 	{Alias: "CommunityPoolSpendProposal", Value: CommunityPoolSpendProposal{}},
 	{Alias: "MsgMultiSend", Value: MsgMultiSend{}},
 	{Alias: "MsgSend", Value: MsgSend{}},
+	{Alias: "MsgSupervisedSend", Value: MsgSupervisedSend{}},
 	{Alias: "MsgVerifyInvariant", Value: MsgVerifyInvariant{}},
 	{Alias: "Supply", Value: Supply{}},
 

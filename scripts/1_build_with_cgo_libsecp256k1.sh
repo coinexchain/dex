@@ -58,9 +58,13 @@ else
     echo "=====build cetd with cgo libsecp256k1 succeeded====="
 fi
 
-md5sum `which cetd`  || md5 `which cetd` 
-md5sum `which cetcli` || md5 `which cetcli`
-md5sum `which cetdev` || md5 `which cetdev`
+MD5=md5sum
+if [ "${OSTYPE//[0-9.]/}" == "darwin" ]
+then
+    MD5=md5
+fi
+
+$MD5 $GOPATH/bin/*
 
 cetd version --long
 cetcli version --long
