@@ -85,6 +85,7 @@ in `TxResponse` is deprecated and will be removed in the next major release.
 
 ### Client Breaking Changes
 * [\#1](https://github.com/coinexchain/dex/issues/1) Add a new type of transaction to support OTC.
+* [\#8](https://github.com/coinexchain/dex/issues/8) Parameter changes
 
 ### Features
 * [\#1](https://github.com/coinexchain/dex/issues/1) Add a new type of transaction to support OTC.
