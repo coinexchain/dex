@@ -95,7 +95,7 @@ func addInitCommands(ctx *server.Context, cdc *codec.Codec, rootCmd *cobra.Comma
 
 func adjustBlockCommitSpeed(config *tmconfig.Config) {
 	c := config.Consensus
-	c.TimeoutCommit = 2700 * time.Millisecond
+	c.TimeoutCommit = 2000 * time.Millisecond
 	c.PeerGossipSleepDuration = 20 * time.Millisecond
 	c.PeerQueryMaj23SleepDuration = 100 * time.Millisecond
 }

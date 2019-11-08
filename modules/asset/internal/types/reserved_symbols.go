@@ -55,7 +55,7 @@ var reserved = []string{
 	"xau", "xag", "xpt", "xpd",
 
 	// extra currency
-	"libra","cet","rmb","dcep","coinex","viabtc","matrix","bitmain",
+	"libra", "cet", "rmb", "dcep", "coinex", "viabtc", "matrix", "bitmain",
 }
 
 func init() {
