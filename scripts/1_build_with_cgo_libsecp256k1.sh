@@ -26,7 +26,8 @@ rm $CETCLI_PATH || true
 
 
 # find correct library version by go.mod
-TENDERMINT_VERSION=`grep tendermint/tendermint go.mod | sed -E 's/(.*) (v[^ ]*)/\2/g'`
+#TENDERMINT_VERSION=`grep tendermint/tendermint go.mod | sed -E 's/(.*) (v[^ ]*)/\2/g'`
+TENDERMINT_VERSION=v0.32.7
 SECP256K1_PATH="$GOPATH/pkg/mod/github.com/tendermint/tendermint@$TENDERMINT_VERSION/crypto/secp256k1/internal/secp256k1/libsecp256k1"
 
 TMP_DIR=/tmp/libsecp256k1
@@ -58,13 +59,13 @@ else
     echo "=====build cetd with cgo libsecp256k1 succeeded====="
 fi
 
-MD5=md5sum
+SHA256=sha256sum
 if [ "${OSTYPE//[0-9.]/}" == "darwin" ]
 then
-    MD5=md5
+    SHA256='shasum -a256'
 fi
 
-$MD5 $GOPATH/bin/*
+$SHA256 $GOPATH/bin/*
 
 cetd version --long
 cetcli version --long

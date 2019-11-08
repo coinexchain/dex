@@ -125,16 +125,17 @@ cp ./.cetd/config/genesis.json .
 cp `which cetcli` ${OUTPUT_DIR}
 cp `which cetd` ${OUTPUT_DIR}
 
-MD5=md5sum
+
+SHA256=sha256sum
 if [ "${OSTYPE//[0-9.]/}" == "darwin" ]
 then
-    MD5=md5
+    SHA256='shasum -a256'
 fi
 
-$MD5 * > md5
+$SHA256 * > sha256.sum
 
 ls ${OUTPUT_DIR}
-cat ${OUTPUT_DIR}/md5
+cat ${OUTPUT_DIR}/sha256.sum
 echo "prepare testnet release package succeeded: $(pwd)"
 
 
