@@ -92,16 +92,8 @@ func (msg MsgBancorInit) ValidateBasic() (err sdk.Error) {
 	if initPrice.IsNegative() {
 		return ErrNegativePrice()
 	}
-	if initPrice.GT(maxPrice) {
-		return ErrPriceConfiguration()
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ErrPriceTooBig()
-		}
-	}()
-	if initPrice.Add(maxPrice).QuoInt64(2).MulInt(msg.MaxSupply).GT(sdk.NewDec(MaxTradeAmount)) {
-		return ErrPriceTooBig()
+	if err := checkMaxPrice(initPrice, maxPrice, msg.MaxSupply); err != nil {
+		return err
 	}
 	if !CheckStockPrecision(msg.MaxSupply, msg.StockPrecision) {
 		return ErrStockSupplyPrecisionNotMatch()
@@ -110,6 +102,21 @@ func (msg MsgBancorInit) ValidateBasic() (err sdk.Error) {
 		return ErrEarliestCancelTimeIsNegative()
 	}
 	return nil
+}
+
+func checkMaxPrice(initPrice, maxPrice sdk.Dec, maxSupply sdk.Int) (err sdk.Error) {
+	if initPrice.GT(maxPrice) {
+		return ErrPriceConfiguration()
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ErrPriceTooBig()
+		}
+	}()
+	if initPrice.Add(maxPrice).QuoInt64(2).MulInt(maxSupply).GT(sdk.NewDec(MaxTradeAmount)) {
+		return ErrPriceTooBig()
+	}
+	return
 }
 
 func CheckStockPrecision(amount sdk.Int, precision byte) bool {
