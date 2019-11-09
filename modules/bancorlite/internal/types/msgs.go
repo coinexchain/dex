@@ -62,7 +62,7 @@ func (msg MsgBancorInit) Route() string { return RouterKey }
 
 func (msg MsgBancorInit) Type() string { return "bancor_init" }
 
-func (msg MsgBancorInit) ValidateBasic() sdk.Error {
+func (msg MsgBancorInit) ValidateBasic() (err sdk.Error) {
 	if len(msg.Owner) == 0 {
 		return sdk.ErrInvalidAddress("missing owner address")
 	}
@@ -74,6 +74,9 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 	}
 	if !msg.MaxSupply.IsPositive() {
 		return ErrNonPositiveSupply()
+	}
+	if msg.MaxSupply.GT(sdk.NewInt(MaxTradeAmount)) {
+		return ErrMaxSupplyTooBig()
 	}
 	maxPrice, err := sdk.NewDecFromStr(msg.MaxPrice)
 	if err != nil {
@@ -91,6 +94,14 @@ func (msg MsgBancorInit) ValidateBasic() sdk.Error {
 	}
 	if initPrice.GT(maxPrice) {
 		return ErrPriceConfiguration()
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ErrPriceTooBig()
+		}
+	}()
+	if initPrice.Add(maxPrice).QuoInt64(2).MulInt(msg.MaxSupply).GT(sdk.NewDec(MaxTradeAmount)) {
+		return ErrPriceTooBig()
 	}
 	if !CheckStockPrecision(msg.MaxSupply, msg.StockPrecision) {
 		return ErrStockSupplyPrecisionNotMatch()

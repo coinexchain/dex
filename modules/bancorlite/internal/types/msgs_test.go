@@ -92,6 +92,19 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 			},
 			ErrNonPositivePrice(),
 		},
+		{
+			"too big price",
+			fields{
+				addrOwner,
+				"abc",
+				"cet",
+				"1000000000000000000000000000000000000000000000000000000000000",
+				sdk.NewInt(100),
+				"10000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000",
+				1000,
+			},
+			ErrPriceTooBig(),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

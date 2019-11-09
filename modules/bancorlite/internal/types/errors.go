@@ -35,6 +35,8 @@ const (
 	CodeErrPriceFmt                  sdk.CodeType = 1025
 	CodeStockAmountPrecisionNotMatch sdk.CodeType = 1026
 	CodeTradeMoneyNotPositive        sdk.CodeType = 1027
+	CodeMaxSupplyTooBig              sdk.CodeType = 1028
+	CodePriceTooBig                  sdk.CodeType = 1029
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -135,4 +137,12 @@ func ErrStockAmountPrecisionNotMatch() sdk.Error {
 
 func ErrTradeMoneyNotPositive() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeTradeMoneyNotPositive, "Non-positive trade money amount is invalid")
+}
+
+func ErrMaxSupplyTooBig() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeMaxSupplyTooBig, "stock max supply is too big")
+}
+
+func ErrPriceTooBig() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodePriceTooBig, "init price or max price is too big")
 }
