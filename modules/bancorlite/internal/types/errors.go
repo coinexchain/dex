@@ -34,6 +34,7 @@ const (
 	CodeStockSupplyPrecisionNotMatch sdk.CodeType = 1024
 	CodeErrPriceFmt                  sdk.CodeType = 1025
 	CodeStockAmountPrecisionNotMatch sdk.CodeType = 1026
+	CodeTradeMoneyNotPositive        sdk.CodeType = 1027
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -130,4 +131,8 @@ func ErrStockSupplyPrecisionNotMatch() sdk.Error {
 
 func ErrStockAmountPrecisionNotMatch() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeStockAmountPrecisionNotMatch, "stock amount not match the stock precision")
+}
+
+func ErrTradeMoneyNotPositive() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeTradeMoneyNotPositive, "Non-positive trade money amount is invalid")
 }

@@ -2,7 +2,6 @@ package bancorlite
 
 import (
 	"bytes"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -178,10 +177,8 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 
 	if msg.IsBuy {
 		diff = biNew.MoneyInPool.Sub(bi.MoneyInPool)
-		//todo: panic_for_test
-		if diff == sdk.ZeroInt() {
-			s := fmt.Sprintf("cannot buy %d stock use 0 money\n", msg.Amount)
-			panic(s)
+		if !diff.IsPositive() {
+			return types.ErrTradeMoneyNotPositive().Result()
 		}
 		coinsToPool = sdk.Coins{sdk.NewCoin(msg.Money, diff)}
 		coinsFromPool = sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
@@ -189,6 +186,9 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		moneyErr = "more than"
 	} else {
 		diff = bi.MoneyInPool.Sub(biNew.MoneyInPool)
+		if !diff.IsPositive() {
+			return types.ErrTradeMoneyNotPositive().Result()
+		}
 		coinsFromPool = sdk.Coins{sdk.NewCoin(msg.Money, diff)}
 		coinsToPool = sdk.Coins{sdk.NewCoin(msg.Stock, sdk.NewInt(msg.Amount))}
 		moneyCrossLimit = msg.MoneyLimit > 0 && diff.LT(sdk.NewInt(msg.MoneyLimit))
