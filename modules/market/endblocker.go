@@ -79,18 +79,15 @@ func (wo *WrappedOrder) Deal(otherSide match.OrderForTrade, amount int64, price 
 	stock, money := SplitSymbol(buyer.TradingPair)
 	// buyer and seller will exchange stockCoins and moneyCoins
 	stockCoins := sdk.Coins{sdk.NewCoin(stock, sdk.NewInt(amount))}
-	// TODO. will change moneyAmount type to int64
 	moneyAmount := price.MulInt(sdk.NewInt(amount)).TruncateInt()
 	moneyCoins := sdk.Coins{sdk.NewCoin(money, moneyAmount)}
 
 	var moneyAmountInt64 int64
 	if moneyAmount.GT(sdk.NewInt(types.MaxOrderAmount)) {
 		// should not reach this clause in production
-		// TODO. will panic or discuss
-		moneyAmountInt64 = 0
-	} else {
-		moneyAmountInt64 = moneyAmount.Int64()
+		return
 	}
+	moneyAmountInt64 = moneyAmount.Int64()
 	buyer.LeftStock -= amount
 	seller.LeftStock -= amount
 	buyer.Freeze -= moneyAmountInt64
