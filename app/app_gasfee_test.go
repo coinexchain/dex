@@ -15,9 +15,13 @@ import (
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	_ "github.com/coinexchain/dex/codec"
 )
 
 func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
+	codec.RunInitFuncList()
 	// acc & app
 	key, acc := testutil.NewBaseAccount(10000000000, 0, 0)
 	app := initAppWithBaseAccounts(acc)
@@ -47,6 +51,7 @@ func TestGasFeeDeductedWhenTxFailed(t *testing.T) {
 }
 
 func TestMinGasPriceLimit(t *testing.T) {
+	codec.RunInitFuncList()
 	// acc & app
 	key, acc := testutil.NewBaseAccount(1e10, 0, 0)
 	app := initAppWithBaseAccounts(acc)
@@ -67,6 +72,7 @@ func TestMinGasPriceLimit(t *testing.T) {
 }
 
 func TestSmallAccountGasCost(t *testing.T) {
+	codec.RunInitFuncList()
 	// acc & app
 	key, acc := testutil.NewBaseAccount(1e10, 0, 0)
 	app := initAppWithBaseAccounts(acc)
@@ -93,6 +99,7 @@ func TestSmallAccountGasCost(t *testing.T) {
 }
 
 func TestBigAccountGasCost(t *testing.T) {
+	codec.RunInitFuncList()
 	// acc & app
 	key, acc := testutil.NewBaseAccount(1e10, 0, 0)
 	for i := 0; i < 1000; i++ {
@@ -120,6 +127,7 @@ func TestBigAccountGasCost(t *testing.T) {
 }
 
 func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
+	codec.RunInitFuncList()
 	// acc & app
 	key, acc := testutil.NewBaseAccount(1e16, 0, 0)
 	_, acc2 := testutil.NewBaseAccount(1e8, 1, 0)
@@ -183,6 +191,7 @@ func TestBigAuthxAccountCreateOrderGasCost(t *testing.T) {
 }
 
 func TestSmallAuthxAccountCreateOrderGasCost(t *testing.T) {
+	codec.RunInitFuncList()
 	// acc & app
 	key, acc := testutil.NewBaseAccount(1e16, 0, 0)
 

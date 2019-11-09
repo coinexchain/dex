@@ -8,6 +8,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/coinexchain/dex/modules/alias/internal/keepers"
 	"github.com/coinexchain/dex/modules/alias/internal/types"
@@ -16,6 +17,7 @@ import (
 )
 
 func TestQueryParams(t *testing.T) {
+	codec.RunInitFuncList()
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	testApp.AliasKeeper.SetParams(ctx, types.DefaultParams())
@@ -30,6 +32,7 @@ func TestQueryParams(t *testing.T) {
 }
 
 func TestQueryAliasInfo(t *testing.T) {
+	codec.RunInitFuncList()
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 

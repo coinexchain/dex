@@ -25,6 +25,7 @@ func RestQueryForTest(_ *codec.Codec, _ context.CLIContext, _ http.ResponseWrite
 }
 
 func TestQuery(t *testing.T) {
+	codec.RunInitFuncList()
 	restutil.RestQuery = RestQueryForTest
 	sdk.GetConfig().SetBech32PrefixForAccount("coinex", "coinexpub")
 

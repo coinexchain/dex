@@ -3,9 +3,11 @@ package bancorlite
 import (
 	"encoding/json"
 	"testing"
+	"github.com/cosmos/cosmos-sdk/codec"
 )
 
 func TestAppModuleBasic_ValidateGenesis(t *testing.T) {
+	codec.RunInitFuncList()
 	type args struct {
 		data json.RawMessage
 	}

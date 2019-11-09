@@ -5,9 +5,11 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 )
 
 func TestMsgIssueToken_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 
 	tests := []struct {
 		name string
@@ -104,6 +106,7 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgTransferOwnership_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 	tests := []struct {
 		name string
@@ -147,6 +150,7 @@ func TestMsgTransferOwnership_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgMintToken_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	tests := []struct {
 		name string
 		msg  MsgMintToken
@@ -184,6 +188,7 @@ func TestMsgMintToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgBurnToken_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	tests := []struct {
 		name string
 		msg  MsgBurnToken
@@ -221,6 +226,7 @@ func TestMsgBurnToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgForbidToken_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	tests := []struct {
 		name string
 		msg  MsgForbidToken
@@ -253,6 +259,7 @@ func TestMsgForbidToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgUnForbidToken_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	tests := []struct {
 		name string
 		msg  MsgUnForbidToken
@@ -285,6 +292,7 @@ func TestMsgUnForbidToken_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	whitelist := mockAddrList()
 	tests := []struct {
 		name string
@@ -328,6 +336,7 @@ func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgRemoveTokenWhitelist_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	whitelist := mockAddrList()
 	tests := []struct {
 		name string
@@ -371,6 +380,7 @@ func TestMsgRemoveTokenWhitelist_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	addresses := mockAddrList()
 	tests := []struct {
 		name string
@@ -419,6 +429,7 @@ func TestMsgForbidAddr_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	addr := mockAddrList()
 	tests := []struct {
 		name string
@@ -462,6 +473,7 @@ func TestMsgUnForbidAddr_ValidateBasic(t *testing.T) {
 }
 
 func TestMsgModifyTokenURL_ValidateBasic(t *testing.T) {
+	codec.RunInitFuncList()
 	tests := []struct {
 		name string
 		msg  MsgModifyTokenInfo
@@ -509,6 +521,7 @@ func TestMsgModifyTokenURL_ValidateBasic(t *testing.T) {
 }
 
 func TestMsg_Route(t *testing.T) {
+	codec.RunInitFuncList()
 	want := RouterKey
 	tests := []struct {
 		name string
@@ -570,6 +583,7 @@ func TestMsg_Route(t *testing.T) {
 }
 
 func TestMsg_Type(t *testing.T) {
+	codec.RunInitFuncList()
 	tests := []struct {
 		name string
 		msg  sdk.Msg
@@ -642,6 +656,7 @@ func TestMsg_Type(t *testing.T) {
 }
 
 func TestMsg_GetSigners(t *testing.T) {
+	codec.RunInitFuncList()
 	tests := []struct {
 		name string
 		msg  sdk.Msg
@@ -715,6 +730,7 @@ func TestMsg_GetSigners(t *testing.T) {
 }
 
 func TestMsg_GetSignBytes(t *testing.T) {
+	codec.RunInitFuncList()
 	var owner, _ = sdk.AccAddressFromBech32("coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd")
 	var addr, _ = sdk.AccAddressFromBech32("coinex1e9kx6klg6z9p9ea4ehqmypl6dvjrp96vfxecd5")
 

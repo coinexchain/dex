@@ -8,6 +8,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
@@ -16,6 +17,7 @@ import (
 )
 
 func Test_queryParams(t *testing.T) {
+	codec.RunInitFuncList()
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := types.DefaultParams()
@@ -31,6 +33,7 @@ func Test_queryParams(t *testing.T) {
 }
 
 func Test_queryBalances(t *testing.T) {
+	codec.RunInitFuncList()
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := types.DefaultParams()

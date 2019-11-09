@@ -18,6 +18,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+	supplyexp "github.com/cosmos/cosmos-sdk/x/supply/exported"
+	"github.com/cosmos/cosmos-sdk/store/rootmulti"
 
 	"github.com/coinexchain/dex/modules/alias"
 	"github.com/coinexchain/dex/modules/asset"
@@ -32,8 +34,10 @@ import (
 
 type (
 	PubKey  = crypto.PubKey
+	PrivKey  = crypto.PrivKey
 	Msg     = sdk.Msg
 	Account = auth.Account
+	VestingAccount = auth.VestingAccount
 	Content = govtypes.Content
 
 	DuplicateVoteEvidence   = tmtypes.DuplicateVoteEvidence
@@ -46,10 +50,16 @@ type (
 	VoteOption              = govtypes.VoteOption
 	Vote                    = tmtypes.Vote
 
-	Int = sdk.Int
-	Dec = sdk.Dec
+	SdkInt = sdk.Int
+	SdkDec = sdk.Dec
 
+	Tx         = sdk.Tx
+	SupplyI                         = supplyexp.SupplyI
+	ModuleAccountI                  = supplyexp.ModuleAccountI
+
+	ConsAddress         = sdk.ConsAddress
 	Coin         = sdk.Coin
+	DecCoin         = sdk.DecCoin
 	StdSignature = auth.StdSignature
 	ParamChange  = ptypes.ParamChange
 	Input        = bank.Input
@@ -79,6 +89,7 @@ type (
 	TextProposal                   = gov.TextProposal
 	ParameterChangeProposal        = ptypes.ParameterChangeProposal
 	CommunityPoolSpendProposal     = distr.CommunityPoolSpendProposal
+	FeePool     = distr.FeePool
 	MsgMultiSend                   = bank.MsgMultiSend
 	MsgSend                        = bank.MsgSend
 	MsgVerifyInvariant             = crisis.MsgVerifyInvariant
@@ -91,6 +102,7 @@ type (
 	MsgSetMemoRequired       = bankx.MsgSetMemoRequired
 	MsgSupervisedSend        = bankx.MsgSupervisedSend
 	BaseToken                = asset.BaseToken
+	Token                = asset.Token
 	MsgAddTokenWhitelist     = asset.MsgAddTokenWhitelist
 	MsgBurnToken             = asset.MsgBurnToken
 	MsgForbidAddr            = asset.MsgForbidAddr
@@ -116,4 +128,8 @@ type (
 	MsgCommentToken          = comment.MsgCommentToken
 	State                    = incentive.State
 	MsgAliasUpdate           = alias.MsgAliasUpdate
+
+	AccAddressList = []AccAddress
+	CommitInfo = rootmulti.CommitInfo
+	StoreInfo = rootmulti.StoreInfo
 )

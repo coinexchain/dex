@@ -9169,58 +9169,102 @@ return v, n, nil
 } // end of DecodeAny
 func AssignIfcPtrFromStruct(ifcPtrIn interface{}, structObjIn interface{}) {
 switch ifcPtr := ifcPtrIn.(type) {
+case *Msg:
+switch structObj := structObjIn.(type) {
+	case MsgMultiSend:
+	*ifcPtr = &structObj
+	case MsgMultiSendX:
+	*ifcPtr = &structObj
+	case MsgForbidToken:
+	*ifcPtr = &structObj
+	case MsgCreateOrder:
+	*ifcPtr = &structObj
+	case MsgAliasUpdate:
+	*ifcPtr = &structObj
+	case MsgVote:
+	*ifcPtr = &structObj
+	case MsgRemoveTokenWhitelist:
+	*ifcPtr = &structObj
+	case MsgUnForbidAddr:
+	*ifcPtr = &structObj
+	case MsgUnjail:
+	*ifcPtr = &structObj
+	case MsgSendX:
+	*ifcPtr = &structObj
+	case MsgSetMemoRequired:
+	*ifcPtr = &structObj
+	case MsgVerifyInvariant:
+	*ifcPtr = &structObj
+	case MsgIssueToken:
+	*ifcPtr = &structObj
+	case MsgWithdrawDelegatorReward:
+	*ifcPtr = &structObj
+	case MsgWithdrawValidatorCommission:
+	*ifcPtr = &structObj
+	case MsgSupervisedSend:
+	*ifcPtr = &structObj
+	case MsgBancorTrade:
+	*ifcPtr = &structObj
+	case MsgUndelegate:
+	*ifcPtr = &structObj
+	case MsgDeposit:
+	*ifcPtr = &structObj
+	case MsgAddTokenWhitelist:
+	*ifcPtr = &structObj
+	case MsgModifyTokenInfo:
+	*ifcPtr = &structObj
+	case MsgCommentToken:
+	*ifcPtr = &structObj
+	case MsgBancorCancel:
+	*ifcPtr = &structObj
+	case MsgDelegate:
+	*ifcPtr = &structObj
+	case MsgSetWithdrawAddress:
+	*ifcPtr = &structObj
+	case MsgMintToken:
+	*ifcPtr = &structObj
+	case MsgUnForbidToken:
+	*ifcPtr = &structObj
+	case MsgCreateTradingPair:
+	*ifcPtr = &structObj
+	case MsgBurnToken:
+	*ifcPtr = &structObj
+	case MsgForbidAddr:
+	*ifcPtr = &structObj
+	case MsgCancelOrder:
+	*ifcPtr = &structObj
+	case MsgModifyPricePrecision:
+	*ifcPtr = &structObj
+	case MsgSend:
+	*ifcPtr = &structObj
+	case MsgEditValidator:
+	*ifcPtr = &structObj
+	case MsgTransferOwnership:
+	*ifcPtr = &structObj
+	case MsgDonateToCommunityPool:
+	*ifcPtr = &structObj
+	case MsgSubmitProposal:
+	*ifcPtr = &structObj
+	case MsgCancelTradingPair:
+	*ifcPtr = &structObj
+	case MsgBancorInit:
+	*ifcPtr = &structObj
+	case MsgBeginRedelegate:
+	*ifcPtr = &structObj
+	case MsgCreateValidator:
+	*ifcPtr = &structObj
+	default:
+	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+	} // end switch of structs
 case *Content:
 switch structObj := structObjIn.(type) {
-	case SoftwareUpgradeProposal:
-	*ifcPtr = &structObj
 	case TextProposal:
-	*ifcPtr = &structObj
-	case CommunityPoolSpendProposal:
 	*ifcPtr = &structObj
 	case ParameterChangeProposal:
 	*ifcPtr = &structObj
-	default:
-	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-	} // end switch of structs
-case *ModuleAccountI:
-switch structObj := structObjIn.(type) {
-	case ModuleAccount:
+	case SoftwareUpgradeProposal:
 	*ifcPtr = &structObj
-	default:
-	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-	} // end switch of structs
-case *PubKey:
-switch structObj := structObjIn.(type) {
-	case PubKeyMultisigThreshold:
-	*ifcPtr = &structObj
-	case PubKeySecp256k1:
-	*ifcPtr = &structObj
-	case StdSignature:
-	*ifcPtr = &structObj
-	case PubKeyEd25519:
-	*ifcPtr = &structObj
-	default:
-	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-	} // end switch of structs
-case *VestingAccount:
-switch structObj := structObjIn.(type) {
-	case DelayedVestingAccount:
-	*ifcPtr = &structObj
-	case ContinuousVestingAccount:
-	*ifcPtr = &structObj
-	default:
-	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-	} // end switch of structs
-case *Tx:
-switch structObj := structObjIn.(type) {
-	case StdTx:
-	*ifcPtr = &structObj
-	default:
-	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-	} // end switch of structs
-case *Token:
-switch structObj := structObjIn.(type) {
-	case BaseToken:
+	case CommunityPoolSpendProposal:
 	*ifcPtr = &structObj
 	default:
 	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
@@ -9234,6 +9278,15 @@ switch structObj := structObjIn.(type) {
 	default:
 	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 	} // end switch of structs
+case *VestingAccount:
+switch structObj := structObjIn.(type) {
+	case DelayedVestingAccount:
+	*ifcPtr = &structObj
+	case ContinuousVestingAccount:
+	*ifcPtr = &structObj
+	default:
+	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+	} // end switch of structs
 case *SupplyI:
 switch structObj := structObjIn.(type) {
 	case Supply:
@@ -9243,102 +9296,49 @@ switch structObj := structObjIn.(type) {
 	} // end switch of structs
 case *Account:
 switch structObj := structObjIn.(type) {
-	case ModuleAccount:
-	*ifcPtr = &structObj
-	case ContinuousVestingAccount:
-	*ifcPtr = &structObj
-	case DelayedVestingAccount:
+	case BaseAccount:
 	*ifcPtr = &structObj
 	case BaseVestingAccount:
 	*ifcPtr = &structObj
-	case BaseAccount:
+	case DelayedVestingAccount:
+	*ifcPtr = &structObj
+	case ContinuousVestingAccount:
+	*ifcPtr = &structObj
+	case ModuleAccount:
 	*ifcPtr = &structObj
 	default:
 	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 	} // end switch of structs
-case *Msg:
+case *Tx:
 switch structObj := structObjIn.(type) {
-	case MsgEditValidator:
+	case StdTx:
 	*ifcPtr = &structObj
-	case MsgSetWithdrawAddress:
+	default:
+	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+	} // end switch of structs
+case *ModuleAccountI:
+switch structObj := structObjIn.(type) {
+	case ModuleAccount:
 	*ifcPtr = &structObj
-	case MsgSend:
+	default:
+	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+	} // end switch of structs
+case *Token:
+switch structObj := structObjIn.(type) {
+	case BaseToken:
 	*ifcPtr = &structObj
-	case MsgModifyTokenInfo:
+	default:
+	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+	} // end switch of structs
+case *PubKey:
+switch structObj := structObjIn.(type) {
+	case PubKeyMultisigThreshold:
 	*ifcPtr = &structObj
-	case MsgUndelegate:
+	case StdSignature:
 	*ifcPtr = &structObj
-	case MsgUnForbidAddr:
+	case PubKeyEd25519:
 	*ifcPtr = &structObj
-	case MsgCancelOrder:
-	*ifcPtr = &structObj
-	case MsgBeginRedelegate:
-	*ifcPtr = &structObj
-	case MsgSupervisedSend:
-	*ifcPtr = &structObj
-	case MsgForbidAddr:
-	*ifcPtr = &structObj
-	case MsgUnjail:
-	*ifcPtr = &structObj
-	case MsgUnForbidToken:
-	*ifcPtr = &structObj
-	case MsgCancelTradingPair:
-	*ifcPtr = &structObj
-	case MsgWithdrawValidatorCommission:
-	*ifcPtr = &structObj
-	case MsgBurnToken:
-	*ifcPtr = &structObj
-	case MsgAliasUpdate:
-	*ifcPtr = &structObj
-	case MsgCreateValidator:
-	*ifcPtr = &structObj
-	case MsgVote:
-	*ifcPtr = &structObj
-	case MsgMultiSend:
-	*ifcPtr = &structObj
-	case MsgMintToken:
-	*ifcPtr = &structObj
-	case MsgTransferOwnership:
-	*ifcPtr = &structObj
-	case MsgModifyPricePrecision:
-	*ifcPtr = &structObj
-	case MsgDelegate:
-	*ifcPtr = &structObj
-	case MsgSubmitProposal:
-	*ifcPtr = &structObj
-	case MsgRemoveTokenWhitelist:
-	*ifcPtr = &structObj
-	case MsgBancorInit:
-	*ifcPtr = &structObj
-	case MsgCreateOrder:
-	*ifcPtr = &structObj
-	case MsgDeposit:
-	*ifcPtr = &structObj
-	case MsgVerifyInvariant:
-	*ifcPtr = &structObj
-	case MsgSetMemoRequired:
-	*ifcPtr = &structObj
-	case MsgIssueToken:
-	*ifcPtr = &structObj
-	case MsgBancorCancel:
-	*ifcPtr = &structObj
-	case MsgDonateToCommunityPool:
-	*ifcPtr = &structObj
-	case MsgForbidToken:
-	*ifcPtr = &structObj
-	case MsgCreateTradingPair:
-	*ifcPtr = &structObj
-	case MsgMultiSendX:
-	*ifcPtr = &structObj
-	case MsgWithdrawDelegatorReward:
-	*ifcPtr = &structObj
-	case MsgBancorTrade:
-	*ifcPtr = &structObj
-	case MsgCommentToken:
-	*ifcPtr = &structObj
-	case MsgSendX:
-	*ifcPtr = &structObj
-	case MsgAddTokenWhitelist:
+	case PubKeySecp256k1:
 	*ifcPtr = &structObj
 	default:
 	panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))

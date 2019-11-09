@@ -30,12 +30,12 @@ func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
 
 // genesis
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return ModuleCdc.MustMarshalJSON(DefaultGenesisState())
+	return types.ModuleCdc.MustMarshalJSON(DefaultGenesisState())
 }
 
 func (AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 	var state GenesisState
-	if err := ModuleCdc.UnmarshalJSON(data, &state); err != nil {
+	if err := types.ModuleCdc.UnmarshalJSON(data, &state); err != nil {
 		return err
 	}
 	return state.Validate()
@@ -43,7 +43,7 @@ func (AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 
 // client functionality
 func (amb AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr, ModuleCdc)
+	rest.RegisterRoutes(ctx, rtr, types.ModuleCdc)
 }
 
 func (amb AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
@@ -99,7 +99,7 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
-	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.marketKeeper, genesisState)
 
 	return []abci.ValidatorUpdate{}
@@ -107,5 +107,5 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.marketKeeper)
-	return ModuleCdc.MustMarshalJSON(gs)
+	return types.ModuleCdc.MustMarshalJSON(gs)
 }

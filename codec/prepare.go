@@ -78,9 +78,15 @@ func ShowInfo() {
 
 var TypeEntryList = []codon.TypeEntry{
 	{Alias: "PubKey", Value: (*PubKey)(nil)},
+	{Alias: "PrivKey", Value: (*PrivKey)(nil)},
 	{Alias: "Msg", Value: (*Msg)(nil)},
 	{Alias: "Account", Value: (*Account)(nil)},
+	{Alias: "VestingAccount", Value: (*VestingAccount)(nil)},
 	{Alias: "Content", Value: (*Content)(nil)},
+	{Alias: "Tx", Value: (*Tx)(nil)},
+	{Alias: "ModuleAccountI", Value: (*ModuleAccountI)(nil)},
+	{Alias: "SupplyI", Value: (*SupplyI)(nil)},
+	{Alias: "Token", Value: (*Token)(nil)},
 
 	//{Alias: "DuplicateVoteEvidence", Value: DuplicateVoteEvidence{}},
 	{Alias: "PrivKeyEd25519", Value: PrivKeyEd25519{}},
@@ -92,7 +98,15 @@ var TypeEntryList = []codon.TypeEntry{
 	{Alias: "VoteOption", Value: VoteOption(0)},
 	{Alias: "Vote", Value: Vote{}},
 
+	{Alias: "SdkInt", Value: SdkInt{}},
+	{Alias: "SdkDec", Value: SdkDec{}},
+
+	{Alias: "uint64", Value: uint64(0)},
+	{Alias: "int64", Value: int64(0)},
+
+	{Alias: "ConsAddress", Value: ConsAddress{}},
 	{Alias: "Coin", Value: Coin{}},
+	{Alias: "DecCoin", Value: DecCoin{}},
 	{Alias: "LockedCoin", Value: LockedCoin{}},
 	{Alias: "StdSignature", Value: StdSignature{}},
 	{Alias: "ParamChange", Value: ParamChange{}},
@@ -124,6 +138,7 @@ var TypeEntryList = []codon.TypeEntry{
 	{Alias: "TextProposal", Value: TextProposal{}},
 	{Alias: "CommunityPoolSpendProposal", Value: CommunityPoolSpendProposal{}},
 	{Alias: "MsgMultiSend", Value: MsgMultiSend{}},
+	{Alias: "FeePool", Value: FeePool{}},
 	{Alias: "MsgSend", Value: MsgSend{}},
 	{Alias: "MsgSupervisedSend", Value: MsgSupervisedSend{}},
 	{Alias: "MsgVerifyInvariant", Value: MsgVerifyInvariant{}},
@@ -159,10 +174,16 @@ var TypeEntryList = []codon.TypeEntry{
 	{Alias: "MsgCommentToken", Value: MsgCommentToken{}},
 	{Alias: "State", Value: State{}},
 	{Alias: "MsgAliasUpdate", Value: MsgAliasUpdate{}},
+
+	{Alias: "AccAddressList", Value: AccAddressList(nil)},
+	{Alias: "CommitInfo", Value: CommitInfo{}},
+	{Alias: "StoreInfo", Value: StoreInfo{}},
 }
 
+
 func GenerateCodecFile(w io.Writer) {
-	extraImports := []string{`"time"`, `"math/big"`, `sdk "github.com/cosmos/cosmos-sdk/types"`}
+	extraImports := []string{`"time"`, `"math/big"`, `sdk "github.com/cosmos/cosmos-sdk/types"`,
+		`"github.com/cosmos/cosmos-sdk/codec"`}
 	extraImports = append(extraImports, codon.ImportsForBridgeLogic...)
 	extraLogics := extraLogicsForLeafTypes + codon.BridgeLogic
 	ignoreImpl := make(map[string]string)
@@ -183,6 +204,12 @@ const MaxSliceLength = 10
 const MaxStringLength = 100
 
 var extraLogicsForLeafTypes = `
+
+func init() {
+	codec.SetFirstInitFunc(func() {
+		amino.Stub = &CodonStub{}
+	})
+}
 func EncodeTime(w *[]byte, t time.Time) {
 	t = t.UTC()
 	sec := t.Unix()

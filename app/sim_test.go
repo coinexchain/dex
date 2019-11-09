@@ -1,5 +1,4 @@
 package app
-
 import (
 	"encoding/json"
 	"flag"
@@ -52,6 +51,7 @@ import (
 	"github.com/coinexchain/dex/modules/stakingx"
 	dexsim "github.com/coinexchain/dex/simulation"
 	dex "github.com/coinexchain/dex/types"
+	_ "github.com/coinexchain/dex/codec"
 )
 
 var (
@@ -581,6 +581,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 }
 
 func TestFullAppSimulation(t *testing.T) {
+	codec.RunInitFuncList()
 	if !enabled {
 		t.Skip("Skipping application simulation")
 	}

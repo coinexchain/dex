@@ -117,7 +117,7 @@ func MakeCodec() *codec.Codec {
 	ModuleBasics.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
-	codec.RegisterEvidences(cdc)
+	//codec.RegisterEvidences(cdc)
 	return cdc
 }
 

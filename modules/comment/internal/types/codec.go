@@ -5,12 +5,16 @@ import (
 )
 
 var (
-	ModuleCdc = codec.New()
+	ModuleCdc *codec.Codec
 )
 
 func init() {
-	RegisterCodec(ModuleCdc)
+	codec.AddInitFunc(func() {
+		ModuleCdc = codec.New()
+		RegisterCodec(ModuleCdc)
+	})
 }
+
 
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgCommentToken{}, "comment/MsgCommentToken", nil)

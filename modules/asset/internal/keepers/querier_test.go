@@ -8,12 +8,14 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/coinexchain/dex/modules/asset/internal/keepers"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
 
 func Test_queryParams(t *testing.T) {
+	codec.RunInitFuncList()
 	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, types.QueryToken),
@@ -31,6 +33,7 @@ func Test_queryParams(t *testing.T) {
 }
 
 func Test_queryToken(t *testing.T) {
+	codec.RunInitFuncList()
 	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, types.QueryToken),
@@ -78,6 +81,7 @@ func Test_queryToken(t *testing.T) {
 }
 
 func Test_queryAllTokenList(t *testing.T) {
+	codec.RunInitFuncList()
 	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, types.QueryTokenList),
@@ -114,6 +118,7 @@ func Test_queryAllTokenList(t *testing.T) {
 }
 
 func Test_queryWhitelist(t *testing.T) {
+	codec.RunInitFuncList()
 	input := createTestInput()
 	symbol := "abc"
 	whitelist := mockAddrList()
@@ -157,6 +162,7 @@ func Test_queryWhitelist(t *testing.T) {
 }
 
 func Test_queryForbiddenAddr(t *testing.T) {
+	codec.RunInitFuncList()
 	input := createTestInput()
 	symbol := "abc"
 	mock := mockAddrList()
@@ -200,6 +206,7 @@ func Test_queryForbiddenAddr(t *testing.T) {
 }
 
 func Test_queryReservedSymbols(t *testing.T) {
+	codec.RunInitFuncList()
 	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, types.QueryReservedSymbols),
@@ -214,6 +221,7 @@ func Test_queryReservedSymbols(t *testing.T) {
 }
 
 func Test_queryDefault(t *testing.T) {
+	codec.RunInitFuncList()
 	input := createTestInput()
 	req := abci.RequestQuery{
 		Path: fmt.Sprintf("custom/%s/%s", types.RouterKey, "unknown"),

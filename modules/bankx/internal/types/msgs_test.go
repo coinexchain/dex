@@ -10,6 +10,7 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/coinexchain/dex/testutil"
@@ -42,6 +43,7 @@ func TestSetMemoRequiredValidation(t *testing.T) {
 }
 
 func TestSetMemoRequiredGetSignBytes(t *testing.T) {
+	codec.RunInitFuncList()
 	addr := sdk.AccAddress(crypto.AddressHash([]byte("addr")))
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	sign := msg.GetSignBytes()

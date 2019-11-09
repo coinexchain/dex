@@ -18,7 +18,7 @@ type AuthModuleBasic struct {
 }
 
 func (amb AuthModuleBasic) DefaultGenesis() json.RawMessage {
-	return auth.ModuleCdc.MustMarshalJSON(GetDefaultAuthGenesisState())
+	return auth.GetModuleCdc().MustMarshalJSON(GetDefaultAuthGenesisState())
 }
 
 func GetDefaultAuthGenesisState() auth.GenesisState {
@@ -39,7 +39,7 @@ func (StakingModuleBasic) DefaultGenesis() json.RawMessage {
 	genState.Params.UnbondingTime = DefaultUnbondingTime
 	genState.Params.MaxValidators = DefaultMaxValidators
 	genState.Params.BondDenom = dex.DefaultBondDenom
-	return staking.ModuleCdc.MustMarshalJSON(genState)
+	return staking.GetModuleCdc().MustMarshalJSON(genState)
 }
 
 type SlashingModuleBasic struct {
@@ -53,7 +53,7 @@ func (SlashingModuleBasic) DefaultGenesis() json.RawMessage {
 	genState.Params.MinSignedPerWindow = DefaultMinSignedPerWindow
 	genState.Params.SlashFractionDoubleSign = DefaultSlashFractionDoubleSign
 	genState.Params.SlashFractionDowntime = DefaultSlashFractionDowntime
-	return slashing.ModuleCdc.MustMarshalJSON(genState)
+	return slashing.GetModuleCdc().MustMarshalJSON(genState)
 }
 
 type GovModuleBasic struct {
@@ -71,7 +71,7 @@ func (GovModuleBasic) DefaultGenesis() json.RawMessage {
 		Threshold: sdk.NewDecWithPrec(5, 1),
 		Veto:      sdk.NewDecWithPrec(334, 3),
 	}
-	return gov.ModuleCdc.MustMarshalJSON(genState)
+	return gov.GetModuleCdc().MustMarshalJSON(genState)
 }
 
 type CrisisModuleBasic struct {
@@ -82,5 +82,5 @@ func (CrisisModuleBasic) DefaultGenesis() json.RawMessage {
 	genState := crisis.DefaultGenesisState()
 	genState.ConstantFee.Denom = dex.DefaultBondDenom
 	genState.ConstantFee.Amount = DefaultCrisisConstantFee
-	return crisis.ModuleCdc.MustMarshalJSON(genState)
+	return crisis.GetModuleCdc().MustMarshalJSON(genState)
 }

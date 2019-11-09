@@ -34,9 +34,9 @@ func (app *CetChainApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhit
 	genState := app.mm.ExportGenesis(ctx)
 	if forZeroHeight {
 		var ig incentive.GenesisState
-		incentive.ModuleCdc.MustUnmarshalJSON(genState[incentive.ModuleName], &ig)
+		incentive.GetModuleCdc().MustUnmarshalJSON(genState[incentive.ModuleName], &ig)
 		ig.State.HeightAdjustment = ig.State.HeightAdjustment + ctx.BlockHeader().Height
-		genState[incentive.ModuleName] = incentive.ModuleCdc.MustMarshalJSON(ig)
+		genState[incentive.ModuleName] = incentive.GetModuleCdc().MustMarshalJSON(ig)
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.cdc, genState)

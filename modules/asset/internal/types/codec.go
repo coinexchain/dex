@@ -8,10 +8,14 @@ import (
 var ModuleCdc *codec.Codec
 
 func init() {
-	ModuleCdc = codec.New()
-	RegisterCodec(ModuleCdc)
-	codec.RegisterCrypto(ModuleCdc)
-	ModuleCdc.Seal()
+	println("Here! 111111111111111")
+	codec.AddInitFunc(func() {
+		ModuleCdc = codec.New()
+		println("Here! 22222222222")
+		RegisterCodec(ModuleCdc)
+		codec.RegisterCrypto(ModuleCdc)
+		ModuleCdc.Seal()
+	})
 }
 
 // Register concrete types on codec codec

@@ -1,9 +1,15 @@
 package authx
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/coinexchain/dex/modules/authx/internal/keepers"
 	"github.com/coinexchain/dex/modules/authx/internal/types"
 )
+
+func GetModuleCdc() *codec.Codec {
+	return types.ModuleCdc
+}
 
 const (
 	StoreKey        = types.StoreKey
@@ -26,7 +32,6 @@ var (
 	NewParams                  = types.NewParams
 	NewAccountX                = types.NewAccountX
 	DefaultParams              = types.DefaultParams
-	ModuleCdc                  = types.ModuleCdc
 	NewAccountXWithAddress     = types.NewAccountXWithAddress
 	NewKeeper                  = keepers.NewKeeper
 )

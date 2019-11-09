@@ -20,12 +20,17 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.4.0
+	github.com/tendermint/go-amino v0.15.0
 	github.com/tendermint/tendermint v0.32.7
 	github.com/tendermint/tm-db v0.2.0
+	github.com/wide-key/wrap-amino v0.0.0-20191104131331-728b454fa17b
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/sys v0.0.0-20190422165155-953cdadca894 // indirect
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 )
 
 replace github.com/cosmos/cosmos-sdk => ../../wide-key/cosmos-sdk
+
 replace github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c => ../../coinexchain/codon
+
+replace github.com/wide-key/wrap-amino v0.0.0-20191104131331-728b454fa17b => ../../wide-key/wrap-amino

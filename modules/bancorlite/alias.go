@@ -1,9 +1,15 @@
 package bancorlite
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
 	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 )
+
+func GetModuleCdc() *codec.Codec {
+	return types.ModuleCdc
+}
 
 const (
 	StoreKey   = types.StoreKey
@@ -14,7 +20,6 @@ var (
 	NewBaseKeeper       = keepers.NewKeeper
 	NewBancorInfoKeeper = keepers.NewBancorInfoKeeper
 	DefaultParams       = types.DefaultParams
-	ModuleCdc           = types.ModuleCdc
 )
 
 type (

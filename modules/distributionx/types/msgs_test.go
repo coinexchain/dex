@@ -9,6 +9,7 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
@@ -22,6 +23,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestDonateToCommunityPoolRoute(t *testing.T) {
+	codec.RunInitFuncList()
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgDonateToCommunityPool(addr, dex.NewCetCoins(1e8))
 	require.Equal(t, msg.Route(), "distrx")
@@ -29,6 +31,7 @@ func TestDonateToCommunityPoolRoute(t *testing.T) {
 }
 
 func TestDonateToCommunityPoolValidation(t *testing.T) {
+	codec.RunInitFuncList()
 	validAddr := sdk.AccAddress([]byte("addr"))
 	var emptyAddr sdk.AccAddress
 
@@ -47,6 +50,7 @@ func TestDonateToCommunityPoolValidation(t *testing.T) {
 }
 
 func TestDonateToCommunityPoolGetSignBytes(t *testing.T) {
+	codec.RunInitFuncList()
 	addr := sdk.AccAddress(crypto.AddressHash([]byte("addr")))
 	msg := NewMsgDonateToCommunityPool(addr, validCoins)
 	sign := msg.GetSignBytes()
@@ -56,6 +60,7 @@ func TestDonateToCommunityPoolGetSignBytes(t *testing.T) {
 }
 
 func TestDonateToCommunityPoolGetSigners(t *testing.T) {
+	codec.RunInitFuncList()
 	addr := sdk.AccAddress([]byte("addr"))
 	msg := NewMsgDonateToCommunityPool(addr, validCoins)
 	signers := msg.GetSigners()
