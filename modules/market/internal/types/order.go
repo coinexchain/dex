@@ -52,11 +52,13 @@ func AssemblyOrderID(userAddr string, seq uint64, identify byte) string {
 func DecToBigEndianBytes(d sdk.Dec) []byte {
 	var result [DecByteCount]byte
 	bytes := d.Int.Bytes() // returns the absolute value of d as a big-endian byte slice. sign is ignored
-	//todo: panic_for_test
+	count := len(bytes)
 	if len(bytes) > DecByteCount {
-		panic("dec length larger than 40")
+		// Impossible to panic for cosmos 0.37.4 and golang 1.13
+		// panic("dec length larger than 40")
+		count = DecByteCount
 	}
-	for i := 1; i <= len(bytes); i++ {
+	for i := 1; i <= count; i++ {
 		result[DecByteCount-i] = bytes[len(bytes)-i]
 	}
 	return result[:]

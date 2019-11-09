@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"fmt"
 	"math"
 	"testing"
 
@@ -11,6 +12,22 @@ import (
 )
 
 func TestOrder(t *testing.T) {
+	bigInt, ok := sdk.NewIntFromString("57896044618658097711785492504343953926634992332820282019728792003956564819967")
+	require.Equal(t, true, ok)
+	bigDec := bigInt.ToDec()
+	require.Equal(t, 40, len(bigDec.Int.Bytes()))
+	//maxInt := sdk.NewInt(1)
+	//for i:=0; i<250; i++ {
+	//	maxInt = maxInt.MulRaw(2)
+	//	fmt.Printf("%v %d \n", maxInt.BigInt().Bytes(), maxInt)
+	//}
+	maxDec := sdk.NewDec(1)
+	for i := 0; i < 255; i++ {
+		maxDec = maxDec.MulInt64(2)
+		fmt.Printf("%v %d \n", maxDec.Int.Bytes(), maxDec)
+	}
+	require.Equal(t, 40, len(maxDec.Int.Bytes()))
+
 	addr, failed := sdk.AccAddressFromHex("0123456789012345678901234567890123423456")
 	require.Nil(t, failed)
 	order := Order{
