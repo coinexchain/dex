@@ -77,7 +77,7 @@ cetd gentx                                \
 --website wallet.viabtc.com               \
 --details "ViaWallet Node"                \
 --amount=500000000000000cet               \
---commission-rate=0.2                     \
+--commission-rate=0.1                     \
 --commission-max-rate=0.5                 \
 --commission-max-change-rate=0.1          \
 --min-self-delegation=500000000000000     \
