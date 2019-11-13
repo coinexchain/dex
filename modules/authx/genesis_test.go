@@ -3,6 +3,7 @@ package authx_test
 import (
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
@@ -10,6 +11,7 @@ import (
 )
 
 func TestValidate(t *testing.T) {
+	codec.RunInitFuncList()
 	var addr1, _ = sdk.AccAddressFromBech32("coinex1y5kdxnzn2tfwayyntf2n28q8q2s80mcul852ke")
 	var addr2, err = sdk.AccAddressFromBech32("coinex133w8vwj73s4h2uynqft9gyyy52cr6rg8dskv3h")
 	require.NoError(t, err)
@@ -32,6 +34,7 @@ func TestValidate(t *testing.T) {
 }
 
 func TestExport(t *testing.T) {
+	codec.RunInitFuncList()
 	accx := authx.NewAccountX(sdk.AccAddress([]byte("addr")), false, nil, nil)
 
 	testInput := setupTestInput()

@@ -34,6 +34,7 @@ import (
 	stakingsim "github.com/cosmos/cosmos-sdk/x/staking/simulation"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
+	_ "github.com/coinexchain/dex/codec"
 	"github.com/coinexchain/dex/modules/alias"
 	aliassim "github.com/coinexchain/dex/modules/alias/simulation"
 	"github.com/coinexchain/dex/modules/asset"
@@ -581,6 +582,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 }
 
 func TestFullAppSimulation(t *testing.T) {
+	codec.RunInitFuncList()
 	if !enabled {
 		t.Skip("Skipping application simulation")
 	}

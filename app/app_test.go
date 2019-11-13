@@ -33,6 +33,10 @@ import (
 	"github.com/coinexchain/dex/msgqueue"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+
+	_ "github.com/coinexchain/dex/codec"
 )
 
 const testChainID = "c1"
@@ -160,11 +164,13 @@ func cetToken() asset.Token {
 }
 
 func TestMain(m *testing.M) {
+	codec.RunInitFuncList()
 	dex.InitSdkConfig()
 	os.Exit(m.Run())
 }
 
 func TestSend(t *testing.T) {
+	codec.RunInitFuncList()
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
 	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
@@ -196,6 +202,7 @@ func TestSend(t *testing.T) {
 }
 
 func TestBankSend(t *testing.T) {
+	codec.RunInitFuncList()
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
 	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))

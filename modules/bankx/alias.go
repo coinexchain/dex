@@ -1,9 +1,15 @@
 package bankx
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 	"github.com/coinexchain/dex/modules/bankx/internal/types"
 )
+
+func GetModuleCdc() *codec.Codec {
+	return types.ModuleCdc
+}
 
 const (
 	DefaultCodespace = types.CodeSpaceBankx
@@ -37,7 +43,6 @@ var (
 
 	// variable aliases
 
-	ModuleCdc       = types.ModuleCdc
 	CodeMemoMissing = types.CodeMemoMissing
 )
 

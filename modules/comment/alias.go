@@ -1,9 +1,15 @@
 package comment
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/coinexchain/dex/modules/comment/internal/keepers"
 	"github.com/coinexchain/dex/modules/comment/internal/types"
 )
+
+func GetModuleCdc() *codec.Codec {
+	return types.ModuleCdc
+}
 
 const (
 	StoreKey   = types.StoreKey

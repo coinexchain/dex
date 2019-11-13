@@ -76,96 +76,119 @@ func ShowInfo() {
 	codon.ShowInfoForVar(leafTypes, &MsgAliasUpdate{})
 }
 
+var TypeEntryList = []codon.TypeEntry{
+	{Alias: "PubKey", Value: (*PubKey)(nil)},
+	{Alias: "PrivKey", Value: (*PrivKey)(nil)},
+	{Alias: "Msg", Value: (*Msg)(nil)},
+	{Alias: "Account", Value: (*Account)(nil)},
+	{Alias: "VestingAccount", Value: (*VestingAccount)(nil)},
+	{Alias: "Content", Value: (*Content)(nil)},
+	{Alias: "Tx", Value: (*Tx)(nil)},
+	{Alias: "ModuleAccountI", Value: (*ModuleAccountI)(nil)},
+	{Alias: "SupplyI", Value: (*SupplyI)(nil)},
+	{Alias: "Token", Value: (*Token)(nil)},
+
+	//{Alias: "DuplicateVoteEvidence", Value: DuplicateVoteEvidence{}},
+	{Alias: "PrivKeyEd25519", Value: PrivKeyEd25519{}},
+	{Alias: "PrivKeySecp256k1", Value: PrivKeySecp256k1{}},
+	{Alias: "PubKeyEd25519", Value: PubKeyEd25519{}},
+	{Alias: "PubKeySecp256k1", Value: PubKeySecp256k1{}},
+	{Alias: "PubKeyMultisigThreshold", Value: PubKeyMultisigThreshold{}},
+	{Alias: "SignedMsgType", Value: SignedMsgType(0)},
+	{Alias: "VoteOption", Value: VoteOption(0)},
+	{Alias: "Vote", Value: Vote{}},
+
+	{Alias: "SdkInt", Value: SdkInt{}},
+	{Alias: "SdkDec", Value: SdkDec{}},
+
+	{Alias: "uint64", Value: uint64(0)},
+	{Alias: "int64", Value: int64(0)},
+
+	{Alias: "ConsAddress", Value: ConsAddress{}},
+	{Alias: "Coin", Value: Coin{}},
+	{Alias: "DecCoin", Value: DecCoin{}},
+	{Alias: "LockedCoin", Value: LockedCoin{}},
+	{Alias: "StdSignature", Value: StdSignature{}},
+	{Alias: "ParamChange", Value: ParamChange{}},
+	{Alias: "Input", Value: Input{}},
+	{Alias: "Output", Value: Output{}},
+	{Alias: "AccAddress", Value: AccAddress{}},
+	{Alias: "CommentRef", Value: CommentRef{}},
+
+	{Alias: "BaseAccount", Value: BaseAccount{}},
+	{Alias: "BaseVestingAccount", Value: BaseVestingAccount{}},
+	{Alias: "ContinuousVestingAccount", Value: ContinuousVestingAccount{}},
+	{Alias: "DelayedVestingAccount", Value: DelayedVestingAccount{}},
+	{Alias: "ModuleAccount", Value: ModuleAccount{}},
+	{Alias: "StdTx", Value: StdTx{}},
+	{Alias: "MsgBeginRedelegate", Value: MsgBeginRedelegate{}},
+	{Alias: "MsgCreateValidator", Value: MsgCreateValidator{}},
+	{Alias: "MsgDelegate", Value: MsgDelegate{}},
+	{Alias: "MsgEditValidator", Value: MsgEditValidator{}},
+	{Alias: "MsgSetWithdrawAddress", Value: MsgSetWithdrawAddress{}},
+	{Alias: "MsgUndelegate", Value: MsgUndelegate{}},
+	{Alias: "MsgUnjail", Value: MsgUnjail{}},
+	{Alias: "MsgWithdrawDelegatorReward", Value: MsgWithdrawDelegatorReward{}},
+	{Alias: "MsgWithdrawValidatorCommission", Value: MsgWithdrawValidatorCommission{}},
+	{Alias: "MsgDeposit", Value: MsgDeposit{}},
+	{Alias: "MsgSubmitProposal", Value: MsgSubmitProposal{}},
+	{Alias: "MsgVote", Value: MsgVote{}},
+	{Alias: "ParameterChangeProposal", Value: ParameterChangeProposal{}},
+	{Alias: "SoftwareUpgradeProposal", Value: SoftwareUpgradeProposal{}},
+	{Alias: "TextProposal", Value: TextProposal{}},
+	{Alias: "CommunityPoolSpendProposal", Value: CommunityPoolSpendProposal{}},
+	{Alias: "MsgMultiSend", Value: MsgMultiSend{}},
+	{Alias: "FeePool", Value: FeePool{}},
+	{Alias: "MsgSend", Value: MsgSend{}},
+	{Alias: "MsgSupervisedSend", Value: MsgSupervisedSend{}},
+	{Alias: "MsgVerifyInvariant", Value: MsgVerifyInvariant{}},
+	{Alias: "Supply", Value: Supply{}},
+
+	{Alias: "AccountX", Value: AccountX{}},
+	{Alias: "MsgMultiSendX", Value: MsgMultiSendX{}},
+	{Alias: "MsgSendX", Value: MsgSendX{}},
+	{Alias: "MsgSetMemoRequired", Value: MsgSetMemoRequired{}},
+	{Alias: "BaseToken", Value: BaseToken{}},
+	{Alias: "MsgAddTokenWhitelist", Value: MsgAddTokenWhitelist{}},
+	{Alias: "MsgBurnToken", Value: MsgBurnToken{}},
+	{Alias: "MsgForbidAddr", Value: MsgForbidAddr{}},
+	{Alias: "MsgForbidToken", Value: MsgForbidToken{}},
+	{Alias: "MsgIssueToken", Value: MsgIssueToken{}},
+	{Alias: "MsgMintToken", Value: MsgMintToken{}},
+	{Alias: "MsgModifyTokenInfo", Value: MsgModifyTokenInfo{}},
+	{Alias: "MsgRemoveTokenWhitelist", Value: MsgRemoveTokenWhitelist{}},
+	{Alias: "MsgTransferOwnership", Value: MsgTransferOwnership{}},
+	{Alias: "MsgUnForbidAddr", Value: MsgUnForbidAddr{}},
+	{Alias: "MsgUnForbidToken", Value: MsgUnForbidToken{}},
+	{Alias: "MsgBancorCancel", Value: MsgBancorCancel{}},
+	{Alias: "MsgBancorInit", Value: MsgBancorInit{}},
+	{Alias: "MsgBancorTrade", Value: MsgBancorTrade{}},
+	{Alias: "MsgCancelOrder", Value: MsgCancelOrder{}},
+	{Alias: "MsgCancelTradingPair", Value: MsgCancelTradingPair{}},
+	{Alias: "MsgCreateOrder", Value: MsgCreateOrder{}},
+	{Alias: "MsgCreateTradingPair", Value: MsgCreateTradingPair{}},
+	{Alias: "MsgModifyPricePrecision", Value: MsgModifyPricePrecision{}},
+	{Alias: "Order", Value: Order{}},
+	{Alias: "MarketInfo", Value: MarketInfo{}},
+	{Alias: "MsgDonateToCommunityPool", Value: MsgDonateToCommunityPool{}},
+	{Alias: "MsgCommentToken", Value: MsgCommentToken{}},
+	{Alias: "State", Value: State{}},
+	{Alias: "MsgAliasUpdate", Value: MsgAliasUpdate{}},
+
+	{Alias: "AccAddressList", Value: AccAddressList(nil)},
+	{Alias: "CommitInfo", Value: CommitInfo{}},
+	{Alias: "StoreInfo", Value: StoreInfo{}},
+}
+
 func GenerateCodecFile(w io.Writer) {
-	list := []codon.AliasAndValue{
-		{Alias: "PubKey", Value: (*PubKey)(nil)},
-		{Alias: "Msg", Value: (*Msg)(nil)},
-		{Alias: "Account", Value: (*Account)(nil)},
-		{Alias: "Content", Value: (*Content)(nil)},
-
-		{Alias: "DuplicateVoteEvidence", Value: DuplicateVoteEvidence{}},
-		{Alias: "PrivKeyEd25519", Value: PrivKeyEd25519{}},
-		{Alias: "PrivKeySecp256k1", Value: PrivKeySecp256k1{}},
-		{Alias: "PubKeyEd25519", Value: PubKeyEd25519{}},
-		{Alias: "PubKeySecp256k1", Value: PubKeySecp256k1{}},
-		{Alias: "PubKeyMultisigThreshold", Value: PubKeyMultisigThreshold{}},
-		{Alias: "SignedMsgType", Value: SignedMsgType(0)},
-		{Alias: "VoteOption", Value: VoteOption(0)},
-		{Alias: "Vote", Value: Vote{}},
-
-		{Alias: "Coin", Value: Coin{}},
-		{Alias: "LockedCoin", Value: LockedCoin{}},
-		{Alias: "StdSignature", Value: StdSignature{}},
-		{Alias: "ParamChange", Value: ParamChange{}},
-		{Alias: "Input", Value: Input{}},
-		{Alias: "Output", Value: Output{}},
-		{Alias: "AccAddress", Value: AccAddress{}},
-		{Alias: "CommentRef", Value: CommentRef{}},
-
-		{Alias: "BaseAccount", Value: BaseAccount{}},
-		{Alias: "BaseVestingAccount", Value: BaseVestingAccount{}},
-		{Alias: "ContinuousVestingAccount", Value: ContinuousVestingAccount{}},
-		{Alias: "DelayedVestingAccount", Value: DelayedVestingAccount{}},
-		{Alias: "ModuleAccount", Value: ModuleAccount{}},
-		{Alias: "StdTx", Value: StdTx{}},
-		{Alias: "MsgBeginRedelegate", Value: MsgBeginRedelegate{}},
-		{Alias: "MsgCreateValidator", Value: MsgCreateValidator{}},
-		{Alias: "MsgDelegate", Value: MsgDelegate{}},
-		{Alias: "MsgEditValidator", Value: MsgEditValidator{}},
-		{Alias: "MsgSetWithdrawAddress", Value: MsgSetWithdrawAddress{}},
-		{Alias: "MsgUndelegate", Value: MsgUndelegate{}},
-		{Alias: "MsgUnjail", Value: MsgUnjail{}},
-		{Alias: "MsgWithdrawDelegatorReward", Value: MsgWithdrawDelegatorReward{}},
-		{Alias: "MsgWithdrawValidatorCommission", Value: MsgWithdrawValidatorCommission{}},
-		{Alias: "MsgDeposit", Value: MsgDeposit{}},
-		{Alias: "MsgSubmitProposal", Value: MsgSubmitProposal{}},
-		{Alias: "MsgVote", Value: MsgVote{}},
-		{Alias: "ParameterChangeProposal", Value: ParameterChangeProposal{}},
-		{Alias: "SoftwareUpgradeProposal", Value: SoftwareUpgradeProposal{}},
-		{Alias: "TextProposal", Value: TextProposal{}},
-		{Alias: "CommunityPoolSpendProposal", Value: CommunityPoolSpendProposal{}},
-		{Alias: "MsgMultiSend", Value: MsgMultiSend{}},
-		{Alias: "MsgSend", Value: MsgSend{}},
-		{Alias: "MsgVerifyInvariant", Value: MsgVerifyInvariant{}},
-		{Alias: "Supply", Value: Supply{}},
-
-		{Alias: "AccountX", Value: AccountX{}},
-		{Alias: "MsgMultiSendX", Value: MsgMultiSendX{}},
-		{Alias: "MsgSendX", Value: MsgSendX{}},
-		{Alias: "MsgSetMemoRequired", Value: MsgSetMemoRequired{}},
-		{Alias: "BaseToken", Value: BaseToken{}},
-		{Alias: "MsgAddTokenWhitelist", Value: MsgAddTokenWhitelist{}},
-		{Alias: "MsgBurnToken", Value: MsgBurnToken{}},
-		{Alias: "MsgForbidAddr", Value: MsgForbidAddr{}},
-		{Alias: "MsgForbidToken", Value: MsgForbidToken{}},
-		{Alias: "MsgIssueToken", Value: MsgIssueToken{}},
-		{Alias: "MsgMintToken", Value: MsgMintToken{}},
-		{Alias: "MsgModifyTokenInfo", Value: MsgModifyTokenInfo{}},
-		{Alias: "MsgRemoveTokenWhitelist", Value: MsgRemoveTokenWhitelist{}},
-		{Alias: "MsgTransferOwnership", Value: MsgTransferOwnership{}},
-		{Alias: "MsgUnForbidAddr", Value: MsgUnForbidAddr{}},
-		{Alias: "MsgUnForbidToken", Value: MsgUnForbidToken{}},
-		{Alias: "MsgBancorCancel", Value: MsgBancorCancel{}},
-		{Alias: "MsgBancorInit", Value: MsgBancorInit{}},
-		{Alias: "MsgBancorTrade", Value: MsgBancorTrade{}},
-		{Alias: "MsgCancelOrder", Value: MsgCancelOrder{}},
-		{Alias: "MsgCancelTradingPair", Value: MsgCancelTradingPair{}},
-		{Alias: "MsgCreateOrder", Value: MsgCreateOrder{}},
-		{Alias: "MsgCreateTradingPair", Value: MsgCreateTradingPair{}},
-		{Alias: "MsgModifyPricePrecision", Value: MsgModifyPricePrecision{}},
-		{Alias: "Order", Value: Order{}},
-		{Alias: "MarketInfo", Value: MarketInfo{}},
-		{Alias: "MsgDonateToCommunityPool", Value: MsgDonateToCommunityPool{}},
-		{Alias: "MsgCommentToken", Value: MsgCommentToken{}},
-		{Alias: "State", Value: State{}},
-		{Alias: "MsgAliasUpdate", Value: MsgAliasUpdate{}},
-	}
-
-	extraImports := []string{`"time"`, `sdk "github.com/cosmos/cosmos-sdk/types"`}
+	extraImports := []string{`"time"`, `"math/big"`, `sdk "github.com/cosmos/cosmos-sdk/types"`,
+		`"github.com/cosmos/cosmos-sdk/codec"`}
+	extraImports = append(extraImports, codon.ImportsForBridgeLogic...)
+	extraLogics := extraLogicsForLeafTypes + codon.BridgeLogic
 	ignoreImpl := make(map[string]string)
 	ignoreImpl["StdSignature"] = "PubKey"
 	ignoreImpl["PubKeyMultisigThreshold"] = "PubKey"
-	codon.GenerateCodecFile(w, GetLeafTypes(), ignoreImpl, list, extraLogics, extraImports)
+	codon.GenerateCodecFile(w, GetLeafTypes(), ignoreImpl, TypeEntryList, extraLogics, extraImports)
 }
 
 func GetLeafTypes() map[string]string {
@@ -176,45 +199,26 @@ func GetLeafTypes() map[string]string {
 	return leafTypes
 }
 
-type RandSrc interface {
-	GetBool() bool
-	GetInt() int
-	GetInt8() int8
-	GetInt16() int16
-	GetInt32() int32
-	GetInt64() int64
-	GetUint() uint
-	GetUint8() uint8
-	GetUint16() uint16
-	GetUint32() uint32
-	GetUint64() uint64
-	GetFloat32() float32
-	GetFloat64() float64
-	GetString(n int) string
-	GetBytes(n int) []byte
-}
-
 const MaxSliceLength = 10
 const MaxStringLength = 100
 
-var extraLogics = `
-func EncodeTime(w io.Writer, t time.Time) error {
+var extraLogicsForLeafTypes = `
+
+func init() {
+	codec.SetFirstInitFunc(func() {
+		amino.Stub = &CodonStub{}
+	})
+}
+func EncodeTime(w *[]byte, t time.Time) {
 	t = t.UTC()
 	sec := t.Unix()
 	var buf [10]byte
 	n := binary.PutVarint(buf[:], sec)
-	_, err := w.Write(buf[0:n])
-	if err != nil {
-		return err
-	}
+	*w = append(*w, buf[0:n]...)
 
 	nanosec := t.Nanosecond()
 	n = binary.PutVarint(buf[:], int64(nanosec))
-	_, err = w.Write(buf[0:n])
-	if err != nil {
-		return err
-	}
-	return nil
+	*w = append(*w, buf[0:n]...)
 }
 
 func DecodeTime(bz []byte) (time.Time, int, error) {
@@ -250,33 +254,69 @@ func DecodeTime(bz []byte) (time.Time, int, error) {
 	return time.Unix(sec, nanosec).UTC(), n+m, nil
 }
 
+func T(s string) time.Time {
+	t, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+var maxSec = T("9999-09-29T08:02:06.647266Z").Unix()
+
 func RandTime(r RandSrc) time.Time {
-	return time.Unix(r.GetInt64(), r.GetInt64()).UTC()
+	sec := r.GetInt64()
+	nanosec := r.GetInt64()
+	if sec < 0 {
+		sec = -sec
+	}
+	if nanosec < 0 {
+		nanosec = -nanosec
+	}
+	nanosec = nanosec%(1000*1000*1000)
+	sec = sec%maxSec
+	return time.Unix(sec, nanosec).UTC()
 }
 
-func EncodeInt(w io.Writer, v sdk.Int) error {
-	s, err := v.MarshalAmino()
-	if err!=nil {
-		return err
-	}
-	return codonEncodeString(w, s)
+
+func DeepCopyTime(t time.Time) time.Time {
+	return t.Add(time.Duration(0))
 }
 
-func DecodeInt(bz []byte) (sdk.Int, int, error) {
-	v := sdk.ZeroInt()
-	var n int
-	var err error
-	s := codonDecodeString(bz, &n, &err)
-	if err!=nil {
-		return v, n, err
-	}
+func EncodeInt(w *[]byte, v sdk.Int) {
+	codonEncodeByteSlice(w, v.BigInt().Bytes())
+	codonEncodeBool(w, v.BigInt().Sign() < 0)
+}
 
-	err = (&v).UnmarshalAmino(s)
-	if err!=nil {
-		return v, n, err
+func DecodeInt(bz []byte) (v sdk.Int, n int, err error) {
+	var m int
+	length := codonDecodeInt64(bz, &m, &err)
+	if err != nil {
+		return
 	}
-
-	return v, n, nil
+	var bs []byte
+	var l int
+	bs, l, err = codonGetByteSlice(bz[m:], int(length))
+	n = m + l
+	if err != nil {
+		return
+	}
+	var k int
+	isNeg := codonDecodeBool(bz[n:], &k, &err)
+	n = n + 1
+	if err != nil {
+		return
+	}
+	x := big.NewInt(0)
+	z := big.NewInt(0)
+	x.SetBytes(bs)
+	if isNeg {
+		z.Neg(x)
+		v = sdk.NewIntFromBigInt(z)
+	} else {
+		v = sdk.NewIntFromBigInt(x)
+	}
+	return
 }
 
 func RandInt(r RandSrc) sdk.Int {
@@ -288,29 +328,40 @@ func RandInt(r RandSrc) sdk.Int {
 	return res
 }
 
-func EncodeDec(w io.Writer, v sdk.Dec) error {
-	s, err := v.MarshalAmino()
-	if err!=nil {
-		return err
-	}
-	return codonEncodeString(w, s)
+func DeepCopyInt(i sdk.Int) sdk.Int {
+	return i.AddRaw(0)
 }
 
-func DecodeDec(bz []byte) (sdk.Dec, int, error) {
-	v := sdk.ZeroDec()
-	var n int
-	var err error
-	s := codonDecodeString(bz, &n, &err)
-	if err!=nil {
-		return v, n, err
-	}
+func EncodeDec(w *[]byte, v sdk.Dec) {
+	codonEncodeByteSlice(w, v.Int.Bytes())
+	codonEncodeBool(w, v.Int.Sign() < 0)
+}
 
-	err = (&v).UnmarshalAmino(s)
-	if err!=nil {
-		return v, n, err
+func DecodeDec(bz []byte) (v sdk.Dec, n int, err error) {
+	var m int
+	length := codonDecodeInt64(bz, &m, &err)
+	if err != nil {
+		return
 	}
-
-	return v, n, nil
+	var bs []byte
+	var l int
+	bs, l, err = codonGetByteSlice(bz[m:], int(length))
+	n = m + l
+	if err != nil {
+		return
+	}
+	var k int
+	isNeg := codonDecodeBool(bz[n:], &k, &err)
+	n = n + 1
+	if err != nil {
+		return
+	}
+	v = sdk.ZeroDec()
+	v.Int.SetBytes(bs)
+	if isNeg {
+		v.Int.Neg(v.Int)
+	}
+	return
 }
 
 func RandDec(r RandSrc) sdk.Dec {
@@ -322,59 +373,9 @@ func RandDec(r RandSrc) sdk.Dec {
 	res = res.QuoInt64(r.GetInt64()&0xFFFFFFFF)
 	return res
 }
+
+func DeepCopyDec(d sdk.Dec) sdk.Dec {
+	return d.MulInt64(1)
+}
+
 `
-
-/*
-func EncodeDuplicateVoteEvidence(w io.Writer, v DuplicateVoteEvidence) error {
-// codon version: 1
-var err error
-err = EncodePubKey(w, v.PubKey)
-}
-
-func EncodePubKeyMultisigThreshold(w io.Writer, v PubKeyMultisigThreshold) error {
-// codon version: 1
-var err error
-err = codonEncodeUvarint(w, uint64(v.K))
-if err != nil {return err}
-err = codonEncodeVarint(w, int64(len(v.PubKeys)))
-if err != nil {return err}
-for _0:=0; _0<len(v.PubKeys); _0++ {
-err = EncodePubKey(w, v.PubKeys[_0])
-if err != nil {return err} // interface_encode
-
-func EncodeStdSignature(w io.Writer, v StdSignature) error {
-// codon version: 1
-var err error
-err = EncodePubKey(w, v.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeBaseVestingAccount(w io.Writer, v BaseVestingAccount) error {
-err = EncodePubKey(w, v.BaseAccount.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeContinuousVestingAccount(w io.Writer, v ContinuousVestingAccount) error {
-err = EncodePubKey(w, v.BaseVestingAccount.BaseAccount.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeDelayedVestingAccount(w io.Writer, v DelayedVestingAccount) error {
-err = EncodePubKey(w, v.BaseVestingAccount.BaseAccount.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeModuleAccount(w io.Writer, v ModuleAccount) error {
-err = EncodePubKey(w, v.BaseVestingAccount.BaseAccount.PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeStdTx(w io.Writer, v StdTx) error {
-for _0:=0; _0<len(v.Msgs); _0++ {
-err = EncodeMsg(w, v.Msgs[_0])
-if err != nil {return err} // interface_encode
-}
-for _0:=0; _0<len(v.Signatures); _0++ {
-err = EncodePubKey(w, v.Signatures[_0].PubKey)
-if err != nil {return err} // interface_encode
-
-func EncodeMsgCreateValidator(w io.Writer, v MsgCreateValidator) error {
-err = EncodePubKey(w, v.PubKey)
-if err != nil {return err} // interface_encode
-
-*/

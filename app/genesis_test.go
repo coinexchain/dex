@@ -22,9 +22,14 @@ import (
 	"github.com/coinexchain/dex/modules/incentive"
 	"github.com/coinexchain/dex/modules/market"
 	"github.com/coinexchain/dex/modules/stakingx"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+
+	_ "github.com/coinexchain/dex/codec"
 )
 
 func TestFromToMap(t *testing.T) {
+	codec.RunInitFuncList()
 	gsMap := ModuleBasics.DefaultGenesis()
 	cdc := MakeCodec()
 	m := FromMap(cdc, gsMap)
@@ -32,11 +37,12 @@ func TestFromToMap(t *testing.T) {
 }
 
 func TestDefaultGenesisState(t *testing.T) {
+	codec.RunInitFuncList()
 	state := ModuleBasics.DefaultGenesis()
 
 	// auth
 	var authData auth.GenesisState
-	auth.ModuleCdc.MustUnmarshalJSON(state[auth.ModuleName], &authData)
+	auth.GetModuleCdc().MustUnmarshalJSON(state[auth.ModuleName], &authData)
 	require.Equal(t, uint64(512), authData.Params.MaxMemoCharacters)
 	require.Equal(t, uint64(7), authData.Params.TxSigLimit)
 	require.Equal(t, DefaultTxSizeCostPerByte, authData.Params.TxSizeCostPerByte)
@@ -45,7 +51,7 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// staking
 	var stakingData staking.GenesisState
-	staking.ModuleCdc.MustUnmarshalJSON(state[staking.ModuleName], &stakingData)
+	staking.GetModuleCdc().MustUnmarshalJSON(state[staking.ModuleName], &stakingData)
 	require.Equal(t, "cet", stakingData.Params.BondDenom)
 	require.Equal(t, "504h0m0s", stakingData.Params.UnbondingTime.String()) // 21 days
 	require.Equal(t, 42, int(stakingData.Params.MaxValidators))
@@ -53,7 +59,7 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// slashing
 	var slashingData slashing.GenesisState
-	slashing.ModuleCdc.MustUnmarshalJSON(state[slashing.ModuleName], &slashingData)
+	slashing.GetModuleCdc().MustUnmarshalJSON(state[slashing.ModuleName], &slashingData)
 	require.Equal(t, "504h0m0s", slashingData.Params.MaxEvidenceAge.String())
 	require.Equal(t, "10m0s", slashingData.Params.DowntimeJailDuration.String())
 	require.Equal(t, 10000, int(slashingData.Params.SignedBlocksWindow))
@@ -63,7 +69,7 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// distr
 	var distrData distr.GenesisState
-	distr.ModuleCdc.MustUnmarshalJSON(state[distr.ModuleName], &distrData)
+	distr.GetModuleCdc().MustUnmarshalJSON(state[distr.ModuleName], &distrData)
 	require.True(t, distrData.WithdrawAddrEnabled)
 	require.Equal(t, sdk.MustNewDecFromStr("0.02"), distrData.CommunityTax)
 	require.Equal(t, sdk.MustNewDecFromStr("0.01"), distrData.BaseProposerReward)
@@ -71,7 +77,7 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// gov
 	var govData gov.GenesisState
-	gov.ModuleCdc.MustUnmarshalJSON(state[gov.ModuleName], &govData)
+	gov.GetModuleCdc().MustUnmarshalJSON(state[gov.ModuleName], &govData)
 	checkCET(t, 10000, govData.DepositParams.MinDeposit)
 	require.Equal(t, "336h0m0s", govData.DepositParams.MaxDepositPeriod.String())
 	require.Equal(t, "336h0m0s", govData.VotingParams.VotingPeriod.String())
@@ -81,26 +87,26 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// crisis
 	var crisisData crisis.GenesisState
-	crisis.ModuleCdc.MustUnmarshalJSON(state[crisis.ModuleName], &crisisData)
+	crisis.GetModuleCdc().MustUnmarshalJSON(state[crisis.ModuleName], &crisisData)
 	checkCET(t, 100000, sdk.Coins{crisisData.ConstantFee})
 
 	// others
 	var authxData authx.GenesisState
-	authx.ModuleCdc.MustUnmarshalJSON(state[authx.ModuleName], &authxData)
+	authx.GetModuleCdc().MustUnmarshalJSON(state[authx.ModuleName], &authxData)
 	require.Equal(t, sdk.NewDec(20), authxData.Params.MinGasPriceLimit)
 	var bankxData bankx.GenesisState
-	bankx.ModuleCdc.MustUnmarshalJSON(state[bankx.ModuleName], &bankxData)
+	bankx.GetModuleCdc().MustUnmarshalJSON(state[bankx.ModuleName], &bankxData)
 	require.Equal(t, int64(1e8), bankxData.Params.ActivationFee)
 	require.Equal(t, int64(604800e9), bankxData.Params.LockCoinsFreeTime)
 	require.Equal(t, int64(1000000), bankxData.Params.LockCoinsFeePerDay)
 	var stakingxData stakingx.GenesisState
-	bankx.ModuleCdc.MustUnmarshalJSON(state[stakingx.ModuleName], &stakingxData) // TODO
+	bankx.GetModuleCdc().MustUnmarshalJSON(state[stakingx.ModuleName], &stakingxData) // TODO
 	require.Equal(t, int64(5000000e8), stakingxData.Params.MinSelfDelegation)
 	require.Equal(t, sdk.MustNewDecFromStr("0.1"), stakingxData.Params.MinMandatoryCommissionRate)
 
 	// alias
 	var aliasData alias.GenesisState
-	alias.ModuleCdc.MustUnmarshalJSON(state[alias.ModuleName], &aliasData)
+	alias.GetModuleCdc().MustUnmarshalJSON(state[alias.ModuleName], &aliasData)
 	require.Equal(t, 5, aliasData.Params.MaxAliasCount)
 	require.Equal(t, int64(10000e8), aliasData.Params.FeeForAliasLength2)
 	require.Equal(t, int64(5000e8), aliasData.Params.FeeForAliasLength3)
@@ -111,25 +117,25 @@ func TestDefaultGenesisState(t *testing.T) {
 
 	// asset
 	var assetData asset.GenesisState
-	asset.ModuleCdc.MustUnmarshalJSON(state[asset.ModuleName], &assetData)
+	asset.GetModuleCdc().MustUnmarshalJSON(state[asset.ModuleName], &assetData)
 	require.Equal(t, int64(10000e8), assetData.Params.IssueTokenFee)
 	require.Equal(t, int64(100000e8), assetData.Params.IssueRareTokenFee)
 
 	// bancor
 	var bancorData bancorlite.GenesisState
-	bancorlite.ModuleCdc.MustUnmarshalJSON(state[bancorlite.ModuleName], &bancorData)
+	bancorlite.GetModuleCdc().MustUnmarshalJSON(state[bancorlite.ModuleName], &bancorData)
 	require.Equal(t, int64(100e8), bancorData.Params.CreateBancorFee)
 	require.Equal(t, int64(100e8), bancorData.Params.CancelBancorFee)
 	require.Equal(t, int64(10), bancorData.Params.TradeFeeRate)
 
 	// incentive
 	var incentiveData incentive.GenesisState
-	incentive.ModuleCdc.MustUnmarshalJSON(state[incentive.ModuleName], &incentiveData)
+	incentive.GetModuleCdc().MustUnmarshalJSON(state[incentive.ModuleName], &incentiveData)
 	require.Equal(t, int64(2e8), incentiveData.Params.DefaultRewardPerBlock)
 
 	// market
 	var marketData market.GenesisState
-	market.ModuleCdc.MustUnmarshalJSON(state[market.ModuleName], &marketData)
+	market.GetModuleCdc().MustUnmarshalJSON(state[market.ModuleName], &marketData)
 	require.Equal(t, int64(10000e8), marketData.Params.CreateMarketFee)
 	require.Equal(t, int64(1000000), marketData.Params.FixedTradeFee)
 	require.Equal(t, int64(604800e9), marketData.Params.MarketMinExpiredTime)

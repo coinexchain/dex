@@ -17,12 +17,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
+	_ "github.com/coinexchain/dex/codec"
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
 )
 
 func TestExportRestore(t *testing.T) {
+	codec.RunInitFuncList()
 	app1, genState1 := startAppWithOneAccountThenExport()
 	app2, genState2 := startAppFromGenesisThenExport(genState1)
 
@@ -56,6 +58,7 @@ func startAppWithOneAccountThenExport() (*CetChainApp, GenesisState) {
 }
 
 func TestExportGenesisState(t *testing.T) {
+	codec.RunInitFuncList()
 	amount := cetToken().GetTotalSupply().Int64()
 	state := startAppWithAccountX(amount)
 
@@ -108,6 +111,7 @@ func startAppWithAccountX(amount int64) GenesisState {
 }
 
 func TestExportDefaultAccountXState(t *testing.T) {
+	codec.RunInitFuncList()
 	_, _, addr := testutil.KeyPubAddr()
 	amount := cetToken().GetTotalSupply().Int64()
 
@@ -129,6 +133,7 @@ func TestExportDefaultAccountXState(t *testing.T) {
 }
 
 func TestExportAppStateAndValidators(t *testing.T) {
+	codec.RunInitFuncList()
 	amount := cetToken().GetTotalSupply().Int64()
 
 	sk, pk, addr := testutil.KeyPubAddr()
@@ -214,6 +219,7 @@ func prepareCreateValidatorTx(addr sdk.AccAddress, app *CetChainApp, ctx sdk.Con
 }
 
 func TestExportValidatorsUpdateRestore(t *testing.T) {
+	codec.RunInitFuncList()
 	sk, pk, addr := testutil.KeyPubAddr()
 	amount := cetToken().GetTotalSupply().Int64()
 

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
@@ -42,6 +43,7 @@ func TestSetMemoRequiredValidation(t *testing.T) {
 }
 
 func TestSetMemoRequiredGetSignBytes(t *testing.T) {
+	codec.RunInitFuncList()
 	addr := sdk.AccAddress(crypto.AddressHash([]byte("addr")))
 	msg := NewMsgSetTransferMemoRequired(addr, true)
 	sign := msg.GetSignBytes()

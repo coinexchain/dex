@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/libs/cli"
@@ -12,6 +13,7 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/coinexchain/dex/app"
+	_ "github.com/coinexchain/dex/codec"
 	dex "github.com/coinexchain/dex/types"
 )
 
@@ -33,6 +35,7 @@ func TestNewApp(t *testing.T) {
 }
 
 func TestInitCmd(t *testing.T) {
+	codec.RunInitFuncList()
 	testHmoe := "./testhome"
 	defer os.RemoveAll(testHmoe)
 

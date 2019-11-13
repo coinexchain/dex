@@ -4,11 +4,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 )
 
-var ModuleCdc = codec.New()
+var (
+	ModuleCdc *codec.Codec
+)
 
 func init() {
-	RegisterCodec(ModuleCdc)
-	ModuleCdc.Seal()
+	codec.AddInitFunc(func() {
+		ModuleCdc = codec.New()
+		RegisterCodec(ModuleCdc)
+	})
 }
 
 // RegisterCodec registers concrete types on the codec

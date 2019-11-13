@@ -3,6 +3,7 @@ package keepers_test
 import (
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -12,6 +13,7 @@ import (
 )
 
 func TestQueryParams(t *testing.T) {
+	codec.RunInitFuncList()
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := types.DefaultParams()

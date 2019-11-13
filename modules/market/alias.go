@@ -1,10 +1,16 @@
 package market
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/coinexchain/dex/modules/market/internal/keepers"
 	"github.com/coinexchain/dex/modules/market/internal/types"
 	dex "github.com/coinexchain/dex/types"
 )
+
+func GetModuleCdc() *codec.Codec {
+	return types.ModuleCdc
+}
 
 const (
 	StoreKey   = types.StoreKey
@@ -29,7 +35,6 @@ var (
 	DecToBigEndianBytes = types.DecToBigEndianBytes
 	ValidateOrderID     = types.ValidateOrderID
 	IsValidTradingPair  = types.IsValidTradingPair
-	ModuleCdc           = types.ModuleCdc
 	GetSymbol           = dex.GetSymbol
 	SplitSymbol         = dex.SplitSymbol
 )

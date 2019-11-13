@@ -13,6 +13,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdkstore "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -90,6 +91,7 @@ func simpleAddr(s string) sdk.AccAddress {
 }
 
 func Test1(t *testing.T) {
+	codec.RunInitFuncList()
 	tom := simpleAddr("00001")
 	bob := simpleAddr("00002")
 	alice := simpleAddr("00003")
@@ -218,6 +220,7 @@ func Test1(t *testing.T) {
 }
 
 func TestReservedAliases(t *testing.T) {
+	codec.RunInitFuncList()
 	ctx, keeper := newContextAndKeeper("test-1")
 	handlerFunc := NewHandler(*keeper)
 	tom := simpleAddr("00001")

@@ -1,9 +1,15 @@
 package asset
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/coinexchain/dex/modules/asset/internal/keepers"
 	"github.com/coinexchain/dex/modules/asset/internal/types"
 )
+
+func GetModuleCdc() *codec.Codec {
+	return types.ModuleCdc
+}
 
 const (
 	DefaultParamspace    = types.DefaultParamspace
@@ -50,10 +56,6 @@ var (
 	ValidateTokenSymbol        = types.ValidateTokenSymbol
 
 	DefaultParams = types.DefaultParams
-
-	// variable aliases
-
-	ModuleCdc = types.ModuleCdc
 )
 
 type (

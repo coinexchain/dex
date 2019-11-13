@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/authx"
@@ -16,6 +17,7 @@ import (
 )
 
 func Test_queryParams(t *testing.T) {
+	codec.RunInitFuncList()
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := types.DefaultParams()
@@ -31,6 +33,7 @@ func Test_queryParams(t *testing.T) {
 }
 
 func Test_queryBalances(t *testing.T) {
+	codec.RunInitFuncList()
 	testApp := testapp.NewTestApp()
 	ctx := testApp.NewCtx()
 	params := types.DefaultParams()

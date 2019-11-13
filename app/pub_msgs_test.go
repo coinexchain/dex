@@ -8,9 +8,14 @@ import (
 	"github.com/tendermint/tendermint/libs/common"
 
 	"github.com/coinexchain/dex/msgqueue"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+
+	_ "github.com/coinexchain/dex/codec"
 )
 
 func TestCollectKafkaEvents(t *testing.T) {
+	codec.RunInitFuncList()
 	events := []abci.Event{
 		{
 			Type: msgqueue.EventTypeMsgQueue,
@@ -41,6 +46,7 @@ func TestCollectKafkaEvents(t *testing.T) {
 }
 
 func TestDiscardKafkaEvents(t *testing.T) {
+	codec.RunInitFuncList()
 	events := []abci.Event{
 		{Type: msgqueue.EventTypeMsgQueue},
 		{Type: "other"},

@@ -17,9 +17,14 @@ import (
 	"github.com/coinexchain/dex/modules/bankx"
 	"github.com/coinexchain/dex/testutil"
 	dex "github.com/coinexchain/dex/types"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+
+	_ "github.com/coinexchain/dex/codec"
 )
 
 func TestAccount2UnconfirmedTx(t *testing.T) {
+	codec.RunInitFuncList()
 	_, _, toAddr := testutil.KeyPubAddr()
 	key, _, fromAddr := testutil.KeyPubAddr()
 	key2, _, fromAddr2 := testutil.KeyPubAddr()
