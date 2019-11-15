@@ -17,7 +17,9 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	ptypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
+	slashtype "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	stakingtype "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 	supplyexp "github.com/cosmos/cosmos-sdk/x/supply/exported"
 
@@ -132,4 +134,16 @@ type (
 	AccAddressList = []AccAddress
 	CommitInfo     = rootmulti.CommitInfo
 	StoreInfo      = rootmulti.StoreInfo
+
+	Validator                  = stakingtype.Validator
+	Delegation                 = stakingtype.Delegation
+	BondStatus                 = sdk.BondStatus
+	DelegatorStartingInfo      = distr.DelegatorStartingInfo
+	ValidatorHistoricalRewards = distr.ValidatorHistoricalRewards
+	ValidatorCurrentRewards    = distr.ValidatorCurrentRewards
+	ValidatorSlashEvent        = distr.ValidatorSlashEvent
+	DecCoins                   = sdk.DecCoins
+	ValidatorSigningInfo       = slashtype.ValidatorSigningInfo
+	ValAddress                 = sdk.ValAddress
+	ValAddressList             = []ValAddress
 )

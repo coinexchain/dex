@@ -178,6 +178,19 @@ var TypeEntryList = []codon.TypeEntry{
 	{Alias: "AccAddressList", Value: AccAddressList(nil)},
 	{Alias: "CommitInfo", Value: CommitInfo{}},
 	{Alias: "StoreInfo", Value: StoreInfo{}},
+
+	{Alias: "Validator", Value: Validator{}},
+	{Alias: "Delegation", Value: Delegation{}},
+	{Alias: "BondStatus", Value: BondStatus(0)},
+	{Alias: "DelegatorStartingInfo", Value: DelegatorStartingInfo{}},
+	{Alias: "ValidatorHistoricalRewards", Value: ValidatorHistoricalRewards{}},
+	{Alias: "ValidatorCurrentRewards", Value: ValidatorCurrentRewards{}},
+	{Alias: "ValidatorSigningInfo", Value: ValidatorSigningInfo{}},
+	{Alias: "ValidatorSlashEvent", Value: ValidatorSlashEvent{}},
+
+	{Alias: "DecCoins", Value: DecCoins{}},
+	{Alias: "ValAddress", Value: ValAddress{}},
+	{Alias: "ValAddressList", Value: ValAddressList(nil)},
 }
 
 func GenerateCodecFile(w io.Writer) {

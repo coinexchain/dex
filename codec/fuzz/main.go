@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	amino "github.com/tendermint/go-amino"
 
 	"github.com/coinexchain/codon"
@@ -26,6 +27,7 @@ func main() {
 }
 
 func runRandTest(r dexcodec.RandSrc) {
+	codec.RunInitFuncList()
 	leafTypes := dexcodec.GetLeafTypes()
 
 	buf := make([]byte, 0, 4096)
