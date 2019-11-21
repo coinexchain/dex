@@ -51,7 +51,7 @@ func QueryMarketListCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `query all trading-pair infos in blockchain.
 
 Example :
-	cetcli query market trading-pairs
+	cetcli query market trading-pairs \
 	--trust-node=true --chain-id=coinexdex`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarkets)
@@ -67,7 +67,7 @@ func QueryMarketCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `query trading-pair info in blockchain. 
 
 Example : 
-	cetcli query market trading-pair 
+	cetcli query market trading-pair \
 	eth/cet --trust-node=true --chain-id=coinexdex`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -87,7 +87,7 @@ func QueryOrderCmd(cdc *codec.Codec) *cobra.Command {
 		Long: `Query order info in blockchain. 
 
 Example :
-	cetcli query market order-info [orderID] 
+	cetcli query market order-info [orderID] \
 	--trust-node=true --chain-id=coinexdex`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -110,7 +110,7 @@ func QueryUserOrderList(cdc *codec.Codec) *cobra.Command {
 		Long: `Query user order list in blockchain. 
 
 Example:
-	cetcli query market order-list [userAddress] 
+	cetcli query market order-list [userAddress] \
 	--trust-node=true --chain-id=coinexdex`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

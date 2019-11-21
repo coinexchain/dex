@@ -91,8 +91,8 @@ func CancelMarket(cdc *codec.Codec) *cobra.Command {
 		Long: `cancel trading-pair in blockchain at least a week from now. 
 
 Example 
-	cetcli tx market cancel-trading-pair 
-	--time=1000000 --trading-pair=etc/cet --from=bob --chain-id=coinexdex 
+	cetcli tx market cancel-trading-pair \
+	--time=1000000 --trading-pair=etc/cet --from=bob --chain-id=coinexdex \
 	--gas=1000000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			msg, err := getCancelMarketMsg()
@@ -126,8 +126,8 @@ func ModifyTradingPairPricePrecision(cdc *codec.Codec) *cobra.Command {
 		Long: `Modify the price precision of the trading pair in the dex.
 
 Example: 
-	cetcli tx market modify-price-precision --trading-pair=etc/cet
-	--price-precision=9 --from=bob --chain-id=coinexdex 
+	cetcli tx market modify-price-precision --trading-pair=etc/cet \
+	--price-precision=9 --from=bob --chain-id=coinexdex \
 	--gas=10000000 --fees=10000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			msg, err := getModifyTradingPairPricePrecisionMsg(cdc)

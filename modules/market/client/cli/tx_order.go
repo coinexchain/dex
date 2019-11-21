@@ -133,7 +133,7 @@ func CancelOrder(cdc *codec.Codec) *cobra.Command {
 		Long: `cancel order in blockchain. 
 
 Examples:
-	cetcli tx market cancel-order --order-id=[id] 
+	cetcli tx market cancel-order --order-id=[id] \
 	--trust-node=true --from=bob --chain-id=coinexdex`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			msg := &types.MsgCancelOrder{
