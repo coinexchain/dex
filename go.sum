@@ -44,6 +44,8 @@ github.com/coinexchain/cosmos-sdk v0.0.0-20191105122849-557d140a540b h1:N5/VQLuO
 github.com/coinexchain/cosmos-sdk v0.0.0-20191105122849-557d140a540b/go.mod h1:Axr+Q+G2Ffduxt4zMA6KwxxvyVSKPB9+nXZVPKgpC2c=
 github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6 h1:ResmUJSlC5h17IL5ZUAOZCwRZELSLr4m1/VowdLfreM=
 github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6/go.mod h1:erQnv+T5z4Ca0rw18gcd4cfpjHj/wvZHW/zmadISOBI=
+github.com/coinexchain/randsrc v0.1.0 h1:MpgSjc/wy9n2eNnMGYQPoJLl+A0xNAuozkVUvhtvkEg=
+github.com/coinexchain/randsrc v0.1.0/go.mod h1:erQnv+T5z4Ca0rw18gcd4cfpjHj/wvZHW/zmadISOBI=
 github.com/coinexchain/shorthanzi v0.1.0 h1:c4Fcb8GkQ37uLNSQr5SRohmS+aW+WY3doyy7ZuhF0W4=
 github.com/coinexchain/shorthanzi v0.1.0/go.mod h1:g/V5MW70JNcg9/OumUZLp63aDxEQImlYqJ6PMJEIu28=
 github.com/coinexchain/tendermint v0.0.0-20191108024645-d56dafa4d3cd h1:ne3SmyvQUUqnYVswCt9Za36SrIyf1eqC/gx2AYhUyrc=

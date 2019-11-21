@@ -40,6 +40,8 @@ const flagInvCheckPeriod = "inv-check-period"
 var invCheckPeriod uint
 
 func main() {
+	codec.RunInitFuncList()
+
 	plugin.SetReloadPluginSignal(syscall.SIGUSR1)
 	msgqueue.SetMkFifoFunc(syscall.Mkfifo)
 

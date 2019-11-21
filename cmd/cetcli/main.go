@@ -32,6 +32,8 @@ import (
 )
 
 func main() {
+	codec.RunInitFuncList()
+
 	// Configure cobra to sort commands
 	cobra.EnableCommandSorting = false
 
