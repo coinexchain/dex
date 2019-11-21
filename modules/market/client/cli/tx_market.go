@@ -38,7 +38,7 @@ Example :
 	--stock=eth --money=cet --order-precision=8 \
 	--price-precision=8 --gas 20000 --fees=1000cet`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			msg, err := getCreateMarketMsg(cdc)
+			msg, err := getCreateMarketMsg()
 			if err != nil {
 				return err
 			}
@@ -58,7 +58,7 @@ Example :
 	return cmd
 }
 
-func getCreateMarketMsg(cdc *codec.Codec) (*types.MsgCreateTradingPair, error) {
+func getCreateMarketMsg() (*types.MsgCreateTradingPair, error) {
 	msg, err := parseCreateMarketFlags()
 	if err != nil {
 		return nil, errors.Errorf("tx flag is error, please see help : " +
