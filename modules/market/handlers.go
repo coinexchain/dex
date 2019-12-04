@@ -104,17 +104,6 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 		return types.ErrInvalidTokenIssuer()
 	}
 
-	if msg.Money != dex.CET && msg.Stock != dex.CET {
-		sym := GetSymbol(msg.Stock, dex.CET)
-		if _, err := keeper.GetMarketInfo(ctx, sym); err != nil {
-			return types.ErrNotListedAgainstCet(msg.Stock)
-		}
-		dlk := keepers.NewDelistKeeper(keeper.GetMarketKey())
-		if dlk.HasDelistRequest(ctx, sym) {
-			return types.ErrNotListedAgainstCet(msg.Stock)
-		}
-	}
-
 	marketParams := keeper.GetParams(ctx)
 	if !keeper.HasCoins(ctx, msg.Creator, dex.NewCetCoins(marketParams.CreateMarketFee)) {
 		return types.ErrInsufficientCoins()
@@ -446,22 +435,6 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 	stockToken := keeper.GetToken(ctx, info.Stock)
 	if !bytes.Equal(msg.Sender, stockToken.GetOwner()) {
 		return types.ErrNotMatchSender("only stock's owner can cancel a market")
-	}
-
-	if !stockToken.GetTokenForbiddable() {
-		if info.Money == dex.CET {
-			return types.ErrDelistNotAllowed("stock token doesn't have globally forbidden attribute, so its market against CET can not be canceled")
-		}
-	}
-
-	if info.Money == dex.CET && keeper.IsBancorExist(ctx, info.Stock) {
-		return types.ErrDelistNotAllowed(
-			fmt.Sprintf("When %s has bancor contracts, you can't delist the %s/cet market", info.Stock, info.Stock))
-	}
-
-	if info.Money == dex.CET && keeper.MarketCountOfStock(ctx, info.Stock) >= 2 {
-		return types.ErrDelistNotAllowed(
-			fmt.Sprintf("When %s has other market with non-cet token as money, you can't delist the %s/cet market", info.Stock, info.Stock))
 	}
 
 	return nil
