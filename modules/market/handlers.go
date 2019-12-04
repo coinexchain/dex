@@ -104,17 +104,6 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 		return types.ErrInvalidTokenIssuer()
 	}
 
-	if msg.Money != dex.CET && msg.Stock != dex.CET {
-		sym := GetSymbol(msg.Stock, dex.CET)
-		if _, err := keeper.GetMarketInfo(ctx, sym); err != nil {
-			return types.ErrNotListedAgainstCet(msg.Stock)
-		}
-		dlk := keepers.NewDelistKeeper(keeper.GetMarketKey())
-		if dlk.HasDelistRequest(ctx, sym) {
-			return types.ErrNotListedAgainstCet(msg.Stock)
-		}
-	}
-
 	marketParams := keeper.GetParams(ctx)
 	if !keeper.HasCoins(ctx, msg.Creator, dex.NewCetCoins(marketParams.CreateMarketFee)) {
 		return types.ErrInsufficientCoins()
@@ -123,34 +112,50 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 	return nil
 }
 
-func calFrozenFeeInOrder(ctx sdk.Context, marketParams types.Params, keeper keepers.Keeper, msg types.MsgCreateOrder) (int64, sdk.Error) {
-	var frozenFeeDec sdk.Dec
-	stock, _ := SplitSymbol(msg.TradingPair)
+type ParamOfCommissionMsg struct {
+	amountOfMoney sdk.Dec
+	amountOfStock sdk.Dec
+	stock         string
+	money         string
+}
 
-	// Calculate the fee when stock is cet
-	rate := sdk.NewDec(marketParams.MarketFeeRate)
-	div := sdk.NewDec(int64(math.Pow10(types.MarketFeeRatePrecision)))
-	if stock == dex.CET {
-		frozenFeeDec = sdk.NewDec(msg.Quantity).Mul(rate).Quo(div).Ceil()
-	} else {
-		stockSepCet := GetSymbol(stock, dex.CET)
-		marketInfo, err := keeper.GetMarketInfo(ctx, stockSepCet)
-		if err != nil || marketInfo.LastExecutedPrice.IsZero() {
-			frozenFeeDec = sdk.NewDec(marketParams.FixedTradeFee)
-		} else {
-			totalPriceInCet := marketInfo.LastExecutedPrice.Mul(sdk.NewDec(msg.Quantity))
-			frozenFeeDec = totalPriceInCet.Mul(rate).Quo(div).Ceil()
-		}
+func CalCommission(ctx sdk.Context, keeper keepers.QueryMarketInfoAndParams, msg ParamOfCommissionMsg) (int64, sdk.Error) {
+	marketParams := keeper.GetParams(ctx)
+	volume := sdk.ZeroDec()
+	if msg.stock == dex.CET {
+		volume = msg.amountOfStock
+	} else if msg.money == dex.CET {
+		volume = msg.amountOfMoney
+	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(dex.CET, msg.money)); err == nil {
+		volume = msg.amountOfMoney.Quo(marketInfo.LastExecutedPrice)
+	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(dex.CET, msg.stock)); err == nil {
+		volume = msg.amountOfStock.Quo(marketInfo.LastExecutedPrice)
+	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.money, dex.CET)); err == nil {
+		volume = msg.amountOfMoney.Mul(marketInfo.LastExecutedPrice)
+	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.stock, dex.CET)); err == nil {
+		volume = msg.amountOfStock.Mul(marketInfo.LastExecutedPrice)
 	}
-	if frozenFeeDec.GT(sdk.NewDec(types.MaxOrderAmount)) {
+
+	rate := sdk.NewDec(marketParams.MarketFeeRate).QuoInt64(int64(math.Pow10(types.DefaultMarketFeeRatePrecision)))
+	commission := volume.Mul(rate).Ceil().RoundInt64()
+	if commission > types.MaxOrderAmount {
 		return 0, types.ErrInvalidOrderAmount("The frozen fee is too large")
 	}
-	frozenFee := frozenFeeDec.RoundInt64()
-	if frozenFee < marketParams.MarketFeeMin {
-		return 0, types.ErrInvalidOrderCommission(fmt.Sprintf("%d", frozenFee))
+	if commission < marketParams.MarketFeeMin {
+		commission = marketParams.MarketFeeMin
 	}
+	return commission, nil
+}
 
-	return frozenFee, nil
+func calOrderCommission(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCreateOrder) (int64, sdk.Error) {
+	stock, money := SplitSymbol(msg.TradingPair)
+	commissionMsg := ParamOfCommissionMsg{
+		amountOfMoney: sdk.NewDec(msg.Quantity).MulInt64(msg.Price),
+		amountOfStock: sdk.NewDec(msg.Quantity),
+		stock:         stock,
+		money:         money,
+	}
+	return CalCommission(ctx, keeper, commissionMsg)
 }
 
 func calFeatureFeeForExistBlocks(msg types.MsgCreateOrder, marketParam types.Params) int64 {
@@ -237,7 +242,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 		return err.Result()
 	}
 	marketParams := keeper.GetParams(ctx)
-	frozenFee, err := calFrozenFeeInOrder(ctx, marketParams, keeper, msg)
+	frozenFee, err := calOrderCommission(ctx, keeper, msg)
 	if err != nil {
 		return err.Result()
 	}
@@ -446,22 +451,6 @@ func checkMsgCancelTradingPair(keeper keepers.Keeper, msg types.MsgCancelTrading
 	stockToken := keeper.GetToken(ctx, info.Stock)
 	if !bytes.Equal(msg.Sender, stockToken.GetOwner()) {
 		return types.ErrNotMatchSender("only stock's owner can cancel a market")
-	}
-
-	if !stockToken.GetTokenForbiddable() {
-		if info.Money == dex.CET {
-			return types.ErrDelistNotAllowed("stock token doesn't have globally forbidden attribute, so its market against CET can not be canceled")
-		}
-	}
-
-	if info.Money == dex.CET && keeper.IsBancorExist(ctx, info.Stock) {
-		return types.ErrDelistNotAllowed(
-			fmt.Sprintf("When %s has bancor contracts, you can't delist the %s/cet market", info.Stock, info.Stock))
-	}
-
-	if info.Money == dex.CET && keeper.MarketCountOfStock(ctx, info.Stock) >= 2 {
-		return types.ErrDelistNotAllowed(
-			fmt.Sprintf("When %s has other market with non-cet token as money, you can't delist the %s/cet market", info.Stock, info.Stock))
 	}
 
 	return nil

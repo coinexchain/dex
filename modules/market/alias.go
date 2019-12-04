@@ -38,6 +38,7 @@ type (
 	Keeper                  = keepers.Keeper
 	Order                   = types.Order
 	MarketInfo              = types.MarketInfo
+	Params                  = types.Params
 	MsgCreateOrder          = types.MsgCreateOrder
 	MsgCreateTradingPair    = types.MsgCreateTradingPair
 	MsgCancelOrder          = types.MsgCancelOrder

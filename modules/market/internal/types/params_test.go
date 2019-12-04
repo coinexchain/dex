@@ -9,7 +9,6 @@ import (
 func TestParams(t *testing.T) {
 	params := Params{
 		CreateMarketFee:             100,
-		FixedTradeFee:               100,
 		MarketMinExpiredTime:        100,
 		GTEOrderLifetime:            100,
 		GTEOrderFeatureFeeByBlocks:  100,
@@ -21,9 +20,6 @@ func TestParams(t *testing.T) {
 	require.Equal(t, nil, params.ValidateGenesis())
 	params1 := params
 	params1.CreateMarketFee = -1
-	require.NotNil(t, params1.ValidateGenesis())
-	params1 = params
-	params1.FixedTradeFee = -1
 	require.NotNil(t, params1.ValidateGenesis())
 	params1 = params
 	params1.GTEOrderLifetime = -1
