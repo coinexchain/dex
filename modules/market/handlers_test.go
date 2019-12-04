@@ -806,6 +806,7 @@ func TestChargeOrderFee(t *testing.T) {
 	ret = input.handler(input.ctx, msgOrder)
 	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	frozeFee, err = calOrderCommission(input.ctx, input.mk, msgOrder)
+	require.Nil(t, err)
 	totalFreeze = dex.NewCetCoin(frozeFee).Add(frozeCoin)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, totalFreeze), "The amount is error ")
@@ -938,7 +939,7 @@ func TestCalFeatureFeeForExistBlocks(t *testing.T) {
 	require.Equal(t, int64(200010), fee)
 }
 
-func TestcalOrderCommission(t *testing.T) {
+func TestCalOrderCommission(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	param := types.Params{MarketFeeRate: 10, MarketFeeMin: 21}
 	input.mk.SetParams(input.ctx, param)

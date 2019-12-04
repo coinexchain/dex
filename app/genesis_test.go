@@ -131,7 +131,6 @@ func TestDefaultGenesisState(t *testing.T) {
 	var marketData market.GenesisState
 	market.ModuleCdc.MustUnmarshalJSON(state[market.ModuleName], &marketData)
 	require.Equal(t, int64(10000e8), marketData.Params.CreateMarketFee)
-	require.Equal(t, int64(1000000), marketData.Params.FixedTradeFee)
 	require.Equal(t, int64(604800e9), marketData.Params.MarketMinExpiredTime)
 	require.EqualValues(t, 100000, marketData.Params.GTEOrderLifetime)
 	require.Equal(t, int64(10), marketData.Params.GTEOrderFeatureFeeByBlocks)
