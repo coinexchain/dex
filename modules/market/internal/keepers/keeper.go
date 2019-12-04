@@ -14,6 +14,11 @@ import (
 	"github.com/coinexchain/dex/msgqueue"
 )
 
+type QueryMarketInfoAndParams interface {
+	GetParams(ctx sdk.Context) types.Params
+	GetMarketInfo(ctx sdk.Context, symbol string) (types.MarketInfo, error)
+}
+
 type Keeper struct {
 	paramSubspace params.Subspace
 	marketKey     sdk.StoreKey
@@ -23,7 +28,6 @@ type Keeper struct {
 	ock           *OrderCleanUpDayKeeper
 	gmk           GlobalMarketInfoKeeper
 	msgProducer   msgqueue.MsgSender
-	bancorK       types.ExpectedBancorKeeper
 	ak            auth.AccountKeeper
 }
 
@@ -31,7 +35,6 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 	bnkVal types.ExpectedBankxKeeper, cdcVal *codec.Codec,
 	msgKeeperVal msgqueue.MsgSender,
 	paramstore params.Subspace,
-	bancor types.ExpectedBancorKeeper,
 	ak auth.AccountKeeper) Keeper {
 
 	return Keeper{
@@ -43,7 +46,6 @@ func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
 		ock:           NewOrderCleanUpDayKeeper(key),
 		gmk:           NewGlobalMarketInfoKeeper(key, cdcVal),
 		msgProducer:   msgKeeperVal,
-		bancorK:       bancor,
 		ak:            ak,
 	}
 }
@@ -54,10 +56,6 @@ func (k Keeper) QuerySeqWithAddr(ctx sdk.Context, addr sdk.AccAddress) (uint64, 
 		return acc.GetSequence(), nil
 	}
 	return 0, sdk.ErrUnknownAddress("account does not exist")
-}
-
-func (k Keeper) IsBancorExist(ctx sdk.Context, stock string) bool {
-	return k.bancorK.IsBancorExist(ctx, stock)
 }
 
 func (k Keeper) GetToken(ctx sdk.Context, symbol string) asset.Token {

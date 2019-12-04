@@ -410,7 +410,6 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.cdc,
 		app.msgQueProducer,
 		app.paramsKeeper.Subspace(market.StoreKey),
-		app.bancorKeeper,
 		app.accountKeeper,
 	)
 	// register the staking hooks

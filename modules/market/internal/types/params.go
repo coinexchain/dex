@@ -10,7 +10,6 @@ import (
 
 const (
 	DefaultCreateMarketFee             = 1e12 // 10000 * 10 ^8
-	DefaultFixedTradeFee               = 1000000
 	DefaultGTEOrderLifetime            = 100000
 	DefaultGTEOrderFeatureFeeByBlocks  = 10
 	DefaultMaxExecutedPriceChangeRatio = 25
@@ -35,7 +34,6 @@ var (
 
 type Params struct {
 	CreateMarketFee             int64 `json:"create_market_fee"`
-	FixedTradeFee               int64 `json:"fixed_trade_fee"`
 	MarketMinExpiredTime        int64 `json:"market_min_expired_time"`
 	GTEOrderLifetime            int64 `json:"gte_order_lifetime"`
 	GTEOrderFeatureFeeByBlocks  int64 `json:"gte_order_feature_fee_by_blocks"`
@@ -54,7 +52,6 @@ func ParamKeyTable() params.KeyTable {
 func DefaultParams() Params {
 	return Params{
 		DefaultCreateMarketFee,
-		DefaultFixedTradeFee,
 		int64(DefaultMarketMinExpiredTime),
 		DefaultGTEOrderLifetime,
 		DefaultGTEOrderFeatureFeeByBlocks,
@@ -71,7 +68,6 @@ func DefaultParams() Params {
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyCreateMarketFee, Value: &p.CreateMarketFee},
-		{Key: KeyFixedTradeFee, Value: &p.FixedTradeFee},
 		{Key: keyMarketMinExpiredTime, Value: &p.MarketMinExpiredTime},
 		{Key: KeyGTEOrderLifetime, Value: &p.GTEOrderLifetime},
 		{Key: KeyGTEOrderFeatureFeeByBlocks, Value: &p.GTEOrderFeatureFeeByBlocks},
@@ -86,10 +82,6 @@ func (p *Params) ValidateGenesis() error {
 	if p.CreateMarketFee <= 0 {
 		return fmt.Errorf("%s must be a positive number, is %d", KeyCreateMarketFee, p.CreateMarketFee)
 	}
-	if p.FixedTradeFee < 0 {
-		return fmt.Errorf("%s must be a valid sdk.Coins, is %d", KeyFixedTradeFee, p.FixedTradeFee)
-	}
-
 	if p.MaxExecutedPriceChangeRatio < 0 || p.MarketFeeRate < 0 || p.MarketFeeMin < 0 || p.FeeForZeroDeal < 0 || p.GTEOrderLifetime < 0 || p.GTEOrderFeatureFeeByBlocks < 0 {
 		return fmt.Errorf("params must be positive, MaxExecutedPriceChangeRatio "+
 			": %d, MarketFeeRate: %d, MarketFeeMin: %d, FeeForZeroDeal: %d, GTEOrderLifetime : %d, GTEOrderFeatureFeeByBlocks : %d",
@@ -108,7 +100,6 @@ func (p Params) Equal(p2 Params) bool {
 func (p Params) String() string {
 	return fmt.Sprintf(`Market Params:
   CreateMarketFee:             %d
-  FixedTradeFee:               %d
   MarketMinExpiredTime:        %d
   GTEOrderLifetime:            %d
   GTEOrderFeatureFeeByBlocks:  %d
@@ -117,7 +108,6 @@ func (p Params) String() string {
   MarketFeeMin:                %d
   FeeForZeroDeal:              %d`,
 		p.CreateMarketFee,
-		p.FixedTradeFee,
 		p.MarketMinExpiredTime,
 		p.GTEOrderLifetime,
 		p.GTEOrderFeatureFeeByBlocks,

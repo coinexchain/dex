@@ -288,7 +288,7 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 	paramsKeeper := params.NewKeeper(cdc, keys.keyParams, keys.tkeyParams, params.DefaultCodespace)
 	// akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
 	mk := keepers.NewKeeper(keys.marketKey, ak, bk, cdc,
-		msgqueue.NewProducer(nil), paramsKeeper.Subspace(types.StoreKey), mockBancorKeeper{}, akp)
+		msgqueue.NewProducer(nil), paramsKeeper.Subspace(types.StoreKey), akp)
 	types.RegisterCodec(cdc)
 
 	// akp := auth.NewAccountKeeper(cdc, keys.authCapKey, paramsKeeper.Subspace(auth.StoreKey), auth.ProtoBaseAccount)
@@ -525,9 +525,6 @@ func TestCreateOrderSuccess(t *testing.T) {
 		Side:           types.SELL,
 		TimeInForce:    types.GTE,
 	}
-
-	param := input.mk.GetParams(input.ctx)
-
 	ret := createCetMarket(input, stock, 10)
 	require.Equal(t, true, ret.IsOK(), "create market should succeed")
 
@@ -564,8 +561,9 @@ func TestCreateOrderSuccess(t *testing.T) {
 	newCoin = input.getCoinFromAddr(haveCetAddress, dex.CET)
 	frozen, _ := calculateAmount(msgIOCOrder.Price, msgIOCOrder.Quantity, msgIOCOrder.PricePrecision)
 	frozenMoney = sdk.NewCoin(dex.CET, frozen.RoundInt())
-	frozenFee := sdk.NewCoin(dex.CET, sdk.NewInt(param.FixedTradeFee))
-	totalFrozen := frozenMoney.Add(frozenFee)
+	frozenFee, err := calOrderCommission(input.ctx, input.mk, msgIOCOrder)
+	require.Nil(t, err)
+	totalFrozen := frozenMoney.Add(sdk.Coin{Denom: dex.CET, Amount: sdk.NewInt(frozenFee)})
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCoin, newCoin, totalFrozen), "The amount is error")
 
@@ -756,7 +754,6 @@ func TestChargeOrderFee(t *testing.T) {
 	input := prepareMockInput(t, false, false)
 	ret := createCetMarket(input, stock, 0)
 	require.Equal(t, true, ret.IsOK(), "create market should success")
-	param := input.mk.GetParams(input.ctx)
 
 	msgOrder := types.MsgCreateOrder{
 		Sender:         haveCetAddress,
@@ -776,8 +773,9 @@ func TestChargeOrderFee(t *testing.T) {
 	newCetCoin := input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	frozen, _ := calculateAmount(msgOrder.Price, msgOrder.Quantity, msgOrder.PricePrecision)
 	frozeCoin := dex.NewCetCoin(frozen.RoundInt64())
-	frozeFee := dex.NewCetCoin(param.FixedTradeFee)
-	totalFreeze := frozeCoin.Add(frozeFee)
+	frozeFee, err := calOrderCommission(input.ctx, input.mk, msgOrder)
+	require.Nil(t, err)
+	totalFreeze := frozeCoin.Add(sdk.Coin{Denom: dex.CET, Amount: sdk.NewInt(frozeFee)})
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, totalFreeze), "The amount is error ")
 
@@ -789,14 +787,15 @@ func TestChargeOrderFee(t *testing.T) {
 	stockIsCetOrder.TradingPair = GetSymbol(dex.CET, stock)
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	ret = input.handler(input.ctx, stockIsCetOrder)
+	require.EqualValues(t, sdk.CodeOK, ret.Code)
 	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
-	rate := sdk.NewDec(param.MarketFeeRate).Quo(sdk.NewDec(int64(math.Pow10(types.MarketFeeRatePrecision))))
-	frozeFee = dex.NewCetCoin(sdk.NewDec(stockIsCetOrder.Quantity).Mul(rate).RoundInt64())
+	frozeFee, err = calOrderCommission(input.ctx, input.mk, stockIsCetOrder)
+	require.Nil(t, err)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
-	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, frozeFee), "The amount is error ")
+	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, dex.NewCetCoin(frozeFee)), "The amount is error ")
 
-	marketInfo, err := input.mk.GetMarketInfo(input.ctx, msgOrder.TradingPair)
-	require.Equal(t, nil, err, "get %s market failed", msgOrder.TradingPair)
+	marketInfo, fail := input.mk.GetMarketInfo(input.ctx, msgOrder.TradingPair)
+	require.Equal(t, nil, fail, "get %s market failed", msgOrder.TradingPair)
 	marketInfo.LastExecutedPrice = sdk.NewDec(12)
 	err = input.mk.SetMarket(input.ctx, marketInfo)
 	require.Equal(t, nil, err, "set %s market failed", msgOrder.TradingPair)
@@ -806,8 +805,8 @@ func TestChargeOrderFee(t *testing.T) {
 	oldCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
 	ret = input.handler(input.ctx, msgOrder)
 	newCetCoin = input.getCoinFromAddr(msgOrder.Sender, dex.CET)
-	frozeFee = dex.NewCetCoin(marketInfo.LastExecutedPrice.MulInt64(msgOrder.Quantity).Mul(rate).RoundInt64())
-	totalFreeze = frozeFee.Add(frozeCoin)
+	frozeFee, err = calOrderCommission(input.ctx, input.mk, msgOrder)
+	totalFreeze = dex.NewCetCoin(frozeFee).Add(frozeCoin)
 	require.Equal(t, true, ret.IsOK(), "create Ioc order should succeed ; ", ret.Log)
 	require.Equal(t, true, IsEqual(oldCetCoin, newCetCoin, totalFreeze), "The amount is error ")
 }
@@ -939,103 +938,157 @@ func TestCalFeatureFeeForExistBlocks(t *testing.T) {
 	require.Equal(t, int64(200010), fee)
 }
 
-func TestCalFrozenFeeInOrder(t *testing.T) {
+func TestcalOrderCommission(t *testing.T) {
 	input := prepareMockInput(t, false, false)
+	param := types.Params{MarketFeeRate: 10, MarketFeeMin: 21}
+	input.mk.SetParams(input.ctx, param)
+
+	// Stock is CET, commission = quantity * rate
+	orderInfo := MsgCreateOrder{
+		Price:       1,
+		Quantity:    10000,
+		TradingPair: GetSymbol(dex.CET, money),
+	}
+
+	// commission < MarketFeeMin
+	cal, err := calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 21, cal)
+
+	// commission > MarketFeeMin
+	orderInfo.Quantity = 30000
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 30, cal)
+
+	// Money is CET, commission = Quantity * Price * rate
+	orderInfo.TradingPair = GetSymbol(stock, dex.CET)
+	orderInfo.Quantity = 10000
+
+	// commission < MarketFeeMin
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 21, cal)
+
+	// commission > MarketFeeMin
+	orderInfo.Price = 3
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 30, cal)
+
+	// create necessary market
 	mkInfo := MarketInfo{
-		Stock:             "abc",
-		Money:             "cet",
+		Stock:             stock,
+		Money:             money,
 		LastExecutedPrice: sdk.NewDec(0),
 		PricePrecision:    1,
 		OrderPrecision:    3,
 	}
 
-	err := input.mk.SetMarket(input.ctx, mkInfo)
-	require.Nil(t, err)
-
-	checkInfo, failed := input.mk.GetMarketInfo(input.ctx, GetSymbol(mkInfo.Stock, mkInfo.Money))
-	require.Nil(t, failed)
-	require.EqualValues(t, mkInfo, checkInfo)
-
-	param := types.Params{MarketFeeRate: 10, FixedTradeFee: 0}
-	orderInfo := MsgCreateOrder{
-		Price:       1,
-		Quantity:    10000,
-		TradingPair: GetSymbol(mkInfo.Stock, mkInfo.Money),
-	}
-
-	// LastExecutedPrice is zero, MarketFeeMin is zero, FixedTradeFee is zero
-	cal, err := calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
-	require.Nil(t, err)
-	require.EqualValues(t, 0, cal)
-
-	// LastExecutedPrice is zero, MarketFeeMin is 100, FixedTradeFee is zero
-	param.MarketFeeMin = 100
-	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
-	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeInvalidOrderCommission, err.Code())
-
-	// LastExecutedPrice is zero, MarketFeeMin is 100, FixedTradeFee is 10
-	param.MarketFeeMin = 100
-	param.FixedTradeFee = 10
-	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
-	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeInvalidOrderCommission, err.Code())
-
-	// LastExecutedPrice is zero, MarketFeeMin is 100, FixedTradeFee is 200
-	param.MarketFeeMin = 100
-	param.FixedTradeFee = 200
-	cal, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
-	require.Nil(t, err)
-	require.EqualValues(t, 200, cal)
-
-	mkInfo.LastExecutedPrice = sdk.NewDec(10)
-	err = input.mk.SetMarket(input.ctx, mkInfo)
-	require.Nil(t, err)
-	checkInfo, failed = input.mk.GetMarketInfo(input.ctx, GetSymbol(mkInfo.Stock, mkInfo.Money))
-	require.Nil(t, failed)
-	require.EqualValues(t, mkInfo, checkInfo)
-
-	// LastExecutedPrice is 10, MarketFeeMin is 200; actual 10 * 10000 * (1 / 1000) = 100
-	param.MarketFeeMin = 200
-	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
-	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeInvalidOrderCommission, err.Code())
-
-	// LastExecutedPrice is 10, MarketFeeMin is 100; actual 10 * 10000 * (1 / 1000) = 100
-	param.MarketFeeMin = 100
-	cal, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
-	require.Nil(t, err)
-	require.EqualValues(t, 100, cal)
-
-	// LastExecutedPrice is 10, MarketFeeMin is 100, MarketFeeRate is 10000; actual 10 * 1e18 = 1e19
-	param.MarketFeeRate = 10000
-	orderInfo.Quantity = types.MaxOrderAmount
-	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
-	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code())
-
 	mkInfo.Stock = dex.CET
-	mkInfo.Money = "abc"
+	mkInfo.LastExecutedPrice = sdk.NewDec(2)
 	err = input.mk.SetMarket(input.ctx, mkInfo)
 	require.Nil(t, err)
-	checkInfo, failed = input.mk.GetMarketInfo(input.ctx, GetSymbol(mkInfo.Stock, mkInfo.Money))
-	require.Nil(t, failed)
-	require.EqualValues(t, mkInfo, checkInfo)
 
-	// LastExecutedPrice is 10, MarketFeeMin is 100, MarketFeeRate is 10000; actual 1000
-	orderInfo.Quantity = 1000
-	orderInfo.TradingPair = GetSymbol(mkInfo.Stock, mkInfo.Money)
-	cal, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
+	mkInfo.Money = stock
+	mkInfo.LastExecutedPrice = sdk.NewDec(3)
+	err = input.mk.SetMarket(input.ctx, mkInfo)
 	require.Nil(t, err)
-	require.EqualValues(t, 1000, cal)
 
-	// LastExecutedPrice is 10, MarketFeeMin is 10000, MarketFeeRate is 10000; actual 1000
-	param.MarketFeeMin = 10000
-	orderInfo.Quantity = 1000
-	orderInfo.TradingPair = GetSymbol(mkInfo.Stock, mkInfo.Money)
-	_, err = calFrozenFeeInOrder(input.ctx, param, input.mk, orderInfo)
-	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeInvalidOrderCommission, err.Code())
+	mkInfo.Stock = money
+	mkInfo.Money = dex.CET
+	mkInfo.LastExecutedPrice = sdk.NewDec(4)
+	err = input.mk.SetMarket(input.ctx, mkInfo)
+	require.Nil(t, err)
+
+	mkInfo.Stock = stock
+	mkInfo.LastExecutedPrice = sdk.NewDec(5)
+	err = input.mk.SetMarket(input.ctx, mkInfo)
+	require.Nil(t, err)
+
+	// When CET/money exist, and cet/money lastPrice = 2; commission = quantity * price / lastPrice
+	orderInfo.TradingPair = GetSymbol(stock, money)
+	orderInfo.Quantity = 10000
+	orderInfo.Price = 2
+
+	// commission < MarketFeeMin; 10000*2/2*0.1% < 21
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 21, cal)
+
+	// commission > MarketFeeMin; 40000 * 2 / 2 * 0.1% > 21
+	orderInfo.Quantity = 40000
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 40, cal)
+
+	// del cet/money market
+	err = input.mk.RemoveMarket(input.ctx, GetSymbol(dex.CET, money))
+	require.Nil(t, err)
+
+	// When CET/stock exist, and cet/stock lastPrice = 3; commission = quantity / lastPrice
+	// commission < MarketFeeMin; 30000 * / 3 * 0.1% < 21
+	orderInfo.Quantity = 30000
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 21, cal)
+
+	// commission > MarketFeeMin; 90000 * / 3 * 0.1% < 21
+	orderInfo.Quantity = 90000
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 30, cal)
+
+	// del cet/stock market
+	err = input.mk.RemoveMarket(input.ctx, GetSymbol(dex.CET, stock))
+	require.Nil(t, err)
+
+	// When money/cet exist, and money/cet lastPrice = 4; commission = quantity * price * lastPrice
+	// commission < MarketFeeMin; 2000 * 2 * 4 * 0.1% < 21
+	orderInfo.Quantity = 2000
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 21, cal)
+
+	// commission < MarketFeeMin; 10000 * 2 * 4 * 0.1% > 21
+	orderInfo.Quantity = 10000
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 80, cal)
+
+	// del monet/cet market
+	err = input.mk.RemoveMarket(input.ctx, GetSymbol(money, dex.CET))
+	require.Nil(t, err)
+
+	// When stock/cet exist, and stock/cet lastPrice = 5; commission = quantity * lastPrice
+	// commission < MarketFeeMin; 2000 * 5 * 0.1% < 21
+	orderInfo.Quantity = 2000
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 21, cal)
+
+	// commission > MarketFeeMin; 2000 * 5 * 0.1% < 21
+	orderInfo.Quantity = 10000
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 50, cal)
+
+	// del stock/cet market
+	err = input.mk.RemoveMarket(input.ctx, GetSymbol(stock, dex.CET))
+	require.Nil(t, err)
+
+	// commission must equal MarketFeeMin;
+	orderInfo.Quantity = 100000000
+	orderInfo.Price = 49
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 21, cal)
+
+	orderInfo.Quantity = 1
+	orderInfo.Price = 1
+	cal, err = calOrderCommission(input.ctx, input.mk, orderInfo)
+	require.Nil(t, err)
+	require.EqualValues(t, 21, cal)
 }
 
 func TestCheckMsgCreateOrder(t *testing.T) {

@@ -84,8 +84,6 @@ func TestKeeper_FreezeCoins(t *testing.T) {
 
 	no = keeper.IsSubScribed("msg")
 	assert.False(t, no)
-	exist := keeper.IsBancorExist(ctx, "abc")
-	assert.False(t, exist)
 
 	err = keeper.GetBankxKeeper().UnFreezeCoins(ctx, alice, coin)
 	assert.Nil(t, err)

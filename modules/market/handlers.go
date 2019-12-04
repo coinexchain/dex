@@ -112,25 +112,31 @@ func checkMsgCreateTradingPair(ctx sdk.Context, msg types.MsgCreateTradingPair, 
 	return nil
 }
 
-func CalOrderCommission(ctx sdk.Context, marketParams types.Params, keeper keepers.Keeper, msg types.MsgCreateOrder) (int64, sdk.Error) {
-	stock, money := SplitSymbol(msg.TradingPair)
-	volume := sdk.ZeroDec()
+type ParamOfCommissionMsg struct {
+	amountOfMoney sdk.Dec
+	amountOfStock sdk.Dec
+	stock         string
+	money         string
+}
 
-	if stock == dex.CET {
-		volume = sdk.NewDec(msg.Quantity)
-	} else if money == dex.CET {
-		volume = sdk.NewDec(msg.Quantity).MulInt64(msg.Price)
-	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(dex.CET, money)); err != nil {
-		volume = sdk.NewDec(msg.Quantity).MulInt64(msg.Price).Quo(marketInfo.LastExecutedPrice)
-	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(dex.CET, stock)); err != nil {
-		volume = sdk.NewDec(msg.Quantity).Quo(marketInfo.LastExecutedPrice)
-	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(money, dex.CET)); err != nil {
-		volume = sdk.NewDec(msg.Quantity).MulInt64(msg.Price).Mul(marketInfo.LastExecutedPrice)
-	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(stock, dex.CET)); err != nil {
-		volume = sdk.NewDec(msg.Quantity).Mul(marketInfo.LastExecutedPrice)
+func CalCommission(ctx sdk.Context, keeper keepers.QueryMarketInfoAndParams, msg ParamOfCommissionMsg) (int64, sdk.Error) {
+	marketParams := keeper.GetParams(ctx)
+	volume := sdk.ZeroDec()
+	if msg.stock == dex.CET {
+		volume = msg.amountOfStock
+	} else if msg.money == dex.CET {
+		volume = msg.amountOfMoney
+	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(dex.CET, msg.money)); err == nil {
+		volume = msg.amountOfMoney.Quo(marketInfo.LastExecutedPrice)
+	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(dex.CET, msg.stock)); err == nil {
+		volume = msg.amountOfStock.Quo(marketInfo.LastExecutedPrice)
+	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.money, dex.CET)); err == nil {
+		volume = msg.amountOfMoney.Mul(marketInfo.LastExecutedPrice)
+	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.stock, dex.CET)); err == nil {
+		volume = msg.amountOfStock.Mul(marketInfo.LastExecutedPrice)
 	}
 
-	rate := sdk.NewDec(marketParams.MarketFeeRate).QuoInt64(types.DefaultMarketFeeRatePrecision)
+	rate := sdk.NewDec(marketParams.MarketFeeRate).QuoInt64(int64(math.Pow10(types.DefaultMarketFeeRatePrecision)))
 	commission := volume.Mul(rate).Ceil().RoundInt64()
 	if commission > types.MaxOrderAmount {
 		return 0, types.ErrInvalidOrderAmount("The frozen fee is too large")
@@ -139,6 +145,17 @@ func CalOrderCommission(ctx sdk.Context, marketParams types.Params, keeper keepe
 		commission = marketParams.MarketFeeMin
 	}
 	return commission, nil
+}
+
+func calOrderCommission(ctx sdk.Context, keeper keepers.Keeper, msg types.MsgCreateOrder) (int64, sdk.Error) {
+	stock, money := SplitSymbol(msg.TradingPair)
+	commissionMsg := ParamOfCommissionMsg{
+		amountOfMoney: sdk.NewDec(msg.Quantity).MulInt64(msg.Price),
+		amountOfStock: sdk.NewDec(msg.Quantity),
+		stock:         stock,
+		money:         money,
+	}
+	return CalCommission(ctx, keeper, commissionMsg)
 }
 
 func calFeatureFeeForExistBlocks(msg types.MsgCreateOrder, marketParam types.Params) int64 {
@@ -225,7 +242,7 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 		return err.Result()
 	}
 	marketParams := keeper.GetParams(ctx)
-	frozenFee, err := CalOrderCommission(ctx, marketParams, keeper, msg)
+	frozenFee, err := calOrderCommission(ctx, keeper, msg)
 	if err != nil {
 		return err.Result()
 	}
