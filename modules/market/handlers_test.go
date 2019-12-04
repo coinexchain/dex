@@ -343,7 +343,8 @@ func TestMarketInfoSetFailed(t *testing.T) {
 	// failed by not have cet trade
 	failedNotHaveCetTrade := msgMarket
 	ret = input.handler(input.ctx, failedNotHaveCetTrade)
-	require.Equal(t, types.CodeNotListedAgainstCet, ret.Code, "create market info should failed")
+	require.EqualValues(t, sdk.CodeOK, ret.Code)
+	remainCoin = remainCoin.Sub(dex.NewCetCoin(types.DefaultCreateMarketFee))
 	require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
 }
 
@@ -668,10 +669,10 @@ func TestCancelMarketFailed(t *testing.T) {
 	ret := input.handler(input.ctx, failedTime)
 	require.Equal(t, types.CodeInvalidCancelTime, ret.Code, "cancel order should failed by invalid cancel time")
 
-	//failedSymbol := msgCancelMarket
-	//failedSymbol.TradingPair = GetSymbol(stock, "not exist")
-	//ret = input.handler(input.ctx, failedSymbol)
-	//require.Equal(t, types.CodeInvalidSymbol, ret.Code, "cancel order should failed by invalid symbol")
+	failedSymbol := msgCancelMarket
+	failedSymbol.TradingPair = GetSymbol(stock, "not exist")
+	ret = input.handler(input.ctx, failedSymbol)
+	require.Equal(t, types.CodeInvalidMarket, ret.Code, "cancel order should failed by invalid symbol")
 
 	failedSender := msgCancelMarket
 	failedSender.Sender = notHaveCetAddress
@@ -680,7 +681,7 @@ func TestCancelMarketFailed(t *testing.T) {
 
 	failedByNotForbidden := msgCancelMarket
 	ret = input.handler(input.ctx, failedByNotForbidden)
-	require.EqualValues(t, types.CodeDelistNotAllowed, ret.Code)
+	require.EqualValues(t, sdk.CodeOK, ret.Code)
 
 }
 
@@ -724,8 +725,7 @@ func TestCancelMarketAgainstCetFail(t *testing.T) {
 	}
 
 	ret := input.handler(input.ctx, msgCancelMarket)
-	err := types.ErrDelistNotAllowed("When tusdt has other market with non-cet token as money, you can't delist the tusdt/cet market")
-	require.EqualValues(t, err.Result(), ret)
+	require.EqualValues(t, ret.Code, sdk.CodeOK)
 }
 
 func TestCancelMarketFailWhenCetDelist(t *testing.T) {
@@ -749,8 +749,7 @@ func TestCancelMarketFailWhenCetDelist(t *testing.T) {
 		OrderPrecision: 8,
 	}
 	ret = input.handler(input.ctx, msg)
-	require.Equal(t, types.ErrNotListedAgainstCet(stock).Result(), ret)
-
+	require.EqualValues(t, sdk.CodeOK, ret.Code)
 }
 
 func TestChargeOrderFee(t *testing.T) {
@@ -1139,8 +1138,7 @@ func TestCheckMsgCreateTradingPair(t *testing.T) {
 	msg.Money = money
 	msg.Creator = haveCetAddress
 	err = checkMsgCreateTradingPair(input.ctx, msg, input.mk)
-	require.NotNil(t, err)
-	require.EqualValues(t, types.CodeNotListedAgainstCet, err.Code())
+	require.Nil(t, err)
 
 	// Insufficient coin
 	input.mk.SetParams(input.ctx, types.Params{
@@ -1302,7 +1300,7 @@ func TestCheckMsgCancelTradingPair(t *testing.T) {
 	// Token not forbidden when money = cet
 	msg.Sender = haveCetAddress
 	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
-	require.EqualValues(t, types.CodeDelistNotAllowed, err.Code())
+	require.Nil(t, nil)
 
 	// Token not forbidden when money != cet
 	err = input.mk.SetMarket(input.ctx, MarketInfo{
@@ -1338,7 +1336,7 @@ func TestCheckMsgCancelTradingPair(t *testing.T) {
 	// Bancor exist when money = cet
 	bancorExist = true
 	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
-	require.EqualValues(t, types.CodeDelistNotAllowed, err.Code())
+	require.Nil(t, nil)
 
 	// Bancor exist when money != cet
 	err = input.mk.SetMarket(input.ctx, MarketInfo{
