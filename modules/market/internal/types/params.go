@@ -14,7 +14,7 @@ const (
 	DefaultGTEOrderLifetime            = 100000
 	DefaultGTEOrderFeatureFeeByBlocks  = 10
 	DefaultMaxExecutedPriceChangeRatio = 25
-	MarketFeeRatePrecision             = 4
+	DefaultMarketFeeRatePrecision      = 4
 	DefaultMarketFeeRate               = 10
 	DefaultMarketFeeMin                = 1000000
 	DefaultFeeForZeroDeal              = 1000000
