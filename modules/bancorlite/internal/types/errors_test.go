@@ -9,8 +9,6 @@ import (
 func TestErrMsg(t *testing.T) {
 	err := ErrInvalidSymbol()
 	require.Equal(t, CodeInvalidSymbol, err.Code())
-	err = ErrNonMarketExist()
-	require.Equal(t, CodeNonMarketExist, err.Code())
 	err = ErrBancorAlreadyExists()
 	require.Equal(t, CodeBancorAlreadyExists, err.Code())
 	err = ErrNonOwnerIsProhibited()

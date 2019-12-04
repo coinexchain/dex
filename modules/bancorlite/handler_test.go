@@ -76,12 +76,11 @@ func prepareAsset(t *testing.T, tk asset.Keeper, ctx sdk.Context, addrForbid, to
 		false, false, addrForbid, tokenForbid, "", "", asset.TestIdentityString)
 	handler := asset.NewHandler(tk)
 	ret := handler(ctx, msgStock)
-	require.Equal(t, true, ret.IsOK(), "issue token should succeed", ret)
+	require.Equal(t, true, ret.IsOK(), "issue stock should succeed", ret)
 	ret = handler(ctx, msgMoney)
-	require.Equal(t, true, ret.IsOK(), "issue token should succeed", ret)
+	require.Equal(t, true, ret.IsOK(), "issue money should succeed", ret)
 	ret = handler(ctx, msgCet)
-	require.Equal(t, true, ret.IsOK(), "issue token should succeed", ret)
-
+	require.Equal(t, true, ret.IsOK(), "issue cet should succeed", ret)
 }
 
 func prepareAccounts(ctx sdk.Context, ak auth.AccountKeeper) {
@@ -96,7 +95,7 @@ func prepareAccounts(ctx sdk.Context, ak auth.AccountKeeper) {
 		sdk.NewCoin(dex.CET, sdk.NewInt(issueAmount))))
 	ak.SetAccount(ctx, eosacc)
 	onlyIssueToken := ak.NewAccountWithAddress(ctx, notHaveCetAddress)
-	_ = onlyIssueToken.SetCoins(dex.NewCetCoins(asset.DefaultIssueTokenFee))
+	_ = onlyIssueToken.SetCoins(dex.NewCetCoins(asset.DefaultIssue3CharTokenFee))
 	ak.SetAccount(ctx, onlyIssueToken)
 
 	//set module account
@@ -115,7 +114,6 @@ func prepareBankx(ctx sdk.Context, keeper bankx.Keeper) {
 func prepareMarket(ctx sdk.Context, keeper market.Keeper) {
 	keeper.SetParams(ctx, market.DefaultParams())
 	_ = keeper.SetMarket(ctx, market.MarketInfo{Stock: stock, Money: "cet", LastExecutedPrice: sdk.NewDec(1e9)})
-
 }
 
 func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
@@ -228,40 +226,6 @@ func Test_handleMsgBancorInit(t *testing.T) {
 				},
 			},
 			want: types.ErrBancorAlreadyExists().Result().Log,
-		},
-		{
-			name: "market trading pair not exist",
-			args: args{
-				ctx: input.ctx,
-				k:   input.bik,
-				msg: types.MsgBancorInit{
-					Owner:              notHaveCetAddress,
-					Stock:              money,
-					Money:              stock,
-					InitPrice:          "0",
-					MaxSupply:          sdk.NewInt(100),
-					MaxPrice:           "10",
-					EarliestCancelTime: 0,
-				},
-			},
-			want: types.ErrNonMarketExist().Result().Log,
-		},
-		{
-			name: "sender does not have enough stock to sell",
-			args: args{
-				ctx: input.ctx,
-				k:   input.bik,
-				msg: types.MsgBancorInit{
-					Owner:              notHaveCetAddress,
-					Stock:              money,
-					Money:              stock,
-					InitPrice:          "0",
-					MaxSupply:          sdk.NewInt(issueAmount + 1),
-					MaxPrice:           "10",
-					EarliestCancelTime: 0,
-				},
-			},
-			want: types.ErrNonMarketExist().Result().Log,
 		},
 	}
 

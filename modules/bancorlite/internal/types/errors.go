@@ -23,7 +23,6 @@ const (
 	CodeUnMarshalFailed              sdk.CodeType = 1013
 	CodeMarshalFailed                sdk.CodeType = 1014
 	CodeNegativeInitPrice            sdk.CodeType = 1015
-	CodeNonMarketExist               sdk.CodeType = 1016
 	CodeNotBancorOwner               sdk.CodeType = 1017
 	CodeCancelTimeNotArrived         sdk.CodeType = 1018
 	CodeGetMarketExePriceFailed      sdk.CodeType = 1019
@@ -77,10 +76,6 @@ func ErrNoSuchToken() sdk.Error {
 
 func ErrNonOwnerIsProhibited() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeNonOwnerIsProhibited, "Non-owner of this token can not create Bancor pool for it.")
-}
-
-func ErrNonMarketExist() sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite, CodeNonMarketExist, "No corresponding market exist")
 }
 
 func ErrNoBancorExists() sdk.Error {

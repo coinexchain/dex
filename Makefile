@@ -60,7 +60,7 @@ ldflags += -X "github.com/cosmos/cosmos-sdk/version.Name=CoinEx Chain" \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-		  -X github.com/cosmos/cosmos-sdk/types.reDnmString=[a-z][a-z0-9.]{1,7}(\.[a-z])?
+		  -X "github.com/cosmos/cosmos-sdk/types.reDnmString=[a-z][a-z0-9]{1,13}([a-z0-9]{1,2}|(\.[a-z]))?"
 
 
 ifeq ($(WITH_CLEVELDB),yes)

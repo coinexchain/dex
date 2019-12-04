@@ -4,8 +4,15 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
+
+func TestValidateTokenSymbol(t *testing.T) {
+	require.NoError(t, ValidateTokenSymbol("aa34567890123456"))
+	require.Error(t, ValidateTokenSymbol("aa345678901234567"))
+}
 
 func TestBaseToken_Validate(t *testing.T) {
 	tests := []struct {

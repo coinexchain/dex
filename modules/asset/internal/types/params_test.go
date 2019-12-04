@@ -14,6 +14,16 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func TestGetIssueTokenFee(t *testing.T) {
+	p := DefaultParams()
+	require.Equal(t, int64(DefaultIssue2CharTokenFee), p.GetIssueTokenFee("aa"))
+	require.Equal(t, int64(DefaultIssue3CharTokenFee), p.GetIssueTokenFee("aaa"))
+	require.Equal(t, int64(DefaultIssue4CharTokenFee), p.GetIssueTokenFee("aaaa"))
+	require.Equal(t, int64(DefaultIssue5CharTokenFee), p.GetIssueTokenFee("aaaaa"))
+	require.Equal(t, int64(DefaultIssue6CharTokenFee), p.GetIssueTokenFee("aaaaaa"))
+	require.Equal(t, int64(DefaultIssueLongTokenFee), p.GetIssueTokenFee("aaaaaaa"))
+}
+
 func TestParams_Equal(t *testing.T) {
 	p1 := DefaultParams()
 	p2 := DefaultParams()
@@ -43,10 +53,7 @@ func TestParams_ValidateGenesis(t *testing.T) {
 		},
 		{
 			"case-invalidate",
-			Params{
-				0,
-				0,
-			},
+			Params{}, // all zeros
 			true,
 		},
 	}

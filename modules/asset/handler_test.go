@@ -138,8 +138,17 @@ func Test_handleMsg(t *testing.T) {
 }
 
 func Test_IssueToken_DeductFee(t *testing.T) {
+	testIssueTokenDeductFee(t, "abc")
+	testIssueTokenDeductFee(t, "abcd")
+	testIssueTokenDeductFee(t, "abcde")
+	testIssueTokenDeductFee(t, "abcdef")
+	testIssueTokenDeductFee(t, "abcdefg")
+	testIssueTokenDeductFee(t, "abcdefgh")
+	testIssueTokenDeductFee(t, "abcdefghi")
+}
+
+func testIssueTokenDeductFee(t *testing.T, symbol string) {
 	input := createTestInput()
-	symbol := "abc"
 	h := asset.NewHandler(input.tk)
 
 	// invalid account issue token
@@ -156,8 +165,7 @@ func Test_IssueToken_DeductFee(t *testing.T) {
 
 	coins := input.tk.GetAccTotalToken(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(2100), coins.AmountOf(symbol))
-	require.Equal(t, sdk.NewInt(1e18-1e12), coins.AmountOf("cet"))
-
+	require.Equal(t, sdk.NewInt(1e18-types.DefaultParams().GetIssueTokenFee(symbol)), coins.AmountOf("cet"))
 }
 
 func Test_BurnToken_SubtractCoins(t *testing.T) {
@@ -202,5 +210,4 @@ func Test_MintToken_AddCoins(t *testing.T) {
 
 	coins := input.tk.GetAccTotalToken(input.ctx, testAddr)
 	require.Equal(t, sdk.NewInt(2200), coins.AmountOf(symbol))
-
 }

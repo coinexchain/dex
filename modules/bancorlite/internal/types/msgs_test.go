@@ -64,7 +64,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				"10",
 				1000,
 			},
-			ErrInvalidSymbol(),
+			nil,
 		},
 		{
 			"negative supply",

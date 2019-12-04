@@ -35,13 +35,26 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## [v0.0.19]
+## [v0.2.0] \(WIP\)
 
 ### State Machine Breaking
+
+* [CIP0004](https://github.com/coinexchain/CIPs/blob/master/cip-0004.md)
 
 ### API Breaking Changes
 
 ### Client Breaking Changes
+
+Parameter changes: 
+
+| REST Endpoint     | Response Field        | Change          |
+| ----------------- | --------------------- | --------------- |
+| /asset/parameters | issue_3char_token_fee | added new field |
+| /asset/parameters | issue_4char_token_fee | added new field |
+| /asset/parameters | issue_5char_token_fee | added new field |
+| /asset/parameters | issue_6char_token_fee | added new field |
+|                   |                       |                 |
+
 
 ### Features
 

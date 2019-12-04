@@ -46,7 +46,7 @@ func ErrInvalidTokenName(name string) sdk.Error {
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenName, msg)
 }
 func ErrInvalidTokenSymbol(symbol string) sdk.Error {
-	msg := fmt.Sprintf("invalid symbol %s : token symbol not match with [a-z][a-z0-9]{1,7}", symbol)
+	msg := fmt.Sprintf("invalid symbol %s : token symbol not match with [a-z][a-z0-9]{1,15}", symbol)
 	return sdk.NewError(CodeSpaceAsset, CodeInvalidTokenSymbol, msg)
 }
 func ErrInvalidTokenSupply(amt string) sdk.Error {

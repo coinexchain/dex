@@ -39,10 +39,6 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	if !k.IsTokenIssuer(ctx, msg.Stock, msg.Owner) {
 		return types.ErrNonOwnerIsProhibited().Result()
 	}
-	if msg.Money != dex.CET &&
-		!k.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
-		return types.ErrNonMarketExist().Result()
-	}
 	suppliedCoins := sdk.Coins{sdk.NewCoin(msg.Stock, msg.MaxSupply)}
 	if err := k.FreezeCoins(ctx, msg.Owner, suppliedCoins); err != nil {
 		return err.Result()
@@ -108,9 +104,6 @@ func handleMsgBancorCancel(ctx sdk.Context, k Keeper, msg types.MsgBancorCancel)
 	}
 	if ctx.BlockHeader().Time.Unix() < bi.EarliestCancelTime {
 		return types.ErrEarliestCancelTimeNotArrive().Result()
-	}
-	if !k.IsMarketExist(ctx, dex.GetSymbol(msg.Stock, dex.CET)) {
-		return types.ErrNonMarketExist().Result()
 	}
 	fee := k.GetParams(ctx).CancelBancorFee
 	if err := k.DeductInt64CetFee(ctx, msg.Owner, fee); err != nil {
