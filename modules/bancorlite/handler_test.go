@@ -229,40 +229,6 @@ func Test_handleMsgBancorInit(t *testing.T) {
 			},
 			want: types.ErrBancorAlreadyExists().Result().Log,
 		},
-		{
-			name: "market trading pair not exist",
-			args: args{
-				ctx: input.ctx,
-				k:   input.bik,
-				msg: types.MsgBancorInit{
-					Owner:              notHaveCetAddress,
-					Stock:              money,
-					Money:              stock,
-					InitPrice:          "0",
-					MaxSupply:          sdk.NewInt(100),
-					MaxPrice:           "10",
-					EarliestCancelTime: 0,
-				},
-			},
-			want: types.ErrNonMarketExist().Result().Log,
-		},
-		{
-			name: "sender does not have enough stock to sell",
-			args: args{
-				ctx: input.ctx,
-				k:   input.bik,
-				msg: types.MsgBancorInit{
-					Owner:              notHaveCetAddress,
-					Stock:              money,
-					Money:              stock,
-					InitPrice:          "0",
-					MaxSupply:          sdk.NewInt(issueAmount + 1),
-					MaxPrice:           "10",
-					EarliestCancelTime: 0,
-				},
-			},
-			want: types.ErrNonMarketExist().Result().Log,
-		},
 	}
 
 	for _, tt := range tests {
