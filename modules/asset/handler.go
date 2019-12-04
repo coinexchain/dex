@@ -43,10 +43,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 
 // handleMsgIssueToken - Handle MsgIssueToken
 func handleMsgIssueToken(ctx sdk.Context, keeper Keeper, msg types.MsgIssueToken) sdk.Result {
-	issueFee := keeper.GetParams(ctx).IssueTokenFee
-	if len(msg.Symbol) == types.RareSymbolLength {
-		issueFee = keeper.GetParams(ctx).IssueRareTokenFee
-	}
+	issueFee := keeper.GetParams(ctx).GetIssueTokenFee(msg.Symbol)
 
 	if err := keeper.DeductIssueFee(ctx, msg.Owner, issueFee); err != nil {
 		return err.Result()

@@ -53,7 +53,6 @@ func (t testInput) getCoinFromAddr(addr sdk.AccAddress, denom string) (cetCoin s
 }
 
 func (t testInput) hasCoins(addr sdk.AccAddress, coins sdk.Coins) bool {
-
 	coinsStore := t.akp.GetAccount(t.ctx, addr).GetCoins()
 	if len(coinsStore) < len(coins) {
 		return false
@@ -189,7 +188,7 @@ func prepareAssetKeeper(t *testing.T, keys storeKeys, cdc *codec.Codec, ctx sdk.
 		sdk.NewCoin(dex.CET, sdk.NewInt(issueAmount))))
 	ak.SetAccount(ctx, usdtacc)
 	onlyIssueToken := ak.NewAccountWithAddress(ctx, notHaveCetAddress)
-	onlyIssueToken.SetCoins(dex.NewCetCoins(asset.DefaultIssueTokenFee))
+	onlyIssueToken.SetCoins(dex.NewCetCoins(asset.DefaultIssue3CharTokenFee))
 	ak.SetAccount(ctx, onlyIssueToken)
 
 	// issue tokens
@@ -302,7 +301,9 @@ func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
 
 func TestMarketInfoSetFailed(t *testing.T) {
 	input := prepareMockInput(t, false, true)
-	remainCoin := dex.NewCetCoin(OriginHaveCetAmount + issueAmount - asset.DefaultIssueTokenFee*2)
+	remainCoin := dex.NewCetCoin(OriginHaveCetAmount + issueAmount - asset.DefaultIssue4CharTokenFee*2 - asset.DefaultIssue5CharTokenFee)
+	require.Equal(t, true, input.hasCoins(haveCetAddress, sdk.Coins{remainCoin}), "The amount is error")
+
 	msgMarket := types.MsgCreateTradingPair{
 		Stock:          stock,
 		Money:          money,
@@ -361,7 +362,6 @@ func createCetMarket(input testInput, stock string, orderPrecision byte) sdk.Res
 }
 
 func IsEqual(old, new sdk.Coin, diff sdk.Coin) bool {
-
 	return old.IsEqual(new.Add(diff))
 }
 
@@ -508,7 +508,6 @@ func TestCreateOrderFiledByOrderPrecision(t *testing.T) {
 			require.Equal(t, types.CodeInvalidOrderAmount, ret.Code, "invalid order amount, must be a multiple of granularity ")
 		}
 	}
-
 }
 
 func TestCreateOrderSuccess(t *testing.T) {
@@ -681,7 +680,6 @@ func TestCancelMarketFailed(t *testing.T) {
 	failedByNotForbidden := msgCancelMarket
 	ret = input.handler(input.ctx, failedByNotForbidden)
 	require.EqualValues(t, types.CodeDelistNotAllowed, ret.Code)
-
 }
 
 func TestCancelMarketSuccess(t *testing.T) {
@@ -750,7 +748,6 @@ func TestCancelMarketFailWhenCetDelist(t *testing.T) {
 	}
 	ret = input.handler(input.ctx, msg)
 	require.Equal(t, types.ErrNotListedAgainstCet(stock).Result(), ret)
-
 }
 
 func TestChargeOrderFee(t *testing.T) {
@@ -1220,7 +1217,6 @@ func TestGetDenomAndOrderAmount(t *testing.T) {
 	_, _, err = getDenomAndOrderAmount(msg)
 	require.NotNil(t, err)
 	require.EqualValues(t, types.CodeInvalidOrderAmount, err.Code())
-
 }
 
 func TestCheckMsgCancelOrder(t *testing.T) {
@@ -1263,7 +1259,6 @@ func TestCheckMsgCancelOrder(t *testing.T) {
 	failed = checkMsgCancelOrder(input.ctx, msg, input.mk)
 	require.NotNil(t, failed)
 	require.EqualValues(t, types.CodeNotMatchSender, failed.Code())
-
 }
 
 func TestCheckMsgCancelTradingPair(t *testing.T) {
@@ -1355,7 +1350,6 @@ func TestCheckMsgCancelTradingPair(t *testing.T) {
 	bancorExist = false
 	err = checkMsgCancelTradingPair(input.mk, msg, input.ctx)
 	require.Nil(t, err)
-
 }
 
 func TestCheckMsgModifyPricePrecision(t *testing.T) {

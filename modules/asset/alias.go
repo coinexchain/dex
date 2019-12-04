@@ -6,22 +6,24 @@ import (
 )
 
 const (
-	DefaultParamspace    = types.DefaultParamspace
-	ModuleName           = types.ModuleName
-	StoreKey             = types.StoreKey
-	QuerierRoute         = types.QuerierRoute
-	RouterKey            = types.RouterKey
-	QueryToken           = types.QueryToken
-	QueryTokenList       = types.QueryTokenList
-	QueryWhitelist       = types.QueryWhitelist
-	QueryForbiddenAddr   = types.QueryForbiddenAddr
-	QueryParameters      = types.QueryParameters
-	QueryReservedSymbols = types.QueryReservedSymbols
-	MaxTokenAmount       = types.MaxTokenAmount
-	RareSymbolLength     = types.RareSymbolLength
-
-	DefaultIssueTokenFee     = types.DefaultIssueTokenFee
-	DefaultIssueRareTokenFee = types.DefaultIssueRareTokenFee
+	DefaultParamspace         = types.DefaultParamspace
+	ModuleName                = types.ModuleName
+	StoreKey                  = types.StoreKey
+	QuerierRoute              = types.QuerierRoute
+	RouterKey                 = types.RouterKey
+	QueryToken                = types.QueryToken
+	QueryTokenList            = types.QueryTokenList
+	QueryWhitelist            = types.QueryWhitelist
+	QueryForbiddenAddr        = types.QueryForbiddenAddr
+	QueryParameters           = types.QueryParameters
+	QueryReservedSymbols      = types.QueryReservedSymbols
+	MaxTokenAmount            = types.MaxTokenAmount
+	DefaultIssueTokenFee      = types.DefaultIssueLongTokenFee
+	DefaultIssue2CharTokenFee = types.DefaultIssue2CharTokenFee
+	DefaultIssue3CharTokenFee = types.DefaultIssue3CharTokenFee
+	DefaultIssue4CharTokenFee = types.DefaultIssue4CharTokenFee
+	DefaultIssue5CharTokenFee = types.DefaultIssue5CharTokenFee
+	DefaultIssue6CharTokenFee = types.DefaultIssue6CharTokenFee
 )
 
 var (

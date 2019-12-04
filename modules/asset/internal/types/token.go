@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -94,11 +95,8 @@ type BaseToken struct {
 
 //nolint
 var (
-	// suffixSymbolRegex : Only CET owner can issue .suffix token
-	suffixSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}\\.[a-z]$")
-
 	// tokenSymbolRegex : Token symbol can be 2 ~ 8 characters long.
-	tokenSymbolRegex = regexp.MustCompile("^[a-z][a-z0-9]{1,7}(\\.[a-z])?$")
+	tokenSymbolRegex = regexp.MustCompile(`^[a-z][a-z0-9]{1,13}([a-z0-9]{1,2}|(\.[a-z]))?$`)
 )
 
 // NewToken - new base token
@@ -205,7 +203,7 @@ func ValidateTokenSymbol(symbol string) sdk.Error {
 }
 
 func IsSuffixSymbol(symbol string) bool {
-	return suffixSymbolRegex.MatchString(symbol)
+	return strings.IndexByte(symbol, '.') >= 0
 }
 
 func (t *BaseToken) SetSymbol(symbol string) sdk.Error {

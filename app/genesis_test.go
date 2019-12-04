@@ -112,8 +112,12 @@ func TestDefaultGenesisState(t *testing.T) {
 	// asset
 	var assetData asset.GenesisState
 	asset.ModuleCdc.MustUnmarshalJSON(state[asset.ModuleName], &assetData)
-	require.Equal(t, int64(10000e8), assetData.Params.IssueTokenFee)
 	require.Equal(t, int64(100000e8), assetData.Params.IssueRareTokenFee)
+	require.Equal(t, int64(10000e8), assetData.Params.Issue3CharTokenFee)
+	require.Equal(t, int64(5000e8), assetData.Params.Issue4CharTokenFee)
+	require.Equal(t, int64(2000e8), assetData.Params.Issue5CharTokenFee)
+	require.Equal(t, int64(1000e8), assetData.Params.Issue6CharTokenFee)
+	require.Equal(t, int64(500e8), assetData.Params.IssueTokenFee)
 
 	// bancor
 	var bancorData bancorlite.GenesisState

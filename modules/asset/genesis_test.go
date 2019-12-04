@@ -99,7 +99,11 @@ func TestGenesis(t *testing.T) {
 
 	export := asset.ExportGenesis(input.ctx, input.tk)
 	require.Equal(t, int64(asset.DefaultIssueTokenFee), export.Params.IssueTokenFee)
-	require.Equal(t, int64(asset.DefaultIssueRareTokenFee), export.Params.IssueRareTokenFee)
+	require.Equal(t, int64(asset.DefaultIssue2CharTokenFee), export.Params.IssueRareTokenFee)
+	require.Equal(t, int64(asset.DefaultIssue3CharTokenFee), export.Params.Issue3CharTokenFee)
+	require.Equal(t, int64(asset.DefaultIssue4CharTokenFee), export.Params.Issue4CharTokenFee)
+	require.Equal(t, int64(asset.DefaultIssue5CharTokenFee), export.Params.Issue5CharTokenFee)
+	require.Equal(t, int64(asset.DefaultIssue6CharTokenFee), export.Params.Issue6CharTokenFee)
 	require.Equal(t, 2, len(export.Tokens))
 	require.Equal(t, whitelist, export.Whitelist)
 	require.Equal(t, forbiddenList, export.ForbiddenAddresses)

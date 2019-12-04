@@ -8,7 +8,6 @@ import (
 )
 
 func TestMsgIssueToken_ValidateBasic(t *testing.T) {
-
 	tests := []struct {
 		name string
 		msg  MsgIssueToken
@@ -46,9 +45,9 @@ func TestMsgIssueToken_ValidateBasic(t *testing.T) {
 		},
 		{
 			"case-symbol3",
-			NewMsgIssueToken("ABC Token", "aa1234567", sdk.NewInt(10000), testAddr,
+			NewMsgIssueToken("ABC Token", "aa345678901234567", sdk.NewInt(10000), testAddr,
 				false, false, false, false, "", "", TestIdentityString),
-			ErrInvalidTokenSymbol("aa1234567"),
+			ErrInvalidTokenSymbol("aa345678901234567"),
 		},
 		{
 			"case-symbol4",
@@ -298,8 +297,8 @@ func TestMsgAddTokenWhitelist_ValidateBasic(t *testing.T) {
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgAddTokenWhitelist("abcdefghi", testAddr, whitelist),
-			ErrInvalidTokenSymbol("abcdefghi"),
+			NewMsgAddTokenWhitelist("abcdefghi01234567", testAddr, whitelist),
+			ErrInvalidTokenSymbol("abcdefghi01234567"),
 		},
 		{
 			"case-invalidOwner",
