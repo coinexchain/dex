@@ -13,6 +13,7 @@ import (
 	"github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
+	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/store/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -52,14 +53,27 @@ func (app *CetChainApp) Deliver(tx sdk.Tx) sdk.Result {
 	}
 }
 
+// wrap CheckTx()
+func (app *CetChainApp) Check(tx sdk.Tx) sdk.Result {
+	//return app.BaseApp.Deliver(tx)
+	txBytes, _ := auth.DefaultTxEncoder(app.cdc)(tx)
+	req := abci.RequestCheckTx{Tx: txBytes}
+	rsp := app.CheckTx(req)
+	return sdk.Result{
+		Code:      sdk.CodeType(rsp.Code),
+		GasUsed:   uint64(rsp.GasUsed),
+		GasWanted: uint64(rsp.GasWanted),
+	}
+}
+
 func newStdTxBuilder() *testutil.StdTxBuilder {
 	return testutil.NewStdTxBuilder(testChainID)
 }
 
-func newApp() *CetChainApp {
+func newApp(baseAppOptions ...func(*bam.BaseApp)) *CetChainApp {
 	logger := log.NewNopLogger()
 	db := dbm.NewMemDB()
-	app := NewCetChainApp(logger, db, nil, true, 10000)
+	app := NewCetChainApp(logger, db, nil, true, 10000, baseAppOptions...)
 	topics := "auth,authx,bancorlite,bank,comment,market"
 	app.msgQueProducer = msgqueue.NewProducerFromConfig([]string{"nop"}, topics, true, nil)
 	return app
@@ -110,8 +124,8 @@ func addAccountForDanglingCET(amount int64, genState *GenesisState) {
 	}
 }
 
-func initApp(cb genesisStateCallback) *CetChainApp {
-	app := newApp()
+func initApp(cb genesisStateCallback, baseAppOptions ...func(*bam.BaseApp)) *CetChainApp {
+	app := newApp(baseAppOptions...)
 
 	// genesis state
 	genState := NewDefaultGenesisState()
@@ -748,4 +762,36 @@ func TestSupervisorNotExist(t *testing.T) {
 
 	toAccX, _ := app.accountXKeeper.GetAccountX(ctx, toAddr)
 	require.Nil(t, toAccX.LockedCoins)
+}
+
+func TestCheckTxWithMsgHandle(t *testing.T) {
+	key, _, fromAddr := testutil.KeyPubAddr()
+	_, _, toAddr := testutil.KeyPubAddr()
+	coins := dex.NewCetCoins(30e8)
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	app := initApp(func(genState *GenesisState) {
+		addGenesisAccounts(genState, acc0)
+		addModuleAccounts(genState)
+		genState.AuthData = GetDefaultAuthGenesisState()
+	}, bam.SetCheckTxWithMsgHandle(true))
+
+	msgSend := bankx.MsgSend{
+		FromAddress: fromAddr,
+		ToAddress:   toAddr,
+		Amount:      dex.NewCetCoins(1e7),
+		UnlockTime:  0,
+	}
+	tx := newStdTxBuilder().
+		Msgs(msgSend).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	// commit genesis state
+	header := abci.Header{Height: 1, ChainID: testChainID}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	result := app.Check(tx)
+	require.Equal(t, bankx.CodeInsufficientCETForActivatingFee, result.Code)
+
 }

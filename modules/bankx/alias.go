@@ -37,8 +37,9 @@ var (
 
 	// variable aliases
 
-	ModuleCdc       = types.ModuleCdc
-	CodeMemoMissing = types.CodeMemoMissing
+	ModuleCdc                           = types.ModuleCdc
+	CodeMemoMissing                     = types.CodeMemoMissing
+	CodeInsufficientCETForActivatingFee = types.CodeInsufficientCETForActivationFee
 )
 
 type (
