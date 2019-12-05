@@ -313,8 +313,6 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 }
 
 func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
-	marketInfoList := keeper.GetAllMarketInfos(ctx)
-	currHeight := ctx.BlockHeight()
 	marketParams := keeper.GetParams(ctx)
 
 	chainID := ctx.ChainID()
@@ -334,12 +332,26 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 
 	// if this is the first block of a new day, we clean the GTE order and there is no trade
 	if needRemove {
+		marketInfoList := keeper.GetAllMarketInfos(ctx)
 		keeper.SetOrderCleanTime(ctx, currTime)
 		removeExpiredOrder(ctx, keeper, marketInfoList, marketParams)
 		removeExpiredMarket(ctx, keeper, marketParams)
 		return //nil
 	}
 
+	markets := keeper.GetMarketsWithNewlyAddedOrder(ctx)
+	if len(markets) == 0 {
+		return
+	}
+	marketInfoList := make([]types.MarketInfo, len(markets))
+	for idx, market := range markets {
+		var err error
+		marketInfoList[idx], err = keeper.GetMarketInfo(ctx, market)
+		if err != nil {
+			return //should not reach here in production
+		}
+	}
+	currHeight := ctx.BlockHeight()
 	ordersForUpdateList := make([]map[string]*types.Order, len(marketInfoList))
 	newPrices := make([]sdk.Dec, len(marketInfoList))
 	for idx, mi := range marketInfoList {
@@ -363,7 +375,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), mi.GetSymbol(), types.ModuleCdc)
 		// update the order book
 		for _, order := range ordersForUpdateList[idx] {
-			orderKeeper.Add(ctx, order)
+			orderKeeper.Update(ctx, order)
 			if order.TimeInForce == types.IOC || order.LeftStock == 0 || notEnoughMoney(order) {
 				if keeper.IsSubScribed(types.Topic) {
 					sendOrderMsg(ctx, order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, keeper)

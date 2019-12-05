@@ -17,6 +17,8 @@ var (
 	BidListKeyPrefix       = []byte{0x12}
 	AskListKeyPrefix       = []byte{0x13}
 	OrderQueueKeyPrefix    = []byte{0x14}
+	NewlyAddedKeyPrefix    = []byte{0x66}
+	NewlyAddedKeyEnd       = []byte{0x67}
 	LastOrderCleanUpDayKey = []byte{0x20}
 )
 
@@ -52,6 +54,7 @@ func (keeper *OrderCleanUpDayKeeper) SetUnixTime(ctx sdk.Context, unixTime int64
 // OrderKeeper manages the order book of one market
 type OrderKeeper interface {
 	Add(ctx sdk.Context, order *types.Order) sdk.Error
+	Update(ctx sdk.Context, order *types.Order) sdk.Error
 	Remove(ctx sdk.Context, order *types.Order) sdk.Error
 	GetOlderThan(ctx sdk.Context, height int64) []*types.Order
 	GetOrdersAtHeight(ctx sdk.Context, height int64) []*types.Order
@@ -127,6 +130,14 @@ func int64ToBigEndianBytes(n int64) []byte {
 }
 
 func (keeper *PersistentOrderKeeper) Add(ctx sdk.Context, order *types.Order) sdk.Error {
+	// mark this order book as newly-added
+	store := ctx.KVStore(keeper.marketKey)
+	store.Set(append(NewlyAddedKeyPrefix, []byte(keeper.symbol)...), []byte{'a'})
+
+	return keeper.Update(ctx, order)
+}
+
+func (keeper *PersistentOrderKeeper) Update(ctx sdk.Context, order *types.Order) sdk.Error {
 	// add it to the global order book
 	store := ctx.KVStore(keeper.marketKey)
 	key := orderBookKey(order.OrderID())
@@ -242,6 +253,9 @@ func (keeper *PersistentOrderKeeper) getOrder(ctx sdk.Context, orderID string) *
 // Return the bid orders and ask orders which have proper prices and have possibilities for deal
 func (keeper *PersistentOrderKeeper) GetMatchingCandidates(ctx sdk.Context) []*types.Order {
 	store := ctx.KVStore(keeper.marketKey)
+	// mark this order book as not-newly-added
+	store.Delete(append(NewlyAddedKeyPrefix, []byte(keeper.symbol)...))
+
 	priceStartPos := len(keeper.symbol) + 2
 	priceEndPos := priceStartPos + types.DecByteCount
 	bidListStart := dex.ConcatKeys(BidListKeyPrefix, []byte(keeper.symbol), []byte{0x0})

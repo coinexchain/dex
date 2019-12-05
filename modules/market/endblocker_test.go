@@ -624,13 +624,11 @@ func TestEndBlocker(t *testing.T) {
 	orderKeeper.Add(input.ctx, &buyOrderInfo2)
 
 	// Choose the largest execution
-	orderCandidates := orderKeeper.GetMatchingCandidates(input.ctx)
-	require.EqualValues(t, 4, len(orderCandidates))
 	EndBlocker(input.ctx, input.mk)
 	mkInfo, err := input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
 	require.Nil(t, err)
 	require.EqualValues(t, sdk.NewDec(98).String(), mkInfo.LastExecutedPrice.String())
-	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
+	orderCandidates := orderKeeper.GetMatchingCandidates(input.ctx)
 	require.EqualValues(t, 0, len(orderCandidates))
 
 	sellOrderInfo1.LeftStock = 200
@@ -656,9 +654,6 @@ func TestEndBlocker(t *testing.T) {
 	orderKeeper.Add(input.ctx, &buyOrderInfo1)
 	orderKeeper.Add(input.ctx, &buyOrderInfo2)
 	orderKeeper.Add(input.ctx, &buyOrderInfo3)
-
-	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
-	require.EqualValues(t, 5, len(orderCandidates))
 
 	mkInfo.LastExecutedPrice = sdk.NewDec(0)
 	input.mk.SetMarket(input.ctx, mkInfo)
@@ -711,9 +706,6 @@ func TestEndBlocker(t *testing.T) {
 	orderKeeper.Add(input.ctx, &buyOrderInfo2)
 	orderKeeper.Add(input.ctx, &buyOrderInfo3)
 	orderKeeper.Add(input.ctx, &buyOrderInfo4)
-
-	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
-	require.EqualValues(t, 7, len(orderCandidates))
 
 	EndBlocker(input.ctx, input.mk)
 	mkInfo, err = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
@@ -794,9 +786,6 @@ func TestLeastAbsImbalance(t *testing.T) {
 	orderKeeper.Add(input.ctx, &buyOrderInfo3)
 	orderKeeper.Add(input.ctx, &buyOrderInfo4)
 
-	orderCandidates := orderKeeper.GetMatchingCandidates(input.ctx)
-	require.EqualValues(t, 7, len(orderCandidates))
-
 	EndBlocker(input.ctx, input.mk)
 	mkInfo, err := input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
 	require.Nil(t, err)
@@ -856,9 +845,6 @@ func TestLowestPriceMatch(t *testing.T) {
 	orderKeeper.Add(input.ctx, &buyOrderInfo1)
 	orderKeeper.Add(input.ctx, &buyOrderInfo2)
 
-	orderCandidates := orderKeeper.GetMatchingCandidates(input.ctx)
-	require.EqualValues(t, 3, len(orderCandidates))
-
 	EndBlocker(input.ctx, input.mk)
 	mkInfo, err := input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
 	require.Nil(t, err)
@@ -881,9 +867,6 @@ func TestLowestPriceMatch(t *testing.T) {
 	buyOrderInfo2.Freeze = 10 * 94
 	orderKeeper.Add(input.ctx, &buyOrderInfo1)
 	orderKeeper.Add(input.ctx, &buyOrderInfo2)
-
-	orderCandidates = orderKeeper.GetMatchingCandidates(input.ctx)
-	require.EqualValues(t, 3, len(orderCandidates))
 
 	mkInfo.LastExecutedPrice = sdk.NewDec(100)
 	input.mk.SetMarket(input.ctx, mkInfo)
