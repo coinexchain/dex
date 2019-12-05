@@ -13,7 +13,6 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/olekukonko/tablewriter v0.0.1
-	github.com/pelletier/go-toml v1.4.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/rakyll/statik v0.1.6
@@ -23,10 +22,9 @@ require (
 	github.com/tendermint/tendermint v0.32.7
 	github.com/tendermint/tm-db v0.2.0
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
-	golang.org/x/sys v0.0.0-20190422165155-953cdadca894 // indirect
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 )
 
-replace github.com/cosmos/cosmos-sdk => github.com/coinexchain/cosmos-sdk v0.0.0-20191105122849-557d140a540b
+replace github.com/cosmos/cosmos-sdk => github.com/coinexchain/cosmos-sdk v0.0.0-20191205082018-7e526a87fc73
 
 replace github.com/tendermint/tendermint => github.com/coinexchain/tendermint v0.0.0-20191108024645-d56dafa4d3cd
