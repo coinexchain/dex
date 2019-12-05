@@ -27,6 +27,7 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 		QueryParamsCmd(cdc),
 		QueryMarketCmd(cdc),
 		QueryMarketListCmd(cdc),
+		QueryOrderbookCmd(cdc),
 		QueryOrderCmd(cdc),
 		QueryUserOrderList(cdc))...)
 	return mktQueryCmd
@@ -75,6 +76,26 @@ Example :
 				return errors.Errorf("trading-pair illegal : %s, For example : eth/cet.", args[0])
 			}
 			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarket)
+			return cliutil.CliQuery(cdc, query, keepers.NewQueryMarketParam(args[0]))
+		},
+	}
+}
+
+func QueryOrderbookCmd(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "orderbook",
+		Short: "query the orders in a market",
+		Long: `query the orders in a market. 
+
+Example : 
+	cetcli query market orderbook \
+	eth/cet --trust-node=true --chain-id=coinexdex`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(strings.Split(args[0], types.SymbolSeparator)) != 2 {
+				return errors.Errorf("trading-pair illegal : %s, For example : eth/cet.", args[0])
+			}
+			query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryOrdersInMarket)
 			return cliutil.CliQuery(cdc, query, keepers.NewQueryMarketParam(args[0]))
 		},
 	}

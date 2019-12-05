@@ -3264,6 +3264,43 @@ paths:
           description: Invalid symbol
         500:
           description: Server internal error
+  /market/orderbook/{stock}/{money}:
+    get:
+      summary: Query trading-pair's orderbook
+      tags:
+        - Market
+      produces:
+        - application/json
+      operationId: getOrdersInMarket
+      parameters:
+        - in: path
+          name: stock
+          description: stock symbol
+          required: true
+          type: string
+          x-example: btc
+        - in: path
+          name: money
+          description: money symbol
+          required: true
+          type: string
+          x-example: cet
+      responses:
+        200:
+          description: orders in the specified trading-pair
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/OrderInfo"
+        400:
+          description: Invalid symbol
+        500:
+          description: Server internal error
   /market/orders/{order-id}:
     get:
       summary: Query order info

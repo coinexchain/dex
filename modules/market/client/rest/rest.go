@@ -14,6 +14,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) 
 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
 	r.HandleFunc("/market/trading-pairs/{stock}/{money}", queryMarketHandlerFn(cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/market/orderbook/{stock}/{money}", queryOrdersInMarketHandlerFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/market/exist-trading-pairs", queryMarketsHandlerFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/market/orders/{order-id}", queryOrderInfoHandlerFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc("/market/orders/account/{address}", queryUserOrderListHandlerFn(cdc, cliCtx)).Methods("GET")

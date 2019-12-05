@@ -98,12 +98,47 @@ func createOrder(ctx sdk.Context, testApp *testapp.TestApp,
 	sender sdk.AccAddress, seq uint64, id byte) types.Order {
 
 	order := types.Order{
-		Sender:   sender,
-		Sequence: seq,
-		Identify: id,
+		TradingPair: "eth/cet",
+		Sender:      sender,
+		Sequence:    seq,
+		Identify:    id,
+		Price:       sdk.NewDec(1),
 	}
 	testApp.MarketKeeper.SetOrder(ctx, &order)
 	return order
+}
+
+func TestQueryOrdersInMarket(t *testing.T) {
+	// setup
+	testApp := testapp.NewTestApp()
+	ctx := testApp.NewCtx()
+	testApp.MarketKeeper.SetParams(ctx, types.DefaultParams())
+	_, _, addr := testutil.KeyPubAddr()
+	order1 := createOrder(ctx, testApp, addr, 12345, 8)
+	order2 := createOrder(ctx, testApp, addr, 12345, 9)
+	order3 := createOrder(ctx, testApp, addr, 12346, 1)
+
+	// query params
+	reqParams := keepers.QueryMarketParam{
+		TradingPair: "eth/cet",
+	}
+	reqBytes := testApp.Cdc.MustMarshalJSON(reqParams)
+
+	// query result
+	querier := keepers.NewQuerier(testApp.MarketKeeper)
+	resBytes, err := querier(ctx, []string{keepers.QueryOrdersInMarket}, abci.RequestQuery{Data: reqBytes})
+	require.NoError(t, err)
+	require.NotNil(t, resBytes)
+
+	//println(string(resBytes))
+
+	// return data
+	var res []types.Order
+	testApp.Cdc.MustUnmarshalJSON(resBytes, &res)
+	require.Equal(t, 3, len(res))
+	require.Equal(t, order1, res[2])
+	require.Equal(t, order2, res[1])
+	require.Equal(t, order3, res[0])
 }
 
 func TestQueryOrderList(t *testing.T) {

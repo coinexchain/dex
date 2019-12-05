@@ -2,6 +2,7 @@ package keepers
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -15,6 +16,7 @@ import (
 const (
 	QueryMarket            = "market-info"
 	QueryMarkets           = "market-list"
+	QueryOrdersInMarket    = "orders-in-market"
 	QueryOrder             = "order-info"
 	QueryUserOrders        = "user-order-list"
 	QueryWaitCancelMarkets = "wait-cancel-markets"
@@ -31,6 +33,8 @@ func NewQuerier(mk Keeper) sdk.Querier {
 			return queryMarket(ctx, req, mk)
 		case QueryMarkets:
 			return queryMarketList(ctx, req, mk)
+		case QueryOrdersInMarket:
+			return queryOrdersInMarket(ctx, req, mk)
 		case QueryOrder:
 			return queryOrder(ctx, req, mk)
 		case QueryUserOrders:
@@ -119,6 +123,22 @@ func queryMarketList(ctx sdk.Context, req abci.RequestQuery, mk Keeper) ([]byte,
 	if err != nil {
 		return nil, types.ErrFailedMarshal()
 	}
+	return bz, nil
+}
+
+func queryOrdersInMarket(ctx sdk.Context, req abci.RequestQuery, mk Keeper) ([]byte, sdk.Error) {
+	var param QueryMarketParam
+	if err := mk.cdc.UnmarshalJSON(req.Data, &param); err != nil {
+		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse param: %s", err))
+	}
+
+	k := NewOrderKeeper(mk.marketKey, param.TradingPair, mk.cdc)
+	orders := k.GetOlderThan(ctx, math.MaxInt64)
+	bz, err := codec.MarshalJSONIndent(mk.cdc, orders)
+	if err != nil {
+		return nil, types.ErrFailedMarshal()
+	}
+
 	return bz, nil
 }
 

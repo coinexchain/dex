@@ -29,6 +29,19 @@ func queryMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 	}
 }
 
+func queryOrdersInMarketHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryOrdersInMarket)
+		if !types.IsValidTradingPair([]string{vars["stock"], vars["money"]}) {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "Invalid Trading pair")
+			return
+		}
+		param := keepers.NewQueryMarketParam(dex.GetSymbol(vars["stock"], vars["money"]))
+		restutil.RestQuery(cdc, cliCtx, w, r, query, param, nil)
+	}
+}
+
 func queryMarketsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query := fmt.Sprintf("custom/%s/%s", types.StoreKey, keepers.QueryMarkets)

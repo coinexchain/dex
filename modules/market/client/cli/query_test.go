@@ -75,6 +75,16 @@ func TestQuery(t *testing.T) {
 	assert.Equal(t, "custom/market/order-info", ResultPath)
 
 	args = []string{
+		"orderbook",
+		"eth/cet",
+	}
+	cmd.SetArgs(args)
+	err = cmd.Execute()
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "custom/market/orders-in-market", ResultPath)
+	assert.Equal(t, keepers.QueryMarketParam{TradingPair: "eth/cet"}, ResultParam)
+
+	args = []string{
 		"order-list",
 		user,
 	}

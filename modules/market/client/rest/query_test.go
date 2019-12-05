@@ -38,6 +38,13 @@ func TestQuery(t *testing.T) {
 		TradingPair: "etc/cet",
 	}, ResultParam)
 
+	req, _ = http.NewRequest("GET", "http://example.com/market/orderbook/etc/cet", nil)
+	router.ServeHTTP(respWr, req)
+	assert.Equal(t, "custom/market/orders-in-market", ResultPath)
+	assert.Equal(t, keepers.QueryMarketParam{
+		TradingPair: "etc/cet",
+	}, ResultParam)
+
 	req, _ = http.NewRequest("GET", "http://example.com/market/exist-trading-pairs", nil)
 	router.ServeHTTP(respWr, req)
 	assert.Equal(t, "custom/market/market-list", ResultPath)
