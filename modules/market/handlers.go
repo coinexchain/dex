@@ -180,13 +180,12 @@ func handleFeeForCreateOrder(ctx sdk.Context, keeper keepers.Keeper, amount int6
 		return err
 	}
 	if frozenFee != 0 {
-		frozenFeeAsCet := sdk.Coins{sdk.NewCoin(dex.CET, sdk.NewInt(frozenFee))}
-		if err := keeper.FreezeCoins(ctx, sender, frozenFeeAsCet); err != nil {
+		if err := keeper.FreezeCoins(ctx, sender, dex.NewCetCoins(frozenFee)); err != nil {
 			return err
 		}
 	}
 	if featureFee != 0 {
-		if err := keeper.SubtractFeeAndCollectFee(ctx, sender, featureFee); err != nil {
+		if err := keeper.FreezeCoins(ctx, sender, dex.NewCetCoins(featureFee)); err != nil {
 			return err
 		}
 	}
@@ -196,18 +195,18 @@ func handleFeeForCreateOrder(ctx sdk.Context, keeper keepers.Keeper, amount int6
 func sendCreateOrderMsg(ctx sdk.Context, keeper keepers.Keeper, order types.Order, featureFee int64) {
 	// send msg to kafka
 	msgInfo := types.CreateOrderInfo{
-		OrderID:     order.OrderID(),
-		Sender:      order.Sender.String(),
-		TradingPair: order.TradingPair,
-		OrderType:   order.OrderType,
-		Price:       order.Price,
-		Quantity:    order.Quantity,
-		Side:        order.Side,
-		TimeInForce: order.TimeInForce,
-		Height:      order.Height,
-		FrozenFee:   order.FrozenFee,
-		Freeze:      order.Freeze,
-		FeatureFee:  featureFee,
+		OrderID:          order.OrderID(),
+		Sender:           order.Sender.String(),
+		TradingPair:      order.TradingPair,
+		OrderType:        order.OrderType,
+		Price:            order.Price,
+		Quantity:         order.Quantity,
+		Side:             order.Side,
+		TimeInForce:      order.TimeInForce,
+		Height:           order.Height,
+		FrozenCommission: order.FrozenCommission,
+		FrozenFeatureFee: order.FrozenFeatureFee,
+		Freeze:           order.Freeze,
 	}
 	fillMsgQueue(ctx, keeper, types.CreateOrderInfoKey, msgInfo)
 }
@@ -260,22 +259,23 @@ func handleMsgCreateOrder(ctx sdk.Context, msg types.MsgCreateOrder, keeper keep
 	}
 
 	order := types.Order{
-		Sender:      msg.Sender,
-		Sequence:    seq,
-		Identify:    msg.Identify,
-		TradingPair: msg.TradingPair,
-		OrderType:   msg.OrderType,
-		Price:       sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision))))),
-		Quantity:    msg.Quantity,
-		Side:        msg.Side,
-		TimeInForce: msg.TimeInForce,
-		Height:      ctx.BlockHeight(),
-		ExistBlocks: existBlocks,
-		FrozenFee:   frozenFee,
-		LeftStock:   msg.Quantity,
-		Freeze:      amount,
-		DealMoney:   0,
-		DealStock:   0,
+		Sender:           msg.Sender,
+		Sequence:         seq,
+		Identify:         msg.Identify,
+		TradingPair:      msg.TradingPair,
+		OrderType:        msg.OrderType,
+		Price:            sdk.NewDec(msg.Price).Quo(sdk.NewDec(int64(math.Pow10(int(msg.PricePrecision))))),
+		Quantity:         msg.Quantity,
+		Side:             msg.Side,
+		TimeInForce:      msg.TimeInForce,
+		Height:           ctx.BlockHeight(),
+		ExistBlocks:      existBlocks,
+		FrozenCommission: frozenFee,
+		FrozenFeatureFee: featureFee,
+		LeftStock:        msg.Quantity,
+		Freeze:           amount,
+		DealMoney:        0,
+		DealStock:        0,
 	}
 
 	ork := keepers.NewOrderKeeper(keeper.GetMarketKey(), order.TradingPair, types.ModuleCdc)
@@ -350,12 +350,10 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 	if err := checkMsgCancelOrder(ctx, msg, keeper); err != nil {
 		return err.Result()
 	}
-
-	order := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc).QueryOrder(ctx, msg.OrderID)
 	marketParams := keeper.GetParams(ctx)
-
+	order := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc).QueryOrder(ctx, msg.OrderID)
 	ork := keepers.NewOrderKeeper(keeper.GetMarketKey(), order.TradingPair, types.ModuleCdc)
-	removeOrder(ctx, ork, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
+	removeOrder(ctx, ork, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
 
 	// send msg to kafka
 	msgInfo := types.CancelOrderInfo{
@@ -365,14 +363,13 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 		Side:           order.Side,
 		Price:          order.Price,
 		DelReason:      types.CancelOrderByManual,
-		UsedCommission: order.CalOrderFeeInt64(marketParams.FeeForZeroDeal),
+		UsedCommission: order.CalActualOrderCommissionInt64(marketParams.FeeForZeroDeal),
 		LeftStock:      order.LeftStock,
 		RemainAmount:   order.Freeze,
 		DealStock:      order.DealStock,
 		DealMoney:      order.DealMoney,
 	}
 	fillMsgQueue(ctx, keeper, types.CancelOrderInfoKey, msgInfo)
-
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			EventTypeKeyCancelOrder,
@@ -398,11 +395,9 @@ func checkMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keepe
 	if order == nil {
 		return types.ErrOrderNotFound(msg.OrderID)
 	}
-
 	if !bytes.Equal(order.Sender, msg.Sender) {
 		return types.ErrNotMatchSender("only order's sender can cancel this order")
 	}
-
 	return nil
 }
 

@@ -11,16 +11,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func TestOrder(t *testing.T) {
+func TestOrderCommission(t *testing.T) {
 	bigInt, ok := sdk.NewIntFromString("57896044618658097711785492504343953926634992332820282019728792003956564819967")
 	require.Equal(t, true, ok)
 	bigDec := bigInt.ToDec()
 	require.Equal(t, 40, len(bigDec.Int.Bytes()))
-	//maxInt := sdk.NewInt(1)
-	//for i:=0; i<250; i++ {
-	//	maxInt = maxInt.MulRaw(2)
-	//	fmt.Printf("%v %d \n", maxInt.BigInt().Bytes(), maxInt)
-	//}
 	maxDec := sdk.NewDec(1)
 	for i := 0; i < 255; i++ {
 		maxDec = maxDec.MulInt64(2)
@@ -50,17 +45,28 @@ func TestOrder(t *testing.T) {
 	require.Equal(t, 1, bytes.Compare(bz2, bz1))
 
 	order.DealStock = 0
-	order.FrozenFee = 10000
+	order.FrozenCommission = 10000
 	order.Quantity = 100000
-	require.Equal(t, int64(100), order.CalOrderFeeInt64(100))
+	require.Equal(t, int64(100), order.CalActualOrderCommissionInt64(100))
 	order.DealStock = 50000
-	require.Equal(t, int64(5000), order.CalOrderFeeInt64(100))
+	require.Equal(t, int64(5000), order.CalActualOrderCommissionInt64(100))
 	order.DealStock = 50009
-	require.Equal(t, int64(5000), order.CalOrderFeeInt64(100))
+	require.Equal(t, int64(5000), order.CalActualOrderCommissionInt64(100))
 	order.DealStock = 50010
-	require.Equal(t, int64(5001), order.CalOrderFeeInt64(100))
-	order.FrozenFee = MaxOrderAmount + 10
+	require.Equal(t, int64(5001), order.CalActualOrderCommissionInt64(100))
+	order.FrozenCommission = MaxOrderAmount + 10
 	order.DealStock = 100000
-	require.Equal(t, MaxOrderAmount, order.CalOrderFeeInt64(100))
+	require.Equal(t, MaxOrderAmount, order.CalActualOrderCommissionInt64(100))
+}
 
+func TestOrder_CalActualOrderFeatureFeeInt64(t *testing.T) {
+	addr, failed := sdk.AccAddressFromHex("0123456789012345678901234567890123423456")
+	require.Nil(t, failed)
+	order := Order{
+		Sender:   addr,
+		Sequence: 9223372036854775818,
+		Identify: 28,
+	}
+
+	ctx, keys := newContextAndMarketKey(unitTestChainID)
 }

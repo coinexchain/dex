@@ -152,22 +152,28 @@ func (k *mockFeeColletKeeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk
 func TestUnfreezeCoinsForOrder(t *testing.T) {
 	bxKeeper := &mocBankxKeeper{records: make([]string, 0, 10)}
 	mockFeeK := &mockFeeColletKeeper{}
-	order := newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998, 3)
-	order.Freeze = 50
-	order.FrozenFee = 10
+	order := newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 10, 3)
+	order.Freeze = 30
+	order.FrozenCommission = 10
+	order.FrozenFeatureFee = 20
 	order.DealStock = 20
 	ctx, _ := newContextAndMarketKey(unitTestChainID)
-	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, mockFeeK)
-	refout := "unfreeze 50 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
-	if refout != bxKeeper.records[0] {
-		t.Errorf("Error in unfreezeCoinsForOrder")
+	ctx = ctx.WithBlockHeight(18)
+	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, mockFeeK, 10)
+	refouts := []string{
+		"unfreeze 30 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
+		"unfreeze 10 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
+		"unfreeze 20 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
 	}
+	require.EqualValues(t, bxKeeper.records, refouts)
 
-	coinFee := sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity)).RoundInt64()
-	refout = fmt.Sprintf("addr : %s, fee : %d", order.Sender, coinFee)
-	if refout != mockFeeK.records[0] {
-		t.Errorf("Error in unfreezeCoinsForOrder")
+	commissionFee := order.CalActualOrderCommissionInt64(types.DefaultFeeForZeroDeal)
+	featureFee := order.CalActualOrderFeatureFeeInt64(ctx, 10)
+	refouts = []string{
+		fmt.Sprintf("addr : %s, fee : %d", order.Sender, commissionFee),
+		fmt.Sprintf("addr : %s, fee : %d", order.Sender, featureFee),
 	}
+	require.EqualValues(t, refouts, mockFeeK.records)
 }
 
 func TestRemoveOrders(t *testing.T) {

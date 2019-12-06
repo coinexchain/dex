@@ -82,10 +82,18 @@ func (p *Params) ValidateGenesis() error {
 	if p.CreateMarketFee <= 0 {
 		return fmt.Errorf("%s must be a positive number, is %d", KeyCreateMarketFee, p.CreateMarketFee)
 	}
-	if p.MaxExecutedPriceChangeRatio < 0 || p.MarketFeeRate < 0 || p.MarketFeeMin < 0 || p.FeeForZeroDeal < 0 || p.GTEOrderLifetime < 0 || p.GTEOrderFeatureFeeByBlocks < 0 {
+	if p.FeeForZeroDeal < p.MarketFeeMin {
+		return fmt.Errorf("%s : %d must greater than or equal to %s : %d", KeyFeeForZeroDeal,
+			p.FeeForZeroDeal, KeyMarketFeeMin, p.MarketFeeMin)
+	}
+	if p.MaxExecutedPriceChangeRatio < 0 || p.MarketFeeRate < 0 ||
+		p.MarketFeeMin < 0 || p.FeeForZeroDeal < 0 ||
+		p.GTEOrderLifetime < 0 || p.GTEOrderFeatureFeeByBlocks < 0 {
 		return fmt.Errorf("params must be positive, MaxExecutedPriceChangeRatio "+
-			": %d, MarketFeeRate: %d, MarketFeeMin: %d, FeeForZeroDeal: %d, GTEOrderLifetime : %d, GTEOrderFeatureFeeByBlocks : %d",
-			p.MaxExecutedPriceChangeRatio, p.MarketFeeRate, p.MarketFeeMin, p.FeeForZeroDeal, p.GTEOrderLifetime, p.GTEOrderFeatureFeeByBlocks)
+			": %d, MarketFeeRate: %d, MarketFeeMin: %d, FeeForZeroDeal: %d, GTEOrderLifetime"+
+			" : %d, GTEOrderFeatureFeeByBlocks : %d", p.MaxExecutedPriceChangeRatio,
+			p.MarketFeeRate, p.MarketFeeMin, p.FeeForZeroDeal, p.GTEOrderLifetime,
+			p.GTEOrderFeatureFeeByBlocks)
 	}
 	return nil
 }
