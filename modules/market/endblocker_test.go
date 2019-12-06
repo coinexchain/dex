@@ -152,22 +152,28 @@ func (k *mockFeeColletKeeper) SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk
 func TestUnfreezeCoinsForOrder(t *testing.T) {
 	bxKeeper := &mocBankxKeeper{records: make([]string, 0, 10)}
 	mockFeeK := &mockFeeColletKeeper{}
-	order := newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 998, 3)
-	order.Freeze = 50
-	order.FrozenFee = 10
+	order := newTO("00001", 1, 11051, 50, types.BUY, types.GTE, 10, 3)
+	order.Freeze = 30
+	order.FrozenCommission = 10
+	order.FrozenFeatureFee = 20
 	order.DealStock = 20
 	ctx, _ := newContextAndMarketKey(unitTestChainID)
-	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, mockFeeK)
-	refout := "unfreeze 50 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca"
-	if refout != bxKeeper.records[0] {
-		t.Errorf("Error in unfreezeCoinsForOrder")
+	ctx = ctx.WithBlockHeight(18)
+	unfreezeCoinsForOrder(ctx, bxKeeper, order, 0, mockFeeK, 10)
+	refouts := []string{
+		"unfreeze 30 usdt at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
+		"unfreeze 10 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
+		"unfreeze 20 cet at cosmos1qy352eufqy352eufqy352eufqy35qqqptw34ca",
 	}
+	require.EqualValues(t, bxKeeper.records, refouts)
 
-	coinFee := sdk.NewDec(order.DealStock).Mul(sdk.NewDec(order.FrozenFee)).Quo(sdk.NewDec(order.Quantity)).RoundInt64()
-	refout = fmt.Sprintf("addr : %s, fee : %d", order.Sender, coinFee)
-	if refout != mockFeeK.records[0] {
-		t.Errorf("Error in unfreezeCoinsForOrder")
+	commissionFee := order.CalActualOrderCommissionInt64(types.DefaultFeeForZeroDeal)
+	featureFee := order.CalActualOrderFeatureFeeInt64(ctx, 10)
+	refouts = []string{
+		fmt.Sprintf("addr : %s, fee : %d", order.Sender, commissionFee),
+		fmt.Sprintf("addr : %s, fee : %d", order.Sender, featureFee),
 	}
+	require.EqualValues(t, refouts, mockFeeK.records)
 }
 
 func TestRemoveOrders(t *testing.T) {
@@ -996,4 +1002,89 @@ func TestClosestLastTradePrice(t *testing.T) {
 	EndBlocker(input.ctx, input.mk)
 	mkInfo, _ = input.mk.GetMarketInfo(input.ctx, mkInfo.GetSymbol())
 	require.EqualValues(t, sdk.NewDec(97).String(), mkInfo.LastExecutedPrice.String())
+}
+
+func TestCalFrozenFeatureFee(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	input.ctx = input.ctx.WithChainID(IntegrationNetSubString + "01")
+	input.ctx = input.ctx.WithBlockTime(time.Unix(1, 0))
+	input.mk.SetOrderCleanTime(input.ctx, 1)
+
+	mkInfo := MarketInfo{
+		Stock:             stock,
+		Money:             types2.CET,
+		LastExecutedPrice: sdk.NewDec(99),
+	}
+	input.mk.SetMarket(input.ctx, mkInfo)
+
+	seller, _ := simpleAddr("00001")
+	buyer, _ := simpleAddr("00002")
+	sellAccount := input.akp.NewAccountWithAddress(input.ctx, seller)
+	buyAccount := input.akp.NewAccountWithAddress(input.ctx, buyer)
+	err := sellAccount.SetCoins(sdk.NewCoins(sdk.NewCoin(stock, sdk.NewInt(10000)),
+		sdk.NewCoin(types2.CET, sdk.NewInt(10000))))
+	require.Nil(t, err)
+	err = buyAccount.SetCoins(sdk.NewCoins(sdk.NewCoin(stock, sdk.NewInt(10000)),
+		sdk.NewCoin(types2.CET, sdk.NewInt(10000))))
+	require.Nil(t, err)
+	input.akp.SetAccount(input.ctx, sellAccount)
+	input.akp.SetAccount(input.ctx, buyAccount)
+
+	orderKeeper := keepers.NewOrderKeeper(input.mk.GetMarketKey(), GetSymbol(stock, types2.CET), types.ModuleCdc)
+	sellOrder := Order{
+		Sender:           seller,
+		Sequence:         1,
+		Identify:         2,
+		TradingPair:      mkInfo.GetSymbol(),
+		LeftStock:        25,
+		Quantity:         25,
+		Price:            sdk.NewDec(98),
+		Freeze:           25,
+		FrozenCommission: 100,
+		FrozenFeatureFee: 300,
+		Height:           900,
+		Side:             SELL,
+		TimeInForce:      GTE,
+	}
+	buyOrder := Order{
+		Sender:           buyer,
+		Sequence:         10,
+		Identify:         2,
+		TradingPair:      mkInfo.GetSymbol(),
+		Price:            sdk.NewDec(100),
+		Freeze:           25 * 100,
+		LeftStock:        25,
+		Quantity:         25,
+		FrozenCommission: 100,
+		FrozenFeatureFee: 300,
+		Height:           900,
+		Side:             BUY,
+		TimeInForce:      GTE,
+	}
+	orderKeeper.Add(input.ctx, &sellOrder)
+	orderKeeper.Add(input.ctx, &buyOrder)
+	EndBlocker(input.ctx, input.mk)
+	sellAccount = input.akp.GetAccount(input.ctx, seller)
+	buyAccount = input.akp.GetAccount(input.ctx, buyer)
+	require.EqualValues(t, sellAccount.GetCoins().AmountOf(stock).Int64(), 9975)
+	require.EqualValues(t, buyAccount.GetCoins().AmountOf(stock).Int64(), 10025)
+	require.EqualValues(t, sellAccount.GetCoins().AmountOf(types2.CET).Int64(), 12400)
+	require.EqualValues(t, buyAccount.GetCoins().AmountOf(types2.CET).Int64(), 7400)
+
+	input.ctx = input.ctx.WithBlockHeight(types.DefaultGTEOrderLifetime + 100)
+	sellOrder.Height = 1
+	sellOrder.Price = sdk.NewDec(100)
+	sellOrder.ExistBlocks = types.DefaultGTEOrderLifetime + 300
+	buyOrder.Height = 1
+	buyOrder.ExistBlocks = types.DefaultGTEOrderLifetime + 300
+	orderKeeper.Add(input.ctx, &sellOrder)
+	orderKeeper.Add(input.ctx, &buyOrder)
+	EndBlocker(input.ctx, input.mk)
+	sellAccount = input.akp.GetAccount(input.ctx, seller)
+	buyAccount = input.akp.GetAccount(input.ctx, buyer)
+	require.EqualValues(t, sellAccount.GetCoins().AmountOf(stock).Int64(), 9950)
+	require.EqualValues(t, buyAccount.GetCoins().AmountOf(stock).Int64(), 10050)
+	require.EqualValues(t, sellAccount.GetCoins().AmountOf(types2.CET).Int64(), 14700)
+	require.EqualValues(t, buyAccount.GetCoins().AmountOf(types2.CET).Int64(), 4700)
+
 }

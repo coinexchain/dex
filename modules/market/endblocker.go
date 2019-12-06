@@ -150,20 +150,24 @@ func SendFillMsg(ctx sdk.Context, seller *Order, buyer *Order, stockAmount, mone
 }
 
 // unfreeze an ask order's stock or a bid order's money
-func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, order *types.Order, feeForZeroDeal int64, feeK types.ExpectedChargeFeeKeeper) {
+func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, order *types.Order, feeForZeroDeal int64, feeK types.ExpectedChargeFeeKeeper, freeTimeBlocks int64) {
 	stock, money := SplitSymbol(order.TradingPair)
 	frozenToken := stock
 	if order.Side == types.BUY {
 		frozenToken = money
 	}
-
-	coins := sdk.Coins([]sdk.Coin{sdk.NewCoin(frozenToken, sdk.NewInt(order.Freeze))})
-	bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
-
-	if order.FrozenFee != 0 {
-		coins = []sdk.Coin{sdk.NewCoin(dex.CET, sdk.NewInt(order.FrozenFee))}
-		bxKeeper.UnFreezeCoins(ctx, order.Sender, coins)
-		actualFee := order.CalOrderFeeInt64(feeForZeroDeal)
+	bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCoins(frozenToken, order.Freeze))
+	if order.FrozenCommission != 0 {
+		bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCetCoins(order.FrozenCommission))
+		actualFee := order.CalActualOrderCommissionInt64(feeForZeroDeal)
+		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee); err != nil {
+			//should not reach this clause in production
+			ctx.Logger().Debug("unfreezeCoinsForOrder: %s", err.Error())
+		}
+	}
+	if order.TimeInForce == GTE && order.FrozenFeatureFee != 0 {
+		bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCetCoins(order.FrozenFeatureFee))
+		actualFee := order.CalActualOrderFeatureFeeInt64(ctx, freeTimeBlocks)
 		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee); err != nil {
 			//should not reach this clause in production
 			ctx.Logger().Debug("unfreezeCoinsForOrder: %s", err.Error())
@@ -172,9 +176,9 @@ func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, 
 }
 
 // unfreeze the frozen token in the order and remove it from the market
-func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper, feeK types.ExpectedChargeFeeKeeper, order *types.Order, feeForZeroDeal int64) {
-	if order.Freeze != 0 || order.FrozenFee != 0 {
-		unfreezeCoinsForOrder(ctx, bxKeeper, order, feeForZeroDeal, feeK)
+func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper, feeK types.ExpectedChargeFeeKeeper, order *types.Order, feeForZeroDeal int64, freeTimeBlocks int64) {
+	if order.Freeze != 0 || order.FrozenFeatureFee != 0 || order.FrozenCommission != 0 {
+		unfreezeCoinsForOrder(ctx, bxKeeper, order, feeForZeroDeal, feeK, freeTimeBlocks)
 	}
 	orderKeeper.Remove(ctx, order)
 }
@@ -257,7 +261,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 			if order.Height+order.ExistBlocks > currHeight {
 				continue
 			}
-			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
+			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
 			if keeper.IsSubScribed(types.Topic) {
 				msgInfo := types.CancelOrderInfo{
 					OrderID:        order.OrderID(),
@@ -266,7 +270,8 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 					Side:           order.Side,
 					Price:          order.Price,
 					DelReason:      types.CancelOrderByGteTimeOut,
-					UsedCommission: order.CalOrderFeeInt64(marketParams.FeeForZeroDeal),
+					UsedCommission: order.CalActualOrderCommissionInt64(marketParams.FeeForZeroDeal),
+					UsedFeatureFee: order.CalActualOrderFeatureFeeInt64(ctx, marketParams.GTEOrderLifetime),
 					LeftStock:      order.LeftStock,
 					RemainAmount:   order.Freeze,
 					DealStock:      order.DealStock,
@@ -289,7 +294,7 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight+1)
 		for _, ord := range oldOrders {
-			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, ord, marketParams.FeeForZeroDeal)
+			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, ord, marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
 			if keeper.IsSubScribed(types.Topic) {
 				msgInfo := types.CancelOrderInfo{
 					OrderID:        ord.OrderID(),
@@ -298,7 +303,8 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 					Side:           ord.Side,
 					Price:          ord.Price,
 					DelReason:      types.CancelOrderByGteTimeOut,
-					UsedCommission: ord.CalOrderFeeInt64(marketParams.FeeForZeroDeal),
+					UsedCommission: ord.CalActualOrderCommissionInt64(marketParams.FeeForZeroDeal),
+					UsedFeatureFee: ord.CalActualOrderFeatureFeeInt64(ctx, marketParams.GTEOrderLifetime),
 					LeftStock:      ord.LeftStock,
 					RemainAmount:   ord.Freeze,
 					DealStock:      ord.DealStock,
@@ -378,9 +384,9 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 			orderKeeper.Update(ctx, order)
 			if order.TimeInForce == types.IOC || order.LeftStock == 0 || notEnoughMoney(order) {
 				if keeper.IsSubScribed(types.Topic) {
-					sendOrderMsg(ctx, order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, keeper)
+					sendOrderMsg(ctx, order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
 				}
-				removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal)
+				removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
 			}
 		}
 		// if some orders dealt, update last executed price of this market
@@ -391,14 +397,15 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 	}
 }
 
-func sendOrderMsg(ctx sdk.Context, order *types.Order, height int64, feeForZeroDeal int64, keeper keepers.Keeper) {
+func sendOrderMsg(ctx sdk.Context, order *types.Order, height int64, feeForZeroDeal int64, freeTimeBlocks int64) {
 	msgInfo := types.CancelOrderInfo{
 		OrderID:        order.OrderID(),
 		TradingPair:    order.TradingPair,
 		Side:           order.Side,
 		Height:         height,
 		Price:          order.Price,
-		UsedCommission: order.CalOrderFeeInt64(feeForZeroDeal),
+		UsedCommission: order.CalActualOrderCommissionInt64(feeForZeroDeal),
+		UsedFeatureFee: order.CalActualOrderFeatureFeeInt64(ctx, freeTimeBlocks),
 		LeftStock:      order.LeftStock,
 		RemainAmount:   order.Freeze,
 		DealStock:      order.DealStock,

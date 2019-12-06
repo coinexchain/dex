@@ -24,7 +24,9 @@ func NewCetCoins(amount int64) sdk.Coins {
 func NewCetCoinsE8(amount int64) sdk.Coins {
 	return sdk.NewCoins(NewCetCoin(amount * E8))
 }
-
+func NewCoins(denom string, amount int64) sdk.Coins {
+	return sdk.NewCoins(sdk.NewCoin(denom, sdk.NewInt(amount)))
+}
 func IsCET(coin sdk.Coin) bool {
 	return coin.Denom == CET
 }

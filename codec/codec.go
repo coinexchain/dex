@@ -1216,23 +1216,15 @@ func EncodeLockedCoin(w io.Writer, v LockedCoin) error {
 	if err != nil {
 		return err
 	}
-	var fromAddress []byte
-	if v.FromAddress != nil {
-		fromAddress = v.FromAddress[:]
-	}
-	err = codonEncodeByteSlice(w, fromAddress)
+	err = codonEncodeByteSlice(w, v.FromAddress[:])
 	if err != nil {
 		return err
 	}
-	var supervisor []byte
-	if v.Supervisor != nil {
-		supervisor = v.Supervisor[:]
-	}
-	err = codonEncodeByteSlice(w, supervisor)
+	err = codonEncodeByteSlice(w, v.Supervisor[:])
 	if err != nil {
 		return err
 	}
-	err = codonEncodeVarint(w, v.Reward)
+	err = codonEncodeVarint(w, int64(v.Reward))
 	if err != nil {
 		return err
 	}
@@ -1269,26 +1261,26 @@ func DecodeLockedCoin(bz []byte) (LockedCoin, int, error) {
 	if err != nil {
 		return v, total, err
 	}
-	if length > 0 {
-		v.FromAddress, n, err = codonGetByteSlice(bz, length)
-		if err != nil {
-			return v, total, err
-		}
-		bz = bz[n:]
-		total += n
+	bz = bz[n:]
+	total += n
+	v.FromAddress, n, err = codonGetByteSlice(bz, length)
+	if err != nil {
+		return v, total, err
 	}
+	bz = bz[n:]
+	total += n
 	length = codonDecodeInt(bz, &n, &err)
 	if err != nil {
 		return v, total, err
 	}
-	if length > 0 {
-		v.Supervisor, n, err = codonGetByteSlice(bz, length)
-		if err != nil {
-			return v, total, err
-		}
-		bz = bz[n:]
-		total += n
+	bz = bz[n:]
+	total += n
+	v.Supervisor, n, err = codonGetByteSlice(bz, length)
+	if err != nil {
+		return v, total, err
 	}
+	bz = bz[n:]
+	total += n
 	v.Reward = int64(codonDecodeInt64(bz, &n, &err))
 	if err != nil {
 		return v, total, err
@@ -1300,11 +1292,17 @@ func DecodeLockedCoin(bz []byte) (LockedCoin, int, error) {
 
 func RandLockedCoin(r RandSrc) LockedCoin {
 	// codon version: 1
+	var length int
 	var v LockedCoin
 	v.Coin.Denom = r.GetString(1 + int(r.GetUint()%(MaxStringLength-1)))
 	v.Coin.Amount = RandInt(r)
 	// end of v.Coin
 	v.UnlockTime = r.GetInt64()
+	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
+	v.FromAddress = r.GetBytes(length)
+	length = 1 + int(r.GetUint()%(MaxSliceLength-1))
+	v.Supervisor = r.GetBytes(length)
+	v.Reward = r.GetInt64()
 	return v
 } //End of RandLockedCoin
 
@@ -4519,6 +4517,18 @@ func EncodeAccountX(w io.Writer, v AccountX) error {
 		if err != nil {
 			return err
 		}
+		err = codonEncodeByteSlice(w, v.LockedCoins[_0].FromAddress[:])
+		if err != nil {
+			return err
+		}
+		err = codonEncodeByteSlice(w, v.LockedCoins[_0].Supervisor[:])
+		if err != nil {
+			return err
+		}
+		err = codonEncodeVarint(w, int64(v.LockedCoins[_0].Reward))
+		if err != nil {
+			return err
+		}
 		// end of v.LockedCoins[_0]
 	}
 	err = codonEncodeVarint(w, int64(len(v.FrozenCoins)))
@@ -6496,13 +6506,13 @@ func DecodeMsgCreateOrder(bz []byte) (MsgCreateOrder, int, error) {
 	}
 	bz = bz[n:]
 	total += n
-	v.TimeInForce = int64(codonDecodeInt(bz, &n, &err))
+	v.TimeInForce = int64(codonDecodeInt64(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
 	bz = bz[n:]
 	total += n
-	v.ExistBlocks = int64(codonDecodeInt(bz, &n, &err))
+	v.ExistBlocks = int64(codonDecodeInt64(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
@@ -6723,11 +6733,15 @@ func EncodeOrder(w io.Writer, v Order) error {
 	if err != nil {
 		return err
 	}
-	err = codonEncodeVarint(w, int64(v.FrozenFee))
+	err = codonEncodeVarint(w, int64(v.FrozenCommission))
 	if err != nil {
 		return err
 	}
 	err = codonEncodeVarint(w, int64(v.ExistBlocks))
+	if err != nil {
+		return err
+	}
+	err = codonEncodeVarint(w, int64(v.FrozenFeatureFee))
 	if err != nil {
 		return err
 	}
@@ -6811,7 +6825,7 @@ func DecodeOrder(bz []byte) (Order, int, error) {
 	}
 	bz = bz[n:]
 	total += n
-	v.TimeInForce = int64(codonDecodeInt(bz, &n, &err))
+	v.TimeInForce = int64(codonDecodeInt64(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
@@ -6823,13 +6837,19 @@ func DecodeOrder(bz []byte) (Order, int, error) {
 	}
 	bz = bz[n:]
 	total += n
-	v.FrozenFee = int64(codonDecodeInt64(bz, &n, &err))
+	v.FrozenCommission = int64(codonDecodeInt64(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
 	bz = bz[n:]
 	total += n
-	v.ExistBlocks = int64(codonDecodeInt(bz, &n, &err))
+	v.ExistBlocks = int64(codonDecodeInt64(bz, &n, &err))
+	if err != nil {
+		return v, total, err
+	}
+	bz = bz[n:]
+	total += n
+	v.FrozenFeatureFee = int64(codonDecodeInt64(bz, &n, &err))
 	if err != nil {
 		return v, total, err
 	}
@@ -6877,8 +6897,9 @@ func RandOrder(r RandSrc) Order {
 	v.Side = r.GetUint8()
 	v.TimeInForce = r.GetInt64()
 	v.Height = r.GetInt64()
-	v.FrozenFee = r.GetInt64()
+	v.FrozenCommission = r.GetInt64()
 	v.ExistBlocks = r.GetInt64()
+	v.FrozenFeatureFee = r.GetInt64()
 	v.LeftStock = r.GetInt64()
 	v.Freeze = r.GetInt64()
 	v.DealStock = r.GetInt64()
@@ -7635,7 +7656,7 @@ func DecodeMsg(bz []byte) (Msg, int, error) {
 	case [4]byte{187, 190, 104, 91}:
 		v, n, err := DecodeMsgBancorCancel(bz[4:])
 		return v, n + 4, err
-	case [4]byte{160, 232, 209, 155}:
+	case [4]byte{177, 152, 232, 60}:
 		v, n, err := DecodeMsgBancorInit(bz[4:])
 		return v, n + 4, err
 	case [4]byte{225, 122, 18, 80}:
@@ -7656,7 +7677,7 @@ func DecodeMsg(bz []byte) (Msg, int, error) {
 	case [4]byte{79, 125, 235, 121}:
 		v, n, err := DecodeMsgCommentToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{145, 241, 102, 115}:
+	case [4]byte{246, 238, 7, 164}:
 		v, n, err := DecodeMsgCreateOrder(bz[4:])
 		return v, n + 4, err
 	case [4]byte{130, 221, 55, 57}:
@@ -7982,7 +8003,7 @@ func getMagicBytes(name string) []byte {
 	case "AccAddress":
 		return []byte{37, 50, 37, 208}
 	case "AccountX":
-		return []byte{3, 161, 99, 37}
+		return []byte{52, 40, 250, 245}
 	case "BaseAccount":
 		return []byte{100, 94, 81, 72}
 	case "BaseToken":
@@ -8004,7 +8025,7 @@ func getMagicBytes(name string) []byte {
 	case "Input":
 		return []byte{165, 152, 189, 47}
 	case "LockedCoin":
-		return []byte{92, 7, 7, 57}
+		return []byte{227, 236, 168, 93}
 	case "MarketInfo":
 		return []byte{174, 117, 167, 230}
 	case "ModuleAccount":
@@ -8016,7 +8037,7 @@ func getMagicBytes(name string) []byte {
 	case "MsgBancorCancel":
 		return []byte{187, 190, 104, 91}
 	case "MsgBancorInit":
-		return []byte{160, 232, 209, 155}
+		return []byte{177, 152, 232, 60}
 	case "MsgBancorTrade":
 		return []byte{225, 122, 18, 80}
 	case "MsgBeginRedelegate":
@@ -8030,7 +8051,7 @@ func getMagicBytes(name string) []byte {
 	case "MsgCommentToken":
 		return []byte{79, 125, 235, 121}
 	case "MsgCreateOrder":
-		return []byte{145, 241, 102, 115}
+		return []byte{246, 238, 7, 164}
 	case "MsgCreateTradingPair":
 		return []byte{130, 221, 55, 57}
 	case "MsgCreateValidator":
@@ -8090,7 +8111,8 @@ func getMagicBytes(name string) []byte {
 	case "MsgWithdrawValidatorCommission":
 		return []byte{18, 172, 190, 152}
 	case "Order":
-		return []byte{227, 245, 17, 65}
+		return []byte{57, 115, 63, 27}
+
 	case "Output":
 		return []byte{251, 0, 54, 127}
 	case "ParamChange":
@@ -8882,7 +8904,7 @@ func DecodeAny(bz []byte) (interface{}, int, error) {
 	case [4]byte{37, 50, 37, 208}:
 		v, n, err := DecodeAccAddress(bz[4:])
 		return v, n + 4, err
-	case [4]byte{3, 161, 99, 37}:
+	case [4]byte{52, 40, 250, 245}:
 		v, n, err := DecodeAccountX(bz[4:])
 		return v, n + 4, err
 	case [4]byte{100, 94, 81, 72}:
@@ -8915,7 +8937,7 @@ func DecodeAny(bz []byte) (interface{}, int, error) {
 	case [4]byte{165, 152, 189, 47}:
 		v, n, err := DecodeInput(bz[4:])
 		return v, n + 4, err
-	case [4]byte{92, 7, 7, 57}:
+	case [4]byte{227, 236, 168, 93}:
 		v, n, err := DecodeLockedCoin(bz[4:])
 		return v, n + 4, err
 	case [4]byte{174, 117, 167, 230}:
@@ -8933,7 +8955,7 @@ func DecodeAny(bz []byte) (interface{}, int, error) {
 	case [4]byte{187, 190, 104, 91}:
 		v, n, err := DecodeMsgBancorCancel(bz[4:])
 		return v, n + 4, err
-	case [4]byte{160, 232, 209, 155}:
+	case [4]byte{177, 152, 232, 60}:
 		v, n, err := DecodeMsgBancorInit(bz[4:])
 		return v, n + 4, err
 	case [4]byte{225, 122, 18, 80}:
@@ -8954,7 +8976,7 @@ func DecodeAny(bz []byte) (interface{}, int, error) {
 	case [4]byte{79, 125, 235, 121}:
 		v, n, err := DecodeMsgCommentToken(bz[4:])
 		return v, n + 4, err
-	case [4]byte{145, 241, 102, 115}:
+	case [4]byte{246, 238, 7, 164}:
 		v, n, err := DecodeMsgCreateOrder(bz[4:])
 		return v, n + 4, err
 	case [4]byte{130, 221, 55, 57}:
@@ -9044,7 +9066,7 @@ func DecodeAny(bz []byte) (interface{}, int, error) {
 	case [4]byte{18, 172, 190, 152}:
 		v, n, err := DecodeMsgWithdrawValidatorCommission(bz[4:])
 		return v, n + 4, err
-	case [4]byte{227, 245, 17, 65}:
+	case [4]byte{57, 115, 63, 27}:
 		v, n, err := DecodeOrder(bz[4:])
 		return v, n + 4, err
 	case [4]byte{251, 0, 54, 127}:

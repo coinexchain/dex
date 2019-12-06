@@ -24,18 +24,18 @@ type CancelMarketInfo struct {
 }
 
 type CreateOrderInfo struct {
-	OrderID     string  `json:"order_id"`
-	Sender      string  `json:"sender"`
-	TradingPair string  `json:"trading_pair"`
-	OrderType   byte    `json:"order_type"`
-	Price       sdk.Dec `json:"price"`
-	Quantity    int64   `json:"quantity"`
-	Side        byte    `json:"side"`
-	TimeInForce int64   `json:"time_in_force"`
-	FeatureFee  int64   `json:"feature_fee"`
-	Height      int64   `json:"height"`
-	FrozenFee   int64   `json:"frozen_fee"`
-	Freeze      int64   `json:"freeze"`
+	OrderID          string  `json:"order_id"`
+	Sender           string  `json:"sender"`
+	TradingPair      string  `json:"trading_pair"`
+	OrderType        byte    `json:"order_type"`
+	Price            sdk.Dec `json:"price"`
+	Quantity         int64   `json:"quantity"`
+	Side             byte    `json:"side"`
+	TimeInForce      int64   `json:"time_in_force"`
+	Height           int64   `json:"height"`
+	FrozenCommission int64   `json:"frozen_commission"`
+	FrozenFeatureFee int64   `json:"frozen_feature_fee"`
+	Freeze           int64   `json:"freeze"`
 }
 
 type FillOrderInfo struct {
@@ -67,6 +67,7 @@ type CancelOrderInfo struct {
 
 	// Fields of amount
 	UsedCommission int64 `json:"used_commission"`
+	UsedFeatureFee int64 `json:"used_feature_fee"`
 	LeftStock      int64 `json:"left_stock"`
 	RemainAmount   int64 `json:"remain_amount"`
 	DealStock      int64 `json:"deal_stock"`
