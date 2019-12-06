@@ -48,10 +48,13 @@ func (or *Order) CalActualOrderFeatureFeeInt64(ctx sdk.Context, freeTimeBlocks i
 	existTime := ctx.BlockHeight() - or.Height + 1
 	if existTime < freeTimeBlocks {
 		return 0
-	} else {
-		chargeBlocks := existTime - freeTimeBlocks
-		return chargeBlocks * or.FrozenFeatureFee / existTime
 	}
+	chargeBlocks := existTime - freeTimeBlocks
+	fee := chargeBlocks * or.FrozenFeatureFee / (or.ExistBlocks - freeTimeBlocks)
+	if fee > or.FrozenFeatureFee {
+		fee = or.FrozenFeatureFee
+	}
+	return fee
 }
 
 func AssemblyOrderID(userAddr string, seq uint64, identify byte) string {

@@ -63,10 +63,32 @@ func TestOrder_CalActualOrderFeatureFeeInt64(t *testing.T) {
 	addr, failed := sdk.AccAddressFromHex("0123456789012345678901234567890123423456")
 	require.Nil(t, failed)
 	order := Order{
-		Sender:   addr,
-		Sequence: 9223372036854775818,
-		Identify: 28,
+		Sender:           addr,
+		Sequence:         9223,
+		Identify:         28,
+		Height:           9,
+		FrozenFeatureFee: 100,
+		ExistBlocks:      200,
 	}
 
-	ctx, keys := newContextAndMarketKey(unitTestChainID)
+	ctx := sdk.Context{}
+	ctx = ctx.WithBlockHeight(10)
+	fee := order.CalActualOrderFeatureFeeInt64(ctx, 100)
+	require.EqualValues(t, 0, fee)
+
+	ctx = ctx.WithBlockHeight(109)
+	fee = order.CalActualOrderFeatureFeeInt64(ctx, 100)
+	require.EqualValues(t, 1, fee)
+
+	ctx = ctx.WithBlockHeight(200)
+	fee = order.CalActualOrderFeatureFeeInt64(ctx, 100)
+	require.EqualValues(t, 92, fee)
+
+	ctx = ctx.WithBlockHeight(208)
+	fee = order.CalActualOrderFeatureFeeInt64(ctx, 100)
+	require.EqualValues(t, 100, fee)
+
+	ctx = ctx.WithBlockHeight(20800)
+	fee = order.CalActualOrderFeatureFeeInt64(ctx, 100)
+	require.EqualValues(t, 100, fee)
 }
