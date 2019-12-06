@@ -44,6 +44,8 @@ github.com/coinexchain/cosmos-sdk v0.0.0-20191105122849-557d140a540b h1:N5/VQLuO
 github.com/coinexchain/cosmos-sdk v0.0.0-20191105122849-557d140a540b/go.mod h1:Axr+Q+G2Ffduxt4zMA6KwxxvyVSKPB9+nXZVPKgpC2c=
 github.com/coinexchain/cosmos-sdk v0.0.0-20191205082018-7e526a87fc73 h1:onQFrlrwAMxFJip2K+HwNxaMd00yY3GfEgf6a6TISsg=
 github.com/coinexchain/cosmos-sdk v0.0.0-20191205082018-7e526a87fc73/go.mod h1:Axr+Q+G2Ffduxt4zMA6KwxxvyVSKPB9+nXZVPKgpC2c=
+github.com/coinexchain/cosmos-sdk v0.0.0-20191206025746-e72414bd95ca h1:TudrUS20Ud7FaBEb2sH8NXCPOKPARNmwtgEq4ktTJyY=
+github.com/coinexchain/cosmos-sdk v0.0.0-20191206025746-e72414bd95ca/go.mod h1:Axr+Q+G2Ffduxt4zMA6KwxxvyVSKPB9+nXZVPKgpC2c=
 github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6 h1:ResmUJSlC5h17IL5ZUAOZCwRZELSLr4m1/VowdLfreM=
 github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6/go.mod h1:erQnv+T5z4Ca0rw18gcd4cfpjHj/wvZHW/zmadISOBI=
 github.com/coinexchain/shorthanzi v0.1.0 h1:c4Fcb8GkQ37uLNSQr5SRohmS+aW+WY3doyy7ZuhF0W4=
