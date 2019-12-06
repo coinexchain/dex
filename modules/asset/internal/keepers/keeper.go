@@ -34,7 +34,9 @@ type Keeper interface {
 	RemoveTokenWhitelist(ctx sdk.Context, symbol string, owner sdk.AccAddress, whitelist []sdk.AccAddress) sdk.Error
 	ForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
 	UnForbidAddress(ctx sdk.Context, symbol string, owner sdk.AccAddress, addresses []sdk.AccAddress) sdk.Error
-	ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string, identity string) sdk.Error
+	ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress,
+		url, description, identity, name string, totalSupply sdk.Int,
+		mintable, burnable, addrForbiddable, tokenForbiddable bool) sdk.Error
 
 	SetParams(ctx sdk.Context, params types.Params)
 	GetParams(ctx sdk.Context) (params types.Params)
@@ -296,28 +298,76 @@ func (keeper BaseKeeper) UnForbidAddress(ctx sdk.Context, symbol string, owner s
 }
 
 // ModifyTokenInfo - modify token info property
-func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress, url string, description string, identity string) sdk.Error {
+func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner sdk.AccAddress,
+	url, description, identity, name string, totalSupply sdk.Int,
+	mintable, burnable, addrForbiddable, tokenForbiddable bool) sdk.Error {
+
 	token, err := keeper.checkPrecondition(ctx, symbol, owner)
 	if err != nil {
 		return err
 	}
 
-	if url != types.DoNotModifyTokenInfo {
+	// always modifiable
+	if url != token.GetURL() {
 		if err := token.SetURL(url); err != nil {
 			return err
 		}
 	}
-
-	if description != types.DoNotModifyTokenInfo {
+	if description != token.GetURL() {
 		if err := token.SetDescription(description); err != nil {
 			return err
 		}
 	}
-
-	if identity != types.DoNotModifyTokenInfo {
+	if identity != token.GetIdentity() {
 		if err := token.SetIdentity(identity); err != nil {
 			return err
 		}
+	}
+
+	distributed := !keeper.bkx.GetTotalCoins(ctx, owner).AmountOf(symbol).Equal(token.GetTotalSupply())
+
+	// modifiable before distribution
+	if name != token.GetName() {
+		if distributed {
+			return types.ErrCodeTokenInfoSealed("Name")
+		}
+		if err := token.SetName(name); err != nil {
+			return err
+		}
+	}
+	if !totalSupply.Equal(token.GetTotalSupply()) {
+		if distributed {
+			return types.ErrCodeTokenInfoSealed("TotalSupply")
+		}
+		if err := token.SetTotalSupply(totalSupply); err != nil {
+			return err
+		}
+	}
+
+	// modifiable (with limitation) after distribution
+	if mintable != token.GetMintable() {
+		if distributed && mintable {
+			return types.ErrCodeTokenInfoSealed("Mintable")
+		}
+		token.SetMintable(mintable)
+	}
+	if burnable != token.GetBurnable() {
+		if distributed && !burnable {
+			return types.ErrCodeTokenInfoSealed("Burnable")
+		}
+		token.SetBurnable(burnable)
+	}
+	if addrForbiddable != token.GetAddrForbiddable() {
+		if distributed && addrForbiddable {
+			return types.ErrCodeTokenInfoSealed("AddrForbiddable")
+		}
+		token.SetAddrForbiddable(addrForbiddable)
+	}
+	if tokenForbiddable != token.GetTokenForbiddable() {
+		if distributed && tokenForbiddable {
+			return types.ErrCodeTokenInfoSealed("TokenForbiddable")
+		}
+		token.SetTokenForbiddable(tokenForbiddable)
 	}
 
 	return keeper.SetToken(ctx, token)

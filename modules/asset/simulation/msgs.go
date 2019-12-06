@@ -418,7 +418,11 @@ func SimulateMsgModifyTokenInfo(k asset.Keeper) simulation.Operation {
 		url := fmt.Sprintf("www.%s.org", symbol)
 		describe := fmt.Sprintf("simulation modify info %s", symbol)
 		identity := types.TestIdentityString
-		msg := asset.NewMsgModifyTokenInfo(symbol, url, describe, identity, owner)
+		msg := asset.NewMsgModifyTokenInfo(symbol, url, describe, identity, owner,
+			types.DoNotModifyTokenInfo, types.DoNotModifyTokenInfo, // TODO
+			types.DoNotModifyTokenInfo, types.DoNotModifyTokenInfo, // TODO
+			types.DoNotModifyTokenInfo, types.DoNotModifyTokenInfo, // TODO
+		)
 		if msg.ValidateBasic() != nil {
 			return simulation.NoOpMsg(asset.ModuleName), nil, nil
 		}

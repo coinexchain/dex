@@ -22,6 +22,7 @@ const (
 // Token is an interface used to store asset at a given token within state.
 // Many complex conditions can be used in the concrete struct which implements Token.
 type Token interface {
+	GetName() string
 	SetName(string) sdk.Error
 
 	GetSymbol() string
@@ -95,7 +96,7 @@ type BaseToken struct {
 
 //nolint
 var (
-	// tokenSymbolRegex : Token symbol can be 2 ~ 8 characters long.
+	// Token symbol can be 2 ~ 16 characters long.
 	tokenSymbolRegex = regexp.MustCompile(`^[a-z][a-z0-9]{1,13}([a-z0-9]{1,2}|(\.[a-z]))?$`)
 )
 
@@ -180,6 +181,10 @@ func (t *BaseToken) Validate() sdk.Error {
 	}
 
 	return nil
+}
+
+func (t *BaseToken) GetName() string {
+	return t.Name
 }
 
 func (t *BaseToken) SetName(name string) sdk.Error {

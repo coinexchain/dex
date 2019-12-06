@@ -45,8 +45,10 @@ func TestTxCmds(t *testing.T) {
 	testTxCmd(t, "unforbid-addr --symbol=abc --addresses={testAddrBech32}",
 		types.NewMsgUnForbidAddr("abc", nil, []sdk.AccAddress{testAddr}))
 
-	testTxCmd(t, "modify-token-info --symbol=abc --url=coinex.org --description=cool --identity=CET",
-		types.NewMsgModifyTokenInfo("abc", "coinex.org", "cool", "CET", nil))
+	testTxCmd(t, "modify-token-info --symbol=abc --url=coinex.org --description=cool --identity=CET"+
+		" --name=NewName --total-supply=123 --mintable=true --burnable=true --addr-forbiddable=true --token-forbiddable=true",
+		types.NewMsgModifyTokenInfo("abc", "coinex.org", "cool", "CET", nil,
+			"NewName", "123", "true", "true", "true", "true"))
 }
 
 func testTxCmd(t *testing.T, args string, expectedMsg interface{}) {

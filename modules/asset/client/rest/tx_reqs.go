@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -73,10 +74,16 @@ type (
 	}
 	// modifyTokenInfoReq defines the properties of a modify token info request's body.
 	modifyTokenInfoReq struct {
-		BaseReq     rest.BaseReq `json:"base_req" yaml:"base_req"`
-		URL         *string      `json:"url,omitempty" yaml:"url,omitempty"`
-		Description *string      `json:"description,omitempty" yaml:"description,omitempty"`
-		Identity    *string      `json:"identity,omitempty" yaml:"identity,omitempty"`
+		BaseReq          rest.BaseReq `json:"base_req" yaml:"base_req"`
+		URL              *string      `json:"url,omitempty" yaml:"url,omitempty"`
+		Description      *string      `json:"description,omitempty" yaml:"description,omitempty"`
+		Identity         *string      `json:"identity,omitempty" yaml:"identity,omitempty"`
+		Name             *string      `json:"name" yaml:"name"`
+		TotalSupply      *string      `json:"total_supply" yaml:"total_supply"`
+		Mintable         *bool        `json:"mintable" yaml:"mintable"`
+		Burnable         *bool        `json:"burnable" yaml:"burnable"`
+		AddrForbiddable  *bool        `json:"addr_forbiddable" yaml:"addr_forbiddable"`
+		TokenForbiddable *bool        `json:"token_forbiddable" yaml:"token_forbiddable"`
 	}
 )
 
@@ -214,23 +221,32 @@ func (req *modifyTokenInfoReq) GetBaseReq() *rest.BaseReq {
 	return &req.BaseReq
 }
 func (req *modifyTokenInfoReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
-	url := types.DoNotModifyTokenInfo
-	if req.URL != nil {
-		url = *req.URL
-	}
-
-	description := types.DoNotModifyTokenInfo
-	if req.Description != nil {
-		description = *req.Description
-	}
-
-	identity := types.DoNotModifyTokenInfo
-	if req.Identity != nil {
-		identity = *req.Identity
-	}
-
 	symbol := getSymbol(r)
-	return types.NewMsgModifyTokenInfo(symbol, url, description, identity, owner), nil
+	url := getNewTokenStrInfo(req.URL)
+	description := getNewTokenStrInfo(req.Description)
+	identity := getNewTokenStrInfo(req.Identity)
+	name := getNewTokenStrInfo(req.Name)
+	supply := getNewTokenStrInfo(req.TotalSupply)
+	mintable := getNewTokenBoolInfo(req.Mintable)
+	burnable := getNewTokenBoolInfo(req.Burnable)
+	addrForbiddable := getNewTokenBoolInfo(req.AddrForbiddable)
+	tokenForbiddable := getNewTokenBoolInfo(req.TokenForbiddable)
+
+	return types.NewMsgModifyTokenInfo(symbol, url, description, identity, owner,
+		name, supply, mintable, burnable, addrForbiddable, tokenForbiddable), nil
+}
+
+func getNewTokenStrInfo(ptr *string) string {
+	if ptr != nil {
+		return *ptr
+	}
+	return types.DoNotModifyTokenInfo
+}
+func getNewTokenBoolInfo(ptr *bool) string {
+	if ptr != nil {
+		return fmt.Sprintf("%v", *ptr)
+	}
+	return types.DoNotModifyTokenInfo
 }
 
 func getSymbol(r *http.Request) string {

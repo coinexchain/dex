@@ -458,6 +458,12 @@ $ cetcli tx asset modify-token-info --symbol="abc" \
 	cmd.Flags().String(flagTokenURL, types.DoNotModifyTokenInfo, "the url of token")
 	cmd.Flags().String(flagTokenDescription, types.DoNotModifyTokenInfo, "the description of token")
 	cmd.Flags().String(flagTokenIdentity, types.DoNotModifyTokenInfo, "the identity of token")
+	cmd.Flags().String(flagName, types.DoNotModifyTokenInfo, "the name of token")
+	cmd.Flags().String(flagTotalSupply, types.DoNotModifyTokenInfo, "the total supply of token")
+	cmd.Flags().String(flagMintable, types.DoNotModifyTokenInfo, "whether the token could be minted")
+	cmd.Flags().String(flagBurnable, types.DoNotModifyTokenInfo, "whether the token could be burned")
+	cmd.Flags().String(flagAddrForbiddable, types.DoNotModifyTokenInfo, "whether the token holder address can be forbidden by token owner")
+	cmd.Flags().String(flagTokenForbiddable, types.DoNotModifyTokenInfo, "whether the token can be forbidden")
 
 	_ = cmd.MarkFlagRequired(client.FlagFrom)
 

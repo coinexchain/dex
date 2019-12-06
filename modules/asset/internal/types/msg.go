@@ -2,7 +2,7 @@ package types
 
 import (
 	"bytes"
-	"unicode/utf8"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -595,20 +595,33 @@ func (msg MsgUnForbidAddr) GetSigners() []sdk.AccAddress {
 
 // MsgModifyTokenInfo
 type MsgModifyTokenInfo struct {
-	Symbol       string         `json:"symbol" yaml:"symbol"`
-	URL          string         `json:"url" yaml:"url"`
-	Description  string         `json:"description" yaml:"description"`
-	Identity     string         `json:"identity" yaml:"identity"`
-	OwnerAddress sdk.AccAddress `json:"owner_address" yaml:"owner_address"` //token owner address
+	Symbol           string         `json:"symbol" yaml:"symbol"`
+	OwnerAddress     sdk.AccAddress `json:"owner_address" yaml:"owner_address"`
+	URL              string         `json:"url" yaml:"url"`
+	Description      string         `json:"description" yaml:"description"`
+	Identity         string         `json:"identity" yaml:"identity"`
+	Name             string         `json:"name" yaml:"name"`
+	TotalSupply      string         `json:"total_supply" yaml:"total_supply"`
+	Mintable         string         `json:"mintable" yaml:"mintable"`
+	Burnable         string         `json:"burnable" yaml:"burnable"`
+	AddrForbiddable  string         `json:"addr_forbiddable" yaml:"addr_forbiddable"`
+	TokenForbiddable string         `json:"token_forbiddable" yaml:"token_forbiddable"`
 }
 
-func NewMsgModifyTokenInfo(symbol string, url string, description string, identity string, owner sdk.AccAddress) MsgModifyTokenInfo {
+func NewMsgModifyTokenInfo(symbol, url, description, identity string, owner sdk.AccAddress,
+	name, totalSupply, mintable, burnable, addrForbiddable, tokenForbiddable string) MsgModifyTokenInfo {
 	return MsgModifyTokenInfo{
-		symbol,
-		url,
-		description,
-		identity,
-		owner,
+		Symbol:           symbol,
+		URL:              url,
+		Description:      description,
+		Identity:         identity,
+		OwnerAddress:     owner,
+		Name:             name,
+		TotalSupply:      totalSupply,
+		Mintable:         mintable,
+		Burnable:         burnable,
+		AddrForbiddable:  addrForbiddable,
+		TokenForbiddable: tokenForbiddable,
 	}
 }
 
@@ -628,26 +641,62 @@ func (msg MsgModifyTokenInfo) Type() string {
 
 // ValidateBasic Implements Msg.
 func (msg MsgModifyTokenInfo) ValidateBasic() sdk.Error {
-	if err := ValidateTokenSymbol(msg.Symbol); err != nil {
+	tmpToken := BaseToken{}
+	if err := tmpToken.SetSymbol(msg.Symbol); err != nil {
+		return err
+	}
+	if err := tmpToken.SetOwner(msg.OwnerAddress); err != nil {
+		return err
+	}
+	if msg.URL != DoNotModifyTokenInfo {
+		if err := tmpToken.SetURL(msg.URL); err != nil {
+			return err
+		}
+	}
+	if msg.Description != DoNotModifyTokenInfo {
+		if err := tmpToken.SetDescription(msg.Description); err != nil {
+			return err
+		}
+	}
+	if msg.Identity != DoNotModifyTokenInfo {
+		if err := tmpToken.SetIdentity(msg.Identity); err != nil {
+			return err
+		}
+	}
+	if msg.Name != DoNotModifyTokenInfo {
+		if err := tmpToken.SetName(msg.Name); err != nil {
+			return err
+		}
+	}
+	if msg.TotalSupply != DoNotModifyTokenInfo {
+		if supply, ok := sdk.NewIntFromString(msg.TotalSupply); !ok {
+			return ErrInvalidTokenInfo("TotalSupply", msg.TotalSupply)
+		} else if err := tmpToken.SetTotalSupply(supply); err != nil {
+			return err
+		}
+	}
+	if err := validateBoolField("Mintable", msg.Mintable); err != nil {
+		return err
+	}
+	if err := validateBoolField("Burnable", msg.Burnable); err != nil {
+		return err
+	}
+	if err := validateBoolField("AddrForbiddable", msg.AddrForbiddable); err != nil {
+		return err
+	}
+	if err := validateBoolField("TokenForbiddable", msg.TokenForbiddable); err != nil {
 		return err
 	}
 
-	if msg.OwnerAddress.Empty() {
-		return ErrNilTokenOwner()
-	}
+	return nil
+}
 
-	if utf8.RuneCountInString(msg.URL) > MaxTokenURLLength {
-		return ErrInvalidTokenURL(msg.URL)
+func validateBoolField(fieldName, valStr string) sdk.Error {
+	if valStr != DoNotModifyTokenInfo {
+		if _, err := strconv.ParseBool(valStr); err != nil {
+			return ErrInvalidTokenInfo(fieldName, valStr)
+		}
 	}
-
-	if len(msg.Description) > MaxTokenDescriptionLength {
-		return ErrInvalidTokenDescription(msg.Description)
-	}
-
-	if len(msg.Identity) > MaxTokenIdentityLength {
-		return ErrInvalidTokenIdentity(msg.Identity)
-	}
-
 	return nil
 }
 

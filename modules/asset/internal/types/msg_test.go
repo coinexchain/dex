@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -468,32 +470,32 @@ func TestMsgModifyTokenURL_ValidateBasic(t *testing.T) {
 	}{
 		{
 			"base-case",
-			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", TestIdentityString, testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", TestIdentityString, testAddr, "ABC token", "1000", "true", "true", "true", "true"),
 			nil,
 		},
 		{
 			"case-invalidSymbol",
-			NewMsgModifyTokenInfo("a😃", "www.abc.org", "abc example description", TestIdentityString, testAddr),
+			NewMsgModifyTokenInfo("a😃", "www.abc.org", "abc example description", TestIdentityString, testAddr, "ABC token", "1000", "true", "true", "true", "true"),
 			ErrInvalidTokenSymbol("a😃"),
 		},
 		{
 			"case-invalidOwner",
-			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", TestIdentityString, sdk.AccAddress{}),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", TestIdentityString, sdk.AccAddress{}, "ABC token", "1000", "true", "true", "true", "true"),
 			ErrNilTokenOwner(),
 		},
 		{
 			"case-invalidURL",
-			NewMsgModifyTokenInfo("abc", string(make([]byte, MaxTokenURLLength+1)), "abc example description", TestIdentityString, testAddr),
+			NewMsgModifyTokenInfo("abc", string(make([]byte, MaxTokenURLLength+1)), "abc example description", TestIdentityString, testAddr, "ABC token", "1000", "true", "true", "true", "true"),
 			ErrInvalidTokenURL(string(make([]byte, MaxTokenURLLength+1))),
 		},
 		{
 			"case-invalidDescription",
-			NewMsgModifyTokenInfo("abc", "www.abc.org", string(make([]byte, MaxTokenDescriptionLength+1)), TestIdentityString, testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", string(make([]byte, MaxTokenDescriptionLength+1)), TestIdentityString, testAddr, "ABC token", "1000", "true", "true", "true", "true"),
 			ErrInvalidTokenDescription(string(make([]byte, MaxTokenDescriptionLength+1))),
 		},
 		{
 			"case-invalidIdentity",
-			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", string(make([]byte, MaxTokenIdentityLength+1)), testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.org", "abc example description", string(make([]byte, MaxTokenIdentityLength+1)), testAddr, "ABC token", "1000", "true", "true", "true", "true"),
 			ErrInvalidTokenIdentity(string(make([]byte, MaxTokenIdentityLength+1))),
 		},
 	}
@@ -699,7 +701,8 @@ func TestMsg_GetSigners(t *testing.T) {
 		},
 		{
 			"modify-token-url",
-			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", TestIdentityString, testAddr),
+			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", TestIdentityString, testAddr,
+				"ABC token", "1000", "true", "true", "true", "true"),
 			[]sdk.AccAddress{testAddr},
 		},
 	}
@@ -779,16 +782,15 @@ func TestMsg_GetSignBytes(t *testing.T) {
 		},
 		{
 			"modify-token-info",
-			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", TestIdentityString, owner),
-			`{"type":"asset/MsgModifyTokenInfo","value":{"description":"abc example description","identity":"552A83BA62F9B1F8","owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","url":"www.abc.com"}}`,
+			NewMsgModifyTokenInfo("abc", "www.abc.com", "abc example description", TestIdentityString, owner,
+				"ABC token", "1000", "true", "true", "true", "true"),
+			`{"type":"asset/MsgModifyTokenInfo","value":{"addr_forbiddable":"true","burnable":"true","description":"abc example description","identity":"552A83BA62F9B1F8","mintable":"true","name":"ABC token","owner_address":"coinex15fvnexrvsm9ryw3nn4mcrnqyhvhazkkrd4aqvd","symbol":"abc","token_forbiddable":"true","total_supply":"1000","url":"www.abc.com"}}`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.msg.GetSignBytes(); !reflect.DeepEqual(string(got), tt.want) {
-				t.Errorf("Msg.GetSignBytes() = %s, want %s", got, tt.want)
-			}
+			require.Equal(t, tt.want, string(tt.msg.GetSignBytes()))
 		})
 	}
 }

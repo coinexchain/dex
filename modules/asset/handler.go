@@ -1,6 +1,9 @@
 package asset
 
 import (
+	"errors"
+	"strconv"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/asset/internal/types"
@@ -313,7 +316,22 @@ func handleMsgUnForbidAddr(ctx sdk.Context, keeper Keeper, msg types.MsgUnForbid
 
 // handleMsgModifyTokenInfo - Handle MsgModifyTokenInfo
 func handleMsgModifyTokenInfo(ctx sdk.Context, keeper Keeper, msg types.MsgModifyTokenInfo) sdk.Result {
-	if err := keeper.ModifyTokenInfo(ctx, msg.Symbol, msg.OwnerAddress, msg.URL, msg.Description, msg.Identity); err != nil {
+	token := keeper.GetToken(ctx, msg.Symbol)
+	if token == nil {
+		return types.ErrTokenNotFound(msg.Symbol).Result()
+	}
+
+	newURL, newDesc, newID, newName, newSupply,
+		newMintable, newBurnable, newAddrForbiddable, newTokenForbiddable,
+		err := CollectTokenModificationInfo(token, msg)
+	if err != nil {
+		return err.Result()
+	}
+
+	if err := keeper.ModifyTokenInfo(ctx, msg.Symbol, msg.OwnerAddress,
+		newURL, newDesc, newID, newName, newSupply,
+		newMintable, newBurnable, newAddrForbiddable, newTokenForbiddable); err != nil {
+
 		return err.Result()
 	}
 
@@ -333,4 +351,62 @@ func handleMsgModifyTokenInfo(ctx sdk.Context, keeper Keeper, msg types.MsgModif
 	return sdk.Result{
 		Events: ctx.EventManager().Events(),
 	}
+}
+
+func CollectTokenModificationInfo(token types.Token, msg types.MsgModifyTokenInfo) (
+	newURL, newDesc, newID, newName string, newSupply sdk.Int,
+	newMintable, newBurnable, newAddrForbiddable, newTokenForbiddable bool,
+	sdkErr sdk.Error) {
+
+	var err error
+
+	// modifiable fields
+	newURL = getNewStringVal(msg.URL, token.GetURL())
+	newDesc = getNewStringVal(msg.Description, token.GetDescription())
+	newID = getNewStringVal(msg.Identity, token.GetIdentity())
+	newName = getNewStringVal(msg.Name, token.GetName())
+	if newSupply, err = getNewIntVal(msg.TotalSupply, token.GetTotalSupply()); err != nil {
+		sdkErr = types.ErrInvalidTokenInfo("TotalSupply", msg.TotalSupply)
+		return
+	}
+	if newMintable, err = getNewBoolVal(msg.Mintable, token.GetMintable()); err != nil {
+		sdkErr = types.ErrInvalidTokenInfo("Mintable", msg.Mintable)
+		return
+	}
+	if newBurnable, err = getNewBoolVal(msg.Burnable, token.GetBurnable()); err != nil {
+		sdkErr = types.ErrInvalidTokenInfo("Burnable", msg.Burnable)
+		return
+	}
+	if newAddrForbiddable, err = getNewBoolVal(msg.AddrForbiddable, token.GetAddrForbiddable()); err != nil {
+		sdkErr = types.ErrInvalidTokenInfo("AddrForbiddable", msg.AddrForbiddable)
+		return
+	}
+	if newTokenForbiddable, err = getNewBoolVal(msg.TokenForbiddable, token.GetTokenForbiddable()); err != nil {
+		sdkErr = types.ErrInvalidTokenInfo("TokenForbiddable", msg.TokenForbiddable)
+		return
+	}
+	return
+}
+
+func getNewStringVal(newVal, oldVal string) string {
+	if newVal == types.DoNotModifyTokenInfo {
+		return oldVal
+	}
+	return newVal
+}
+func getNewBoolVal(newVal string, oldVal bool) (bool, error) {
+	if newVal == types.DoNotModifyTokenInfo {
+		return oldVal, nil
+	}
+	return strconv.ParseBool(newVal)
+}
+func getNewIntVal(newVal string, oldVal sdk.Int) (sdk.Int, error) {
+	if newVal == types.DoNotModifyTokenInfo {
+		return oldVal, nil
+	}
+	n, ok := sdk.NewIntFromString(newVal)
+	if !ok {
+		return oldVal, errors.New(newVal)
+	}
+	return n, nil
 }
