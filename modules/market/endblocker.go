@@ -248,14 +248,10 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int64, symbol string, kee
 }
 
 func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList []types.MarketInfo, marketParams types.Params) {
-	lifeTime := marketParams.GTEOrderLifetime
 	currHeight := ctx.BlockHeight()
-	if currHeight-lifeTime <= 0 {
-		return
-	}
 	for _, mi := range marketInfoList {
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), mi.GetSymbol(), types.ModuleCdc)
-		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight-lifeTime)
+		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight)
 
 		for _, order := range oldOrders {
 			if order.Height+order.ExistBlocks > currHeight {
