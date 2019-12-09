@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -80,10 +79,10 @@ type (
 		Identity         *string      `json:"identity,omitempty" yaml:"identity,omitempty"`
 		Name             *string      `json:"name" yaml:"name"`
 		TotalSupply      *string      `json:"total_supply" yaml:"total_supply"`
-		Mintable         *bool        `json:"mintable" yaml:"mintable"`
-		Burnable         *bool        `json:"burnable" yaml:"burnable"`
-		AddrForbiddable  *bool        `json:"addr_forbiddable" yaml:"addr_forbiddable"`
-		TokenForbiddable *bool        `json:"token_forbiddable" yaml:"token_forbiddable"`
+		Mintable         *string      `json:"mintable" yaml:"mintable"`
+		Burnable         *string      `json:"burnable" yaml:"burnable"`
+		AddrForbiddable  *string      `json:"addr_forbiddable" yaml:"addr_forbiddable"`
+		TokenForbiddable *string      `json:"token_forbiddable" yaml:"token_forbiddable"`
 	}
 )
 
@@ -222,29 +221,23 @@ func (req *modifyTokenInfoReq) GetBaseReq() *rest.BaseReq {
 }
 func (req *modifyTokenInfoReq) GetMsg(r *http.Request, owner sdk.AccAddress) (sdk.Msg, error) {
 	symbol := getSymbol(r)
-	url := getNewTokenStrInfo(req.URL)
-	description := getNewTokenStrInfo(req.Description)
-	identity := getNewTokenStrInfo(req.Identity)
-	name := getNewTokenStrInfo(req.Name)
-	supply := getNewTokenStrInfo(req.TotalSupply)
-	mintable := getNewTokenBoolInfo(req.Mintable)
-	burnable := getNewTokenBoolInfo(req.Burnable)
-	addrForbiddable := getNewTokenBoolInfo(req.AddrForbiddable)
-	tokenForbiddable := getNewTokenBoolInfo(req.TokenForbiddable)
+	url := getNewTokenInfo(req.URL)
+	description := getNewTokenInfo(req.Description)
+	identity := getNewTokenInfo(req.Identity)
+	name := getNewTokenInfo(req.Name)
+	supply := getNewTokenInfo(req.TotalSupply)
+	mintable := getNewTokenInfo(req.Mintable)
+	burnable := getNewTokenInfo(req.Burnable)
+	addrForbiddable := getNewTokenInfo(req.AddrForbiddable)
+	tokenForbiddable := getNewTokenInfo(req.TokenForbiddable)
 
 	return types.NewMsgModifyTokenInfo(symbol, url, description, identity, owner,
 		name, supply, mintable, burnable, addrForbiddable, tokenForbiddable), nil
 }
 
-func getNewTokenStrInfo(ptr *string) string {
+func getNewTokenInfo(ptr *string) string {
 	if ptr != nil {
 		return *ptr
-	}
-	return types.DoNotModifyTokenInfo
-}
-func getNewTokenBoolInfo(ptr *bool) string {
-	if ptr != nil {
-		return fmt.Sprintf("%v", *ptr)
 	}
 	return types.DoNotModifyTokenInfo
 }
