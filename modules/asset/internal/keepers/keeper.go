@@ -313,7 +313,7 @@ func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner s
 			return err
 		}
 	}
-	if description != token.GetURL() {
+	if description != token.GetDescription() {
 		if err := token.SetDescription(description); err != nil {
 			return err
 		}
