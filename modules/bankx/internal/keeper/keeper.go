@@ -226,10 +226,8 @@ func (k Keeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin
 }
 
 func (k Keeper) AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-	if _, err := k.bk.AddCoins(ctx, addr, amt); err != nil {
-		return err
-	}
-	return nil
+	_, err := k.bk.AddCoins(ctx, addr, amt)
+	return err
 }
 
 func (k Keeper) MockAddLockedCoins(ctx sdk.Context, addr sdk.AccAddress, lockedCoins authx.LockedCoins) {
