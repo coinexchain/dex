@@ -664,6 +664,7 @@ func TestTokenKeeper_ModifyTokenInfo_AfterDistribution(t *testing.T) {
 	testModifyTokenInfo(t, tokenTmpl, true, func(token types.Token) error { return token.SetIdentity("newID") }, "")
 	testModifyTokenInfo(t, tokenTmpl, true, func(token types.Token) error { return token.SetName("newName") }, "token Name sealed")
 	testModifyTokenInfo(t, tokenTmpl, true, func(token types.Token) error { return token.SetTotalSupply(token.GetTotalSupply().MulRaw(2)) }, "token TotalSupply sealed")
+	testModifyTokenInfo(t, tokenTmpl, true, func(token types.Token) error { return token.SetTotalSupply(token.GetTotalSupply().SubRaw(100)) }, "token TotalSupply sealed")
 	testModifyTokenInfo(t, tokenTmpl, true, func(token types.Token) error { token.SetMintable(!token.GetMintable()); return nil }, "")
 	testModifyTokenInfo(t, tokenTmpl, true, func(token types.Token) error { token.SetBurnable(!token.GetBurnable()); return nil }, "")
 	testModifyTokenInfo(t, tokenTmpl, true, func(token types.Token) error { token.SetAddrForbiddable(!token.GetAddrForbiddable()); return nil }, "")
@@ -687,7 +688,11 @@ func testModifyTokenInfo(t *testing.T,
 	errMsg string) {
 
 	input, token := issueTokenForTest(t, tokenTmpl, distributed)
+	oldSupply := token.GetTotalSupply()
+
 	require.NoError(t, modifyFn(token))
+	newSupply := token.GetTotalSupply()
+
 	err := input.tk.ModifyTokenInfo(input.ctx, token.GetSymbol(), token.GetOwner(),
 		token.GetURL(), token.GetDescription(), token.GetIdentity(),
 		token.GetName(), token.GetTotalSupply(),
@@ -698,6 +703,11 @@ func testModifyTokenInfo(t *testing.T,
 
 		newToken := input.tk.GetToken(input.ctx, token.GetSymbol())
 		checkTokensEqual(t, token, newToken)
+
+		if !oldSupply.Equal(newSupply) {
+			require.Equal(t, newSupply,
+				input.bkx.GetTotalCoins(input.ctx, token.GetOwner()).AmountOf(token.GetSymbol()))
+		}
 	} else {
 		require.Error(t, err)
 		require.Contains(t, err.Error(), errMsg)

@@ -324,7 +324,8 @@ func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner s
 		}
 	}
 
-	distributed := !keeper.bkx.GetTotalCoins(ctx, owner).AmountOf(symbol).Equal(token.GetTotalSupply())
+	ownerAmt := keeper.bkx.GetTotalCoins(ctx, owner).AmountOf(symbol)
+	distributed := !ownerAmt.Equal(token.GetTotalSupply())
 
 	// modifiable before distribution
 	if name != token.GetName() {
@@ -340,6 +341,11 @@ func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner s
 			return types.ErrCodeTokenInfoSealed("TotalSupply")
 		}
 		if err := token.SetTotalSupply(totalSupply); err != nil {
+			return err
+		}
+		diffAmt := totalSupply.Sub(ownerAmt)
+		diffCoins := sdk.NewCoins(sdk.NewCoin(symbol, diffAmt))
+		if err := keeper.bkx.AddCoins(ctx, owner, diffCoins); err != nil {
 			return err
 		}
 	}

@@ -37,6 +37,7 @@ type testInput struct {
 	cdc *codec.Codec
 	ctx sdk.Context
 	tk  keepers.BaseKeeper
+	bkx bankx.Keeper
 }
 
 func createTestInput() testInput {
@@ -89,7 +90,7 @@ func createTestInput() testInput {
 	_ = notBondedPool.SetCoins(initSupply)
 	sk.SetModuleAccount(ctx, notBondedPool)
 
-	return testInput{cdc, ctx, tk}
+	return testInput{cdc, ctx, tk, bkx}
 }
 
 // create a codec used only for testing
