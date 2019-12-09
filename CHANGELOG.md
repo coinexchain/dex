@@ -40,7 +40,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### State Machine Breaking
 
 * [CIP0004](https://github.com/coinexchain/CIPs/blob/master/cip-0004.md)
-
+* [CIP0005](https://github.com/coinexchain/CIPs/blob/master/cip-0005.md)
 ### API Breaking Changes
 
 ### Client Breaking Changes
