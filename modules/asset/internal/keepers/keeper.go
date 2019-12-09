@@ -344,15 +344,21 @@ func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner s
 			return err
 		}
 		if totalSupply.GT(ownerAmt) {
-			diffAmt := totalSupply.Sub(ownerAmt)
-			diffCoins := sdk.NewCoins(sdk.NewCoin(symbol, diffAmt))
-			if err := keeper.bkx.AddCoins(ctx, owner, diffCoins); err != nil {
+			mintAmt := totalSupply.Sub(ownerAmt)
+			mintedCoins := types.NewTokenCoins(symbol, mintAmt)
+			if err := keeper.sk.MintCoins(ctx, types.ModuleName, mintedCoins); err != nil {
+				return err
+			}
+			if err := keeper.SendCoinsFromAssetModuleToAccount(ctx, owner, mintedCoins); err != nil {
 				return err
 			}
 		} else {
-			diffAmt := ownerAmt.Sub(totalSupply)
-			diffCoins := sdk.NewCoins(sdk.NewCoin(symbol, diffAmt))
-			if err := keeper.bkx.SubtractCoins(ctx, owner, diffCoins); err != nil {
+			burnAmt := ownerAmt.Sub(totalSupply)
+			burntCoins := sdk.NewCoins(sdk.NewCoin(symbol, burnAmt))
+			if err := keeper.SendCoinsFromAccountToAssetModule(ctx, owner, burntCoins); err != nil {
+				return err
+			}
+			if err := keeper.sk.BurnCoins(ctx, types.ModuleName, burntCoins); err != nil {
 				return err
 			}
 		}
