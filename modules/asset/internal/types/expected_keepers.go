@@ -10,6 +10,7 @@ type ExpectedBankxKeeper interface {
 	DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error
 
 	AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
+	SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	GetTotalCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
 	BlacklistedAddr(addr sdk.AccAddress) bool
 }

@@ -343,10 +343,18 @@ func (keeper BaseKeeper) ModifyTokenInfo(ctx sdk.Context, symbol string, owner s
 		if err := token.SetTotalSupply(totalSupply); err != nil {
 			return err
 		}
-		diffAmt := totalSupply.Sub(ownerAmt)
-		diffCoins := sdk.NewCoins(sdk.NewCoin(symbol, diffAmt))
-		if err := keeper.bkx.AddCoins(ctx, owner, diffCoins); err != nil {
-			return err
+		if totalSupply.GT(ownerAmt) {
+			diffAmt := totalSupply.Sub(ownerAmt)
+			diffCoins := sdk.NewCoins(sdk.NewCoin(symbol, diffAmt))
+			if err := keeper.bkx.AddCoins(ctx, owner, diffCoins); err != nil {
+				return err
+			}
+		} else {
+			diffAmt := ownerAmt.Sub(totalSupply)
+			diffCoins := sdk.NewCoins(sdk.NewCoin(symbol, diffAmt))
+			if err := keeper.bkx.SubtractCoins(ctx, owner, diffCoins); err != nil {
+				return err
+			}
 		}
 	}
 
