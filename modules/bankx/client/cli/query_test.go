@@ -7,17 +7,17 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/coinexchain/dex/client/cliutil"
+	"github.com/coinexchain/dex/modules/bankx/internal/keeper"
 )
 
-var ResultParam *auth.QueryAccountParams
+var ResultParam *keeper.QueryAddrBalances
 var ResultPath string
 
 func TestQuery(t *testing.T) {
 	cliutil.CliQuery = func(cdc *codec.Codec, path string, param interface{}) error {
-		ResultParam = param.(*auth.QueryAccountParams)
+		ResultParam = param.(*keeper.QueryAddrBalances)
 		ResultPath = path
 		return nil
 	}
@@ -33,7 +33,7 @@ func TestQuery(t *testing.T) {
 	err := cmd.Execute()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "custom/bankx/balances", ResultPath)
-	assert.Equal(t, &auth.QueryAccountParams{Address: addr}, ResultParam)
+	assert.Equal(t, &keeper.QueryAddrBalances{Addr: addr}, ResultParam)
 
 	args = []string{
 		"balances",

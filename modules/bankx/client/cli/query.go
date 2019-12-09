@@ -12,7 +12,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
@@ -51,7 +50,7 @@ func QueryBalancesCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			param := auth.NewQueryAccountParams(acc)
+			param := keeper.NewQueryAddrBalances(acc)
 			return cliutil.CliQuery(cdc, route, &param)
 		},
 	}
