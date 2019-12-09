@@ -489,19 +489,22 @@ func TestRemoveExpiredOrder(t *testing.T) {
 	input.ctx = input.ctx.WithBlockHeight(16)
 	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
 	orders = orderKeeper.GetOlderThan(input.ctx, 9)
-	require.EqualValues(t, 4, len(orders))
+	require.EqualValues(t, 3, len(orders))
+	require.EqualValues(t, 8, orders[0].Height)
+	require.EqualValues(t, 7, orders[1].Height)
+	require.EqualValues(t, 5, orders[2].Height)
 
 	// Set blockHeight = 18; test remove order old than height = 8
-	input.ctx = input.ctx.WithBlockHeight(18)
+	input.ctx = input.ctx.WithBlockHeight(17)
 	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
 	orders = orderKeeper.GetOlderThan(input.ctx, 8)
 	require.EqualValues(t, 0, len(orders))
 	orders = orderKeeper.GetOlderThan(input.ctx, 9)
 	require.EqualValues(t, 1, len(orders))
-	require.EqualValues(t, 8, orders[0].Sequence)
+	require.EqualValues(t, 8, orders[0].Height)
 
 	// Set blockHeight = 20; test remove order old than height = 10
-	input.ctx = input.ctx.WithBlockHeight(20)
+	input.ctx = input.ctx.WithBlockHeight(18)
 	removeExpiredOrder(input.ctx, input.mk, []MarketInfo{mkInfo}, param)
 	orders = orderKeeper.GetOlderThan(input.ctx, 10)
 	require.EqualValues(t, 0, len(orders))
