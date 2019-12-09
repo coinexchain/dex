@@ -3022,6 +3022,18 @@ paths:
                 type: string
               identity:
                 type: string
+              name:
+                type: string
+              total_supply:
+                type: string
+              mintable:
+                type: string
+              burnable:
+                type: string
+              addr_forbiddable:
+                type: string
+              token_forbiddable:
+                type: string
       responses:
         200:
           description: Modify token info result

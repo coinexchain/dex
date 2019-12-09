@@ -47,13 +47,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 Parameter changes: 
 
-| REST Endpoint     | Response Field        | Change          |
-| ----------------- | --------------------- | --------------- |
-| /asset/parameters | issue_3char_token_fee | added new field |
-| /asset/parameters | issue_4char_token_fee | added new field |
-| /asset/parameters | issue_5char_token_fee | added new field |
-| /asset/parameters | issue_6char_token_fee | added new field |
-|                   |                       |                 |
+| REST Endpoint                | Change       | Detail                                                       |
+| ---------------------------- | ------------ | ------------------------------------------------------------ |
+| /asset/parameters            | Response     | added new field: **issue_3char_token_fee**<br />added new field: **issue_4char_token_fee**<br />added new field: **issue_5char_token_fee**<br />added new field: **issue_6char_token_fee** |
+| /asset/tokens/{symbol}/infos | Request Body | added new field: **name**<br />added new field: **total_supply**<br />added new field: **mintable**<br />added new field: **burnable**<br />added new field: **addr_forbiddable**<br />added new field: **token_forbiddable** |
+|                              |              |                                                              |
 
 
 ### Features
