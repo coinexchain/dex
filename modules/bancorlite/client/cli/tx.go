@@ -68,7 +68,7 @@ Example:
 			}
 			time, err := strconv.ParseInt(viper.GetString(FlagEarliestCancelTime), 10, 64)
 			if err != nil {
-				return errors.New("bancor enable-cancel-time is invalid")
+				return errors.New("bancor earliest-cancel-time is invalid")
 			}
 			msg := &types.MsgBancorInit{
 				Stock:              args[0],
