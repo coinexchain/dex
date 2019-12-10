@@ -83,6 +83,16 @@ func createRootCmd(cdc *codec.Codec) *cobra.Command {
 		client.LineBreak,
 	)
 
+	// fix `keys parse` cmd
+	keys.Bech32Prefixes = []string{
+		dex.Bech32PrefixAccAddr,
+		dex.Bech32PrefixAccPub,
+		dex.Bech32PrefixValAddr,
+		dex.Bech32PrefixValPub,
+		dex.Bech32PrefixConsAddr,
+		dex.Bech32PrefixConsPub,
+	}
+
 	return rootCmd
 }
 
