@@ -3,14 +3,13 @@ package main
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/libs/cli"
-
-	"github.com/cosmos/cosmos-sdk/client/keys"
 
 	"github.com/coinexchain/dex/app"
 	dex "github.com/coinexchain/dex/types"
@@ -21,8 +20,7 @@ func init() {
 }
 
 func TestInitConfig(t *testing.T) {
-	cdc := app.MakeCodec()
-	rootCmd := createRootCmd(cdc)
+	rootCmd := newRootCmd()
 	viper.Set("trust-node", true)
 	_ = rootCmd.PersistentFlags().String(cli.HomeFlag, "./", "")
 
@@ -31,8 +29,7 @@ func TestInitConfig(t *testing.T) {
 }
 
 func TestFixDescriptions(t *testing.T) {
-	cdc := app.MakeCodec()
-	rootCmd := createRootCmd(cdc)
+	rootCmd := newRootCmd()
 	fixDescriptions(rootCmd)
 	// TODO
 	//require.Equal(t, cmd.Flag(client.FlagFees).Usage, "Fees to pay along with transaction; eg: 100cet")
@@ -40,6 +37,54 @@ func TestFixDescriptions(t *testing.T) {
 
 // https://trello.com/c/c5sx305m
 func TestKeysParseCmd(t *testing.T) {
+	viper.Set(cli.OutputFlag, "text")
+	parseCmd := getSubCmd(t, newRootCmd(), "keys", "parse")
+	output := execAndGetOutput(t, parseCmd, []string{"BD7F0C07B8EC2DA56E2BB89C958925B8B13B272C"})
+	require.Contains(t, output, "coinex")
+	require.NotContains(t, output, "cosmos")
+}
+
+func TestGovCmd(t *testing.T) {
+	rootCmd := newRootCmd()
+	cmd := getSubCmd(t, rootCmd, "tx", "gov", "submit-proposal")
+	require.NotContains(t, cmd.Long, "10test")
+	require.Contains(t, cmd.Long, "10cet")
+
+	cmd = getSubCmd(t, rootCmd, "tx", "gov", "submit-proposal", "param-change")
+	require.NotContains(t, cmd.Long, `"stake"`)
+	require.Contains(t, cmd.Long, `"cet"`)
+
+	cmd = getSubCmd(t, rootCmd, "tx", "gov", "submit-proposal", "community-pool-spend")
+	require.NotContains(t, cmd.Long, `"stake"`)
+	require.Contains(t, cmd.Long, `"cet"`)
+	require.NotContains(t, cmd.Long, `Atoms`)
+	require.Contains(t, cmd.Long, `CETs`)
+}
+
+func newRootCmd() *cobra.Command {
+	cdc := app.MakeCodec()
+	return createRootCmd(cdc)
+}
+
+func getSubCmd(t *testing.T,
+	cmd *cobra.Command, names ...string) *cobra.Command {
+
+	name := names[0]
+	for _, subCmd := range cmd.Commands() {
+		if subCmd.Name() == name {
+			if len(names) == 1 {
+				return subCmd
+			}
+			return getSubCmd(t, subCmd, names[1:]...)
+		}
+	}
+	require.Fail(t, "command not found: "+strings.Join(names, " "))
+	return nil
+}
+
+func execAndGetOutput(t *testing.T,
+	cmd *cobra.Command, args []string) string {
+
 	tmpFileName := "TestKeysParseCmd.output"
 	tmpOutput, err := os.Create(tmpFileName)
 	require.NoError(t, err)
@@ -51,27 +96,9 @@ func TestKeysParseCmd(t *testing.T) {
 		os.Remove(tmpFileName)
 	}()
 
-	parseCmd := getKeysParseCmd()
-	require.NotNil(t, parseCmd)
-	viper.Set(cli.OutputFlag, "text")
-	err = parseCmd.RunE(nil, []string{"BD7F0C07B8EC2DA56E2BB89C958925B8B13B272C"})
+	err = cmd.RunE(cmd, args)
 	require.NoError(t, err)
 	output, err := ioutil.ReadFile(tmpFileName)
 	require.NoError(t, err)
-	require.Contains(t, string(output), "coinex")
-	require.NotContains(t, string(output), "cosmos")
-}
-
-func getKeysParseCmd() *cobra.Command {
-	cdc := app.MakeCodec()
-	for _, subCmd := range createRootCmd(cdc).Commands() {
-		if subCmd.Use == "keys" {
-			for _, subCmd := range keys.Commands().Commands() {
-				if subCmd.Use == "parse <hex-or-bech32-address>" {
-					return subCmd
-				}
-			}
-		}
-	}
-	return nil
+	return string(output)
 }

@@ -39,9 +39,7 @@ func main() {
 
 	// Instantiate the codec for the command line application
 	cdc := app.MakeCodec()
-
 	rootCmd := createRootCmd(cdc)
-	fixDescriptions(rootCmd)
 
 	// Add flags and prefix all env exposed with GA
 	executor := cli.PrepareMainCmd(rootCmd, "GA", app.DefaultCLIHome)
@@ -93,6 +91,7 @@ func createRootCmd(cdc *codec.Codec) *cobra.Command {
 		dex.Bech32PrefixConsPub,
 	}
 
+	fixDescriptions(rootCmd)
 	return rootCmd
 }
 
@@ -230,6 +229,17 @@ func fixDescriptions(cmd *cobra.Command) {
 			flag.Usage = strings.Replace(flag.Usage, "uatom", dex.CET, -1)
 			//fmt.Printf("%s -> %s\n", "uatom", dex.CET)
 		}
+	}
+
+	if cmd.Name() == "submit-proposal" {
+		cmd.Long = strings.ReplaceAll(cmd.Long, `10test`, `10cet`)
+	}
+	if cmd.Name() == "param-change" {
+		cmd.Long = strings.ReplaceAll(cmd.Long, `"stake"`, `"cet"`)
+	}
+	if cmd.Name() == "community-pool-spend" {
+		cmd.Long = strings.ReplaceAll(cmd.Long, `"stake"`, `"cet"`)
+		cmd.Long = strings.ReplaceAll(cmd.Long, "Pay me some Atoms!", "Pay me some CETs!")
 	}
 
 	if len(cmd.Commands()) > 0 {
