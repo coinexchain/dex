@@ -21,6 +21,7 @@ const (
 	CodeInvalidOperation                sdk.CodeType = 311
 	CodeRewardExceedsAmount             sdk.CodeType = 312
 	CodeLockedCoinNotFound              sdk.CodeType = 313
+	CodeInvalidTokenSymbol              sdk.CodeType = 314
 )
 
 func ErrMemoMissing() sdk.Error {
@@ -73,4 +74,8 @@ func ErrRewardExceedsAmount() sdk.Error {
 
 func ErrLockedCoinNotFound() sdk.Error {
 	return sdk.NewError(CodeSpaceBankx, CodeLockedCoinNotFound, "locked coin not found")
+}
+
+func ErrInvalidTokenSymbol(symbol string) sdk.Error {
+	return sdk.NewError(CodeSpaceBankx, CodeInvalidTokenSymbol, "%s token not exist", symbol)
 }
