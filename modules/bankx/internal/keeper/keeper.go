@@ -298,6 +298,15 @@ func (k Keeper) IsSendForbidden(ctx sdk.Context, amt sdk.Coins, addr sdk.AccAddr
 	return false
 }
 
+func (k Keeper) IsTokensExist(ctx sdk.Context, amt sdk.Coins) (bool, string) {
+	for _, coin := range amt {
+		if !k.tk.IsTokenExists(ctx, coin.Denom) {
+			return false, coin.Denom
+		}
+	}
+	return true, ""
+}
+
 func (k Keeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) auth.Account {
 	return k.ak.GetAccount(ctx, addr)
 }
