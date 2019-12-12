@@ -50,7 +50,7 @@ func (or *Order) CalActualOrderFeatureFeeInt64(ctx sdk.Context, freeTimeBlocks i
 		return 0
 	}
 	chargeBlocks := existTime - freeTimeBlocks
-	fee := chargeBlocks * or.FrozenFeatureFee / (or.ExistBlocks - freeTimeBlocks)
+	fee := sdk.NewDec(chargeBlocks).MulInt64(or.FrozenFeatureFee).QuoInt64(or.ExistBlocks - freeTimeBlocks).TruncateInt64()
 	if fee > or.FrozenFeatureFee {
 		fee = or.FrozenFeatureFee
 	}
