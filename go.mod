@@ -16,6 +16,7 @@ require (
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/rakyll/statik v0.1.6
+	github.com/shopspring/decimal v0.0.0-20191130220710-360f2bc03045
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.4.0

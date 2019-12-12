@@ -36,6 +36,9 @@ const (
 	CodeTradeMoneyNotPositive        sdk.CodeType = 1027
 	CodeMaxSupplyTooBig              sdk.CodeType = 1028
 	CodePriceTooBig                  sdk.CodeType = 1029
+	CodeCWBreakLimit                 sdk.CodeType = 1030
+	CodeMaxMoneyTooBig               sdk.CodeType = 1031
+	CodeNegativeMaxMoney             sdk.CodeType = 1032
 )
 
 func ErrInvalidSymbol() sdk.Error {
@@ -140,4 +143,16 @@ func ErrMaxSupplyTooBig() sdk.Error {
 
 func ErrPriceTooBig() sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodePriceTooBig, "init price or max price is too big")
+}
+
+func ErrCWBreakLimit() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeCWBreakLimit, "cw not within the permitted ranges")
+}
+
+func ErrNegativeMaxMoney() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeNegativeMaxMoney, "negative max Money")
+}
+
+func ErrMaxMoneyTooBIg() sdk.Error {
+	return sdk.NewError(CodeSpaceBancorlite, CodeMaxMoneyTooBig, "max money is too big")
 }

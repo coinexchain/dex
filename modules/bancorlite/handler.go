@@ -2,7 +2,6 @@ package bancorlite
 
 import (
 	"bytes"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
@@ -59,6 +58,9 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	if err != nil {
 		return types.ErrPriceFmt().Result()
 	}
+
+	cw := types.CheckCW(msg, initPrice, maxPrice)
+
 	bi := &keepers.BancorInfo{
 		Owner:              msg.Owner,
 		Stock:              msg.Stock,
@@ -67,6 +69,8 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		MaxSupply:          msg.MaxSupply,
 		StockPrecision:     precision,
 		MaxPrice:           maxPrice,
+		MaxMoney:           msg.MaxMoney,
+		CW:                 cw,
 		Price:              initPrice,
 		StockInPool:        msg.MaxSupply,
 		MoneyInPool:        sdk.ZeroInt(),
@@ -221,7 +225,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		Amount:      msg.Amount,
 		Side:        byte(side),
 		MoneyLimit:  msg.MoneyLimit,
-		TxPrice:     biNew.Price.Add(bi.Price).QuoInt64(2),
+		TxPrice:     sdk.NewDecFromInt(diff).QuoInt64(msg.Amount),
 		BlockHeight: ctx.BlockHeight(),
 	}
 	fillMsgQueue(ctx, k, KafkaBancorTrade, m)

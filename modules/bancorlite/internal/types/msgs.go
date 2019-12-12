@@ -24,6 +24,7 @@ type MsgBancorInit struct {
 	InitPrice          string         `json:"init_price"`
 	MaxSupply          sdk.Int        `json:"max_supply"`
 	MaxPrice           string         `json:"max_price"`
+	MaxMoney           sdk.Int        `json:"max_money"`
 	StockPrecision     byte           `json:"stock_precision"`
 	EarliestCancelTime int64          `json:"earliest_cancel_time"`
 }
@@ -78,6 +79,12 @@ func (msg MsgBancorInit) ValidateBasic() (err sdk.Error) {
 	if msg.MaxSupply.GT(sdk.NewInt(MaxTradeAmount)) {
 		return ErrMaxSupplyTooBig()
 	}
+	if !msg.MaxMoney.IsPositive() {
+		return ErrNegativeMaxMoney()
+	}
+	if msg.MaxMoney.GT(sdk.NewInt(MaxTradeAmount)) {
+		return ErrMaxMoneyTooBIg()
+	}
 	maxPrice, err := sdk.NewDecFromStr(msg.MaxPrice)
 	if err != nil {
 		return ErrPriceFmt()
@@ -92,8 +99,15 @@ func (msg MsgBancorInit) ValidateBasic() (err sdk.Error) {
 	if initPrice.IsNegative() {
 		return ErrNegativePrice()
 	}
-	if err := checkMaxPrice(initPrice, maxPrice, msg.MaxSupply); err != nil {
-		return err
+
+	cw := CheckCW(msg, initPrice, maxPrice)
+	if cw > CWMax || cw < 0 {
+		return ErrCWBreakLimit()
+	}
+	if cw == 0 {
+		if err := checkMaxPrice(initPrice, maxPrice, msg.MaxSupply); err != nil {
+			return err
+		}
 	}
 	if !CheckStockPrecision(msg.MaxSupply, msg.StockPrecision) {
 		return ErrStockSupplyPrecisionNotMatch()
@@ -113,9 +127,11 @@ func checkMaxPrice(initPrice, maxPrice sdk.Dec, maxSupply sdk.Int) (err sdk.Erro
 			err = ErrPriceTooBig()
 		}
 	}()
+
 	if initPrice.Add(maxPrice).QuoInt64(2).MulInt(maxSupply).GT(sdk.NewDec(MaxTradeAmount)) {
 		return ErrPriceTooBig()
 	}
+
 	return
 }
 
@@ -130,6 +146,22 @@ func CheckStockPrecision(amount sdk.Int, precision byte) bool {
 		}
 	}
 	return true
+}
+
+func CheckCW(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) int64 {
+	cwCalculate := func() int64 {
+		defer func() {
+			if r := recover(); r != nil {
+			}
+		}()
+		if !msg.MaxMoney.IsZero() {
+			return maxPrice.MulInt(msg.MaxSupply).Sub(sdk.NewDecFromInt(msg.MaxMoney)).
+				QuoTruncate(sdk.NewDecFromInt(msg.MaxMoney).Sub(initPrice.MulInt(msg.MaxSupply))).
+				MulInt64(10).Int64()
+		}
+		return 0
+	}
+	return cwCalculate()
 }
 
 func (msg MsgBancorInit) GetSignBytes() []byte {

@@ -171,6 +171,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
+					MaxMoney:           sdk.NewInt(900),
 					EarliestCancelTime: 0,
 				},
 			},

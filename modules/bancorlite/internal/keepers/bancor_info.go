@@ -2,6 +2,7 @@ package keepers
 
 import (
 	"fmt"
+	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,6 +18,8 @@ type BancorInfo struct {
 	MaxSupply          sdk.Int        `json:"max_supply"`
 	StockPrecision     byte           `json:"stock_precision"`
 	MaxPrice           sdk.Dec        `json:"max_price"`
+	MaxMoney           sdk.Int        `json:"max_money"`
+	CW                 int64          `json:"cw"`
 	Price              sdk.Dec        `json:"price"`
 	StockInPool        sdk.Int        `json:"stock_in_pool"`
 	MoneyInPool        sdk.Int        `json:"money_in_pool"`
@@ -31,11 +34,48 @@ func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
 	if stockInPool.IsNegative() || stockInPool.GT(bi.MaxSupply) {
 		return false
 	}
-
 	bi.StockInPool = stockInPool
-	suppliedStock := bi.MaxSupply.Sub(bi.StockInPool)
-	bi.Price = bi.MaxPrice.Sub(bi.InitPrice).MulInt(suppliedStock).QuoInt(bi.MaxSupply).Add(bi.InitPrice)
-	bi.MoneyInPool = bi.Price.Add(bi.InitPrice).MulInt(suppliedStock).QuoInt64(2).RoundInt()
+	if bi.MaxMoney.IsZero() {
+		suppliedStock := bi.MaxSupply.Sub(bi.StockInPool)
+		bi.Price = bi.MaxPrice.Sub(bi.InitPrice).MulInt(suppliedStock).QuoInt(bi.MaxSupply).Add(bi.InitPrice)
+		bi.MoneyInPool = bi.Price.Add(bi.InitPrice).MulInt(suppliedStock).QuoInt64(2).RoundInt()
+	} else {
+		// s = s/s_max * 1000, as of precision is 0.001
+		factoredStock := stockInPool.MulRaw(types.SupplyRatioSamples)
+		s := factoredStock.Quo(bi.MaxSupply).Int64()
+		if s > types.SupplyRatioSamples {
+			return false
+		}
+		contrast := sdk.NewInt(s).Mul(bi.MaxSupply)
+		var ratio sdk.Dec
+		// ratio = (s/s_max)^cw, cw = (p_max * s_max - m_max) / (m_max - p_init * s_max)
+		ratio, _ = sdk.NewDecFromStr(types.BancorMap[bi.CW+1][s])
+		if contrast.GT(factoredStock) {
+			if s == types.SupplyRatioSamples {
+				return false
+			}
+			ratioNear, _ := sdk.NewDecFromStr(types.BancorMap[bi.CW+1][s-1])
+			// ratio = (ratio - ratioNear) * (stock_now / s_max * 1000 - (s-1)) + ratioNear
+			ratio = ratio.Sub(ratioNear).MulInt(factoredStock.Sub(sdk.NewInt(s-1).Mul(bi.MaxSupply))).
+				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(ratioNear)
+		}else if factoredStock.GT(contrast) {
+			if s > types.SupplyRatioSamples {
+				return false
+			}
+			// ratio = (ratioNear - ratio) * (stock_now / s_max * 1000 - (s)) + ratio
+			ratioNear, _ := sdk.NewDecFromStr(types.BancorMap[bi.CW+1][s+1])
+			ratio = ratioNear.Sub(ratio).MulInt(factoredStock.Sub(sdk.NewInt(s).Mul(bi.MaxSupply))).
+				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(ratio)
+		}
+
+		// m_now = m_max * ratio
+		bi.MoneyInPool = ratio.MulInt(bi.MaxMoney).TruncateInt()
+		// price_ratio = (s/s_max)^(cw-1)
+		priceRatio, _ := sdk.NewDecFromStr(types.BancorMap[bi.CW][s])
+		// price = priceRatio * (maxPrice - initPrice) + initPrice
+		bi.Price = priceRatio.MulTruncate(bi.MaxPrice.Sub(bi.InitPrice)).Add(bi.InitPrice)
+
+	}
 	return true
 }
 
