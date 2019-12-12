@@ -43,7 +43,7 @@ func handleMsgMultiSend(ctx sdk.Context, k Keeper, msg types.MsgMultiSend) sdk.R
 
 	for _, input := range msg.Inputs {
 		if k.IsSendForbidden(ctx, input.Coins, input.Address) {
-			if exist, denom := k.IsTokensExist(ctx, input.Coins); !exist {
+			if denom, exist := k.IsTokensExist(ctx, input.Coins); !exist {
 				return types.ErrInvalidTokenSymbol(denom).Result()
 			}
 			return types.ErrTokenForbiddenByOwner().Result()
@@ -84,7 +84,7 @@ func handleMsgSend(ctx sdk.Context, k Keeper, msg types.MsgSend) sdk.Result {
 	}
 
 	if k.IsSendForbidden(ctx, msg.Amount, msg.FromAddress) {
-		if exist, denom := k.IsTokensExist(ctx, msg.Amount); !exist {
+		if denom, exist := k.IsTokensExist(ctx, msg.Amount); !exist {
 			return types.ErrInvalidTokenSymbol(denom).Result()
 		}
 		return types.ErrTokenForbiddenByOwner().Result()
@@ -216,7 +216,7 @@ func handleMsgSupervisedSend(ctx sdk.Context, k Keeper, msg types.MsgSupervisedS
 	if msg.UnlockTime < ctx.BlockHeader().Time.Unix() {
 		return types.ErrUnlockTime("Invalid Unlock Time:" + fmt.Sprintf("%d < %d", msg.UnlockTime, ctx.BlockHeader().Time.Unix())).Result()
 	}
-	if exist, denom := k.IsTokensExist(ctx, sdk.Coins{msg.Amount}); !exist {
+	if denom, exist := k.IsTokensExist(ctx, sdk.Coins{msg.Amount}); !exist {
 		return types.ErrInvalidTokenSymbol(denom).Result()
 	}
 
