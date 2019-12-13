@@ -100,11 +100,11 @@ func (msg MsgBancorInit) ValidateBasic() (err sdk.Error) {
 		return ErrNegativePrice()
 	}
 
-	cw := CheckCW(msg, initPrice, maxPrice)
-	if cw > CWMax || cw < 0 {
-		return ErrCWBreakLimit()
+	ar := CheckAR(msg, initPrice, maxPrice)
+	if ar > MaxAR || ar < 0 {
+		return ErrAlphaBreakLimit()
 	}
-	if cw == 0 {
+	if ar == 0 {
 		if err := checkMaxPrice(initPrice, maxPrice, msg.MaxSupply); err != nil {
 			return err
 		}
@@ -148,7 +148,7 @@ func CheckStockPrecision(amount sdk.Int, precision byte) bool {
 	return true
 }
 
-func CheckCW(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) int64 {
+func CheckAR(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) int64 {
 	cwCalculate := func() int64 {
 		defer func() {
 			if r := recover(); r != nil {
