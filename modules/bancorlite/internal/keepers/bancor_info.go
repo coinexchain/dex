@@ -49,12 +49,12 @@ func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
 		contrast := sdk.NewInt(s).Mul(bi.MaxSupply)
 		var ratio sdk.Dec
 		// ratio = (s/s_max)^cw, cw = (p_max * s_max - m_max) / (m_max - p_init * s_max)
-		ratio, _ = sdk.NewDecFromStr(types.BancorMap[bi.CW+1][s])
+		ratio = types.CWTable[bi.CW+1][s]
 		if contrast.GT(factoredStock) {
 			if s == types.SupplyRatioSamples {
 				return false
 			}
-			ratioNear, _ := sdk.NewDecFromStr(types.BancorMap[bi.CW+1][s-1])
+			ratioNear := types.CWTable[bi.CW+1][s-1]
 			// ratio = (ratio - ratioNear) * (stock_now / s_max * 1000 - (s-1)) + ratioNear
 			ratio = ratio.Sub(ratioNear).MulInt(factoredStock.Sub(sdk.NewInt(s-1).Mul(bi.MaxSupply))).
 				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(ratioNear)
@@ -63,15 +63,15 @@ func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
 				return false
 			}
 			// ratio = (ratioNear - ratio) * (stock_now / s_max * 1000 - (s)) + ratio
-			ratioNear, _ := sdk.NewDecFromStr(types.BancorMap[bi.CW+1][s+1])
+			ratioNear := types.CWTable[bi.CW+1][s+1]
 			ratio = ratioNear.Sub(ratio).MulInt(factoredStock.Sub(sdk.NewInt(s).Mul(bi.MaxSupply))).
 				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(ratio)
 		}
 
 		// m_now = m_max * ratio
 		bi.MoneyInPool = ratio.MulInt(bi.MaxMoney).TruncateInt()
-		// price_ratio = (s/s_max)^(cw-1)
-		priceRatio, _ := sdk.NewDecFromStr(types.BancorMap[bi.CW][s])
+		// price_ratio = (s/s_max)^(cw)
+		priceRatio := types.CWTable[bi.CW][s]
 		// price = priceRatio * (maxPrice - initPrice) + initPrice
 		bi.Price = priceRatio.MulTruncate(bi.MaxPrice.Sub(bi.InitPrice)).Add(bi.InitPrice)
 
