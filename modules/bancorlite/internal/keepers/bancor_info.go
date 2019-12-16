@@ -96,6 +96,8 @@ type BancorInfoDisplay struct {
 	MaxSupply          string `json:"max_supply"`
 	StockPrecision     string `json:"stock_precision"`
 	MaxPrice           string `json:"max_price"`
+	MaxMoney           string `json:"max_money"`
+	AR                 string `json:"ar"`
 	CurrentPrice       string `json:"current_price"`
 	StockInPool        string `json:"stock_in_pool"`
 	MoneyInPool        string `json:"money_in_pool"`
@@ -110,6 +112,8 @@ func NewBancorInfoDisplay(bi *BancorInfo) BancorInfoDisplay {
 		MaxSupply:          bi.MaxSupply.String(),
 		StockPrecision:     fmt.Sprintf("%d", bi.StockPrecision),
 		MaxPrice:           bi.MaxPrice.String(),
+		MaxMoney:           bi.MaxMoney.String(),
+		AR:                 fmt.Sprintf("%d", bi.AR),
 		CurrentPrice:       bi.Price.String(),
 		StockInPool:        bi.StockInPool.String(),
 		MoneyInPool:        bi.MoneyInPool.String(),
