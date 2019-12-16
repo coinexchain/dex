@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"io/ioutil"
 
 	"github.com/spf13/cobra"
@@ -60,5 +61,11 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 
 func upgradeGenesisState(genState *app.GenesisState) {
 	genState.AssetData.Params = asset.DefaultParams()
+	for k, v := range genState.BancorData.BancorInfoMap {
+		if v.AR == 0 {
+			v.MaxMoney = sdk.ZeroInt()
+			genState.BancorData.BancorInfoMap[k] = v
+		}
+	}
 	// TODO: more upgrades
 }
