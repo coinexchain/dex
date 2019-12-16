@@ -41,11 +41,11 @@ func TableLookup(x,y int64) sdk.Dec {
 		for j := 0; j <= 1000; j++ {
 			a := 0.1 * float64(i)
 			x := 0.001 * float64(j)
-			v := int32(math.Pow(x, a)*float64(math.MaxInt32))
+			v := int32(math.Pow(x, a) * float64(math.MaxInt32))
 			s := fmt.Sprintf("%d,", v)
 			if j == 1000 {
 				s = fmt.Sprintf("%d},\n", v)
-			} else if j % 10 == 9 {
+			} else if j%10 == 9 {
 				s = fmt.Sprintf("%d,\n", v)
 			}
 			f.WriteString(s)

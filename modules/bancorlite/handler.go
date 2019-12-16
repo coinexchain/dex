@@ -2,6 +2,7 @@ package bancorlite
 
 import (
 	"bytes"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/dex/modules/bancorlite/internal/keepers"
@@ -278,7 +279,6 @@ func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
 			MulInt(sdk.NewInt(k.GetParams(ctx).TradeFeeRate)).
 			QuoInt(sdk.NewInt(10000)).RoundInt()
 	}
-
 	if commission.Int64() < k.GetMarketFeeMin(ctx) {
 		return commission, types.ErrTradeQuantityTooSmall(commission.Int64())
 	}

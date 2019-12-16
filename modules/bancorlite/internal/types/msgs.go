@@ -79,7 +79,7 @@ func (msg MsgBancorInit) ValidateBasic() (err sdk.Error) {
 	if msg.MaxSupply.GT(sdk.NewInt(MaxTradeAmount)) {
 		return ErrMaxSupplyTooBig()
 	}
-	if !msg.MaxMoney.IsPositive() {
+	if msg.MaxMoney.IsNegative() {
 		return ErrNegativeMaxMoney()
 	}
 	if msg.MaxMoney.GT(sdk.NewInt(MaxTradeAmount)) {
@@ -157,7 +157,7 @@ func CheckAR(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) int64 {
 		if !msg.MaxMoney.IsZero() {
 			return maxPrice.MulInt(msg.MaxSupply).Sub(sdk.NewDecFromInt(msg.MaxMoney)).
 				QuoTruncate(sdk.NewDecFromInt(msg.MaxMoney).Sub(initPrice.MulInt(msg.MaxSupply))).
-				MulInt64(10).Int64()
+				MulInt64(10).TruncateInt64()
 		}
 		return 0
 	}

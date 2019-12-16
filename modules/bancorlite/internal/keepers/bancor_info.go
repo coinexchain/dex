@@ -2,8 +2,9 @@ package keepers
 
 import (
 	"fmt"
-	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 	"time"
+
+	"github.com/coinexchain/dex/modules/bancorlite/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -35,13 +36,13 @@ func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
 		return false
 	}
 	bi.StockInPool = stockInPool
+	suppliedStock := bi.MaxSupply.Sub(bi.StockInPool)
 	if bi.MaxMoney.IsZero() {
-		suppliedStock := bi.MaxSupply.Sub(bi.StockInPool)
 		bi.Price = bi.MaxPrice.Sub(bi.InitPrice).MulInt(suppliedStock).QuoInt(bi.MaxSupply).Add(bi.InitPrice)
 		bi.MoneyInPool = bi.Price.Add(bi.InitPrice).MulInt(suppliedStock).QuoInt64(2).RoundInt()
 	} else {
 		// s = s/s_max * 1000, as of precision is 0.001
-		factoredStock := stockInPool.MulRaw(types.SupplyRatioSamples)
+		factoredStock := suppliedStock.MulRaw(types.SupplyRatioSamples)
 		s := factoredStock.Quo(bi.MaxSupply).Int64()
 		if s > types.SupplyRatioSamples {
 			return false
@@ -55,9 +56,9 @@ func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
 			}
 			ratioNear := types.TableLookup(bi.AR+10, s-1)
 			// ratio = (ratio - ratioNear) * (stock_now / s_max * 1000 - (s-1)) + ratioNear
-			ratio = ratio.Sub(ratioNear).MulInt(factoredStock.Sub(sdk.NewInt(s-1).Mul(bi.MaxSupply))).
+			ratio = ratio.Sub(ratioNear).MulInt(factoredStock.Sub(sdk.NewInt(s - 1).Mul(bi.MaxSupply))).
 				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(ratioNear)
-		}else if factoredStock.GT(contrast) {
+		} else if factoredStock.GT(contrast) {
 			if s > types.SupplyRatioSamples {
 				return false
 			}

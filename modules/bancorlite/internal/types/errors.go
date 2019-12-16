@@ -36,7 +36,7 @@ const (
 	CodeTradeMoneyNotPositive        sdk.CodeType = 1027
 	CodeMaxSupplyTooBig              sdk.CodeType = 1028
 	CodePriceTooBig                  sdk.CodeType = 1029
-	CodeAlphaBreakLimit                 sdk.CodeType = 1030
+	CodeAlphaBreakLimit              sdk.CodeType = 1030
 	CodeMaxMoneyTooBig               sdk.CodeType = 1031
 	CodeNegativeMaxMoney             sdk.CodeType = 1032
 )
