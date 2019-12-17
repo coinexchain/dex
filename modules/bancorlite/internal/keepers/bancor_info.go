@@ -68,8 +68,9 @@ func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
 				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(ratio)
 		}
 
-		// m_now = m_max * ratio
-		bi.MoneyInPool = ratio.MulInt(bi.MaxMoney).TruncateInt()
+		// m_now = (m_max - s_max * price_max) * ratio + price_init * s_now
+		bi.MoneyInPool = ratio.MulInt(bi.MaxMoney.Sub(bi.InitPrice.MulInt(bi.MaxSupply).TruncateInt())).
+			Add(bi.InitPrice.MulInt(suppliedStock)).TruncateInt()
 		// price_ratio = (s/s_max)^(ar)
 		priceRatio := types.TableLookup(bi.AR, s)
 		// price = priceRatio * (maxPrice - initPrice) + initPrice
