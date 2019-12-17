@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"io/ioutil"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

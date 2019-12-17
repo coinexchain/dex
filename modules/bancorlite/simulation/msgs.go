@@ -65,8 +65,9 @@ func createMsgBancorInit(r *rand.Rand,
 	if initPrice > 0 {
 		initPrice = r.Int63n(1000)
 	}
-	maxPrice := (initPrice + 1) * 1000 //  make maxPrice not 0 when initPrice is 0
-
+	maxPrice := (initPrice + 1) * 1000                         //  make maxPrice not 0 when initPrice is 0
+	maxMoney := r.Int63n(maxPrice-initPrice)*maxSupply*4/5 + 1 // 80% max token value
+	maxMoney += initPrice * maxSupply
 	return bancorlite.MsgBancorInit{
 		Owner:              owner,
 		Stock:              stockSymbol,
@@ -74,6 +75,7 @@ func createMsgBancorInit(r *rand.Rand,
 		InitPrice:          sdk.NewDec(initPrice).String(),
 		MaxPrice:           sdk.NewDec(maxPrice).String(),
 		MaxSupply:          sdk.NewInt(maxSupply),
+		MaxMoney:           sdk.NewInt(maxMoney),
 		EarliestCancelTime: 0, // TODO
 	}
 }
@@ -87,7 +89,7 @@ func verifyBancorInit(ctx sdk.Context, keeper bancorlite.Keeper, msg bancorlite.
 		bancorInfo.MaxPrice.String() == msg.MaxPrice &&
 		bancorInfo.MaxSupply.Equal(msg.MaxSupply) &&
 		bancorInfo.StockInPool.Equal(msg.MaxSupply) &&
-		bancorInfo.MoneyInPool.IsZero() &&
+		bancorInfo.MoneyInPool.Equal(msg.MaxMoney) &&
 		bancorInfo.Price.String() == msg.InitPrice
 }
 
