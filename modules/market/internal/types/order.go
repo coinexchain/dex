@@ -18,6 +18,7 @@ type Order struct {
 	FrozenCommission int64          `json:"frozen_commission"`
 	ExistBlocks      int64          `json:"exist_blocks"`
 	FrozenFeatureFee int64          `json:"frozen_feature_fee"`
+	FrozenFee        int64          `json:"frozen_fee,omitempty"`
 
 	// These fields will change when order was filled/canceled.
 	LeftStock int64 `json:"left_stock"`

@@ -22,7 +22,6 @@ const (
 
 var (
 	KeyCreateMarketFee             = []byte("CreateMarketFee")
-	KeyFixedTradeFee               = []byte("FixedTradeFee")
 	keyMarketMinExpiredTime        = []byte("MarketMinExpiredTime")
 	KeyGTEOrderLifetime            = []byte("GTEOrderLifetime")
 	KeyGTEOrderFeatureFeeByBlocks  = []byte("GTEOrderFeatureFeeByBlocks")

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/coinexchain/dex/modules/market"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tm "github.com/tendermint/tendermint/types"
@@ -60,5 +62,12 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 
 func upgradeGenesisState(genState *app.GenesisState) {
 	genState.AssetData.Params = asset.DefaultParams()
+	genState.MarketData.Params = market.DefaultParams()
+	for _, v := range genState.MarketData.Orders {
+		if v.FrozenFee != 0 {
+			v.FrozenCommission = v.FrozenFee
+			v.FrozenFee = 0
+		}
+	}
 	// TODO: more upgrades
 }
