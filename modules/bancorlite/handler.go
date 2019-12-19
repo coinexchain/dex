@@ -60,7 +60,7 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		return types.ErrPriceFmt().Result()
 	}
 
-	ar := types.CheckAR(msg, initPrice, maxPrice)
+	ar := types.CalculateAR(msg, initPrice, maxPrice)
 
 	bi := &keepers.BancorInfo{
 		Owner:              msg.Owner,

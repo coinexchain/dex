@@ -11,6 +11,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.37.4
 	github.com/emirpasic/gods v1.12.0
 	github.com/gorilla/mux v1.7.3
+	github.com/magiconair/properties v1.8.1
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/olekukonko/tablewriter v0.0.1
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect

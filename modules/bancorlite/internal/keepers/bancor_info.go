@@ -49,27 +49,15 @@ func (bi *BancorInfo) UpdateStockInPool(stockInPool sdk.Int) bool {
 		}
 		contrast := sdk.NewInt(s).Mul(bi.MaxSupply)
 		// ratio = (s/s_max)^ar, ar = (p_max * s_max - m_max) / (m_max - p_init * s_max)
-		ratio := types.TableLookup(bi.AR+10, s)
+		ratio := types.TableLookup(bi.AR+types.ARSamples, s)
 		// price_ratio = (s/s_max)^(ar)
 		priceRatio := types.TableLookup(bi.AR, s)
-		if contrast.GT(factoredStock) {
-			if s == types.SupplyRatioSamples {
-				return false
-			}
-			ratioNear := types.TableLookup(bi.AR+10, s-1)
-			// ratio = (ratio - ratioNear) * (stock_now / s_max * 1000 - (s-1)) + ratioNear
-			ratio = ratio.Sub(ratioNear).MulInt(factoredStock.Sub(sdk.NewInt(s - 1).Mul(bi.MaxSupply))).
-				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(ratioNear)
-
-			priceRatioNear := types.TableLookup(bi.AR, s-1)
-			priceRatio = priceRatio.Sub(priceRatioNear).MulInt(factoredStock.Sub(sdk.NewInt(s - 1).Mul(bi.MaxSupply))).
-				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(priceRatioNear)
-		} else if factoredStock.GT(contrast) {
+		if factoredStock.GT(contrast) {
 			if s > types.SupplyRatioSamples {
 				return false
 			}
 			// ratio = (ratioNear - ratio) * (stock_now / s_max * 1000 - (s)) + ratio
-			ratioNear := types.TableLookup(bi.AR+10, s+1)
+			ratioNear := types.TableLookup(bi.AR+types.ARSamples, s+1)
 			ratio = ratioNear.Sub(ratio).MulInt(factoredStock.Sub(sdk.NewInt(s).Mul(bi.MaxSupply))).
 				Quo(sdk.NewDecFromInt(bi.MaxSupply)).Add(ratio)
 			priceRatioNear := types.TableLookup(bi.AR, s+1)

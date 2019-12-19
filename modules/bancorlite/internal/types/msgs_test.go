@@ -139,8 +139,8 @@ func TestCheckAR(t *testing.T) {
 	}
 	initPrice := sdk.NewDec(0)
 	maxPrice := sdk.NewDec(10)
-	ar := CheckAR(msg, initPrice, maxPrice)
-	assert.Equal(t, int64(23), ar)
+	ar, _ := CheckAR(msg, initPrice, maxPrice)
+	assert.Equal(t, int64(2333), ar)
 }
 
 func TestMsgBancorTrade_ValidateBasic(t *testing.T) {

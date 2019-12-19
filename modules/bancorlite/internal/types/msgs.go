@@ -100,8 +100,8 @@ func (msg MsgBancorInit) ValidateBasic() (err sdk.Error) {
 		return ErrNegativePrice()
 	}
 
-	ar := CheckAR(msg, initPrice, maxPrice)
-	if ar > MaxAR || ar < 0 {
+	ar, ok := CheckAR(msg, initPrice, maxPrice)
+	if ar > MaxAR || ar < 0 || !ok {
 		return ErrAlphaBreakLimit()
 	}
 	if ar == 0 {
@@ -148,20 +148,28 @@ func CheckStockPrecision(amount sdk.Int, precision byte) bool {
 	return true
 }
 
-func CheckAR(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) int64 {
-	cwCalculate := func() int64 {
+func CheckAR(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) (int64, bool) {
+	cwCalculate := func() (int64, bool) {
 		defer func() {
 			if r := recover(); r != nil {
 			}
 		}()
 		if !msg.MaxMoney.IsZero() {
-			return maxPrice.MulInt(msg.MaxSupply).Sub(sdk.NewDecFromInt(msg.MaxMoney)).
-				QuoTruncate(sdk.NewDecFromInt(msg.MaxMoney).Sub(initPrice.MulInt(msg.MaxSupply))).
-				MulInt64(10).TruncateInt64()
+			ar := CalculateAR(msg, initPrice, maxPrice)
+			if ar == 0 {
+				return 0, false
+			}
+			return ar, true
 		}
-		return 0
+		return 0, true
 	}
 	return cwCalculate()
+}
+
+func CalculateAR(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) int64 {
+	return maxPrice.MulInt(msg.MaxSupply).Sub(sdk.NewDecFromInt(msg.MaxMoney)).
+		QuoTruncate(sdk.NewDecFromInt(msg.MaxMoney).Sub(initPrice.MulInt(msg.MaxSupply))).
+		MulInt64(ARSamples).TruncateInt64()
 }
 
 func (msg MsgBancorInit) GetSignBytes() []byte {

@@ -153,6 +153,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					Money:              money,
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
+					MaxMoney:           sdk.NewInt(300),
 					MaxPrice:           "10",
 					EarliestCancelTime: 0,
 				},
@@ -171,7 +172,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
-					MaxMoney:           sdk.NewInt(900),
+					MaxMoney:           sdk.NewInt(300),
 					EarliestCancelTime: 0,
 				},
 			},
@@ -189,6 +190,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
+					MaxMoney:           sdk.NewInt(300),
 					EarliestCancelTime: 0,
 				},
 			},
@@ -206,6 +208,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
+					MaxMoney:           sdk.NewInt(300),
 					EarliestCancelTime: 0,
 				},
 			},
@@ -223,6 +226,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
+					MaxMoney:           sdk.NewInt(300),
 					EarliestCancelTime: 0,
 				},
 			},
@@ -286,7 +290,7 @@ func prepareBancorInit(input testInput) bool {
 			Money:              money,
 			InitPrice:          "0",
 			MaxSupply:          sdk.NewInt(1000000),
-			MaxMoney:           sdk.NewInt(0),
+			MaxMoney:           sdk.NewInt(3000000),
 			MaxPrice:           "10",
 			EarliestCancelTime: 0,
 		}, {
@@ -295,7 +299,7 @@ func prepareBancorInit(input testInput) bool {
 			Money:              "cet",
 			InitPrice:          "10",
 			MaxSupply:          sdk.NewInt(issueAmount / 2),
-			MaxMoney:           sdk.NewInt(0),
+			MaxMoney:           sdk.NewInt(issueAmount * 30),
 			MaxPrice:           "100",
 			EarliestCancelTime: 0,
 		},
@@ -335,7 +339,7 @@ func Test_handleBancorInitWithAR(t *testing.T) {
 
 	input.handler(input.ctx, msg)
 	bi := input.bik.Load(input.ctx, stock+"/"+money)
-	assert.Equal(t, int64(304594), bi.MoneyInPool.Int64())
+	assert.Equal(t, int64(297706), bi.MoneyInPool.Int64())
 
 	msg = types.MsgBancorTrade{
 		Sender:     notHaveCetAddress,
@@ -347,7 +351,7 @@ func Test_handleBancorInitWithAR(t *testing.T) {
 	}
 	input.handler(input.ctx, msg)
 	bi = input.bik.Load(input.ctx, stock+"/"+money)
-	assert.Equal(t, int64(145854), bi.MoneyInPool.Int64())
+	assert.Equal(t, int64(141510), bi.MoneyInPool.Int64())
 
 	msg = types.MsgBancorTrade{
 		Sender:     notHaveCetAddress,
@@ -359,7 +363,7 @@ func Test_handleBancorInitWithAR(t *testing.T) {
 	}
 	input.handler(input.ctx, msg)
 	bi = input.bik.Load(input.ctx, stock+"/"+money)
-	assert.Equal(t, int64(924580), bi.MoneyInPool.Int64())
+	assert.Equal(t, int64(913761), bi.MoneyInPool.Int64())
 
 	msg = types.MsgBancorTrade{
 		Sender:     notHaveCetAddress,
@@ -371,7 +375,7 @@ func Test_handleBancorInitWithAR(t *testing.T) {
 	}
 	input.handler(input.ctx, msg)
 	bi = input.bik.Load(input.ctx, stock+"/"+money)
-	assert.Equal(t, int64(304594), bi.MoneyInPool.Int64())
+	assert.Equal(t, int64(297706), bi.MoneyInPool.Int64())
 
 	msg = types.MsgBancorTrade{
 		Sender:     notHaveCetAddress,
@@ -407,7 +411,7 @@ func Test_handleBancorInitWithAR(t *testing.T) {
 	}
 	input.handler(input.ctx, msg)
 	bi = input.bik.Load(input.ctx, stock+"/"+money)
-	assert.Equal(t, int64(1766), bi.MoneyInPool.Int64())
+	assert.Equal(t, int64(1639), bi.MoneyInPool.Int64())
 }
 
 func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
@@ -500,7 +504,7 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 					MoneyLimit: math.MaxInt64,
 				},
 			},
-			want: sdk.ErrInsufficientCoins("insufficient account funds; 204221000000cet,400000teos,209999200000tusdt < 5775000000000cet").Result(),
+			want: sdk.ErrInsufficientCoins("insufficient account funds; 203696000000cet,400000teos,209999858490tusdt < 6300000000000cet").Result(),
 		},
 		{
 			name: "trade quantity too small",
