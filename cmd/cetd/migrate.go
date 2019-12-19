@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/coinexchain/dex/modules/market"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tm "github.com/tendermint/tendermint/types"
@@ -14,6 +12,7 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/modules/asset"
+	"github.com/coinexchain/dex/modules/market"
 )
 
 const (
