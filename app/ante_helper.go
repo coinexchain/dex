@@ -2,7 +2,10 @@ package app
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+
+	"github.com/coinexchain/dex/modules/distributionx"
 
 	"github.com/coinexchain/dex/modules/authx"
 	"github.com/coinexchain/dex/modules/bankx"
@@ -32,8 +35,10 @@ func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Err
 	switch msg := msg.(type) {
 	case bankx.MsgSend:
 		return ah.checkMemo(ctx, msg.ToAddress, memo)
+
 	case bankx.MsgSupervisedSend:
 		return ah.checkMemo(ctx, msg.ToAddress, memo)
+
 	case bankx.MsgMultiSend:
 		for _, out := range msg.Outputs {
 			if err := ah.checkMemo(ctx, out.Address, memo); err != nil {
@@ -41,11 +46,18 @@ func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Err
 			}
 		}
 		return nil
+
 	case staking.MsgCreateValidator:
 		return ah.checkMsgCreateValidator(ctx, msg)
 
 	case staking.MsgEditValidator:
 		return ah.checkMsgEditValidator(ctx, msg.CommissionRate)
+
+	case distribution.MsgSetWithdrawAddress:
+		if ah.memoRequired(ctx, msg.WithdrawAddress) {
+			return distributionx.ErrMemoRequiredWithdrawAddr(msg.WithdrawAddress.String())
+		}
+		return nil
 	}
 
 	return nil
@@ -74,6 +86,13 @@ func (ah anteHelper) checkMemo(ctx sdk.Context, addr sdk.AccAddress, memo string
 		}
 	}
 	return nil
+}
+
+func (ah anteHelper) memoRequired(ctx sdk.Context, addr sdk.AccAddress) bool {
+	if ax, ok := ah.accountXKeeper.GetAccountX(ctx, addr); ok && ax.MemoRequired {
+		return true
+	}
+	return false
 }
 
 func (ah anteHelper) checkMinSelfDelegation(ctx sdk.Context, actual sdk.Int) sdk.Error {

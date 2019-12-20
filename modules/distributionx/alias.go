@@ -11,3 +11,7 @@ const (
 type (
 	MsgDonateToCommunityPool = types.MsgDonateToCommunityPool
 )
+
+var (
+	ErrMemoRequiredWithdrawAddr = types.ErrMemoRequiredWithdrawAddr
+)
