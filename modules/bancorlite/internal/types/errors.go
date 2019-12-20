@@ -25,7 +25,6 @@ const (
 	CodeNegativeInitPrice            sdk.CodeType = 1015
 	CodeNotBancorOwner               sdk.CodeType = 1017
 	CodeCancelTimeNotArrived         sdk.CodeType = 1018
-	CodeGetMarketExePriceFailed      sdk.CodeType = 1019
 	CodeInitPriceBigThanMaxPrice     sdk.CodeType = 1020
 	CodeCancelEnableTimeNegative     sdk.CodeType = 1021
 	CodeTradeQuantityTooSmall        sdk.CodeType = 1022
@@ -103,10 +102,6 @@ func ErrStockInPoolOutofBound() sdk.Error {
 
 func ErrMoneyCrossLimit(moneyErr string) sdk.Error {
 	return sdk.NewError(CodeSpaceBancorlite, CodeMoneyCrossLimit, "The money amount in this trade is "+moneyErr+" the limited value.")
-}
-
-func ErrGetMarketPrice(err string) sdk.Error {
-	return sdk.NewError(CodeSpaceBancorlite, CodeGetMarketExePriceFailed, err)
 }
 
 func ErrTradeQuantityTooSmall(amount int64) sdk.Error {

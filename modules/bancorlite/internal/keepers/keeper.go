@@ -163,9 +163,10 @@ func (keeper *Keeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, ad
 	return keeper.axk.IsForbiddenByTokenIssuer(ctx, denom, addr)
 }
 
-func (keeper *Keeper) GetMarketLastExePrice(ctx sdk.Context, symbol string) (sdk.Dec, error) {
-	return keeper.mk.GetMarketLastExePrice(ctx, symbol)
+func (keeper *Keeper) GetMarketVolume(ctx sdk.Context, stock, money string, stockVolume, moneyVolume sdk.Dec) sdk.Dec {
+	return keeper.mk.GetMarketVolume(ctx, stock, money, stockVolume, moneyVolume)
 }
+
 func (keeper *Keeper) IsMarketExist(ctx sdk.Context, symbol string) bool {
 	return keeper.mk.IsMarketExist(ctx, symbol)
 }

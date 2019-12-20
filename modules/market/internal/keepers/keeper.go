@@ -3,6 +3,7 @@ package keepers
 import (
 	"bytes"
 	"errors"
+
 	dex "github.com/coinexchain/dex/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -195,7 +196,7 @@ func (k *Keeper) GetMarketLastExePrice(ctx sdk.Context, symbol string) (sdk.Dec,
 	return mi.LastExecutedPrice, err
 }
 
-func (k *Keeper) GetMarketVolume(ctx sdk.Context, stock, money string, stockVolume, moneyVolume sdk.Dec) sdk.Dec {
+func (k Keeper) GetMarketVolume(ctx sdk.Context, stock, money string, stockVolume, moneyVolume sdk.Dec) sdk.Dec {
 	volume := sdk.ZeroDec()
 	if stock == dex.CET {
 		volume = stockVolume

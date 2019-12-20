@@ -197,16 +197,13 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		return types.ErrMoneyCrossLimit(moneyErr).Result()
 	}
 
-	commission, err := getTradeFee(ctx, k, msg, diff)
-	if err != nil {
-		return err.Result()
-	}
+	commission := getTradeFee(ctx, k, msg, diff)
 
 	if err := k.DeductFee(ctx, msg.Sender, sdk.NewCoins(sdk.NewCoin(dex.CET, commission))); err != nil {
 		return err.Result()
 	}
 
-	if err = swapStockAndMoney(ctx, k, msg.Sender, bi.Owner, coinsFromPool, coinsToPool); err != nil {
+	if err := swapStockAndMoney(ctx, k, msg.Sender, bi.Owner, coinsFromPool, coinsToPool); err != nil {
 		return err.Result()
 	}
 
@@ -262,27 +259,18 @@ func fillMsgQueue(ctx sdk.Context, keeper Keeper, key string, msg interface{}) {
 }
 
 func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
-	amountOfMoney sdk.Int) (sdk.Int, sdk.Error) {
+	amountOfMoney sdk.Int) sdk.Int {
 
-	var commission sdk.Int
-	if msg.Money == "cet" {
-		commission = amountOfMoney.
-			Mul(sdk.NewInt(k.GetParams(ctx).TradeFeeRate)).
-			Quo(sdk.NewInt(10000))
-	} else {
-		price, err := k.GetMarketLastExePrice(ctx, dex.GetSymbol(msg.Stock, dex.CET))
-		if err != nil {
-			return commission, types.ErrGetMarketPrice(err.Error())
-		}
-		commission = price.
-			MulInt(sdk.NewInt(msg.Amount)).
-			MulInt(sdk.NewInt(k.GetParams(ctx).TradeFeeRate)).
-			QuoInt(sdk.NewInt(10000)).RoundInt()
+	volume := k.GetMarketVolume(ctx, msg.Stock, msg.Money, sdk.NewDec(msg.Amount), sdk.NewDecFromInt(amountOfMoney))
+	commission := volume.
+		Mul(sdk.NewDec(k.GetParams(ctx).TradeFeeRate)).
+		QuoInt64(10000).TruncateInt64()
+
+	min := k.GetMarketFeeMin(ctx)
+	if commission < min {
+		return sdk.NewInt(min)
 	}
-	if commission.Int64() < k.GetMarketFeeMin(ctx) {
-		return commission, types.ErrTradeQuantityTooSmall(commission.Int64())
-	}
-	return commission, nil
+	return sdk.NewInt(commission)
 }
 
 func swapStockAndMoney(ctx sdk.Context, k keepers.Keeper, trader sdk.AccAddress, owner sdk.AccAddress,
