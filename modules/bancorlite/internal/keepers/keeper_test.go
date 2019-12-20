@@ -216,6 +216,7 @@ func TestBancorInfo_IsConsistent(t *testing.T) {
 				InitPrice:          tt.fields.InitPrice,
 				MaxSupply:          tt.fields.MaxSupply,
 				MaxPrice:           tt.fields.MaxPrice,
+				MaxMoney:           sdk.ZeroInt(),
 				Price:              tt.fields.Price,
 				StockInPool:        tt.fields.StockInPool,
 				MoneyInPool:        tt.fields.MoneyInPool,

@@ -167,6 +167,12 @@ func CheckAR(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) (int64, bool) {
 }
 
 func CalculateAR(msg MsgBancorInit, initPrice, maxPrice sdk.Dec) int64 {
+	if maxPrice.Equal(initPrice) {
+		return 0
+	}
+	if sdk.NewDecFromInt(msg.MaxMoney).LTE(initPrice.MulInt(msg.MaxSupply)) {
+		return 0
+	}
 	return maxPrice.MulInt(msg.MaxSupply).Sub(sdk.NewDecFromInt(msg.MaxMoney)).
 		QuoTruncate(sdk.NewDecFromInt(msg.MaxMoney).Sub(initPrice.MulInt(msg.MaxSupply))).
 		MulInt64(ARSamples).TruncateInt64()

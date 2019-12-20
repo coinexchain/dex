@@ -80,9 +80,40 @@ func (bi *BancorInfo) IsConsistent() bool {
 		return false
 	}
 	suppliedStock := bi.MaxSupply.Sub(bi.StockInPool)
-	price := bi.MaxPrice.Sub(bi.InitPrice).MulInt(suppliedStock).QuoInt(bi.MaxSupply).Add(bi.InitPrice)
-	moneyInPool := price.Add(bi.InitPrice).MulInt(suppliedStock).QuoInt64(2).RoundInt()
-	return price.Equal(bi.Price) && moneyInPool.Equal(bi.MoneyInPool)
+	if bi.InitPrice.Equal(bi.MaxPrice) {
+		if !bi.MaxMoney.Equal(bi.InitPrice.MulInt(bi.MaxSupply).TruncateInt()) || bi.AR != 0 {
+			return false
+		}
+		if !bi.InitPrice.MulInt(suppliedStock).Equal(sdk.NewDecFromInt(bi.MoneyInPool)) {
+			return false
+		}
+		return true
+	}
+	if bi.MaxMoney.IsZero() {
+		price := bi.MaxPrice.Sub(bi.InitPrice).MulInt(suppliedStock).QuoInt(bi.MaxSupply).Add(bi.InitPrice)
+		moneyInPool := price.Add(bi.InitPrice).MulInt(suppliedStock).QuoInt64(2).RoundInt()
+		return price.Equal(bi.Price) && moneyInPool.Equal(bi.MoneyInPool) && (bi.AR == 0)
+	}
+
+	if bi.MoneyInPool.IsNegative() || bi.MoneyInPool.
+		GT(bi.MaxPrice.MulInt(bi.MaxSupply).TruncateInt()) || bi.MaxMoney.
+		LT(bi.InitPrice.MulInt(bi.MaxSupply).TruncateInt()) {
+		return false
+	}
+	biMsg := types.MsgBancorInit{
+		MaxSupply: bi.MaxSupply,
+		MaxMoney:  bi.MaxMoney,
+	}
+	ar, ok := types.CheckAR(biMsg, bi.InitPrice, bi.MaxPrice)
+	if ok || ar != bi.AR {
+		return false
+	}
+	biNew := *bi
+	ok = biNew.UpdateStockInPool(biNew.StockInPool)
+	if !ok {
+		return false
+	}
+	return bi.MoneyInPool.Equal(biNew.MoneyInPool) && bi.Price.Equal(biNew.Price)
 }
 
 type BancorInfoDisplay struct {
