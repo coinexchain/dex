@@ -37,8 +37,8 @@ var (
 	haveCetAddress            = getAddr("000001")
 	notHaveCetAddress         = getAddr("000002")
 	tradeAddr                 = getAddr("000003")
-	stock                     = "tusdt"
-	money                     = "teos"
+	stock                     = "teos"
+	money                     = "tusdt"
 	OriginHaveCetAmount int64 = 1e13
 	issueAmount         int64 = 210000000000
 )
@@ -113,7 +113,7 @@ func prepareBankx(ctx sdk.Context, keeper bankx.Keeper) {
 
 func prepareMarket(ctx sdk.Context, keeper market.Keeper) {
 	keeper.SetParams(ctx, market.DefaultParams())
-	_ = keeper.SetMarket(ctx, market.MarketInfo{Stock: stock, Money: "cet", LastExecutedPrice: sdk.NewDec(1e9)})
+	_ = keeper.SetMarket(ctx, market.MarketInfo{Stock: stock, Money: "cet", LastExecutedPrice: sdk.NewDec(1e4)})
 }
 
 func prepareMockInput(t *testing.T, addrForbid, tokenForbid bool) testInput {
@@ -153,6 +153,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					Money:              money,
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
+					MaxMoney:           sdk.NewInt(300),
 					MaxPrice:           "10",
 					EarliestCancelTime: 0,
 				},
@@ -171,6 +172,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
+					MaxMoney:           sdk.NewInt(300),
 					EarliestCancelTime: 0,
 				},
 			},
@@ -188,6 +190,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
+					MaxMoney:           sdk.NewInt(300),
 					EarliestCancelTime: 0,
 				},
 			},
@@ -205,6 +208,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
+					MaxMoney:           sdk.NewInt(300),
 					EarliestCancelTime: 0,
 				},
 			},
@@ -222,6 +226,7 @@ func Test_handleMsgBancorInit(t *testing.T) {
 					InitPrice:          "0",
 					MaxSupply:          sdk.NewInt(100),
 					MaxPrice:           "10",
+					MaxMoney:           sdk.NewInt(300),
 					EarliestCancelTime: 0,
 				},
 			},
@@ -284,7 +289,8 @@ func prepareBancorInit(input testInput) bool {
 			Stock:              stock,
 			Money:              money,
 			InitPrice:          "0",
-			MaxSupply:          sdk.NewInt(100),
+			MaxSupply:          sdk.NewInt(1000000),
+			MaxMoney:           sdk.NewInt(3000000),
 			MaxPrice:           "10",
 			EarliestCancelTime: 0,
 		}, {
@@ -293,6 +299,7 @@ func prepareBancorInit(input testInput) bool {
 			Money:              "cet",
 			InitPrice:          "10",
 			MaxSupply:          sdk.NewInt(issueAmount / 2),
+			MaxMoney:           sdk.NewInt(issueAmount * 30),
 			MaxPrice:           "100",
 			EarliestCancelTime: 0,
 		},
@@ -305,6 +312,108 @@ func prepareBancorInit(input testInput) bool {
 	}
 	return true
 }
+
+func Test_handleBancorInitWithAR(t *testing.T) {
+	input := prepareMockInput(t, false, false)
+	ctx := input.ctx
+	msgInit := types.MsgBancorInit{
+		Owner:              haveCetAddress,
+		Stock:              stock,
+		Money:              money,
+		InitPrice:          "0",
+		MaxSupply:          sdk.NewInt(1000000),
+		MaxMoney:           sdk.NewInt(3000000),
+		MaxPrice:           "10",
+		EarliestCancelTime: 0,
+	}
+	input.handler(ctx, msgInit)
+
+	msg := types.MsgBancorTrade{
+		Sender:     notHaveCetAddress,
+		Stock:      stock,
+		Money:      money,
+		Amount:     500000,
+		IsBuy:      true,
+		MoneyLimit: 0,
+	}
+
+	input.handler(input.ctx, msg)
+	bi := input.bik.Load(input.ctx, stock+"/"+money)
+	assert.Equal(t, int64(297706), bi.MoneyInPool.Int64())
+
+	msg = types.MsgBancorTrade{
+		Sender:     notHaveCetAddress,
+		Stock:      stock,
+		Money:      money,
+		Amount:     100000,
+		IsBuy:      false,
+		MoneyLimit: 0,
+	}
+	input.handler(input.ctx, msg)
+	bi = input.bik.Load(input.ctx, stock+"/"+money)
+	assert.Equal(t, int64(141510), bi.MoneyInPool.Int64())
+
+	msg = types.MsgBancorTrade{
+		Sender:     notHaveCetAddress,
+		Stock:      stock,
+		Money:      money,
+		Amount:     300000,
+		IsBuy:      true,
+		MoneyLimit: 0,
+	}
+	input.handler(input.ctx, msg)
+	bi = input.bik.Load(input.ctx, stock+"/"+money)
+	assert.Equal(t, int64(913761), bi.MoneyInPool.Int64())
+
+	msg = types.MsgBancorTrade{
+		Sender:     notHaveCetAddress,
+		Stock:      stock,
+		Money:      money,
+		Amount:     200000,
+		IsBuy:      false,
+		MoneyLimit: 0,
+	}
+	input.handler(input.ctx, msg)
+	bi = input.bik.Load(input.ctx, stock+"/"+money)
+	assert.Equal(t, int64(297706), bi.MoneyInPool.Int64())
+
+	msg = types.MsgBancorTrade{
+		Sender:     notHaveCetAddress,
+		Stock:      stock,
+		Money:      money,
+		Amount:     500000,
+		IsBuy:      true,
+		MoneyLimit: 0,
+	}
+	input.handler(input.ctx, msg)
+	bi = input.bik.Load(input.ctx, stock+"/"+money)
+	assert.Equal(t, int64(3000000), bi.MoneyInPool.Int64())
+
+	msg = types.MsgBancorTrade{
+		Sender:     notHaveCetAddress,
+		Stock:      stock,
+		Money:      money,
+		Amount:     1000000,
+		IsBuy:      false,
+		MoneyLimit: 0,
+	}
+	input.handler(input.ctx, msg)
+	bi = input.bik.Load(input.ctx, stock+"/"+money)
+	assert.Equal(t, int64(0), bi.MoneyInPool.Int64())
+
+	msg = types.MsgBancorTrade{
+		Sender:     notHaveCetAddress,
+		Stock:      stock,
+		Money:      money,
+		Amount:     105000,
+		IsBuy:      true,
+		MoneyLimit: 0,
+	}
+	input.handler(input.ctx, msg)
+	bi = input.bik.Load(input.ctx, stock+"/"+money)
+	assert.Equal(t, int64(1639), bi.MoneyInPool.Int64())
+}
+
 func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 	type args struct {
 		ctx      sdk.Context
@@ -328,9 +437,9 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 					Sender:     haveCetAddress,
 					Stock:      stock,
 					Money:      money,
-					Amount:     10,
+					Amount:     200000,
 					IsBuy:      true,
-					MoneyLimit: 100,
+					MoneyLimit: 2000000,
 				},
 			},
 			want: types.ErrOwnerIsProhibited().Result(),
@@ -343,9 +452,9 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 					Sender:     tradeAddr,
 					Stock:      stock,
 					Money:      money,
-					Amount:     5,
+					Amount:     200000,
 					IsBuy:      true,
-					MoneyLimit: 100,
+					MoneyLimit: 2000000,
 				},
 			},
 			want: sdk.Result{},
@@ -358,9 +467,9 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 					Sender:     tradeAddr,
 					Stock:      stock,
 					Money:      money,
-					Amount:     100,
+					Amount:     200000,
 					IsBuy:      true,
-					MoneyLimit: 100,
+					MoneyLimit: 2000000,
 				},
 			},
 			want: types.ErrStockInPoolOutofBound().Result(),
@@ -374,9 +483,9 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 					Sender:     tradeAddr,
 					Stock:      stock,
 					Money:      money,
-					Amount:     5,
+					Amount:     200000,
 					IsBuy:      false,
-					MoneyLimit: 200,
+					MoneyLimit: 2000000,
 				},
 			},
 			want: types.ErrMoneyCrossLimit("less than").Result(),
@@ -395,7 +504,7 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 					MoneyLimit: math.MaxInt64,
 				},
 			},
-			want: sdk.ErrInsufficientCoins("insufficient account funds; 204220000000cet,209999999999teos,5tusdt < 5775000000000cet").Result(),
+			want: sdk.ErrInsufficientCoins("insufficient account funds; 203696000000cet,400000teos,209999858490tusdt < 6300000000000cet").Result(),
 		},
 		{
 			name: "trade quantity too small",
@@ -423,6 +532,7 @@ func Test_handleMsgBancorTradeAfterInit(t *testing.T) {
 		})
 	}
 }
+
 func Test_BancorCancel(t *testing.T) {
 	type args struct {
 		ctx       sdk.Context

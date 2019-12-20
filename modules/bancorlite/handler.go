@@ -59,6 +59,9 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 	if err != nil {
 		return types.ErrPriceFmt().Result()
 	}
+
+	ar := types.CalculateAR(msg, initPrice, maxPrice)
+
 	bi := &keepers.BancorInfo{
 		Owner:              msg.Owner,
 		Stock:              msg.Stock,
@@ -67,6 +70,8 @@ func handleMsgBancorInit(ctx sdk.Context, k Keeper, msg types.MsgBancorInit) sdk
 		MaxSupply:          msg.MaxSupply,
 		StockPrecision:     precision,
 		MaxPrice:           maxPrice,
+		MaxMoney:           msg.MaxMoney,
+		AR:                 ar,
 		Price:              initPrice,
 		StockInPool:        msg.MaxSupply,
 		MoneyInPool:        sdk.ZeroInt(),
@@ -221,7 +226,7 @@ func handleMsgBancorTrade(ctx sdk.Context, k Keeper, msg types.MsgBancorTrade) s
 		Amount:      msg.Amount,
 		Side:        byte(side),
 		MoneyLimit:  msg.MoneyLimit,
-		TxPrice:     biNew.Price.Add(bi.Price).QuoInt64(2),
+		TxPrice:     sdk.NewDecFromInt(diff).QuoInt64(msg.Amount),
 		BlockHeight: ctx.BlockHeight(),
 	}
 	fillMsgQueue(ctx, k, KafkaBancorTrade, m)
@@ -274,7 +279,6 @@ func getTradeFee(ctx sdk.Context, k keepers.Keeper, msg types.MsgBancorTrade,
 			MulInt(sdk.NewInt(k.GetParams(ctx).TradeFeeRate)).
 			QuoInt(sdk.NewInt(10000)).RoundInt()
 	}
-
 	if commission.Int64() < k.GetMarketFeeMin(ctx) {
 		return commission, types.ErrTradeQuantityTooSmall(commission.Int64())
 	}

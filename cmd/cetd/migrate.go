@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tm "github.com/tendermint/tendermint/types"
@@ -66,6 +68,13 @@ func upgradeGenesisState(genState *app.GenesisState) {
 		if v.FrozenFee != 0 {
 			v.FrozenCommission = v.FrozenFee
 			v.FrozenFee = 0
+		}
+	}
+	for k, v := range genState.BancorData.BancorInfoMap {
+		if v.AR == 0 {
+			v.MaxMoney = sdk.ZeroInt()
+			genState.BancorData.BancorInfoMap[k] = v
+
 		}
 	}
 	// TODO: more upgrades

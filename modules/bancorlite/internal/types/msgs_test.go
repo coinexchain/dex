@@ -21,6 +21,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 		InitPrice          string
 		MaxSupply          sdk.Int
 		MaxPrice           string
+		maxMoney           sdk.Int
 		EarliestCancelTime int64
 	}
 	tests := []struct {
@@ -37,6 +38,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				"0",
 				sdk.NewInt(100),
 				"10",
+				sdk.ZeroInt(),
 				100},
 			nil,
 		},
@@ -49,6 +51,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				"0",
 				sdk.NewInt(100),
 				"10",
+				sdk.ZeroInt(),
 				1000,
 			},
 			sdk.ErrInvalidAddress("missing owner address"),
@@ -62,6 +65,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				"0",
 				sdk.NewInt(100),
 				"10",
+				sdk.ZeroInt(),
 				1000,
 			},
 			nil,
@@ -75,6 +79,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				"0",
 				sdk.NewInt(0),
 				"10",
+				sdk.ZeroInt(),
 				1000,
 			},
 			ErrNonPositiveSupply(),
@@ -88,6 +93,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				"0",
 				sdk.NewInt(100),
 				"0",
+				sdk.ZeroInt(),
 				1000,
 			},
 			ErrNonPositivePrice(),
@@ -101,6 +107,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				"1000000000000000000000000000000000000000000000000000000000000",
 				sdk.NewInt(100),
 				"10000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000",
+				sdk.ZeroInt(),
 				1000,
 			},
 			ErrPriceTooBig(),
@@ -115,6 +122,7 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 				InitPrice:          tt.fields.InitPrice,
 				MaxSupply:          tt.fields.MaxSupply,
 				MaxPrice:           tt.fields.MaxPrice,
+				MaxMoney:           tt.fields.maxMoney,
 				EarliestCancelTime: tt.fields.EarliestCancelTime,
 			}
 			if got := msg.ValidateBasic(); !reflect.DeepEqual(got, tt.want) {
@@ -122,6 +130,17 @@ func TestMsgBancorInit_ValidateBasic(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCheckAR(t *testing.T) {
+	msg := MsgBancorInit{
+		MaxMoney:  sdk.NewInt(300),
+		MaxSupply: sdk.NewInt(100),
+	}
+	initPrice := sdk.NewDec(0)
+	maxPrice := sdk.NewDec(10)
+	ar, _ := CheckAR(msg, initPrice, maxPrice)
+	assert.Equal(t, int64(2333), ar)
 }
 
 func TestMsgBancorTrade_ValidateBasic(t *testing.T) {

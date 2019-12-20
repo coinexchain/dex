@@ -3782,6 +3782,7 @@ paths:
               - init_price
               - max_supply
               - max_price
+              - max_money
               - earliest_cancel_time
             properties:
               base_req:
@@ -3804,6 +3805,9 @@ paths:
               max_price:
                 type: string
                 example: "100"
+              max_money:
+                type: string
+                example: "100000"
               earliest_cancel_time:
                 type: string
                 example: "1564479501"
@@ -3940,6 +3944,8 @@ paths:
                   - init_price
                   - max_supply
                   - max_price
+                  - max_money
+                  - ar
                   - current_price
                   - stock_in_pool
                   - money_in_pool
@@ -3956,6 +3962,10 @@ paths:
                   stock_precision:
                     type: string
                   max_price:
+                    type: string
+                  max_money:
+                    type: string
+                  ar:
                     type: string
                   current_price:
                     type: string
