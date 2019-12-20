@@ -25,4 +25,5 @@ type ExpectedMarketKeeper interface {
 	GetMarketLastExePrice(ctx sdk.Context, symbol string) (sdk.Dec, error)
 	IsMarketExist(ctx sdk.Context, symbol string) bool
 	GetMarketFeeMin(ctx sdk.Context) int64
+	GetMarketVolume(ctx sdk.Context, stock, money string, stockVolume, moneyVolume sdk.Dec) sdk.Dec
 }

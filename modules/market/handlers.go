@@ -121,21 +121,7 @@ type ParamOfCommissionMsg struct {
 
 func CalCommission(ctx sdk.Context, keeper keepers.QueryMarketInfoAndParams, msg ParamOfCommissionMsg) (int64, sdk.Error) {
 	marketParams := keeper.GetParams(ctx)
-	volume := sdk.ZeroDec()
-	if msg.stock == dex.CET {
-		volume = msg.amountOfStock
-	} else if msg.money == dex.CET {
-		volume = msg.amountOfMoney
-	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(dex.CET, msg.money)); err == nil {
-		volume = msg.amountOfMoney.Quo(marketInfo.LastExecutedPrice)
-	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(dex.CET, msg.stock)); err == nil {
-		volume = msg.amountOfStock.Quo(marketInfo.LastExecutedPrice)
-	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.money, dex.CET)); err == nil {
-		volume = msg.amountOfMoney.Mul(marketInfo.LastExecutedPrice)
-	} else if marketInfo, err := keeper.GetMarketInfo(ctx, GetSymbol(msg.stock, dex.CET)); err == nil {
-		volume = msg.amountOfStock.Mul(marketInfo.LastExecutedPrice)
-	}
-
+	volume := keeper.GetMarketVolume(ctx, msg.stock, msg.money, msg.amountOfStock, msg.amountOfMoney)
 	rate := sdk.NewDec(marketParams.MarketFeeRate).QuoInt64(int64(math.Pow10(types.DefaultMarketFeeRatePrecision)))
 	commission := volume.Mul(rate).Ceil().RoundInt64()
 	if commission > types.MaxOrderAmount {
