@@ -35,7 +35,7 @@ endif
 
 
 ifeq ($(IS_TESTNET),true)
-	ldflags += -X github.com/coinexchain/dex/types.Bech32MainPrefix=cettest
+	ldflags += -X github.com/coinexchain/cet-sdk/types.Bech32MainPrefix=cettest
 	build_tags += testnet
 endif
 

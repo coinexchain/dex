@@ -29,10 +29,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/stakingx"
-	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/cet-sdk/modules/asset"
+	"github.com/coinexchain/cet-sdk/modules/authx"
+	"github.com/coinexchain/cet-sdk/modules/stakingx"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 const nodeDirPerm = 0755

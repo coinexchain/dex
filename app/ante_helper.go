@@ -5,12 +5,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/modules/distributionx"
+	"github.com/coinexchain/cet-sdk/modules/distributionx"
 
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/incentive"
-	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/cet-sdk/modules/authx"
+	"github.com/coinexchain/cet-sdk/modules/bankx"
+	"github.com/coinexchain/cet-sdk/modules/incentive"
+	"github.com/coinexchain/cet-sdk/modules/stakingx"
 )
 
 var _ authx.AnteHelper = anteHelper{}

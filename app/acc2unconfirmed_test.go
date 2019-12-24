@@ -14,9 +14,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/testutil"
-	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/cet-sdk/modules/bankx"
+	"github.com/coinexchain/cet-sdk/testutil"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 func TestAccount2UnconfirmedTx(t *testing.T) {

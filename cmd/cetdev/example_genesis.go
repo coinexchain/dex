@@ -9,11 +9,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
 	"github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/incentive"
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/testutil"
-	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/cet-sdk/modules/asset"
+	"github.com/coinexchain/cet-sdk/modules/incentive"
+	"github.com/coinexchain/cet-sdk/modules/market"
+	"github.com/coinexchain/cet-sdk/testutil"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {

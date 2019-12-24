@@ -14,8 +14,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	"github.com/cosmos/cosmos-sdk/version"
 
-	"github.com/coinexchain/dex/modules/authx"
-	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/cet-sdk/modules/authx"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 func PersistentPreRunEFn(context *sdkserver.Context) func(*cobra.Command, []string) error {

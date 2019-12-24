@@ -13,8 +13,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/coinexchain/dex/app"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/market"
+	"github.com/coinexchain/cet-sdk/modules/asset"
+	"github.com/coinexchain/cet-sdk/modules/market"
 )
 
 const (

@@ -17,9 +17,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/testutil"
-	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/cet-sdk/modules/authx"
+	"github.com/coinexchain/cet-sdk/testutil"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 func TestExportRestore(t *testing.T) {

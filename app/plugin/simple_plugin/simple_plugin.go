@@ -7,8 +7,8 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/coinexchain/dex/app/plugin"
-	"github.com/coinexchain/dex/modules/bankx"
-	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/cet-sdk/modules/bankx"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 const (

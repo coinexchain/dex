@@ -5,8 +5,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 
-	"github.com/coinexchain/dex/modules/asset"
-	dex "github.com/coinexchain/dex/types"
+	"github.com/coinexchain/cet-sdk/modules/asset"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 func newBaseGenesisAccount(address string, amt int64) genaccounts.GenesisAccount {

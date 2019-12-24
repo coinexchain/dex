@@ -38,6 +38,8 @@ github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792/go.mod h1:ghJtE
 github.com/btcsuite/winsvc v1.0.0/go.mod h1:jsenWakMcC0zFBFurPLEAyrnc/teJEM1O46fmI40EZs=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
+github.com/coinexchain/cet-sdk v0.0.0-20191224084723-c730f48d882b h1:59Z1wsRnzcWYxFzogqr+oLqHYbFESVZoQFYt2BZBsWM=
+github.com/coinexchain/cet-sdk v0.0.0-20191224084723-c730f48d882b/go.mod h1:FolIprsOKNI41fKpKS/e8eC9XMBQsKOw5Wx8MMJ+OvM=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c h1:ZcWk9BWVuvAZW23esCnCyhp7Ss6xhVuffwNxHsQccRE=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c/go.mod h1:IPOtAzhvIJrmitYLXC4DC0fJFoGulqhn3LBSnwkA1eo=
 github.com/coinexchain/cosmos-sdk v0.0.0-20191210021926-99ec1332fbaa h1:q/L7MdPQPTRP5B/kwoEDi+lSe8IDD/D1/9/5vPHTqVw=

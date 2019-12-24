@@ -25,10 +25,10 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	_ "github.com/coinexchain/dex/cmd/cetcli/statik"
-	authxcmd "github.com/coinexchain/dex/modules/authx/client/cli"
-	bankxcmd "github.com/coinexchain/dex/modules/bankx/client/cli"
-	distrxcmd "github.com/coinexchain/dex/modules/distributionx/client/cli"
-	dex "github.com/coinexchain/dex/types"
+	authxcmd "github.com/coinexchain/cet-sdk/modules/authx/client/cli"
+	bankxcmd "github.com/coinexchain/cet-sdk/modules/bankx/client/cli"
+	distrxcmd "github.com/coinexchain/cet-sdk/modules/distributionx/client/cli"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 func main() {

@@ -15,15 +15,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
-	"github.com/coinexchain/dex/modules/alias"
-	"github.com/coinexchain/dex/modules/asset"
-	"github.com/coinexchain/dex/modules/authx"
-	"github.com/coinexchain/dex/modules/bancorlite"
-	"github.com/coinexchain/dex/modules/bankx"
-	"github.com/coinexchain/dex/modules/comment"
-	"github.com/coinexchain/dex/modules/incentive"
-	"github.com/coinexchain/dex/modules/market"
-	"github.com/coinexchain/dex/modules/stakingx"
+	"github.com/coinexchain/cet-sdk/modules/alias"
+	"github.com/coinexchain/cet-sdk/modules/asset"
+	"github.com/coinexchain/cet-sdk/modules/authx"
+	"github.com/coinexchain/cet-sdk/modules/bancorlite"
+	"github.com/coinexchain/cet-sdk/modules/bankx"
+	"github.com/coinexchain/cet-sdk/modules/comment"
+	"github.com/coinexchain/cet-sdk/modules/incentive"
+	"github.com/coinexchain/cet-sdk/modules/market"
+	"github.com/coinexchain/cet-sdk/modules/stakingx"
 )
 
 // State to Unmarshal

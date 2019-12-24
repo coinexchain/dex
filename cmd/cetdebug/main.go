@@ -18,7 +18,7 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 
-	dex "github.com/coinexchain/dex/types"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 func init() {

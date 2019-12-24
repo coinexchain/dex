@@ -3,7 +3,7 @@ package app
 import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/coinexchain/dex/msgqueue"
+	"github.com/coinexchain/cet-sdk/msgqueue"
 )
 
 type PubMsg struct {

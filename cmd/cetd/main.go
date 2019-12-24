@@ -28,10 +28,10 @@ import (
 
 	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/dex/app/plugin"
-	assetcli "github.com/coinexchain/dex/modules/asset/client/cli"
-	"github.com/coinexchain/dex/msgqueue"
+	assetcli "github.com/coinexchain/cet-sdk/modules/asset/client/cli"
+	"github.com/coinexchain/cet-sdk/msgqueue"
 	dexserver "github.com/coinexchain/dex/server"
-	dex "github.com/coinexchain/dex/types"
+	dex "github.com/coinexchain/cet-sdk/types"
 )
 
 // cetd custom flags
