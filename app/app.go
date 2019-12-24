@@ -31,7 +31,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
-	"github.com/coinexchain/dex/app/plugin"
 	"github.com/coinexchain/cet-sdk/modules/alias"
 	"github.com/coinexchain/cet-sdk/modules/asset"
 	"github.com/coinexchain/cet-sdk/modules/authx"
@@ -45,6 +44,7 @@ import (
 	"github.com/coinexchain/cet-sdk/modules/supplyx"
 	"github.com/coinexchain/cet-sdk/msgqueue"
 	dex "github.com/coinexchain/cet-sdk/types"
+	"github.com/coinexchain/dex/app/plugin"
 )
 
 const (

@@ -8,12 +8,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/dex/app"
 	"github.com/coinexchain/cet-sdk/modules/asset"
 	"github.com/coinexchain/cet-sdk/modules/incentive"
 	"github.com/coinexchain/cet-sdk/modules/market"
 	"github.com/coinexchain/cet-sdk/testutil"
 	dex "github.com/coinexchain/cet-sdk/types"
+	"github.com/coinexchain/dex/app"
 )
 
 func createExampleGenesisState(cdc *codec.Codec) app.GenesisState {

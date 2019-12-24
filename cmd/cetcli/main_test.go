@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/libs/cli"
 
-	"github.com/coinexchain/dex/app"
 	dex "github.com/coinexchain/cet-sdk/types"
+	"github.com/coinexchain/dex/app"
 )
 
 func init() {

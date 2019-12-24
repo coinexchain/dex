@@ -6,9 +6,9 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/coinexchain/dex/app/plugin"
 	"github.com/coinexchain/cet-sdk/modules/bankx"
 	dex "github.com/coinexchain/cet-sdk/types"
+	"github.com/coinexchain/dex/app/plugin"
 )
 
 const (

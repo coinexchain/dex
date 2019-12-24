@@ -12,8 +12,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 
-	"github.com/coinexchain/dex/app"
 	dex "github.com/coinexchain/cet-sdk/types"
+	"github.com/coinexchain/dex/app"
 )
 
 func main() {

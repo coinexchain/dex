@@ -11,8 +11,8 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/coinexchain/dex/app"
 	dex "github.com/coinexchain/cet-sdk/types"
+	"github.com/coinexchain/dex/app"
 )
 
 func init() {
