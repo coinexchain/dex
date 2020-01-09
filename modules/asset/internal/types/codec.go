@@ -8,7 +8,6 @@ import (
 var ModuleCdc *codec.Codec
 
 func init() {
-	println("Here! 111111111111111")
 	codec.AddInitFunc(func() {
 		ModuleCdc = codec.New()
 		println("Here! 22222222222")

@@ -42,8 +42,7 @@ func runBench(r dexcodec.RandSrc) {
 			panic(err)
 		}
 		bzList[i] = buf
-	}
-	for i := 0; i < len(accounts); i++ {
+
 		obj, _, err := dexcodec.DecodeAny(bzList[i])
 		v := obj.(dexcodec.AccountX)
 		if err != nil {

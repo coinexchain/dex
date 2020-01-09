@@ -7,6 +7,7 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmtypes "github.com/tendermint/tendermint/types"
 
+	"github.com/cosmos/cosmos-sdk/store/rootmulti"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -19,7 +20,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 	supplyexp "github.com/cosmos/cosmos-sdk/x/supply/exported"
-	"github.com/cosmos/cosmos-sdk/store/rootmulti"
 
 	"github.com/coinexchain/dex/modules/alias"
 	"github.com/coinexchain/dex/modules/asset"
@@ -33,12 +33,12 @@ import (
 )
 
 type (
-	PubKey  = crypto.PubKey
-	PrivKey  = crypto.PrivKey
-	Msg     = sdk.Msg
-	Account = auth.Account
+	PubKey         = crypto.PubKey
+	PrivKey        = crypto.PrivKey
+	Msg            = sdk.Msg
+	Account        = auth.Account
 	VestingAccount = auth.VestingAccount
-	Content = govtypes.Content
+	Content        = govtypes.Content
 
 	DuplicateVoteEvidence   = tmtypes.DuplicateVoteEvidence
 	PrivKeyEd25519          = ed25519.PrivKeyEd25519
@@ -53,13 +53,13 @@ type (
 	SdkInt = sdk.Int
 	SdkDec = sdk.Dec
 
-	Tx         = sdk.Tx
-	SupplyI                         = supplyexp.SupplyI
-	ModuleAccountI                  = supplyexp.ModuleAccountI
+	Tx             = sdk.Tx
+	SupplyI        = supplyexp.SupplyI
+	ModuleAccountI = supplyexp.ModuleAccountI
 
-	ConsAddress         = sdk.ConsAddress
+	ConsAddress  = sdk.ConsAddress
 	Coin         = sdk.Coin
-	DecCoin         = sdk.DecCoin
+	DecCoin      = sdk.DecCoin
 	StdSignature = auth.StdSignature
 	ParamChange  = ptypes.ParamChange
 	Input        = bank.Input
@@ -89,7 +89,7 @@ type (
 	TextProposal                   = gov.TextProposal
 	ParameterChangeProposal        = ptypes.ParameterChangeProposal
 	CommunityPoolSpendProposal     = distr.CommunityPoolSpendProposal
-	FeePool     = distr.FeePool
+	FeePool                        = distr.FeePool
 	MsgMultiSend                   = bank.MsgMultiSend
 	MsgSend                        = bank.MsgSend
 	MsgVerifyInvariant             = crisis.MsgVerifyInvariant
@@ -102,7 +102,7 @@ type (
 	MsgSetMemoRequired       = bankx.MsgSetMemoRequired
 	MsgSupervisedSend        = bankx.MsgSupervisedSend
 	BaseToken                = asset.BaseToken
-	Token                = asset.Token
+	Token                    = asset.Token
 	MsgAddTokenWhitelist     = asset.MsgAddTokenWhitelist
 	MsgBurnToken             = asset.MsgBurnToken
 	MsgForbidAddr            = asset.MsgForbidAddr
@@ -130,6 +130,6 @@ type (
 	MsgAliasUpdate           = alias.MsgAliasUpdate
 
 	AccAddressList = []AccAddress
-	CommitInfo = rootmulti.CommitInfo
-	StoreInfo = rootmulti.StoreInfo
+	CommitInfo     = rootmulti.CommitInfo
+	StoreInfo      = rootmulti.StoreInfo
 )
