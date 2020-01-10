@@ -909,9 +909,9 @@ func DeepCopyPubKeySecp256k1(in PubKeySecp256k1) (out PubKeySecp256k1) {
 
 // Non-Interface
 func EncodePubKeyMultisigThreshold(w *[]byte, v PubKeyMultisigThreshold) {
-	codonEncodeUvarint(0, w, uint64(v.K))
+	codonEncodeUvarint(1, w, uint64(v.K))
 	for _0 := 0; _0 < len(v.PubKeys); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			w := make([]byte, 0, 64)
 			EncodePubKey(&w, v.PubKeys[_0]) // interface_encode
 			return w
@@ -1085,26 +1085,26 @@ func DeepCopyVoteOption(in VoteOption) (out VoteOption) {
 
 // Non-Interface
 func EncodeVote(w *[]byte, v Vote) {
-	codonEncodeUint8(0, w, uint8(v.Type))
-	codonEncodeVarint(1, w, int64(v.Height))
-	codonEncodeVarint(2, w, int64(v.Round))
-	codonEncodeByteSlice(3, w, func() []byte {
+	codonEncodeUint8(1, w, uint8(v.Type))
+	codonEncodeVarint(2, w, int64(v.Height))
+	codonEncodeVarint(3, w, int64(v.Round))
+	codonEncodeByteSlice(4, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeByteSlice(0, w, v.BlockID.Hash[:])
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(1, w, v.BlockID.Hash[:])
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeVarint(0, w, int64(v.BlockID.PartsHeader.Total))
-			codonEncodeByteSlice(1, w, v.BlockID.PartsHeader.Hash[:])
+			codonEncodeVarint(1, w, int64(v.BlockID.PartsHeader.Total))
+			codonEncodeByteSlice(2, w, v.BlockID.PartsHeader.Hash[:])
 			return wBuf
 		}()) // end of v.BlockID.PartsHeader
 		return wBuf
 	}()) // end of v.BlockID
-	codonEncodeByteSlice(4, w, EncodeTime(v.Timestamp))
-	codonEncodeByteSlice(5, w, v.ValidatorAddress[:])
-	codonEncodeVarint(6, w, int64(v.ValidatorIndex))
-	codonEncodeByteSlice(7, w, v.Signature[:])
+	codonEncodeByteSlice(5, w, EncodeTime(v.Timestamp))
+	codonEncodeByteSlice(6, w, v.ValidatorAddress[:])
+	codonEncodeVarint(7, w, int64(v.ValidatorIndex))
+	codonEncodeByteSlice(8, w, v.Signature[:])
 } //End of EncodeVote
 
 func DecodeVote(bz []byte) (v Vote, total int, err error) {
@@ -1588,8 +1588,8 @@ func DeepCopyConsAddress(in ConsAddress) (out ConsAddress) {
 
 // Non-Interface
 func EncodeCoin(w *[]byte, v Coin) {
-	codonEncodeString(0, w, v.Denom)
-	codonEncodeByteSlice(1, w, EncodeInt(v.Amount))
+	codonEncodeString(1, w, v.Denom)
+	codonEncodeByteSlice(2, w, EncodeInt(v.Amount))
 } //End of EncodeCoin
 
 func DecodeCoin(bz []byte) (v Coin, total int, err error) {
@@ -1654,8 +1654,8 @@ func DeepCopyCoin(in Coin) (out Coin) {
 
 // Non-Interface
 func EncodeDecCoin(w *[]byte, v DecCoin) {
-	codonEncodeString(0, w, v.Denom)
-	codonEncodeByteSlice(1, w, EncodeDec(v.Amount))
+	codonEncodeString(1, w, v.Denom)
+	codonEncodeByteSlice(2, w, EncodeDec(v.Amount))
 } //End of EncodeDecCoin
 
 func DecodeDecCoin(bz []byte) (v DecCoin, total int, err error) {
@@ -1720,17 +1720,17 @@ func DeepCopyDecCoin(in DecCoin) (out DecCoin) {
 
 // Non-Interface
 func EncodeLockedCoin(w *[]byte, v LockedCoin) {
-	codonEncodeByteSlice(0, w, func() []byte {
+	codonEncodeByteSlice(1, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeString(0, w, v.Coin.Denom)
-		codonEncodeByteSlice(1, w, EncodeInt(v.Coin.Amount))
+		codonEncodeString(1, w, v.Coin.Denom)
+		codonEncodeByteSlice(2, w, EncodeInt(v.Coin.Amount))
 		return wBuf
 	}()) // end of v.Coin
-	codonEncodeVarint(1, w, int64(v.UnlockTime))
-	codonEncodeByteSlice(2, w, v.FromAddress[:])
-	codonEncodeByteSlice(3, w, v.Supervisor[:])
-	codonEncodeVarint(4, w, int64(v.Reward))
+	codonEncodeVarint(2, w, int64(v.UnlockTime))
+	codonEncodeByteSlice(3, w, v.FromAddress[:])
+	codonEncodeByteSlice(4, w, v.Supervisor[:])
+	codonEncodeVarint(5, w, int64(v.Reward))
 } //End of EncodeLockedCoin
 
 func DecodeLockedCoin(bz []byte) (v LockedCoin, total int, err error) {
@@ -1881,12 +1881,12 @@ func DeepCopyLockedCoin(in LockedCoin) (out LockedCoin) {
 
 // Non-Interface
 func EncodeStdSignature(w *[]byte, v StdSignature) {
-	codonEncodeByteSlice(0, w, func() []byte {
+	codonEncodeByteSlice(1, w, func() []byte {
 		w := make([]byte, 0, 64)
 		EncodePubKey(&w, v.PubKey) // interface_encode
 		return w
 	}()) // end of v.PubKey
-	codonEncodeByteSlice(1, w, v.Signature[:])
+	codonEncodeByteSlice(2, w, v.Signature[:])
 } //End of EncodeStdSignature
 
 func DecodeStdSignature(bz []byte) (v StdSignature, total int, err error) {
@@ -1962,10 +1962,10 @@ func DeepCopyStdSignature(in StdSignature) (out StdSignature) {
 
 // Non-Interface
 func EncodeParamChange(w *[]byte, v ParamChange) {
-	codonEncodeString(0, w, v.Subspace)
-	codonEncodeString(1, w, v.Key)
-	codonEncodeString(2, w, v.Subkey)
-	codonEncodeString(3, w, v.Value)
+	codonEncodeString(1, w, v.Subspace)
+	codonEncodeString(2, w, v.Key)
+	codonEncodeString(3, w, v.Subkey)
+	codonEncodeString(4, w, v.Value)
 } //End of EncodeParamChange
 
 func DecodeParamChange(bz []byte) (v ParamChange, total int, err error) {
@@ -2034,13 +2034,13 @@ func DeepCopyParamChange(in ParamChange) (out ParamChange) {
 
 // Non-Interface
 func EncodeInput(w *[]byte, v Input) {
-	codonEncodeByteSlice(0, w, v.Address[:])
+	codonEncodeByteSlice(1, w, v.Address[:])
 	for _0 := 0; _0 < len(v.Coins); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Coins[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Coins[_0].Amount))
+			codonEncodeString(1, w, v.Coins[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Coins[_0].Amount))
 			return wBuf
 		}()) // end of v.Coins[_0]
 	}
@@ -2137,13 +2137,13 @@ func DeepCopyInput(in Input) (out Input) {
 
 // Non-Interface
 func EncodeOutput(w *[]byte, v Output) {
-	codonEncodeByteSlice(0, w, v.Address[:])
+	codonEncodeByteSlice(1, w, v.Address[:])
 	for _0 := 0; _0 < len(v.Coins); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Coins[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Coins[_0].Amount))
+			codonEncodeString(1, w, v.Coins[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Coins[_0].Amount))
 			return wBuf
 		}()) // end of v.Coins[_0]
 	}
@@ -2293,12 +2293,12 @@ func DeepCopyAccAddress(in AccAddress) (out AccAddress) {
 
 // Non-Interface
 func EncodeCommentRef(w *[]byte, v CommentRef) {
-	codonEncodeUvarint(0, w, uint64(v.ID))
-	codonEncodeByteSlice(1, w, v.RewardTarget[:])
-	codonEncodeString(2, w, v.RewardToken)
-	codonEncodeVarint(3, w, int64(v.RewardAmount))
+	codonEncodeUvarint(1, w, uint64(v.ID))
+	codonEncodeByteSlice(2, w, v.RewardTarget[:])
+	codonEncodeString(3, w, v.RewardToken)
+	codonEncodeVarint(4, w, int64(v.RewardAmount))
 	for _0 := 0; _0 < len(v.Attitudes); _0++ {
-		codonEncodeVarint(4, w, int64(v.Attitudes[_0]))
+		codonEncodeVarint(5, w, int64(v.Attitudes[_0]))
 	}
 } //End of EncodeCommentRef
 
@@ -2406,23 +2406,23 @@ func DeepCopyCommentRef(in CommentRef) (out CommentRef) {
 
 // Non-Interface
 func EncodeBaseAccount(w *[]byte, v BaseAccount) {
-	codonEncodeByteSlice(0, w, v.Address[:])
+	codonEncodeByteSlice(1, w, v.Address[:])
 	for _0 := 0; _0 < len(v.Coins); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Coins[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Coins[_0].Amount))
+			codonEncodeString(1, w, v.Coins[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Coins[_0].Amount))
 			return wBuf
 		}()) // end of v.Coins[_0]
 	}
-	codonEncodeByteSlice(2, w, func() []byte {
+	codonEncodeByteSlice(3, w, func() []byte {
 		w := make([]byte, 0, 64)
 		EncodePubKey(&w, v.PubKey) // interface_encode
 		return w
 	}()) // end of v.PubKey
-	codonEncodeUvarint(3, w, uint64(v.AccountNumber))
-	codonEncodeUvarint(4, w, uint64(v.Sequence))
+	codonEncodeUvarint(4, w, uint64(v.AccountNumber))
+	codonEncodeUvarint(5, w, uint64(v.Sequence))
 } //End of EncodeBaseAccount
 
 func DecodeBaseAccount(bz []byte) (v BaseAccount, total int, err error) {
@@ -2557,56 +2557,56 @@ func DeepCopyBaseAccount(in BaseAccount) (out BaseAccount) {
 
 // Non-Interface
 func EncodeBaseVestingAccount(w *[]byte, v BaseVestingAccount) {
-	codonEncodeByteSlice(0, w, func() []byte {
+	codonEncodeByteSlice(1, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeByteSlice(0, w, v.BaseAccount.Address[:])
+		codonEncodeByteSlice(1, w, v.BaseAccount.Address[:])
 		for _0 := 0; _0 < len(v.BaseAccount.Coins); _0++ {
-			codonEncodeByteSlice(1, w, func() []byte {
+			codonEncodeByteSlice(2, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.BaseAccount.Coins[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.BaseAccount.Coins[_0].Amount))
+				codonEncodeString(1, w, v.BaseAccount.Coins[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.BaseAccount.Coins[_0].Amount))
 				return wBuf
 			}()) // end of v.BaseAccount.Coins[_0]
 		}
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			w := make([]byte, 0, 64)
 			EncodePubKey(&w, v.BaseAccount.PubKey) // interface_encode
 			return w
 		}()) // end of v.BaseAccount.PubKey
-		codonEncodeUvarint(3, w, uint64(v.BaseAccount.AccountNumber))
-		codonEncodeUvarint(4, w, uint64(v.BaseAccount.Sequence))
+		codonEncodeUvarint(4, w, uint64(v.BaseAccount.AccountNumber))
+		codonEncodeUvarint(5, w, uint64(v.BaseAccount.Sequence))
 		return wBuf
 	}()) // end of v.BaseAccount
 	for _0 := 0; _0 < len(v.OriginalVesting); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.OriginalVesting[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.OriginalVesting[_0].Amount))
+			codonEncodeString(1, w, v.OriginalVesting[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.OriginalVesting[_0].Amount))
 			return wBuf
 		}()) // end of v.OriginalVesting[_0]
 	}
 	for _0 := 0; _0 < len(v.DelegatedFree); _0++ {
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.DelegatedFree[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.DelegatedFree[_0].Amount))
+			codonEncodeString(1, w, v.DelegatedFree[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.DelegatedFree[_0].Amount))
 			return wBuf
 		}()) // end of v.DelegatedFree[_0]
 	}
 	for _0 := 0; _0 < len(v.DelegatedVesting); _0++ {
-		codonEncodeByteSlice(3, w, func() []byte {
+		codonEncodeByteSlice(4, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.DelegatedVesting[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.DelegatedVesting[_0].Amount))
+			codonEncodeString(1, w, v.DelegatedVesting[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.DelegatedVesting[_0].Amount))
 			return wBuf
 		}()) // end of v.DelegatedVesting[_0]
 	}
-	codonEncodeVarint(4, w, int64(v.EndTime))
+	codonEncodeVarint(5, w, int64(v.EndTime))
 } //End of EncodeBaseVestingAccount
 
 func DecodeBaseVestingAccount(bz []byte) (v BaseVestingAccount, total int, err error) {
@@ -2906,62 +2906,62 @@ func DeepCopyBaseVestingAccount(in BaseVestingAccount) (out BaseVestingAccount) 
 
 // Non-Interface
 func EncodeContinuousVestingAccount(w *[]byte, v ContinuousVestingAccount) {
-	codonEncodeByteSlice(0, w, func() []byte {
+	codonEncodeByteSlice(1, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeByteSlice(0, w, func() []byte {
+		codonEncodeByteSlice(1, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeByteSlice(0, w, v.BaseVestingAccount.BaseAccount.Address[:])
+			codonEncodeByteSlice(1, w, v.BaseVestingAccount.BaseAccount.Address[:])
 			for _0 := 0; _0 < len(v.BaseVestingAccount.BaseAccount.Coins); _0++ {
-				codonEncodeByteSlice(1, w, func() []byte {
+				codonEncodeByteSlice(2, w, func() []byte {
 					wBuf := make([]byte, 0, 64)
 					w := &wBuf
-					codonEncodeString(0, w, v.BaseVestingAccount.BaseAccount.Coins[_0].Denom)
-					codonEncodeByteSlice(1, w, EncodeInt(v.BaseVestingAccount.BaseAccount.Coins[_0].Amount))
+					codonEncodeString(1, w, v.BaseVestingAccount.BaseAccount.Coins[_0].Denom)
+					codonEncodeByteSlice(2, w, EncodeInt(v.BaseVestingAccount.BaseAccount.Coins[_0].Amount))
 					return wBuf
 				}()) // end of v.BaseVestingAccount.BaseAccount.Coins[_0]
 			}
-			codonEncodeByteSlice(2, w, func() []byte {
+			codonEncodeByteSlice(3, w, func() []byte {
 				w := make([]byte, 0, 64)
 				EncodePubKey(&w, v.BaseVestingAccount.BaseAccount.PubKey) // interface_encode
 				return w
 			}()) // end of v.BaseVestingAccount.BaseAccount.PubKey
-			codonEncodeUvarint(3, w, uint64(v.BaseVestingAccount.BaseAccount.AccountNumber))
-			codonEncodeUvarint(4, w, uint64(v.BaseVestingAccount.BaseAccount.Sequence))
+			codonEncodeUvarint(4, w, uint64(v.BaseVestingAccount.BaseAccount.AccountNumber))
+			codonEncodeUvarint(5, w, uint64(v.BaseVestingAccount.BaseAccount.Sequence))
 			return wBuf
 		}()) // end of v.BaseVestingAccount.BaseAccount
 		for _0 := 0; _0 < len(v.BaseVestingAccount.OriginalVesting); _0++ {
-			codonEncodeByteSlice(1, w, func() []byte {
+			codonEncodeByteSlice(2, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.BaseVestingAccount.OriginalVesting[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.BaseVestingAccount.OriginalVesting[_0].Amount))
+				codonEncodeString(1, w, v.BaseVestingAccount.OriginalVesting[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.BaseVestingAccount.OriginalVesting[_0].Amount))
 				return wBuf
 			}()) // end of v.BaseVestingAccount.OriginalVesting[_0]
 		}
 		for _0 := 0; _0 < len(v.BaseVestingAccount.DelegatedFree); _0++ {
-			codonEncodeByteSlice(2, w, func() []byte {
+			codonEncodeByteSlice(3, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.BaseVestingAccount.DelegatedFree[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.BaseVestingAccount.DelegatedFree[_0].Amount))
+				codonEncodeString(1, w, v.BaseVestingAccount.DelegatedFree[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.BaseVestingAccount.DelegatedFree[_0].Amount))
 				return wBuf
 			}()) // end of v.BaseVestingAccount.DelegatedFree[_0]
 		}
 		for _0 := 0; _0 < len(v.BaseVestingAccount.DelegatedVesting); _0++ {
-			codonEncodeByteSlice(3, w, func() []byte {
+			codonEncodeByteSlice(4, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.BaseVestingAccount.DelegatedVesting[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.BaseVestingAccount.DelegatedVesting[_0].Amount))
+				codonEncodeString(1, w, v.BaseVestingAccount.DelegatedVesting[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.BaseVestingAccount.DelegatedVesting[_0].Amount))
 				return wBuf
 			}()) // end of v.BaseVestingAccount.DelegatedVesting[_0]
 		}
-		codonEncodeVarint(4, w, int64(v.BaseVestingAccount.EndTime))
+		codonEncodeVarint(5, w, int64(v.BaseVestingAccount.EndTime))
 		return wBuf
 	}()) // end of v.BaseVestingAccount
-	codonEncodeVarint(1, w, int64(v.StartTime))
+	codonEncodeVarint(2, w, int64(v.StartTime))
 } //End of EncodeContinuousVestingAccount
 
 func DecodeContinuousVestingAccount(bz []byte) (v ContinuousVestingAccount, total int, err error) {
@@ -3303,59 +3303,59 @@ func DeepCopyContinuousVestingAccount(in ContinuousVestingAccount) (out Continuo
 
 // Non-Interface
 func EncodeDelayedVestingAccount(w *[]byte, v DelayedVestingAccount) {
-	codonEncodeByteSlice(0, w, func() []byte {
+	codonEncodeByteSlice(1, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeByteSlice(0, w, func() []byte {
+		codonEncodeByteSlice(1, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeByteSlice(0, w, v.BaseVestingAccount.BaseAccount.Address[:])
+			codonEncodeByteSlice(1, w, v.BaseVestingAccount.BaseAccount.Address[:])
 			for _0 := 0; _0 < len(v.BaseVestingAccount.BaseAccount.Coins); _0++ {
-				codonEncodeByteSlice(1, w, func() []byte {
+				codonEncodeByteSlice(2, w, func() []byte {
 					wBuf := make([]byte, 0, 64)
 					w := &wBuf
-					codonEncodeString(0, w, v.BaseVestingAccount.BaseAccount.Coins[_0].Denom)
-					codonEncodeByteSlice(1, w, EncodeInt(v.BaseVestingAccount.BaseAccount.Coins[_0].Amount))
+					codonEncodeString(1, w, v.BaseVestingAccount.BaseAccount.Coins[_0].Denom)
+					codonEncodeByteSlice(2, w, EncodeInt(v.BaseVestingAccount.BaseAccount.Coins[_0].Amount))
 					return wBuf
 				}()) // end of v.BaseVestingAccount.BaseAccount.Coins[_0]
 			}
-			codonEncodeByteSlice(2, w, func() []byte {
+			codonEncodeByteSlice(3, w, func() []byte {
 				w := make([]byte, 0, 64)
 				EncodePubKey(&w, v.BaseVestingAccount.BaseAccount.PubKey) // interface_encode
 				return w
 			}()) // end of v.BaseVestingAccount.BaseAccount.PubKey
-			codonEncodeUvarint(3, w, uint64(v.BaseVestingAccount.BaseAccount.AccountNumber))
-			codonEncodeUvarint(4, w, uint64(v.BaseVestingAccount.BaseAccount.Sequence))
+			codonEncodeUvarint(4, w, uint64(v.BaseVestingAccount.BaseAccount.AccountNumber))
+			codonEncodeUvarint(5, w, uint64(v.BaseVestingAccount.BaseAccount.Sequence))
 			return wBuf
 		}()) // end of v.BaseVestingAccount.BaseAccount
 		for _0 := 0; _0 < len(v.BaseVestingAccount.OriginalVesting); _0++ {
-			codonEncodeByteSlice(1, w, func() []byte {
+			codonEncodeByteSlice(2, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.BaseVestingAccount.OriginalVesting[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.BaseVestingAccount.OriginalVesting[_0].Amount))
+				codonEncodeString(1, w, v.BaseVestingAccount.OriginalVesting[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.BaseVestingAccount.OriginalVesting[_0].Amount))
 				return wBuf
 			}()) // end of v.BaseVestingAccount.OriginalVesting[_0]
 		}
 		for _0 := 0; _0 < len(v.BaseVestingAccount.DelegatedFree); _0++ {
-			codonEncodeByteSlice(2, w, func() []byte {
+			codonEncodeByteSlice(3, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.BaseVestingAccount.DelegatedFree[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.BaseVestingAccount.DelegatedFree[_0].Amount))
+				codonEncodeString(1, w, v.BaseVestingAccount.DelegatedFree[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.BaseVestingAccount.DelegatedFree[_0].Amount))
 				return wBuf
 			}()) // end of v.BaseVestingAccount.DelegatedFree[_0]
 		}
 		for _0 := 0; _0 < len(v.BaseVestingAccount.DelegatedVesting); _0++ {
-			codonEncodeByteSlice(3, w, func() []byte {
+			codonEncodeByteSlice(4, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.BaseVestingAccount.DelegatedVesting[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.BaseVestingAccount.DelegatedVesting[_0].Amount))
+				codonEncodeString(1, w, v.BaseVestingAccount.DelegatedVesting[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.BaseVestingAccount.DelegatedVesting[_0].Amount))
 				return wBuf
 			}()) // end of v.BaseVestingAccount.DelegatedVesting[_0]
 		}
-		codonEncodeVarint(4, w, int64(v.BaseVestingAccount.EndTime))
+		codonEncodeVarint(5, w, int64(v.BaseVestingAccount.EndTime))
 		return wBuf
 	}()) // end of v.BaseVestingAccount
 } //End of EncodeDelayedVestingAccount
@@ -3690,31 +3690,31 @@ func DeepCopyDelayedVestingAccount(in DelayedVestingAccount) (out DelayedVesting
 
 // Non-Interface
 func EncodeModuleAccount(w *[]byte, v ModuleAccount) {
-	codonEncodeByteSlice(0, w, func() []byte {
+	codonEncodeByteSlice(1, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeByteSlice(0, w, v.BaseAccount.Address[:])
+		codonEncodeByteSlice(1, w, v.BaseAccount.Address[:])
 		for _0 := 0; _0 < len(v.BaseAccount.Coins); _0++ {
-			codonEncodeByteSlice(1, w, func() []byte {
+			codonEncodeByteSlice(2, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.BaseAccount.Coins[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.BaseAccount.Coins[_0].Amount))
+				codonEncodeString(1, w, v.BaseAccount.Coins[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.BaseAccount.Coins[_0].Amount))
 				return wBuf
 			}()) // end of v.BaseAccount.Coins[_0]
 		}
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			w := make([]byte, 0, 64)
 			EncodePubKey(&w, v.BaseAccount.PubKey) // interface_encode
 			return w
 		}()) // end of v.BaseAccount.PubKey
-		codonEncodeUvarint(3, w, uint64(v.BaseAccount.AccountNumber))
-		codonEncodeUvarint(4, w, uint64(v.BaseAccount.Sequence))
+		codonEncodeUvarint(4, w, uint64(v.BaseAccount.AccountNumber))
+		codonEncodeUvarint(5, w, uint64(v.BaseAccount.Sequence))
 		return wBuf
 	}()) // end of v.BaseAccount
-	codonEncodeString(1, w, v.Name)
+	codonEncodeString(2, w, v.Name)
 	for _0 := 0; _0 < len(v.Permissions); _0++ {
-		codonEncodeString(2, w, v.Permissions[_0])
+		codonEncodeString(3, w, v.Permissions[_0])
 	}
 } //End of EncodeModuleAccount
 
@@ -3920,41 +3920,41 @@ func DeepCopyModuleAccount(in ModuleAccount) (out ModuleAccount) {
 // Non-Interface
 func EncodeStdTx(w *[]byte, v StdTx) {
 	for _0 := 0; _0 < len(v.Msgs); _0++ {
-		codonEncodeByteSlice(0, w, func() []byte {
+		codonEncodeByteSlice(1, w, func() []byte {
 			w := make([]byte, 0, 64)
 			EncodeMsg(&w, v.Msgs[_0]) // interface_encode
 			return w
 		}()) // end of v.Msgs[_0]
 	}
-	codonEncodeByteSlice(1, w, func() []byte {
+	codonEncodeByteSlice(2, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
 		for _0 := 0; _0 < len(v.Fee.Amount); _0++ {
-			codonEncodeByteSlice(0, w, func() []byte {
+			codonEncodeByteSlice(1, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.Fee.Amount[_0].Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.Fee.Amount[_0].Amount))
+				codonEncodeString(1, w, v.Fee.Amount[_0].Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.Fee.Amount[_0].Amount))
 				return wBuf
 			}()) // end of v.Fee.Amount[_0]
 		}
-		codonEncodeUvarint(1, w, uint64(v.Fee.Gas))
+		codonEncodeUvarint(2, w, uint64(v.Fee.Gas))
 		return wBuf
 	}()) // end of v.Fee
 	for _0 := 0; _0 < len(v.Signatures); _0++ {
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeByteSlice(0, w, func() []byte {
+			codonEncodeByteSlice(1, w, func() []byte {
 				w := make([]byte, 0, 64)
 				EncodePubKey(&w, v.Signatures[_0].PubKey) // interface_encode
 				return w
 			}()) // end of v.Signatures[_0].PubKey
-			codonEncodeByteSlice(1, w, v.Signatures[_0].Signature[:])
+			codonEncodeByteSlice(2, w, v.Signatures[_0].Signature[:])
 			return wBuf
 		}()) // end of v.Signatures[_0]
 	}
-	codonEncodeString(3, w, v.Memo)
+	codonEncodeString(4, w, v.Memo)
 } //End of EncodeStdTx
 
 func DecodeStdTx(bz []byte) (v StdTx, total int, err error) {
@@ -4160,14 +4160,14 @@ func DeepCopyStdTx(in StdTx) (out StdTx) {
 
 // Non-Interface
 func EncodeMsgBeginRedelegate(w *[]byte, v MsgBeginRedelegate) {
-	codonEncodeByteSlice(0, w, v.DelegatorAddress[:])
-	codonEncodeByteSlice(1, w, v.ValidatorSrcAddress[:])
-	codonEncodeByteSlice(2, w, v.ValidatorDstAddress[:])
-	codonEncodeByteSlice(3, w, func() []byte {
+	codonEncodeByteSlice(1, w, v.DelegatorAddress[:])
+	codonEncodeByteSlice(2, w, v.ValidatorSrcAddress[:])
+	codonEncodeByteSlice(3, w, v.ValidatorDstAddress[:])
+	codonEncodeByteSlice(4, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeString(0, w, v.Amount.Denom)
-		codonEncodeByteSlice(1, w, EncodeInt(v.Amount.Amount))
+		codonEncodeString(1, w, v.Amount.Denom)
+		codonEncodeByteSlice(2, w, EncodeInt(v.Amount.Amount))
 		return wBuf
 	}()) // end of v.Amount
 } //End of EncodeMsgBeginRedelegate
@@ -4320,36 +4320,36 @@ func DeepCopyMsgBeginRedelegate(in MsgBeginRedelegate) (out MsgBeginRedelegate) 
 
 // Non-Interface
 func EncodeMsgCreateValidator(w *[]byte, v MsgCreateValidator) {
-	codonEncodeByteSlice(0, w, func() []byte {
-		wBuf := make([]byte, 0, 64)
-		w := &wBuf
-		codonEncodeString(0, w, v.Description.Moniker)
-		codonEncodeString(1, w, v.Description.Identity)
-		codonEncodeString(2, w, v.Description.Website)
-		codonEncodeString(3, w, v.Description.Details)
-		return wBuf
-	}()) // end of v.Description
 	codonEncodeByteSlice(1, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeByteSlice(0, w, EncodeDec(v.Commission.Rate))
-		codonEncodeByteSlice(1, w, EncodeDec(v.Commission.MaxRate))
-		codonEncodeByteSlice(2, w, EncodeDec(v.Commission.MaxChangeRate))
+		codonEncodeString(1, w, v.Description.Moniker)
+		codonEncodeString(2, w, v.Description.Identity)
+		codonEncodeString(3, w, v.Description.Website)
+		codonEncodeString(4, w, v.Description.Details)
+		return wBuf
+	}()) // end of v.Description
+	codonEncodeByteSlice(2, w, func() []byte {
+		wBuf := make([]byte, 0, 64)
+		w := &wBuf
+		codonEncodeByteSlice(1, w, EncodeDec(v.Commission.Rate))
+		codonEncodeByteSlice(2, w, EncodeDec(v.Commission.MaxRate))
+		codonEncodeByteSlice(3, w, EncodeDec(v.Commission.MaxChangeRate))
 		return wBuf
 	}()) // end of v.Commission
-	codonEncodeByteSlice(2, w, EncodeInt(v.MinSelfDelegation))
-	codonEncodeByteSlice(3, w, v.DelegatorAddress[:])
-	codonEncodeByteSlice(4, w, v.ValidatorAddress[:])
-	codonEncodeByteSlice(5, w, func() []byte {
+	codonEncodeByteSlice(3, w, EncodeInt(v.MinSelfDelegation))
+	codonEncodeByteSlice(4, w, v.DelegatorAddress[:])
+	codonEncodeByteSlice(5, w, v.ValidatorAddress[:])
+	codonEncodeByteSlice(6, w, func() []byte {
 		w := make([]byte, 0, 64)
 		EncodePubKey(&w, v.PubKey) // interface_encode
 		return w
 	}()) // end of v.PubKey
-	codonEncodeByteSlice(6, w, func() []byte {
+	codonEncodeByteSlice(7, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeString(0, w, v.Value.Denom)
-		codonEncodeByteSlice(1, w, EncodeInt(v.Value.Amount))
+		codonEncodeString(1, w, v.Value.Denom)
+		codonEncodeByteSlice(2, w, EncodeInt(v.Value.Amount))
 		return wBuf
 	}()) // end of v.Value
 } //End of EncodeMsgCreateValidator
@@ -4695,13 +4695,13 @@ func DeepCopyMsgCreateValidator(in MsgCreateValidator) (out MsgCreateValidator) 
 
 // Non-Interface
 func EncodeMsgDelegate(w *[]byte, v MsgDelegate) {
-	codonEncodeByteSlice(0, w, v.DelegatorAddress[:])
-	codonEncodeByteSlice(1, w, v.ValidatorAddress[:])
-	codonEncodeByteSlice(2, w, func() []byte {
+	codonEncodeByteSlice(1, w, v.DelegatorAddress[:])
+	codonEncodeByteSlice(2, w, v.ValidatorAddress[:])
+	codonEncodeByteSlice(3, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeString(0, w, v.Amount.Denom)
-		codonEncodeByteSlice(1, w, EncodeInt(v.Amount.Amount))
+		codonEncodeString(1, w, v.Amount.Denom)
+		codonEncodeByteSlice(2, w, EncodeInt(v.Amount.Amount))
 		return wBuf
 	}()) // end of v.Amount
 } //End of EncodeMsgDelegate
@@ -4836,18 +4836,18 @@ func DeepCopyMsgDelegate(in MsgDelegate) (out MsgDelegate) {
 
 // Non-Interface
 func EncodeMsgEditValidator(w *[]byte, v MsgEditValidator) {
-	codonEncodeByteSlice(0, w, func() []byte {
+	codonEncodeByteSlice(1, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeString(0, w, v.Description.Moniker)
-		codonEncodeString(1, w, v.Description.Identity)
-		codonEncodeString(2, w, v.Description.Website)
-		codonEncodeString(3, w, v.Description.Details)
+		codonEncodeString(1, w, v.Description.Moniker)
+		codonEncodeString(2, w, v.Description.Identity)
+		codonEncodeString(3, w, v.Description.Website)
+		codonEncodeString(4, w, v.Description.Details)
 		return wBuf
 	}()) // end of v.Description
-	codonEncodeByteSlice(1, w, v.ValidatorAddress[:])
-	codonEncodeByteSlice(2, w, EncodeDec(*(v.CommissionRate)))
-	codonEncodeByteSlice(3, w, EncodeInt(*(v.MinSelfDelegation)))
+	codonEncodeByteSlice(2, w, v.ValidatorAddress[:])
+	codonEncodeByteSlice(3, w, EncodeDec(*(v.CommissionRate)))
+	codonEncodeByteSlice(4, w, EncodeInt(*(v.MinSelfDelegation)))
 } //End of EncodeMsgEditValidator
 
 func DecodeMsgEditValidator(bz []byte) (v MsgEditValidator, total int, err error) {
@@ -5018,8 +5018,8 @@ func DeepCopyMsgEditValidator(in MsgEditValidator) (out MsgEditValidator) {
 
 // Non-Interface
 func EncodeMsgSetWithdrawAddress(w *[]byte, v MsgSetWithdrawAddress) {
-	codonEncodeByteSlice(0, w, v.DelegatorAddress[:])
-	codonEncodeByteSlice(1, w, v.WithdrawAddress[:])
+	codonEncodeByteSlice(1, w, v.DelegatorAddress[:])
+	codonEncodeByteSlice(2, w, v.WithdrawAddress[:])
 } //End of EncodeMsgSetWithdrawAddress
 
 func DecodeMsgSetWithdrawAddress(bz []byte) (v MsgSetWithdrawAddress, total int, err error) {
@@ -5090,13 +5090,13 @@ func DeepCopyMsgSetWithdrawAddress(in MsgSetWithdrawAddress) (out MsgSetWithdraw
 
 // Non-Interface
 func EncodeMsgUndelegate(w *[]byte, v MsgUndelegate) {
-	codonEncodeByteSlice(0, w, v.DelegatorAddress[:])
-	codonEncodeByteSlice(1, w, v.ValidatorAddress[:])
-	codonEncodeByteSlice(2, w, func() []byte {
+	codonEncodeByteSlice(1, w, v.DelegatorAddress[:])
+	codonEncodeByteSlice(2, w, v.ValidatorAddress[:])
+	codonEncodeByteSlice(3, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeString(0, w, v.Amount.Denom)
-		codonEncodeByteSlice(1, w, EncodeInt(v.Amount.Amount))
+		codonEncodeString(1, w, v.Amount.Denom)
+		codonEncodeByteSlice(2, w, EncodeInt(v.Amount.Amount))
 		return wBuf
 	}()) // end of v.Amount
 } //End of EncodeMsgUndelegate
@@ -5231,7 +5231,7 @@ func DeepCopyMsgUndelegate(in MsgUndelegate) (out MsgUndelegate) {
 
 // Non-Interface
 func EncodeMsgUnjail(w *[]byte, v MsgUnjail) {
-	codonEncodeByteSlice(0, w, v.ValidatorAddr[:])
+	codonEncodeByteSlice(1, w, v.ValidatorAddr[:])
 } //End of EncodeMsgUnjail
 
 func DecodeMsgUnjail(bz []byte) (v MsgUnjail, total int, err error) {
@@ -5284,8 +5284,8 @@ func DeepCopyMsgUnjail(in MsgUnjail) (out MsgUnjail) {
 
 // Non-Interface
 func EncodeMsgWithdrawDelegatorReward(w *[]byte, v MsgWithdrawDelegatorReward) {
-	codonEncodeByteSlice(0, w, v.DelegatorAddress[:])
-	codonEncodeByteSlice(1, w, v.ValidatorAddress[:])
+	codonEncodeByteSlice(1, w, v.DelegatorAddress[:])
+	codonEncodeByteSlice(2, w, v.ValidatorAddress[:])
 } //End of EncodeMsgWithdrawDelegatorReward
 
 func DecodeMsgWithdrawDelegatorReward(bz []byte) (v MsgWithdrawDelegatorReward, total int, err error) {
@@ -5356,7 +5356,7 @@ func DeepCopyMsgWithdrawDelegatorReward(in MsgWithdrawDelegatorReward) (out MsgW
 
 // Non-Interface
 func EncodeMsgWithdrawValidatorCommission(w *[]byte, v MsgWithdrawValidatorCommission) {
-	codonEncodeByteSlice(0, w, v.ValidatorAddress[:])
+	codonEncodeByteSlice(1, w, v.ValidatorAddress[:])
 } //End of EncodeMsgWithdrawValidatorCommission
 
 func DecodeMsgWithdrawValidatorCommission(bz []byte) (v MsgWithdrawValidatorCommission, total int, err error) {
@@ -5409,14 +5409,14 @@ func DeepCopyMsgWithdrawValidatorCommission(in MsgWithdrawValidatorCommission) (
 
 // Non-Interface
 func EncodeMsgDeposit(w *[]byte, v MsgDeposit) {
-	codonEncodeUvarint(0, w, uint64(v.ProposalID))
-	codonEncodeByteSlice(1, w, v.Depositor[:])
+	codonEncodeUvarint(1, w, uint64(v.ProposalID))
+	codonEncodeByteSlice(2, w, v.Depositor[:])
 	for _0 := 0; _0 < len(v.Amount); _0++ {
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Amount[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Amount[_0].Amount))
+			codonEncodeString(1, w, v.Amount[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Amount[_0].Amount))
 			return wBuf
 		}()) // end of v.Amount[_0]
 	}
@@ -5522,21 +5522,21 @@ func DeepCopyMsgDeposit(in MsgDeposit) (out MsgDeposit) {
 
 // Non-Interface
 func EncodeMsgSubmitProposal(w *[]byte, v MsgSubmitProposal) {
-	codonEncodeByteSlice(0, w, func() []byte {
+	codonEncodeByteSlice(1, w, func() []byte {
 		w := make([]byte, 0, 64)
 		EncodeContent(&w, v.Content) // interface_encode
 		return w
 	}()) // end of v.Content
 	for _0 := 0; _0 < len(v.InitialDeposit); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.InitialDeposit[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.InitialDeposit[_0].Amount))
+			codonEncodeString(1, w, v.InitialDeposit[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.InitialDeposit[_0].Amount))
 			return wBuf
 		}()) // end of v.InitialDeposit[_0]
 	}
-	codonEncodeByteSlice(2, w, v.Proposer[:])
+	codonEncodeByteSlice(3, w, v.Proposer[:])
 } //End of EncodeMsgSubmitProposal
 
 func DecodeMsgSubmitProposal(bz []byte) (v MsgSubmitProposal, total int, err error) {
@@ -5653,9 +5653,9 @@ func DeepCopyMsgSubmitProposal(in MsgSubmitProposal) (out MsgSubmitProposal) {
 
 // Non-Interface
 func EncodeMsgVote(w *[]byte, v MsgVote) {
-	codonEncodeUvarint(0, w, uint64(v.ProposalID))
-	codonEncodeByteSlice(1, w, v.Voter[:])
-	codonEncodeUint8(2, w, uint8(v.Option))
+	codonEncodeUvarint(1, w, uint64(v.ProposalID))
+	codonEncodeByteSlice(2, w, v.Voter[:])
+	codonEncodeUint8(3, w, uint8(v.Option))
 } //End of EncodeMsgVote
 
 func DecodeMsgVote(bz []byte) (v MsgVote, total int, err error) {
@@ -5726,16 +5726,16 @@ func DeepCopyMsgVote(in MsgVote) (out MsgVote) {
 
 // Non-Interface
 func EncodeParameterChangeProposal(w *[]byte, v ParameterChangeProposal) {
-	codonEncodeString(0, w, v.Title)
-	codonEncodeString(1, w, v.Description)
+	codonEncodeString(1, w, v.Title)
+	codonEncodeString(2, w, v.Description)
 	for _0 := 0; _0 < len(v.Changes); _0++ {
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Changes[_0].Subspace)
-			codonEncodeString(1, w, v.Changes[_0].Key)
-			codonEncodeString(2, w, v.Changes[_0].Subkey)
-			codonEncodeString(3, w, v.Changes[_0].Value)
+			codonEncodeString(1, w, v.Changes[_0].Subspace)
+			codonEncodeString(2, w, v.Changes[_0].Key)
+			codonEncodeString(3, w, v.Changes[_0].Subkey)
+			codonEncodeString(4, w, v.Changes[_0].Value)
 			return wBuf
 		}()) // end of v.Changes[_0]
 	}
@@ -5832,8 +5832,8 @@ func DeepCopyParameterChangeProposal(in ParameterChangeProposal) (out ParameterC
 
 // Non-Interface
 func EncodeSoftwareUpgradeProposal(w *[]byte, v SoftwareUpgradeProposal) {
-	codonEncodeString(0, w, v.Title)
-	codonEncodeString(1, w, v.Description)
+	codonEncodeString(1, w, v.Title)
+	codonEncodeString(2, w, v.Description)
 } //End of EncodeSoftwareUpgradeProposal
 
 func DecodeSoftwareUpgradeProposal(bz []byte) (v SoftwareUpgradeProposal, total int, err error) {
@@ -5884,8 +5884,8 @@ func DeepCopySoftwareUpgradeProposal(in SoftwareUpgradeProposal) (out SoftwareUp
 
 // Non-Interface
 func EncodeTextProposal(w *[]byte, v TextProposal) {
-	codonEncodeString(0, w, v.Title)
-	codonEncodeString(1, w, v.Description)
+	codonEncodeString(1, w, v.Title)
+	codonEncodeString(2, w, v.Description)
 } //End of EncodeTextProposal
 
 func DecodeTextProposal(bz []byte) (v TextProposal, total int, err error) {
@@ -5936,15 +5936,15 @@ func DeepCopyTextProposal(in TextProposal) (out TextProposal) {
 
 // Non-Interface
 func EncodeCommunityPoolSpendProposal(w *[]byte, v CommunityPoolSpendProposal) {
-	codonEncodeString(0, w, v.Title)
-	codonEncodeString(1, w, v.Description)
-	codonEncodeByteSlice(2, w, v.Recipient[:])
+	codonEncodeString(1, w, v.Title)
+	codonEncodeString(2, w, v.Description)
+	codonEncodeByteSlice(3, w, v.Recipient[:])
 	for _0 := 0; _0 < len(v.Amount); _0++ {
-		codonEncodeByteSlice(3, w, func() []byte {
+		codonEncodeByteSlice(4, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Amount[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Amount[_0].Amount))
+			codonEncodeString(1, w, v.Amount[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Amount[_0].Amount))
 			return wBuf
 		}()) // end of v.Amount[_0]
 	}
@@ -6060,16 +6060,16 @@ func DeepCopyCommunityPoolSpendProposal(in CommunityPoolSpendProposal) (out Comm
 // Non-Interface
 func EncodeMsgMultiSend(w *[]byte, v MsgMultiSend) {
 	for _0 := 0; _0 < len(v.Inputs); _0++ {
-		codonEncodeByteSlice(0, w, func() []byte {
+		codonEncodeByteSlice(1, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeByteSlice(0, w, v.Inputs[_0].Address[:])
+			codonEncodeByteSlice(1, w, v.Inputs[_0].Address[:])
 			for _1 := 0; _1 < len(v.Inputs[_0].Coins); _1++ {
-				codonEncodeByteSlice(1, w, func() []byte {
+				codonEncodeByteSlice(2, w, func() []byte {
 					wBuf := make([]byte, 0, 64)
 					w := &wBuf
-					codonEncodeString(0, w, v.Inputs[_0].Coins[_1].Denom)
-					codonEncodeByteSlice(1, w, EncodeInt(v.Inputs[_0].Coins[_1].Amount))
+					codonEncodeString(1, w, v.Inputs[_0].Coins[_1].Denom)
+					codonEncodeByteSlice(2, w, EncodeInt(v.Inputs[_0].Coins[_1].Amount))
 					return wBuf
 				}()) // end of v.Inputs[_0].Coins[_1]
 			}
@@ -6077,16 +6077,16 @@ func EncodeMsgMultiSend(w *[]byte, v MsgMultiSend) {
 		}()) // end of v.Inputs[_0]
 	}
 	for _0 := 0; _0 < len(v.Outputs); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeByteSlice(0, w, v.Outputs[_0].Address[:])
+			codonEncodeByteSlice(1, w, v.Outputs[_0].Address[:])
 			for _1 := 0; _1 < len(v.Outputs[_0].Coins); _1++ {
-				codonEncodeByteSlice(1, w, func() []byte {
+				codonEncodeByteSlice(2, w, func() []byte {
 					wBuf := make([]byte, 0, 64)
 					w := &wBuf
-					codonEncodeString(0, w, v.Outputs[_0].Coins[_1].Denom)
-					codonEncodeByteSlice(1, w, EncodeInt(v.Outputs[_0].Coins[_1].Amount))
+					codonEncodeString(1, w, v.Outputs[_0].Coins[_1].Denom)
+					codonEncodeByteSlice(2, w, EncodeInt(v.Outputs[_0].Coins[_1].Amount))
 					return wBuf
 				}()) // end of v.Outputs[_0].Coins[_1]
 			}
@@ -6210,11 +6210,11 @@ func DeepCopyMsgMultiSend(in MsgMultiSend) (out MsgMultiSend) {
 // Non-Interface
 func EncodeFeePool(w *[]byte, v FeePool) {
 	for _0 := 0; _0 < len(v.CommunityPool); _0++ {
-		codonEncodeByteSlice(0, w, func() []byte {
+		codonEncodeByteSlice(1, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.CommunityPool[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeDec(v.CommunityPool[_0].Amount))
+			codonEncodeString(1, w, v.CommunityPool[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeDec(v.CommunityPool[_0].Amount))
 			return wBuf
 		}()) // end of v.CommunityPool[_0]
 	}
@@ -6293,14 +6293,14 @@ func DeepCopyFeePool(in FeePool) (out FeePool) {
 
 // Non-Interface
 func EncodeMsgSend(w *[]byte, v MsgSend) {
-	codonEncodeByteSlice(0, w, v.FromAddress[:])
-	codonEncodeByteSlice(1, w, v.ToAddress[:])
+	codonEncodeByteSlice(1, w, v.FromAddress[:])
+	codonEncodeByteSlice(2, w, v.ToAddress[:])
 	for _0 := 0; _0 < len(v.Amount); _0++ {
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Amount[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Amount[_0].Amount))
+			codonEncodeString(1, w, v.Amount[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Amount[_0].Amount))
 			return wBuf
 		}()) // end of v.Amount[_0]
 	}
@@ -6415,19 +6415,19 @@ func DeepCopyMsgSend(in MsgSend) (out MsgSend) {
 
 // Non-Interface
 func EncodeMsgSupervisedSend(w *[]byte, v MsgSupervisedSend) {
-	codonEncodeByteSlice(0, w, v.FromAddress[:])
-	codonEncodeByteSlice(1, w, v.Supervisor[:])
-	codonEncodeByteSlice(2, w, v.ToAddress[:])
-	codonEncodeByteSlice(3, w, func() []byte {
+	codonEncodeByteSlice(1, w, v.FromAddress[:])
+	codonEncodeByteSlice(2, w, v.Supervisor[:])
+	codonEncodeByteSlice(3, w, v.ToAddress[:])
+	codonEncodeByteSlice(4, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeString(0, w, v.Amount.Denom)
-		codonEncodeByteSlice(1, w, EncodeInt(v.Amount.Amount))
+		codonEncodeString(1, w, v.Amount.Denom)
+		codonEncodeByteSlice(2, w, EncodeInt(v.Amount.Amount))
 		return wBuf
 	}()) // end of v.Amount
-	codonEncodeVarint(4, w, int64(v.UnlockTime))
-	codonEncodeVarint(5, w, int64(v.Reward))
-	codonEncodeUint8(6, w, v.Operation)
+	codonEncodeVarint(5, w, int64(v.UnlockTime))
+	codonEncodeVarint(6, w, int64(v.Reward))
+	codonEncodeUint8(7, w, v.Operation)
 } //End of EncodeMsgSupervisedSend
 
 func DecodeMsgSupervisedSend(bz []byte) (v MsgSupervisedSend, total int, err error) {
@@ -6605,9 +6605,9 @@ func DeepCopyMsgSupervisedSend(in MsgSupervisedSend) (out MsgSupervisedSend) {
 
 // Non-Interface
 func EncodeMsgVerifyInvariant(w *[]byte, v MsgVerifyInvariant) {
-	codonEncodeByteSlice(0, w, v.Sender[:])
-	codonEncodeString(1, w, v.InvariantModuleName)
-	codonEncodeString(2, w, v.InvariantRoute)
+	codonEncodeByteSlice(1, w, v.Sender[:])
+	codonEncodeString(2, w, v.InvariantModuleName)
+	codonEncodeString(3, w, v.InvariantRoute)
 } //End of EncodeMsgVerifyInvariant
 
 func DecodeMsgVerifyInvariant(bz []byte) (v MsgVerifyInvariant, total int, err error) {
@@ -6679,11 +6679,11 @@ func DeepCopyMsgVerifyInvariant(in MsgVerifyInvariant) (out MsgVerifyInvariant) 
 // Non-Interface
 func EncodeSupply(w *[]byte, v Supply) {
 	for _0 := 0; _0 < len(v.Total); _0++ {
-		codonEncodeByteSlice(0, w, func() []byte {
+		codonEncodeByteSlice(1, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Total[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Total[_0].Amount))
+			codonEncodeString(1, w, v.Total[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Total[_0].Amount))
 			return wBuf
 		}()) // end of v.Total[_0]
 	}
@@ -6762,32 +6762,32 @@ func DeepCopySupply(in Supply) (out Supply) {
 
 // Non-Interface
 func EncodeAccountX(w *[]byte, v AccountX) {
-	codonEncodeByteSlice(0, w, v.Address[:])
-	codonEncodeBool(1, w, v.MemoRequired)
+	codonEncodeByteSlice(1, w, v.Address[:])
+	codonEncodeBool(2, w, v.MemoRequired)
 	for _0 := 0; _0 < len(v.LockedCoins); _0++ {
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeByteSlice(0, w, func() []byte {
+			codonEncodeByteSlice(1, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeString(0, w, v.LockedCoins[_0].Coin.Denom)
-				codonEncodeByteSlice(1, w, EncodeInt(v.LockedCoins[_0].Coin.Amount))
+				codonEncodeString(1, w, v.LockedCoins[_0].Coin.Denom)
+				codonEncodeByteSlice(2, w, EncodeInt(v.LockedCoins[_0].Coin.Amount))
 				return wBuf
 			}()) // end of v.LockedCoins[_0].Coin
-			codonEncodeVarint(1, w, int64(v.LockedCoins[_0].UnlockTime))
-			codonEncodeByteSlice(2, w, v.LockedCoins[_0].FromAddress[:])
-			codonEncodeByteSlice(3, w, v.LockedCoins[_0].Supervisor[:])
-			codonEncodeVarint(4, w, int64(v.LockedCoins[_0].Reward))
+			codonEncodeVarint(2, w, int64(v.LockedCoins[_0].UnlockTime))
+			codonEncodeByteSlice(3, w, v.LockedCoins[_0].FromAddress[:])
+			codonEncodeByteSlice(4, w, v.LockedCoins[_0].Supervisor[:])
+			codonEncodeVarint(5, w, int64(v.LockedCoins[_0].Reward))
 			return wBuf
 		}()) // end of v.LockedCoins[_0]
 	}
 	for _0 := 0; _0 < len(v.FrozenCoins); _0++ {
-		codonEncodeByteSlice(3, w, func() []byte {
+		codonEncodeByteSlice(4, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.FrozenCoins[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.FrozenCoins[_0].Amount))
+			codonEncodeString(1, w, v.FrozenCoins[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.FrozenCoins[_0].Amount))
 			return wBuf
 		}()) // end of v.FrozenCoins[_0]
 	}
@@ -6935,16 +6935,16 @@ func DeepCopyAccountX(in AccountX) (out AccountX) {
 // Non-Interface
 func EncodeMsgMultiSendX(w *[]byte, v MsgMultiSendX) {
 	for _0 := 0; _0 < len(v.Inputs); _0++ {
-		codonEncodeByteSlice(0, w, func() []byte {
+		codonEncodeByteSlice(1, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeByteSlice(0, w, v.Inputs[_0].Address[:])
+			codonEncodeByteSlice(1, w, v.Inputs[_0].Address[:])
 			for _1 := 0; _1 < len(v.Inputs[_0].Coins); _1++ {
-				codonEncodeByteSlice(1, w, func() []byte {
+				codonEncodeByteSlice(2, w, func() []byte {
 					wBuf := make([]byte, 0, 64)
 					w := &wBuf
-					codonEncodeString(0, w, v.Inputs[_0].Coins[_1].Denom)
-					codonEncodeByteSlice(1, w, EncodeInt(v.Inputs[_0].Coins[_1].Amount))
+					codonEncodeString(1, w, v.Inputs[_0].Coins[_1].Denom)
+					codonEncodeByteSlice(2, w, EncodeInt(v.Inputs[_0].Coins[_1].Amount))
 					return wBuf
 				}()) // end of v.Inputs[_0].Coins[_1]
 			}
@@ -6952,16 +6952,16 @@ func EncodeMsgMultiSendX(w *[]byte, v MsgMultiSendX) {
 		}()) // end of v.Inputs[_0]
 	}
 	for _0 := 0; _0 < len(v.Outputs); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeByteSlice(0, w, v.Outputs[_0].Address[:])
+			codonEncodeByteSlice(1, w, v.Outputs[_0].Address[:])
 			for _1 := 0; _1 < len(v.Outputs[_0].Coins); _1++ {
-				codonEncodeByteSlice(1, w, func() []byte {
+				codonEncodeByteSlice(2, w, func() []byte {
 					wBuf := make([]byte, 0, 64)
 					w := &wBuf
-					codonEncodeString(0, w, v.Outputs[_0].Coins[_1].Denom)
-					codonEncodeByteSlice(1, w, EncodeInt(v.Outputs[_0].Coins[_1].Amount))
+					codonEncodeString(1, w, v.Outputs[_0].Coins[_1].Denom)
+					codonEncodeByteSlice(2, w, EncodeInt(v.Outputs[_0].Coins[_1].Amount))
 					return wBuf
 				}()) // end of v.Outputs[_0].Coins[_1]
 			}
@@ -7084,18 +7084,18 @@ func DeepCopyMsgMultiSendX(in MsgMultiSendX) (out MsgMultiSendX) {
 
 // Non-Interface
 func EncodeMsgSendX(w *[]byte, v MsgSendX) {
-	codonEncodeByteSlice(0, w, v.FromAddress[:])
-	codonEncodeByteSlice(1, w, v.ToAddress[:])
+	codonEncodeByteSlice(1, w, v.FromAddress[:])
+	codonEncodeByteSlice(2, w, v.ToAddress[:])
 	for _0 := 0; _0 < len(v.Amount); _0++ {
-		codonEncodeByteSlice(2, w, func() []byte {
+		codonEncodeByteSlice(3, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Amount[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Amount[_0].Amount))
+			codonEncodeString(1, w, v.Amount[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Amount[_0].Amount))
 			return wBuf
 		}()) // end of v.Amount[_0]
 	}
-	codonEncodeVarint(3, w, int64(v.UnlockTime))
+	codonEncodeVarint(4, w, int64(v.UnlockTime))
 } //End of EncodeMsgSendX
 
 func DecodeMsgSendX(bz []byte) (v MsgSendX, total int, err error) {
@@ -7216,8 +7216,8 @@ func DeepCopyMsgSendX(in MsgSendX) (out MsgSendX) {
 
 // Non-Interface
 func EncodeMsgSetMemoRequired(w *[]byte, v MsgSetMemoRequired) {
-	codonEncodeByteSlice(0, w, v.Address[:])
-	codonEncodeBool(1, w, v.Required)
+	codonEncodeByteSlice(1, w, v.Address[:])
+	codonEncodeBool(2, w, v.Required)
 } //End of EncodeMsgSetMemoRequired
 
 func DecodeMsgSetMemoRequired(bz []byte) (v MsgSetMemoRequired, total int, err error) {
@@ -7279,21 +7279,21 @@ func DeepCopyMsgSetMemoRequired(in MsgSetMemoRequired) (out MsgSetMemoRequired) 
 
 // Non-Interface
 func EncodeBaseToken(w *[]byte, v BaseToken) {
-	codonEncodeString(0, w, v.Name)
-	codonEncodeString(1, w, v.Symbol)
-	codonEncodeByteSlice(2, w, EncodeInt(v.TotalSupply))
-	codonEncodeByteSlice(3, w, EncodeInt(v.SendLock))
-	codonEncodeByteSlice(4, w, v.Owner[:])
-	codonEncodeBool(5, w, v.Mintable)
-	codonEncodeBool(6, w, v.Burnable)
-	codonEncodeBool(7, w, v.AddrForbiddable)
-	codonEncodeBool(8, w, v.TokenForbiddable)
-	codonEncodeByteSlice(9, w, EncodeInt(v.TotalBurn))
-	codonEncodeByteSlice(10, w, EncodeInt(v.TotalMint))
-	codonEncodeBool(11, w, v.IsForbidden)
-	codonEncodeString(12, w, v.URL)
-	codonEncodeString(13, w, v.Description)
-	codonEncodeString(14, w, v.Identity)
+	codonEncodeString(1, w, v.Name)
+	codonEncodeString(2, w, v.Symbol)
+	codonEncodeByteSlice(3, w, EncodeInt(v.TotalSupply))
+	codonEncodeByteSlice(4, w, EncodeInt(v.SendLock))
+	codonEncodeByteSlice(5, w, v.Owner[:])
+	codonEncodeBool(6, w, v.Mintable)
+	codonEncodeBool(7, w, v.Burnable)
+	codonEncodeBool(8, w, v.AddrForbiddable)
+	codonEncodeBool(9, w, v.TokenForbiddable)
+	codonEncodeByteSlice(10, w, EncodeInt(v.TotalBurn))
+	codonEncodeByteSlice(11, w, EncodeInt(v.TotalMint))
+	codonEncodeBool(12, w, v.IsForbidden)
+	codonEncodeString(13, w, v.URL)
+	codonEncodeString(14, w, v.Description)
+	codonEncodeString(15, w, v.Identity)
 } //End of EncodeBaseToken
 
 func DecodeBaseToken(bz []byte) (v BaseToken, total int, err error) {
@@ -7528,10 +7528,10 @@ func DeepCopyBaseToken(in BaseToken) (out BaseToken) {
 
 // Non-Interface
 func EncodeMsgAddTokenWhitelist(w *[]byte, v MsgAddTokenWhitelist) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, v.OwnerAddress[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, v.OwnerAddress[:])
 	for _0 := 0; _0 < len(v.Whitelist); _0++ {
-		codonEncodeByteSlice(2, w, v.Whitelist[_0][:])
+		codonEncodeByteSlice(3, w, v.Whitelist[_0][:])
 	}
 } //End of EncodeMsgAddTokenWhitelist
 
@@ -7630,9 +7630,9 @@ func DeepCopyMsgAddTokenWhitelist(in MsgAddTokenWhitelist) (out MsgAddTokenWhite
 
 // Non-Interface
 func EncodeMsgBurnToken(w *[]byte, v MsgBurnToken) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, EncodeInt(v.Amount))
-	codonEncodeByteSlice(2, w, v.OwnerAddress[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, EncodeInt(v.Amount))
+	codonEncodeByteSlice(3, w, v.OwnerAddress[:])
 } //End of EncodeMsgBurnToken
 
 func DecodeMsgBurnToken(bz []byte) (v MsgBurnToken, total int, err error) {
@@ -7717,10 +7717,10 @@ func DeepCopyMsgBurnToken(in MsgBurnToken) (out MsgBurnToken) {
 
 // Non-Interface
 func EncodeMsgForbidAddr(w *[]byte, v MsgForbidAddr) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, v.OwnerAddr[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, v.OwnerAddr[:])
 	for _0 := 0; _0 < len(v.Addresses); _0++ {
-		codonEncodeByteSlice(2, w, v.Addresses[_0][:])
+		codonEncodeByteSlice(3, w, v.Addresses[_0][:])
 	}
 } //End of EncodeMsgForbidAddr
 
@@ -7819,8 +7819,8 @@ func DeepCopyMsgForbidAddr(in MsgForbidAddr) (out MsgForbidAddr) {
 
 // Non-Interface
 func EncodeMsgForbidToken(w *[]byte, v MsgForbidToken) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, v.OwnerAddress[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, v.OwnerAddress[:])
 } //End of EncodeMsgForbidToken
 
 func DecodeMsgForbidToken(bz []byte) (v MsgForbidToken, total int, err error) {
@@ -7882,17 +7882,17 @@ func DeepCopyMsgForbidToken(in MsgForbidToken) (out MsgForbidToken) {
 
 // Non-Interface
 func EncodeMsgIssueToken(w *[]byte, v MsgIssueToken) {
-	codonEncodeString(0, w, v.Name)
-	codonEncodeString(1, w, v.Symbol)
-	codonEncodeByteSlice(2, w, EncodeInt(v.TotalSupply))
-	codonEncodeByteSlice(3, w, v.Owner[:])
-	codonEncodeBool(4, w, v.Mintable)
-	codonEncodeBool(5, w, v.Burnable)
-	codonEncodeBool(6, w, v.AddrForbiddable)
-	codonEncodeBool(7, w, v.TokenForbiddable)
-	codonEncodeString(8, w, v.URL)
-	codonEncodeString(9, w, v.Description)
-	codonEncodeString(10, w, v.Identity)
+	codonEncodeString(1, w, v.Name)
+	codonEncodeString(2, w, v.Symbol)
+	codonEncodeByteSlice(3, w, EncodeInt(v.TotalSupply))
+	codonEncodeByteSlice(4, w, v.Owner[:])
+	codonEncodeBool(5, w, v.Mintable)
+	codonEncodeBool(6, w, v.Burnable)
+	codonEncodeBool(7, w, v.AddrForbiddable)
+	codonEncodeBool(8, w, v.TokenForbiddable)
+	codonEncodeString(9, w, v.URL)
+	codonEncodeString(10, w, v.Description)
+	codonEncodeString(11, w, v.Identity)
 } //End of EncodeMsgIssueToken
 
 func DecodeMsgIssueToken(bz []byte) (v MsgIssueToken, total int, err error) {
@@ -8049,9 +8049,9 @@ func DeepCopyMsgIssueToken(in MsgIssueToken) (out MsgIssueToken) {
 
 // Non-Interface
 func EncodeMsgMintToken(w *[]byte, v MsgMintToken) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, EncodeInt(v.Amount))
-	codonEncodeByteSlice(2, w, v.OwnerAddress[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, EncodeInt(v.Amount))
+	codonEncodeByteSlice(3, w, v.OwnerAddress[:])
 } //End of EncodeMsgMintToken
 
 func DecodeMsgMintToken(bz []byte) (v MsgMintToken, total int, err error) {
@@ -8136,11 +8136,11 @@ func DeepCopyMsgMintToken(in MsgMintToken) (out MsgMintToken) {
 
 // Non-Interface
 func EncodeMsgModifyTokenInfo(w *[]byte, v MsgModifyTokenInfo) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeString(1, w, v.URL)
-	codonEncodeString(2, w, v.Description)
-	codonEncodeString(3, w, v.Identity)
-	codonEncodeByteSlice(4, w, v.OwnerAddress[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeString(2, w, v.URL)
+	codonEncodeString(3, w, v.Description)
+	codonEncodeString(4, w, v.Identity)
+	codonEncodeByteSlice(5, w, v.OwnerAddress[:])
 } //End of EncodeMsgModifyTokenInfo
 
 func DecodeMsgModifyTokenInfo(bz []byte) (v MsgModifyTokenInfo, total int, err error) {
@@ -8229,10 +8229,10 @@ func DeepCopyMsgModifyTokenInfo(in MsgModifyTokenInfo) (out MsgModifyTokenInfo) 
 
 // Non-Interface
 func EncodeMsgRemoveTokenWhitelist(w *[]byte, v MsgRemoveTokenWhitelist) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, v.OwnerAddress[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, v.OwnerAddress[:])
 	for _0 := 0; _0 < len(v.Whitelist); _0++ {
-		codonEncodeByteSlice(2, w, v.Whitelist[_0][:])
+		codonEncodeByteSlice(3, w, v.Whitelist[_0][:])
 	}
 } //End of EncodeMsgRemoveTokenWhitelist
 
@@ -8331,9 +8331,9 @@ func DeepCopyMsgRemoveTokenWhitelist(in MsgRemoveTokenWhitelist) (out MsgRemoveT
 
 // Non-Interface
 func EncodeMsgTransferOwnership(w *[]byte, v MsgTransferOwnership) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, v.OriginalOwner[:])
-	codonEncodeByteSlice(2, w, v.NewOwner[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, v.OriginalOwner[:])
+	codonEncodeByteSlice(3, w, v.NewOwner[:])
 } //End of EncodeMsgTransferOwnership
 
 func DecodeMsgTransferOwnership(bz []byte) (v MsgTransferOwnership, total int, err error) {
@@ -8413,10 +8413,10 @@ func DeepCopyMsgTransferOwnership(in MsgTransferOwnership) (out MsgTransferOwner
 
 // Non-Interface
 func EncodeMsgUnForbidAddr(w *[]byte, v MsgUnForbidAddr) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, v.OwnerAddr[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, v.OwnerAddr[:])
 	for _0 := 0; _0 < len(v.Addresses); _0++ {
-		codonEncodeByteSlice(2, w, v.Addresses[_0][:])
+		codonEncodeByteSlice(3, w, v.Addresses[_0][:])
 	}
 } //End of EncodeMsgUnForbidAddr
 
@@ -8515,8 +8515,8 @@ func DeepCopyMsgUnForbidAddr(in MsgUnForbidAddr) (out MsgUnForbidAddr) {
 
 // Non-Interface
 func EncodeMsgUnForbidToken(w *[]byte, v MsgUnForbidToken) {
-	codonEncodeString(0, w, v.Symbol)
-	codonEncodeByteSlice(1, w, v.OwnerAddress[:])
+	codonEncodeString(1, w, v.Symbol)
+	codonEncodeByteSlice(2, w, v.OwnerAddress[:])
 } //End of EncodeMsgUnForbidToken
 
 func DecodeMsgUnForbidToken(bz []byte) (v MsgUnForbidToken, total int, err error) {
@@ -8578,9 +8578,9 @@ func DeepCopyMsgUnForbidToken(in MsgUnForbidToken) (out MsgUnForbidToken) {
 
 // Non-Interface
 func EncodeMsgBancorCancel(w *[]byte, v MsgBancorCancel) {
-	codonEncodeByteSlice(0, w, v.Owner[:])
-	codonEncodeString(1, w, v.Stock)
-	codonEncodeString(2, w, v.Money)
+	codonEncodeByteSlice(1, w, v.Owner[:])
+	codonEncodeString(2, w, v.Stock)
+	codonEncodeString(3, w, v.Money)
 } //End of EncodeMsgBancorCancel
 
 func DecodeMsgBancorCancel(bz []byte) (v MsgBancorCancel, total int, err error) {
@@ -8651,14 +8651,14 @@ func DeepCopyMsgBancorCancel(in MsgBancorCancel) (out MsgBancorCancel) {
 
 // Non-Interface
 func EncodeMsgBancorInit(w *[]byte, v MsgBancorInit) {
-	codonEncodeByteSlice(0, w, v.Owner[:])
-	codonEncodeString(1, w, v.Stock)
-	codonEncodeString(2, w, v.Money)
-	codonEncodeString(3, w, v.InitPrice)
-	codonEncodeByteSlice(4, w, EncodeInt(v.MaxSupply))
-	codonEncodeString(5, w, v.MaxPrice)
-	codonEncodeUint8(6, w, v.StockPrecision)
-	codonEncodeVarint(7, w, int64(v.EarliestCancelTime))
+	codonEncodeByteSlice(1, w, v.Owner[:])
+	codonEncodeString(2, w, v.Stock)
+	codonEncodeString(3, w, v.Money)
+	codonEncodeString(4, w, v.InitPrice)
+	codonEncodeByteSlice(5, w, EncodeInt(v.MaxSupply))
+	codonEncodeString(6, w, v.MaxPrice)
+	codonEncodeUint8(7, w, v.StockPrecision)
+	codonEncodeVarint(8, w, int64(v.EarliestCancelTime))
 } //End of EncodeMsgBancorInit
 
 func DecodeMsgBancorInit(bz []byte) (v MsgBancorInit, total int, err error) {
@@ -8788,12 +8788,12 @@ func DeepCopyMsgBancorInit(in MsgBancorInit) (out MsgBancorInit) {
 
 // Non-Interface
 func EncodeMsgBancorTrade(w *[]byte, v MsgBancorTrade) {
-	codonEncodeByteSlice(0, w, v.Sender[:])
-	codonEncodeString(1, w, v.Stock)
-	codonEncodeString(2, w, v.Money)
-	codonEncodeVarint(3, w, int64(v.Amount))
-	codonEncodeBool(4, w, v.IsBuy)
-	codonEncodeVarint(5, w, int64(v.MoneyLimit))
+	codonEncodeByteSlice(1, w, v.Sender[:])
+	codonEncodeString(2, w, v.Stock)
+	codonEncodeString(3, w, v.Money)
+	codonEncodeVarint(4, w, int64(v.Amount))
+	codonEncodeBool(5, w, v.IsBuy)
+	codonEncodeVarint(6, w, int64(v.MoneyLimit))
 } //End of EncodeMsgBancorTrade
 
 func DecodeMsgBancorTrade(bz []byte) (v MsgBancorTrade, total int, err error) {
@@ -8891,8 +8891,8 @@ func DeepCopyMsgBancorTrade(in MsgBancorTrade) (out MsgBancorTrade) {
 
 // Non-Interface
 func EncodeMsgCancelOrder(w *[]byte, v MsgCancelOrder) {
-	codonEncodeByteSlice(0, w, v.Sender[:])
-	codonEncodeString(1, w, v.OrderID)
+	codonEncodeByteSlice(1, w, v.Sender[:])
+	codonEncodeString(2, w, v.OrderID)
 } //End of EncodeMsgCancelOrder
 
 func DecodeMsgCancelOrder(bz []byte) (v MsgCancelOrder, total int, err error) {
@@ -8954,9 +8954,9 @@ func DeepCopyMsgCancelOrder(in MsgCancelOrder) (out MsgCancelOrder) {
 
 // Non-Interface
 func EncodeMsgCancelTradingPair(w *[]byte, v MsgCancelTradingPair) {
-	codonEncodeByteSlice(0, w, v.Sender[:])
-	codonEncodeString(1, w, v.TradingPair)
-	codonEncodeVarint(2, w, int64(v.EffectiveTime))
+	codonEncodeByteSlice(1, w, v.Sender[:])
+	codonEncodeString(2, w, v.TradingPair)
+	codonEncodeVarint(3, w, int64(v.EffectiveTime))
 } //End of EncodeMsgCancelTradingPair
 
 func DecodeMsgCancelTradingPair(bz []byte) (v MsgCancelTradingPair, total int, err error) {
@@ -9027,16 +9027,16 @@ func DeepCopyMsgCancelTradingPair(in MsgCancelTradingPair) (out MsgCancelTrading
 
 // Non-Interface
 func EncodeMsgCreateOrder(w *[]byte, v MsgCreateOrder) {
-	codonEncodeByteSlice(0, w, v.Sender[:])
-	codonEncodeUint8(1, w, v.Identify)
-	codonEncodeString(2, w, v.TradingPair)
-	codonEncodeUint8(3, w, v.OrderType)
-	codonEncodeUint8(4, w, v.PricePrecision)
-	codonEncodeVarint(5, w, int64(v.Price))
-	codonEncodeVarint(6, w, int64(v.Quantity))
-	codonEncodeUint8(7, w, v.Side)
-	codonEncodeVarint(8, w, int64(v.TimeInForce))
-	codonEncodeVarint(9, w, int64(v.ExistBlocks))
+	codonEncodeByteSlice(1, w, v.Sender[:])
+	codonEncodeUint8(2, w, v.Identify)
+	codonEncodeString(3, w, v.TradingPair)
+	codonEncodeUint8(4, w, v.OrderType)
+	codonEncodeUint8(5, w, v.PricePrecision)
+	codonEncodeVarint(6, w, int64(v.Price))
+	codonEncodeVarint(7, w, int64(v.Quantity))
+	codonEncodeUint8(8, w, v.Side)
+	codonEncodeVarint(9, w, int64(v.TimeInForce))
+	codonEncodeVarint(10, w, int64(v.ExistBlocks))
 } //End of EncodeMsgCreateOrder
 
 func DecodeMsgCreateOrder(bz []byte) (v MsgCreateOrder, total int, err error) {
@@ -9170,11 +9170,11 @@ func DeepCopyMsgCreateOrder(in MsgCreateOrder) (out MsgCreateOrder) {
 
 // Non-Interface
 func EncodeMsgCreateTradingPair(w *[]byte, v MsgCreateTradingPair) {
-	codonEncodeString(0, w, v.Stock)
-	codonEncodeString(1, w, v.Money)
-	codonEncodeByteSlice(2, w, v.Creator[:])
-	codonEncodeUint8(3, w, v.PricePrecision)
-	codonEncodeUint8(4, w, v.OrderPrecision)
+	codonEncodeString(1, w, v.Stock)
+	codonEncodeString(2, w, v.Money)
+	codonEncodeByteSlice(3, w, v.Creator[:])
+	codonEncodeUint8(4, w, v.PricePrecision)
+	codonEncodeUint8(5, w, v.OrderPrecision)
 } //End of EncodeMsgCreateTradingPair
 
 func DecodeMsgCreateTradingPair(bz []byte) (v MsgCreateTradingPair, total int, err error) {
@@ -9263,9 +9263,9 @@ func DeepCopyMsgCreateTradingPair(in MsgCreateTradingPair) (out MsgCreateTrading
 
 // Non-Interface
 func EncodeMsgModifyPricePrecision(w *[]byte, v MsgModifyPricePrecision) {
-	codonEncodeByteSlice(0, w, v.Sender[:])
-	codonEncodeString(1, w, v.TradingPair)
-	codonEncodeUint8(2, w, v.PricePrecision)
+	codonEncodeByteSlice(1, w, v.Sender[:])
+	codonEncodeString(2, w, v.TradingPair)
+	codonEncodeUint8(3, w, v.PricePrecision)
 } //End of EncodeMsgModifyPricePrecision
 
 func DecodeMsgModifyPricePrecision(bz []byte) (v MsgModifyPricePrecision, total int, err error) {
@@ -9336,22 +9336,22 @@ func DeepCopyMsgModifyPricePrecision(in MsgModifyPricePrecision) (out MsgModifyP
 
 // Non-Interface
 func EncodeOrder(w *[]byte, v Order) {
-	codonEncodeByteSlice(0, w, v.Sender[:])
-	codonEncodeUvarint(1, w, uint64(v.Sequence))
-	codonEncodeUint8(2, w, v.Identify)
-	codonEncodeString(3, w, v.TradingPair)
-	codonEncodeUint8(4, w, v.OrderType)
-	codonEncodeByteSlice(5, w, EncodeDec(v.Price))
-	codonEncodeVarint(6, w, int64(v.Quantity))
-	codonEncodeUint8(7, w, v.Side)
-	codonEncodeVarint(8, w, int64(v.TimeInForce))
-	codonEncodeVarint(9, w, int64(v.Height))
-	codonEncodeVarint(10, w, int64(v.FrozenFee))
-	codonEncodeVarint(11, w, int64(v.ExistBlocks))
-	codonEncodeVarint(12, w, int64(v.LeftStock))
-	codonEncodeVarint(13, w, int64(v.Freeze))
-	codonEncodeVarint(14, w, int64(v.DealStock))
-	codonEncodeVarint(15, w, int64(v.DealMoney))
+	codonEncodeByteSlice(1, w, v.Sender[:])
+	codonEncodeUvarint(2, w, uint64(v.Sequence))
+	codonEncodeUint8(3, w, v.Identify)
+	codonEncodeString(4, w, v.TradingPair)
+	codonEncodeUint8(5, w, v.OrderType)
+	codonEncodeByteSlice(6, w, EncodeDec(v.Price))
+	codonEncodeVarint(7, w, int64(v.Quantity))
+	codonEncodeUint8(8, w, v.Side)
+	codonEncodeVarint(9, w, int64(v.TimeInForce))
+	codonEncodeVarint(10, w, int64(v.Height))
+	codonEncodeVarint(11, w, int64(v.FrozenFee))
+	codonEncodeVarint(12, w, int64(v.ExistBlocks))
+	codonEncodeVarint(13, w, int64(v.LeftStock))
+	codonEncodeVarint(14, w, int64(v.Freeze))
+	codonEncodeVarint(15, w, int64(v.DealStock))
+	codonEncodeVarint(16, w, int64(v.DealMoney))
 } //End of EncodeOrder
 
 func DecodeOrder(bz []byte) (v Order, total int, err error) {
@@ -9553,11 +9553,11 @@ func DeepCopyOrder(in Order) (out Order) {
 
 // Non-Interface
 func EncodeMarketInfo(w *[]byte, v MarketInfo) {
-	codonEncodeString(0, w, v.Stock)
-	codonEncodeString(1, w, v.Money)
-	codonEncodeUint8(2, w, v.PricePrecision)
-	codonEncodeByteSlice(3, w, EncodeDec(v.LastExecutedPrice))
-	codonEncodeUint8(4, w, v.OrderPrecision)
+	codonEncodeString(1, w, v.Stock)
+	codonEncodeString(2, w, v.Money)
+	codonEncodeUint8(3, w, v.PricePrecision)
+	codonEncodeByteSlice(4, w, EncodeDec(v.LastExecutedPrice))
+	codonEncodeUint8(5, w, v.OrderPrecision)
 } //End of EncodeMarketInfo
 
 func DecodeMarketInfo(bz []byte) (v MarketInfo, total int, err error) {
@@ -9649,13 +9649,13 @@ func DeepCopyMarketInfo(in MarketInfo) (out MarketInfo) {
 
 // Non-Interface
 func EncodeMsgDonateToCommunityPool(w *[]byte, v MsgDonateToCommunityPool) {
-	codonEncodeByteSlice(0, w, v.FromAddr[:])
+	codonEncodeByteSlice(1, w, v.FromAddr[:])
 	for _0 := 0; _0 < len(v.Amount); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.Amount[_0].Denom)
-			codonEncodeByteSlice(1, w, EncodeInt(v.Amount[_0].Amount))
+			codonEncodeString(1, w, v.Amount[_0].Denom)
+			codonEncodeByteSlice(2, w, EncodeInt(v.Amount[_0].Amount))
 			return wBuf
 		}()) // end of v.Amount[_0]
 	}
@@ -9752,22 +9752,22 @@ func DeepCopyMsgDonateToCommunityPool(in MsgDonateToCommunityPool) (out MsgDonat
 
 // Non-Interface
 func EncodeMsgCommentToken(w *[]byte, v MsgCommentToken) {
-	codonEncodeByteSlice(0, w, v.Sender[:])
-	codonEncodeString(1, w, v.Token)
-	codonEncodeVarint(2, w, int64(v.Donation))
-	codonEncodeString(3, w, v.Title)
-	codonEncodeByteSlice(4, w, v.Content[:])
-	codonEncodeInt8(5, w, v.ContentType)
+	codonEncodeByteSlice(1, w, v.Sender[:])
+	codonEncodeString(2, w, v.Token)
+	codonEncodeVarint(3, w, int64(v.Donation))
+	codonEncodeString(4, w, v.Title)
+	codonEncodeByteSlice(5, w, v.Content[:])
+	codonEncodeInt8(6, w, v.ContentType)
 	for _0 := 0; _0 < len(v.References); _0++ {
-		codonEncodeByteSlice(6, w, func() []byte {
+		codonEncodeByteSlice(7, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeUvarint(0, w, uint64(v.References[_0].ID))
-			codonEncodeByteSlice(1, w, v.References[_0].RewardTarget[:])
-			codonEncodeString(2, w, v.References[_0].RewardToken)
-			codonEncodeVarint(3, w, int64(v.References[_0].RewardAmount))
+			codonEncodeUvarint(1, w, uint64(v.References[_0].ID))
+			codonEncodeByteSlice(2, w, v.References[_0].RewardTarget[:])
+			codonEncodeString(3, w, v.References[_0].RewardToken)
+			codonEncodeVarint(4, w, int64(v.References[_0].RewardAmount))
 			for _1 := 0; _1 < len(v.References[_0].Attitudes); _1++ {
-				codonEncodeVarint(4, w, int64(v.References[_0].Attitudes[_1]))
+				codonEncodeVarint(5, w, int64(v.References[_0].Attitudes[_1]))
 			}
 			return wBuf
 		}()) // end of v.References[_0]
@@ -9919,7 +9919,7 @@ func DeepCopyMsgCommentToken(in MsgCommentToken) (out MsgCommentToken) {
 
 // Non-Interface
 func EncodeState(w *[]byte, v State) {
-	codonEncodeVarint(0, w, int64(v.HeightAdjustment))
+	codonEncodeVarint(1, w, int64(v.HeightAdjustment))
 } //End of EncodeState
 
 func DecodeState(bz []byte) (v State, total int, err error) {
@@ -9961,10 +9961,10 @@ func DeepCopyState(in State) (out State) {
 
 // Non-Interface
 func EncodeMsgAliasUpdate(w *[]byte, v MsgAliasUpdate) {
-	codonEncodeByteSlice(0, w, v.Owner[:])
-	codonEncodeString(1, w, v.Alias)
-	codonEncodeBool(2, w, v.IsAdd)
-	codonEncodeBool(3, w, v.AsDefault)
+	codonEncodeByteSlice(1, w, v.Owner[:])
+	codonEncodeString(2, w, v.Alias)
+	codonEncodeBool(3, w, v.IsAdd)
+	codonEncodeBool(4, w, v.AsDefault)
 } //End of EncodeMsgAliasUpdate
 
 func DecodeMsgAliasUpdate(bz []byte) (v MsgAliasUpdate, total int, err error) {
@@ -10117,20 +10117,20 @@ func DeepCopyAccAddressList(in AccAddressList) (out AccAddressList) {
 
 // Non-Interface
 func EncodeCommitInfo(w *[]byte, v CommitInfo) {
-	codonEncodeVarint(0, w, int64(v.Version))
+	codonEncodeVarint(1, w, int64(v.Version))
 	for _0 := 0; _0 < len(v.StoreInfos); _0++ {
-		codonEncodeByteSlice(1, w, func() []byte {
+		codonEncodeByteSlice(2, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeString(0, w, v.StoreInfos[_0].Name)
-			codonEncodeByteSlice(1, w, func() []byte {
+			codonEncodeString(1, w, v.StoreInfos[_0].Name)
+			codonEncodeByteSlice(2, w, func() []byte {
 				wBuf := make([]byte, 0, 64)
 				w := &wBuf
-				codonEncodeByteSlice(0, w, func() []byte {
+				codonEncodeByteSlice(1, w, func() []byte {
 					wBuf := make([]byte, 0, 64)
 					w := &wBuf
-					codonEncodeVarint(0, w, int64(v.StoreInfos[_0].Core.CommitID.Version))
-					codonEncodeByteSlice(1, w, v.StoreInfos[_0].Core.CommitID.Hash[:])
+					codonEncodeVarint(1, w, int64(v.StoreInfos[_0].Core.CommitID.Version))
+					codonEncodeByteSlice(2, w, v.StoreInfos[_0].Core.CommitID.Hash[:])
 					return wBuf
 				}()) // end of v.StoreInfos[_0].Core.CommitID
 				return wBuf
@@ -10222,15 +10222,15 @@ func DeepCopyCommitInfo(in CommitInfo) (out CommitInfo) {
 
 // Non-Interface
 func EncodeStoreInfo(w *[]byte, v StoreInfo) {
-	codonEncodeString(0, w, v.Name)
-	codonEncodeByteSlice(1, w, func() []byte {
+	codonEncodeString(1, w, v.Name)
+	codonEncodeByteSlice(2, w, func() []byte {
 		wBuf := make([]byte, 0, 64)
 		w := &wBuf
-		codonEncodeByteSlice(0, w, func() []byte {
+		codonEncodeByteSlice(1, w, func() []byte {
 			wBuf := make([]byte, 0, 64)
 			w := &wBuf
-			codonEncodeVarint(0, w, int64(v.Core.CommitID.Version))
-			codonEncodeByteSlice(1, w, v.Core.CommitID.Hash[:])
+			codonEncodeVarint(1, w, int64(v.Core.CommitID.Version))
+			codonEncodeByteSlice(2, w, v.Core.CommitID.Hash[:])
 			return wBuf
 		}()) // end of v.Core.CommitID
 		return wBuf
@@ -10375,7 +10375,7 @@ func DecodePubKey(bz []byte) (v PubKey, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 2779925618:
+	case 32929284:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10399,7 +10399,7 @@ func DecodePubKey(bz []byte) (v PubKey, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2131042574:
+	case 471601077:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10423,7 +10423,7 @@ func DecodePubKey(bz []byte) (v PubKey, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1626972467:
+	case 45700893:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10447,7 +10447,7 @@ func DecodePubKey(bz []byte) (v PubKey, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1176316663:
+	case 496135554:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10578,7 +10578,7 @@ func DecodePrivKey(bz []byte) (v PrivKey, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 1455054494:
+	case 454630091:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10602,7 +10602,7 @@ func DecodePrivKey(bz []byte) (v PrivKey, total int, err error) {
 		}
 		v = tmp
 		return
-	case 135729235:
+	case 252074570:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10705,7 +10705,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 620244126:
+	case 153655625:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10729,7 +10729,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 52199162:
+	case 285022960:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10753,7 +10753,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 411694972:
+	case 495620655:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10777,7 +10777,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2174318272:
+	case 115719891:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10801,7 +10801,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3707813311:
+	case 158991245:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10825,7 +10825,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 653330317:
+	case 241505485:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10849,7 +10849,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2014956330:
+	case 449833530:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10873,7 +10873,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2343070190:
+	case 304885884:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10897,7 +10897,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3483352248:
+	case 332906025:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10921,7 +10921,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3881860373:
+	case 56755914:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10945,7 +10945,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2446025939:
+	case 377235122:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10969,7 +10969,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1988999796:
+	case 484769215:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -10993,7 +10993,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2125287192:
+	case 374726888:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11017,7 +11017,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2654108088:
+	case 106121128:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11041,7 +11041,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3681766634:
+	case 402428987:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11065,7 +11065,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3745982100:
+	case 138691582:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11089,7 +11089,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3618242057:
+	case 502447547:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11113,7 +11113,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1460115320:
+	case 488219826:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11137,7 +11137,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1891506879:
+	case 286625767:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11161,7 +11161,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3058377027:
+	case 336682718:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11185,7 +11185,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2159306412:
+	case 135231766:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11209,7 +11209,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3050406078:
+	case 380178367:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11233,7 +11233,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1382451634:
+	case 405536984:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11257,7 +11257,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3755177792:
+	case 167957709:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11281,7 +11281,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3027843440:
+	case 155708190:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11305,7 +11305,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1473324998:
+	case 94212241:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11329,7 +11329,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3794730964:
+	case 31944689:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11353,7 +11353,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3785663294:
+	case 145878995:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11377,7 +11377,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1434760978:
+	case 376054118:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11401,7 +11401,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 648513744:
+	case 73614168:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11425,7 +11425,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2492591188:
+	case 331897574:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11449,7 +11449,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3532434663:
+	case 87007006:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11473,7 +11473,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3889173624:
+	case 377250605:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11497,7 +11497,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3664778637:
+	case 92120341:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11521,7 +11521,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2657838927:
+	case 355758274:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11545,7 +11545,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2160390421:
+	case 479724980:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11569,7 +11569,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3047452299:
+	case 261008494:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11593,7 +11593,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 4029525357:
+	case 121564406:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11617,7 +11617,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3121445353:
+	case 314113032:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11641,7 +11641,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1404506923:
+	case 23904706:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -11665,7 +11665,7 @@ func DecodeMsg(bz []byte) (v Msg, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1320375636:
+	case 514264249:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -12626,7 +12626,7 @@ func DecodeAccount(bz []byte) (v Account, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 4100693401:
+	case 26591049:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -12650,7 +12650,7 @@ func DecodeAccount(bz []byte) (v Account, total int, err error) {
 		}
 		v = &tmp
 		return
-	case 6748238:
+	case 351017031:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -12674,7 +12674,7 @@ func DecodeAccount(bz []byte) (v Account, total int, err error) {
 		}
 		v = tmp
 		return
-	case 54150475:
+	case 82892118:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -12698,7 +12698,7 @@ func DecodeAccount(bz []byte) (v Account, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3479748923:
+	case 12374068:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -12722,7 +12722,7 @@ func DecodeAccount(bz []byte) (v Account, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2923109669:
+	case 321193714:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -12889,7 +12889,7 @@ func DecodeVestingAccount(bz []byte) (v VestingAccount, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 54150475:
+	case 82892118:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -12913,7 +12913,7 @@ func DecodeVestingAccount(bz []byte) (v VestingAccount, total int, err error) {
 		}
 		v = &tmp
 		return
-	case 3479748923:
+	case 12374068:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13012,7 +13012,7 @@ func DecodeContent(bz []byte) (v Content, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 380460319:
+	case 23847857:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13036,7 +13036,7 @@ func DecodeContent(bz []byte) (v Content, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1402283313:
+	case 84061114:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13060,7 +13060,7 @@ func DecodeContent(bz []byte) (v Content, total int, err error) {
 		}
 		v = tmp
 		return
-	case 229479586:
+	case 261665006:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13084,7 +13084,7 @@ func DecodeContent(bz []byte) (v Content, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3501044687:
+	case 458846397:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13231,7 +13231,7 @@ func DecodeTx(bz []byte) (v Tx, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 1362340599:
+	case 420461272:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13312,7 +13312,7 @@ func DecodeModuleAccountI(bz []byte) (v ModuleAccountI, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 2923109669:
+	case 321193714:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13393,7 +13393,7 @@ func DecodeSupplyI(bz []byte) (v SupplyI, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 3848815295:
+	case 288082478:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13474,7 +13474,7 @@ func DecodeToken(bz []byte) (v Token, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 4159115302:
+	case 412190080:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -13544,171 +13544,171 @@ func DeepCopyToken(x Token) Token {
 func getMagicNum(name string) uint32 {
 	switch name {
 	case "AccAddress":
-		return 3880557824
+		return 45679485
 	case "AccAddressList":
-		return 1299335205
+		return 156864174
 	case "AccountX":
-		return 3934391208
+		return 59743196
 	case "BaseAccount":
-		return 4100693401
+		return 26591049
 	case "BaseToken":
-		return 4159115302
+		return 412190080
 	case "BaseVestingAccount":
-		return 6748238
+		return 351017031
 	case "Coin":
-		return 3131719938
+		return 206716790
 	case "CommentRef":
-		return 3216598656
+		return 311958167
 	case "CommitInfo":
-		return 956897794
+		return 19375602
 	case "CommunityPoolSpendProposal":
-		return 380460319
+		return 23847857
 	case "ConsAddress":
-		return 2346923292
+		return 373125373
 	case "ContinuousVestingAccount":
-		return 54150475
+		return 82892118
 	case "DecCoin":
-		return 1422369592
+		return 1055185
 	case "DelayedVestingAccount":
-		return 3479748923
+		return 12374068
 	case "FeePool":
-		return 3294413074
+		return 130333088
 	case "Input":
-		return 1481698358
+		return 495419206
 	case "LockedCoin":
-		return 3074963888
+		return 149648993
 	case "MarketInfo":
-		return 1362215517
+		return 413425332
 	case "ModuleAccount":
-		return 2923109669
+		return 321193714
 	case "MsgAddTokenWhitelist":
-		return 620244126
+		return 153655625
 	case "MsgAliasUpdate":
-		return 52199162
+		return 285022960
 	case "MsgBancorCancel":
-		return 411694972
+		return 495620655
 	case "MsgBancorInit":
-		return 2174318272
+		return 115719891
 	case "MsgBancorTrade":
-		return 3707813311
+		return 158991245
 	case "MsgBeginRedelegate":
-		return 653330317
+		return 241505485
 	case "MsgBurnToken":
-		return 2014956330
+		return 449833530
 	case "MsgCancelOrder":
-		return 2343070190
+		return 304885884
 	case "MsgCancelTradingPair":
-		return 3483352248
+		return 332906025
 	case "MsgCommentToken":
-		return 3881860373
+		return 56755914
 	case "MsgCreateOrder":
-		return 2446025939
+		return 377235122
 	case "MsgCreateTradingPair":
-		return 1988999796
+		return 484769215
 	case "MsgCreateValidator":
-		return 2125287192
+		return 374726888
 	case "MsgDelegate":
-		return 2654108088
+		return 106121128
 	case "MsgDeposit":
-		return 3681766634
+		return 402428987
 	case "MsgDonateToCommunityPool":
-		return 3745982100
+		return 138691582
 	case "MsgEditValidator":
-		return 3618242057
+		return 502447547
 	case "MsgForbidAddr":
-		return 1460115320
+		return 488219826
 	case "MsgForbidToken":
-		return 1891506879
+		return 286625767
 	case "MsgIssueToken":
-		return 3058377027
+		return 336682718
 	case "MsgMintToken":
-		return 2159306412
+		return 135231766
 	case "MsgModifyPricePrecision":
-		return 3050406078
+		return 380178367
 	case "MsgModifyTokenInfo":
-		return 1382451634
+		return 405536984
 	case "MsgMultiSend":
-		return 3755177792
+		return 167957709
 	case "MsgMultiSendX":
-		return 3027843440
+		return 155708190
 	case "MsgRemoveTokenWhitelist":
-		return 1473324998
+		return 94212241
 	case "MsgSend":
-		return 3794730964
+		return 31944689
 	case "MsgSendX":
-		return 3785663294
+		return 145878995
 	case "MsgSetMemoRequired":
-		return 1434760978
+		return 376054118
 	case "MsgSetWithdrawAddress":
-		return 648513744
+		return 73614168
 	case "MsgSubmitProposal":
-		return 2492591188
+		return 331897574
 	case "MsgSupervisedSend":
-		return 3532434663
+		return 87007006
 	case "MsgTransferOwnership":
-		return 3889173624
+		return 377250605
 	case "MsgUnForbidAddr":
-		return 3664778637
+		return 92120341
 	case "MsgUnForbidToken":
-		return 2657838927
+		return 355758274
 	case "MsgUndelegate":
-		return 2160390421
+		return 479724980
 	case "MsgUnjail":
-		return 3047452299
+		return 261008494
 	case "MsgVerifyInvariant":
-		return 4029525357
+		return 121564406
 	case "MsgVote":
-		return 3121445353
+		return 314113032
 	case "MsgWithdrawDelegatorReward":
-		return 1404506923
+		return 23904706
 	case "MsgWithdrawValidatorCommission":
-		return 1320375636
+		return 514264249
 	case "Order":
-		return 526377067
+		return 168833459
 	case "Output":
-		return 1883194290
+		return 337371032
 	case "ParamChange":
-		return 3159554626
+		return 19646903
 	case "ParameterChangeProposal":
-		return 1402283313
+		return 84061114
 	case "PrivKeyEd25519":
-		return 1455054494
+		return 454630091
 	case "PrivKeySecp256k1":
-		return 135729235
+		return 252074570
 	case "PubKeyEd25519":
-		return 2779925618
+		return 32929284
 	case "PubKeyMultisigThreshold":
-		return 2131042574
+		return 471601077
 	case "PubKeySecp256k1":
-		return 1626972467
+		return 45700893
 	case "SdkDec":
-		return 172320131
+		return 136348929
 	case "SdkInt":
-		return 2300105405
+		return 497782922
 	case "SignedMsgType":
-		return 2430153795
+		return 294706048
 	case "SoftwareUpgradeProposal":
-		return 229479586
+		return 261665006
 	case "State":
-		return 3124475299
+		return 25024364
 	case "StdSignature":
-		return 1176316663
+		return 496135554
 	case "StdTx":
-		return 1362340599
+		return 420461272
 	case "StoreInfo":
-		return 3916313056
+		return 415199234
 	case "Supply":
-		return 3848815295
+		return 288082478
 	case "TextProposal":
-		return 3501044687
+		return 458846397
 	case "Vote":
-		return 3874772429
+		return 236500255
 	case "VoteOption":
-		return 2889994410
+		return 484880195
 	case "int64":
-		return 2056659644
+		return 344770825
 	case "uint64":
-		return 3589394980
+		return 318185791
 	} // end of switch
 	panic("Should not reach here")
 	return 0
@@ -13716,171 +13716,171 @@ func getMagicNum(name string) uint32 {
 func getMagicNumOfVar(x interface{}) (uint32, bool) {
 	switch x.(type) {
 	case *AccAddress, AccAddress:
-		return 3880557824, true
+		return 45679485, true
 	case *AccAddressList, AccAddressList:
-		return 1299335205, true
+		return 156864174, true
 	case *AccountX, AccountX:
-		return 3934391208, true
+		return 59743196, true
 	case *BaseAccount, BaseAccount:
-		return 4100693401, true
+		return 26591049, true
 	case *BaseToken, BaseToken:
-		return 4159115302, true
+		return 412190080, true
 	case *BaseVestingAccount, BaseVestingAccount:
-		return 6748238, true
+		return 351017031, true
 	case *Coin, Coin:
-		return 3131719938, true
+		return 206716790, true
 	case *CommentRef, CommentRef:
-		return 3216598656, true
+		return 311958167, true
 	case *CommitInfo, CommitInfo:
-		return 956897794, true
+		return 19375602, true
 	case *CommunityPoolSpendProposal, CommunityPoolSpendProposal:
-		return 380460319, true
+		return 23847857, true
 	case *ConsAddress, ConsAddress:
-		return 2346923292, true
+		return 373125373, true
 	case *ContinuousVestingAccount, ContinuousVestingAccount:
-		return 54150475, true
+		return 82892118, true
 	case *DecCoin, DecCoin:
-		return 1422369592, true
+		return 1055185, true
 	case *DelayedVestingAccount, DelayedVestingAccount:
-		return 3479748923, true
+		return 12374068, true
 	case *FeePool, FeePool:
-		return 3294413074, true
+		return 130333088, true
 	case *Input, Input:
-		return 1481698358, true
+		return 495419206, true
 	case *LockedCoin, LockedCoin:
-		return 3074963888, true
+		return 149648993, true
 	case *MarketInfo, MarketInfo:
-		return 1362215517, true
+		return 413425332, true
 	case *ModuleAccount, ModuleAccount:
-		return 2923109669, true
+		return 321193714, true
 	case *MsgAddTokenWhitelist, MsgAddTokenWhitelist:
-		return 620244126, true
+		return 153655625, true
 	case *MsgAliasUpdate, MsgAliasUpdate:
-		return 52199162, true
+		return 285022960, true
 	case *MsgBancorCancel, MsgBancorCancel:
-		return 411694972, true
+		return 495620655, true
 	case *MsgBancorInit, MsgBancorInit:
-		return 2174318272, true
+		return 115719891, true
 	case *MsgBancorTrade, MsgBancorTrade:
-		return 3707813311, true
+		return 158991245, true
 	case *MsgBeginRedelegate, MsgBeginRedelegate:
-		return 653330317, true
+		return 241505485, true
 	case *MsgBurnToken, MsgBurnToken:
-		return 2014956330, true
+		return 449833530, true
 	case *MsgCancelOrder, MsgCancelOrder:
-		return 2343070190, true
+		return 304885884, true
 	case *MsgCancelTradingPair, MsgCancelTradingPair:
-		return 3483352248, true
+		return 332906025, true
 	case *MsgCommentToken, MsgCommentToken:
-		return 3881860373, true
+		return 56755914, true
 	case *MsgCreateOrder, MsgCreateOrder:
-		return 2446025939, true
+		return 377235122, true
 	case *MsgCreateTradingPair, MsgCreateTradingPair:
-		return 1988999796, true
+		return 484769215, true
 	case *MsgCreateValidator, MsgCreateValidator:
-		return 2125287192, true
+		return 374726888, true
 	case *MsgDelegate, MsgDelegate:
-		return 2654108088, true
+		return 106121128, true
 	case *MsgDeposit, MsgDeposit:
-		return 3681766634, true
+		return 402428987, true
 	case *MsgDonateToCommunityPool, MsgDonateToCommunityPool:
-		return 3745982100, true
+		return 138691582, true
 	case *MsgEditValidator, MsgEditValidator:
-		return 3618242057, true
+		return 502447547, true
 	case *MsgForbidAddr, MsgForbidAddr:
-		return 1460115320, true
+		return 488219826, true
 	case *MsgForbidToken, MsgForbidToken:
-		return 1891506879, true
+		return 286625767, true
 	case *MsgIssueToken, MsgIssueToken:
-		return 3058377027, true
+		return 336682718, true
 	case *MsgMintToken, MsgMintToken:
-		return 2159306412, true
+		return 135231766, true
 	case *MsgModifyPricePrecision, MsgModifyPricePrecision:
-		return 3050406078, true
+		return 380178367, true
 	case *MsgModifyTokenInfo, MsgModifyTokenInfo:
-		return 1382451634, true
+		return 405536984, true
 	case *MsgMultiSend, MsgMultiSend:
-		return 3755177792, true
+		return 167957709, true
 	case *MsgMultiSendX, MsgMultiSendX:
-		return 3027843440, true
+		return 155708190, true
 	case *MsgRemoveTokenWhitelist, MsgRemoveTokenWhitelist:
-		return 1473324998, true
+		return 94212241, true
 	case *MsgSend, MsgSend:
-		return 3794730964, true
+		return 31944689, true
 	case *MsgSendX, MsgSendX:
-		return 3785663294, true
+		return 145878995, true
 	case *MsgSetMemoRequired, MsgSetMemoRequired:
-		return 1434760978, true
+		return 376054118, true
 	case *MsgSetWithdrawAddress, MsgSetWithdrawAddress:
-		return 648513744, true
+		return 73614168, true
 	case *MsgSubmitProposal, MsgSubmitProposal:
-		return 2492591188, true
+		return 331897574, true
 	case *MsgSupervisedSend, MsgSupervisedSend:
-		return 3532434663, true
+		return 87007006, true
 	case *MsgTransferOwnership, MsgTransferOwnership:
-		return 3889173624, true
+		return 377250605, true
 	case *MsgUnForbidAddr, MsgUnForbidAddr:
-		return 3664778637, true
+		return 92120341, true
 	case *MsgUnForbidToken, MsgUnForbidToken:
-		return 2657838927, true
+		return 355758274, true
 	case *MsgUndelegate, MsgUndelegate:
-		return 2160390421, true
+		return 479724980, true
 	case *MsgUnjail, MsgUnjail:
-		return 3047452299, true
+		return 261008494, true
 	case *MsgVerifyInvariant, MsgVerifyInvariant:
-		return 4029525357, true
+		return 121564406, true
 	case *MsgVote, MsgVote:
-		return 3121445353, true
+		return 314113032, true
 	case *MsgWithdrawDelegatorReward, MsgWithdrawDelegatorReward:
-		return 1404506923, true
+		return 23904706, true
 	case *MsgWithdrawValidatorCommission, MsgWithdrawValidatorCommission:
-		return 1320375636, true
+		return 514264249, true
 	case *Order, Order:
-		return 526377067, true
+		return 168833459, true
 	case *Output, Output:
-		return 1883194290, true
+		return 337371032, true
 	case *ParamChange, ParamChange:
-		return 3159554626, true
+		return 19646903, true
 	case *ParameterChangeProposal, ParameterChangeProposal:
-		return 1402283313, true
+		return 84061114, true
 	case *PrivKeyEd25519, PrivKeyEd25519:
-		return 1455054494, true
+		return 454630091, true
 	case *PrivKeySecp256k1, PrivKeySecp256k1:
-		return 135729235, true
+		return 252074570, true
 	case *PubKeyEd25519, PubKeyEd25519:
-		return 2779925618, true
+		return 32929284, true
 	case *PubKeyMultisigThreshold, PubKeyMultisigThreshold:
-		return 2131042574, true
+		return 471601077, true
 	case *PubKeySecp256k1, PubKeySecp256k1:
-		return 1626972467, true
+		return 45700893, true
 	case *SdkDec, SdkDec:
-		return 172320131, true
+		return 136348929, true
 	case *SdkInt, SdkInt:
-		return 2300105405, true
+		return 497782922, true
 	case *SignedMsgType, SignedMsgType:
-		return 2430153795, true
+		return 294706048, true
 	case *SoftwareUpgradeProposal, SoftwareUpgradeProposal:
-		return 229479586, true
+		return 261665006, true
 	case *State, State:
-		return 3124475299, true
+		return 25024364, true
 	case *StdSignature, StdSignature:
-		return 1176316663, true
+		return 496135554, true
 	case *StdTx, StdTx:
-		return 1362340599, true
+		return 420461272, true
 	case *StoreInfo, StoreInfo:
-		return 3916313056, true
+		return 415199234, true
 	case *Supply, Supply:
-		return 3848815295, true
+		return 288082478, true
 	case *TextProposal, TextProposal:
-		return 3501044687, true
+		return 458846397, true
 	case *Vote, Vote:
-		return 3874772429, true
+		return 236500255, true
 	case *VoteOption, VoteOption:
-		return 2889994410, true
+		return 484880195, true
 	case *int64, int64:
-		return 2056659644, true
+		return 344770825, true
 	case *uint64, uint64:
-		return 3589394980, true
+		return 318185791, true
 	default:
 		return 0, false
 	} // end of switch
@@ -15064,7 +15064,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 	total += n
 	magicNum := uint32(tag >> 3)
 	switch magicNum {
-	case 3880557824:
+	case 45679485:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15088,7 +15088,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1299335205:
+	case 156864174:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15112,7 +15112,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3934391208:
+	case 59743196:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15136,7 +15136,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 4100693401:
+	case 26591049:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15160,7 +15160,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 4159115302:
+	case 412190080:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15184,7 +15184,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 6748238:
+	case 351017031:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15208,7 +15208,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3131719938:
+	case 206716790:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15232,7 +15232,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3216598656:
+	case 311958167:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15256,7 +15256,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 956897794:
+	case 19375602:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15280,7 +15280,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 380460319:
+	case 23847857:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15304,7 +15304,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2346923292:
+	case 373125373:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15328,7 +15328,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 54150475:
+	case 82892118:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15352,7 +15352,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1422369592:
+	case 1055185:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15376,7 +15376,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3479748923:
+	case 12374068:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15400,7 +15400,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3294413074:
+	case 130333088:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15424,7 +15424,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1481698358:
+	case 495419206:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15448,7 +15448,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3074963888:
+	case 149648993:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15472,7 +15472,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1362215517:
+	case 413425332:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15496,7 +15496,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2923109669:
+	case 321193714:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15520,7 +15520,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 620244126:
+	case 153655625:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15544,7 +15544,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 52199162:
+	case 285022960:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15568,7 +15568,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 411694972:
+	case 495620655:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15592,7 +15592,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2174318272:
+	case 115719891:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15616,7 +15616,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3707813311:
+	case 158991245:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15640,7 +15640,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 653330317:
+	case 241505485:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15664,7 +15664,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2014956330:
+	case 449833530:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15688,7 +15688,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2343070190:
+	case 304885884:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15712,7 +15712,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3483352248:
+	case 332906025:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15736,7 +15736,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3881860373:
+	case 56755914:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15760,7 +15760,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2446025939:
+	case 377235122:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15784,7 +15784,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1988999796:
+	case 484769215:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15808,7 +15808,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2125287192:
+	case 374726888:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15832,7 +15832,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2654108088:
+	case 106121128:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15856,7 +15856,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3681766634:
+	case 402428987:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15880,7 +15880,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3745982100:
+	case 138691582:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15904,7 +15904,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3618242057:
+	case 502447547:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15928,7 +15928,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1460115320:
+	case 488219826:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15952,7 +15952,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1891506879:
+	case 286625767:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -15976,7 +15976,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3058377027:
+	case 336682718:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16000,7 +16000,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2159306412:
+	case 135231766:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16024,7 +16024,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3050406078:
+	case 380178367:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16048,7 +16048,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1382451634:
+	case 405536984:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16072,7 +16072,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3755177792:
+	case 167957709:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16096,7 +16096,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3027843440:
+	case 155708190:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16120,7 +16120,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1473324998:
+	case 94212241:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16144,7 +16144,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3794730964:
+	case 31944689:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16168,7 +16168,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3785663294:
+	case 145878995:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16192,7 +16192,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1434760978:
+	case 376054118:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16216,7 +16216,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 648513744:
+	case 73614168:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16240,7 +16240,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2492591188:
+	case 331897574:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16264,7 +16264,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3532434663:
+	case 87007006:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16288,7 +16288,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3889173624:
+	case 377250605:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16312,7 +16312,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3664778637:
+	case 92120341:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16336,7 +16336,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2657838927:
+	case 355758274:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16360,7 +16360,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2160390421:
+	case 479724980:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16384,7 +16384,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3047452299:
+	case 261008494:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16408,7 +16408,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 4029525357:
+	case 121564406:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16432,7 +16432,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3121445353:
+	case 314113032:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16456,7 +16456,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1404506923:
+	case 23904706:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16480,7 +16480,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1320375636:
+	case 514264249:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16504,7 +16504,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 526377067:
+	case 168833459:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16528,7 +16528,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1883194290:
+	case 337371032:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16552,7 +16552,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3159554626:
+	case 19646903:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16576,7 +16576,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1402283313:
+	case 84061114:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16600,7 +16600,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1455054494:
+	case 454630091:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16624,7 +16624,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 135729235:
+	case 252074570:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16648,7 +16648,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2779925618:
+	case 32929284:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16672,7 +16672,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2131042574:
+	case 471601077:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16696,7 +16696,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1626972467:
+	case 45700893:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16720,7 +16720,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 172320131:
+	case 136348929:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16744,7 +16744,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2300105405:
+	case 497782922:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16768,7 +16768,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2430153795:
+	case 294706048:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16792,7 +16792,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 229479586:
+	case 261665006:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16816,7 +16816,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3124475299:
+	case 25024364:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16840,7 +16840,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1176316663:
+	case 496135554:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16864,7 +16864,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 1362340599:
+	case 420461272:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16888,7 +16888,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3916313056:
+	case 415199234:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16912,7 +16912,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3848815295:
+	case 288082478:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16936,7 +16936,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3501044687:
+	case 458846397:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16960,7 +16960,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3874772429:
+	case 236500255:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -16984,7 +16984,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2889994410:
+	case 484880195:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -17008,7 +17008,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 2056659644:
+	case 344770825:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -17032,7 +17032,7 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 		}
 		v = tmp
 		return
-	case 3589394980:
+	case 318185791:
 		l := codonDecodeUint64(bz, &n, &err)
 		if err != nil {
 			return
@@ -17063,110 +17063,111 @@ func DecodeAny(bz []byte) (v interface{}, total int, err error) {
 } // end of DecodeAny
 func AssignIfcPtrFromStruct(ifcPtrIn interface{}, structObjIn interface{}) {
 	switch ifcPtr := ifcPtrIn.(type) {
-	case *Tx:
-		switch structObj := structObjIn.(type) {
-		case StdTx:
-			*ifcPtr = &structObj
-		default:
-			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-		} // end switch of structs
-	case *Token:
-		switch structObj := structObjIn.(type) {
-		case BaseToken:
-			*ifcPtr = &structObj
-		default:
-			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-		} // end switch of structs
 	case *Msg:
 		switch structObj := structObjIn.(type) {
-		case MsgAliasUpdate:
-			*ifcPtr = &structObj
 		case MsgWithdrawValidatorCommission:
-			*ifcPtr = &structObj
-		case MsgSupervisedSend:
-			*ifcPtr = &structObj
-		case MsgMintToken:
-			*ifcPtr = &structObj
-		case MsgCommentToken:
-			*ifcPtr = &structObj
-		case MsgUndelegate:
-			*ifcPtr = &structObj
-		case MsgSendX:
-			*ifcPtr = &structObj
-		case MsgCreateOrder:
-			*ifcPtr = &structObj
-		case MsgForbidAddr:
 			*ifcPtr = &structObj
 		case MsgBancorCancel:
 			*ifcPtr = &structObj
-		case MsgDeposit:
-			*ifcPtr = &structObj
-		case MsgSubmitProposal:
-			*ifcPtr = &structObj
-		case MsgDelegate:
-			*ifcPtr = &structObj
-		case MsgUnjail:
-			*ifcPtr = &structObj
 		case MsgMultiSend:
 			*ifcPtr = &structObj
-		case MsgForbidToken:
-			*ifcPtr = &structObj
-		case MsgUnForbidAddr:
-			*ifcPtr = &structObj
-		case MsgSetWithdrawAddress:
-			*ifcPtr = &structObj
-		case MsgRemoveTokenWhitelist:
-			*ifcPtr = &structObj
-		case MsgBancorTrade:
-			*ifcPtr = &structObj
-		case MsgCreateValidator:
-			*ifcPtr = &structObj
-		case MsgUnForbidToken:
-			*ifcPtr = &structObj
-		case MsgMultiSendX:
-			*ifcPtr = &structObj
-		case MsgCancelOrder:
-			*ifcPtr = &structObj
-		case MsgEditValidator:
-			*ifcPtr = &structObj
-		case MsgCancelTradingPair:
+		case MsgSupervisedSend:
 			*ifcPtr = &structObj
 		case MsgDonateToCommunityPool:
 			*ifcPtr = &structObj
-		case MsgVote:
+		case MsgAddTokenWhitelist:
+			*ifcPtr = &structObj
+		case MsgEditValidator:
+			*ifcPtr = &structObj
+		case MsgRemoveTokenWhitelist:
+			*ifcPtr = &structObj
+		case MsgCreateValidator:
+			*ifcPtr = &structObj
+		case MsgTransferOwnership:
+			*ifcPtr = &structObj
+		case MsgUnForbidAddr:
+			*ifcPtr = &structObj
+		case MsgCommentToken:
+			*ifcPtr = &structObj
+		case MsgModifyTokenInfo:
+			*ifcPtr = &structObj
+		case MsgModifyPricePrecision:
+			*ifcPtr = &structObj
+		case MsgIssueToken:
 			*ifcPtr = &structObj
 		case MsgVerifyInvariant:
 			*ifcPtr = &structObj
 		case MsgBurnToken:
 			*ifcPtr = &structObj
-		case MsgModifyTokenInfo:
+		case MsgSend:
 			*ifcPtr = &structObj
-		case MsgIssueToken:
+		case MsgForbidAddr:
 			*ifcPtr = &structObj
-		case MsgModifyPricePrecision:
+		case MsgForbidToken:
 			*ifcPtr = &structObj
-		case MsgBancorInit:
+		case MsgCancelOrder:
 			*ifcPtr = &structObj
 		case MsgCreateTradingPair:
 			*ifcPtr = &structObj
-		case MsgBeginRedelegate:
-			*ifcPtr = &structObj
-		case MsgSend:
-			*ifcPtr = &structObj
-		case MsgAddTokenWhitelist:
-			*ifcPtr = &structObj
-		case MsgWithdrawDelegatorReward:
+		case MsgUnjail:
 			*ifcPtr = &structObj
 		case MsgSetMemoRequired:
 			*ifcPtr = &structObj
-		case MsgTransferOwnership:
+		case MsgUndelegate:
+			*ifcPtr = &structObj
+		case MsgUnForbidToken:
+			*ifcPtr = &structObj
+		case MsgBancorTrade:
+			*ifcPtr = &structObj
+		case MsgCancelTradingPair:
+			*ifcPtr = &structObj
+		case MsgDeposit:
+			*ifcPtr = &structObj
+		case MsgVote:
+			*ifcPtr = &structObj
+		case MsgBeginRedelegate:
+			*ifcPtr = &structObj
+		case MsgMultiSendX:
+			*ifcPtr = &structObj
+		case MsgMintToken:
+			*ifcPtr = &structObj
+		case MsgBancorInit:
+			*ifcPtr = &structObj
+		case MsgSetWithdrawAddress:
+			*ifcPtr = &structObj
+		case MsgSendX:
+			*ifcPtr = &structObj
+		case MsgCreateOrder:
+			*ifcPtr = &structObj
+		case MsgDelegate:
+			*ifcPtr = &structObj
+		case MsgAliasUpdate:
+			*ifcPtr = &structObj
+		case MsgWithdrawDelegatorReward:
+			*ifcPtr = &structObj
+		case MsgSubmitProposal:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
-	case *ModuleAccountI:
+	case *Account:
 		switch structObj := structObjIn.(type) {
+		case ContinuousVestingAccount:
+			*ifcPtr = &structObj
+		case DelayedVestingAccount:
+			*ifcPtr = &structObj
 		case ModuleAccount:
+			*ifcPtr = &structObj
+		case BaseAccount:
+			*ifcPtr = &structObj
+		case BaseVestingAccount:
+			*ifcPtr = &structObj
+		default:
+			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+		} // end switch of structs
+	case *Tx:
+		switch structObj := structObjIn.(type) {
+		case StdTx:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
@@ -17178,61 +17179,60 @@ func AssignIfcPtrFromStruct(ifcPtrIn interface{}, structObjIn interface{}) {
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
-	case *PubKey:
+	case *Token:
 		switch structObj := structObjIn.(type) {
-		case PubKeyEd25519:
-			*ifcPtr = &structObj
-		case PubKeyMultisigThreshold:
-			*ifcPtr = &structObj
-		case StdSignature:
-			*ifcPtr = &structObj
-		case PubKeySecp256k1:
+		case BaseToken:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
 	case *VestingAccount:
 		switch structObj := structObjIn.(type) {
-		case DelayedVestingAccount:
-			*ifcPtr = &structObj
 		case ContinuousVestingAccount:
+			*ifcPtr = &structObj
+		case DelayedVestingAccount:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
 	case *Content:
 		switch structObj := structObjIn.(type) {
+		case TextProposal:
+			*ifcPtr = &structObj
+		case ParameterChangeProposal:
+			*ifcPtr = &structObj
 		case CommunityPoolSpendProposal:
 			*ifcPtr = &structObj
 		case SoftwareUpgradeProposal:
 			*ifcPtr = &structObj
-		case TextProposal:
+		default:
+			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+		} // end switch of structs
+	case *ModuleAccountI:
+		switch structObj := structObjIn.(type) {
+		case ModuleAccount:
 			*ifcPtr = &structObj
-		case ParameterChangeProposal:
+		default:
+			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+		} // end switch of structs
+	case *PubKey:
+		switch structObj := structObjIn.(type) {
+		case StdSignature:
+			*ifcPtr = &structObj
+		case PubKeyMultisigThreshold:
+			*ifcPtr = &structObj
+		case PubKeyEd25519:
+			*ifcPtr = &structObj
+		case PubKeySecp256k1:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
 	case *PrivKey:
 		switch structObj := structObjIn.(type) {
-		case PrivKeySecp256k1:
-			*ifcPtr = &structObj
 		case PrivKeyEd25519:
 			*ifcPtr = &structObj
-		default:
-			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-		} // end switch of structs
-	case *Account:
-		switch structObj := structObjIn.(type) {
-		case DelayedVestingAccount:
-			*ifcPtr = &structObj
-		case ContinuousVestingAccount:
-			*ifcPtr = &structObj
-		case BaseVestingAccount:
-			*ifcPtr = &structObj
-		case BaseAccount:
-			*ifcPtr = &structObj
-		case ModuleAccount:
+		case PrivKeySecp256k1:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))

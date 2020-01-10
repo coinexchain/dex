@@ -191,6 +191,13 @@ func GenerateCodecFile(w io.Writer) {
 	codon.GenerateCodecFile(w, GetLeafTypes(), ignoreImpl, TypeEntryList, extraLogics, extraImports)
 }
 
+func GenerateProtoFile() {
+	ignoreImpl := make(map[string]string)
+	ignoreImpl["StdSignature"] = "PubKey"
+	ignoreImpl["PubKeyMultisigThreshold"] = "PubKey"
+	codon.DumpProtoFile(GetLeafTypes(), ignoreImpl, TypeEntryList)
+}
+
 func GetLeafTypes() map[string]string {
 	leafTypes := make(map[string]string, 20)
 	leafTypes["github.com/cosmos/cosmos-sdk/types.Int"] = "sdk.Int"
