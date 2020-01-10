@@ -516,16 +516,16 @@ func (_ *CodonStub) DeepCopy(o interface{}) (r interface{}) {
 }
 
 func (_ *CodonStub) MarshalBinaryBare(o interface{}) ([]byte, error) {
-	if _, err := getMagicBytesOfVar(o); err != nil {
-		return nil, err
+	if _, ok := getMagicNumOfVar(o); !ok {
+		return nil, errors.New("Not Supported Type")
 	}
 	buf := make([]byte, 0, 1024)
 	EncodeAny(&buf, o)
 	return buf, nil
 }
 func (s *CodonStub) MarshalBinaryLengthPrefixed(o interface{}) ([]byte, error) {
-	if _, err := getMagicBytesOfVar(o); err != nil {
-		return nil, err
+	if _, ok := getMagicNumOfVar(o); !ok {
+		return nil, errors.New("Not Supported Type")
 	}
 	bz, err := s.MarshalBinaryBare(o)
 	var buf [binary.MaxVarintLen64]byte
@@ -540,15 +540,6 @@ func (_ *CodonStub) UnmarshalBinaryBare(bz []byte, ptr interface{}) error {
 
 	if len(bz) <= 4 {
 		return fmt.Errorf("Byte slice is too short: %d", len(bz))
-	}
-	if rv.Elem().Kind() != reflect.Interface {
-		magicBytes, err := getMagicBytesOfVar(ptr)
-		if err != nil {
-			return err
-		}
-		if bz[0] != magicBytes[0] || bz[1] != magicBytes[1] || bz[2] != magicBytes[2] || bz[3] != magicBytes[3] {
-			return fmt.Errorf("MagicBytes Missmatch %v vs %v", bz[0:4], magicBytes[:])
-		}
 	}
 	o, _, err := DecodeAny(bz)
 	if rv.Elem().Kind() == reflect.Interface {
@@ -10373,26 +10364,113 @@ func DeepCopyStoreInfo(in StoreInfo) (out StoreInfo) {
 } //End of DeepCopyStoreInfo
 
 // Interface
-func DecodePubKey(bz []byte) (PubKey, int, error) {
-	var v PubKey
-	var magicBytes [4]byte
+func DecodePubKey(bz []byte) (v PubKey, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{114, 76, 37, 23}:
-		v, n, err := DecodePubKeyEd25519(bz[4:])
-		return v, n + 4, err
-	case [4]byte{14, 33, 23, 141}:
-		v, n, err := DecodePubKeyMultisigThreshold(bz[4:])
-		return v, n + 4, err
-	case [4]byte{51, 161, 20, 197}:
-		v, n, err := DecodePubKeySecp256k1(bz[4:])
-		return v, n + 4, err
-	case [4]byte{247, 42, 43, 179}:
-		v, n, err := DecodeStdSignature(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 2779925618:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PubKeyEd25519
+		tmp, n, err = DecodePubKeyEd25519(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2131042574:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PubKeyMultisigThreshold
+		tmp, n, err = DecodePubKeyMultisigThreshold(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1626972467:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PubKeySecp256k1
+		tmp, n, err = DecodePubKeySecp256k1(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1176316663:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp StdSignature
+		tmp, n, err = DecodeStdSignature(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -10401,29 +10479,61 @@ func DecodePubKey(bz []byte) (PubKey, int, error) {
 func EncodePubKey(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case PubKeyEd25519:
-		*w = append(*w, getMagicBytes("PubKeyEd25519")...)
-		EncodePubKeyEd25519(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeyEd25519")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeyEd25519(w, v)
+			return wBuf
+		}())
 	case *PubKeyEd25519:
-		*w = append(*w, getMagicBytes("PubKeyEd25519")...)
-		EncodePubKeyEd25519(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeyEd25519")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeyEd25519(w, *v)
+			return wBuf
+		}())
 	case PubKeyMultisigThreshold:
-		*w = append(*w, getMagicBytes("PubKeyMultisigThreshold")...)
-		EncodePubKeyMultisigThreshold(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeyMultisigThreshold")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeyMultisigThreshold(w, v)
+			return wBuf
+		}())
 	case *PubKeyMultisigThreshold:
-		*w = append(*w, getMagicBytes("PubKeyMultisigThreshold")...)
-		EncodePubKeyMultisigThreshold(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeyMultisigThreshold")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeyMultisigThreshold(w, *v)
+			return wBuf
+		}())
 	case PubKeySecp256k1:
-		*w = append(*w, getMagicBytes("PubKeySecp256k1")...)
-		EncodePubKeySecp256k1(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeySecp256k1")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeySecp256k1(w, v)
+			return wBuf
+		}())
 	case *PubKeySecp256k1:
-		*w = append(*w, getMagicBytes("PubKeySecp256k1")...)
-		EncodePubKeySecp256k1(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeySecp256k1")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeySecp256k1(w, *v)
+			return wBuf
+		}())
 	case StdSignature:
-		*w = append(*w, getMagicBytes("StdSignature")...)
-		EncodeStdSignature(w, v)
+		codonEncodeByteSlice(int(getMagicNum("StdSignature")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStdSignature(w, v)
+			return wBuf
+		}())
 	case *StdSignature:
-		*w = append(*w, getMagicBytes("StdSignature")...)
-		EncodeStdSignature(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("StdSignature")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStdSignature(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -10457,20 +10567,65 @@ func DeepCopyPubKey(x PubKey) PubKey {
 	} // end of switch
 } // end of func
 // Interface
-func DecodePrivKey(bz []byte) (PrivKey, int, error) {
-	var v PrivKey
-	var magicBytes [4]byte
+func DecodePrivKey(bz []byte) (v PrivKey, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{158, 94, 112, 161}:
-		v, n, err := DecodePrivKeyEd25519(bz[4:])
-		return v, n + 4, err
-	case [4]byte{83, 16, 177, 42}:
-		v, n, err := DecodePrivKeySecp256k1(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 1455054494:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PrivKeyEd25519
+		tmp, n, err = DecodePrivKeyEd25519(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 135729235:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PrivKeySecp256k1
+		tmp, n, err = DecodePrivKeySecp256k1(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -10479,17 +10634,33 @@ func DecodePrivKey(bz []byte) (PrivKey, int, error) {
 func EncodePrivKey(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case PrivKeyEd25519:
-		*w = append(*w, getMagicBytes("PrivKeyEd25519")...)
-		EncodePrivKeyEd25519(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PrivKeyEd25519")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePrivKeyEd25519(w, v)
+			return wBuf
+		}())
 	case *PrivKeyEd25519:
-		*w = append(*w, getMagicBytes("PrivKeyEd25519")...)
-		EncodePrivKeyEd25519(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PrivKeyEd25519")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePrivKeyEd25519(w, *v)
+			return wBuf
+		}())
 	case PrivKeySecp256k1:
-		*w = append(*w, getMagicBytes("PrivKeySecp256k1")...)
-		EncodePrivKeySecp256k1(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PrivKeySecp256k1")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePrivKeySecp256k1(w, v)
+			return wBuf
+		}())
 	case *PrivKeySecp256k1:
-		*w = append(*w, getMagicBytes("PrivKeySecp256k1")...)
-		EncodePrivKeySecp256k1(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PrivKeySecp256k1")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePrivKeySecp256k1(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -10523,137 +10694,1001 @@ func DeepCopyPrivKey(x PrivKey) PrivKey {
 	} // end of switch
 } // end of func
 // Interface
-func DecodeMsg(bz []byte) (Msg, int, error) {
-	var v Msg
-	var magicBytes [4]byte
+func DecodeMsg(bz []byte) (v Msg, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{158, 44, 49, 82}:
-		v, n, err := DecodeMsgAddTokenWhitelist(bz[4:])
-		return v, n + 4, err
-	case [4]byte{250, 126, 184, 36}:
-		v, n, err := DecodeMsgAliasUpdate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{124, 247, 85, 232}:
-		v, n, err := DecodeMsgBancorCancel(bz[4:])
-		return v, n + 4, err
-	case [4]byte{192, 118, 23, 126}:
-		v, n, err := DecodeMsgBancorInit(bz[4:])
-		return v, n + 4, err
-	case [4]byte{191, 189, 4, 59}:
-		v, n, err := DecodeMsgBancorTrade(bz[4:])
-		return v, n + 4, err
-	case [4]byte{141, 7, 107, 68}:
-		v, n, err := DecodeMsgBeginRedelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{42, 203, 158, 131}:
-		v, n, err := DecodeMsgBurnToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{238, 105, 251, 19}:
-		v, n, err := DecodeMsgCancelOrder(bz[4:])
-		return v, n + 4, err
-	case [4]byte{184, 188, 48, 70}:
-		v, n, err := DecodeMsgCancelTradingPair(bz[4:])
-		return v, n + 4, err
-	case [4]byte{21, 125, 54, 51}:
-		v, n, err := DecodeMsgCommentToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{211, 100, 66, 245}:
-		v, n, err := DecodeMsgCreateOrder(bz[4:])
-		return v, n + 4, err
-	case [4]byte{116, 186, 50, 92}:
-		v, n, err := DecodeMsgCreateTradingPair(bz[4:])
-		return v, n + 4, err
-	case [4]byte{24, 79, 66, 107}:
-		v, n, err := DecodeMsgCreateValidator(bz[4:])
-		return v, n + 4, err
-	case [4]byte{184, 121, 196, 185}:
-		v, n, err := DecodeMsgDelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{234, 76, 240, 151}:
-		v, n, err := DecodeMsgDeposit(bz[4:])
-		return v, n + 4, err
-	case [4]byte{148, 38, 167, 140}:
-		v, n, err := DecodeMsgDonateToCommunityPool(bz[4:])
-		return v, n + 4, err
-	case [4]byte{9, 254, 168, 109}:
-		v, n, err := DecodeMsgEditValidator(bz[4:])
-		return v, n + 4, err
-	case [4]byte{120, 151, 22, 12}:
-		v, n, err := DecodeMsgForbidAddr(bz[4:])
-		return v, n + 4, err
-	case [4]byte{191, 26, 148, 82}:
-		v, n, err := DecodeMsgForbidToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{67, 33, 188, 107}:
-		v, n, err := DecodeMsgIssueToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{172, 102, 179, 22}:
-		v, n, err := DecodeMsgMintToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{190, 128, 0, 94}:
-		v, n, err := DecodeMsgModifyPricePrecision(bz[4:])
-		return v, n + 4, err
-	case [4]byte{178, 137, 211, 164}:
-		v, n, err := DecodeMsgModifyTokenInfo(bz[4:])
-		return v, n + 4, err
-	case [4]byte{64, 119, 59, 163}:
-		v, n, err := DecodeMsgMultiSend(bz[4:])
-		return v, n + 4, err
-	case [4]byte{112, 57, 9, 246}:
-		v, n, err := DecodeMsgMultiSendX(bz[4:])
-		return v, n + 4, err
-	case [4]byte{198, 39, 33, 109}:
-		v, n, err := DecodeMsgRemoveTokenWhitelist(bz[4:])
-		return v, n + 4, err
-	case [4]byte{212, 255, 125, 220}:
-		v, n, err := DecodeMsgSend(bz[4:])
-		return v, n + 4, err
-	case [4]byte{62, 163, 57, 104}:
-		v, n, err := DecodeMsgSendX(bz[4:])
-		return v, n + 4, err
-	case [4]byte{18, 183, 33, 189}:
-		v, n, err := DecodeMsgSetMemoRequired(bz[4:])
-		return v, n + 4, err
-	case [4]byte{208, 136, 199, 77}:
-		v, n, err := DecodeMsgSetWithdrawAddress(bz[4:])
-		return v, n + 4, err
-	case [4]byte{84, 236, 141, 114}:
-		v, n, err := DecodeMsgSubmitProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{231, 172, 14, 69}:
-		v, n, err := DecodeMsgSupervisedSend(bz[4:])
-		return v, n + 4, err
-	case [4]byte{120, 20, 134, 126}:
-		v, n, err := DecodeMsgTransferOwnership(bz[4:])
-		return v, n + 4, err
-	case [4]byte{141, 21, 34, 63}:
-		v, n, err := DecodeMsgUnForbidAddr(bz[4:])
-		return v, n + 4, err
-	case [4]byte{79, 103, 52, 189}:
-		v, n, err := DecodeMsgUnForbidToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{21, 241, 6, 56}:
-		v, n, err := DecodeMsgUndelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{139, 110, 39, 159}:
-		v, n, err := DecodeMsgUnjail(bz[4:])
-		return v, n + 4, err
-	case [4]byte{109, 173, 240, 7}:
-		v, n, err := DecodeMsgVerifyInvariant(bz[4:])
-		return v, n + 4, err
-	case [4]byte{233, 121, 28, 250}:
-		v, n, err := DecodeMsgVote(bz[4:])
-		return v, n + 4, err
-	case [4]byte{43, 19, 183, 111}:
-		v, n, err := DecodeMsgWithdrawDelegatorReward(bz[4:])
-		return v, n + 4, err
-	case [4]byte{84, 85, 236, 88}:
-		v, n, err := DecodeMsgWithdrawValidatorCommission(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 620244126:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgAddTokenWhitelist
+		tmp, n, err = DecodeMsgAddTokenWhitelist(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 52199162:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgAliasUpdate
+		tmp, n, err = DecodeMsgAliasUpdate(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 411694972:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBancorCancel
+		tmp, n, err = DecodeMsgBancorCancel(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2174318272:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBancorInit
+		tmp, n, err = DecodeMsgBancorInit(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3707813311:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBancorTrade
+		tmp, n, err = DecodeMsgBancorTrade(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 653330317:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBeginRedelegate
+		tmp, n, err = DecodeMsgBeginRedelegate(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2014956330:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBurnToken
+		tmp, n, err = DecodeMsgBurnToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2343070190:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCancelOrder
+		tmp, n, err = DecodeMsgCancelOrder(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3483352248:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCancelTradingPair
+		tmp, n, err = DecodeMsgCancelTradingPair(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3881860373:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCommentToken
+		tmp, n, err = DecodeMsgCommentToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2446025939:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCreateOrder
+		tmp, n, err = DecodeMsgCreateOrder(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1988999796:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCreateTradingPair
+		tmp, n, err = DecodeMsgCreateTradingPair(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2125287192:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCreateValidator
+		tmp, n, err = DecodeMsgCreateValidator(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2654108088:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgDelegate
+		tmp, n, err = DecodeMsgDelegate(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3681766634:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgDeposit
+		tmp, n, err = DecodeMsgDeposit(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3745982100:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgDonateToCommunityPool
+		tmp, n, err = DecodeMsgDonateToCommunityPool(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3618242057:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgEditValidator
+		tmp, n, err = DecodeMsgEditValidator(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1460115320:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgForbidAddr
+		tmp, n, err = DecodeMsgForbidAddr(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1891506879:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgForbidToken
+		tmp, n, err = DecodeMsgForbidToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3058377027:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgIssueToken
+		tmp, n, err = DecodeMsgIssueToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2159306412:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgMintToken
+		tmp, n, err = DecodeMsgMintToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3050406078:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgModifyPricePrecision
+		tmp, n, err = DecodeMsgModifyPricePrecision(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1382451634:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgModifyTokenInfo
+		tmp, n, err = DecodeMsgModifyTokenInfo(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3755177792:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgMultiSend
+		tmp, n, err = DecodeMsgMultiSend(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3027843440:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgMultiSendX
+		tmp, n, err = DecodeMsgMultiSendX(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1473324998:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgRemoveTokenWhitelist
+		tmp, n, err = DecodeMsgRemoveTokenWhitelist(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3794730964:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSend
+		tmp, n, err = DecodeMsgSend(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3785663294:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSendX
+		tmp, n, err = DecodeMsgSendX(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1434760978:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSetMemoRequired
+		tmp, n, err = DecodeMsgSetMemoRequired(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 648513744:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSetWithdrawAddress
+		tmp, n, err = DecodeMsgSetWithdrawAddress(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2492591188:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSubmitProposal
+		tmp, n, err = DecodeMsgSubmitProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3532434663:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSupervisedSend
+		tmp, n, err = DecodeMsgSupervisedSend(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3889173624:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgTransferOwnership
+		tmp, n, err = DecodeMsgTransferOwnership(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3664778637:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgUnForbidAddr
+		tmp, n, err = DecodeMsgUnForbidAddr(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2657838927:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgUnForbidToken
+		tmp, n, err = DecodeMsgUnForbidToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2160390421:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgUndelegate
+		tmp, n, err = DecodeMsgUndelegate(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3047452299:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgUnjail
+		tmp, n, err = DecodeMsgUnjail(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 4029525357:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgVerifyInvariant
+		tmp, n, err = DecodeMsgVerifyInvariant(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3121445353:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgVote
+		tmp, n, err = DecodeMsgVote(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1404506923:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgWithdrawDelegatorReward
+		tmp, n, err = DecodeMsgWithdrawDelegatorReward(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1320375636:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgWithdrawValidatorCommission
+		tmp, n, err = DecodeMsgWithdrawValidatorCommission(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -10662,251 +11697,579 @@ func DecodeMsg(bz []byte) (Msg, int, error) {
 func EncodeMsg(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case MsgAddTokenWhitelist:
-		*w = append(*w, getMagicBytes("MsgAddTokenWhitelist")...)
-		EncodeMsgAddTokenWhitelist(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgAddTokenWhitelist")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgAddTokenWhitelist(w, v)
+			return wBuf
+		}())
 	case *MsgAddTokenWhitelist:
-		*w = append(*w, getMagicBytes("MsgAddTokenWhitelist")...)
-		EncodeMsgAddTokenWhitelist(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgAddTokenWhitelist")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgAddTokenWhitelist(w, *v)
+			return wBuf
+		}())
 	case MsgAliasUpdate:
-		*w = append(*w, getMagicBytes("MsgAliasUpdate")...)
-		EncodeMsgAliasUpdate(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgAliasUpdate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgAliasUpdate(w, v)
+			return wBuf
+		}())
 	case *MsgAliasUpdate:
-		*w = append(*w, getMagicBytes("MsgAliasUpdate")...)
-		EncodeMsgAliasUpdate(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgAliasUpdate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgAliasUpdate(w, *v)
+			return wBuf
+		}())
 	case MsgBancorCancel:
-		*w = append(*w, getMagicBytes("MsgBancorCancel")...)
-		EncodeMsgBancorCancel(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorCancel")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorCancel(w, v)
+			return wBuf
+		}())
 	case *MsgBancorCancel:
-		*w = append(*w, getMagicBytes("MsgBancorCancel")...)
-		EncodeMsgBancorCancel(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorCancel")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorCancel(w, *v)
+			return wBuf
+		}())
 	case MsgBancorInit:
-		*w = append(*w, getMagicBytes("MsgBancorInit")...)
-		EncodeMsgBancorInit(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorInit")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorInit(w, v)
+			return wBuf
+		}())
 	case *MsgBancorInit:
-		*w = append(*w, getMagicBytes("MsgBancorInit")...)
-		EncodeMsgBancorInit(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorInit")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorInit(w, *v)
+			return wBuf
+		}())
 	case MsgBancorTrade:
-		*w = append(*w, getMagicBytes("MsgBancorTrade")...)
-		EncodeMsgBancorTrade(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorTrade")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorTrade(w, v)
+			return wBuf
+		}())
 	case *MsgBancorTrade:
-		*w = append(*w, getMagicBytes("MsgBancorTrade")...)
-		EncodeMsgBancorTrade(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorTrade")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorTrade(w, *v)
+			return wBuf
+		}())
 	case MsgBeginRedelegate:
-		*w = append(*w, getMagicBytes("MsgBeginRedelegate")...)
-		EncodeMsgBeginRedelegate(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBeginRedelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBeginRedelegate(w, v)
+			return wBuf
+		}())
 	case *MsgBeginRedelegate:
-		*w = append(*w, getMagicBytes("MsgBeginRedelegate")...)
-		EncodeMsgBeginRedelegate(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBeginRedelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBeginRedelegate(w, *v)
+			return wBuf
+		}())
 	case MsgBurnToken:
-		*w = append(*w, getMagicBytes("MsgBurnToken")...)
-		EncodeMsgBurnToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBurnToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBurnToken(w, v)
+			return wBuf
+		}())
 	case *MsgBurnToken:
-		*w = append(*w, getMagicBytes("MsgBurnToken")...)
-		EncodeMsgBurnToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBurnToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBurnToken(w, *v)
+			return wBuf
+		}())
 	case MsgCancelOrder:
-		*w = append(*w, getMagicBytes("MsgCancelOrder")...)
-		EncodeMsgCancelOrder(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCancelOrder")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCancelOrder(w, v)
+			return wBuf
+		}())
 	case *MsgCancelOrder:
-		*w = append(*w, getMagicBytes("MsgCancelOrder")...)
-		EncodeMsgCancelOrder(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCancelOrder")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCancelOrder(w, *v)
+			return wBuf
+		}())
 	case MsgCancelTradingPair:
-		*w = append(*w, getMagicBytes("MsgCancelTradingPair")...)
-		EncodeMsgCancelTradingPair(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCancelTradingPair")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCancelTradingPair(w, v)
+			return wBuf
+		}())
 	case *MsgCancelTradingPair:
-		*w = append(*w, getMagicBytes("MsgCancelTradingPair")...)
-		EncodeMsgCancelTradingPair(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCancelTradingPair")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCancelTradingPair(w, *v)
+			return wBuf
+		}())
 	case MsgCommentToken:
-		*w = append(*w, getMagicBytes("MsgCommentToken")...)
-		EncodeMsgCommentToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCommentToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCommentToken(w, v)
+			return wBuf
+		}())
 	case *MsgCommentToken:
-		*w = append(*w, getMagicBytes("MsgCommentToken")...)
-		EncodeMsgCommentToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCommentToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCommentToken(w, *v)
+			return wBuf
+		}())
 	case MsgCreateOrder:
-		*w = append(*w, getMagicBytes("MsgCreateOrder")...)
-		EncodeMsgCreateOrder(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateOrder")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateOrder(w, v)
+			return wBuf
+		}())
 	case *MsgCreateOrder:
-		*w = append(*w, getMagicBytes("MsgCreateOrder")...)
-		EncodeMsgCreateOrder(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateOrder")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateOrder(w, *v)
+			return wBuf
+		}())
 	case MsgCreateTradingPair:
-		*w = append(*w, getMagicBytes("MsgCreateTradingPair")...)
-		EncodeMsgCreateTradingPair(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateTradingPair")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateTradingPair(w, v)
+			return wBuf
+		}())
 	case *MsgCreateTradingPair:
-		*w = append(*w, getMagicBytes("MsgCreateTradingPair")...)
-		EncodeMsgCreateTradingPair(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateTradingPair")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateTradingPair(w, *v)
+			return wBuf
+		}())
 	case MsgCreateValidator:
-		*w = append(*w, getMagicBytes("MsgCreateValidator")...)
-		EncodeMsgCreateValidator(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateValidator")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateValidator(w, v)
+			return wBuf
+		}())
 	case *MsgCreateValidator:
-		*w = append(*w, getMagicBytes("MsgCreateValidator")...)
-		EncodeMsgCreateValidator(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateValidator")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateValidator(w, *v)
+			return wBuf
+		}())
 	case MsgDelegate:
-		*w = append(*w, getMagicBytes("MsgDelegate")...)
-		EncodeMsgDelegate(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDelegate(w, v)
+			return wBuf
+		}())
 	case *MsgDelegate:
-		*w = append(*w, getMagicBytes("MsgDelegate")...)
-		EncodeMsgDelegate(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDelegate(w, *v)
+			return wBuf
+		}())
 	case MsgDeposit:
-		*w = append(*w, getMagicBytes("MsgDeposit")...)
-		EncodeMsgDeposit(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDeposit")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDeposit(w, v)
+			return wBuf
+		}())
 	case *MsgDeposit:
-		*w = append(*w, getMagicBytes("MsgDeposit")...)
-		EncodeMsgDeposit(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDeposit")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDeposit(w, *v)
+			return wBuf
+		}())
 	case MsgDonateToCommunityPool:
-		*w = append(*w, getMagicBytes("MsgDonateToCommunityPool")...)
-		EncodeMsgDonateToCommunityPool(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDonateToCommunityPool")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDonateToCommunityPool(w, v)
+			return wBuf
+		}())
 	case *MsgDonateToCommunityPool:
-		*w = append(*w, getMagicBytes("MsgDonateToCommunityPool")...)
-		EncodeMsgDonateToCommunityPool(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDonateToCommunityPool")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDonateToCommunityPool(w, *v)
+			return wBuf
+		}())
 	case MsgEditValidator:
-		*w = append(*w, getMagicBytes("MsgEditValidator")...)
-		EncodeMsgEditValidator(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgEditValidator")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgEditValidator(w, v)
+			return wBuf
+		}())
 	case *MsgEditValidator:
-		*w = append(*w, getMagicBytes("MsgEditValidator")...)
-		EncodeMsgEditValidator(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgEditValidator")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgEditValidator(w, *v)
+			return wBuf
+		}())
 	case MsgForbidAddr:
-		*w = append(*w, getMagicBytes("MsgForbidAddr")...)
-		EncodeMsgForbidAddr(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgForbidAddr")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgForbidAddr(w, v)
+			return wBuf
+		}())
 	case *MsgForbidAddr:
-		*w = append(*w, getMagicBytes("MsgForbidAddr")...)
-		EncodeMsgForbidAddr(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgForbidAddr")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgForbidAddr(w, *v)
+			return wBuf
+		}())
 	case MsgForbidToken:
-		*w = append(*w, getMagicBytes("MsgForbidToken")...)
-		EncodeMsgForbidToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgForbidToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgForbidToken(w, v)
+			return wBuf
+		}())
 	case *MsgForbidToken:
-		*w = append(*w, getMagicBytes("MsgForbidToken")...)
-		EncodeMsgForbidToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgForbidToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgForbidToken(w, *v)
+			return wBuf
+		}())
 	case MsgIssueToken:
-		*w = append(*w, getMagicBytes("MsgIssueToken")...)
-		EncodeMsgIssueToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgIssueToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgIssueToken(w, v)
+			return wBuf
+		}())
 	case *MsgIssueToken:
-		*w = append(*w, getMagicBytes("MsgIssueToken")...)
-		EncodeMsgIssueToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgIssueToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgIssueToken(w, *v)
+			return wBuf
+		}())
 	case MsgMintToken:
-		*w = append(*w, getMagicBytes("MsgMintToken")...)
-		EncodeMsgMintToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMintToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMintToken(w, v)
+			return wBuf
+		}())
 	case *MsgMintToken:
-		*w = append(*w, getMagicBytes("MsgMintToken")...)
-		EncodeMsgMintToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMintToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMintToken(w, *v)
+			return wBuf
+		}())
 	case MsgModifyPricePrecision:
-		*w = append(*w, getMagicBytes("MsgModifyPricePrecision")...)
-		EncodeMsgModifyPricePrecision(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgModifyPricePrecision")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgModifyPricePrecision(w, v)
+			return wBuf
+		}())
 	case *MsgModifyPricePrecision:
-		*w = append(*w, getMagicBytes("MsgModifyPricePrecision")...)
-		EncodeMsgModifyPricePrecision(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgModifyPricePrecision")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgModifyPricePrecision(w, *v)
+			return wBuf
+		}())
 	case MsgModifyTokenInfo:
-		*w = append(*w, getMagicBytes("MsgModifyTokenInfo")...)
-		EncodeMsgModifyTokenInfo(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgModifyTokenInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgModifyTokenInfo(w, v)
+			return wBuf
+		}())
 	case *MsgModifyTokenInfo:
-		*w = append(*w, getMagicBytes("MsgModifyTokenInfo")...)
-		EncodeMsgModifyTokenInfo(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgModifyTokenInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgModifyTokenInfo(w, *v)
+			return wBuf
+		}())
 	case MsgMultiSend:
-		*w = append(*w, getMagicBytes("MsgMultiSend")...)
-		EncodeMsgMultiSend(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMultiSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMultiSend(w, v)
+			return wBuf
+		}())
 	case *MsgMultiSend:
-		*w = append(*w, getMagicBytes("MsgMultiSend")...)
-		EncodeMsgMultiSend(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMultiSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMultiSend(w, *v)
+			return wBuf
+		}())
 	case MsgMultiSendX:
-		*w = append(*w, getMagicBytes("MsgMultiSendX")...)
-		EncodeMsgMultiSendX(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMultiSendX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMultiSendX(w, v)
+			return wBuf
+		}())
 	case *MsgMultiSendX:
-		*w = append(*w, getMagicBytes("MsgMultiSendX")...)
-		EncodeMsgMultiSendX(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMultiSendX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMultiSendX(w, *v)
+			return wBuf
+		}())
 	case MsgRemoveTokenWhitelist:
-		*w = append(*w, getMagicBytes("MsgRemoveTokenWhitelist")...)
-		EncodeMsgRemoveTokenWhitelist(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgRemoveTokenWhitelist")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgRemoveTokenWhitelist(w, v)
+			return wBuf
+		}())
 	case *MsgRemoveTokenWhitelist:
-		*w = append(*w, getMagicBytes("MsgRemoveTokenWhitelist")...)
-		EncodeMsgRemoveTokenWhitelist(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgRemoveTokenWhitelist")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgRemoveTokenWhitelist(w, *v)
+			return wBuf
+		}())
 	case MsgSend:
-		*w = append(*w, getMagicBytes("MsgSend")...)
-		EncodeMsgSend(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSend(w, v)
+			return wBuf
+		}())
 	case *MsgSend:
-		*w = append(*w, getMagicBytes("MsgSend")...)
-		EncodeMsgSend(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSend(w, *v)
+			return wBuf
+		}())
 	case MsgSendX:
-		*w = append(*w, getMagicBytes("MsgSendX")...)
-		EncodeMsgSendX(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSendX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSendX(w, v)
+			return wBuf
+		}())
 	case *MsgSendX:
-		*w = append(*w, getMagicBytes("MsgSendX")...)
-		EncodeMsgSendX(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSendX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSendX(w, *v)
+			return wBuf
+		}())
 	case MsgSetMemoRequired:
-		*w = append(*w, getMagicBytes("MsgSetMemoRequired")...)
-		EncodeMsgSetMemoRequired(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSetMemoRequired")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSetMemoRequired(w, v)
+			return wBuf
+		}())
 	case *MsgSetMemoRequired:
-		*w = append(*w, getMagicBytes("MsgSetMemoRequired")...)
-		EncodeMsgSetMemoRequired(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSetMemoRequired")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSetMemoRequired(w, *v)
+			return wBuf
+		}())
 	case MsgSetWithdrawAddress:
-		*w = append(*w, getMagicBytes("MsgSetWithdrawAddress")...)
-		EncodeMsgSetWithdrawAddress(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSetWithdrawAddress")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSetWithdrawAddress(w, v)
+			return wBuf
+		}())
 	case *MsgSetWithdrawAddress:
-		*w = append(*w, getMagicBytes("MsgSetWithdrawAddress")...)
-		EncodeMsgSetWithdrawAddress(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSetWithdrawAddress")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSetWithdrawAddress(w, *v)
+			return wBuf
+		}())
 	case MsgSubmitProposal:
-		*w = append(*w, getMagicBytes("MsgSubmitProposal")...)
-		EncodeMsgSubmitProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSubmitProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSubmitProposal(w, v)
+			return wBuf
+		}())
 	case *MsgSubmitProposal:
-		*w = append(*w, getMagicBytes("MsgSubmitProposal")...)
-		EncodeMsgSubmitProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSubmitProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSubmitProposal(w, *v)
+			return wBuf
+		}())
 	case MsgSupervisedSend:
-		*w = append(*w, getMagicBytes("MsgSupervisedSend")...)
-		EncodeMsgSupervisedSend(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSupervisedSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSupervisedSend(w, v)
+			return wBuf
+		}())
 	case *MsgSupervisedSend:
-		*w = append(*w, getMagicBytes("MsgSupervisedSend")...)
-		EncodeMsgSupervisedSend(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSupervisedSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSupervisedSend(w, *v)
+			return wBuf
+		}())
 	case MsgTransferOwnership:
-		*w = append(*w, getMagicBytes("MsgTransferOwnership")...)
-		EncodeMsgTransferOwnership(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgTransferOwnership")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgTransferOwnership(w, v)
+			return wBuf
+		}())
 	case *MsgTransferOwnership:
-		*w = append(*w, getMagicBytes("MsgTransferOwnership")...)
-		EncodeMsgTransferOwnership(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgTransferOwnership")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgTransferOwnership(w, *v)
+			return wBuf
+		}())
 	case MsgUnForbidAddr:
-		*w = append(*w, getMagicBytes("MsgUnForbidAddr")...)
-		EncodeMsgUnForbidAddr(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnForbidAddr")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnForbidAddr(w, v)
+			return wBuf
+		}())
 	case *MsgUnForbidAddr:
-		*w = append(*w, getMagicBytes("MsgUnForbidAddr")...)
-		EncodeMsgUnForbidAddr(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnForbidAddr")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnForbidAddr(w, *v)
+			return wBuf
+		}())
 	case MsgUnForbidToken:
-		*w = append(*w, getMagicBytes("MsgUnForbidToken")...)
-		EncodeMsgUnForbidToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnForbidToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnForbidToken(w, v)
+			return wBuf
+		}())
 	case *MsgUnForbidToken:
-		*w = append(*w, getMagicBytes("MsgUnForbidToken")...)
-		EncodeMsgUnForbidToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnForbidToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnForbidToken(w, *v)
+			return wBuf
+		}())
 	case MsgUndelegate:
-		*w = append(*w, getMagicBytes("MsgUndelegate")...)
-		EncodeMsgUndelegate(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUndelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUndelegate(w, v)
+			return wBuf
+		}())
 	case *MsgUndelegate:
-		*w = append(*w, getMagicBytes("MsgUndelegate")...)
-		EncodeMsgUndelegate(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUndelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUndelegate(w, *v)
+			return wBuf
+		}())
 	case MsgUnjail:
-		*w = append(*w, getMagicBytes("MsgUnjail")...)
-		EncodeMsgUnjail(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnjail")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnjail(w, v)
+			return wBuf
+		}())
 	case *MsgUnjail:
-		*w = append(*w, getMagicBytes("MsgUnjail")...)
-		EncodeMsgUnjail(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnjail")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnjail(w, *v)
+			return wBuf
+		}())
 	case MsgVerifyInvariant:
-		*w = append(*w, getMagicBytes("MsgVerifyInvariant")...)
-		EncodeMsgVerifyInvariant(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgVerifyInvariant")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgVerifyInvariant(w, v)
+			return wBuf
+		}())
 	case *MsgVerifyInvariant:
-		*w = append(*w, getMagicBytes("MsgVerifyInvariant")...)
-		EncodeMsgVerifyInvariant(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgVerifyInvariant")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgVerifyInvariant(w, *v)
+			return wBuf
+		}())
 	case MsgVote:
-		*w = append(*w, getMagicBytes("MsgVote")...)
-		EncodeMsgVote(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgVote")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgVote(w, v)
+			return wBuf
+		}())
 	case *MsgVote:
-		*w = append(*w, getMagicBytes("MsgVote")...)
-		EncodeMsgVote(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgVote")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgVote(w, *v)
+			return wBuf
+		}())
 	case MsgWithdrawDelegatorReward:
-		*w = append(*w, getMagicBytes("MsgWithdrawDelegatorReward")...)
-		EncodeMsgWithdrawDelegatorReward(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgWithdrawDelegatorReward")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgWithdrawDelegatorReward(w, v)
+			return wBuf
+		}())
 	case *MsgWithdrawDelegatorReward:
-		*w = append(*w, getMagicBytes("MsgWithdrawDelegatorReward")...)
-		EncodeMsgWithdrawDelegatorReward(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgWithdrawDelegatorReward")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgWithdrawDelegatorReward(w, *v)
+			return wBuf
+		}())
 	case MsgWithdrawValidatorCommission:
-		*w = append(*w, getMagicBytes("MsgWithdrawValidatorCommission")...)
-		EncodeMsgWithdrawValidatorCommission(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgWithdrawValidatorCommission")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgWithdrawValidatorCommission(w, v)
+			return wBuf
+		}())
 	case *MsgWithdrawValidatorCommission:
-		*w = append(*w, getMagicBytes("MsgWithdrawValidatorCommission")...)
-		EncodeMsgWithdrawValidatorCommission(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgWithdrawValidatorCommission")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgWithdrawValidatorCommission(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -11252,29 +12615,137 @@ func DeepCopyMsg(x Msg) Msg {
 	} // end of switch
 } // end of func
 // Interface
-func DecodeAccount(bz []byte) (Account, int, error) {
-	var v Account
-	var magicBytes [4]byte
+func DecodeAccount(bz []byte) (v Account, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{153, 157, 134, 34}:
-		v, n, err := DecodeBaseAccount(bz[4:])
-		return &v, n + 4, err
-	case [4]byte{78, 248, 144, 54}:
-		v, n, err := DecodeBaseVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{75, 69, 41, 151}:
-		v, n, err := DecodeContinuousVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{59, 193, 203, 230}:
-		v, n, err := DecodeDelayedVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{37, 29, 227, 212}:
-		v, n, err := DecodeModuleAccount(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 4100693401:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp BaseAccount
+		tmp, n, err = DecodeBaseAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = &tmp
+		return
+	case 6748238:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp BaseVestingAccount
+		tmp, n, err = DecodeBaseVestingAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 54150475:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ContinuousVestingAccount
+		tmp, n, err = DecodeContinuousVestingAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3479748923:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp DelayedVestingAccount
+		tmp, n, err = DecodeDelayedVestingAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2923109669:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ModuleAccount
+		tmp, n, err = DecodeModuleAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -11283,35 +12754,75 @@ func DecodeAccount(bz []byte) (Account, int, error) {
 func EncodeAccount(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case BaseAccount:
-		*w = append(*w, getMagicBytes("BaseAccount")...)
-		EncodeBaseAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("BaseAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseAccount(w, v)
+			return wBuf
+		}())
 	case *BaseAccount:
-		*w = append(*w, getMagicBytes("BaseAccount")...)
-		EncodeBaseAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("BaseAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseAccount(w, *v)
+			return wBuf
+		}())
 	case BaseVestingAccount:
-		*w = append(*w, getMagicBytes("BaseVestingAccount")...)
-		EncodeBaseVestingAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("BaseVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseVestingAccount(w, v)
+			return wBuf
+		}())
 	case *BaseVestingAccount:
-		*w = append(*w, getMagicBytes("BaseVestingAccount")...)
-		EncodeBaseVestingAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("BaseVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseVestingAccount(w, *v)
+			return wBuf
+		}())
 	case ContinuousVestingAccount:
-		*w = append(*w, getMagicBytes("ContinuousVestingAccount")...)
-		EncodeContinuousVestingAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ContinuousVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeContinuousVestingAccount(w, v)
+			return wBuf
+		}())
 	case *ContinuousVestingAccount:
-		*w = append(*w, getMagicBytes("ContinuousVestingAccount")...)
-		EncodeContinuousVestingAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ContinuousVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeContinuousVestingAccount(w, *v)
+			return wBuf
+		}())
 	case DelayedVestingAccount:
-		*w = append(*w, getMagicBytes("DelayedVestingAccount")...)
-		EncodeDelayedVestingAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("DelayedVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeDelayedVestingAccount(w, v)
+			return wBuf
+		}())
 	case *DelayedVestingAccount:
-		*w = append(*w, getMagicBytes("DelayedVestingAccount")...)
-		EncodeDelayedVestingAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("DelayedVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeDelayedVestingAccount(w, *v)
+			return wBuf
+		}())
 	case ModuleAccount:
-		*w = append(*w, getMagicBytes("ModuleAccount")...)
-		EncodeModuleAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ModuleAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeModuleAccount(w, v)
+			return wBuf
+		}())
 	case *ModuleAccount:
-		*w = append(*w, getMagicBytes("ModuleAccount")...)
-		EncodeModuleAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ModuleAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeModuleAccount(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -11367,20 +12878,65 @@ func DeepCopyAccount(x Account) Account {
 	} // end of switch
 } // end of func
 // Interface
-func DecodeVestingAccount(bz []byte) (VestingAccount, int, error) {
-	var v VestingAccount
-	var magicBytes [4]byte
+func DecodeVestingAccount(bz []byte) (v VestingAccount, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{75, 69, 41, 151}:
-		v, n, err := DecodeContinuousVestingAccount(bz[4:])
-		return &v, n + 4, err
-	case [4]byte{59, 193, 203, 230}:
-		v, n, err := DecodeDelayedVestingAccount(bz[4:])
-		return &v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 54150475:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ContinuousVestingAccount
+		tmp, n, err = DecodeContinuousVestingAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = &tmp
+		return
+	case 3479748923:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp DelayedVestingAccount
+		tmp, n, err = DecodeDelayedVestingAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = &tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -11389,17 +12945,33 @@ func DecodeVestingAccount(bz []byte) (VestingAccount, int, error) {
 func EncodeVestingAccount(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case ContinuousVestingAccount:
-		*w = append(*w, getMagicBytes("ContinuousVestingAccount")...)
-		EncodeContinuousVestingAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ContinuousVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeContinuousVestingAccount(w, v)
+			return wBuf
+		}())
 	case *ContinuousVestingAccount:
-		*w = append(*w, getMagicBytes("ContinuousVestingAccount")...)
-		EncodeContinuousVestingAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ContinuousVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeContinuousVestingAccount(w, *v)
+			return wBuf
+		}())
 	case DelayedVestingAccount:
-		*w = append(*w, getMagicBytes("DelayedVestingAccount")...)
-		EncodeDelayedVestingAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("DelayedVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeDelayedVestingAccount(w, v)
+			return wBuf
+		}())
 	case *DelayedVestingAccount:
-		*w = append(*w, getMagicBytes("DelayedVestingAccount")...)
-		EncodeDelayedVestingAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("DelayedVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeDelayedVestingAccount(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -11429,26 +13001,113 @@ func DeepCopyVestingAccount(x VestingAccount) VestingAccount {
 	} // end of switch
 } // end of func
 // Interface
-func DecodeContent(bz []byte) (Content, int, error) {
-	var v Content
-	var magicBytes [4]byte
+func DecodeContent(bz []byte) (v Content, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{31, 93, 37, 208}:
-		v, n, err := DecodeCommunityPoolSpendProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{49, 37, 122, 86}:
-		v, n, err := DecodeParameterChangeProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{162, 148, 222, 207}:
-		v, n, err := DecodeSoftwareUpgradeProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{207, 179, 211, 152}:
-		v, n, err := DecodeTextProposal(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 380460319:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp CommunityPoolSpendProposal
+		tmp, n, err = DecodeCommunityPoolSpendProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1402283313:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ParameterChangeProposal
+		tmp, n, err = DecodeParameterChangeProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 229479586:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp SoftwareUpgradeProposal
+		tmp, n, err = DecodeSoftwareUpgradeProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3501044687:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp TextProposal
+		tmp, n, err = DecodeTextProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -11457,29 +13116,61 @@ func DecodeContent(bz []byte) (Content, int, error) {
 func EncodeContent(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case CommunityPoolSpendProposal:
-		*w = append(*w, getMagicBytes("CommunityPoolSpendProposal")...)
-		EncodeCommunityPoolSpendProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("CommunityPoolSpendProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCommunityPoolSpendProposal(w, v)
+			return wBuf
+		}())
 	case *CommunityPoolSpendProposal:
-		*w = append(*w, getMagicBytes("CommunityPoolSpendProposal")...)
-		EncodeCommunityPoolSpendProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("CommunityPoolSpendProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCommunityPoolSpendProposal(w, *v)
+			return wBuf
+		}())
 	case ParameterChangeProposal:
-		*w = append(*w, getMagicBytes("ParameterChangeProposal")...)
-		EncodeParameterChangeProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ParameterChangeProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeParameterChangeProposal(w, v)
+			return wBuf
+		}())
 	case *ParameterChangeProposal:
-		*w = append(*w, getMagicBytes("ParameterChangeProposal")...)
-		EncodeParameterChangeProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ParameterChangeProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeParameterChangeProposal(w, *v)
+			return wBuf
+		}())
 	case SoftwareUpgradeProposal:
-		*w = append(*w, getMagicBytes("SoftwareUpgradeProposal")...)
-		EncodeSoftwareUpgradeProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("SoftwareUpgradeProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSoftwareUpgradeProposal(w, v)
+			return wBuf
+		}())
 	case *SoftwareUpgradeProposal:
-		*w = append(*w, getMagicBytes("SoftwareUpgradeProposal")...)
-		EncodeSoftwareUpgradeProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("SoftwareUpgradeProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSoftwareUpgradeProposal(w, *v)
+			return wBuf
+		}())
 	case TextProposal:
-		*w = append(*w, getMagicBytes("TextProposal")...)
-		EncodeTextProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("TextProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeTextProposal(w, v)
+			return wBuf
+		}())
 	case *TextProposal:
-		*w = append(*w, getMagicBytes("TextProposal")...)
-		EncodeTextProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("TextProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeTextProposal(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -11529,17 +13220,41 @@ func DeepCopyContent(x Content) Content {
 	} // end of switch
 } // end of func
 // Interface
-func DecodeTx(bz []byte) (Tx, int, error) {
-	var v Tx
-	var magicBytes [4]byte
+func DecodeTx(bz []byte) (v Tx, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{247, 170, 118, 185}:
-		v, n, err := DecodeStdTx(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 1362340599:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp StdTx
+		tmp, n, err = DecodeStdTx(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -11548,11 +13263,19 @@ func DecodeTx(bz []byte) (Tx, int, error) {
 func EncodeTx(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case StdTx:
-		*w = append(*w, getMagicBytes("StdTx")...)
-		EncodeStdTx(w, v)
+		codonEncodeByteSlice(int(getMagicNum("StdTx")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStdTx(w, v)
+			return wBuf
+		}())
 	case *StdTx:
-		*w = append(*w, getMagicBytes("StdTx")...)
-		EncodeStdTx(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("StdTx")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStdTx(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -11578,17 +13301,41 @@ func DeepCopyTx(x Tx) Tx {
 	} // end of switch
 } // end of func
 // Interface
-func DecodeModuleAccountI(bz []byte) (ModuleAccountI, int, error) {
-	var v ModuleAccountI
-	var magicBytes [4]byte
+func DecodeModuleAccountI(bz []byte) (v ModuleAccountI, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{37, 29, 227, 212}:
-		v, n, err := DecodeModuleAccount(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 2923109669:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ModuleAccount
+		tmp, n, err = DecodeModuleAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -11597,11 +13344,19 @@ func DecodeModuleAccountI(bz []byte) (ModuleAccountI, int, error) {
 func EncodeModuleAccountI(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case ModuleAccount:
-		*w = append(*w, getMagicBytes("ModuleAccount")...)
-		EncodeModuleAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ModuleAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeModuleAccount(w, v)
+			return wBuf
+		}())
 	case *ModuleAccount:
-		*w = append(*w, getMagicBytes("ModuleAccount")...)
-		EncodeModuleAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ModuleAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeModuleAccount(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -11627,17 +13382,41 @@ func DeepCopyModuleAccountI(x ModuleAccountI) ModuleAccountI {
 	} // end of switch
 } // end of func
 // Interface
-func DecodeSupplyI(bz []byte) (SupplyI, int, error) {
-	var v SupplyI
-	var magicBytes [4]byte
+func DecodeSupplyI(bz []byte) (v SupplyI, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{191, 66, 141, 63}:
-		v, n, err := DecodeSupply(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 3848815295:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp Supply
+		tmp, n, err = DecodeSupply(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -11646,11 +13425,19 @@ func DecodeSupplyI(bz []byte) (SupplyI, int, error) {
 func EncodeSupplyI(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case Supply:
-		*w = append(*w, getMagicBytes("Supply")...)
-		EncodeSupply(w, v)
+		codonEncodeByteSlice(int(getMagicNum("Supply")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSupply(w, v)
+			return wBuf
+		}())
 	case *Supply:
-		*w = append(*w, getMagicBytes("Supply")...)
-		EncodeSupply(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("Supply")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSupply(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -11676,17 +13463,41 @@ func DeepCopySupplyI(x SupplyI) SupplyI {
 	} // end of switch
 } // end of func
 // Interface
-func DecodeToken(bz []byte) (Token, int, error) {
-	var v Token
-	var magicBytes [4]byte
+func DecodeToken(bz []byte) (v Token, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{38, 16, 216, 53}:
-		v, n, err := DecodeBaseToken(bz[4:])
-		return &v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 4159115302:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp BaseToken
+		tmp, n, err = DecodeBaseToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = &tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -11695,11 +13506,19 @@ func DecodeToken(bz []byte) (Token, int, error) {
 func EncodeToken(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case BaseToken:
-		*w = append(*w, getMagicBytes("BaseToken")...)
-		EncodeBaseToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("BaseToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseToken(w, v)
+			return wBuf
+		}())
 	case *BaseToken:
-		*w = append(*w, getMagicBytes("BaseToken")...)
-		EncodeBaseToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("BaseToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseToken(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
@@ -11722,1111 +13541,3521 @@ func DeepCopyToken(x Token) Token {
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
 } // end of func
-func getMagicBytes(name string) []byte {
+func getMagicNum(name string) uint32 {
 	switch name {
 	case "AccAddress":
-		return []byte{0, 157, 18, 162}
+		return 3880557824
 	case "AccAddressList":
-		return []byte{37, 72, 3, 140}
+		return 1299335205
 	case "AccountX":
-		return []byte{168, 11, 31, 112}
+		return 3934391208
 	case "BaseAccount":
-		return []byte{153, 157, 134, 34}
+		return 4100693401
 	case "BaseToken":
-		return []byte{38, 16, 216, 53}
+		return 4159115302
 	case "BaseVestingAccount":
-		return []byte{78, 248, 144, 54}
+		return 6748238
 	case "Coin":
-		return []byte{2, 65, 204, 255}
+		return 3131719938
 	case "CommentRef":
-		return []byte{128, 102, 129, 152}
+		return 3216598656
 	case "CommitInfo":
-		return []byte{2, 26, 137, 96}
+		return 956897794
 	case "CommunityPoolSpendProposal":
-		return []byte{31, 93, 37, 208}
+		return 380460319
 	case "ConsAddress":
-		return []byte{28, 53, 138, 173}
+		return 2346923292
 	case "ContinuousVestingAccount":
-		return []byte{75, 69, 41, 151}
+		return 54150475
 	case "DecCoin":
-		return []byte{56, 163, 255, 105}
+		return 1422369592
 	case "DelayedVestingAccount":
-		return []byte{59, 193, 203, 230}
+		return 3479748923
 	case "FeePool":
-		return []byte{18, 193, 65, 104}
+		return 3294413074
 	case "Input":
-		return []byte{54, 236, 180, 248}
+		return 1481698358
 	case "LockedCoin":
-		return []byte{176, 57, 246, 199}
+		return 3074963888
 	case "MarketInfo":
-		return []byte{93, 194, 118, 168}
+		return 1362215517
 	case "ModuleAccount":
-		return []byte{37, 29, 227, 212}
+		return 2923109669
 	case "MsgAddTokenWhitelist":
-		return []byte{158, 44, 49, 82}
+		return 620244126
 	case "MsgAliasUpdate":
-		return []byte{250, 126, 184, 36}
+		return 52199162
 	case "MsgBancorCancel":
-		return []byte{124, 247, 85, 232}
+		return 411694972
 	case "MsgBancorInit":
-		return []byte{192, 118, 23, 126}
+		return 2174318272
 	case "MsgBancorTrade":
-		return []byte{191, 189, 4, 59}
+		return 3707813311
 	case "MsgBeginRedelegate":
-		return []byte{141, 7, 107, 68}
+		return 653330317
 	case "MsgBurnToken":
-		return []byte{42, 203, 158, 131}
+		return 2014956330
 	case "MsgCancelOrder":
-		return []byte{238, 105, 251, 19}
+		return 2343070190
 	case "MsgCancelTradingPair":
-		return []byte{184, 188, 48, 70}
+		return 3483352248
 	case "MsgCommentToken":
-		return []byte{21, 125, 54, 51}
+		return 3881860373
 	case "MsgCreateOrder":
-		return []byte{211, 100, 66, 245}
+		return 2446025939
 	case "MsgCreateTradingPair":
-		return []byte{116, 186, 50, 92}
+		return 1988999796
 	case "MsgCreateValidator":
-		return []byte{24, 79, 66, 107}
+		return 2125287192
 	case "MsgDelegate":
-		return []byte{184, 121, 196, 185}
+		return 2654108088
 	case "MsgDeposit":
-		return []byte{234, 76, 240, 151}
+		return 3681766634
 	case "MsgDonateToCommunityPool":
-		return []byte{148, 38, 167, 140}
+		return 3745982100
 	case "MsgEditValidator":
-		return []byte{9, 254, 168, 109}
+		return 3618242057
 	case "MsgForbidAddr":
-		return []byte{120, 151, 22, 12}
+		return 1460115320
 	case "MsgForbidToken":
-		return []byte{191, 26, 148, 82}
+		return 1891506879
 	case "MsgIssueToken":
-		return []byte{67, 33, 188, 107}
+		return 3058377027
 	case "MsgMintToken":
-		return []byte{172, 102, 179, 22}
+		return 2159306412
 	case "MsgModifyPricePrecision":
-		return []byte{190, 128, 0, 94}
+		return 3050406078
 	case "MsgModifyTokenInfo":
-		return []byte{178, 137, 211, 164}
+		return 1382451634
 	case "MsgMultiSend":
-		return []byte{64, 119, 59, 163}
+		return 3755177792
 	case "MsgMultiSendX":
-		return []byte{112, 57, 9, 246}
+		return 3027843440
 	case "MsgRemoveTokenWhitelist":
-		return []byte{198, 39, 33, 109}
+		return 1473324998
 	case "MsgSend":
-		return []byte{212, 255, 125, 220}
+		return 3794730964
 	case "MsgSendX":
-		return []byte{62, 163, 57, 104}
+		return 3785663294
 	case "MsgSetMemoRequired":
-		return []byte{18, 183, 33, 189}
+		return 1434760978
 	case "MsgSetWithdrawAddress":
-		return []byte{208, 136, 199, 77}
+		return 648513744
 	case "MsgSubmitProposal":
-		return []byte{84, 236, 141, 114}
+		return 2492591188
 	case "MsgSupervisedSend":
-		return []byte{231, 172, 14, 69}
+		return 3532434663
 	case "MsgTransferOwnership":
-		return []byte{120, 20, 134, 126}
+		return 3889173624
 	case "MsgUnForbidAddr":
-		return []byte{141, 21, 34, 63}
+		return 3664778637
 	case "MsgUnForbidToken":
-		return []byte{79, 103, 52, 189}
+		return 2657838927
 	case "MsgUndelegate":
-		return []byte{21, 241, 6, 56}
+		return 2160390421
 	case "MsgUnjail":
-		return []byte{139, 110, 39, 159}
+		return 3047452299
 	case "MsgVerifyInvariant":
-		return []byte{109, 173, 240, 7}
+		return 4029525357
 	case "MsgVote":
-		return []byte{233, 121, 28, 250}
+		return 3121445353
 	case "MsgWithdrawDelegatorReward":
-		return []byte{43, 19, 183, 111}
+		return 1404506923
 	case "MsgWithdrawValidatorCommission":
-		return []byte{84, 85, 236, 88}
+		return 1320375636
 	case "Order":
-		return []byte{107, 224, 144, 130}
+		return 526377067
 	case "Output":
-		return []byte{178, 67, 155, 203}
+		return 1883194290
 	case "ParamChange":
-		return []byte{66, 250, 248, 208}
+		return 3159554626
 	case "ParameterChangeProposal":
-		return []byte{49, 37, 122, 86}
+		return 1402283313
 	case "PrivKeyEd25519":
-		return []byte{158, 94, 112, 161}
+		return 1455054494
 	case "PrivKeySecp256k1":
-		return []byte{83, 16, 177, 42}
+		return 135729235
 	case "PubKeyEd25519":
-		return []byte{114, 76, 37, 23}
+		return 2779925618
 	case "PubKeyMultisigThreshold":
-		return []byte{14, 33, 23, 141}
+		return 2131042574
 	case "PubKeySecp256k1":
-		return []byte{51, 161, 20, 197}
+		return 1626972467
 	case "SdkDec":
-		return []byte{131, 101, 23, 4}
+		return 172320131
 	case "SdkInt":
-		return []byte{189, 210, 54, 221}
+		return 2300105405
 	case "SignedMsgType":
-		return []byte{67, 52, 162, 78}
+		return 2430153795
 	case "SoftwareUpgradeProposal":
-		return []byte{162, 148, 222, 207}
+		return 229479586
 	case "State":
-		return []byte{163, 181, 12, 71}
+		return 3124475299
 	case "StdSignature":
-		return []byte{247, 42, 43, 179}
+		return 1176316663
 	case "StdTx":
-		return []byte{247, 170, 118, 185}
+		return 1362340599
 	case "StoreInfo":
-		return []byte{224, 49, 135, 8}
+		return 3916313056
 	case "Supply":
-		return []byte{191, 66, 141, 63}
+		return 3848815295
 	case "TextProposal":
-		return []byte{207, 179, 211, 152}
+		return 3501044687
 	case "Vote":
-		return []byte{205, 85, 136, 219}
+		return 3874772429
 	case "VoteOption":
-		return []byte{170, 208, 50, 2}
+		return 2889994410
 	case "int64":
-		return []byte{188, 34, 41, 102}
+		return 2056659644
 	case "uint64":
-		return []byte{36, 210, 58, 112}
+		return 3589394980
 	} // end of switch
 	panic("Should not reach here")
-	return []byte{}
-} // end of getMagicBytes
-func getMagicBytesOfVar(x interface{}) ([4]byte, error) {
+	return 0
+} // end of getMagicNum
+func getMagicNumOfVar(x interface{}) (uint32, bool) {
 	switch x.(type) {
 	case *AccAddress, AccAddress:
-		return [4]byte{0, 157, 18, 162}, nil
+		return 3880557824, true
 	case *AccAddressList, AccAddressList:
-		return [4]byte{37, 72, 3, 140}, nil
+		return 1299335205, true
 	case *AccountX, AccountX:
-		return [4]byte{168, 11, 31, 112}, nil
+		return 3934391208, true
 	case *BaseAccount, BaseAccount:
-		return [4]byte{153, 157, 134, 34}, nil
+		return 4100693401, true
 	case *BaseToken, BaseToken:
-		return [4]byte{38, 16, 216, 53}, nil
+		return 4159115302, true
 	case *BaseVestingAccount, BaseVestingAccount:
-		return [4]byte{78, 248, 144, 54}, nil
+		return 6748238, true
 	case *Coin, Coin:
-		return [4]byte{2, 65, 204, 255}, nil
+		return 3131719938, true
 	case *CommentRef, CommentRef:
-		return [4]byte{128, 102, 129, 152}, nil
+		return 3216598656, true
 	case *CommitInfo, CommitInfo:
-		return [4]byte{2, 26, 137, 96}, nil
+		return 956897794, true
 	case *CommunityPoolSpendProposal, CommunityPoolSpendProposal:
-		return [4]byte{31, 93, 37, 208}, nil
+		return 380460319, true
 	case *ConsAddress, ConsAddress:
-		return [4]byte{28, 53, 138, 173}, nil
+		return 2346923292, true
 	case *ContinuousVestingAccount, ContinuousVestingAccount:
-		return [4]byte{75, 69, 41, 151}, nil
+		return 54150475, true
 	case *DecCoin, DecCoin:
-		return [4]byte{56, 163, 255, 105}, nil
+		return 1422369592, true
 	case *DelayedVestingAccount, DelayedVestingAccount:
-		return [4]byte{59, 193, 203, 230}, nil
+		return 3479748923, true
 	case *FeePool, FeePool:
-		return [4]byte{18, 193, 65, 104}, nil
+		return 3294413074, true
 	case *Input, Input:
-		return [4]byte{54, 236, 180, 248}, nil
+		return 1481698358, true
 	case *LockedCoin, LockedCoin:
-		return [4]byte{176, 57, 246, 199}, nil
+		return 3074963888, true
 	case *MarketInfo, MarketInfo:
-		return [4]byte{93, 194, 118, 168}, nil
+		return 1362215517, true
 	case *ModuleAccount, ModuleAccount:
-		return [4]byte{37, 29, 227, 212}, nil
+		return 2923109669, true
 	case *MsgAddTokenWhitelist, MsgAddTokenWhitelist:
-		return [4]byte{158, 44, 49, 82}, nil
+		return 620244126, true
 	case *MsgAliasUpdate, MsgAliasUpdate:
-		return [4]byte{250, 126, 184, 36}, nil
+		return 52199162, true
 	case *MsgBancorCancel, MsgBancorCancel:
-		return [4]byte{124, 247, 85, 232}, nil
+		return 411694972, true
 	case *MsgBancorInit, MsgBancorInit:
-		return [4]byte{192, 118, 23, 126}, nil
+		return 2174318272, true
 	case *MsgBancorTrade, MsgBancorTrade:
-		return [4]byte{191, 189, 4, 59}, nil
+		return 3707813311, true
 	case *MsgBeginRedelegate, MsgBeginRedelegate:
-		return [4]byte{141, 7, 107, 68}, nil
+		return 653330317, true
 	case *MsgBurnToken, MsgBurnToken:
-		return [4]byte{42, 203, 158, 131}, nil
+		return 2014956330, true
 	case *MsgCancelOrder, MsgCancelOrder:
-		return [4]byte{238, 105, 251, 19}, nil
+		return 2343070190, true
 	case *MsgCancelTradingPair, MsgCancelTradingPair:
-		return [4]byte{184, 188, 48, 70}, nil
+		return 3483352248, true
 	case *MsgCommentToken, MsgCommentToken:
-		return [4]byte{21, 125, 54, 51}, nil
+		return 3881860373, true
 	case *MsgCreateOrder, MsgCreateOrder:
-		return [4]byte{211, 100, 66, 245}, nil
+		return 2446025939, true
 	case *MsgCreateTradingPair, MsgCreateTradingPair:
-		return [4]byte{116, 186, 50, 92}, nil
+		return 1988999796, true
 	case *MsgCreateValidator, MsgCreateValidator:
-		return [4]byte{24, 79, 66, 107}, nil
+		return 2125287192, true
 	case *MsgDelegate, MsgDelegate:
-		return [4]byte{184, 121, 196, 185}, nil
+		return 2654108088, true
 	case *MsgDeposit, MsgDeposit:
-		return [4]byte{234, 76, 240, 151}, nil
+		return 3681766634, true
 	case *MsgDonateToCommunityPool, MsgDonateToCommunityPool:
-		return [4]byte{148, 38, 167, 140}, nil
+		return 3745982100, true
 	case *MsgEditValidator, MsgEditValidator:
-		return [4]byte{9, 254, 168, 109}, nil
+		return 3618242057, true
 	case *MsgForbidAddr, MsgForbidAddr:
-		return [4]byte{120, 151, 22, 12}, nil
+		return 1460115320, true
 	case *MsgForbidToken, MsgForbidToken:
-		return [4]byte{191, 26, 148, 82}, nil
+		return 1891506879, true
 	case *MsgIssueToken, MsgIssueToken:
-		return [4]byte{67, 33, 188, 107}, nil
+		return 3058377027, true
 	case *MsgMintToken, MsgMintToken:
-		return [4]byte{172, 102, 179, 22}, nil
+		return 2159306412, true
 	case *MsgModifyPricePrecision, MsgModifyPricePrecision:
-		return [4]byte{190, 128, 0, 94}, nil
+		return 3050406078, true
 	case *MsgModifyTokenInfo, MsgModifyTokenInfo:
-		return [4]byte{178, 137, 211, 164}, nil
+		return 1382451634, true
 	case *MsgMultiSend, MsgMultiSend:
-		return [4]byte{64, 119, 59, 163}, nil
+		return 3755177792, true
 	case *MsgMultiSendX, MsgMultiSendX:
-		return [4]byte{112, 57, 9, 246}, nil
+		return 3027843440, true
 	case *MsgRemoveTokenWhitelist, MsgRemoveTokenWhitelist:
-		return [4]byte{198, 39, 33, 109}, nil
+		return 1473324998, true
 	case *MsgSend, MsgSend:
-		return [4]byte{212, 255, 125, 220}, nil
+		return 3794730964, true
 	case *MsgSendX, MsgSendX:
-		return [4]byte{62, 163, 57, 104}, nil
+		return 3785663294, true
 	case *MsgSetMemoRequired, MsgSetMemoRequired:
-		return [4]byte{18, 183, 33, 189}, nil
+		return 1434760978, true
 	case *MsgSetWithdrawAddress, MsgSetWithdrawAddress:
-		return [4]byte{208, 136, 199, 77}, nil
+		return 648513744, true
 	case *MsgSubmitProposal, MsgSubmitProposal:
-		return [4]byte{84, 236, 141, 114}, nil
+		return 2492591188, true
 	case *MsgSupervisedSend, MsgSupervisedSend:
-		return [4]byte{231, 172, 14, 69}, nil
+		return 3532434663, true
 	case *MsgTransferOwnership, MsgTransferOwnership:
-		return [4]byte{120, 20, 134, 126}, nil
+		return 3889173624, true
 	case *MsgUnForbidAddr, MsgUnForbidAddr:
-		return [4]byte{141, 21, 34, 63}, nil
+		return 3664778637, true
 	case *MsgUnForbidToken, MsgUnForbidToken:
-		return [4]byte{79, 103, 52, 189}, nil
+		return 2657838927, true
 	case *MsgUndelegate, MsgUndelegate:
-		return [4]byte{21, 241, 6, 56}, nil
+		return 2160390421, true
 	case *MsgUnjail, MsgUnjail:
-		return [4]byte{139, 110, 39, 159}, nil
+		return 3047452299, true
 	case *MsgVerifyInvariant, MsgVerifyInvariant:
-		return [4]byte{109, 173, 240, 7}, nil
+		return 4029525357, true
 	case *MsgVote, MsgVote:
-		return [4]byte{233, 121, 28, 250}, nil
+		return 3121445353, true
 	case *MsgWithdrawDelegatorReward, MsgWithdrawDelegatorReward:
-		return [4]byte{43, 19, 183, 111}, nil
+		return 1404506923, true
 	case *MsgWithdrawValidatorCommission, MsgWithdrawValidatorCommission:
-		return [4]byte{84, 85, 236, 88}, nil
+		return 1320375636, true
 	case *Order, Order:
-		return [4]byte{107, 224, 144, 130}, nil
+		return 526377067, true
 	case *Output, Output:
-		return [4]byte{178, 67, 155, 203}, nil
+		return 1883194290, true
 	case *ParamChange, ParamChange:
-		return [4]byte{66, 250, 248, 208}, nil
+		return 3159554626, true
 	case *ParameterChangeProposal, ParameterChangeProposal:
-		return [4]byte{49, 37, 122, 86}, nil
+		return 1402283313, true
 	case *PrivKeyEd25519, PrivKeyEd25519:
-		return [4]byte{158, 94, 112, 161}, nil
+		return 1455054494, true
 	case *PrivKeySecp256k1, PrivKeySecp256k1:
-		return [4]byte{83, 16, 177, 42}, nil
+		return 135729235, true
 	case *PubKeyEd25519, PubKeyEd25519:
-		return [4]byte{114, 76, 37, 23}, nil
+		return 2779925618, true
 	case *PubKeyMultisigThreshold, PubKeyMultisigThreshold:
-		return [4]byte{14, 33, 23, 141}, nil
+		return 2131042574, true
 	case *PubKeySecp256k1, PubKeySecp256k1:
-		return [4]byte{51, 161, 20, 197}, nil
+		return 1626972467, true
 	case *SdkDec, SdkDec:
-		return [4]byte{131, 101, 23, 4}, nil
+		return 172320131, true
 	case *SdkInt, SdkInt:
-		return [4]byte{189, 210, 54, 221}, nil
+		return 2300105405, true
 	case *SignedMsgType, SignedMsgType:
-		return [4]byte{67, 52, 162, 78}, nil
+		return 2430153795, true
 	case *SoftwareUpgradeProposal, SoftwareUpgradeProposal:
-		return [4]byte{162, 148, 222, 207}, nil
+		return 229479586, true
 	case *State, State:
-		return [4]byte{163, 181, 12, 71}, nil
+		return 3124475299, true
 	case *StdSignature, StdSignature:
-		return [4]byte{247, 42, 43, 179}, nil
+		return 1176316663, true
 	case *StdTx, StdTx:
-		return [4]byte{247, 170, 118, 185}, nil
+		return 1362340599, true
 	case *StoreInfo, StoreInfo:
-		return [4]byte{224, 49, 135, 8}, nil
+		return 3916313056, true
 	case *Supply, Supply:
-		return [4]byte{191, 66, 141, 63}, nil
+		return 3848815295, true
 	case *TextProposal, TextProposal:
-		return [4]byte{207, 179, 211, 152}, nil
+		return 3501044687, true
 	case *Vote, Vote:
-		return [4]byte{205, 85, 136, 219}, nil
+		return 3874772429, true
 	case *VoteOption, VoteOption:
-		return [4]byte{170, 208, 50, 2}, nil
+		return 2889994410, true
 	case *int64, int64:
-		return [4]byte{188, 34, 41, 102}, nil
+		return 2056659644, true
 	case *uint64, uint64:
-		return [4]byte{36, 210, 58, 112}, nil
+		return 3589394980, true
 	default:
-		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
+		return 0, false
 	} // end of switch
 } // end of func
 func EncodeAny(w *[]byte, x interface{}) {
 	switch v := x.(type) {
 	case AccAddress:
-		*w = append(*w, getMagicBytes("AccAddress")...)
-		EncodeAccAddress(w, v)
+		codonEncodeByteSlice(int(getMagicNum("AccAddress")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeAccAddress(w, v)
+			return wBuf
+		}())
 	case *AccAddress:
-		*w = append(*w, getMagicBytes("AccAddress")...)
-		EncodeAccAddress(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("AccAddress")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeAccAddress(w, *v)
+			return wBuf
+		}())
 	case AccAddressList:
-		*w = append(*w, getMagicBytes("AccAddressList")...)
-		EncodeAccAddressList(w, v)
+		codonEncodeByteSlice(int(getMagicNum("AccAddressList")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeAccAddressList(w, v)
+			return wBuf
+		}())
 	case *AccAddressList:
-		*w = append(*w, getMagicBytes("AccAddressList")...)
-		EncodeAccAddressList(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("AccAddressList")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeAccAddressList(w, *v)
+			return wBuf
+		}())
 	case AccountX:
-		*w = append(*w, getMagicBytes("AccountX")...)
-		EncodeAccountX(w, v)
+		codonEncodeByteSlice(int(getMagicNum("AccountX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeAccountX(w, v)
+			return wBuf
+		}())
 	case *AccountX:
-		*w = append(*w, getMagicBytes("AccountX")...)
-		EncodeAccountX(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("AccountX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeAccountX(w, *v)
+			return wBuf
+		}())
 	case BaseAccount:
-		*w = append(*w, getMagicBytes("BaseAccount")...)
-		EncodeBaseAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("BaseAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseAccount(w, v)
+			return wBuf
+		}())
 	case *BaseAccount:
-		*w = append(*w, getMagicBytes("BaseAccount")...)
-		EncodeBaseAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("BaseAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseAccount(w, *v)
+			return wBuf
+		}())
 	case BaseToken:
-		*w = append(*w, getMagicBytes("BaseToken")...)
-		EncodeBaseToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("BaseToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseToken(w, v)
+			return wBuf
+		}())
 	case *BaseToken:
-		*w = append(*w, getMagicBytes("BaseToken")...)
-		EncodeBaseToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("BaseToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseToken(w, *v)
+			return wBuf
+		}())
 	case BaseVestingAccount:
-		*w = append(*w, getMagicBytes("BaseVestingAccount")...)
-		EncodeBaseVestingAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("BaseVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseVestingAccount(w, v)
+			return wBuf
+		}())
 	case *BaseVestingAccount:
-		*w = append(*w, getMagicBytes("BaseVestingAccount")...)
-		EncodeBaseVestingAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("BaseVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeBaseVestingAccount(w, *v)
+			return wBuf
+		}())
 	case Coin:
-		*w = append(*w, getMagicBytes("Coin")...)
-		EncodeCoin(w, v)
+		codonEncodeByteSlice(int(getMagicNum("Coin")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCoin(w, v)
+			return wBuf
+		}())
 	case *Coin:
-		*w = append(*w, getMagicBytes("Coin")...)
-		EncodeCoin(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("Coin")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCoin(w, *v)
+			return wBuf
+		}())
 	case CommentRef:
-		*w = append(*w, getMagicBytes("CommentRef")...)
-		EncodeCommentRef(w, v)
+		codonEncodeByteSlice(int(getMagicNum("CommentRef")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCommentRef(w, v)
+			return wBuf
+		}())
 	case *CommentRef:
-		*w = append(*w, getMagicBytes("CommentRef")...)
-		EncodeCommentRef(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("CommentRef")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCommentRef(w, *v)
+			return wBuf
+		}())
 	case CommitInfo:
-		*w = append(*w, getMagicBytes("CommitInfo")...)
-		EncodeCommitInfo(w, v)
+		codonEncodeByteSlice(int(getMagicNum("CommitInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCommitInfo(w, v)
+			return wBuf
+		}())
 	case *CommitInfo:
-		*w = append(*w, getMagicBytes("CommitInfo")...)
-		EncodeCommitInfo(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("CommitInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCommitInfo(w, *v)
+			return wBuf
+		}())
 	case CommunityPoolSpendProposal:
-		*w = append(*w, getMagicBytes("CommunityPoolSpendProposal")...)
-		EncodeCommunityPoolSpendProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("CommunityPoolSpendProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCommunityPoolSpendProposal(w, v)
+			return wBuf
+		}())
 	case *CommunityPoolSpendProposal:
-		*w = append(*w, getMagicBytes("CommunityPoolSpendProposal")...)
-		EncodeCommunityPoolSpendProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("CommunityPoolSpendProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeCommunityPoolSpendProposal(w, *v)
+			return wBuf
+		}())
 	case ConsAddress:
-		*w = append(*w, getMagicBytes("ConsAddress")...)
-		EncodeConsAddress(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ConsAddress")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeConsAddress(w, v)
+			return wBuf
+		}())
 	case *ConsAddress:
-		*w = append(*w, getMagicBytes("ConsAddress")...)
-		EncodeConsAddress(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ConsAddress")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeConsAddress(w, *v)
+			return wBuf
+		}())
 	case ContinuousVestingAccount:
-		*w = append(*w, getMagicBytes("ContinuousVestingAccount")...)
-		EncodeContinuousVestingAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ContinuousVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeContinuousVestingAccount(w, v)
+			return wBuf
+		}())
 	case *ContinuousVestingAccount:
-		*w = append(*w, getMagicBytes("ContinuousVestingAccount")...)
-		EncodeContinuousVestingAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ContinuousVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeContinuousVestingAccount(w, *v)
+			return wBuf
+		}())
 	case DecCoin:
-		*w = append(*w, getMagicBytes("DecCoin")...)
-		EncodeDecCoin(w, v)
+		codonEncodeByteSlice(int(getMagicNum("DecCoin")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeDecCoin(w, v)
+			return wBuf
+		}())
 	case *DecCoin:
-		*w = append(*w, getMagicBytes("DecCoin")...)
-		EncodeDecCoin(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("DecCoin")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeDecCoin(w, *v)
+			return wBuf
+		}())
 	case DelayedVestingAccount:
-		*w = append(*w, getMagicBytes("DelayedVestingAccount")...)
-		EncodeDelayedVestingAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("DelayedVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeDelayedVestingAccount(w, v)
+			return wBuf
+		}())
 	case *DelayedVestingAccount:
-		*w = append(*w, getMagicBytes("DelayedVestingAccount")...)
-		EncodeDelayedVestingAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("DelayedVestingAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeDelayedVestingAccount(w, *v)
+			return wBuf
+		}())
 	case FeePool:
-		*w = append(*w, getMagicBytes("FeePool")...)
-		EncodeFeePool(w, v)
+		codonEncodeByteSlice(int(getMagicNum("FeePool")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeFeePool(w, v)
+			return wBuf
+		}())
 	case *FeePool:
-		*w = append(*w, getMagicBytes("FeePool")...)
-		EncodeFeePool(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("FeePool")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeFeePool(w, *v)
+			return wBuf
+		}())
 	case Input:
-		*w = append(*w, getMagicBytes("Input")...)
-		EncodeInput(w, v)
+		codonEncodeByteSlice(int(getMagicNum("Input")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeInput(w, v)
+			return wBuf
+		}())
 	case *Input:
-		*w = append(*w, getMagicBytes("Input")...)
-		EncodeInput(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("Input")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeInput(w, *v)
+			return wBuf
+		}())
 	case LockedCoin:
-		*w = append(*w, getMagicBytes("LockedCoin")...)
-		EncodeLockedCoin(w, v)
+		codonEncodeByteSlice(int(getMagicNum("LockedCoin")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeLockedCoin(w, v)
+			return wBuf
+		}())
 	case *LockedCoin:
-		*w = append(*w, getMagicBytes("LockedCoin")...)
-		EncodeLockedCoin(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("LockedCoin")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeLockedCoin(w, *v)
+			return wBuf
+		}())
 	case MarketInfo:
-		*w = append(*w, getMagicBytes("MarketInfo")...)
-		EncodeMarketInfo(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MarketInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMarketInfo(w, v)
+			return wBuf
+		}())
 	case *MarketInfo:
-		*w = append(*w, getMagicBytes("MarketInfo")...)
-		EncodeMarketInfo(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MarketInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMarketInfo(w, *v)
+			return wBuf
+		}())
 	case ModuleAccount:
-		*w = append(*w, getMagicBytes("ModuleAccount")...)
-		EncodeModuleAccount(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ModuleAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeModuleAccount(w, v)
+			return wBuf
+		}())
 	case *ModuleAccount:
-		*w = append(*w, getMagicBytes("ModuleAccount")...)
-		EncodeModuleAccount(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ModuleAccount")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeModuleAccount(w, *v)
+			return wBuf
+		}())
 	case MsgAddTokenWhitelist:
-		*w = append(*w, getMagicBytes("MsgAddTokenWhitelist")...)
-		EncodeMsgAddTokenWhitelist(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgAddTokenWhitelist")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgAddTokenWhitelist(w, v)
+			return wBuf
+		}())
 	case *MsgAddTokenWhitelist:
-		*w = append(*w, getMagicBytes("MsgAddTokenWhitelist")...)
-		EncodeMsgAddTokenWhitelist(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgAddTokenWhitelist")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgAddTokenWhitelist(w, *v)
+			return wBuf
+		}())
 	case MsgAliasUpdate:
-		*w = append(*w, getMagicBytes("MsgAliasUpdate")...)
-		EncodeMsgAliasUpdate(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgAliasUpdate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgAliasUpdate(w, v)
+			return wBuf
+		}())
 	case *MsgAliasUpdate:
-		*w = append(*w, getMagicBytes("MsgAliasUpdate")...)
-		EncodeMsgAliasUpdate(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgAliasUpdate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgAliasUpdate(w, *v)
+			return wBuf
+		}())
 	case MsgBancorCancel:
-		*w = append(*w, getMagicBytes("MsgBancorCancel")...)
-		EncodeMsgBancorCancel(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorCancel")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorCancel(w, v)
+			return wBuf
+		}())
 	case *MsgBancorCancel:
-		*w = append(*w, getMagicBytes("MsgBancorCancel")...)
-		EncodeMsgBancorCancel(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorCancel")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorCancel(w, *v)
+			return wBuf
+		}())
 	case MsgBancorInit:
-		*w = append(*w, getMagicBytes("MsgBancorInit")...)
-		EncodeMsgBancorInit(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorInit")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorInit(w, v)
+			return wBuf
+		}())
 	case *MsgBancorInit:
-		*w = append(*w, getMagicBytes("MsgBancorInit")...)
-		EncodeMsgBancorInit(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorInit")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorInit(w, *v)
+			return wBuf
+		}())
 	case MsgBancorTrade:
-		*w = append(*w, getMagicBytes("MsgBancorTrade")...)
-		EncodeMsgBancorTrade(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorTrade")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorTrade(w, v)
+			return wBuf
+		}())
 	case *MsgBancorTrade:
-		*w = append(*w, getMagicBytes("MsgBancorTrade")...)
-		EncodeMsgBancorTrade(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBancorTrade")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBancorTrade(w, *v)
+			return wBuf
+		}())
 	case MsgBeginRedelegate:
-		*w = append(*w, getMagicBytes("MsgBeginRedelegate")...)
-		EncodeMsgBeginRedelegate(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBeginRedelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBeginRedelegate(w, v)
+			return wBuf
+		}())
 	case *MsgBeginRedelegate:
-		*w = append(*w, getMagicBytes("MsgBeginRedelegate")...)
-		EncodeMsgBeginRedelegate(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBeginRedelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBeginRedelegate(w, *v)
+			return wBuf
+		}())
 	case MsgBurnToken:
-		*w = append(*w, getMagicBytes("MsgBurnToken")...)
-		EncodeMsgBurnToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBurnToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBurnToken(w, v)
+			return wBuf
+		}())
 	case *MsgBurnToken:
-		*w = append(*w, getMagicBytes("MsgBurnToken")...)
-		EncodeMsgBurnToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgBurnToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgBurnToken(w, *v)
+			return wBuf
+		}())
 	case MsgCancelOrder:
-		*w = append(*w, getMagicBytes("MsgCancelOrder")...)
-		EncodeMsgCancelOrder(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCancelOrder")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCancelOrder(w, v)
+			return wBuf
+		}())
 	case *MsgCancelOrder:
-		*w = append(*w, getMagicBytes("MsgCancelOrder")...)
-		EncodeMsgCancelOrder(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCancelOrder")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCancelOrder(w, *v)
+			return wBuf
+		}())
 	case MsgCancelTradingPair:
-		*w = append(*w, getMagicBytes("MsgCancelTradingPair")...)
-		EncodeMsgCancelTradingPair(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCancelTradingPair")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCancelTradingPair(w, v)
+			return wBuf
+		}())
 	case *MsgCancelTradingPair:
-		*w = append(*w, getMagicBytes("MsgCancelTradingPair")...)
-		EncodeMsgCancelTradingPair(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCancelTradingPair")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCancelTradingPair(w, *v)
+			return wBuf
+		}())
 	case MsgCommentToken:
-		*w = append(*w, getMagicBytes("MsgCommentToken")...)
-		EncodeMsgCommentToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCommentToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCommentToken(w, v)
+			return wBuf
+		}())
 	case *MsgCommentToken:
-		*w = append(*w, getMagicBytes("MsgCommentToken")...)
-		EncodeMsgCommentToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCommentToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCommentToken(w, *v)
+			return wBuf
+		}())
 	case MsgCreateOrder:
-		*w = append(*w, getMagicBytes("MsgCreateOrder")...)
-		EncodeMsgCreateOrder(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateOrder")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateOrder(w, v)
+			return wBuf
+		}())
 	case *MsgCreateOrder:
-		*w = append(*w, getMagicBytes("MsgCreateOrder")...)
-		EncodeMsgCreateOrder(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateOrder")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateOrder(w, *v)
+			return wBuf
+		}())
 	case MsgCreateTradingPair:
-		*w = append(*w, getMagicBytes("MsgCreateTradingPair")...)
-		EncodeMsgCreateTradingPair(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateTradingPair")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateTradingPair(w, v)
+			return wBuf
+		}())
 	case *MsgCreateTradingPair:
-		*w = append(*w, getMagicBytes("MsgCreateTradingPair")...)
-		EncodeMsgCreateTradingPair(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateTradingPair")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateTradingPair(w, *v)
+			return wBuf
+		}())
 	case MsgCreateValidator:
-		*w = append(*w, getMagicBytes("MsgCreateValidator")...)
-		EncodeMsgCreateValidator(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateValidator")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateValidator(w, v)
+			return wBuf
+		}())
 	case *MsgCreateValidator:
-		*w = append(*w, getMagicBytes("MsgCreateValidator")...)
-		EncodeMsgCreateValidator(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgCreateValidator")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgCreateValidator(w, *v)
+			return wBuf
+		}())
 	case MsgDelegate:
-		*w = append(*w, getMagicBytes("MsgDelegate")...)
-		EncodeMsgDelegate(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDelegate(w, v)
+			return wBuf
+		}())
 	case *MsgDelegate:
-		*w = append(*w, getMagicBytes("MsgDelegate")...)
-		EncodeMsgDelegate(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDelegate(w, *v)
+			return wBuf
+		}())
 	case MsgDeposit:
-		*w = append(*w, getMagicBytes("MsgDeposit")...)
-		EncodeMsgDeposit(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDeposit")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDeposit(w, v)
+			return wBuf
+		}())
 	case *MsgDeposit:
-		*w = append(*w, getMagicBytes("MsgDeposit")...)
-		EncodeMsgDeposit(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDeposit")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDeposit(w, *v)
+			return wBuf
+		}())
 	case MsgDonateToCommunityPool:
-		*w = append(*w, getMagicBytes("MsgDonateToCommunityPool")...)
-		EncodeMsgDonateToCommunityPool(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDonateToCommunityPool")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDonateToCommunityPool(w, v)
+			return wBuf
+		}())
 	case *MsgDonateToCommunityPool:
-		*w = append(*w, getMagicBytes("MsgDonateToCommunityPool")...)
-		EncodeMsgDonateToCommunityPool(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgDonateToCommunityPool")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgDonateToCommunityPool(w, *v)
+			return wBuf
+		}())
 	case MsgEditValidator:
-		*w = append(*w, getMagicBytes("MsgEditValidator")...)
-		EncodeMsgEditValidator(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgEditValidator")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgEditValidator(w, v)
+			return wBuf
+		}())
 	case *MsgEditValidator:
-		*w = append(*w, getMagicBytes("MsgEditValidator")...)
-		EncodeMsgEditValidator(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgEditValidator")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgEditValidator(w, *v)
+			return wBuf
+		}())
 	case MsgForbidAddr:
-		*w = append(*w, getMagicBytes("MsgForbidAddr")...)
-		EncodeMsgForbidAddr(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgForbidAddr")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgForbidAddr(w, v)
+			return wBuf
+		}())
 	case *MsgForbidAddr:
-		*w = append(*w, getMagicBytes("MsgForbidAddr")...)
-		EncodeMsgForbidAddr(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgForbidAddr")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgForbidAddr(w, *v)
+			return wBuf
+		}())
 	case MsgForbidToken:
-		*w = append(*w, getMagicBytes("MsgForbidToken")...)
-		EncodeMsgForbidToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgForbidToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgForbidToken(w, v)
+			return wBuf
+		}())
 	case *MsgForbidToken:
-		*w = append(*w, getMagicBytes("MsgForbidToken")...)
-		EncodeMsgForbidToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgForbidToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgForbidToken(w, *v)
+			return wBuf
+		}())
 	case MsgIssueToken:
-		*w = append(*w, getMagicBytes("MsgIssueToken")...)
-		EncodeMsgIssueToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgIssueToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgIssueToken(w, v)
+			return wBuf
+		}())
 	case *MsgIssueToken:
-		*w = append(*w, getMagicBytes("MsgIssueToken")...)
-		EncodeMsgIssueToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgIssueToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgIssueToken(w, *v)
+			return wBuf
+		}())
 	case MsgMintToken:
-		*w = append(*w, getMagicBytes("MsgMintToken")...)
-		EncodeMsgMintToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMintToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMintToken(w, v)
+			return wBuf
+		}())
 	case *MsgMintToken:
-		*w = append(*w, getMagicBytes("MsgMintToken")...)
-		EncodeMsgMintToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMintToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMintToken(w, *v)
+			return wBuf
+		}())
 	case MsgModifyPricePrecision:
-		*w = append(*w, getMagicBytes("MsgModifyPricePrecision")...)
-		EncodeMsgModifyPricePrecision(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgModifyPricePrecision")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgModifyPricePrecision(w, v)
+			return wBuf
+		}())
 	case *MsgModifyPricePrecision:
-		*w = append(*w, getMagicBytes("MsgModifyPricePrecision")...)
-		EncodeMsgModifyPricePrecision(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgModifyPricePrecision")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgModifyPricePrecision(w, *v)
+			return wBuf
+		}())
 	case MsgModifyTokenInfo:
-		*w = append(*w, getMagicBytes("MsgModifyTokenInfo")...)
-		EncodeMsgModifyTokenInfo(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgModifyTokenInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgModifyTokenInfo(w, v)
+			return wBuf
+		}())
 	case *MsgModifyTokenInfo:
-		*w = append(*w, getMagicBytes("MsgModifyTokenInfo")...)
-		EncodeMsgModifyTokenInfo(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgModifyTokenInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgModifyTokenInfo(w, *v)
+			return wBuf
+		}())
 	case MsgMultiSend:
-		*w = append(*w, getMagicBytes("MsgMultiSend")...)
-		EncodeMsgMultiSend(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMultiSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMultiSend(w, v)
+			return wBuf
+		}())
 	case *MsgMultiSend:
-		*w = append(*w, getMagicBytes("MsgMultiSend")...)
-		EncodeMsgMultiSend(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMultiSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMultiSend(w, *v)
+			return wBuf
+		}())
 	case MsgMultiSendX:
-		*w = append(*w, getMagicBytes("MsgMultiSendX")...)
-		EncodeMsgMultiSendX(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMultiSendX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMultiSendX(w, v)
+			return wBuf
+		}())
 	case *MsgMultiSendX:
-		*w = append(*w, getMagicBytes("MsgMultiSendX")...)
-		EncodeMsgMultiSendX(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgMultiSendX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgMultiSendX(w, *v)
+			return wBuf
+		}())
 	case MsgRemoveTokenWhitelist:
-		*w = append(*w, getMagicBytes("MsgRemoveTokenWhitelist")...)
-		EncodeMsgRemoveTokenWhitelist(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgRemoveTokenWhitelist")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgRemoveTokenWhitelist(w, v)
+			return wBuf
+		}())
 	case *MsgRemoveTokenWhitelist:
-		*w = append(*w, getMagicBytes("MsgRemoveTokenWhitelist")...)
-		EncodeMsgRemoveTokenWhitelist(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgRemoveTokenWhitelist")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgRemoveTokenWhitelist(w, *v)
+			return wBuf
+		}())
 	case MsgSend:
-		*w = append(*w, getMagicBytes("MsgSend")...)
-		EncodeMsgSend(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSend(w, v)
+			return wBuf
+		}())
 	case *MsgSend:
-		*w = append(*w, getMagicBytes("MsgSend")...)
-		EncodeMsgSend(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSend(w, *v)
+			return wBuf
+		}())
 	case MsgSendX:
-		*w = append(*w, getMagicBytes("MsgSendX")...)
-		EncodeMsgSendX(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSendX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSendX(w, v)
+			return wBuf
+		}())
 	case *MsgSendX:
-		*w = append(*w, getMagicBytes("MsgSendX")...)
-		EncodeMsgSendX(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSendX")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSendX(w, *v)
+			return wBuf
+		}())
 	case MsgSetMemoRequired:
-		*w = append(*w, getMagicBytes("MsgSetMemoRequired")...)
-		EncodeMsgSetMemoRequired(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSetMemoRequired")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSetMemoRequired(w, v)
+			return wBuf
+		}())
 	case *MsgSetMemoRequired:
-		*w = append(*w, getMagicBytes("MsgSetMemoRequired")...)
-		EncodeMsgSetMemoRequired(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSetMemoRequired")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSetMemoRequired(w, *v)
+			return wBuf
+		}())
 	case MsgSetWithdrawAddress:
-		*w = append(*w, getMagicBytes("MsgSetWithdrawAddress")...)
-		EncodeMsgSetWithdrawAddress(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSetWithdrawAddress")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSetWithdrawAddress(w, v)
+			return wBuf
+		}())
 	case *MsgSetWithdrawAddress:
-		*w = append(*w, getMagicBytes("MsgSetWithdrawAddress")...)
-		EncodeMsgSetWithdrawAddress(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSetWithdrawAddress")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSetWithdrawAddress(w, *v)
+			return wBuf
+		}())
 	case MsgSubmitProposal:
-		*w = append(*w, getMagicBytes("MsgSubmitProposal")...)
-		EncodeMsgSubmitProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSubmitProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSubmitProposal(w, v)
+			return wBuf
+		}())
 	case *MsgSubmitProposal:
-		*w = append(*w, getMagicBytes("MsgSubmitProposal")...)
-		EncodeMsgSubmitProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSubmitProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSubmitProposal(w, *v)
+			return wBuf
+		}())
 	case MsgSupervisedSend:
-		*w = append(*w, getMagicBytes("MsgSupervisedSend")...)
-		EncodeMsgSupervisedSend(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSupervisedSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSupervisedSend(w, v)
+			return wBuf
+		}())
 	case *MsgSupervisedSend:
-		*w = append(*w, getMagicBytes("MsgSupervisedSend")...)
-		EncodeMsgSupervisedSend(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgSupervisedSend")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgSupervisedSend(w, *v)
+			return wBuf
+		}())
 	case MsgTransferOwnership:
-		*w = append(*w, getMagicBytes("MsgTransferOwnership")...)
-		EncodeMsgTransferOwnership(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgTransferOwnership")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgTransferOwnership(w, v)
+			return wBuf
+		}())
 	case *MsgTransferOwnership:
-		*w = append(*w, getMagicBytes("MsgTransferOwnership")...)
-		EncodeMsgTransferOwnership(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgTransferOwnership")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgTransferOwnership(w, *v)
+			return wBuf
+		}())
 	case MsgUnForbidAddr:
-		*w = append(*w, getMagicBytes("MsgUnForbidAddr")...)
-		EncodeMsgUnForbidAddr(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnForbidAddr")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnForbidAddr(w, v)
+			return wBuf
+		}())
 	case *MsgUnForbidAddr:
-		*w = append(*w, getMagicBytes("MsgUnForbidAddr")...)
-		EncodeMsgUnForbidAddr(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnForbidAddr")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnForbidAddr(w, *v)
+			return wBuf
+		}())
 	case MsgUnForbidToken:
-		*w = append(*w, getMagicBytes("MsgUnForbidToken")...)
-		EncodeMsgUnForbidToken(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnForbidToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnForbidToken(w, v)
+			return wBuf
+		}())
 	case *MsgUnForbidToken:
-		*w = append(*w, getMagicBytes("MsgUnForbidToken")...)
-		EncodeMsgUnForbidToken(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnForbidToken")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnForbidToken(w, *v)
+			return wBuf
+		}())
 	case MsgUndelegate:
-		*w = append(*w, getMagicBytes("MsgUndelegate")...)
-		EncodeMsgUndelegate(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUndelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUndelegate(w, v)
+			return wBuf
+		}())
 	case *MsgUndelegate:
-		*w = append(*w, getMagicBytes("MsgUndelegate")...)
-		EncodeMsgUndelegate(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUndelegate")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUndelegate(w, *v)
+			return wBuf
+		}())
 	case MsgUnjail:
-		*w = append(*w, getMagicBytes("MsgUnjail")...)
-		EncodeMsgUnjail(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnjail")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnjail(w, v)
+			return wBuf
+		}())
 	case *MsgUnjail:
-		*w = append(*w, getMagicBytes("MsgUnjail")...)
-		EncodeMsgUnjail(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgUnjail")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgUnjail(w, *v)
+			return wBuf
+		}())
 	case MsgVerifyInvariant:
-		*w = append(*w, getMagicBytes("MsgVerifyInvariant")...)
-		EncodeMsgVerifyInvariant(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgVerifyInvariant")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgVerifyInvariant(w, v)
+			return wBuf
+		}())
 	case *MsgVerifyInvariant:
-		*w = append(*w, getMagicBytes("MsgVerifyInvariant")...)
-		EncodeMsgVerifyInvariant(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgVerifyInvariant")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgVerifyInvariant(w, *v)
+			return wBuf
+		}())
 	case MsgVote:
-		*w = append(*w, getMagicBytes("MsgVote")...)
-		EncodeMsgVote(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgVote")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgVote(w, v)
+			return wBuf
+		}())
 	case *MsgVote:
-		*w = append(*w, getMagicBytes("MsgVote")...)
-		EncodeMsgVote(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgVote")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgVote(w, *v)
+			return wBuf
+		}())
 	case MsgWithdrawDelegatorReward:
-		*w = append(*w, getMagicBytes("MsgWithdrawDelegatorReward")...)
-		EncodeMsgWithdrawDelegatorReward(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgWithdrawDelegatorReward")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgWithdrawDelegatorReward(w, v)
+			return wBuf
+		}())
 	case *MsgWithdrawDelegatorReward:
-		*w = append(*w, getMagicBytes("MsgWithdrawDelegatorReward")...)
-		EncodeMsgWithdrawDelegatorReward(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgWithdrawDelegatorReward")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgWithdrawDelegatorReward(w, *v)
+			return wBuf
+		}())
 	case MsgWithdrawValidatorCommission:
-		*w = append(*w, getMagicBytes("MsgWithdrawValidatorCommission")...)
-		EncodeMsgWithdrawValidatorCommission(w, v)
+		codonEncodeByteSlice(int(getMagicNum("MsgWithdrawValidatorCommission")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgWithdrawValidatorCommission(w, v)
+			return wBuf
+		}())
 	case *MsgWithdrawValidatorCommission:
-		*w = append(*w, getMagicBytes("MsgWithdrawValidatorCommission")...)
-		EncodeMsgWithdrawValidatorCommission(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("MsgWithdrawValidatorCommission")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeMsgWithdrawValidatorCommission(w, *v)
+			return wBuf
+		}())
 	case Order:
-		*w = append(*w, getMagicBytes("Order")...)
-		EncodeOrder(w, v)
+		codonEncodeByteSlice(int(getMagicNum("Order")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeOrder(w, v)
+			return wBuf
+		}())
 	case *Order:
-		*w = append(*w, getMagicBytes("Order")...)
-		EncodeOrder(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("Order")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeOrder(w, *v)
+			return wBuf
+		}())
 	case Output:
-		*w = append(*w, getMagicBytes("Output")...)
-		EncodeOutput(w, v)
+		codonEncodeByteSlice(int(getMagicNum("Output")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeOutput(w, v)
+			return wBuf
+		}())
 	case *Output:
-		*w = append(*w, getMagicBytes("Output")...)
-		EncodeOutput(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("Output")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeOutput(w, *v)
+			return wBuf
+		}())
 	case ParamChange:
-		*w = append(*w, getMagicBytes("ParamChange")...)
-		EncodeParamChange(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ParamChange")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeParamChange(w, v)
+			return wBuf
+		}())
 	case *ParamChange:
-		*w = append(*w, getMagicBytes("ParamChange")...)
-		EncodeParamChange(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ParamChange")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeParamChange(w, *v)
+			return wBuf
+		}())
 	case ParameterChangeProposal:
-		*w = append(*w, getMagicBytes("ParameterChangeProposal")...)
-		EncodeParameterChangeProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("ParameterChangeProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeParameterChangeProposal(w, v)
+			return wBuf
+		}())
 	case *ParameterChangeProposal:
-		*w = append(*w, getMagicBytes("ParameterChangeProposal")...)
-		EncodeParameterChangeProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("ParameterChangeProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeParameterChangeProposal(w, *v)
+			return wBuf
+		}())
 	case PrivKeyEd25519:
-		*w = append(*w, getMagicBytes("PrivKeyEd25519")...)
-		EncodePrivKeyEd25519(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PrivKeyEd25519")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePrivKeyEd25519(w, v)
+			return wBuf
+		}())
 	case *PrivKeyEd25519:
-		*w = append(*w, getMagicBytes("PrivKeyEd25519")...)
-		EncodePrivKeyEd25519(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PrivKeyEd25519")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePrivKeyEd25519(w, *v)
+			return wBuf
+		}())
 	case PrivKeySecp256k1:
-		*w = append(*w, getMagicBytes("PrivKeySecp256k1")...)
-		EncodePrivKeySecp256k1(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PrivKeySecp256k1")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePrivKeySecp256k1(w, v)
+			return wBuf
+		}())
 	case *PrivKeySecp256k1:
-		*w = append(*w, getMagicBytes("PrivKeySecp256k1")...)
-		EncodePrivKeySecp256k1(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PrivKeySecp256k1")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePrivKeySecp256k1(w, *v)
+			return wBuf
+		}())
 	case PubKeyEd25519:
-		*w = append(*w, getMagicBytes("PubKeyEd25519")...)
-		EncodePubKeyEd25519(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeyEd25519")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeyEd25519(w, v)
+			return wBuf
+		}())
 	case *PubKeyEd25519:
-		*w = append(*w, getMagicBytes("PubKeyEd25519")...)
-		EncodePubKeyEd25519(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeyEd25519")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeyEd25519(w, *v)
+			return wBuf
+		}())
 	case PubKeyMultisigThreshold:
-		*w = append(*w, getMagicBytes("PubKeyMultisigThreshold")...)
-		EncodePubKeyMultisigThreshold(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeyMultisigThreshold")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeyMultisigThreshold(w, v)
+			return wBuf
+		}())
 	case *PubKeyMultisigThreshold:
-		*w = append(*w, getMagicBytes("PubKeyMultisigThreshold")...)
-		EncodePubKeyMultisigThreshold(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeyMultisigThreshold")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeyMultisigThreshold(w, *v)
+			return wBuf
+		}())
 	case PubKeySecp256k1:
-		*w = append(*w, getMagicBytes("PubKeySecp256k1")...)
-		EncodePubKeySecp256k1(w, v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeySecp256k1")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeySecp256k1(w, v)
+			return wBuf
+		}())
 	case *PubKeySecp256k1:
-		*w = append(*w, getMagicBytes("PubKeySecp256k1")...)
-		EncodePubKeySecp256k1(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("PubKeySecp256k1")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodePubKeySecp256k1(w, *v)
+			return wBuf
+		}())
 	case SdkDec:
-		*w = append(*w, getMagicBytes("SdkDec")...)
-		EncodeSdkDec(w, v)
+		codonEncodeByteSlice(int(getMagicNum("SdkDec")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSdkDec(w, v)
+			return wBuf
+		}())
 	case *SdkDec:
-		*w = append(*w, getMagicBytes("SdkDec")...)
-		EncodeSdkDec(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("SdkDec")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSdkDec(w, *v)
+			return wBuf
+		}())
 	case SdkInt:
-		*w = append(*w, getMagicBytes("SdkInt")...)
-		EncodeSdkInt(w, v)
+		codonEncodeByteSlice(int(getMagicNum("SdkInt")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSdkInt(w, v)
+			return wBuf
+		}())
 	case *SdkInt:
-		*w = append(*w, getMagicBytes("SdkInt")...)
-		EncodeSdkInt(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("SdkInt")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSdkInt(w, *v)
+			return wBuf
+		}())
 	case SignedMsgType:
-		*w = append(*w, getMagicBytes("SignedMsgType")...)
-		EncodeSignedMsgType(w, v)
+		codonEncodeByteSlice(int(getMagicNum("SignedMsgType")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSignedMsgType(w, v)
+			return wBuf
+		}())
 	case *SignedMsgType:
-		*w = append(*w, getMagicBytes("SignedMsgType")...)
-		EncodeSignedMsgType(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("SignedMsgType")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSignedMsgType(w, *v)
+			return wBuf
+		}())
 	case SoftwareUpgradeProposal:
-		*w = append(*w, getMagicBytes("SoftwareUpgradeProposal")...)
-		EncodeSoftwareUpgradeProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("SoftwareUpgradeProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSoftwareUpgradeProposal(w, v)
+			return wBuf
+		}())
 	case *SoftwareUpgradeProposal:
-		*w = append(*w, getMagicBytes("SoftwareUpgradeProposal")...)
-		EncodeSoftwareUpgradeProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("SoftwareUpgradeProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSoftwareUpgradeProposal(w, *v)
+			return wBuf
+		}())
 	case State:
-		*w = append(*w, getMagicBytes("State")...)
-		EncodeState(w, v)
+		codonEncodeByteSlice(int(getMagicNum("State")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeState(w, v)
+			return wBuf
+		}())
 	case *State:
-		*w = append(*w, getMagicBytes("State")...)
-		EncodeState(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("State")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeState(w, *v)
+			return wBuf
+		}())
 	case StdSignature:
-		*w = append(*w, getMagicBytes("StdSignature")...)
-		EncodeStdSignature(w, v)
+		codonEncodeByteSlice(int(getMagicNum("StdSignature")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStdSignature(w, v)
+			return wBuf
+		}())
 	case *StdSignature:
-		*w = append(*w, getMagicBytes("StdSignature")...)
-		EncodeStdSignature(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("StdSignature")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStdSignature(w, *v)
+			return wBuf
+		}())
 	case StdTx:
-		*w = append(*w, getMagicBytes("StdTx")...)
-		EncodeStdTx(w, v)
+		codonEncodeByteSlice(int(getMagicNum("StdTx")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStdTx(w, v)
+			return wBuf
+		}())
 	case *StdTx:
-		*w = append(*w, getMagicBytes("StdTx")...)
-		EncodeStdTx(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("StdTx")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStdTx(w, *v)
+			return wBuf
+		}())
 	case StoreInfo:
-		*w = append(*w, getMagicBytes("StoreInfo")...)
-		EncodeStoreInfo(w, v)
+		codonEncodeByteSlice(int(getMagicNum("StoreInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStoreInfo(w, v)
+			return wBuf
+		}())
 	case *StoreInfo:
-		*w = append(*w, getMagicBytes("StoreInfo")...)
-		EncodeStoreInfo(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("StoreInfo")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeStoreInfo(w, *v)
+			return wBuf
+		}())
 	case Supply:
-		*w = append(*w, getMagicBytes("Supply")...)
-		EncodeSupply(w, v)
+		codonEncodeByteSlice(int(getMagicNum("Supply")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSupply(w, v)
+			return wBuf
+		}())
 	case *Supply:
-		*w = append(*w, getMagicBytes("Supply")...)
-		EncodeSupply(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("Supply")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeSupply(w, *v)
+			return wBuf
+		}())
 	case TextProposal:
-		*w = append(*w, getMagicBytes("TextProposal")...)
-		EncodeTextProposal(w, v)
+		codonEncodeByteSlice(int(getMagicNum("TextProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeTextProposal(w, v)
+			return wBuf
+		}())
 	case *TextProposal:
-		*w = append(*w, getMagicBytes("TextProposal")...)
-		EncodeTextProposal(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("TextProposal")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeTextProposal(w, *v)
+			return wBuf
+		}())
 	case Vote:
-		*w = append(*w, getMagicBytes("Vote")...)
-		EncodeVote(w, v)
+		codonEncodeByteSlice(int(getMagicNum("Vote")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeVote(w, v)
+			return wBuf
+		}())
 	case *Vote:
-		*w = append(*w, getMagicBytes("Vote")...)
-		EncodeVote(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("Vote")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeVote(w, *v)
+			return wBuf
+		}())
 	case VoteOption:
-		*w = append(*w, getMagicBytes("VoteOption")...)
-		EncodeVoteOption(w, v)
+		codonEncodeByteSlice(int(getMagicNum("VoteOption")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeVoteOption(w, v)
+			return wBuf
+		}())
 	case *VoteOption:
-		*w = append(*w, getMagicBytes("VoteOption")...)
-		EncodeVoteOption(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("VoteOption")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			EncodeVoteOption(w, *v)
+			return wBuf
+		}())
 	case int64:
-		*w = append(*w, getMagicBytes("int64")...)
-		Encodeint64(w, v)
+		codonEncodeByteSlice(int(getMagicNum("int64")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			Encodeint64(w, v)
+			return wBuf
+		}())
 	case *int64:
-		*w = append(*w, getMagicBytes("int64")...)
-		Encodeint64(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("int64")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			Encodeint64(w, *v)
+			return wBuf
+		}())
 	case uint64:
-		*w = append(*w, getMagicBytes("uint64")...)
-		Encodeuint64(w, v)
+		codonEncodeByteSlice(int(getMagicNum("uint64")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			Encodeuint64(w, v)
+			return wBuf
+		}())
 	case *uint64:
-		*w = append(*w, getMagicBytes("uint64")...)
-		Encodeuint64(w, *v)
+		codonEncodeByteSlice(int(getMagicNum("uint64")), w, func() []byte {
+			wBuf := make([]byte, 0, 64)
+			w := &wBuf
+			Encodeuint64(w, *v)
+			return wBuf
+		}())
 	default:
 		panic(fmt.Sprintf("Unknown Type %v %v\n", x, reflect.TypeOf(x)))
 	} // end of switch
 } // end of func
-func DecodeAny(bz []byte) (interface{}, int, error) {
-	var v interface{}
-	var magicBytes [4]byte
+func DecodeAny(bz []byte) (v interface{}, total int, err error) {
+
 	var n int
-	for i := 0; i < 4; i++ {
-		magicBytes[i] = bz[i]
+	tag := codonDecodeUint64(bz, &n, &err)
+	if err != nil {
+		return
 	}
-	switch magicBytes {
-	case [4]byte{0, 157, 18, 162}:
-		v, n, err := DecodeAccAddress(bz[4:])
-		return v, n + 4, err
-	case [4]byte{37, 72, 3, 140}:
-		v, n, err := DecodeAccAddressList(bz[4:])
-		return v, n + 4, err
-	case [4]byte{168, 11, 31, 112}:
-		v, n, err := DecodeAccountX(bz[4:])
-		return v, n + 4, err
-	case [4]byte{153, 157, 134, 34}:
-		v, n, err := DecodeBaseAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{38, 16, 216, 53}:
-		v, n, err := DecodeBaseToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{78, 248, 144, 54}:
-		v, n, err := DecodeBaseVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{2, 65, 204, 255}:
-		v, n, err := DecodeCoin(bz[4:])
-		return v, n + 4, err
-	case [4]byte{128, 102, 129, 152}:
-		v, n, err := DecodeCommentRef(bz[4:])
-		return v, n + 4, err
-	case [4]byte{2, 26, 137, 96}:
-		v, n, err := DecodeCommitInfo(bz[4:])
-		return v, n + 4, err
-	case [4]byte{31, 93, 37, 208}:
-		v, n, err := DecodeCommunityPoolSpendProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{28, 53, 138, 173}:
-		v, n, err := DecodeConsAddress(bz[4:])
-		return v, n + 4, err
-	case [4]byte{75, 69, 41, 151}:
-		v, n, err := DecodeContinuousVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{56, 163, 255, 105}:
-		v, n, err := DecodeDecCoin(bz[4:])
-		return v, n + 4, err
-	case [4]byte{59, 193, 203, 230}:
-		v, n, err := DecodeDelayedVestingAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{18, 193, 65, 104}:
-		v, n, err := DecodeFeePool(bz[4:])
-		return v, n + 4, err
-	case [4]byte{54, 236, 180, 248}:
-		v, n, err := DecodeInput(bz[4:])
-		return v, n + 4, err
-	case [4]byte{176, 57, 246, 199}:
-		v, n, err := DecodeLockedCoin(bz[4:])
-		return v, n + 4, err
-	case [4]byte{93, 194, 118, 168}:
-		v, n, err := DecodeMarketInfo(bz[4:])
-		return v, n + 4, err
-	case [4]byte{37, 29, 227, 212}:
-		v, n, err := DecodeModuleAccount(bz[4:])
-		return v, n + 4, err
-	case [4]byte{158, 44, 49, 82}:
-		v, n, err := DecodeMsgAddTokenWhitelist(bz[4:])
-		return v, n + 4, err
-	case [4]byte{250, 126, 184, 36}:
-		v, n, err := DecodeMsgAliasUpdate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{124, 247, 85, 232}:
-		v, n, err := DecodeMsgBancorCancel(bz[4:])
-		return v, n + 4, err
-	case [4]byte{192, 118, 23, 126}:
-		v, n, err := DecodeMsgBancorInit(bz[4:])
-		return v, n + 4, err
-	case [4]byte{191, 189, 4, 59}:
-		v, n, err := DecodeMsgBancorTrade(bz[4:])
-		return v, n + 4, err
-	case [4]byte{141, 7, 107, 68}:
-		v, n, err := DecodeMsgBeginRedelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{42, 203, 158, 131}:
-		v, n, err := DecodeMsgBurnToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{238, 105, 251, 19}:
-		v, n, err := DecodeMsgCancelOrder(bz[4:])
-		return v, n + 4, err
-	case [4]byte{184, 188, 48, 70}:
-		v, n, err := DecodeMsgCancelTradingPair(bz[4:])
-		return v, n + 4, err
-	case [4]byte{21, 125, 54, 51}:
-		v, n, err := DecodeMsgCommentToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{211, 100, 66, 245}:
-		v, n, err := DecodeMsgCreateOrder(bz[4:])
-		return v, n + 4, err
-	case [4]byte{116, 186, 50, 92}:
-		v, n, err := DecodeMsgCreateTradingPair(bz[4:])
-		return v, n + 4, err
-	case [4]byte{24, 79, 66, 107}:
-		v, n, err := DecodeMsgCreateValidator(bz[4:])
-		return v, n + 4, err
-	case [4]byte{184, 121, 196, 185}:
-		v, n, err := DecodeMsgDelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{234, 76, 240, 151}:
-		v, n, err := DecodeMsgDeposit(bz[4:])
-		return v, n + 4, err
-	case [4]byte{148, 38, 167, 140}:
-		v, n, err := DecodeMsgDonateToCommunityPool(bz[4:])
-		return v, n + 4, err
-	case [4]byte{9, 254, 168, 109}:
-		v, n, err := DecodeMsgEditValidator(bz[4:])
-		return v, n + 4, err
-	case [4]byte{120, 151, 22, 12}:
-		v, n, err := DecodeMsgForbidAddr(bz[4:])
-		return v, n + 4, err
-	case [4]byte{191, 26, 148, 82}:
-		v, n, err := DecodeMsgForbidToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{67, 33, 188, 107}:
-		v, n, err := DecodeMsgIssueToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{172, 102, 179, 22}:
-		v, n, err := DecodeMsgMintToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{190, 128, 0, 94}:
-		v, n, err := DecodeMsgModifyPricePrecision(bz[4:])
-		return v, n + 4, err
-	case [4]byte{178, 137, 211, 164}:
-		v, n, err := DecodeMsgModifyTokenInfo(bz[4:])
-		return v, n + 4, err
-	case [4]byte{64, 119, 59, 163}:
-		v, n, err := DecodeMsgMultiSend(bz[4:])
-		return v, n + 4, err
-	case [4]byte{112, 57, 9, 246}:
-		v, n, err := DecodeMsgMultiSendX(bz[4:])
-		return v, n + 4, err
-	case [4]byte{198, 39, 33, 109}:
-		v, n, err := DecodeMsgRemoveTokenWhitelist(bz[4:])
-		return v, n + 4, err
-	case [4]byte{212, 255, 125, 220}:
-		v, n, err := DecodeMsgSend(bz[4:])
-		return v, n + 4, err
-	case [4]byte{62, 163, 57, 104}:
-		v, n, err := DecodeMsgSendX(bz[4:])
-		return v, n + 4, err
-	case [4]byte{18, 183, 33, 189}:
-		v, n, err := DecodeMsgSetMemoRequired(bz[4:])
-		return v, n + 4, err
-	case [4]byte{208, 136, 199, 77}:
-		v, n, err := DecodeMsgSetWithdrawAddress(bz[4:])
-		return v, n + 4, err
-	case [4]byte{84, 236, 141, 114}:
-		v, n, err := DecodeMsgSubmitProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{231, 172, 14, 69}:
-		v, n, err := DecodeMsgSupervisedSend(bz[4:])
-		return v, n + 4, err
-	case [4]byte{120, 20, 134, 126}:
-		v, n, err := DecodeMsgTransferOwnership(bz[4:])
-		return v, n + 4, err
-	case [4]byte{141, 21, 34, 63}:
-		v, n, err := DecodeMsgUnForbidAddr(bz[4:])
-		return v, n + 4, err
-	case [4]byte{79, 103, 52, 189}:
-		v, n, err := DecodeMsgUnForbidToken(bz[4:])
-		return v, n + 4, err
-	case [4]byte{21, 241, 6, 56}:
-		v, n, err := DecodeMsgUndelegate(bz[4:])
-		return v, n + 4, err
-	case [4]byte{139, 110, 39, 159}:
-		v, n, err := DecodeMsgUnjail(bz[4:])
-		return v, n + 4, err
-	case [4]byte{109, 173, 240, 7}:
-		v, n, err := DecodeMsgVerifyInvariant(bz[4:])
-		return v, n + 4, err
-	case [4]byte{233, 121, 28, 250}:
-		v, n, err := DecodeMsgVote(bz[4:])
-		return v, n + 4, err
-	case [4]byte{43, 19, 183, 111}:
-		v, n, err := DecodeMsgWithdrawDelegatorReward(bz[4:])
-		return v, n + 4, err
-	case [4]byte{84, 85, 236, 88}:
-		v, n, err := DecodeMsgWithdrawValidatorCommission(bz[4:])
-		return v, n + 4, err
-	case [4]byte{107, 224, 144, 130}:
-		v, n, err := DecodeOrder(bz[4:])
-		return v, n + 4, err
-	case [4]byte{178, 67, 155, 203}:
-		v, n, err := DecodeOutput(bz[4:])
-		return v, n + 4, err
-	case [4]byte{66, 250, 248, 208}:
-		v, n, err := DecodeParamChange(bz[4:])
-		return v, n + 4, err
-	case [4]byte{49, 37, 122, 86}:
-		v, n, err := DecodeParameterChangeProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{158, 94, 112, 161}:
-		v, n, err := DecodePrivKeyEd25519(bz[4:])
-		return v, n + 4, err
-	case [4]byte{83, 16, 177, 42}:
-		v, n, err := DecodePrivKeySecp256k1(bz[4:])
-		return v, n + 4, err
-	case [4]byte{114, 76, 37, 23}:
-		v, n, err := DecodePubKeyEd25519(bz[4:])
-		return v, n + 4, err
-	case [4]byte{14, 33, 23, 141}:
-		v, n, err := DecodePubKeyMultisigThreshold(bz[4:])
-		return v, n + 4, err
-	case [4]byte{51, 161, 20, 197}:
-		v, n, err := DecodePubKeySecp256k1(bz[4:])
-		return v, n + 4, err
-	case [4]byte{131, 101, 23, 4}:
-		v, n, err := DecodeSdkDec(bz[4:])
-		return v, n + 4, err
-	case [4]byte{189, 210, 54, 221}:
-		v, n, err := DecodeSdkInt(bz[4:])
-		return v, n + 4, err
-	case [4]byte{67, 52, 162, 78}:
-		v, n, err := DecodeSignedMsgType(bz[4:])
-		return v, n + 4, err
-	case [4]byte{162, 148, 222, 207}:
-		v, n, err := DecodeSoftwareUpgradeProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{163, 181, 12, 71}:
-		v, n, err := DecodeState(bz[4:])
-		return v, n + 4, err
-	case [4]byte{247, 42, 43, 179}:
-		v, n, err := DecodeStdSignature(bz[4:])
-		return v, n + 4, err
-	case [4]byte{247, 170, 118, 185}:
-		v, n, err := DecodeStdTx(bz[4:])
-		return v, n + 4, err
-	case [4]byte{224, 49, 135, 8}:
-		v, n, err := DecodeStoreInfo(bz[4:])
-		return v, n + 4, err
-	case [4]byte{191, 66, 141, 63}:
-		v, n, err := DecodeSupply(bz[4:])
-		return v, n + 4, err
-	case [4]byte{207, 179, 211, 152}:
-		v, n, err := DecodeTextProposal(bz[4:])
-		return v, n + 4, err
-	case [4]byte{205, 85, 136, 219}:
-		v, n, err := DecodeVote(bz[4:])
-		return v, n + 4, err
-	case [4]byte{170, 208, 50, 2}:
-		v, n, err := DecodeVoteOption(bz[4:])
-		return v, n + 4, err
-	case [4]byte{188, 34, 41, 102}:
-		v, n, err := Decodeint64(bz[4:])
-		return v, n + 4, err
-	case [4]byte{36, 210, 58, 112}:
-		v, n, err := Decodeuint64(bz[4:])
-		return v, n + 4, err
+	bz = bz[n:]
+	total += n
+	magicNum := uint32(tag >> 3)
+	switch magicNum {
+	case 3880557824:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp AccAddress
+		tmp, n, err = DecodeAccAddress(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1299335205:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp AccAddressList
+		tmp, n, err = DecodeAccAddressList(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3934391208:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp AccountX
+		tmp, n, err = DecodeAccountX(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 4100693401:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp BaseAccount
+		tmp, n, err = DecodeBaseAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 4159115302:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp BaseToken
+		tmp, n, err = DecodeBaseToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 6748238:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp BaseVestingAccount
+		tmp, n, err = DecodeBaseVestingAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3131719938:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp Coin
+		tmp, n, err = DecodeCoin(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3216598656:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp CommentRef
+		tmp, n, err = DecodeCommentRef(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 956897794:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp CommitInfo
+		tmp, n, err = DecodeCommitInfo(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 380460319:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp CommunityPoolSpendProposal
+		tmp, n, err = DecodeCommunityPoolSpendProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2346923292:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ConsAddress
+		tmp, n, err = DecodeConsAddress(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 54150475:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ContinuousVestingAccount
+		tmp, n, err = DecodeContinuousVestingAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1422369592:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp DecCoin
+		tmp, n, err = DecodeDecCoin(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3479748923:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp DelayedVestingAccount
+		tmp, n, err = DecodeDelayedVestingAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3294413074:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp FeePool
+		tmp, n, err = DecodeFeePool(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1481698358:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp Input
+		tmp, n, err = DecodeInput(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3074963888:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp LockedCoin
+		tmp, n, err = DecodeLockedCoin(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1362215517:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MarketInfo
+		tmp, n, err = DecodeMarketInfo(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2923109669:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ModuleAccount
+		tmp, n, err = DecodeModuleAccount(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 620244126:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgAddTokenWhitelist
+		tmp, n, err = DecodeMsgAddTokenWhitelist(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 52199162:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgAliasUpdate
+		tmp, n, err = DecodeMsgAliasUpdate(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 411694972:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBancorCancel
+		tmp, n, err = DecodeMsgBancorCancel(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2174318272:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBancorInit
+		tmp, n, err = DecodeMsgBancorInit(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3707813311:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBancorTrade
+		tmp, n, err = DecodeMsgBancorTrade(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 653330317:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBeginRedelegate
+		tmp, n, err = DecodeMsgBeginRedelegate(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2014956330:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgBurnToken
+		tmp, n, err = DecodeMsgBurnToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2343070190:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCancelOrder
+		tmp, n, err = DecodeMsgCancelOrder(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3483352248:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCancelTradingPair
+		tmp, n, err = DecodeMsgCancelTradingPair(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3881860373:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCommentToken
+		tmp, n, err = DecodeMsgCommentToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2446025939:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCreateOrder
+		tmp, n, err = DecodeMsgCreateOrder(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1988999796:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCreateTradingPair
+		tmp, n, err = DecodeMsgCreateTradingPair(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2125287192:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgCreateValidator
+		tmp, n, err = DecodeMsgCreateValidator(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2654108088:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgDelegate
+		tmp, n, err = DecodeMsgDelegate(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3681766634:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgDeposit
+		tmp, n, err = DecodeMsgDeposit(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3745982100:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgDonateToCommunityPool
+		tmp, n, err = DecodeMsgDonateToCommunityPool(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3618242057:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgEditValidator
+		tmp, n, err = DecodeMsgEditValidator(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1460115320:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgForbidAddr
+		tmp, n, err = DecodeMsgForbidAddr(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1891506879:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgForbidToken
+		tmp, n, err = DecodeMsgForbidToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3058377027:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgIssueToken
+		tmp, n, err = DecodeMsgIssueToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2159306412:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgMintToken
+		tmp, n, err = DecodeMsgMintToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3050406078:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgModifyPricePrecision
+		tmp, n, err = DecodeMsgModifyPricePrecision(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1382451634:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgModifyTokenInfo
+		tmp, n, err = DecodeMsgModifyTokenInfo(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3755177792:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgMultiSend
+		tmp, n, err = DecodeMsgMultiSend(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3027843440:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgMultiSendX
+		tmp, n, err = DecodeMsgMultiSendX(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1473324998:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgRemoveTokenWhitelist
+		tmp, n, err = DecodeMsgRemoveTokenWhitelist(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3794730964:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSend
+		tmp, n, err = DecodeMsgSend(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3785663294:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSendX
+		tmp, n, err = DecodeMsgSendX(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1434760978:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSetMemoRequired
+		tmp, n, err = DecodeMsgSetMemoRequired(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 648513744:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSetWithdrawAddress
+		tmp, n, err = DecodeMsgSetWithdrawAddress(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2492591188:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSubmitProposal
+		tmp, n, err = DecodeMsgSubmitProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3532434663:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgSupervisedSend
+		tmp, n, err = DecodeMsgSupervisedSend(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3889173624:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgTransferOwnership
+		tmp, n, err = DecodeMsgTransferOwnership(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3664778637:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgUnForbidAddr
+		tmp, n, err = DecodeMsgUnForbidAddr(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2657838927:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgUnForbidToken
+		tmp, n, err = DecodeMsgUnForbidToken(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2160390421:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgUndelegate
+		tmp, n, err = DecodeMsgUndelegate(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3047452299:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgUnjail
+		tmp, n, err = DecodeMsgUnjail(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 4029525357:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgVerifyInvariant
+		tmp, n, err = DecodeMsgVerifyInvariant(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3121445353:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgVote
+		tmp, n, err = DecodeMsgVote(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1404506923:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgWithdrawDelegatorReward
+		tmp, n, err = DecodeMsgWithdrawDelegatorReward(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1320375636:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp MsgWithdrawValidatorCommission
+		tmp, n, err = DecodeMsgWithdrawValidatorCommission(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 526377067:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp Order
+		tmp, n, err = DecodeOrder(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1883194290:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp Output
+		tmp, n, err = DecodeOutput(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3159554626:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ParamChange
+		tmp, n, err = DecodeParamChange(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1402283313:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp ParameterChangeProposal
+		tmp, n, err = DecodeParameterChangeProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1455054494:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PrivKeyEd25519
+		tmp, n, err = DecodePrivKeyEd25519(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 135729235:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PrivKeySecp256k1
+		tmp, n, err = DecodePrivKeySecp256k1(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2779925618:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PubKeyEd25519
+		tmp, n, err = DecodePubKeyEd25519(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2131042574:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PubKeyMultisigThreshold
+		tmp, n, err = DecodePubKeyMultisigThreshold(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1626972467:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp PubKeySecp256k1
+		tmp, n, err = DecodePubKeySecp256k1(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 172320131:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp SdkDec
+		tmp, n, err = DecodeSdkDec(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2300105405:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp SdkInt
+		tmp, n, err = DecodeSdkInt(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2430153795:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp SignedMsgType
+		tmp, n, err = DecodeSignedMsgType(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 229479586:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp SoftwareUpgradeProposal
+		tmp, n, err = DecodeSoftwareUpgradeProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3124475299:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp State
+		tmp, n, err = DecodeState(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1176316663:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp StdSignature
+		tmp, n, err = DecodeStdSignature(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 1362340599:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp StdTx
+		tmp, n, err = DecodeStdTx(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3916313056:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp StoreInfo
+		tmp, n, err = DecodeStoreInfo(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3848815295:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp Supply
+		tmp, n, err = DecodeSupply(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3501044687:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp TextProposal
+		tmp, n, err = DecodeTextProposal(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3874772429:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp Vote
+		tmp, n, err = DecodeVote(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2889994410:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp VoteOption
+		tmp, n, err = DecodeVoteOption(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 2056659644:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp int64
+		tmp, n, err = Decodeint64(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
+	case 3589394980:
+		l := codonDecodeUint64(bz, &n, &err)
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) > len(bz) {
+			err = errors.New("Length Too Large")
+			return
+		}
+		var tmp uint64
+		tmp, n, err = Decodeuint64(bz[:l])
+		if err != nil {
+			return
+		}
+		bz = bz[n:]
+		total += n
+		if int(l) != n {
+			err = errors.New("Length Mismatch")
+			return
+		}
+		v = tmp
+		return
 	default:
 		panic("Unknown type")
 	} // end of switch
@@ -12834,19 +17063,6 @@ func DecodeAny(bz []byte) (interface{}, int, error) {
 } // end of DecodeAny
 func AssignIfcPtrFromStruct(ifcPtrIn interface{}, structObjIn interface{}) {
 	switch ifcPtr := ifcPtrIn.(type) {
-	case *Content:
-		switch structObj := structObjIn.(type) {
-		case CommunityPoolSpendProposal:
-			*ifcPtr = &structObj
-		case SoftwareUpgradeProposal:
-			*ifcPtr = &structObj
-		case ParameterChangeProposal:
-			*ifcPtr = &structObj
-		case TextProposal:
-			*ifcPtr = &structObj
-		default:
-			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
-		} // end switch of structs
 	case *Tx:
 		switch structObj := structObjIn.(type) {
 		case StdTx:
@@ -12854,18 +17070,96 @@ func AssignIfcPtrFromStruct(ifcPtrIn interface{}, structObjIn interface{}) {
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
-	case *VestingAccount:
+	case *Token:
 		switch structObj := structObjIn.(type) {
-		case ContinuousVestingAccount:
-			*ifcPtr = &structObj
-		case DelayedVestingAccount:
+		case BaseToken:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
-	case *Token:
+	case *Msg:
 		switch structObj := structObjIn.(type) {
-		case BaseToken:
+		case MsgAliasUpdate:
+			*ifcPtr = &structObj
+		case MsgWithdrawValidatorCommission:
+			*ifcPtr = &structObj
+		case MsgSupervisedSend:
+			*ifcPtr = &structObj
+		case MsgMintToken:
+			*ifcPtr = &structObj
+		case MsgCommentToken:
+			*ifcPtr = &structObj
+		case MsgUndelegate:
+			*ifcPtr = &structObj
+		case MsgSendX:
+			*ifcPtr = &structObj
+		case MsgCreateOrder:
+			*ifcPtr = &structObj
+		case MsgForbidAddr:
+			*ifcPtr = &structObj
+		case MsgBancorCancel:
+			*ifcPtr = &structObj
+		case MsgDeposit:
+			*ifcPtr = &structObj
+		case MsgSubmitProposal:
+			*ifcPtr = &structObj
+		case MsgDelegate:
+			*ifcPtr = &structObj
+		case MsgUnjail:
+			*ifcPtr = &structObj
+		case MsgMultiSend:
+			*ifcPtr = &structObj
+		case MsgForbidToken:
+			*ifcPtr = &structObj
+		case MsgUnForbidAddr:
+			*ifcPtr = &structObj
+		case MsgSetWithdrawAddress:
+			*ifcPtr = &structObj
+		case MsgRemoveTokenWhitelist:
+			*ifcPtr = &structObj
+		case MsgBancorTrade:
+			*ifcPtr = &structObj
+		case MsgCreateValidator:
+			*ifcPtr = &structObj
+		case MsgUnForbidToken:
+			*ifcPtr = &structObj
+		case MsgMultiSendX:
+			*ifcPtr = &structObj
+		case MsgCancelOrder:
+			*ifcPtr = &structObj
+		case MsgEditValidator:
+			*ifcPtr = &structObj
+		case MsgCancelTradingPair:
+			*ifcPtr = &structObj
+		case MsgDonateToCommunityPool:
+			*ifcPtr = &structObj
+		case MsgVote:
+			*ifcPtr = &structObj
+		case MsgVerifyInvariant:
+			*ifcPtr = &structObj
+		case MsgBurnToken:
+			*ifcPtr = &structObj
+		case MsgModifyTokenInfo:
+			*ifcPtr = &structObj
+		case MsgIssueToken:
+			*ifcPtr = &structObj
+		case MsgModifyPricePrecision:
+			*ifcPtr = &structObj
+		case MsgBancorInit:
+			*ifcPtr = &structObj
+		case MsgCreateTradingPair:
+			*ifcPtr = &structObj
+		case MsgBeginRedelegate:
+			*ifcPtr = &structObj
+		case MsgSend:
+			*ifcPtr = &structObj
+		case MsgAddTokenWhitelist:
+			*ifcPtr = &structObj
+		case MsgWithdrawDelegatorReward:
+			*ifcPtr = &structObj
+		case MsgSetMemoRequired:
+			*ifcPtr = &structObj
+		case MsgTransferOwnership:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
@@ -12886,124 +17180,59 @@ func AssignIfcPtrFromStruct(ifcPtrIn interface{}, structObjIn interface{}) {
 		} // end switch of structs
 	case *PubKey:
 		switch structObj := structObjIn.(type) {
+		case PubKeyEd25519:
+			*ifcPtr = &structObj
 		case PubKeyMultisigThreshold:
 			*ifcPtr = &structObj
 		case StdSignature:
-			*ifcPtr = &structObj
-		case PubKeyEd25519:
 			*ifcPtr = &structObj
 		case PubKeySecp256k1:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
-	case *Msg:
+	case *VestingAccount:
 		switch structObj := structObjIn.(type) {
-		case MsgEditValidator:
+		case DelayedVestingAccount:
 			*ifcPtr = &structObj
-		case MsgForbidAddr:
+		case ContinuousVestingAccount:
 			*ifcPtr = &structObj
-		case MsgUnForbidAddr:
+		default:
+			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
+		} // end switch of structs
+	case *Content:
+		switch structObj := structObjIn.(type) {
+		case CommunityPoolSpendProposal:
 			*ifcPtr = &structObj
-		case MsgBancorInit:
+		case SoftwareUpgradeProposal:
 			*ifcPtr = &structObj
-		case MsgCancelTradingPair:
+		case TextProposal:
 			*ifcPtr = &structObj
-		case MsgAliasUpdate:
-			*ifcPtr = &structObj
-		case MsgSend:
-			*ifcPtr = &structObj
-		case MsgForbidToken:
-			*ifcPtr = &structObj
-		case MsgUnForbidToken:
-			*ifcPtr = &structObj
-		case MsgCommentToken:
-			*ifcPtr = &structObj
-		case MsgCreateValidator:
-			*ifcPtr = &structObj
-		case MsgUndelegate:
-			*ifcPtr = &structObj
-		case MsgWithdrawDelegatorReward:
-			*ifcPtr = &structObj
-		case MsgModifyTokenInfo:
-			*ifcPtr = &structObj
-		case MsgVote:
-			*ifcPtr = &structObj
-		case MsgModifyPricePrecision:
-			*ifcPtr = &structObj
-		case MsgDeposit:
-			*ifcPtr = &structObj
-		case MsgDelegate:
-			*ifcPtr = &structObj
-		case MsgSupervisedSend:
-			*ifcPtr = &structObj
-		case MsgDonateToCommunityPool:
-			*ifcPtr = &structObj
-		case MsgVerifyInvariant:
-			*ifcPtr = &structObj
-		case MsgCancelOrder:
-			*ifcPtr = &structObj
-		case MsgMultiSendX:
-			*ifcPtr = &structObj
-		case MsgBurnToken:
-			*ifcPtr = &structObj
-		case MsgWithdrawValidatorCommission:
-			*ifcPtr = &structObj
-		case MsgSendX:
-			*ifcPtr = &structObj
-		case MsgRemoveTokenWhitelist:
-			*ifcPtr = &structObj
-		case MsgAddTokenWhitelist:
-			*ifcPtr = &structObj
-		case MsgSetWithdrawAddress:
-			*ifcPtr = &structObj
-		case MsgUnjail:
-			*ifcPtr = &structObj
-		case MsgSetMemoRequired:
-			*ifcPtr = &structObj
-		case MsgCreateTradingPair:
-			*ifcPtr = &structObj
-		case MsgBeginRedelegate:
-			*ifcPtr = &structObj
-		case MsgBancorTrade:
-			*ifcPtr = &structObj
-		case MsgTransferOwnership:
-			*ifcPtr = &structObj
-		case MsgBancorCancel:
-			*ifcPtr = &structObj
-		case MsgSubmitProposal:
-			*ifcPtr = &structObj
-		case MsgMintToken:
-			*ifcPtr = &structObj
-		case MsgIssueToken:
-			*ifcPtr = &structObj
-		case MsgMultiSend:
-			*ifcPtr = &structObj
-		case MsgCreateOrder:
+		case ParameterChangeProposal:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
 	case *PrivKey:
 		switch structObj := structObjIn.(type) {
-		case PrivKeyEd25519:
-			*ifcPtr = &structObj
 		case PrivKeySecp256k1:
+			*ifcPtr = &structObj
+		case PrivKeyEd25519:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
 		} // end switch of structs
 	case *Account:
 		switch structObj := structObjIn.(type) {
+		case DelayedVestingAccount:
+			*ifcPtr = &structObj
+		case ContinuousVestingAccount:
+			*ifcPtr = &structObj
 		case BaseVestingAccount:
 			*ifcPtr = &structObj
 		case BaseAccount:
 			*ifcPtr = &structObj
 		case ModuleAccount:
-			*ifcPtr = &structObj
-		case ContinuousVestingAccount:
-			*ifcPtr = &structObj
-		case DelayedVestingAccount:
 			*ifcPtr = &structObj
 		default:
 			panic(fmt.Sprintf("Type mismatch %v %v\n", reflect.TypeOf(ifcPtr), reflect.TypeOf(structObjIn)))
