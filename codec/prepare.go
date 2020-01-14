@@ -191,6 +191,17 @@ func GenerateCodecFile(w io.Writer) {
 	codon.GenerateCodecFile(w, GetLeafTypes(), ignoreImpl, TypeEntryList, extraLogics, extraImports)
 }
 
+func GenerateSerializableImpl(w io.Writer) {
+	extraImports := []string{`"time"`, `"math/big"`, `sdk "github.com/cosmos/cosmos-sdk/types"`,
+		`"github.com/cosmos/cosmos-sdk/codec"`}
+	extraImports = append(extraImports, codon.ImportsForBridgeLogic...)
+	extraLogics := extraLogicsForLeafTypes + codon.BridgeLogic
+	ignoreImpl := make(map[string]string)
+	ignoreImpl["StdSignature"] = "PubKey"
+	ignoreImpl["PubKeyMultisigThreshold"] = "PubKey"
+	codon.GenerateCodecFile(w, GetLeafTypes(), ignoreImpl, TypeEntryList, extraLogics, extraImports)
+}
+
 func GenerateProtoFile() {
 	ignoreImpl := make(map[string]string)
 	ignoreImpl["StdSignature"] = "PubKey"
