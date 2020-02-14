@@ -94,9 +94,6 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, re
 	ok := ret.Code == uint32(sdk.CodeOK)
 	unbondingMsgList := make([][]byte, 0, 10)
 	redelegationMsgList := make([][]byte, 0, 10)
-	valiatorCommissionMsgList := make([][]byte, 0, 10)
-	delegatorRewardsMsgList := make([][]byte, 0, 10)
-	subscribedDistr := app.msgQueProducer.IsSubscribed(distr.ModuleName)
 	for i := 0; ok && i < len(events); i++ {
 		if events[i].Type == stypes.EventTypeUnbond {
 			if i+1 <= len(events) {
@@ -110,12 +107,6 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, re
 				redelegationMsgList = append(redelegationMsgList, val)
 				i++
 			}
-		} else if subscribedDistr && events[i].Type == distrtypes.EventTypeCommission {
-			val := getValidatorCommissionMsg(events[i])
-			valiatorCommissionMsgList = append(valiatorCommissionMsgList, val)
-		} else if subscribedDistr && events[i].Type == distrtypes.EventTypeRewards {
-			val := getDelegatorRewardsMsg(events[i])
-			delegatorRewardsMsgList = append(delegatorRewardsMsgList, val)
 		} else if events[i].Type == "transfer" && i+2 <= len(events) {
 			val := getTransferRecord(events[i : i+2])
 			transfers = append(transfers, val)
@@ -175,12 +166,6 @@ func (app *CetChainApp) notifyTx(req abci.RequestDeliverTx, stdTx auth.StdTx, re
 	}
 	for _, val := range redelegationMsgList {
 		app.appendPubMsgKV("begin_redelegation", val)
-	}
-	for _, val := range valiatorCommissionMsgList {
-		app.appendPubMsgKV("validator_commission", val)
-	}
-	for _, val := range delegatorRewardsMsgList {
-		app.appendPubMsgKV("delegator_rewards", val)
 	}
 }
 
@@ -301,6 +286,7 @@ func getNotificationSlash(event abci.Event) []byte {
 
 func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {
 	//fmt.Printf("========== BeginBlock events ============\n")
+	subscribedDistr := app.msgQueProducer.IsSubscribed(distr.ModuleName)
 	for _, event := range events {
 		//fmt.Printf("= Event: %s\n", event.Type)
 		//for _, attr := range event.Attributes {
@@ -309,6 +295,12 @@ func (app *CetChainApp) notifyBeginBlock(events []abci.Event) {
 		if event.Type == sltypes.EventTypeSlash {
 			val := getNotificationSlash(event)
 			app.appendPubMsgKV("slash", val)
+		} else if subscribedDistr && event.Type == distrtypes.EventTypeCommission {
+			val := getValidatorCommissionMsg(event)
+			app.appendPubMsgKV("validator_commission", val)
+		} else if subscribedDistr && event.Type == distrtypes.EventTypeRewards {
+			val := getDelegatorRewardsMsg(event)
+			app.appendPubMsgKV("delegator_rewards", val)
 		}
 	}
 }
