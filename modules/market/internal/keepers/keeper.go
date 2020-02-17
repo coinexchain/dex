@@ -29,6 +29,7 @@ type Keeper struct {
 	gmk           GlobalMarketInfoKeeper
 	msgProducer   msgqueue.MsgSender
 	ak            auth.AccountKeeper
+	authX         types.ExpectedAuthXKeeper
 }
 
 func NewKeeper(key sdk.StoreKey, axkVal types.ExpectedAssetStatusKeeper,
@@ -82,6 +83,22 @@ func (k Keeper) FreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) 
 	return k.bnk.FreezeCoins(ctx, acc, amt)
 }
 
+func (k Keeper) SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return k.bnk.SubtractCoins(ctx, addr, amt)
+}
+
+func (k Keeper) DeductInt64CetFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error {
+	return k.bnk.DeductInt64CetFee(ctx, addr, amt)
+}
+
+func (k Keeper) SendCoins(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return k.bnk.SendCoins(ctx, from, to, amt)
+}
+
+func (k Keeper) UnFreezeCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	return k.bnk.UnFreezeCoins(ctx, acc, amt)
+}
+
 func (k Keeper) IsTokenIssuer(ctx sdk.Context, denom string, addr sdk.AccAddress) bool {
 	return k.axk.IsTokenIssuer(ctx, denom, addr)
 }
@@ -101,6 +118,7 @@ func (k Keeper) IsForbiddenByTokenIssuer(ctx sdk.Context, denom string, addr sdk
 func (k Keeper) IsTokenForbidden(ctx sdk.Context, symbol string) bool {
 	return k.axk.IsTokenForbidden(ctx, symbol)
 }
+
 func (k Keeper) GetOrderCleanTime(ctx sdk.Context) int64 {
 	return k.ock.GetUnixTime(ctx)
 }
@@ -123,6 +141,18 @@ func (k Keeper) GetAssetKeeper() types.ExpectedAssetStatusKeeper {
 
 func (k Keeper) GetMarketKey() sdk.StoreKey {
 	return k.marketKey
+}
+
+func (k Keeper) GetRefereeAddr(ctx sdk.Context, accAddr sdk.AccAddress) sdk.AccAddress {
+	return k.authX.GetRefereeAddr(ctx, accAddr)
+}
+
+func (k Keeper) GetRebateRatio(ctx sdk.Context) int64 {
+	return k.authX.GetRebateRatio(ctx)
+}
+
+func (k Keeper) GetRebateRatioBase(ctx sdk.Context) int64 {
+	return k.authX.GetRebateRatioBase(ctx)
 }
 
 // -----------------------------------------------------------------------------

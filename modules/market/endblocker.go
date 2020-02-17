@@ -149,38 +149,75 @@ func SendFillMsg(ctx sdk.Context, seller *Order, buyer *Order, stockAmount, mone
 	msgqueue.FillMsgs(ctx, types.FillOrderInfoKey, buyInfo)
 }
 
-// unfreeze an ask order's stock or a bid order's money
-func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, order *types.Order, feeForZeroDeal int64, feeK types.ExpectedChargeFeeKeeper, freeTimeBlocks int64) {
-	stock, money := SplitSymbol(order.TradingPair)
-	frozenToken := stock
-	if order.Side == types.BUY {
-		frozenToken = money
+// unfreeze the frozen token in the order and remove it from the market
+func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper,
+	keeper types.Keeper, order *types.Order, marketParam *types.Params) {
+	if order.Freeze != 0 || order.FrozenFeatureFee != 0 || order.FrozenCommission != 0 {
+		unfreezeCoinsForOrder(ctx, bxKeeper, order, keeper, marketParam)
 	}
-	bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCoins(frozenToken, order.Freeze))
-	if order.FrozenCommission != 0 {
-		bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCetCoins(order.FrozenCommission))
-		actualFee := order.CalActualOrderCommissionInt64(feeForZeroDeal)
-		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee); err != nil {
-			//should not reach this clause in production
-			ctx.Logger().Debug("unfreezeCoinsForOrder: %s", err.Error())
-		}
-	}
-	if order.TimeInForce == GTE && order.FrozenFeatureFee != 0 {
-		bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCetCoins(order.FrozenFeatureFee))
-		actualFee := order.CalActualOrderFeatureFeeInt64(ctx, freeTimeBlocks)
-		if err := feeK.SubtractFeeAndCollectFee(ctx, order.Sender, actualFee); err != nil {
-			//should not reach this clause in production
-			ctx.Logger().Debug("unfreezeCoinsForOrder: %s", err.Error())
-		}
+	if err := orderKeeper.Remove(ctx, order); err != nil {
+		ctx.Logger().Error("%s", err.Error())
 	}
 }
 
-// unfreeze the frozen token in the order and remove it from the market
-func removeOrder(ctx sdk.Context, orderKeeper keepers.OrderKeeper, bxKeeper types.ExpectedBankxKeeper, feeK types.ExpectedChargeFeeKeeper, order *types.Order, feeForZeroDeal int64, freeTimeBlocks int64) {
-	if order.Freeze != 0 || order.FrozenFeatureFee != 0 || order.FrozenCommission != 0 {
-		unfreezeCoinsForOrder(ctx, bxKeeper, order, feeForZeroDeal, feeK, freeTimeBlocks)
+// unfreeze an ask order's stock or a bid order's money
+func unfreezeCoinsForOrder(ctx sdk.Context, bxKeeper types.ExpectedBankxKeeper, order *types.Order,
+	keeper types.Keeper, marketParam *types.Params) {
+	unfreezeCoinsInOrder(ctx, order, bxKeeper)
+	chargeOrderCommission(ctx, order, marketParam.FeeForZeroDeal, bxKeeper, keeper)
+	chargeOrderFeatureFee(ctx, order, marketParam.GTEOrderLifetime, bxKeeper, keeper)
+}
+
+func unfreezeCoinsInOrder(ctx sdk.Context, order *types.Order, bxKeeper types.ExpectedBankxKeeper) {
+	frozenToken := order.GetOrderUsedDenom()
+	if err := bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCoins(frozenToken, order.Freeze)); err != nil {
+		ctx.Logger().Error("%s", err.Error())
 	}
-	orderKeeper.Remove(ctx, order)
+}
+
+func chargeOrderCommission(ctx sdk.Context, order *types.Order, feeForZeroDeal int64,
+	bxKeeper types.ExpectedBankxKeeper, keeper types.Keeper) {
+	if order.FrozenCommission != 0 {
+		if err := bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCetCoins(order.FrozenCommission)); err != nil {
+			ctx.Logger().Error("%s", err.Error())
+		}
+		actualFee := order.CalActualOrderCommissionInt64(feeForZeroDeal)
+		chargeFee(ctx, actualFee, order.Sender, keeper)
+	}
+}
+
+func chargeOrderFeatureFee(ctx sdk.Context, order *types.Order, freeTimeBlocks int64,
+	bxKeeper types.ExpectedBankxKeeper, keeper types.Keeper) {
+	if order.TimeInForce == GTE && order.FrozenFeatureFee != 0 {
+		if err := bxKeeper.UnFreezeCoins(ctx, order.Sender, dex.NewCetCoins(order.FrozenFeatureFee)); err != nil {
+			ctx.Logger().Error("%s", err.Error())
+		}
+		actualFee := order.CalActualOrderFeatureFeeInt64(ctx, freeTimeBlocks)
+		chargeFee(ctx, actualFee, order.Sender, keeper)
+	}
+}
+
+func chargeFee(ctx sdk.Context, fee int64, userAddr sdk.AccAddress, keeper types.Keeper) {
+	var (
+		rebateAmount int64
+		refereeAddr  sdk.AccAddress
+	)
+	refereeAddr = keeper.GetRefereeAddr(ctx, userAddr)
+	if refereeAddr != nil {
+		ratio := keeper.GetRebateRatio(ctx)
+		ratioBase := keeper.GetRebateRatioBase(ctx)
+		rebateAmount = sdk.NewInt(fee).MulRaw(ratio).QuoRaw(ratioBase).Int64()
+		fee = fee - rebateAmount
+	}
+	if rebateAmount > 0 {
+		if err := keeper.SendCoins(ctx, userAddr, refereeAddr, dex.NewCetCoins(rebateAmount)); err != nil {
+			ctx.Logger().Error("%s", err.Error())
+		}
+	}
+	if err := keeper.SubtractFeeAndCollectFee(ctx, userAddr, fee); err != nil {
+		//should not reach this clause in production
+		ctx.Logger().Debug("unfreezeCoinsForOrder: %s", err.Error())
+	}
 }
 
 // Iterate the candidate orders for matching, and remove the orders whose sender is forbidden by the money owner or the stock owner.
@@ -249,6 +286,7 @@ func runMatch(ctx sdk.Context, midPrice sdk.Dec, ratio int64, symbol string, kee
 
 func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList []types.MarketInfo, marketParams types.Params) {
 	currHeight := ctx.BlockHeight()
+	bankxKeeper := keeper.GetBankxKeeper()
 	for _, mi := range marketInfoList {
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), mi.GetSymbol(), types.ModuleCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight)
@@ -257,7 +295,7 @@ func removeExpiredOrder(ctx sdk.Context, keeper keepers.Keeper, marketInfoList [
 			if order.Height+order.ExistBlocks > currHeight {
 				continue
 			}
-			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
+			removeOrder(ctx, orderKeeper, bankxKeeper, keeper, order, &marketParams)
 			if keeper.IsSubScribed(types.Topic) {
 				msgInfo := types.CancelOrderInfo{
 					OrderID:        order.OrderID(),
@@ -284,13 +322,14 @@ func removeExpiredMarket(ctx sdk.Context, keeper keepers.Keeper, marketParams ty
 	currTime := ctx.BlockHeader().Time.UnixNano()
 
 	// process the delist requests
+	bankxKeeper := keeper.GetBankxKeeper()
 	delistKeeper := keepers.NewDelistKeeper(keeper.GetMarketKey())
 	delistSymbols := delistKeeper.GetDelistSymbolsBeforeTime(ctx, currTime)
 	for _, symbol := range delistSymbols {
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), symbol, types.ModuleCdc)
 		oldOrders := orderKeeper.GetOlderThan(ctx, currHeight+1)
 		for _, ord := range oldOrders {
-			removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, ord, marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
+			removeOrder(ctx, orderKeeper, bankxKeeper, keeper, ord, &marketParams)
 			if keeper.IsSubScribed(types.Topic) {
 				msgInfo := types.CancelOrderInfo{
 					OrderID:        ord.OrderID(),
@@ -374,6 +413,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 		if len(ordersForUpdateList[idx]) == 0 {
 			continue
 		}
+		bankxKeeper := keeper.GetBankxKeeper()
 		orderKeeper := keepers.NewOrderKeeper(keeper.GetMarketKey(), mi.GetSymbol(), types.ModuleCdc)
 		// update the order book
 		for _, order := range ordersForUpdateList[idx] {
@@ -382,7 +422,7 @@ func EndBlocker(ctx sdk.Context, keeper keepers.Keeper) /*sdk.Tags*/ {
 				if keeper.IsSubScribed(types.Topic) {
 					sendOrderMsg(ctx, order, ctx.BlockHeight(), marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
 				}
-				removeOrder(ctx, orderKeeper, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
+				removeOrder(ctx, orderKeeper, bankxKeeper, keeper, order, &marketParams)
 			}
 		}
 		// if some orders dealt, update last executed price of this market

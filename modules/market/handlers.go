@@ -351,9 +351,11 @@ func handleMsgCancelOrder(ctx sdk.Context, msg types.MsgCancelOrder, keeper keep
 		return err.Result()
 	}
 	marketParams := keeper.GetParams(ctx)
-	order := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc).QueryOrder(ctx, msg.OrderID)
+	bankxKeeper := keeper.GetBankxKeeper()
+	glk := keepers.NewGlobalOrderKeeper(keeper.GetMarketKey(), types.ModuleCdc)
+	order := glk.QueryOrder(ctx, msg.OrderID)
 	ork := keepers.NewOrderKeeper(keeper.GetMarketKey(), order.TradingPair, types.ModuleCdc)
-	removeOrder(ctx, ork, keeper.GetBankxKeeper(), keeper, order, marketParams.FeeForZeroDeal, marketParams.GTEOrderLifetime)
+	removeOrder(ctx, ork, bankxKeeper, keeper, order, &marketParams)
 
 	// send msg to kafka
 	msgInfo := types.CancelOrderInfo{

@@ -6,6 +6,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+type Keeper interface {
+	ExpectedChargeFeeKeeper
+	ExpectedAuthXKeeper
+	ExpectedBankxKeeper
+}
+
 // Bankx Keeper will implement the interface
 type ExpectedBankxKeeper interface {
 	SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
@@ -29,6 +35,8 @@ type ExpectedChargeFeeKeeper interface {
 	SubtractFeeAndCollectFee(ctx sdk.Context, addr sdk.AccAddress, amt int64) sdk.Error
 }
 
-type ExpectedBancorKeeper interface {
-	IsBancorExist(ctx sdk.Context, stock string) bool
+type ExpectedAuthXKeeper interface {
+	GetRefereeAddr(ctx sdk.Context, accAddr sdk.AccAddress) sdk.AccAddress
+	GetRebateRatio(ctx sdk.Context) int64
+	GetRebateRatioBase(ctx sdk.Context) int64
 }

@@ -2,6 +2,8 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/coinexchain/dex/types"
 )
 
 type Order struct {
@@ -56,6 +58,14 @@ func (or *Order) CalActualOrderFeatureFeeInt64(ctx sdk.Context, freeTimeBlocks i
 		fee = or.FrozenFeatureFee
 	}
 	return fee
+}
+
+func (or *Order) GetOrderUsedDenom() string {
+	frozenToken, money := types.SplitSymbol(or.TradingPair)
+	if or.Side == BUY {
+		frozenToken = money
+	}
+	return frozenToken
 }
 
 func AssemblyOrderID(userAddr string, seq uint64, identify byte) string {
