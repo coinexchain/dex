@@ -401,6 +401,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.bankxKeeper,
 		app.assetKeeper,
 		&app.marketKeeper,
+		app.accountXKeeper,
 		app.msgQueProducer)
 
 	app.marketKeeper = market.NewBaseKeeper(
@@ -411,6 +412,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.msgQueProducer,
 		app.paramsKeeper.Subspace(market.StoreKey),
 		app.accountKeeper,
+		app.accountXKeeper,
 	)
 	// register the staking hooks
 	// NOTE: The stakingKeeper above is passed by reference, so that it can be

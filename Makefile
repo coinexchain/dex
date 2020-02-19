@@ -93,10 +93,10 @@ build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
 
 install: go.sum check-ledger update-cet-lite-docs
-	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetd
-	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetcli
-	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetdev
-	go install -mod=readonly $(BUILD_FLAGS) -buildmode=plugin app/plugin/simple_plugin/simple_plugin.go
+	go install  $(BUILD_FLAGS) ./cmd/cetd
+	go install  $(BUILD_FLAGS) ./cmd/cetcli
+	go install  $(BUILD_FLAGS) ./cmd/cetdev
+	go install  $(BUILD_FLAGS) -buildmode=plugin app/plugin/simple_plugin/simple_plugin.go
 
 install-debug: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/cetdebug

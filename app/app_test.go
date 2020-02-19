@@ -795,3 +795,46 @@ func TestCheckTxWithMsgHandle(t *testing.T) {
 	require.Equal(t, bankx.CodeInsufficientCETForActivatingFee, result.Code)
 
 }
+func TestMsgSetRefereeHandle(t *testing.T) {
+	key, _, senderAddr := testutil.KeyPubAddr()
+	_, _, refereeAddr := testutil.KeyPubAddr()
+
+	coins := dex.NewCetCoins(30e8)
+	acc0 := auth.BaseAccount{Address: senderAddr, Coins: coins}
+	acc1 := auth.BaseAccount{Address: refereeAddr, Coins: coins}
+
+	// app
+	app := initAppWithBaseAccounts(acc0, acc1)
+
+	// begin block
+	header := abci.Header{Height: 1, Time: time.Now()}
+	app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+	msgSetReferee := authx.MsgSetReferee{
+		Sender:  senderAddr,
+		Referee: refereeAddr,
+	}
+
+	tx := newStdTxBuilder().
+		Msgs(msgSetReferee).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+	res := app.Deliver(tx)
+	require.True(t, res.IsOK())
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	header.Height = header.Height + 1
+	header.Time = header.Time.Add(time.Hour)
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: 2, Time: time.Now(), ChainID: testChainID}})
+	ctx := app.NewContext(false, abci.Header{Height: 2})
+
+	_, exist := app.accountXKeeper.GetAccountX(ctx, senderAddr)
+	require.True(t, exist)
+
+	tx = newStdTxBuilder().
+		Msgs(msgSetReferee).GasAndFee(1000000, 100).AccNumSeqKey(0, 1, key).Build()
+
+	res = app.Deliver(tx)
+	require.Equal(t, authx.CodeRefereeChangeTooFast, res.Code)
+
+}
