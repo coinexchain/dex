@@ -593,6 +593,8 @@ paths:
                   - account_number
                   - sequence
                   - memo_required
+                  - referee
+                  - referee_change_time
                 properties:
                   address:
                     type: string
@@ -618,11 +620,56 @@ paths:
                     type: string
                   memo_required:
                     type: boolean
+                  referee:
+                    type: string
+                  referee_change_time:
+                    type: integer
                 additionalProperties: false
         204:
           description: No content about this account address
         500:
           description: Server internel error
+  /auth/accounts/{address}/setReferee:
+    post:
+      summary: Set referee for account
+      operationId: setReferee
+      tags:
+        - Auth
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: sender
+          description: Account address in bech32 format
+          required: true
+          type: string
+          x-example: coinex16gdxm24ht2mxtpz9cma6tr6a6d47x63hlq4pxt
+        - in: body
+          name: referee
+          description: Referee
+          required: true
+          schema:
+            type: object
+            required:
+              - base_req
+              - referee
+            properties:
+              base_req:
+                $ref: "#/definitions/BaseReq"
+              referee:
+                type: string
+            additionalProperties: false
+      responses:
+        200:
+          description: Tx was succesfully generated
+          schema:
+            $ref: "#/definitions/StdTx"
+        400:
+          description: Invalid request
+        500:
+          description: Server internal error
   /staking/delegators/{delegatorAddr}/delegations:
     parameters:
       - in: path
