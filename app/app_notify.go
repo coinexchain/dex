@@ -31,6 +31,7 @@ type TxExtraInfo struct {
 }
 
 type NewHeightInfo struct {
+	ChainID       string       `json:"chain_id"`
 	Height        int64        `json:"height"`
 	TimeStamp     time.Time    `json:"timestamp"`
 	LastBlockHash cmn.HexBytes `json:"last_block_hash"`
@@ -38,6 +39,7 @@ type NewHeightInfo struct {
 
 func (app *CetChainApp) pushNewHeightInfo(ctx sdk.Context) {
 	msg := NewHeightInfo{
+		ChainID:       ctx.BlockHeader().ChainID,
 		Height:        ctx.BlockHeight(),
 		TimeStamp:     ctx.BlockHeader().Time,
 		LastBlockHash: ctx.BlockHeader().LastBlockId.Hash,
