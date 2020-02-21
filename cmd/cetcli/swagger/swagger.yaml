@@ -629,7 +629,7 @@ paths:
           description: No content about this account address
         500:
           description: Server internel error
-  /auth/accounts/{address}/setReferee:
+  /auth/accounts/{address}/referee:
     post:
       summary: Set referee for account
       operationId: setReferee
