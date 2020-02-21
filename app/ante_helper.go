@@ -3,12 +3,14 @@ package app
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/coinexchain/cet-sdk/modules/distributionx"
+	"github.com/coinexchain/cet-sdk/types"
 
 	"github.com/coinexchain/cet-sdk/modules/authx"
 	"github.com/coinexchain/cet-sdk/modules/bankx"
+	"github.com/coinexchain/cet-sdk/modules/distributionx"
 	"github.com/coinexchain/cet-sdk/modules/incentive"
 	"github.com/coinexchain/cet-sdk/modules/stakingx"
 )
@@ -58,6 +60,10 @@ func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Err
 			return distributionx.ErrMemoRequiredWithdrawAddr(msg.WithdrawAddress.String())
 		}
 		return nil
+
+	case gov.MsgDeposit:
+		return ah.checkMsgDeposit(msg)
+
 	}
 
 	return nil
@@ -109,6 +115,13 @@ func (ah anteHelper) checkMinMandatoryCommissionRate(ctx sdk.Context, actualRate
 		return stakingx.ErrRateBelowMinMandatoryCommissionRate(minMandatoryRate, actualRate)
 	}
 
+	return nil
+}
+
+func (ah anteHelper) checkMsgDeposit(msg gov.MsgDeposit) sdk.Error {
+	if msg.Amount.Len() > 1 || (msg.Amount.Len() == 1 && msg.Amount[0].Denom != types.CET) {
+		return sdk.ErrInvalidCoins("tx not allowed to deposit other coins than cet")
+	}
 	return nil
 }
 
