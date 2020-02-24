@@ -12,6 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/coinexchain/cet-sdk/modules/asset"
+	"github.com/coinexchain/cet-sdk/modules/authx"
 	"github.com/coinexchain/cet-sdk/modules/market"
 	"github.com/coinexchain/dex/app"
 )
@@ -63,6 +64,7 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 func upgradeGenesisState(genState *app.GenesisState) {
 	genState.AssetData.Params = asset.DefaultParams()
 	genState.MarketData.Params = market.DefaultParams()
+	genState.AuthXData.Params = authx.DefaultParams()
 	for _, v := range genState.MarketData.Orders {
 		if v.FrozenFee != 0 {
 			v.FrozenCommission = v.FrozenFee
@@ -73,7 +75,6 @@ func upgradeGenesisState(genState *app.GenesisState) {
 		if v.AR == 0 {
 			v.MaxMoney = sdk.ZeroInt()
 			genState.BancorData.BancorInfoMap[k] = v
-
 		}
 	}
 	// TODO: more upgrades
