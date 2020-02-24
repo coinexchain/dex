@@ -3984,50 +3984,77 @@ paths:
               height:
                 type: string
               result:
-                type: object
-                required:
-                  - stock
-                  - money
-                  - init_price
-                  - max_supply
-                  - max_price
-                  - max_money
-                  - ar
-                  - current_price
-                  - stock_in_pool
-                  - money_in_pool
-                  - earliest_cancel_time
-                properties:
-                  stock:
-                    type: string
-                  money:
-                    type: string
-                  init_price:
-                    type: string
-                  max_supply:
-                    type: string
-                  stock_precision:
-                    type: string
-                  max_price:
-                    type: string
-                  max_money:
-                    type: string
-                  ar:
-                    type: string
-                  current_price:
-                    type: string
-                  stock_in_pool:
-                    type: string
-                  money_in_pool:
-                    type: string
-                  earliest_cancel_time:
-                    type: string
+                $ref: "#/definitions/BancorInfo"
                 additionalProperties: false
         404:
           description: There is no corresponding bancor info
         500:
           description: Server internal error
+  /bancorlite/infos:
+    get:
+      summary: get all bancor infos
+      operationId: getBancorInfos
+      tags:
+        - Bancorlite
+      produces:
+        - application/json
+      responses:
+        200:
+          description: bancor infos
+          schema:
+            type: object
+            properties:
+              height:
+                type: string
+              result:
+                type: array
+                items:
+                  $ref: "#/definitions/BancorInfo"
+                additionalProperties: false
+        404:
+          description: There is no bancor infos
+        500:
+          description: Server internal error
 definitions:
+  BancorInfo:
+    type: object
+    required:
+      - stock
+      - money
+      - init_price
+      - max_supply
+      - max_price
+      - max_money
+      - ar
+      - current_price
+      - stock_in_pool
+      - money_in_pool
+      - earliest_cancel_time
+    properties:
+      stock:
+        type: string
+      money:
+        type: string
+      init_price:
+        type: string
+      max_supply:
+        type: string
+      stock_precision:
+        type: string
+      max_price:
+        type: string
+      max_money:
+        type: string
+      ar:
+        type: string
+      current_price:
+        type: string
+      stock_in_pool:
+        type: string
+      money_in_pool:
+        type: string
+      earliest_cancel_time:
+        type: string
   BaseMarket:
     type: object
     required:

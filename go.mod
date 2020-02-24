@@ -3,11 +3,12 @@ module github.com/coinexchain/dex
 go 1.13
 
 require (
-	github.com/coinexchain/cet-sdk v0.0.0-20200219135335-4e3c3c240485
+	github.com/coinexchain/cet-sdk v0.0.0-20200224115504-9cebc6540c79
 	github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c
 	github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6
 	github.com/cosmos/cosmos-sdk v0.37.4
 	github.com/gorilla/mux v1.7.3
+	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.1
 	github.com/rakyll/statik v0.1.6
 	github.com/spf13/cobra v0.0.5

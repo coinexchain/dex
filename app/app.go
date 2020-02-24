@@ -344,6 +344,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.paramsKeeper.Subspace(authx.DefaultParamspace),
 		app.supplyKeeper,
 		app.accountKeeper,
+		app.bankKeeper,
 		eventTypeMsgQueue,
 	)
 
