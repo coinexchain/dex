@@ -3,7 +3,7 @@ module github.com/coinexchain/dex
 go 1.13
 
 require (
-	github.com/coinexchain/cet-sdk v0.0.0-20200224115504-9cebc6540c79
+	github.com/coinexchain/cet-sdk v0.0.0-20200225022739-fdf532d631e3
 	github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c
 	github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6
 	github.com/cosmos/cosmos-sdk v0.37.4

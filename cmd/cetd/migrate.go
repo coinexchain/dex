@@ -51,11 +51,12 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 
 	upgradeGenesisState(genState)
 
+	genDoc.ChainID = "coinexdex2"
 	genDoc.AppState = cdc.MustMarshalJSON(genState)
 	data = cdc.MustMarshalJSON(genDoc)
 
 	if outputFile == "" {
-		fmt.Println(data)
+		fmt.Println(string(data))
 		return nil
 	}
 	return ioutil.WriteFile(outputFile, data, 0644)
