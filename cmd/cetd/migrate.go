@@ -19,6 +19,7 @@ import (
 
 const (
 	flagOutput = "output"
+	GenesisBlockHeight = "genesis-block-height"
 )
 
 func migrateCmd(cdc *codec.Codec) *cobra.Command {
@@ -33,6 +34,7 @@ func migrateCmd(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().Int64(GenesisBlockHeight, 0, "node's genesis block height")
 	cmd.Flags().String(flagOutput, "", "New genesis.json file")
 	return cmd
 }
@@ -52,6 +54,7 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 	upgradeGenesisState(genState)
 
 	genDoc.ChainID = "coinexdex2"
+	genDoc.GenesisBlockHeight = viper.GetInt64(GenesisBlockHeight)
 	genDoc.AppState = cdc.MustMarshalJSON(genState)
 	data = cdc.MustMarshalJSON(genDoc)
 
