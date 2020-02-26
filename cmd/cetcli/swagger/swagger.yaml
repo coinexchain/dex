@@ -623,7 +623,7 @@ paths:
                   referee:
                     type: string
                   referee_change_time:
-                    type: integer
+                    type: string
                 additionalProperties: false
         204:
           description: No content about this account address
@@ -641,7 +641,7 @@ paths:
         - application/json
       parameters:
         - in: path
-          name: sender
+          name: address
           description: Account address in bech32 format
           required: true
           type: string
