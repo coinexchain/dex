@@ -2,6 +2,8 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/spf13/viper"
 	"io"
 	"os"
 	"strconv"
@@ -195,6 +197,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 	bApp := bam.NewBaseApp(appName, logger, db, txDecoder, baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
 	bApp.SetAppVersion(version.Version)
+	bam.SetHaltHeight(viper.GetUint64(server.FlagHaltHeight))(bApp)
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod, txDecoder)
 	app.initPubMsgBuf()
