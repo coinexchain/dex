@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	flagOutput = "output"
+	flagOutput         = "output"
 	GenesisBlockHeight = "genesis-block-height"
 )
 
@@ -54,7 +54,7 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 	upgradeGenesisState(genState)
 
 	genDoc.ChainID = "coinexdex2"
-	genDoc.GenesisBlockHeight = viper.GetInt64(GenesisBlockHeight)
+	//genDoc.GenesisBlockHeight = viper.GetInt64(GenesisBlockHeight)
 	genDoc.AppState = cdc.MustMarshalJSON(genState)
 	data = cdc.MustMarshalJSON(genDoc)
 
