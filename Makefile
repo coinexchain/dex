@@ -85,8 +85,8 @@ ifeq ($(OS),Windows_NT)
 	go build -mod=readonly $(BUILD_FLAGS) -o build/cetd.exe ./cmd/cetd
 	go build -mod=readonly $(BUILD_FLAGS) -o build/cetcli.exe ./cmd/cetcli
 else
-	go build  $(BUILD_FLAGS) -o build/cetd ./cmd/cetd
-	go build  $(BUILD_FLAGS) -o build/cetcli ./cmd/cetcli
+	go build -mod=readonly $(BUILD_FLAGS) -o build/cetd ./cmd/cetd
+	go build -mod=readonly $(BUILD_FLAGS) -o build/cetcli ./cmd/cetcli
 endif
 
 build-linux: go.sum
