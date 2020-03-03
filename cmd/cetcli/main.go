@@ -211,6 +211,9 @@ func fixDescriptions(cmd *cobra.Command) {
 		}
 	}
 	// cosmosXXX -> coinexXXX
+	if idx := strings.Index(cmd.Long, "cosmos1..."); idx >= 0 {
+		cmd.Long = strings.ReplaceAll(cmd.Long, "cosmos1...", "coinex1...")
+	}
 	if idx := strings.Index(cmd.Long, "cosmos1"); idx >= 0 {
 		cosmosAccAddr := cmd.Long[idx : idx+45]
 		rawAccAddr := rawAddressFromBech32("cosmos", cosmosAccAddr)
