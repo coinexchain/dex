@@ -115,7 +115,7 @@ func checkMinGasPrice(bApp *app.CetChainApp, logger log.Logger) {
 	ctx := bApp.NewContext(true, abci.Header{})
 	minGasPrice := ctx.MinGasPrices().AmountOf(dex.CET)
 	if !minGasPrice.IsPositive() {
-		logger.Info("--minimum-gas-prices option not set!")
+		panic("--minimum-gas-prices option not set!")
 	}
 }
 
