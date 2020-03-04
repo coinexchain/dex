@@ -13,9 +13,12 @@ Sign | 46000ns | 92138ns | 81926ns |
 Verify | 69200ns | 151701ns | 236794ns | 
 
 ### Compile with go-secp256k1
+
 ```bash
 make tools install
 ``` 
+
+Cross-platform compilation: `make tools install build-linux`
 
 ### Compile with c-libsecp256k1
 
@@ -46,6 +49,7 @@ Compile dex
 cd dex
 make tools install BUILD_TAGS=libsecp256k1
 ```
+Cross-platform compilation: `make tools install build-linux BUILD_TAGS=libsecp256k1`
 
 - `cetd` and `cetcli` will be install in your GOPATH.
 - `cetd` is the CoinEx Chain full node daemon. 
