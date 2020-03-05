@@ -34,6 +34,9 @@ matrix:
         #- pip3 install --upgrade pip
         - python3 --version
         - pip3 --version
+        #- pip3 install pipenv
+        #- pipenv --version
+        - pip3 install setuptools
         - go get github.com/rakyll/statik
         - go mod tidy
         - go mod vendor
