@@ -11,6 +11,8 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
+	"github.com/cosmos/cosmos-sdk/server"
+
 	dex "github.com/coinexchain/cet-sdk/types"
 	"github.com/coinexchain/dex/app"
 )
@@ -27,6 +29,7 @@ func TestCreateRootCmd(t *testing.T) {
 func TestNewApp(t *testing.T) {
 	db := dbm.NewMemDB()
 	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
+	viper.Set(server.FlagMinGasPrices, "20.0cet")
 	cet := newApp(logger, db, log.NewSyncWriter(os.Stdout))
 	value := reflect.ValueOf(cet).Interface().(*app.CetChainApp)
 	require.Equal(t, "CoinExChainApp", value.Name())

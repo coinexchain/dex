@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	flagOutput = "output"
+	flagOutput         = "output"
 	GenesisBlockHeight = "genesis-block-height"
 )
 

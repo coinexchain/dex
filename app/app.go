@@ -2,11 +2,12 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/spf13/viper"
 	"io"
 	"os"
 	"strconv"
+
+	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/spf13/viper"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
