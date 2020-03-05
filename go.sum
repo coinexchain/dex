@@ -43,8 +43,8 @@ github.com/coinexchain/cet-sdk v0.2.0 h1:ftwpF5nHjI81tJ20SbEFbofp0qxEUOAw41A99VB
 github.com/coinexchain/cet-sdk v0.2.0/go.mod h1:I1czo5LprM+0HF29mflswmY35vntTpBKGTABiI0eZWQ=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c h1:ZcWk9BWVuvAZW23esCnCyhp7Ss6xhVuffwNxHsQccRE=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c/go.mod h1:IPOtAzhvIJrmitYLXC4DC0fJFoGulqhn3LBSnwkA1eo=
-github.com/coinexchain/cosmos-sdk v0.37.700 h1:Rot4X8N0tG9CqMjcM85HBrHstj4m90lzt24/HQGO/lQ=
-github.com/coinexchain/cosmos-sdk v0.37.700/go.mod h1:Q7qRT15KYd9S0w5yRvr2MX/MIcyrgta4qRopfrykdEo=
+github.com/coinexchain/cosmos-sdk v0.37.701 h1:mQGZQpZFo5KmFloFsNHCtyzL4AkXWF4RNDg2g+RT13U=
+github.com/coinexchain/cosmos-sdk v0.37.701/go.mod h1:Q7qRT15KYd9S0w5yRvr2MX/MIcyrgta4qRopfrykdEo=
 github.com/coinexchain/cosmos-utils v0.0.0-20200109031554-f15ba3b1d6a7 h1:cIQxD8xh/Lp6m+PyRq7rkiLg8WPXtU5Fpr/P7jbDYpo=
 github.com/coinexchain/cosmos-utils v0.0.0-20200109031554-f15ba3b1d6a7/go.mod h1:JvdHh+tB6eBmuQ75l/QqSLx8Jj5rOoVS4DkLJrmYJgw=
 github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6 h1:ResmUJSlC5h17IL5ZUAOZCwRZELSLr4m1/VowdLfreM=
