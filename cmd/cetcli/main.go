@@ -81,14 +81,15 @@ func createRootCmd(cdc *codec.Codec) *cobra.Command {
 		client.LineBreak,
 	)
 
+	config := sdk.GetConfig()
 	// fix `keys parse` cmd
 	keys.Bech32Prefixes = []string{
-		dex.Bech32PrefixAccAddr,
-		dex.Bech32PrefixAccPub,
-		dex.Bech32PrefixValAddr,
-		dex.Bech32PrefixValPub,
-		dex.Bech32PrefixConsAddr,
-		dex.Bech32PrefixConsPub,
+		config.GetBech32AccountAddrPrefix(),
+		config.GetBech32AccountPubPrefix(),
+		config.GetBech32ValidatorAddrPrefix(),
+		config.GetBech32ValidatorPubPrefix(),
+		config.GetBech32ConsensusAddrPrefix(),
+		config.GetBech32ConsensusPubPrefix(),
 	}
 
 	fixDescriptions(rootCmd)
