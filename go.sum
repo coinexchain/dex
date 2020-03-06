@@ -41,6 +41,10 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/coinexchain/cet-sdk v0.2.0 h1:ftwpF5nHjI81tJ20SbEFbofp0qxEUOAw41A99VByYxI=
 github.com/coinexchain/cet-sdk v0.2.0/go.mod h1:I1czo5LprM+0HF29mflswmY35vntTpBKGTABiI0eZWQ=
+github.com/coinexchain/cet-sdk v0.2.1-alpha h1:a85wyOIQYEHpWVa3U9AIfuah0hENCA2FcHG0ByX+JsU=
+github.com/coinexchain/cet-sdk v0.2.1-alpha/go.mod h1:zY5tbQrF09ZLaatqpy/rc6UHV7R1/ksjARm0NQypkqw=
+github.com/coinexchain/cet-sdk v0.2.1-alpha.0.20200306033534-ed7c70019490 h1:pDgP22TZkte2feQi5/HnevNaIRJ7HJMSV7AfqxSH4NM=
+github.com/coinexchain/cet-sdk v0.2.1-alpha.0.20200306033534-ed7c70019490/go.mod h1:zY5tbQrF09ZLaatqpy/rc6UHV7R1/ksjARm0NQypkqw=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c h1:ZcWk9BWVuvAZW23esCnCyhp7Ss6xhVuffwNxHsQccRE=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c/go.mod h1:IPOtAzhvIJrmitYLXC4DC0fJFoGulqhn3LBSnwkA1eo=
 github.com/coinexchain/cosmos-sdk v0.37.701 h1:mQGZQpZFo5KmFloFsNHCtyzL4AkXWF4RNDg2g+RT13U=
