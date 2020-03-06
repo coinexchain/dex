@@ -26,8 +26,9 @@ func TestMigrate(t *testing.T) {
 	upgradeGenesisState(&state)
 
 	// check state
-	require.Equal(t, int64(5e11), state.AssetData.Params.Issue4CharTokenFee)
+	require.Equal(t, app.VotingPeriod, state.GovData.VotingParams.VotingPeriod)
 	require.Equal(t, int64(1000), state.AuthXData.Params.RebateRatio)
+	require.Equal(t, int64(5e11), state.AssetData.Params.Issue4CharTokenFee)
 	require.Equal(t, int64(100), state.MarketData.Orders[0].FrozenCommission)
 	require.Equal(t, sdk.ZeroInt(), state.BancorData.BancorInfoMap["x"].MaxMoney)
 }

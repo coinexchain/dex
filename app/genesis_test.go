@@ -74,7 +74,7 @@ func TestDefaultGenesisState(t *testing.T) {
 	gov.ModuleCdc.MustUnmarshalJSON(state[gov.ModuleName], &govData)
 	checkCET(t, 10000, govData.DepositParams.MinDeposit)
 	require.Equal(t, "336h0m0s", govData.DepositParams.MaxDepositPeriod.String())
-	require.Equal(t, "336h0m0s", govData.VotingParams.VotingPeriod.String())
+	require.Equal(t, "168h0m0s", govData.VotingParams.VotingPeriod.String())
 	require.Equal(t, sdk.MustNewDecFromStr("0.4"), govData.TallyParams.Quorum)
 	require.Equal(t, sdk.MustNewDecFromStr("0.5"), govData.TallyParams.Threshold)
 	require.Equal(t, sdk.MustNewDecFromStr("0.334"), govData.TallyParams.Veto)

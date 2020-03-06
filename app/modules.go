@@ -65,7 +65,7 @@ func (GovModuleBasic) DefaultGenesis() json.RawMessage {
 	genState.DepositParams.MinDeposit[0].Denom = dex.DefaultBondDenom
 	genState.DepositParams.MinDeposit[0].Amount = DefaultGovMinDeposit
 	genState.DepositParams.MaxDepositPeriod = DefaultPeriod
-	genState.VotingParams.VotingPeriod = DefaultPeriod
+	genState.VotingParams.VotingPeriod = VotingPeriod
 	genState.TallyParams = gov.TallyParams{
 		Quorum:    sdk.NewDecWithPrec(4, 1),
 		Threshold: sdk.NewDecWithPrec(5, 1),

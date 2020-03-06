@@ -50,5 +50,6 @@ var (
 // gov
 const (
 	// Default period for deposits & voting
-	DefaultPeriod = 14 * Day
+	DefaultPeriod = 14 * Day // TODO
+	VotingPeriod  = 7 * Day
 )

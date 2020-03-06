@@ -66,9 +66,10 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 }
 
 func upgradeGenesisState(genState *app.GenesisState) {
+	genState.GovData.VotingParams.VotingPeriod = app.VotingPeriod
+	genState.AuthXData.Params = authx.DefaultParams()
 	genState.AssetData.Params = asset.DefaultParams()
 	genState.MarketData.Params = market.DefaultParams()
-	genState.AuthXData.Params = authx.DefaultParams()
 	for _, v := range genState.MarketData.Orders {
 		if v.FrozenFee != 0 {
 			v.FrozenCommission = v.FrozenFee
