@@ -3985,7 +3985,7 @@ paths:
                 type: string
               result:
                 $ref: "#/definitions/BancorInfo"
-                additionalProperties: false
+            additionalProperties: false
         404:
           description: There is no corresponding bancor info
         500:
