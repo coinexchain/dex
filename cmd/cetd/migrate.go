@@ -19,6 +19,7 @@ import (
 
 const (
 	flagOutput         = "output"
+	flagListValidators = "list-validators"
 	GenesisBlockHeight = "genesis-block-height"
 )
 
@@ -36,6 +37,7 @@ func migrateCmd(cdc *codec.Codec) *cobra.Command {
 
 	cmd.Flags().Int64(GenesisBlockHeight, 0, "node's genesis block height")
 	cmd.Flags().String(flagOutput, "", "New genesis.json file")
+	cmd.Flags().Bool(flagListValidators, false, "List validators in genesis.json file")
 	return cmd
 }
 
@@ -47,6 +49,10 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 
 	genDoc := &tm.GenesisDoc{}
 	cdc.MustUnmarshalJSON(data, genDoc)
+	if viper.GetBool(flagListValidators) {
+		listValidators(genDoc)
+		return nil
+	}
 
 	genState := &app.GenesisState{}
 	cdc.MustUnmarshalJSON(genDoc.AppState, genState)
