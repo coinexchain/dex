@@ -4019,6 +4019,7 @@ definitions:
   BancorInfo:
     type: object
     required:
+      - owner
       - stock
       - money
       - init_price
@@ -4031,6 +4032,8 @@ definitions:
       - money_in_pool
       - earliest_cancel_time
     properties:
+      owner:
+        type: string
       stock:
         type: string
       money:
