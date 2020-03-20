@@ -33,7 +33,7 @@ type TxExtraInfo struct {
 type NewHeightInfo struct {
 	ChainID       string       `json:"chain_id"`
 	Height        int64        `json:"height"`
-	TimeStamp     time.Time    `json:"timestamp"`
+	TimeStamp     int64        `json:"timestamp"`
 	LastBlockHash cmn.HexBytes `json:"last_block_hash"`
 }
 
@@ -41,7 +41,7 @@ func (app *CetChainApp) pushNewHeightInfo(ctx sdk.Context) {
 	msg := NewHeightInfo{
 		ChainID:       ctx.BlockHeader().ChainID,
 		Height:        ctx.BlockHeight(),
-		TimeStamp:     ctx.BlockHeader().Time,
+		TimeStamp:     ctx.BlockHeader().Time.Unix(),
 		LastBlockHash: ctx.BlockHeader().LastBlockId.Hash,
 	}
 	bytes := dex.SafeJSONMarshal(msg)
@@ -176,7 +176,7 @@ type NotificationBeginRedelegation struct {
 	ValidatorSrc   string `json:"src"`
 	ValidatorDst   string `json:"dst"`
 	Amount         string `json:"amount"`
-	CompletionTime string `json:"completion_time"`
+	CompletionTime int64  `json:"completion_time"`
 }
 
 func getNotificationBeginRedelegation(dualEvent []abci.Event) []byte {
@@ -189,7 +189,9 @@ func getNotificationBeginRedelegation(dualEvent []abci.Event) []byte {
 		} else if string(attr.Key) == sdk.AttributeKeyAmount {
 			res.Amount = string(attr.Value)
 		} else if string(attr.Key) == stypes.AttributeKeyCompletionTime {
-			res.CompletionTime = string(attr.Value)
+			if tmp, err := time.Parse(time.RFC3339, string(attr.Value)); err != nil {
+				res.CompletionTime = tmp.Unix()
+			}
 		}
 	}
 	for _, attr := range dualEvent[1].Attributes {
@@ -204,7 +206,7 @@ type NotificationBeginUnbonding struct {
 	Delegator      string `json:"delegator"`
 	Validator      string `json:"validator"`
 	Amount         string `json:"amount"`
-	CompletionTime string `json:"completion_time"`
+	CompletionTime int64  `json:"completion_time"`
 }
 
 func getNotificationBeginUnbonding(dualEvent []abci.Event) []byte {
@@ -215,7 +217,9 @@ func getNotificationBeginUnbonding(dualEvent []abci.Event) []byte {
 		} else if string(attr.Key) == sdk.AttributeKeyAmount {
 			res.Amount = string(attr.Value)
 		} else if string(attr.Key) == stypes.AttributeKeyCompletionTime {
-			res.CompletionTime = string(attr.Value)
+			if tmp, err := time.Parse(time.RFC3339, string(attr.Value)); err != nil {
+				res.CompletionTime = tmp.Unix()
+			}
 		}
 	}
 	for _, attr := range dualEvent[1].Attributes {
