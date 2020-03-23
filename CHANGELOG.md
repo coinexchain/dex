@@ -35,6 +35,20 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+
+## [v0.2.8-alpha] - 2020.03-23
+
+### Bug Fixes
+
+*   [#16](https://github.com/coinexchain/dex/issues/16) Rebate amount
+
+### API Breaking
+
+*   [#1](https://github.com/coinexchain/cet-sdk/issues/1)  Add market creator in push msg
+*   [#15](https://github.com/coinexchain/dex/issues/15) Uniform timestamp to unix.
+*   [#17](https://github.com/coinexchain/dex/issues/17) Uniform bancor message format
+*   [#18](https://github.com/coinexchain/dex/issues/18) Modify name of the rebate field
+
 ## [v0.2.0] \(WIP\)
 
 ### State Machine Breaking
