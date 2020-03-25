@@ -73,6 +73,7 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 
 func upgradeGenesisState(genState *app.GenesisState) {
 	genState.GovData.VotingParams.VotingPeriod = app.VotingPeriod
+	genState.StakingXData.Params.MinSelfDelegation = app.MinSelfDelegation
 	genState.AuthXData.Params = authx.DefaultParams()
 	genState.AssetData.Params = asset.DefaultParams()
 	genState.MarketData.Params = market.DefaultParams()

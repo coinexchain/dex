@@ -53,3 +53,8 @@ const (
 	DefaultPeriod = 14 * Day // TODO
 	VotingPeriod  = 7 * Day
 )
+
+// staking
+const (
+	MinSelfDelegation = 1000000e8
+)
