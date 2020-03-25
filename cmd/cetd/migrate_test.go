@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -27,8 +28,17 @@ func TestMigrate(t *testing.T) {
 
 	// check state
 	require.Equal(t, app.VotingPeriod, state.GovData.VotingParams.VotingPeriod)
-	require.Equal(t, int64(1000), state.AuthXData.Params.RebateRatio)
-	require.Equal(t, int64(5e11), state.AssetData.Params.Issue4CharTokenFee)
-	require.Equal(t, int64(100), state.MarketData.Orders[0].FrozenCommission)
+	require.EqualValues(t, app.MinSelfDelegation, state.StakingXData.Params.MinSelfDelegation)
+	require.EqualValues(t, 2000, state.AuthXData.Params.RebateRatio)
+	require.EqualValues(t, time.Hour*24*7, state.AuthXData.Params.RefereeChangeMinInterval)
+	require.EqualValues(t, 1e12, state.AssetData.Params.IssueRareTokenFee)
+	require.EqualValues(t, 1e11, state.AssetData.Params.Issue3CharTokenFee)
+	require.EqualValues(t, 5e10, state.AssetData.Params.Issue4CharTokenFee)
+	require.EqualValues(t, 2e10, state.AssetData.Params.Issue5CharTokenFee)
+	require.EqualValues(t, 1e10, state.AssetData.Params.Issue6CharTokenFee)
+	require.EqualValues(t, 5e9, state.AssetData.Params.IssueTokenFee)
+	require.EqualValues(t, 100e8, state.MarketData.Params.CreateMarketFee)
+	require.EqualValues(t, 200000, state.MarketData.Params.GTEOrderLifetime)
+	require.EqualValues(t, 100, state.MarketData.Orders[0].FrozenCommission)
 	require.Equal(t, sdk.ZeroInt(), state.BancorData.BancorInfoMap["x"].MaxMoney)
 }
