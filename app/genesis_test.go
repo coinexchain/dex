@@ -112,12 +112,12 @@ func TestDefaultGenesisState(t *testing.T) {
 	// asset
 	var assetData asset.GenesisState
 	asset.ModuleCdc.MustUnmarshalJSON(state[asset.ModuleName], &assetData)
-	require.Equal(t, int64(100000e8), assetData.Params.IssueRareTokenFee)
-	require.Equal(t, int64(10000e8), assetData.Params.Issue3CharTokenFee)
-	require.Equal(t, int64(5000e8), assetData.Params.Issue4CharTokenFee)
-	require.Equal(t, int64(2000e8), assetData.Params.Issue5CharTokenFee)
-	require.Equal(t, int64(1000e8), assetData.Params.Issue6CharTokenFee)
-	require.Equal(t, int64(500e8), assetData.Params.IssueTokenFee)
+	require.Equal(t, int64(10000e8), assetData.Params.IssueRareTokenFee)
+	require.Equal(t, int64(1000e8), assetData.Params.Issue3CharTokenFee)
+	require.Equal(t, int64(500e8), assetData.Params.Issue4CharTokenFee)
+	require.Equal(t, int64(200e8), assetData.Params.Issue5CharTokenFee)
+	require.Equal(t, int64(100e8), assetData.Params.Issue6CharTokenFee)
+	require.Equal(t, int64(50e8), assetData.Params.IssueTokenFee)
 
 	// bancor
 	var bancorData bancorlite.GenesisState
@@ -134,9 +134,9 @@ func TestDefaultGenesisState(t *testing.T) {
 	// market
 	var marketData market.GenesisState
 	market.ModuleCdc.MustUnmarshalJSON(state[market.ModuleName], &marketData)
-	require.Equal(t, int64(10000e8), marketData.Params.CreateMarketFee)
+	require.Equal(t, int64(100e8), marketData.Params.CreateMarketFee)
 	require.Equal(t, int64(604800e9), marketData.Params.MarketMinExpiredTime)
-	require.EqualValues(t, 100000, marketData.Params.GTEOrderLifetime)
+	require.EqualValues(t, 200000, marketData.Params.GTEOrderLifetime)
 	require.Equal(t, int64(10), marketData.Params.GTEOrderFeatureFeeByBlocks)
 	require.EqualValues(t, 25, marketData.Params.MaxExecutedPriceChangeRatio)
 	require.Equal(t, int64(10), marketData.Params.MarketFeeRate)
