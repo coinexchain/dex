@@ -89,5 +89,6 @@ func upgradeGenesisState(genState *app.GenesisState) {
 			genState.BancorData.BancorInfoMap[k] = v
 		}
 	}
+	genState.Incentive.State.HeightAdjustment = 0
 	// TODO: more upgrades
 }
