@@ -39,6 +39,8 @@ github.com/coinexchain/cet-sdk v0.2.6-alpha h1:gWwZg/H7PJunuD6gfe/dqGYCQShlO2wZx
 github.com/coinexchain/cet-sdk v0.2.6-alpha/go.mod h1:92QKrP0yVYv+hwuX/ivK/wC8y7JKLs2EcbUarwxMkW4=
 github.com/coinexchain/cet-sdk v0.2.7-alpha h1:jEOGi6zHQnH7TEx/i9QNfpyfK/8aLYJyKfzvzuwp2Dk=
 github.com/coinexchain/cet-sdk v0.2.7-alpha/go.mod h1:92QKrP0yVYv+hwuX/ivK/wC8y7JKLs2EcbUarwxMkW4=
+github.com/coinexchain/cet-sdk v0.2.8-alpha h1:RPGcKmvc8c1ZNE0n/2CPpa6GSf37JptaQFMSaIETYmQ=
+github.com/coinexchain/cet-sdk v0.2.8-alpha/go.mod h1:92QKrP0yVYv+hwuX/ivK/wC8y7JKLs2EcbUarwxMkW4=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c h1:ZcWk9BWVuvAZW23esCnCyhp7Ss6xhVuffwNxHsQccRE=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c/go.mod h1:IPOtAzhvIJrmitYLXC4DC0fJFoGulqhn3LBSnwkA1eo=
 github.com/coinexchain/cosmos-sdk v0.37.703 h1:KR5/icNZAsgEbpoY+4Uox2tqv0hpLqBdhmoqhuXStv0=
