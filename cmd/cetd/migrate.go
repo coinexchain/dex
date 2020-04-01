@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,6 +22,7 @@ const (
 	flagOutput         = "output"
 	flagListValidators = "list-validators"
 	GenesisBlockHeight = "genesis-block-height"
+	flagGenesisTime    = "genesis-time"
 )
 
 func migrateCmd(cdc *codec.Codec) *cobra.Command {
@@ -36,8 +38,11 @@ func migrateCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	cmd.Flags().Int64(GenesisBlockHeight, 0, "node's genesis block height")
+	cmd.Flags().Int64(flagGenesisTime, 0, "The unix timestamp for genesis time, in seconds")
 	cmd.Flags().String(flagOutput, "", "New genesis.json file")
 	cmd.Flags().Bool(flagListValidators, false, "List validators in genesis.json file")
+
+	cmd.MarkFlagRequired(flagGenesisTime)
 	return cmd
 }
 
@@ -53,6 +58,7 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 		listValidators(genDoc)
 		return nil
 	}
+	genesisTime := viper.GetInt64(flagGenesisTime)
 
 	genState := &app.GenesisState{}
 	cdc.MustUnmarshalJSON(genDoc.AppState, genState)
@@ -61,6 +67,7 @@ func migrateGenesisFile(cdc *codec.Codec, inputFile, outputFile string) error {
 
 	genDoc.ChainID = "coinexdex2"
 	genDoc.GenesisBlockHeight = viper.GetInt64(GenesisBlockHeight)
+	genDoc.GenesisTime = time.Unix(genesisTime, 0)
 	genDoc.AppState = cdc.MustMarshalJSON(genState)
 	data = cdc.MustMarshalJSON(genDoc)
 
