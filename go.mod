@@ -18,6 +18,6 @@ require (
 	github.com/tendermint/tm-db v0.2.0
 )
 
-replace github.com/cosmos/cosmos-sdk => github.com/coinexchain/cosmos-sdk v0.37.706
+replace github.com/cosmos/cosmos-sdk => github.com/coinexchain/cosmos-sdk v0.37.707
 
 replace github.com/tendermint/tendermint => github.com/coinexchain/tendermint v0.32.904

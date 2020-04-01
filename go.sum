@@ -41,11 +41,15 @@ github.com/coinexchain/cet-sdk v0.2.7-alpha h1:jEOGi6zHQnH7TEx/i9QNfpyfK/8aLYJyK
 github.com/coinexchain/cet-sdk v0.2.7-alpha/go.mod h1:92QKrP0yVYv+hwuX/ivK/wC8y7JKLs2EcbUarwxMkW4=
 github.com/coinexchain/cet-sdk v0.2.8-alpha h1:RPGcKmvc8c1ZNE0n/2CPpa6GSf37JptaQFMSaIETYmQ=
 github.com/coinexchain/cet-sdk v0.2.8-alpha/go.mod h1:92QKrP0yVYv+hwuX/ivK/wC8y7JKLs2EcbUarwxMkW4=
+github.com/coinexchain/cet-sdk v0.2.11 h1:tZZhn0d2Nf2H+furtz8rIthnjiH3Pjle48z451OEOTU=
+github.com/coinexchain/cet-sdk v0.2.11/go.mod h1:z/Iqxji0EJ1OXg4YOpGGJwLPvCeUjS+WE9D/OKlEv8E=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c h1:ZcWk9BWVuvAZW23esCnCyhp7Ss6xhVuffwNxHsQccRE=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c/go.mod h1:IPOtAzhvIJrmitYLXC4DC0fJFoGulqhn3LBSnwkA1eo=
 github.com/coinexchain/cosmos-sdk v0.37.703 h1:KR5/icNZAsgEbpoY+4Uox2tqv0hpLqBdhmoqhuXStv0=
 github.com/coinexchain/cosmos-sdk v0.37.703/go.mod h1:wEOMDW1Qy4Ipp2M1zIYFKzzbJZVTghY1blHaZH+iGNE=
 github.com/coinexchain/cosmos-sdk v0.37.704/go.mod h1:wEOMDW1Qy4Ipp2M1zIYFKzzbJZVTghY1blHaZH+iGNE=
+github.com/coinexchain/cosmos-sdk v0.37.707 h1:QtfnalT4HwGe01AhP6eERD+/i1RvFDv3xzkm/G93ens=
+github.com/coinexchain/cosmos-sdk v0.37.707/go.mod h1:c5v6OZTBSSNnLaiBYf8afefHi7SPQG02k5GqI3LPrIU=
 github.com/coinexchain/cosmos-utils v0.0.0-20200109031554-f15ba3b1d6a7 h1:cIQxD8xh/Lp6m+PyRq7rkiLg8WPXtU5Fpr/P7jbDYpo=
 github.com/coinexchain/cosmos-utils v0.0.0-20200109031554-f15ba3b1d6a7/go.mod h1:JvdHh+tB6eBmuQ75l/QqSLx8Jj5rOoVS4DkLJrmYJgw=
 github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6 h1:ResmUJSlC5h17IL5ZUAOZCwRZELSLr4m1/VowdLfreM=
@@ -54,6 +58,8 @@ github.com/coinexchain/shorthanzi v0.1.0 h1:c4Fcb8GkQ37uLNSQr5SRohmS+aW+WY3doyy7
 github.com/coinexchain/shorthanzi v0.1.0/go.mod h1:g/V5MW70JNcg9/OumUZLp63aDxEQImlYqJ6PMJEIu28=
 github.com/coinexchain/tendermint v0.32.903 h1:rmSwB/ZWuK81MKHTGmMSRPI91/EMmJ/Gy+sYvBVV+CQ=
 github.com/coinexchain/tendermint v0.32.903/go.mod h1:5/B1XZjNYtVBso8o1l/Eg4A0Mhu42lDcmftoQl95j/E=
+github.com/coinexchain/tendermint v0.32.904 h1:zBWvYlz9Y5lXCdx0L+mGcGWLOIYGNHCUSI8pzIXBBAA=
+github.com/coinexchain/tendermint v0.32.904/go.mod h1:5/B1XZjNYtVBso8o1l/Eg4A0Mhu42lDcmftoQl95j/E=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=
@@ -62,7 +68,9 @@ github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7
 github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f/go.mod h1:E3G3o1h8I7cfcXa63jLwjI0eiQQMgzzUDFVpN/nH/eA=
 github.com/cosmos/go-bip39 v0.0.0-20180618194314-52158e4697b8 h1:Iwin12wRQtyZhH6FV3ykFcdGNlYEzoeR0jN8Vn+JWsI=
 github.com/cosmos/go-bip39 v0.0.0-20180618194314-52158e4697b8/go.mod h1:tSxLoYXyBmiFeKpvmq4dzayMdCjCnu8uqmCysIGBT2Y=
+github.com/cosmos/ledger-cosmos-go v0.10.3 h1:Qhi5yTR5Pg1CaTpd00pxlGwNl4sFRdtK1J96OTjeFFc=
 github.com/cosmos/ledger-cosmos-go v0.10.3/go.mod h1:J8//BsAGTo3OC/vDLjMRFLW6q0WAaXvHnVc7ZmE8iUY=
+github.com/cosmos/ledger-go v0.9.2 h1:Nnao/dLwaVTk1Q5U9THldpUMMXU94BOTWPddSmVB6pI=
 github.com/cosmos/ledger-go v0.9.2/go.mod h1:oZJ2hHAZROdlHiwTg4t7kP+GKIIkBT+o6c9QWFanOyI=
 github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwcJI5acqYI6dE=
 github.com/davecgh/go-spew v0.0.0-20171005155431-ecdeabc65495/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -258,6 +266,7 @@ github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c/go.mod h1:lB8K/P019DLNhe
 github.com/xdg/stringprep v1.0.0/go.mod h1:Jhud4/sHMO4oL310DaZAKk9ZaJ08SJfe+sJh0HrGL1Y=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
+github.com/zondax/hid v0.9.0 h1:eiT3P6vNxAEVxXMw66eZUAAnU2zD33JBkfG/EnfAKl8=
 github.com/zondax/hid v0.9.0/go.mod h1:l5wttcP0jwtdLjqjMMWFVEE7d1zO0jvSPA9OPZxWpEM=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
