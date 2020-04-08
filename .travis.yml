@@ -54,34 +54,6 @@ matrix:
         - docker build . --tag=coinexchain/cetdtest
         - scripts/functional_test.sh 4 0
 
-    - <<: *ft_job
-      script:
-        - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 1
-    - <<: *ft_job
-      script:
-        - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 2
-    - <<: *ft_job
-      script:
-        - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh 4 3
-
-    - <<: *ft_job
-      script:
-        - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh -3 0
-
-    - <<: *ft_job
-      script:
-        - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh -3 1
-
-    - <<: *ft_job
-      script:
-        - docker build . --tag=coinexchain/cetdtest
-        - scripts/functional_test.sh -3 2
-
     - language: go
       go: 1.13.x
       dist: bionic

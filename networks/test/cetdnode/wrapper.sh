@@ -23,9 +23,9 @@ fi
 export CETDHOME="/cetd/node${ID}/cetd"
 
 if [[ -d "`dirname ${CETDHOME}/${LOG}`" ]]; then
-  "$BINARY" --home "$CETDHOME" "$@" | tee "${CETDHOME}/${LOG}"
+  "$BINARY" --home "$CETDHOME" --minimum-gas-prices=20.0cet "$@" | tee "${CETDHOME}/${LOG}"
 else
-  "$BINARY" --home "$CETDHOME" "$@"
+  "$BINARY" --home "$CETDHOME" --minimum-gas-prices=20.0cet "$@"
 fi
 
 chmod 777 -R /cetd
