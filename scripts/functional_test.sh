@@ -34,7 +34,7 @@ date +%s
 echo "$(pwd)"
 cd func_test
 # bash script/run_ft_all.sh 
-bash script/ft.sh ./features/bank_send.feature --tags=~@wip
+bash script/ft.sh ./features/ --tags=~@wip --no-capture --no-capture-stderr --no-logcapture --no-skipped
 
 date +%s
 echo "Test end"
