@@ -137,13 +137,11 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 	accs := make([]genaccounts.GenesisAccount, numValidators)
 	genFiles := make([]string, numValidators)
 
-	dexConfig := srvconfig.DefaultConfig()
-	dexConfig.MinGasPrices = minGasPrices
-
 	// generate private keys, node IDs, and initial transactions
 	for i := 0; i < numValidators; i++ {
-		nodeInfo, err := initTestnetNode(cmd, config, cdc, outputDir, chainID,
-			nodeDirPrefix, nodeDaemonHome, nodeCLIHome, startingIPAddress, i)
+		nodeInfo, err := initTestnetNode(cmd, config, cdc,
+			outputDir, chainID, minGasPrices, nodeDirPrefix, nodeDaemonHome,
+			nodeCLIHome, startingIPAddress, i)
 		if err != nil {
 			return err
 		}
@@ -171,7 +169,7 @@ func initTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
 }
 
 func initTestnetNode(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec,
-	outputDir, chainID, nodeDirPrefix, nodeDaemonHome, nodeCLIHome, startingIPAddr string, i int,
+	outputDir, chainID, minGasPrices, nodeDirPrefix, nodeDaemonHome, nodeCLIHome, startingIPAddr string, i int,
 ) (testnetNodeInfo, error) {
 
 	nodeDirName := fmt.Sprintf("%s%d", nodeDirPrefix, i)
@@ -284,8 +282,11 @@ func initTestnetNode(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Cod
 		return testnetNodeInfo{}, err
 	}
 
+	dexConfig := srvconfig.DefaultConfig()
+	dexConfig.MinGasPrices = minGasPrices
+
 	configFilePath := filepath.Join(nodeDir, "config/cetd.toml")
-	srvconfig.WriteConfigFile(configFilePath, srvconfig.DefaultConfig())
+	srvconfig.WriteConfigFile(configFilePath, dexConfig)
 	return testnetNodeInfo{
 		nodeID:    nodeID,
 		valPubKey: valPubKey,
