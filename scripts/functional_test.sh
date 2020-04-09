@@ -34,7 +34,7 @@ date +%s
 echo "$(pwd)"
 cd func_test
 # bash script/run_ft_all.sh 
-bash script/ft.sh ./features/ --tags=~@wip --no-capture --no-capture-stderr --no-logcapture --no-skipped
+bash script/ft.sh ./features/ --tags=~@wip --no-capture --no-capture-stderr --no-logcapture --no-skipped -D TEST_KAFKA=true
 
 date +%s
 echo "Test end"
