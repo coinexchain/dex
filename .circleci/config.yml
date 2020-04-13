@@ -8,7 +8,6 @@ jobs:
       # specify the version
       - image: cimg/go:1.13
     resource_class: xlarge
-
     steps:
       - checkout
       - setup_remote_docker:
@@ -16,12 +15,12 @@ jobs:
       - run:
         name: Install dependencies
         command: |
-          apt install python3-pip
-          apt install parallel
-          apt install g++-6
-          apt install gcc-6
-          apt install bzr
-          apt install build-essential
+          sudo apt-get install python3-pip
+          sudo apt-get install parallel
+          sudo apt-get install g++-6
+          sudo apt-get install gcc-6
+          sudo apt-get install bzr
+          sudo apt-get install build-essential
           go get github.com/rakyll/statik
           python3 --version
           pip3 --version
