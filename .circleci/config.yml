@@ -37,6 +37,7 @@ jobs:
           name: Docker proceed
           command: |
             docker build . --tag=coinexchain/cetdtest
+            echo $pwd
             bash scripts/functional_test.sh 4 0
 
 
