@@ -12,6 +12,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            echo $pwd
             sudo apt update && sudo apt-get install python3-pip parallel g++-6 gcc-6 bzr build-essential -y
             python3 --version
             pip3 --version
@@ -31,8 +32,10 @@ jobs:
           name: Project set up
           command: |
             go mod tidy
+            echo $pwd
             make statik-swagger
             make build-linux
+            echo $pwd
       - run:
           name: Docker proceed
           command: |
