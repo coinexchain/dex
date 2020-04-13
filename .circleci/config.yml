@@ -12,7 +12,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            echo $pwd
+            echo $PWD
             sudo apt update && sudo apt-get install python3-pip parallel g++-6 gcc-6 bzr build-essential -y
             python3 --version
             pip3 --version
@@ -32,15 +32,15 @@ jobs:
           name: Project set up
           command: |
             go mod tidy
-            echo $pwd
+            echo $PWD
             make statik-swagger
             make build-linux
-            echo $pwd
+            echo $PWD
       - run:
           name: Docker proceed
           command: |
             docker build . --tag=coinexchain/cetdtest
-            echo $pwd
+            echo $PWD
             bash scripts/functional_test.sh 4 0
 
 
