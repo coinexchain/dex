@@ -12,7 +12,7 @@ then
 fi
 
 set -e
-
+echo $PWD
 mkdir func_test
 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin

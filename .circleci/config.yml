@@ -20,6 +20,7 @@ jobs:
             go get github.com/rakyll/statik
             free -m
             df -lh
+            echo $PWD
       - run:
           name: Env set up
           command: |
@@ -39,6 +40,7 @@ jobs:
       - run:
           name: Docker proceed
           command: |
+            echo $PWD
             docker build . --tag=coinexchain/cetdtest
             echo $PWD
             bash scripts/functional_test.sh 4 0
