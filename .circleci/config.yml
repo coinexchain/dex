@@ -13,30 +13,30 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-        name: Install dependencies
-        command: |
-          sudo apt update && sudo apt-get install python3-pip parallel g++-6 gcc-6 bzr build-essential -y
-          python3 --version
-          pip3 --version
-          pip3 install setuptools
-          go get github.com/rakyll/statik
-          python3 --version
-          pip3 --version
-          pip3 install setuptools
+          name: Install dependencies
+          command: |
+            sudo apt update && sudo apt-get install python3-pip parallel g++-6 gcc-6 bzr build-essential -y
+            python3 --version
+            pip3 --version
+            pip3 install setuptools
+            go get github.com/rakyll/statik
+            python3 --version
+            pip3 --version
+            pip3 install setuptools
       - run:
-        name: Env set up
-        command: |
-          - export GO111MODULE=on
-          - export GOPRIVATE=github.com/coinexchain/*
-          - export GOROOT=$(go env GOROOT)
-          - export CXX="g++-6" CC="gcc-6"
-          - export PATH=$PATH:$HOME/gopath/bin
+          name: Env set up
+          command: |
+            - export GO111MODULE=on
+            - export GOPRIVATE=github.com/coinexchain/*
+            - export GOROOT=$(go env GOROOT)
+            - export CXX="g++-6" CC="gcc-6"
+            - export PATH=$PATH:$HOME/gopath/bin
       - run:
-        name: Project set up
-        command: |
-          go mod tidy
-          make statik-swagger
-          make build-linux
+          name: Project set up
+          command: |
+            go mod tidy
+            make statik-swagger
+            make build-linux
       - run:
           name: Docker proceed
           run: |
