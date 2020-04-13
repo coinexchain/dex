@@ -15,13 +15,13 @@ set -e
 
 mkdir func_test
 
-echo "$DPW" | docker login -u "$DUN" --password-stdin
+echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
 echo "begin pull walle"
 date +%s
-docker pull coinexchain/walle
+docker pull ludetewill/walle
 echo "end pull walle"
 date +%s
-docker run --rm -v $(pwd)/func_test:/test:Z coinexchain/walle /data/script/cp_data.sh
+docker run --rm -v $(pwd)/func_test:/test:Z ludetewill/walle /data/script/cp_data.sh
 
 mkdir func_test/run
 pushd func_test
