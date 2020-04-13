@@ -25,6 +25,9 @@ docker run --rm -v $(pwd)/func_test:/test:Z ludetewill/walle /data/script/cp_dat
 
 mkdir func_test/run
 pushd func_test
+echo $PWD
+cd ..
+echo $PWD
 ls .
 ls script
 bash script/init.sh
