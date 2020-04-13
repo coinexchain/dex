@@ -15,12 +15,10 @@ jobs:
       - run:
         name: Install dependencies
         command: |
-          sudo apt-get install python3-pip
-          sudo apt-get install parallel
-          sudo apt-get install g++-6
-          sudo apt-get install gcc-6
-          sudo apt-get install bzr
-          sudo apt-get install build-essential
+          sudo apt update && sudo apt-get install python3-pip parallel g++-6 gcc-6 bzr build-essential -y
+          python3 --version
+          pip3 --version
+          pip3 install setuptools
           go get github.com/rakyll/statik
           python3 --version
           pip3 --version
