@@ -23,12 +23,15 @@ echo "end pull walle"
 date +%s
 docker run --rm -v $(pwd)/func_test:/test:Z ludetewill/walle /data/script/cp_data.sh
 
+echo $PWD
+ls -R
 mkdir func_test/run
 pushd func_test
 echo $PWD
+ls -R
 cd ..
 echo $PWD
-ls .
+ls -R
 ls script
 bash script/init.sh
 popd
