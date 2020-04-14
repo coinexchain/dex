@@ -9,6 +9,9 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
+      - add_ssh_keys:
+          fingerprints:
+            - "8a:0e:bb:a1:17:8e:b3:4e:5c:44:65:40:62:af:73:5a"
       - run:
           name: Install dependencies
           command: |
