@@ -15,7 +15,6 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            echo $PWD
             sudo apt update && sudo apt-get install python3-pip parallel g++-6 gcc-6 bzr build-essential -y
             python3 --version
             pip3 --version
@@ -23,7 +22,6 @@ jobs:
             go get github.com/rakyll/statik
             free -m
             df -lh
-            echo $PWD
       - run:
           name: Env set up
           command: |
@@ -36,16 +34,12 @@ jobs:
           name: Project set up
           command: |
             go mod tidy
-            echo $PWD
             make statik-swagger
             make build-linux
-            echo $PWD
       - run:
           name: Docker proceed
           command: |
-            echo $PWD
             docker build . --tag=coinexchain/cetdtest
-            echo $PWD
             bash scripts/functional_test.sh 4 0
 
 
