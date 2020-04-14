@@ -5,6 +5,7 @@ jobs:
   build:
     docker:
       - image: cimg/go:1.13
+    resource_class: xlarge
     steps:
       - checkout
       - setup_remote_docker:
