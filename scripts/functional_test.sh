@@ -18,10 +18,10 @@ mkdir func_test
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
 echo "begin pull walle"
 date +%s
-docker pull ludetewill/walle
+docker pull coinexchain/walle
 echo "end pull walle"
 date +%s
-docker run --name walle ludetewill/walle /data/script/cp_data.sh
+docker run --name walle coinexchain/walle /data/script/cp_data.sh
 docker cp walle:/test func_test
 
 mkdir func_test/run
