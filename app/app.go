@@ -2,9 +2,12 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
+	"strings"
+	"sync"
 
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/spf13/viper"
@@ -48,6 +51,7 @@ import (
 	"github.com/coinexchain/cet-sdk/msgqueue"
 	dex "github.com/coinexchain/cet-sdk/types"
 	"github.com/coinexchain/dex/app/plugin"
+	tserver "github.com/coinexchain/trade-server/server"
 )
 
 const (
@@ -176,6 +180,8 @@ type CetChainApp struct {
 	msgQueProducer  msgqueue.MsgSender
 	aliasKeeper     alias.Keeper
 	commentKeeper   comment.Keeper
+	ts              *tserver.TradeServer
+	once            *sync.Once
 
 	enableUnconfirmedLimit bool
 	currBlockTime          int64
@@ -202,6 +208,7 @@ func NewCetChainApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLate
 
 	app := newCetChainApp(bApp, cdc, invCheckPeriod, txDecoder)
 	app.initPubMsgBuf()
+	app.initMsgQue()
 	app.initKeepers(invCheckPeriod)
 	app.initModules()
 	app.mountStores()
@@ -270,8 +277,31 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint, tx
 	}
 }
 
-func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
+func (app *CetChainApp) initMsgQue() {
 	app.msgQueProducer = msgqueue.NewProducer(app.Logger()) // TODO
+	if isOpenTs() {
+		conf, err := initConf()
+		if err != nil {
+			panic(fmt.Sprintf("init trade-server conf faild, err : %s\b", err.Error()))
+		}
+		if app.ts = tserver.NewServer(conf); app.ts == nil {
+			panic("Init trade-server failed")
+		}
+		app.ts.Start(conf)
+	}
+}
+
+func isOpenTs() bool {
+	brokers := viper.GetStringSlice(msgqueue.FlagBrokers)
+	for _, b := range brokers {
+		if strings.HasPrefix(b, msgqueue.CfgPrefixPrune) {
+			return true
+		}
+	}
+	return false
+}
+
+func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 	app.paramsKeeper = params.NewKeeper(app.cdc, app.keyParams, app.tkeyParams, params.DefaultCodespace)
 	// define the accountKeeper
 	app.accountKeeper = auth.NewAccountKeeper(
