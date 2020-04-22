@@ -27,7 +27,7 @@ func initConf() (*toml.Tree, error) {
 	if err != nil {
 		return nil, err
 	}
-	filePath := conf.RootDir + "config/trade-server.toml"
+	filePath := conf.RootDir + "/config/trade-server.toml"
 	info, err := os.Stat(filePath)
 	if err != nil || info.IsDir() {
 		return nil, err
@@ -36,7 +36,8 @@ func initConf() (*toml.Tree, error) {
 	if err != nil {
 		return config, err
 	}
-	config.Set(TSDirCfg, getPreFixBks(msgqueue.CfgPrefixPrune))
+	path := strings.Split(getPreFixBks(msgqueue.CfgPrefixPrune), msgqueue.CfgPrefixPrune)[1]
+	config.Set(TSDirCfg, path)
 	return config, err
 }
 

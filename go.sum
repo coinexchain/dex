@@ -52,6 +52,8 @@ github.com/coinexchain/cet-sdk v0.2.16 h1:uo0TD6zOrikJ7VvVh1xjtmIwtm8q3mMgKDWVgF
 github.com/coinexchain/cet-sdk v0.2.16/go.mod h1:Djk9yY1fq/z/bZK5bhyMnprUiShhUJfe/vkCbz3HuCc=
 github.com/coinexchain/cet-sdk v0.2.17-0.20200422032358-75cdf10d3714 h1:4BxO7nfZdZnl07CpFCPnUdPLvE4shyZApqrhFC+GGkk=
 github.com/coinexchain/cet-sdk v0.2.17-0.20200422032358-75cdf10d3714/go.mod h1:HYw9w/+gVv38seolFBcinTHDhQ7Fk01X5iydQcLgl88=
+github.com/coinexchain/cet-sdk v0.2.17-0.20200422093521-1a8e2c0d4d8c h1:rCGrzDPa2IWJhegJ1hJV8Dt/BCkSuMyZaltTCGn/hSM=
+github.com/coinexchain/cet-sdk v0.2.17-0.20200422093521-1a8e2c0d4d8c/go.mod h1:HYw9w/+gVv38seolFBcinTHDhQ7Fk01X5iydQcLgl88=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c h1:ZcWk9BWVuvAZW23esCnCyhp7Ss6xhVuffwNxHsQccRE=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c/go.mod h1:IPOtAzhvIJrmitYLXC4DC0fJFoGulqhn3LBSnwkA1eo=
 github.com/coinexchain/cosmos-sdk v0.37.703 h1:KR5/icNZAsgEbpoY+4Uox2tqv0hpLqBdhmoqhuXStv0=
@@ -81,6 +83,10 @@ github.com/coinexchain/tendermint v0.32.905 h1:7ybCStjSaZKqO4aowj+miTrfoUmDzt7pZ
 github.com/coinexchain/tendermint v0.32.905/go.mod h1:5/B1XZjNYtVBso8o1l/Eg4A0Mhu42lDcmftoQl95j/E=
 github.com/coinexchain/trade-server v0.2.8-0.20200422033720-e925e580054d h1:y60iulvjZl8QpKk06y4C9diSOkAe9oQJ9WgRQOUpmKo=
 github.com/coinexchain/trade-server v0.2.8-0.20200422033720-e925e580054d/go.mod h1:TEZbx8KJj6wO21ojcohCk+P/cWkbdocrVS/HmstIzhw=
+github.com/coinexchain/trade-server v0.2.8-0.20200422072959-8c7514f26339 h1:WzyPjoViudsErYuG7TWZ6yTLj8ZKQzfFREUVgUwv9SA=
+github.com/coinexchain/trade-server v0.2.8-0.20200422072959-8c7514f26339/go.mod h1:TEZbx8KJj6wO21ojcohCk+P/cWkbdocrVS/HmstIzhw=
+github.com/coinexchain/trade-server v0.2.8-0.20200422093745-513ff7de3793 h1:34JLx/94SA6wOQ8KwxiczrZ2PYro4P12++NPbRZjvRg=
+github.com/coinexchain/trade-server v0.2.8-0.20200422093745-513ff7de3793/go.mod h1:ktV1k7Tc4YIZC4bZ8Zdfic1lvKOmp5+ydcyVBn2cGso=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=
@@ -179,7 +185,9 @@ github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFB
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/lestrrat/go-file-rotatelogs v0.0.0-20180223000712-d3151e2a480f h1:sgUSP4zdTUZYZgAGGtN5Lxk92rK+JUFOwf+FT99EEI4=
 github.com/lestrrat/go-file-rotatelogs v0.0.0-20180223000712-d3151e2a480f/go.mod h1:UGmTpUd3rjbtfIpwAPrcfmGf/Z1HS95TATB+m57TPB8=
+github.com/lestrrat/go-strftime v0.0.0-20180220042222-ba3bf9c1d042 h1:Bvq8AziQ5jFF4BHGAEDSqwPW1NJS3XshxbRCxtjFAZc=
 github.com/lestrrat/go-strftime v0.0.0-20180220042222-ba3bf9c1d042/go.mod h1:TPpsiPUEh0zFL1Snz4crhMlBe60PYxRHr5oFF3rRYg0=
 github.com/libp2p/go-buffer-pool v0.0.2 h1:QNK2iAFa8gjAe1SPz6mHSMuCcjs+X1wlHzeOSqcmlfs=
 github.com/libp2p/go-buffer-pool v0.0.2/go.mod h1:MvaB6xw5vOrDl8rYZGLFdKAuk/hRoRZd1Vi32+RXyFM=
@@ -235,6 +243,7 @@ github.com/rakyll/statik v0.1.6/go.mod h1:OEi9wJV/fMUAGx1eNjq75DKDsJVuEv1U0oYdX6
 github.com/rcrowley/go-metrics v0.0.0-20180503174638-e2704e165165/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a h1:9ZKAASQSHhDYGoxY8uLVpewe1GDZ2vu2Tr/vTdVAkFQ=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
+github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5 h1:mZHayPoR0lNmnHyvtYjDeq0zlVHn9K/ZXoy17ylucdo=
 github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5/go.mod h1:GEXHk5HgEKCvEIIrSpFI3ozzG5xOKA2DVlEX/gGnewM=
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/rs/cors v1.7.0 h1:+88SsELBHx5r+hZ8TCkggzSstaWNbDvThkVK8H6f9ik=

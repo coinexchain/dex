@@ -3,10 +3,10 @@ module github.com/coinexchain/dex
 go 1.13
 
 require (
-	github.com/coinexchain/cet-sdk v0.2.17-0.20200422032358-75cdf10d3714
+	github.com/coinexchain/cet-sdk v0.2.17-0.20200422093521-1a8e2c0d4d8c
 	github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c
 	github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6
-	github.com/coinexchain/trade-server v0.2.8-0.20200422033720-e925e580054d
+	github.com/coinexchain/trade-server v0.2.8-0.20200422093745-513ff7de3793
 	github.com/cosmos/cosmos-sdk v0.37.4
 	github.com/gorilla/mux v1.7.3
 	github.com/mattn/go-runewidth v0.0.8 // indirect
