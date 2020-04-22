@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/cosmos/cosmos-sdk/server"
@@ -289,16 +288,6 @@ func (app *CetChainApp) initMsgQue() {
 		}
 		app.ts.Start(conf)
 	}
-}
-
-func isOpenTs() bool {
-	brokers := viper.GetStringSlice(msgqueue.FlagBrokers)
-	for _, b := range brokers {
-		if strings.HasPrefix(b, msgqueue.CfgPrefixPrune) {
-			return true
-		}
-	}
-	return false
 }
 
 func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
