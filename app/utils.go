@@ -73,10 +73,10 @@ func newCLIContextForEmbeddedLDC() context.CLIContext {
 
 	// fill members of ctx
 	return context.CLIContext{
-		Codec:   cdc,
-		Client:  rpc,
-		NodeURI: nodeURI,
-		TrustNode:     true,
+		Codec:     cdc,
+		Client:    rpc,
+		NodeURI:   nodeURI,
+		TrustNode: true,
 
 		// default values is enough?
 		//Output:        os.Stdout,
