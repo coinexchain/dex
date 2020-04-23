@@ -283,7 +283,7 @@ func (app *CetChainApp) initMsgQue() {
 		if err != nil {
 			panic(fmt.Sprintf("init trade-server conf faild, err : %s\b", err.Error()))
 		}
-		if app.ts = tserver.NewTradeServer(conf); app.ts == nil {
+		if app.ts = tserver.NewTradeServer(conf, CreateContextAndRegisterRoutes); app.ts == nil {
 			panic("Init trade-server failed")
 		}
 		app.ts.Start(conf)

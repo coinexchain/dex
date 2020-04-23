@@ -87,6 +87,8 @@ github.com/coinexchain/trade-server v0.2.8-0.20200422072959-8c7514f26339 h1:WzyP
 github.com/coinexchain/trade-server v0.2.8-0.20200422072959-8c7514f26339/go.mod h1:TEZbx8KJj6wO21ojcohCk+P/cWkbdocrVS/HmstIzhw=
 github.com/coinexchain/trade-server v0.2.8-0.20200422093745-513ff7de3793 h1:34JLx/94SA6wOQ8KwxiczrZ2PYro4P12++NPbRZjvRg=
 github.com/coinexchain/trade-server v0.2.8-0.20200422093745-513ff7de3793/go.mod h1:ktV1k7Tc4YIZC4bZ8Zdfic1lvKOmp5+ydcyVBn2cGso=
+github.com/coinexchain/trade-server v0.2.8-0.20200423021423-12d59229ce5a h1:I2ogwz72+Aj9l5AZrw/7sfwmIT7QPcsfuqqMMk1M9Z4=
+github.com/coinexchain/trade-server v0.2.8-0.20200423021423-12d59229ce5a/go.mod h1:ktV1k7Tc4YIZC4bZ8Zdfic1lvKOmp5+ydcyVBn2cGso=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=

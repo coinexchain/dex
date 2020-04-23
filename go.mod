@@ -6,7 +6,7 @@ require (
 	github.com/coinexchain/cet-sdk v0.2.17-0.20200422093521-1a8e2c0d4d8c
 	github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c
 	github.com/coinexchain/randsrc v0.0.0-20191012073615-acfab7318ec6
-	github.com/coinexchain/trade-server v0.2.8-0.20200422093745-513ff7de3793
+	github.com/coinexchain/trade-server v0.2.8-0.20200423021423-12d59229ce5a
 	github.com/cosmos/cosmos-sdk v0.37.4
 	github.com/gorilla/mux v1.7.3
 	github.com/mattn/go-runewidth v0.0.8 // indirect
