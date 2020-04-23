@@ -12,6 +12,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 
 	"github.com/coinexchain/cet-sdk/msgqueue"
@@ -66,7 +67,7 @@ func CreateContextAndRegisterRoutes(router *mux.Router) {
 // see cosmos-sdk/client/context/context.go#NewCLIContextWithFrom()
 func newCLIContextForEmbeddedLDC() context.CLIContext {
 	var cdc = MakeCodec()
-	var nodeURI = viper.GetString("address")
+	var nodeURI = viper.GetString(flags.FlagNode)
 	if nodeURI == "" {
 		nodeURI = "tcp://localhost:26657"
 	}
