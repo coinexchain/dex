@@ -12,17 +12,18 @@
 > feature-toggle = true </br>
 >  subscribe-modules = "comment,authx,bankx,market,bancorlite" </br>
 >  brokers = [ </br>
->      "prune:/path/to/dex_data"                # 指定节点为trade-server数据存储的目录 </br>
+>      "prune:/path/to/dex_data"                # 指定节点吐数据的存储目录 </br>
 >  ] </br>
 >
 
 ### 修改trade-server 配置
 
 拷贝项目目录下的`trade-server.toml.default` 至 `RUN_DIR/.cetd/config/trade-server.toml`; 
+
 修改 `dir`的配置与`cetd`配置文件中`brokers`下`prune`模式配置的路径一致;
 
 
-`trade-server.toml` 配置文件中字段含义：https://github.com/coinexchain/trade-server/blob/master/docs/trade-server-deploy.md#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E
+`trade-server.toml` 配置文件中[各字段含义](https://github.com/coinexchain/trade-server/blob/master/docs/trade-server-deploy.md#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E)
 
 ### 放置历史数据
  
