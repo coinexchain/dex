@@ -4015,6 +4015,820 @@ paths:
           description: There is no bancor infos
         500:
           description: Server internal error
+  /misc/height:
+    get:
+      tags:
+        - Misc
+      summary: Query least block info
+      description: Query least block info
+      operationId: queryLastBlock
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              height:
+                type: integer
+                format: int64
+                example: 1565740
+                description: Block height
+              timestamp:
+                type: integer
+                format: int64
+                example: 1577746413
+                description: Block timestamp
+        500:
+          description: Server internal error
+  /misc/block-times:
+    get:
+      tags:
+        - Misc
+      summary: Query block time
+      description: Query the block time up to given height
+      operationId: queryBlockTimes
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: height
+          description: Block height
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+              example: 1565740800
+              description: Unix timestamp
+        500:
+          description: Server internal error
+  /misc/donations:
+    get:
+      tags:
+        - Misc
+      summary: Query donations info
+      description: Query donations by DonateToCommunityPool or CommentToken
+      operationId: queryDonation
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Donation'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /market/tickers:
+    get:
+      tags:
+        - Market
+      summary: Query market tickers
+      description: Query tickers info
+      operationId: queryTickers
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: market_list
+          description: Market count limited to 1~100
+          required: true
+          type: array
+          items:
+            type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Tickers"
+        500:
+          description: Server internal error
+  /market/depths:
+    get:
+      tags:
+        - Market
+      summary: Query market depth
+      description: Query purchases and sales of a market at all price levels
+      operationId: queryDepth
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: market
+          description: stock/money
+          required: true
+          type: string
+        - in: query
+          name: count
+          description: Querier count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              asks:
+                type: array
+                items:
+                  $ref: "#/definitions/PricePoint"
+              bids:
+                type: array
+                items:
+                  $ref: "#/definitions/PricePoint"
+        500:
+          description: Server internal error
+  /market/candle-sticks:
+    get:
+      tags:
+        - Market
+      summary: Query market candleStick
+      description: Query candleStick until to given time
+      operationId: queryCandleStick
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: market
+          description: stock/money
+          required: true
+          type: string
+        - in: query
+          name: timespan
+          description: 1min/1hour/1day
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier candleStick count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CandleStick'
+        500:
+          description: Server internal error
+  /market/user-orders:
+    get:
+      tags:
+        - Market
+      summary: Query account's order
+      description: Query account's order activities in all markets until to given time
+      operationId: queryOrder
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: account
+          description: Bech32 address
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier order count limited to 1024
+          required: true
+          type: integer
+          format: int32
+        - in: query
+          name: token
+          description: Symbol
+          required: false
+          type: string
+        - in: query
+          name: tag
+          description: Filter responses type by tag string create/fill/cancel
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/UserOrder'
+        500:
+          description: Server internal error
+  /market/deals:
+    get:
+      tags:
+        - Market
+      summary: Query market deal
+      description: Query market deal until to given time
+      operationId: queryDeal
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: market
+          description: stock/money
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier deal count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/FillOrderInfo'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /bancorlite/deals:
+    get:
+      tags:
+        - Bancor
+      summary: Query bancor market deal
+      description: Query bancor market deal until to given time
+      operationId: queryBancorDeal
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: market
+          description: B:stock/money
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier deal count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/BancorTrade'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /expiry/redelegations:
+    get:
+      tags:
+        - Expiry
+      summary: Query redelegation
+      description: Query delegator's redelegation-completion info
+      operationId: queryRedelegation
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: account
+          description: Bech32 address
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Redelegation'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /expiry/unbondings:
+    get:
+      tags:
+        - Expiry
+      summary: Query Unbonding
+      description: Query delegator's unbonding-completion info
+      operationId: queryUnbonding
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: account
+          description: Bech32 address
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Unbonding'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /expiry/lockeds:
+    get:
+      tags:
+        - Expiry
+      summary: Query lock tx
+      description: Query lock transfer info
+      operationId: querylocked
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: account
+          description: Bech32 address
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count
+          required: true
+          type: integer
+          format: int32
+        - in: query
+          name: token
+          description: Symbol
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Locked'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /expiry/unlocks:
+    get:
+      tags:
+        - Expiry
+      summary: Query Unlock
+      description: Query Unlock info
+      operationId: queryUnlock
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: account
+          description: Bech32 address
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count
+          required: true
+          type: integer
+          format: int32
+        - in: query
+          name: token
+          description: Symbol
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Unlock'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /tx/incomes:
+    get:
+      tags:
+        - Tx
+      summary: Query account all income until to given time
+      description: Query income info
+      operationId: queryIncome
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: account
+          description: Bech32 address
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count limited to 1024
+          required: true
+          type: integer
+          format: int32
+        - in: query
+          name: token
+          description: Symbol
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Tx'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /tx/txs:
+    get:
+      tags:
+        - Tx
+      summary: Query transactions
+      description: Query transactions signed by given account until to given time
+      operationId: queryTx
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: account
+          description: Bech32 address
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count limited to 1024
+          required: true
+          type: integer
+          format: int32
+        - in: query
+          name: token
+          description: Symbol
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Tx'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /tx/txs/{hash}:
+    get:
+      summary: Get a Tx from trade server by hash
+      operationId: getTxFromTradeServer
+      tags:
+        - Tx
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: hash
+          description: Tx hash
+          required: true
+          type: string
+          x-example: 2B6D7633C460DAABFCA47592B7F76A95CE95C52B515179C9E9BA49AA620377BA
+      responses:
+        200:
+          description: Tx with the provided hash
+          schema:
+            $ref: '#/definitions/Tx'
+        500:
+          description: Internal Server Error
+  /comment/comments:
+    get:
+      tags:
+        - Comment
+      summary: Query token comment
+      description: Query all comments about given token until to time
+      operationId: queryComment
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: token
+          description: Symbol
+          required: true
+          type: string
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier comment count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Comment'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
+  /slash/slashings:
+    get:
+      tags:
+        - Slash
+      summary: Query validator slash info
+      description: Query validator slash power, reason, and jailed status etc
+      operationId: querySlash
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: time
+          description: Unix timestamp
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: sid
+          description: Sequence id
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          description: Querier count limited to 1024
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Slash'
+              timesid:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+                  description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+        500:
+          description: Server internal error
 definitions:
   BancorInfo:
     type: object
@@ -5198,3 +6012,457 @@ definitions:
         type: array
         items:
           type: integer
+  Tickers:
+    type: object
+    properties:
+      market:
+        type: string
+        example: "abc/cet"
+      new:
+        type: string
+        example: "0"
+        description: Newest price
+      old:
+        type: string
+        example: "0"
+        description: Old price one day ago
+  PricePoint:
+    type: object
+    properties:
+      price:
+        type: string
+        example: "0"
+        description: Price of depth without precision consolidation
+      amount:
+        type: string
+        example: "0"
+        description: Amount of all the unfilled orders
+  CandleStick:
+    type: object
+    properties:
+      open:
+        type: string
+        example: "0"
+        description: open price
+      close:
+        type: string
+        example: "0"
+        description: close price
+      high:
+        type: string
+        example: "0"
+        description: high price
+      low:
+        type: string
+        example: "0"
+        description: low price
+      total:
+        type: string
+        example: "0"
+        description: total deal
+      unix_time:
+        type: integer
+        format: int64
+        example: 1565740800
+        description: ending unix time
+      time_span:
+        type: integer
+        format: uint8
+        example: 16
+        description: Minute:16/Hour:32/Day:48
+      market:
+        type: string
+        example: abc/cet
+  UserOrder:
+    type: object
+    properties:
+      createOrderInfo:
+        type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/definitions/CreateOrderInfo'
+          timesid:
+            type: array
+            items:
+              type: integer
+              format: int64
+              description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+      fillOrderInfo:
+        type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/definitions/FillOrderInfo'
+          timesid:
+            type: array
+            items:
+              type: integer
+              format: int64
+              description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+      cancelOrderInfo:
+        type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/definitions/CancelOrderInfo'
+          timesid:
+            type: array
+            items:
+              type: integer
+              format: int64
+              description: Timesid entry are in pairs, a count correspond two entry(time,sid)
+  CreateOrderInfo:
+    type: object
+    properties:
+      order_id:
+        type: string
+        example: "coinex1nv3ghvdnpgc28mvjfkyrle5ccx0m3vesqp8tdx-1"
+      sender:
+        $ref: '#/definitions/Address'
+      trading_pair:
+        type: string
+        example: "abc/cet"
+      order_type:
+        type: integer
+        format: byte
+        example: 2
+        description: Limited value 2
+      price:
+        type: string
+        example: "0"
+      quantity:
+        type: integer
+        format: int64
+        example: 0
+      side:
+        type: integer
+        format: byte
+        example: 1
+        description: BUY:1/SELL:2
+      time_in_force:
+        type: integer
+        format: int32
+        example: 3
+        description: GTE:3/IOC:4
+      feature_fee:
+        type: integer
+        format: int64
+        example: 0
+        description: Order feature fee, sato.CET as the unit
+      height:
+        type: integer
+        format: int64
+        example: 0
+      frozen_fee:
+        type: integer
+        format: int64
+        example: 0
+        description: Order frozen fee, sato.CET as the unit
+      freeze:
+        type: integer
+        format: int64
+        example: 0
+        description: Freeze sato.CET amount
+      tx_hash:
+        type: string
+        description: The tx hash
+  FillOrderInfo:
+    type: object
+    properties:
+      order_id:
+        type: string
+        example: "coinex1nv3ghvdnpgc28mvjfkyrle5ccx0m3vesqp8tdx-1"
+      trading_pair:
+        type: string
+        example: "abc/cet"
+      height:
+        type: integer
+        format: int64
+        example: 0
+      side:
+        type: integer
+        format: byte
+        example: 1
+        description: BUY:1/SELL:2
+      price:
+        type: string
+        example: "0"
+      left_stock:
+        type: integer
+        format: int64
+        example: 0
+        description: Order left stock
+      freeze:
+        type: integer
+        format: int64
+        example: 0
+        description: Freeze sato.CET amount
+      deal_stock:
+        type: integer
+        format: int64
+        example: 0
+        description: Order accumulated deal stock amount
+      deal_money:
+        type: integer
+        format: int64
+        example: 0
+        description: Order accumulated deal money amount
+      curr_stock:
+        type: integer
+        format: int64
+        example: 0
+        description: Current block deal stock amount
+      curr_money:
+        type: integer
+        format: int64
+        example: 0
+        description: Current block deal money amount
+  CancelOrderInfo:
+    type: object
+    properties:
+      order_id:
+        type: string
+        example: "coinex1nv3ghvdnpgc28mvjfkyrle5ccx0m3vesqp8tdx-1"
+      trading_pair:
+        type: string
+        example: "abc/cet"
+      height:
+        type: integer
+        format: int64
+        example: 0
+      side:
+        type: integer
+        format: byte
+        example: 1
+        description: BUY:1/SELL:2
+      price:
+        type: string
+        example: "0"
+      del_reason:
+        type: string
+        example: "cancel order reason"
+      used_commission:
+        type: integer
+        format: int64
+        example: 0
+        description: Order used commission
+      left_stock:
+        type: integer
+        format: int64
+        example: 0
+      remain_amount:
+        type: integer
+        format: int64
+        example: 0
+      deal_stock:
+        type: integer
+        format: int64
+        example: 0
+      deal_money:
+        type: integer
+        format: int64
+        example: 0
+      tx_hash:
+        type: string
+        description: The tx hash
+  BancorTrade:
+    type: object
+    properties:
+      sender:
+        $ref: '#/definitions/Address'
+      stock:
+        type: string
+        example: "abc"
+      money:
+        type: string
+        example: "cet"
+      amount:
+        type: integer
+        format: int64
+        example: 0
+      side:
+        type: integer
+        format: byte
+        example: 1
+        description: BUY:1/SELL:2
+      money_limit:
+        type: integer
+        format: int64
+        example: 0
+      transaction_price:
+        type: string
+        example: "0"
+      block_height:
+        type: integer
+        format: int64
+        example: 0
+      tx_hash:
+        type: string
+        description: The tx hash
+  Unbonding:
+    type: object
+    properties:
+      delegator:
+        $ref: '#/definitions/Address'
+      validator:
+        $ref: '#/definitions/Address'
+      amount:
+        type: string
+        example: "0"
+      completion_time:
+        type: string
+        example: "0"
+      tx_hash:
+        type: string
+        description: The tx hash
+  Unlock:
+    type: object
+    properties:
+      address:
+        $ref: '#/definitions/Address'
+      unlocked:
+        type: array
+        items:
+          $ref: '#/definitions/Coin'
+      locked_coins:
+        type: array
+        items:
+          $ref: "#/definitions/LockedCoin"
+      frozen_coins:
+        type: array
+        items:
+          $ref: '#/definitions/Coin'
+      coins:
+        type: array
+        items:
+          $ref: '#/definitions/Coin'
+      height:
+        type: integer
+        format: int64
+        example: 0
+  TransferRecord:
+    type: object
+    properties:
+      sender:
+        $ref: '#/definitions/Address'
+      recipient:
+        $ref: '#/definitions/Address'
+      amount:
+        type: string
+        example: "0"
+  Tx:
+    type: object
+    properties:
+      signers:
+        type: array
+        items:
+          $ref: '#/definitions/Address'
+      transfers:
+        type: array
+        items:
+          $ref: '#/definitions/TransferRecord'
+      serial_number:
+        type: integer
+        format: int64
+        example: 0
+        description: Tx global serial number
+      msg_types:
+        type: array
+        items:
+          type: string
+          example: ""
+          description: Tx messages type
+      tx_json:
+        type: string
+        example: ""
+        description: Raw tx json byte
+      height:
+        type: integer
+        format: int64
+        example: 0
+      hash:
+        type: string
+        description: The tx hash
+  Comment:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: uint64
+        example: 1
+      height:
+        type: integer
+        format: int64
+        example: 0
+      sender:
+        $ref: '#/definitions/Address'
+      token:
+        type: string
+        example: "abc"
+      donation:
+        type: integer
+        format: int64
+        example: 1
+      title:
+        type: string
+        example: "First Comment"
+      content:
+        type: string
+        example: "Comment content"
+      content_type:
+        type: integer
+        format: int8
+        example: 3
+        description: IPFS:0,Magnet:1,HTTP:2,UTF8Text:3,RawBytes:6
+      references:
+        type: array
+        items:
+          $ref: '#/definitions/CommentRef'
+      tx_hash:
+        type: string
+        description: The tx hash
+  Slash:
+    type: object
+    properties:
+      validator:
+        $ref: '#/definitions/Address'
+      power:
+        type: string
+        example: "0"
+        description: Vote power
+      reason:
+        type: string
+        example: ""
+      jailed:
+        type: boolean
+        example: false
+  Locked:
+    type: object
+    properties:
+      from_address:
+        $ref: '#/definitions/Address'
+      to_Address:
+        $ref: '#/definitions/Address'
+      amount:
+        $ref: '#/definitions/Coin'
+      unlock_time:
+        type: integer
+        format: int64
+        example: 1565740800
+        description: The unix timestamp when tokens can transfer again
+      tx_hash:
+        type: string
+        description: The tx hash
+  Donation:
+    type: object
+    properties:
+      sender:
+        $ref: '#/definitions/Address'
+      amount:
+        type: string
+        example: "0"
+        
