@@ -1,0 +1,31 @@
+# listen port
+port = 9000
+
+# level DB
+data-dir = "data"
+
+# https
+cert-dir = "cert"
+https-toggle = false
+
+# init chain height 
+initChainHeight=0
+
+# log
+log-dir = "log"
+# log level: debug | info | warn | error
+log-level = "info"
+# log format: plain | json
+log-format = "plain"
+
+# websocket
+interval = 120
+
+# dir-mode
+
+dir-mode = true
+dir = "/path/to/dex_data"
+file-prefix = "backup-"
+
+chain-id = ""
+upgrade-height = 4545600
