@@ -1,5 +1,12 @@
 # 启动cetd 中的trade-server功能
 
+### 安装Rocksdb依赖
+
+> git clone https://github.com/facebook/rocksdb.git && cd rocksdb </br> 
+> git checkout v6.6.4 </br>
+> mkdir build && cd build && cmake .. && make -j2 </br>
+> sudo make install </br>
+
 ### 节点初始化配置
 
 参照[节点的通用步骤步骤](https://github.com/coinexchain/artifacts/blob/master/coinexdex-v0.2/Validator+%E5%93%A8%E5%85%B5%E8%8A%82%E7%82%B9-%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88.md#%E8%8A%82%E7%82%B9%E7%9A%84%E9%80%9A%E7%94%A8%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4)初始化节点配置；
