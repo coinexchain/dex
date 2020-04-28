@@ -9,7 +9,7 @@ cert-dir = "cert"
 https-toggle = false
 
 # init chain height 
-initChainHeight=0
+initChainHeight=4545600
 
 # log
 log-dir = "log"
