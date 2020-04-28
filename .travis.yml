@@ -113,8 +113,14 @@ matrix:
         - cd -
         - go mod tidy
         - go mod vendor
+        - echo $PWD
         - go get golang.org/x/tools/cmd/cover
         - go get github.com/mattn/goveralls
+        - wget  https://github.com/facebook/rocksdb/archive/v6.6.4.tar.gz
+        - tar -xzvf v6.6.4.tar.gz && cd rocksdb-6.6.4
+        - pwd
+        - mkdir build && cd build && cmake .. && make -j4 &&  sudo make install
+        - echo $PWD
 
       script:
         - RUN_IN_TRAVIS=true ./scripts/check.sh
