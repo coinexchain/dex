@@ -34,9 +34,11 @@
 
 ### 放置历史数据
  
- 从[地址](todo)下载cetd的历史数据，历史数据中存储了cetd `coinexdex`链上的订单信息，与当前`coinexdex2`链上的订单信息一起组织，
+ 从[地址](https://github.com/coinexchain/artifacts/blob/master/coinexdex-v0.2/history_data.tar.gz)下载cetd的历史数据，历史数据中存储了cetd `coinexdex`链上的订单信息，与当前`coinexdex2`链上的订单信息一起组织，
  形成用户所需要的订单深度、ticker等数据；
  
+ 解压该历史数据：`tar -zxvf history_data.tr.gz`
+
  修改`trade-server.toml`配置文件中`data-dir`字段，指向存储 `cetd`历史数据的目录；
 
 ### 启动节点
