@@ -120,6 +120,7 @@ matrix:
         - tar -xzvf v6.6.4.tar.gz && cd rocksdb-6.6.4
         - pwd
         - mkdir build && cd build && cmake .. && make -j4 &&  sudo make install
+        - cd ../..
         - echo $PWD
 
       script:
