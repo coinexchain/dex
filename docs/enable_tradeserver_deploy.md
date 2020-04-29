@@ -63,3 +63,8 @@
 ### 启动节点
 
 接下来可按照您的习惯，选择使用systemctl或supervisor等工具来配置新链cetd的自动运行。这里的配置方式各不相同，本文不再一一介绍。
+
+或者，先用下述简单方式启动节点，看是否连接到主链，是否出块
+
+>  ${RUN_DIR}/cetd start --home=${RUN_DIR}/.cetd --minimum-gas-prices=20.0cet   <br/>
+
