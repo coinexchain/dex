@@ -39,7 +39,7 @@ Finally, in the configuration file `${RUN_DIR}/.cetd/config/trade-server.toml`, 
 
 `${RUN_DIR}/.cetd/config/trade-server.toml` [The meaning of fields in this file](https://github.com/coinexchain/trade-server/blob/master/docs/trade-server-deploy.md#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E)
 
-### 3. Start cetd node
+#### 3. Start cetd node
 
 Follow the remaining description of the [document[3.3,  3.4]](docs/AtlantisHardForkGuide.en.md) and start the node
 
