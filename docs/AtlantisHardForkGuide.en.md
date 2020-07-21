@@ -50,7 +50,7 @@ wget ${ARTIFACTS_URL} && tar -zxvf linux_x86_64.tar.gz
     *   Copy the ED25519 private key file `priv_validator_key.json` of the old chain to the data direction of the new chain. It should be at `${RUN_DIR}/.cetd/config`
 4. If you aren't a validator, configure the external IP of this node
 
-   *   `sed -i '/external_address/cexternal_address = \"tcp://${PUBLIC_IP}:26656\" ${RUN_DIR}/.cetd/config/config.toml`
+   *   `sed -i "/external_address/cexternal_address = \"tcp://${PUBLIC_IP}:26656\"" ${RUN_DIR}/.cetd/config/config.toml`
 5. Verify the execuatbles and genesis.json file, etc:
    *  `bash dex2_check.sh`
 
