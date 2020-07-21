@@ -20,9 +20,9 @@ A public chain built for the decentralized exchange
 
 Reference [quick start](docs/quickstart.md)
 
-### deploy with trade-server
+### deploy without trade-server
 
-Please read the [deploy doc](docs/enable_tradeserver_deploy.md)
+Please read the [deploy doc](docs/AtlantisHardForkGuide.en.md)
 
 
 ### Resources
