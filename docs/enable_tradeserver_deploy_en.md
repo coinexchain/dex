@@ -2,7 +2,7 @@
 
 
 
-Follow the [document[2,  3.2]](docs/AtlantisHardForkGuide.en.md) to configure the common settings of the `cetd` node, and then configure the special settings to `trade-server function` as described below.
+Follow the [document[2,  3.2]](AtlantisHardForkGuide.en.md) to configure the common settings of the `cetd` node, and then configure the special settings to `trade-server function` as described below.
 
 
 #### 1. Customize node configuration
