@@ -27,9 +27,11 @@ import (
 
 	"github.com/coinexchain/cet-sdk/modules/asset"
 	"github.com/coinexchain/cet-sdk/modules/authx"
+	"github.com/coinexchain/cet-sdk/modules/bancorlite"
 	"github.com/coinexchain/cet-sdk/modules/bankx"
 	types2 "github.com/coinexchain/cet-sdk/modules/distributionx/types"
 	"github.com/coinexchain/cet-sdk/modules/incentive"
+	"github.com/coinexchain/cet-sdk/modules/market"
 	"github.com/coinexchain/cet-sdk/modules/stakingx"
 	"github.com/coinexchain/cet-sdk/msgqueue"
 	"github.com/coinexchain/cet-sdk/testutil"
@@ -47,6 +49,7 @@ func (app *CetChainApp) Deliver(tx sdk.Tx) sdk.Result {
 	req := abci.RequestDeliverTx{Tx: txBytes}
 	rsp := app.DeliverTx(req)
 	return sdk.Result{
+		Codespace: sdk.CodespaceType(rsp.Codespace),
 		Code:      sdk.CodeType(rsp.Code),
 		GasUsed:   uint64(rsp.GasUsed),
 		GasWanted: uint64(rsp.GasWanted),
@@ -668,6 +671,7 @@ func TestPubMsgBuf(t *testing.T) {
 	require.Equal(t, 10000, cap(app.pubMsgs))
 	require.Equal(t, 0, len(app.pubMsgs))
 }
+
 func TestLockSend(t *testing.T) {
 	toAddr := sdk.AccAddress([]byte("addr"))
 	key, _, fromAddr := testutil.KeyPubAddr()
@@ -712,8 +716,8 @@ func TestLockSend(t *testing.T) {
 	require.Nil(t, toAccX.LockedCoins)
 	toAcc := app.accountKeeper.GetAccount(ctx, toAddr)
 	require.Equal(t, coins, toAcc.GetCoins())
-
 }
+
 func TestSupervisorNotExist(t *testing.T) {
 	key, _, fromAddr := testutil.KeyPubAddr()
 	_, _, toAddr := testutil.KeyPubAddr()
@@ -793,8 +797,8 @@ func TestCheckTxWithMsgHandle(t *testing.T) {
 
 	result := app.Check(tx)
 	require.Equal(t, bankx.CodeInsufficientCETForActivatingFee, result.Code)
-
 }
+
 func TestMsgSetRefereeHandle(t *testing.T) {
 	key, _, senderAddr := testutil.KeyPubAddr()
 	_, _, refereeAddr := testutil.KeyPubAddr()
@@ -836,5 +840,41 @@ func TestMsgSetRefereeHandle(t *testing.T) {
 
 	res = app.Deliver(tx)
 	require.Equal(t, authx.CodeRefereeChangeTooFast, res.Code)
+}
 
+func TestMarketAndBancorMsgAfterDex3(t *testing.T) {
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	msgs := []sdk.Msg{
+		market.MsgCreateTradingPair{Creator: fromAddr, Stock: "foo", Money: "bar"},
+		market.MsgModifyPricePrecision{Sender: fromAddr, TradingPair: "foo/bar", PricePrecision: 1},
+		market.MsgCancelTradingPair{Sender: fromAddr, TradingPair: "foo/bar"},
+		market.MsgCreateOrder{Sender: fromAddr, TradingPair: "foo/bar", Side: 1, OrderType: 2, TimeInForce: 3, Price: 4, Quantity: 5},
+		market.MsgCancelOrder{Sender: fromAddr, OrderID: fromAddr.String() + "-123"},
+		bancorlite.MsgBancorInit{Owner: fromAddr, Stock: "foo", Money: "bar", MaxMoney: sdk.NewInt(300), MaxSupply: sdk.NewInt(100), MaxPrice: "10", InitPrice: "1"},
+		bancorlite.MsgBancorTrade{Sender: fromAddr, Stock: "foo", Money: "bar", Amount: 1},
+		bancorlite.MsgBancorCancel{Owner: fromAddr, Stock: "foo", Money: "bar"},
+	}
+
+	for _, msg := range msgs {
+		// app
+		app := initAppWithBaseAccounts(acc0)
+
+		// begin block
+		oldGBH := types.GenesisBlockHeight
+		defer func() { types.GenesisBlockHeight = oldGBH }()
+		types.GenesisBlockHeight = Dex3StartHeight - 1
+		header := abci.Header{Height: Dex3StartHeight}
+		app.BeginBlock(abci.RequestBeginBlock{Header: header})
+
+		// deliver tx
+		tx := newStdTxBuilder().
+			Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+
+		result := app.Deliver(tx)
+		require.Equal(t, "DEX3", string(result.Codespace))
+		require.Equal(t, Dex3StartHeight, int(result.Code))
+	}
 }
