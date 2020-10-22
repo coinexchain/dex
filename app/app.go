@@ -57,6 +57,9 @@ const (
 	appName = "CoinExChainApp"
 	// DefaultKeyPass contains the default key password for genesis transactions
 	DefaultKeyPass = "12345678"
+
+	// TODO
+	Dex3StartHeight = 100000000
 )
 
 // default home directories for expected binaries
@@ -579,7 +582,24 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 		app.currBlockTime = req.Header.Time.Unix()
 		app.account2UnconfirmedTx.ClearRemoveList()
 	}
+	if ctx.BlockHeight() == Dex3StartHeight {
+		app.cancelAllBancors(ctx)
+	}
 	return ret
+}
+
+func (app *CetChainApp) cancelAllBancors(ctx sdk.Context) {
+	k := app.bancorKeeper
+	for _, bi := range app.bancorKeeper.GetAllBancorInfos(ctx) {
+		k.Remove(ctx, bi)
+		// ignore errors
+		if err := k.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Stock, bi.StockInPool))); err != nil {
+			app.Logger().Error(err.Error())
+		}
+		if err := k.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
+			app.Logger().Error(err.Error())
+		}
+	}
 }
 
 // application updates every end block
