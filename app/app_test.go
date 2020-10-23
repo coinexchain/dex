@@ -844,7 +844,7 @@ func TestMsgSetRefereeHandle(t *testing.T) {
 
 func TestMarketAndBancorMsgAfterDex3(t *testing.T) {
 	key, _, fromAddr := testutil.KeyPubAddr()
-	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000), sdk.NewInt64Coin("eth", 100000000000))
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 30000000000))
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	msgs := []sdk.Msg{
@@ -858,14 +858,15 @@ func TestMarketAndBancorMsgAfterDex3(t *testing.T) {
 		bancorlite.MsgBancorCancel{Owner: fromAddr, Stock: "foo", Money: "bar"},
 	}
 
+	oldGBH := types.GenesisBlockHeight
+	defer func() { types.GenesisBlockHeight = oldGBH }()
+	types.GenesisBlockHeight = Dex3StartHeight - 1
+
 	for _, msg := range msgs {
 		// app
 		app := initAppWithBaseAccounts(acc0)
 
 		// begin block
-		oldGBH := types.GenesisBlockHeight
-		defer func() { types.GenesisBlockHeight = oldGBH }()
-		types.GenesisBlockHeight = Dex3StartHeight - 1
 		header := abci.Header{Height: Dex3StartHeight}
 		app.BeginBlock(abci.RequestBeginBlock{Header: header})
 
@@ -876,5 +877,49 @@ func TestMarketAndBancorMsgAfterDex3(t *testing.T) {
 		result := app.Deliver(tx)
 		require.Equal(t, "DEX3", string(result.Codespace))
 		require.Equal(t, Dex3StartHeight, int(result.Code))
+	}
+}
+
+func TestDEX3BancorCancellation(t *testing.T) {
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 3000000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	oldGBH := types.GenesisBlockHeight
+	defer func() { types.GenesisBlockHeight = oldGBH }()
+	types.GenesisBlockHeight = Dex3StartHeight - 5
+
+	// create bancors
+	app := initAppWithBaseAccounts(acc0)
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight - 4}})
+	msgs := []sdk.Msg{
+		asset.MsgIssueToken{Owner: fromAddr, Symbol: "foo", Identity: "foo", TotalSupply: sdk.NewInt(10000)},
+		asset.MsgIssueToken{Owner: fromAddr, Symbol: "bar", Identity: "bar", TotalSupply: sdk.NewInt(10000)},
+		bancorlite.MsgBancorInit{Owner: fromAddr, Stock: "foo", Money: "bar", MaxMoney: sdk.NewInt(300), MaxSupply: sdk.NewInt(100), MaxPrice: "10", InitPrice: "1"},
+		bancorlite.MsgBancorInit{Owner: fromAddr, Stock: "bar", Money: "foo", MaxMoney: sdk.NewInt(300), MaxSupply: sdk.NewInt(100), MaxPrice: "10", InitPrice: "1"},
+	}
+	tx := newStdTxBuilder().
+		Msgs(msgs...).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.Commit()
+
+	// query bancors
+	for i := int64(3); i >= 1; i-- {
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight - i}})
+		bis := app.bancorKeeper.GetAllBancorInfos(app.NewContext(false, abci.Header{}))
+		require.Equal(t, 2, len(bis))
+		app.EndBlock(abci.RequestEndBlock{Height: 1})
+		app.Commit()
+	}
+
+	// DEX3 start
+	for i := int64(0); i < 3; i++ {
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight + i}})
+		bis := app.bancorKeeper.GetAllBancorInfos(app.NewContext(false, abci.Header{}))
+		require.Equal(t, 0, len(bis))
+		app.EndBlock(abci.RequestEndBlock{Height: 1})
+		app.Commit()
 	}
 }
