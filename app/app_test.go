@@ -863,19 +863,27 @@ func TestMarketAndBancorMsgAfterDex3(t *testing.T) {
 	types.GenesisBlockHeight = Dex3StartHeight - 1
 
 	for _, msg := range msgs {
-		// app
 		app := initAppWithBaseAccounts(acc0)
-
-		// begin block
-		header := abci.Header{Height: Dex3StartHeight}
-		app.BeginBlock(abci.RequestBeginBlock{Header: header})
-
-		// deliver tx
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight}})
 		tx := newStdTxBuilder().
 			Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
-
 		result := app.Deliver(tx)
 		require.Equal(t, "DEX3", string(result.Codespace))
+		require.Equal(t, Dex3StartHeight, int(result.Code))
+	}
+
+	for _, msg := range msgs {
+		app := initAppWithBaseAccounts(acc0)
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight}})
+		app.EndBlock(abci.RequestEndBlock{Height: Dex3StartHeight})
+		app.Commit()
+
+		// Dex3StartHeight+1
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight + 1, ChainID: "c1"}})
+		tx := newStdTxBuilder().
+			Msgs(msg).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+		result := app.Deliver(tx)
+		//require.Equal(t, "DEX3", string(result.Codespace))
 		require.Equal(t, Dex3StartHeight, int(result.Code))
 	}
 }
@@ -891,7 +899,8 @@ func TestDEX3BancorCancellation(t *testing.T) {
 
 	// create bancors
 	app := initAppWithBaseAccounts(acc0)
-	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight - 4}})
+	var h int64 = Dex3StartHeight - 4
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: h}})
 	msgs := []sdk.Msg{
 		asset.MsgIssueToken{Owner: fromAddr, Symbol: "foo", Identity: "foo", TotalSupply: sdk.NewInt(10000)},
 		asset.MsgIssueToken{Owner: fromAddr, Symbol: "bar", Identity: "bar", TotalSupply: sdk.NewInt(10000)},
@@ -902,24 +911,26 @@ func TestDEX3BancorCancellation(t *testing.T) {
 		Msgs(msgs...).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
 	result := app.Deliver(tx)
 	require.Equal(t, sdk.CodeOK, result.Code)
-	app.EndBlock(abci.RequestEndBlock{Height: 1})
+	app.EndBlock(abci.RequestEndBlock{Height: h})
 	app.Commit()
 
 	// query bancors
 	for i := int64(3); i >= 1; i-- {
-		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight - i}})
+		h = Dex3StartHeight - i
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: h}})
 		bis := app.bancorKeeper.GetAllBancorInfos(app.NewContext(false, abci.Header{}))
 		require.Equal(t, 2, len(bis))
-		app.EndBlock(abci.RequestEndBlock{Height: 1})
+		app.EndBlock(abci.RequestEndBlock{Height: h})
 		app.Commit()
 	}
 
 	// DEX3 start
 	for i := int64(0); i < 3; i++ {
-		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: Dex3StartHeight + i}})
+		h = Dex3StartHeight + i
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: h}})
 		bis := app.bancorKeeper.GetAllBancorInfos(app.NewContext(false, abci.Header{}))
 		require.Equal(t, 0, len(bis))
-		app.EndBlock(abci.RequestEndBlock{Height: 1})
+		app.EndBlock(abci.RequestEndBlock{Height: h})
 		app.Commit()
 	}
 }
