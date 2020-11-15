@@ -84,6 +84,7 @@ var (
 		gov.ModuleName:            {supply.Burner},
 		authx.ModuleName:          nil,
 		asset.ModuleName:          {supply.Burner, supply.Minter},
+		incentive.ModuleName:      {supply.Burner, supply.Minter},
 	}
 )
 
@@ -382,13 +383,6 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.paramsKeeper.Subspace(slashing.DefaultParamspace),
 		slashing.DefaultCodespace,
 	)
-	app.incentiveKeeper = incentive.NewKeeper(
-		app.cdc, app.keyIncentive,
-		app.paramsKeeper.Subspace(incentive.DefaultParamspace),
-		app.bankKeeper,
-		app.supplyKeeper,
-		auth.FeeCollectorName,
-	)
 	app.tokenKeeper = asset.NewBaseTokenKeeper(
 		app.cdc, app.keyAsset,
 	)
@@ -409,6 +403,14 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.paramsKeeper.Subspace(asset.DefaultParamspace),
 		app.bankxKeeper,
 		app.supplyKeeper,
+	)
+	app.incentiveKeeper = incentive.NewKeeper(
+		app.cdc, app.keyIncentive,
+		app.paramsKeeper.Subspace(incentive.DefaultParamspace),
+		app.bankKeeper,
+		app.supplyKeeper,
+		app.assetKeeper,
+		auth.FeeCollectorName,
 	)
 	app.stakingXKeeper = stakingx.NewKeeper(
 		app.keyStakingX,
