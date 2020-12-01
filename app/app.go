@@ -39,6 +39,7 @@ import (
 	"github.com/coinexchain/cet-sdk/modules/alias"
 	"github.com/coinexchain/cet-sdk/modules/asset"
 	"github.com/coinexchain/cet-sdk/modules/authx"
+	"github.com/coinexchain/cet-sdk/modules/autoswap"
 	"github.com/coinexchain/cet-sdk/modules/bancorlite"
 	"github.com/coinexchain/cet-sdk/modules/bankx"
 	"github.com/coinexchain/cet-sdk/modules/comment"
@@ -85,6 +86,7 @@ var (
 		authx.ModuleName:          nil,
 		asset.ModuleName:          {supply.Burner, supply.Minter},
 		incentive.ModuleName:      {supply.Burner, supply.Minter},
+		autoswap.PoolModuleAcc:    nil,
 	}
 )
 
@@ -97,6 +99,7 @@ func init() {
 		comment.AppModuleBasic{},
 		incentive.AppModuleBasic{},
 		market.AppModuleBasic{},
+		autoswap.AppModuleBasic{},
 
 		//modules wraps those of cosmos
 		authx.AppModuleBasic{}, //before `bank` to override `/bank/balances/{address}`
@@ -160,6 +163,7 @@ type CetChainApp struct {
 	keyIncentive *sdk.KVStoreKey
 	keyAlias     *sdk.KVStoreKey
 	keyComment   *sdk.KVStoreKey
+	keyAutoSwap  *sdk.KVStoreKey
 
 	// Manage getting and setting accounts
 	accountKeeper   auth.AccountKeeper
@@ -183,6 +187,7 @@ type CetChainApp struct {
 	msgQueProducer  msgqueue.MsgSender
 	aliasKeeper     alias.Keeper
 	commentKeeper   comment.Keeper
+	autoSwapKeeper  *autoswap.Keeper
 	ts              *tserver.TradeServer
 	once            *sync.Once
 
@@ -277,6 +282,7 @@ func newCetChainApp(bApp *bam.BaseApp, cdc *codec.Codec, invCheckPeriod uint, tx
 		keyIncentive:   sdk.NewKVStoreKey(incentive.StoreKey),
 		keyAlias:       sdk.NewKVStoreKey(alias.StoreKey),
 		keyComment:     sdk.NewKVStoreKey(comment.StoreKey),
+		keyAutoSwap:    sdk.NewKVStoreKey(autoswap.StoreKey),
 	}
 }
 
@@ -466,6 +472,15 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.bankxKeeper,
 		app.assetKeeper,
 		app.paramsKeeper.Subspace(alias.StoreKey),
+	)
+	app.autoSwapKeeper = autoswap.NewKeeper(
+		app.cdc,
+		app.keyAutoSwap,
+		app.paramsKeeper.Subspace(autoswap.StoreKey),
+		app.bankxKeeper,
+		app.accountKeeper,
+		app.accountXKeeper,
+		app.supplyKeeper,
 	)
 }
 
