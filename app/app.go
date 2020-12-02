@@ -531,6 +531,7 @@ func (app *CetChainApp) createAppModules() []module.AppModule {
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		alias.NewAppModule(app.aliasKeeper),
 		comment.NewAppModule(app.commentKeeper),
+		autoswap.NewAppModule(app.autoSwapKeeper),
 	}
 }
 
