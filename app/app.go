@@ -603,6 +603,7 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 	}
 	if ctx.BlockHeight() == Dex3StartHeight {
 		app.cancelAllBancors(ctx)
+		app.cancelAllMarketOrders(ctx)
 	}
 	return ret
 }
@@ -618,6 +619,12 @@ func (app *CetChainApp) cancelAllBancors(ctx sdk.Context) {
 		if err := k.UnFreezeCoins(ctx, bi.Owner, sdk.NewCoins(sdk.NewCoin(bi.Money, bi.MoneyInPool))); err != nil {
 			app.Logger().Error(err.Error())
 		}
+	}
+}
+func (app *CetChainApp) cancelAllMarketOrders(ctx sdk.Context) {
+	k := app.marketKeeper
+	for _, order := range k.GetAllOrders(ctx) {
+		market.DoCancelOrder(ctx, k, order.OrderID())
 	}
 }
 
