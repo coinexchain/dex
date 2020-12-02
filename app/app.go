@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/spf13/viper"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -19,6 +18,7 @@ import (
 
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
@@ -602,6 +602,7 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 	if ctx.BlockHeight() == Dex3StartHeight {
 		app.cancelAllBancors(ctx)
 		app.cancelAllMarketOrders(ctx)
+		//app.autoSwapKeeper.SetParams(ctx, autoswap.DefaultParams())
 	}
 	return ret
 }
