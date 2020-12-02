@@ -67,7 +67,7 @@ func (ah anteHelper) CheckMsg(ctx sdk.Context, msg sdk.Msg, memo string) sdk.Err
 	case bancorlite.MsgBancorInit, bancorlite.MsgBancorTrade, bancorlite.MsgBancorCancel:
 		if ctx.BlockHeight() >= Dex3StartHeight {
 			return sdk.NewError("DEX3", Dex3StartHeight,
-				"market module and bancor module are disabled")
+				"bancor module is disabled")
 		}
 	}
 
