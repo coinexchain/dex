@@ -491,9 +491,9 @@ func (app *CetChainApp) initModules() {
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
-	app.mm.SetOrderBeginBlockers(market.ModuleName, incentive.ModuleName, distr.ModuleName, slashing.ModuleName)
+	app.mm.SetOrderBeginBlockers(incentive.ModuleName, distr.ModuleName, slashing.ModuleName, autoswap.ModuleName)
 
-	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, authx.ModuleName, market.ModuleName, crisis.ModuleName)
+	app.mm.SetOrderEndBlockers(gov.ModuleName, staking.ModuleName, authx.ModuleName, crisis.ModuleName, autoswap.ModuleName)
 
 	initGenesisOrder := getAppModuleInitOrder()
 
@@ -526,7 +526,6 @@ func (app *CetChainApp) createAppModules() []module.AppModule {
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		stakingx.NewAppModule(app.stakingXKeeper),
 		asset.NewAppModule(app.assetKeeper),
-		market.NewAppModule(app.marketKeeper),
 		bancorlite.NewAppModule(app.bancorKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		alias.NewAppModule(app.aliasKeeper),
@@ -550,7 +549,6 @@ func getAppModuleInitOrder() []string {
 		incentive.ModuleName,
 		asset.ModuleName,
 		stakingx.ModuleName,
-		market.ModuleName,
 		bancorlite.ModuleName,
 		crisis.ModuleName,
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
@@ -580,7 +578,7 @@ func (app *CetChainApp) mountStores() {
 		app.keySlashing, app.keyGov, app.keyParams,
 		app.tkeyParams, app.tkeyStaking,
 		app.keyAccountX, app.keyAsset, app.keyMarket, app.keyIncentive,
-		app.keyBancor, app.keyAlias, app.keyComment, app.keyStakingX,
+		app.keyBancor, app.keyAlias, app.keyComment, app.keyStakingX, app.keyAutoSwap,
 	)
 }
 
