@@ -31,7 +31,6 @@ import (
 	"github.com/coinexchain/cet-sdk/modules/bankx"
 	types2 "github.com/coinexchain/cet-sdk/modules/distributionx/types"
 	"github.com/coinexchain/cet-sdk/modules/incentive"
-	"github.com/coinexchain/cet-sdk/modules/market"
 	"github.com/coinexchain/cet-sdk/modules/stakingx"
 	"github.com/coinexchain/cet-sdk/msgqueue"
 	"github.com/coinexchain/cet-sdk/testutil"
@@ -848,11 +847,11 @@ func TestMarketAndBancorMsgAfterDex3(t *testing.T) {
 	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
 
 	msgs := []sdk.Msg{
-		market.MsgCreateTradingPair{Creator: fromAddr, Stock: "foo", Money: "bar"},
-		market.MsgModifyPricePrecision{Sender: fromAddr, TradingPair: "foo/bar", PricePrecision: 1},
-		market.MsgCancelTradingPair{Sender: fromAddr, TradingPair: "foo/bar"},
-		market.MsgCreateOrder{Sender: fromAddr, TradingPair: "foo/bar", Side: 1, OrderType: 2, TimeInForce: 3, Price: 4, Quantity: 5},
-		market.MsgCancelOrder{Sender: fromAddr, OrderID: fromAddr.String() + "-123"},
+		//market.MsgCreateTradingPair{Creator: fromAddr, Stock: "foo", Money: "bar"},
+		//market.MsgModifyPricePrecision{Sender: fromAddr, TradingPair: "foo/bar", PricePrecision: 1},
+		//market.MsgCancelTradingPair{Sender: fromAddr, TradingPair: "foo/bar"},
+		//market.MsgCreateOrder{Sender: fromAddr, TradingPair: "foo/bar", Side: 1, OrderType: 2, TimeInForce: 3, Price: 4, Quantity: 5},
+		//market.MsgCancelOrder{Sender: fromAddr, OrderID: fromAddr.String() + "-123"},
 		bancorlite.MsgBancorInit{Owner: fromAddr, Stock: "foo", Money: "bar", MaxMoney: sdk.NewInt(300), MaxSupply: sdk.NewInt(100), MaxPrice: "10", InitPrice: "1"},
 		bancorlite.MsgBancorTrade{Sender: fromAddr, Stock: "foo", Money: "bar", Amount: 1},
 		bancorlite.MsgBancorCancel{Owner: fromAddr, Stock: "foo", Money: "bar"},
