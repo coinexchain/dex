@@ -555,6 +555,7 @@ func getAppModuleInitOrder() []string {
 		genutil.ModuleName, //call DeliverGenTxs in genutil at last
 		alias.ModuleName,
 		comment.ModuleName,
+		autoswap.ModuleName,
 	}
 }
 
