@@ -642,6 +642,11 @@ func (app *CetChainApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 	var genesisState map[string]json.RawMessage
 	app.cdc.MustUnmarshalJSON(req.AppStateBytes, &genesisState)
 
+	// use default AutoSwap genesis state
+	if genesisState[autoswap.ModuleName] == nil {
+		genesisState[autoswap.ModuleName] = autoswap.AppModuleBasic{}.DefaultGenesis()
+	}
+
 	if err := ModuleBasics.ValidateGenesis(genesisState); err != nil {
 		panic(err)
 	}
