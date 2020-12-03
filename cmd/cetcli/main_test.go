@@ -61,6 +61,14 @@ func TestGovCmd(t *testing.T) {
 	require.Contains(t, cmd.Long, `CETs`)
 }
 
+func TestMktCmd(t *testing.T) {
+	rootCmd := newRootCmd()
+	mktCmd := getSubCmd(t, rootCmd, "tx", "market")
+	require.NotNil(t, mktCmd)
+	asCmd := getSubCmd(t, rootCmd, "tx", "autoswap")
+	require.Nil(t, asCmd)
+}
+
 func newRootCmd() *cobra.Command {
 	cdc := app.MakeCodec()
 	return createRootCmd(cdc)
