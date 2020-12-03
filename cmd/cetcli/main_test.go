@@ -65,8 +65,8 @@ func TestMktCmd(t *testing.T) {
 	rootCmd := newRootCmd()
 	mktCmd := getSubCmd(t, rootCmd, "tx", "market")
 	require.NotNil(t, mktCmd)
-	asCmd := getSubCmd(t, rootCmd, "tx", "autoswap")
-	require.Nil(t, asCmd)
+	//asCmd := getSubCmd(t, rootCmd, "tx", "autoswap")
+	//require.Nil(t, asCmd)
 }
 
 func newRootCmd() *cobra.Command {
