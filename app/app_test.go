@@ -3,8 +3,11 @@ package app
 import (
 	"fmt"
 	"os"
+	"reflect"
+	"runtime"
 	"testing"
 	"time"
+	"unsafe"
 
 	"github.com/stretchr/testify/require"
 
@@ -1001,4 +1004,24 @@ func TestDEX3MarketOrdersCancellation(t *testing.T) {
 		app.EndBlock(abci.RequestEndBlock{Height: h})
 		app.Commit()
 	}
+}
+
+func TestDex3Routers(t *testing.T) {
+	type _baseApp struct {
+		logger log.Logger
+		name   string
+		db     dbm.DB
+		cms    sdk.CommitMultiStore
+		router sdk.Router
+	}
+
+	app := initAppWithBaseAccounts()
+	bApp := (*_baseApp)(unsafe.Pointer(app.BaseApp))
+	h := bApp.router.Route("market")
+	require.NotNil(t, h)
+	require.Equal(t, reflect.Func, reflect.ValueOf(h).Type().Kind())
+	require.Equal(t, "github.com/coinexchain/cet-sdk/modules/autoswap.NewHandler.func1",
+		runtime.FuncForPC(reflect.ValueOf(h).Pointer()).Name())
+
+	require.Nil(t, bApp.router.Route("autoswap"))
 }
