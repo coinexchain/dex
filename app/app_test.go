@@ -31,6 +31,7 @@ import (
 	"github.com/coinexchain/cet-sdk/modules/bankx"
 	types2 "github.com/coinexchain/cet-sdk/modules/distributionx/types"
 	"github.com/coinexchain/cet-sdk/modules/incentive"
+	"github.com/coinexchain/cet-sdk/modules/market"
 	"github.com/coinexchain/cet-sdk/modules/stakingx"
 	"github.com/coinexchain/cet-sdk/msgqueue"
 	"github.com/coinexchain/cet-sdk/testutil"
@@ -929,6 +930,74 @@ func TestDEX3BancorCancellation(t *testing.T) {
 		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: h}})
 		bis := app.bancorKeeper.GetAllBancorInfos(app.NewContext(false, abci.Header{}))
 		require.Equal(t, 0, len(bis))
+		app.EndBlock(abci.RequestEndBlock{Height: h})
+		app.Commit()
+	}
+}
+
+func TestDEX3MarketOrdersCancellation(t *testing.T) {
+	key, _, fromAddr := testutil.KeyPubAddr()
+	coins := sdk.NewCoins(sdk.NewInt64Coin("cet", 3000000000000))
+	acc0 := auth.BaseAccount{Address: fromAddr, Coins: coins}
+
+	oldGBH := types.GenesisBlockHeight
+	defer func() { types.GenesisBlockHeight = oldGBH }()
+	types.GenesisBlockHeight = Dex3StartHeight - 5
+
+	// issue tokens
+	app := initAppWithBaseAccounts(acc0)
+	var h int64 = Dex3StartHeight - 4
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: h}})
+	msgs := []sdk.Msg{
+		asset.MsgIssueToken{Owner: fromAddr, Symbol: "foo", Identity: "foo", TotalSupply: sdk.NewInt(10000)},
+		asset.MsgIssueToken{Owner: fromAddr, Symbol: "bar", Identity: "bar", TotalSupply: sdk.NewInt(10000)},
+		//market.MsgCreateTradingPair{Creator: fromAddr, Stock: "foo", Money: "bar", PricePrecision: 8, OrderPrecision: 8},
+		//market.MsgCreateOrder{Sender: fromAddr, Identify: 1, TradingPair: "foo/bar", OrderType: market.LimitOrder,
+		//	PricePrecision: 8, Price: 500, Quantity: 100, Side: market.BUY, TimeInForce: market.GTE},
+	}
+	tx := newStdTxBuilder().
+		Msgs(msgs...).GasAndFee(1000000, 100).AccNumSeqKey(0, 0, key).Build()
+	result := app.Deliver(tx)
+	require.Equal(t, sdk.CodeOK, result.Code)
+	app.EndBlock(abci.RequestEndBlock{Height: h})
+	app.Commit()
+
+	// create market, create orders
+	h = Dex3StartHeight - 3
+	app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: h}})
+	msgs = []sdk.Msg{
+		market.MsgCreateTradingPair{Creator: fromAddr, Stock: "foo", Money: "bar", PricePrecision: 8, OrderPrecision: 8},
+		market.MsgCreateOrder{Sender: fromAddr, Identify: 1, TradingPair: "foo/bar", OrderType: market.LimitOrder,
+			PricePrecision: 8, Price: 500, Quantity: 100000000, Side: market.BUY, TimeInForce: market.GTE},
+		market.MsgCreateOrder{Sender: fromAddr, Identify: 2, TradingPair: "foo/bar", OrderType: market.LimitOrder,
+			PricePrecision: 8, Price: 800, Quantity: 200000000, Side: market.BUY, TimeInForce: market.GTE},
+	}
+	ctx := app.NewContext(false, abci.Header{})
+	app.marketKeeper.SetParams(ctx, market.DefaultParams())
+	mktHandler := market.NewHandler(app.marketKeeper)
+	for _, msg := range msgs {
+		result := mktHandler(ctx, msg)
+		require.Equal(t, sdk.CodeOK, result.Code)
+	}
+	app.EndBlock(abci.RequestEndBlock{Height: h})
+	app.Commit()
+
+	// query market orders
+	for i := int64(2); i >= 1; i-- {
+		h = Dex3StartHeight - i
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: h}})
+		orders := app.marketKeeper.GetAllOrders(app.NewContext(false, abci.Header{}))
+		require.Equal(t, 2, len(orders))
+		app.EndBlock(abci.RequestEndBlock{Height: h})
+		app.Commit()
+	}
+
+	// DEX3 start
+	for i := int64(0); i < 3; i++ {
+		h = Dex3StartHeight + i
+		app.BeginBlock(abci.RequestBeginBlock{Header: abci.Header{Height: h}})
+		orders := app.marketKeeper.GetAllOrders(app.NewContext(false, abci.Header{}))
+		require.Equal(t, 0, len(orders))
 		app.EndBlock(abci.RequestEndBlock{Height: h})
 		app.Commit()
 	}

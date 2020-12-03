@@ -623,6 +623,7 @@ func (app *CetChainApp) cancelAllBancors(ctx sdk.Context) {
 func (app *CetChainApp) cancelAllMarketOrders(ctx sdk.Context) {
 	k := app.marketKeeper
 	for _, order := range k.GetAllOrders(ctx) {
+		//println("cancel market order: " + order.OrderID())
 		market.DoCancelOrder(ctx, k, order.OrderID())
 	}
 }
