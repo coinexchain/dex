@@ -65,7 +65,7 @@ Cross-platform compilation: `make tools install build-linux BUILD_TAGS=libsecp25
 ## Start cetd
 
 ```bash
-./cetd start
+./cetd start --minimum-gas-prices=20.0cet
 ```
 
 ## Start rest-server
