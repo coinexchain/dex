@@ -98,7 +98,6 @@ func init() {
 		bancorlite.AppModuleBasic{},
 		comment.AppModuleBasic{},
 		incentive.AppModuleBasic{},
-		market.AppModuleBasic{},
 		autoswap.AppModuleBasic{},
 
 		//modules wraps those of cosmos
