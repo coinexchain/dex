@@ -1025,3 +1025,7 @@ func TestDex3Routers(t *testing.T) {
 
 	require.Nil(t, bApp.router.Route("autoswap"))
 }
+
+func TestAutoSwap(t *testing.T) {
+	// TODO
+}
