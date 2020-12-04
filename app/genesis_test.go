@@ -20,7 +20,6 @@ import (
 	"github.com/coinexchain/cet-sdk/modules/bancorlite"
 	"github.com/coinexchain/cet-sdk/modules/bankx"
 	"github.com/coinexchain/cet-sdk/modules/incentive"
-	"github.com/coinexchain/cet-sdk/modules/market"
 	"github.com/coinexchain/cet-sdk/modules/stakingx"
 )
 
@@ -129,19 +128,8 @@ func TestDefaultGenesisState(t *testing.T) {
 	// incentive
 	var incentiveData incentive.GenesisState
 	incentive.ModuleCdc.MustUnmarshalJSON(state[incentive.ModuleName], &incentiveData)
-	require.Equal(t, int64(2e8), incentiveData.Params.DefaultRewardPerBlock)
+	require.Equal(t, int64(3e8), incentiveData.Params.DefaultRewardPerBlock)
 
-	// market
-	var marketData market.GenesisState
-	market.ModuleCdc.MustUnmarshalJSON(state[market.ModuleName], &marketData)
-	require.Equal(t, int64(100e8), marketData.Params.CreateMarketFee)
-	require.Equal(t, int64(604800e9), marketData.Params.MarketMinExpiredTime)
-	require.EqualValues(t, 200000, marketData.Params.GTEOrderLifetime)
-	require.Equal(t, int64(10), marketData.Params.GTEOrderFeatureFeeByBlocks)
-	require.EqualValues(t, 25, marketData.Params.MaxExecutedPriceChangeRatio)
-	require.Equal(t, int64(10), marketData.Params.MarketFeeRate)
-	require.Equal(t, int64(1000000), marketData.Params.MarketFeeMin)
-	require.Equal(t, int64(1000000), marketData.Params.FeeForZeroDeal)
 }
 
 func checkCET(t *testing.T, amt int64, coins sdk.Coins) {

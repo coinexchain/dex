@@ -589,6 +589,12 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 		app.txCount = req.Header.TotalTxs - req.Header.NumTxs
 		app.pushNewHeightInfo(ctx)
 	}
+	if ctx.BlockHeight() == Dex3StartHeight {
+		app.cancelAllBancors(ctx)
+		app.cancelAllMarketOrders(ctx)
+		app.autoSwapKeeper.SetParams(ctx, autoswap.DefaultParams())
+		app.incentiveKeeper.ClearIncentiveState(ctx)
+	}
 	ret := app.mm.BeginBlock(ctx, req)
 	if app.msgQueProducer.IsOpenToggle() {
 		ret.Events = collectKafkaEvents(ret.Events, app)
@@ -597,11 +603,6 @@ func (app *CetChainApp) beginBlocker(ctx sdk.Context, req abci.RequestBeginBlock
 	if app.enableUnconfirmedLimit {
 		app.currBlockTime = req.Header.Time.Unix()
 		app.account2UnconfirmedTx.ClearRemoveList()
-	}
-	if ctx.BlockHeight() == Dex3StartHeight {
-		app.cancelAllBancors(ctx)
-		app.cancelAllMarketOrders(ctx)
-		//app.autoSwapKeeper.SetParams(ctx, autoswap.DefaultParams())
 	}
 	return ret
 }
