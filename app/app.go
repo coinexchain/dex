@@ -60,7 +60,7 @@ const (
 	DefaultKeyPass = "12345678"
 
 	// TODO
-	Dex3StartHeight = 100000000
+	Dex3StartHeight = 1
 )
 
 // default home directories for expected binaries
