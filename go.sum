@@ -66,12 +66,9 @@ github.com/coinexchain/cet-sdk v0.2.18-0.20201202111718-512febb0d32f h1:+/QFoyNu
 github.com/coinexchain/cet-sdk v0.2.18-0.20201202111718-512febb0d32f/go.mod h1:0MRjqlNTLOWOdxgwnm6lZvNdSLqtRugsIRdZlhfw8vs=
 github.com/coinexchain/cet-sdk v0.2.18-0.20201202115452-8e0cd271a062 h1:Uoq1BSTokB7reI1wizr/kU95eMgHZrVwTfDOox1k8/E=
 github.com/coinexchain/cet-sdk v0.2.18-0.20201202115452-8e0cd271a062/go.mod h1:0MRjqlNTLOWOdxgwnm6lZvNdSLqtRugsIRdZlhfw8vs=
-github.com/coinexchain/cet-sdk v0.2.18-0.20201203111159-a6c57c3b4370 h1:RevSBndOkE4NSwJzWb1Cu2yaStlKxa3GVxeZLcVG+SQ=
-github.com/coinexchain/cet-sdk v0.2.18-0.20201203111159-a6c57c3b4370/go.mod h1:0MRjqlNTLOWOdxgwnm6lZvNdSLqtRugsIRdZlhfw8vs=
-github.com/coinexchain/cet-sdk v0.2.18-0.20201203114752-7f227f66bcd5 h1:5vjczFREBude3mUrhd92FZHkb8tJ/sa2i8iH2ZDzNr0=
-github.com/coinexchain/cet-sdk v0.2.18-0.20201203114752-7f227f66bcd5/go.mod h1:0MRjqlNTLOWOdxgwnm6lZvNdSLqtRugsIRdZlhfw8vs=
-github.com/coinexchain/cet-sdk v0.2.18-0.20201204032556-3b5cd5d9aa2b h1:iIBNNxxk6w/+VfqboqKZvtkxYz6xnyEfZn19BO3C2bA=
 github.com/coinexchain/cet-sdk v0.2.18-0.20201204032556-3b5cd5d9aa2b/go.mod h1:0MRjqlNTLOWOdxgwnm6lZvNdSLqtRugsIRdZlhfw8vs=
+github.com/coinexchain/cet-sdk v0.2.18-0.20201204094855-d720c1014c55 h1:Qjq6KqtVEW/T7NMQiqiuNhr8ji1a7BIvZTbHLrXrKYI=
+github.com/coinexchain/cet-sdk v0.2.18-0.20201204094855-d720c1014c55/go.mod h1:0MRjqlNTLOWOdxgwnm6lZvNdSLqtRugsIRdZlhfw8vs=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c h1:ZcWk9BWVuvAZW23esCnCyhp7Ss6xhVuffwNxHsQccRE=
 github.com/coinexchain/codon v0.0.0-20191012070227-3ee72dde596c/go.mod h1:IPOtAzhvIJrmitYLXC4DC0fJFoGulqhn3LBSnwkA1eo=
 github.com/coinexchain/cosmos-sdk v0.37.703 h1:KR5/icNZAsgEbpoY+4Uox2tqv0hpLqBdhmoqhuXStv0=

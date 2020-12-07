@@ -480,6 +480,7 @@ func (app *CetChainApp) initKeepers(invCheckPeriod uint) {
 		app.accountKeeper,
 		app.accountXKeeper,
 		app.supplyKeeper,
+		app.assetKeeper,
 	)
 }
 
